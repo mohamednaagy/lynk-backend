@@ -4,11 +4,6 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< HEAD
-    "content-hash": "713c658ff7c28f38f74a1cd10c599fad",
-    "packages": [
-        {
-=======
     "content-hash": "5cbf7edede0db6675c4665455e3e986e",
     "packages": [
         {
@@ -96,7 +91,6 @@
             "time": "2022-04-08T07:46:13+00:00"
         },
         {
->>>>>>> LARABOILER-7-installing-necessary-packages
             "name": "brick/math",
             "version": "0.9.3",
             "source": {
@@ -157,8 +151,6 @@
             "time": "2021-08-15T20:50:18+00:00"
         },
         {
-<<<<<<< HEAD
-=======
             "name": "composer/ca-bundle",
             "version": "1.3.1",
             "source": {
@@ -707,7 +699,6 @@
             "time": "2022-02-25T21:32:43+00:00"
         },
         {
->>>>>>> LARABOILER-7-installing-necessary-packages
             "name": "dflydev/dot-access-data",
             "version": "v3.0.1",
             "source": {
@@ -1655,26 +1646,6 @@
                     "type": "github"
                 },
                 {
-<<<<<<< HEAD
-                    "url": "https://tidelift.com/funding/github/packagist/guzzlehttp/psr7",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2022-03-20T21:55:58+00:00"
-        },
-        {
-            "name": "laravel/framework",
-            "version": "v9.11.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/laravel/framework.git",
-                "reference": "598a8c84d452a66b90a3213b1d67189cc726c728"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/598a8c84d452a66b90a3213b1d67189cc726c728",
-                "reference": "598a8c84d452a66b90a3213b1d67189cc726c728",
-=======
                     "url": "https://tidelift.com/funding/github/packagist/guzzlehttp/psr7",
                     "type": "tidelift"
                 }
@@ -1829,7 +1800,6 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/framework/zipball/b5b5c635f1a93f277b5248725a1f7ffc97e20810",
                 "reference": "b5b5c635f1a93f277b5248725a1f7ffc97e20810",
->>>>>>> LARABOILER-7-installing-necessary-packages
                 "shasum": ""
             },
             "require": {
@@ -1995,11 +1965,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-<<<<<<< HEAD
-            "time": "2022-05-03T14:47:20+00:00"
-=======
             "time": "2022-05-11T13:38:26+00:00"
->>>>>>> LARABOILER-7-installing-necessary-packages
         },
         {
             "name": "laravel/sanctum",
@@ -2586,18 +2552,6 @@
         },
         {
             "name": "monolog/monolog",
-<<<<<<< HEAD
-            "version": "2.5.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Seldaek/monolog.git",
-                "reference": "4192345e260f1d51b365536199744b987e160edc"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/4192345e260f1d51b365536199744b987e160edc",
-                "reference": "4192345e260f1d51b365536199744b987e160edc",
-=======
             "version": "2.6.0",
             "source": {
                 "type": "git",
@@ -2608,7 +2562,6 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/Seldaek/monolog/zipball/247918972acd74356b0a91dfaa5adcaec069b6c0",
                 "reference": "247918972acd74356b0a91dfaa5adcaec069b6c0",
->>>>>>> LARABOILER-7-installing-necessary-packages
                 "shasum": ""
             },
             "require": {
@@ -2621,20 +2574,6 @@
             "require-dev": {
                 "aws/aws-sdk-php": "^2.4.9 || ^3.0",
                 "doctrine/couchdb": "~1.0@dev",
-<<<<<<< HEAD
-                "elasticsearch/elasticsearch": "^7",
-                "graylog2/gelf-php": "^1.4.2",
-                "mongodb/mongodb": "^1.8",
-                "php-amqplib/php-amqplib": "~2.4 || ^3",
-                "php-console/php-console": "^3.1.3",
-                "phpspec/prophecy": "^1.6.1",
-                "phpstan/phpstan": "^0.12.91",
-                "phpunit/phpunit": "^8.5",
-                "predis/predis": "^1.1",
-                "rollbar/rollbar": "^1.3 || ^2 || ^3",
-                "ruflin/elastica": ">=0.90@dev",
-                "swiftmailer/swiftmailer": "^5.3|^6.0"
-=======
                 "elasticsearch/elasticsearch": "^7 || ^8",
                 "ext-json": "*",
                 "graylog2/gelf-php": "^1.4.2",
@@ -2652,7 +2591,6 @@
                 "swiftmailer/swiftmailer": "^5.3|^6.0",
                 "symfony/mailer": "^5.4 || ^6",
                 "symfony/mime": "^5.4 || ^6"
->>>>>>> LARABOILER-7-installing-necessary-packages
             },
             "suggest": {
                 "aws/aws-sdk-php": "Allow sending log messages to AWS services like DynamoDB",
@@ -2702,11 +2640,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Seldaek/monolog/issues",
-<<<<<<< HEAD
-                "source": "https://github.com/Seldaek/monolog/tree/2.5.0"
-=======
                 "source": "https://github.com/Seldaek/monolog/tree/2.6.0"
->>>>>>> LARABOILER-7-installing-necessary-packages
             },
             "funding": [
                 {
@@ -2718,11 +2652,7 @@
                     "type": "tidelift"
                 }
             ],
-<<<<<<< HEAD
-            "time": "2022-04-08T15:43:54+00:00"
-=======
             "time": "2022-05-10T09:36:00+00:00"
->>>>>>> LARABOILER-7-installing-necessary-packages
         },
         {
             "name": "nesbot/carbon",
@@ -3025,8 +2955,6 @@
             "time": "2021-11-30T19:35:32+00:00"
         },
         {
-<<<<<<< HEAD
-=======
             "name": "nwidart/laravel-modules",
             "version": "9.0.1",
             "source": {
@@ -3108,7 +3036,6 @@
             "time": "2022-02-28T13:17:36+00:00"
         },
         {
->>>>>>> LARABOILER-7-installing-necessary-packages
             "name": "phpoption/phpoption",
             "version": "1.8.1",
             "source": {
@@ -3769,9 +3696,6 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-<<<<<<< HEAD
-                    "Ramsey\\Collection\\": "src/"
-=======
                     "Ramsey\\Collection\\": "src/"
                 }
             },
@@ -4009,7 +3933,6 @@
             "autoload": {
                 "psr-4": {
                     "Seld\\JsonLint\\": "src/Seld/JsonLint/"
->>>>>>> LARABOILER-7-installing-necessary-packages
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -4018,96 +3941,6 @@
             ],
             "authors": [
                 {
-<<<<<<< HEAD
-                    "name": "Ben Ramsey",
-                    "email": "ben@benramsey.com",
-                    "homepage": "https://benramsey.com"
-                }
-            ],
-            "description": "A PHP library for representing and manipulating collections.",
-            "keywords": [
-                "array",
-                "collection",
-                "hash",
-                "map",
-                "queue",
-                "set"
-            ],
-            "support": {
-                "issues": "https://github.com/ramsey/collection/issues",
-                "source": "https://github.com/ramsey/collection/tree/1.2.2"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/ramsey",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/ramsey/collection",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2021-10-10T03:01:02+00:00"
-        },
-        {
-            "name": "ramsey/uuid",
-            "version": "4.3.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ramsey/uuid.git",
-                "reference": "8505afd4fea63b81a85d3b7b53ac3cb8dc347c28"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ramsey/uuid/zipball/8505afd4fea63b81a85d3b7b53ac3cb8dc347c28",
-                "reference": "8505afd4fea63b81a85d3b7b53ac3cb8dc347c28",
-                "shasum": ""
-            },
-            "require": {
-                "brick/math": "^0.8 || ^0.9",
-                "ext-ctype": "*",
-                "ext-json": "*",
-                "php": "^8.0",
-                "ramsey/collection": "^1.0"
-            },
-            "replace": {
-                "rhumsaa/uuid": "self.version"
-            },
-            "require-dev": {
-                "captainhook/captainhook": "^5.10",
-                "captainhook/plugin-composer": "^5.3",
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
-                "doctrine/annotations": "^1.8",
-                "ergebnis/composer-normalize": "^2.15",
-                "mockery/mockery": "^1.3",
-                "moontoast/math": "^1.1",
-                "paragonie/random-lib": "^2",
-                "php-mock/php-mock": "^2.2",
-                "php-mock/php-mock-mockery": "^1.3",
-                "php-parallel-lint/php-parallel-lint": "^1.1",
-                "phpbench/phpbench": "^1.0",
-                "phpstan/extension-installer": "^1.0",
-                "phpstan/phpstan": "^0.12",
-                "phpstan/phpstan-mockery": "^0.12",
-                "phpstan/phpstan-phpunit": "^0.12",
-                "phpunit/phpunit": "^8.5 || ^9",
-                "slevomat/coding-standard": "^7.0",
-                "squizlabs/php_codesniffer": "^3.5",
-                "vimeo/psalm": "^4.9"
-            },
-            "suggest": {
-                "ext-bcmath": "Enables faster math with arbitrary-precision integers using BCMath.",
-                "ext-ctype": "Enables faster processing of character classification using ctype functions.",
-                "ext-gmp": "Enables faster math with arbitrary-precision integers using GMP.",
-                "ext-uuid": "Enables the use of PeclUuidTimeGenerator and PeclUuidRandomGenerator.",
-                "paragonie/random-lib": "Provides RandomLib for use with the RandomLibAdapter",
-                "ramsey/uuid-doctrine": "Allows the use of Ramsey\\Uuid\\Uuid as Doctrine field type."
-            },
-            "type": "library",
-            "extra": {
-                "captainhook": {
-                    "force-install": true
-=======
                     "name": "Jordi Boggiano",
                     "email": "j.boggiano@seld.be",
                     "homepage": "http://seld.be"
@@ -4220,51 +4053,20 @@
                 "branch-alias": {
                     "dev-main": "5.x-dev",
                     "dev-master": "5.x-dev"
->>>>>>> LARABOILER-7-installing-necessary-packages
                 }
             },
             "autoload": {
                 "files": [
-<<<<<<< HEAD
-                    "src/functions.php"
-                ],
-                "psr-4": {
-                    "Ramsey\\Uuid\\": "src/"
-=======
                     "src/helpers.php"
                 ],
                 "psr-4": {
                     "Spatie\\Permission\\": "src"
->>>>>>> LARABOILER-7-installing-necessary-packages
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
-<<<<<<< HEAD
-            "description": "A PHP library for generating and working with universally unique identifiers (UUIDs).",
-            "keywords": [
-                "guid",
-                "identifier",
-                "uuid"
-            ],
-            "support": {
-                "issues": "https://github.com/ramsey/uuid/issues",
-                "source": "https://github.com/ramsey/uuid/tree/4.3.1"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/ramsey",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/ramsey/uuid",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2022-03-27T21:42:02+00:00"
-=======
             "authors": [
                 {
                     "name": "Freek Van der Herten",
@@ -4296,7 +4098,6 @@
                 }
             ],
             "time": "2022-05-05T21:50:47+00:00"
->>>>>>> LARABOILER-7-installing-necessary-packages
         },
         {
             "name": "symfony/console",
@@ -4759,8 +4560,6 @@
             "time": "2022-01-02T09:55:41+00:00"
         },
         {
-<<<<<<< HEAD
-=======
             "name": "symfony/filesystem",
             "version": "v6.0.7",
             "source": {
@@ -4824,7 +4623,6 @@
             "time": "2022-04-01T12:54:51+00:00"
         },
         {
->>>>>>> LARABOILER-7-installing-necessary-packages
             "name": "symfony/finder",
             "version": "v6.0.8",
             "source": {
@@ -5715,8 +5513,6 @@
             "time": "2021-05-27T09:17:38+00:00"
         },
         {
-<<<<<<< HEAD
-=======
             "name": "symfony/polyfill-php73",
             "version": "v1.25.0",
             "source": {
@@ -5796,7 +5592,6 @@
             "time": "2021-06-05T21:20:04+00:00"
         },
         {
->>>>>>> LARABOILER-7-installing-necessary-packages
             "name": "symfony/polyfill-php80",
             "version": "v1.25.0",
             "source": {
@@ -7116,18 +6911,6 @@
         },
         {
             "name": "laravel/sail",
-<<<<<<< HEAD
-            "version": "v1.14.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/laravel/sail.git",
-                "reference": "9a7348dedfccc894718a21f71c09d669747e3f33"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/laravel/sail/zipball/9a7348dedfccc894718a21f71c09d669747e3f33",
-                "reference": "9a7348dedfccc894718a21f71c09d669747e3f33",
-=======
             "version": "v1.14.2",
             "source": {
                 "type": "git",
@@ -7138,7 +6921,6 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/sail/zipball/cee088fbe57432dd15678e3f7b6a8259f3073c46",
                 "reference": "cee088fbe57432dd15678e3f7b6a8259f3073c46",
->>>>>>> LARABOILER-7-installing-necessary-packages
                 "shasum": ""
             },
             "require": {
@@ -7185,11 +6967,7 @@
                 "issues": "https://github.com/laravel/sail/issues",
                 "source": "https://github.com/laravel/sail"
             },
-<<<<<<< HEAD
-            "time": "2022-05-02T13:58:40+00:00"
-=======
             "time": "2022-05-10T12:58:49+00:00"
->>>>>>> LARABOILER-7-installing-necessary-packages
         },
         {
             "name": "mockery/mockery",
@@ -9196,18 +8974,6 @@
         },
         {
             "name": "spatie/flare-client-php",
-<<<<<<< HEAD
-            "version": "1.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/spatie/flare-client-php.git",
-                "reference": "ceab058852a1278d9f57a7b95f1c348e4956d866"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/spatie/flare-client-php/zipball/ceab058852a1278d9f57a7b95f1c348e4956d866",
-                "reference": "ceab058852a1278d9f57a7b95f1c348e4956d866",
-=======
             "version": "1.1.1",
             "source": {
                 "type": "git",
@@ -9218,7 +8984,6 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/spatie/flare-client-php/zipball/1059fd8f229fa016b11063c6be9d1922d036adb7",
                 "reference": "1059fd8f229fa016b11063c6be9d1922d036adb7",
->>>>>>> LARABOILER-7-installing-necessary-packages
                 "shasum": ""
             },
             "require": {
@@ -9239,14 +9004,11 @@
                 "spatie/phpunit-snapshot-assertions": "^4.0"
             },
             "type": "library",
-<<<<<<< HEAD
-=======
             "extra": {
                 "branch-alias": {
                     "dev-main": "1.1.x-dev"
                 }
             },
->>>>>>> LARABOILER-7-installing-necessary-packages
             "autoload": {
                 "files": [
                     "src/helpers.php"
@@ -9269,11 +9031,7 @@
             ],
             "support": {
                 "issues": "https://github.com/spatie/flare-client-php/issues",
-<<<<<<< HEAD
-                "source": "https://github.com/spatie/flare-client-php/tree/1.1.0"
-=======
                 "source": "https://github.com/spatie/flare-client-php/tree/1.1.1"
->>>>>>> LARABOILER-7-installing-necessary-packages
             },
             "funding": [
                 {
@@ -9281,22 +9039,6 @@
                     "type": "github"
                 }
             ],
-<<<<<<< HEAD
-            "time": "2022-03-11T13:21:28+00:00"
-        },
-        {
-            "name": "spatie/ignition",
-            "version": "1.2.9",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/spatie/ignition.git",
-                "reference": "db25202fab2d5c14613b8914a1bb374998bbf870"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/spatie/ignition/zipball/db25202fab2d5c14613b8914a1bb374998bbf870",
-                "reference": "db25202fab2d5c14613b8914a1bb374998bbf870",
-=======
             "time": "2022-05-11T09:43:07+00:00"
         },
         {
@@ -9311,7 +9053,6 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/spatie/ignition/zipball/dd8c3a21170b1d0f4d15048b2f4fa4a1a3a92a64",
                 "reference": "dd8c3a21170b1d0f4d15048b2f4fa4a1a3a92a64",
->>>>>>> LARABOILER-7-installing-necessary-packages
                 "shasum": ""
             },
             "require": {
@@ -9368,11 +9109,7 @@
                     "type": "github"
                 }
             ],
-<<<<<<< HEAD
-            "time": "2022-04-23T20:37:21+00:00"
-=======
             "time": "2022-05-10T12:21:27+00:00"
->>>>>>> LARABOILER-7-installing-necessary-packages
         },
         {
             "name": "spatie/laravel-ignition",
@@ -9524,9 +9261,5 @@
         "php": "^8.0.2"
     },
     "platform-dev": [],
-<<<<<<< HEAD
     "plugin-api-version": "2.3.0"
-=======
-    "plugin-api-version": "2.2.0"
->>>>>>> LARABOILER-7-installing-necessary-packages
 }
