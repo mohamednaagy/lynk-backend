@@ -11,14 +11,22 @@ class RegisterCustomerRequest extends FormRequest
      *
      * @return array
      */
+
+    public function messages()
+    {
+        return [
+            'phone_number.phone' => 'The :attribute field contains an invalid number.',
+        ];
+    }
+
     public function rules()
     {
         return [
             'first_name' => ['required', 'min:3'],
             'last_name' => ['required', 'min:3'],
-            'phone_country_code' => ['required', 'min:2'],
-            'phone_number' => ['required', 'numeric'],
-            'email' => ['required', 'email', 'unique:customers'],
+            'phone_country_code' => ['required_with:phone_number', 'string', 'min:2'],
+            'phone_number' => ['required', 'phone:phone_country_code', 'numeric'],
+            'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'confirmed', 'min:8'],
             'password_confirmation' => ['required', 'min:8'],
         ];

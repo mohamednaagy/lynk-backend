@@ -22,11 +22,14 @@ class CustomerAuthController extends Controller
             'password',
         ]);
         $validated['password'] = Hash::make($validated['password']);
-        Customer::create($validated);
+
+
+        // User::create($validated); after create user module
 
         return response()->json([
             'data' => [
                 'message' => 'registered successfuly',
+                "data" => $validated
             ]
         ], 201);
     }
