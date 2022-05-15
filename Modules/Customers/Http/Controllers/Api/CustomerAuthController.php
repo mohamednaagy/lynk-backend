@@ -2,6 +2,7 @@
 
 namespace Modules\Customers\Http\Controllers\api;
 
+use App\Models\User;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -16,7 +17,6 @@ class CustomerAuthController extends Controller
         $validated = $request->safe()->only([
             'first_name',
             'last_name',
-            'phone_country_code',
             'phone_number',
             'email',
             'password',
@@ -24,7 +24,7 @@ class CustomerAuthController extends Controller
         $validated['password'] = Hash::make($validated['password']);
 
 
-        // User::create($validated); after create user module
+        User::create($validated);
 
         return response()->json([
             'data' => [
