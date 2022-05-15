@@ -7,6 +7,29 @@ use Illuminate\Foundation\Http\FormRequest;
 class RegisterCustomerRequest extends FormRequest
 {
     /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+    public function rules()
+    {
+        return [
+            'first_name' => ['required', 'min:3', 'string', 'max:100'],
+            'last_name' => ['required', 'min:3', 'string', 'max:100'],
+            'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
+            'phone_number' => ['required', 'phone:phone_country_code', 'string'],
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'confirmed', 'min:8'],
+            'password_confirmation' => ['required', 'min:8'],
+        ];
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array
@@ -15,30 +38,7 @@ class RegisterCustomerRequest extends FormRequest
     public function messages()
     {
         return [
-            'phone_number.phone' => 'The :attribute field contains an invalid number.',
+            'phone_number.phone' => trans('customers::validation.phone'),
         ];
-    }
-
-    public function rules()
-    {
-        return [
-            'first_name' => ['required', 'min:3'],
-            'last_name' => ['required', 'min:3'],
-            'phone_country_code' => ['required_with:phone_number', 'string', 'min:2'],
-            'phone_number' => ['required', 'phone:phone_country_code', 'numeric'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'confirmed', 'min:8'],
-            'password_confirmation' => ['required', 'min:8'],
-        ];
-    }
-
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
-    {
-        return true;
     }
 }

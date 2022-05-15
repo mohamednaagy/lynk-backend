@@ -1,18 +1,15 @@
 <?php
 
-namespace Modules\Customers\Http\Controllers\api;
+namespace Modules\Customers\Http\Controllers\api\auth;
 
 use App\Models\User;
-use Illuminate\Contracts\Support\Renderable;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Hash;
-use Modules\Customers\Entities\Customer;
 use Modules\Customers\Http\Requests\RegisterCustomerRequest;
 
-class CustomerAuthController extends Controller
+class RegisterController extends Controller
 {
-    public function register(RegisterCustomerRequest $request)
+    public function __invoke(RegisterCustomerRequest $request)
     {
         $validated = $request->safe()->only([
             'first_name',
@@ -22,14 +19,13 @@ class CustomerAuthController extends Controller
             'password',
         ]);
         $validated['password'] = Hash::make($validated['password']);
-
+        $validated['phone_number'] = phone($validated['phone_number'], $request->input('phone_country_code'));
 
         User::create($validated);
 
         return response()->json([
             'data' => [
                 'message' => 'registered successfuly',
-                "data" => $validated
             ]
         ], 201);
     }
