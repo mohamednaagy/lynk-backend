@@ -1,0 +1,21 @@
+<?php
+
+namespace Modules\Customers\Http\Controllers\api;
+
+use App\Models\User;
+use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+use Modules\Customers\Transformers\AuthResource;
+
+class GetAuthUser  extends Controller
+{
+
+    public function __invoke()
+    {
+        $user = Auth::user();
+
+        return new AuthResource($user);
+    }
+}
