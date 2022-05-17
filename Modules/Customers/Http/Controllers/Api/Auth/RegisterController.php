@@ -5,11 +5,11 @@ namespace Modules\Customers\Http\Controllers\api\auth;
 use App\Models\User;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Hash;
-use Modules\Customers\Http\Requests\RegisterCustomerRequest;
+use Modules\Customers\Http\Requests\RegisterRequest;
 
 class RegisterController extends Controller
 {
-    public function __invoke(RegisterCustomerRequest $request)
+    public function __invoke(RegisterRequest $request)
     {
         $validated = $request->safe()->only([
             'first_name',
@@ -18,6 +18,7 @@ class RegisterController extends Controller
             'email',
             'password',
         ]);
+
         $validated['password'] = Hash::make($validated['password']);
         $validated['phone_number'] = phone($validated['phone_number'], $request->input('phone_country_code'));
 
