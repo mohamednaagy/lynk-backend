@@ -4,7 +4,7 @@ namespace Modules\Customers\Http\Controllers\api;
 
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
-use Modules\Customers\Transformers\AuthResource;
+use Modules\Customers\Http\Resources\AuthResource;
 
 class GetAuthUser extends Controller
 {
