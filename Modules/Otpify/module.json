@@ -1,0 +1,15 @@
+{
+    "name": "Otpify",
+    "alias": "otpify",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Otpify\\Providers\\OtpifyServiceProvider"
+    ],
+    "aliases": {},
+    "files": [
+        "Utils/helpers.php"
+    ],
+    "requires": []
+}

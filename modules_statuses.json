@@ -1,4 +1,4 @@
 {
     "Customers": true,
-    "TwoFactorAuth": true
+    "Otpify": true
 }

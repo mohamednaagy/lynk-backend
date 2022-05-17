@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Modules\Otpify\Contracts\Otpifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements Otpifiable
 {
     use HasApiTokens, HasFactory, Notifiable;
 

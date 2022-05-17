@@ -191,7 +191,7 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
-        'TwoFactorAuth' => Modules\TwoFactorAuth\Facades\TwoFactorAuth::class
+        'Otpify' => Modules\Otpify\Facades\Otpify::class
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
 
