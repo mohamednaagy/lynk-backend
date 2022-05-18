@@ -10,7 +10,3 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-Route::prefix('permission')->group(function() {
-    Route::get('/', 'PermissionController@index');
-});
