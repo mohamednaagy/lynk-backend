@@ -3,7 +3,7 @@
 namespace Modules\Otpify\Contracts;
 
 use Illuminate\Http\Request;
-use Modules\Otpify\Entities\OtpifyCode;
+use Modules\Otpify\Models\OtpifyCode;
 
 interface OtpifyDriverInterface
 {

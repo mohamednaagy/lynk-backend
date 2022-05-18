@@ -21,8 +21,8 @@ class OtpifyCodeMessage extends Notification
      */
     public function __construct($otpCode, $expiredAt)
     {
-        $this->otpCode      = $otpCode;
-        $this->expiredAt    = $expiredAt;
+        $this->otpCode = $otpCode;
+        $this->expiredAt = $expiredAt;
     }
 
     /**
@@ -45,10 +45,11 @@ class OtpifyCodeMessage extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('Your OTP Code is: '. $this->otpCode .'.')
-                    ->action('Verify Here', url('/'))
-                    ->line('The code will expire in '. $this->expiredAt->diffInMinutes(now()) .' Minutes')
-                    ->line('If you have not tried to login, ignore this message.');
+                    ->greeting(trans('otpify::email.greeting', ['name' => $notifiable->fullName]))
+                    ->line(trans('otpify::email.otp_code', ['code' => $this->otpCode]))
+                    ->action(trans('otpify::email.verify_here'), url('/'))
+                    ->line(trans('otpify::email.expire_at', ['time' => $this->expiredAt->diffInMinutes(now())]))
+                    ->line(trans('otpify::email.ignore_message'));
     }
 
     /**

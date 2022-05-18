@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Otpify\Entities;
+namespace Modules\Otpify\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,6 +10,7 @@ class OtpifyCode extends Model
     use HasFactory;
 
     protected $fillable = [
+        'id',
         'otp_code',
         'expired_at',
         'data'
@@ -41,6 +42,6 @@ class OtpifyCode extends Model
 
     public function getVid()
     {
-        return $this->vid;
+        return $this->id;
     }
 }

@@ -3,6 +3,10 @@
 return [
     'name' => 'Otpify',
 
+    'code_length' => env('OTPIFY_CODE_LENGTH', 4),
+
+    'code_expiration_time' => env('OTPIFY_CODE_EXPIRATION_TIME', 10),
+
     /*
     |--------------------------------------------------------------------------
     | Default Otpify Driver

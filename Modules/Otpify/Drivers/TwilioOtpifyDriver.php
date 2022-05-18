@@ -6,30 +6,30 @@ use Illuminate\Http\Request;
 use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
 use Exception;
-use Modules\Otpify\Entities\OtpifyCode;
-use Modules\Otpify\Traits\GenerateOtpifyCode;
+use Modules\Otpify\Models\OtpifyCode;
+use Modules\Otpify\Traits\OtpifiableCode;
 use Twilio\Http\CurlClient;
 use Twilio\Rest\Client;
 
 class TwilioOtpifyDriver implements OtpifyDriverInterface
 {
-    use GenerateOtpifyCode;
+    use OtpifiableCode;
 
     /**
      * Execute the driver logic.
      *
      * @param Request $request
-     * @param Otpifiable $model
+     * @param Otpifiable $otpifiable
      * @param array $data
      * @return OtpifyCode
      * @throws \ErrorException
      */
-    public function execute(Request $request, Otpifiable $model, array $data): OtpifyCode
+    public function execute(Request $request, Otpifiable $otpifiable, array $data): OtpifyCode
     {
         $otpifyCode = $this->createOtpifyCode($data);
 
-        $receiverNumber = "+201221580037";
-        $message = 'Your OTP Code is: '. $otpifyCode->otp_code .', It will be expired in '. $otpifyCode->expired_at->diffInMinutes(now()).' Minutes';
+        $receiverNumber = $otpifiable->phone_number;
+        $message = trans('otpify::phone.message', ['code' => $otpifyCode->otp_code, 'time' => $otpifyCode->expired_at->diffInMinutes(now())]);
 
         try {
 
@@ -59,8 +59,17 @@ class TwilioOtpifyDriver implements OtpifyDriverInterface
         // TODO: Implement shouldAsk() method.
     }
 
+    /**
+     * Execute the driver logic.
+     *
+     * @param Request $request
+     * @param $vid
+     * @param $code
+     * @return bool
+     */
     public function verify(Request $request, $vid, $code): bool
     {
-        // TODO: Implement verify() method.
+        $otpifyCode = $this->getOtpifyCode($vid, $code);
+        return $this->codeIsValid($otpifyCode->expired_at);
     }
 }
