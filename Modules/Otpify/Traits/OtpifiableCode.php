@@ -2,30 +2,29 @@
 
 namespace Modules\Otpify\Traits;
 
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Modules\Otpify\Models\OtpifyCode;
 
 trait OtpifiableCode
 {
-    public function createOtpifyCode(array $data): OtpifyCode
+    public function createOtpifyCode(array $data, $code): OtpifyCode
     {
-        $code = generateRandomCode(config("otpify.code_length"));
-
         return OtpifyCode::create([
             'id' => (string)Str::uuid(),
-            'otp_code' => $code,
-            'expired_at' => now()->addMinutes(10),
+            'otp_code' => Hash::make($code),
+            'expiration_date' => now()->addMinutes(config('otpify.code_expiration_time')),
             'data' => $data
         ]);
     }
 
     public function getOtpifyCode($vid, $code): OtpifyCode
     {
-        return OtpifyCode::where(['id' => $vid, 'otp_code' => $code])->first();
+        return OtpifyCode::where('id', $vid)->first();
     }
 
-    public function codeIsValid($expiredAt): bool
+    public function isCodeExpired($expiredAt): bool
     {
-        return $expiredAt->gt(now());
+        return $expiredAt->lt(now());
     }
 }

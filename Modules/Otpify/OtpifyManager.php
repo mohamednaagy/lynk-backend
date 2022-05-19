@@ -4,8 +4,8 @@ namespace Modules\Otpify;
 
 use Illuminate\Support\Manager;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
-use Modules\Otpify\Drivers\EmailOtpifyDriver;
-use Modules\Otpify\Drivers\TwilioOtpifyDriver;
+use Modules\Otpify\Drivers\EmailDriver;
+use Modules\Otpify\Drivers\TwilioSmsDriver;
 
 class OtpifyManager extends Manager
 {
@@ -26,7 +26,7 @@ class OtpifyManager extends Manager
      */
     public function createEmailDriver(): OtpifyDriverInterface
     {
-        return new EmailOtpifyDriver();
+        return new EmailDriver();
     }
 
     /**
@@ -36,7 +36,7 @@ class OtpifyManager extends Manager
      */
     public function createTwilioDriver(): OtpifyDriverInterface
     {
-        return new TwilioOtpifyDriver();
+        return new TwilioSmsDriver();
     }
 
 }

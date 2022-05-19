@@ -35,6 +35,8 @@ return [
 
         ],
         'twilio' => [
+            'ssl_verify_host' => env('APP_ENV') == 'local' ? false : true,
+            'ssl_verify_peer' => env('APP_ENV') == 'local' ? false : true,
             'sid' => env('TWILIO_SID'),
             'token' => env('TWILIO_TOKEN'),
             'from_phone' => env('TWILIO_FROM')

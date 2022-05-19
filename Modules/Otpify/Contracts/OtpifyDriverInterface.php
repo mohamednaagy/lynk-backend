@@ -19,6 +19,6 @@ interface OtpifyDriverInterface
 
     public function shouldAsk(Request $request, Otpifiable $model): bool;
 
-    public function verify(Request $request, $vid, $code): bool;
+    public function verify(Request $request, $vid, $code, $continue): bool;
 
 }

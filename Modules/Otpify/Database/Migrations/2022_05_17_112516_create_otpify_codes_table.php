@@ -15,7 +15,8 @@ return new class extends Migration
     {
         Schema::create('otpify_codes', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('otp_code');
+            $table->string('otp_code')->nullable();
+            $table->timestamp('expiration_date');
             $table->timestamp('expired_at')->nullable();
             $table->json('data');
             $table->timestamps();

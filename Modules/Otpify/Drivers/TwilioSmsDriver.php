@@ -11,7 +11,7 @@ use Modules\Otpify\Traits\OtpifiableCode;
 use Twilio\Http\CurlClient;
 use Twilio\Rest\Client;
 
-class TwilioOtpifyDriver implements OtpifyDriverInterface
+class TwilioSmsDriver implements OtpifyDriverInterface
 {
     use OtpifiableCode;
 
@@ -26,10 +26,15 @@ class TwilioOtpifyDriver implements OtpifyDriverInterface
      */
     public function execute(Request $request, Otpifiable $otpifiable, array $data): OtpifyCode
     {
-        $otpifyCode = $this->createOtpifyCode($data);
+        $code = generateRandomCode(config('otpify.code_length'));
+        $otpifyCode = $this->createOtpifyCode($data, $code);
 
-        $receiverNumber = $otpifiable->phone_number;
-        $message = trans('otpify::phone.message', ['code' => $otpifyCode->otp_code, 'time' => $otpifyCode->expired_at->diffInMinutes(now())]);
+        if (method_exists($otpifiable, 'routeOtpForPhoneNumber'))
+            $receiverNumber = $otpifiable->routeOtpForPhoneNumber()->formatE164();
+        else
+            $receiverNumber = $otpifiable->phone_number;
+
+        $message = trans('otpify::phone.message', ['code' => $code, 'time' => $otpifyCode->expired_at->diffInMinutes(now())]);
 
         try {
 
@@ -39,8 +44,10 @@ class TwilioOtpifyDriver implements OtpifyDriverInterface
 
             $client = new Client($account_sid, $auth_token);
 
-            //Those two lines of code for ssl issue to send SMS in localhost
-            $curlOptions = [ CURLOPT_SSL_VERIFYHOST => false, CURLOPT_SSL_VERIFYPEER => false];
+            $curlOptions = [
+                CURLOPT_SSL_VERIFYHOST => config("otpify.drivers.twilio.ssl_verify_host"),
+                CURLOPT_SSL_VERIFYPEER => config("otpify.drivers.twilio.ssl_verify_peer")
+            ];
             $client->setHttpClient(new CurlClient($curlOptions));
 
             $client->messages->create($receiverNumber, [
@@ -70,6 +77,6 @@ class TwilioOtpifyDriver implements OtpifyDriverInterface
     public function verify(Request $request, $vid, $code): bool
     {
         $otpifyCode = $this->getOtpifyCode($vid, $code);
-        return $this->codeIsValid($otpifyCode->expired_at);
+        return $this->isCodeExpired($otpifyCode->expiration_date);
     }
 }
