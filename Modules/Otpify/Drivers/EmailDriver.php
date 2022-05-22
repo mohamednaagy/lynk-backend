@@ -5,6 +5,7 @@ namespace Modules\Otpify\Drivers;
 use Illuminate\Http\Request;
 use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
+use Modules\Otpify\Exceptions\OtpifyVerificationException;
 use Modules\Otpify\Models\OtpifyCode;
 use Modules\Otpify\Notifications\OtpifyCodeMessage;
 use Modules\Otpify\Traits\OtpifiableCode;
@@ -21,11 +22,11 @@ class EmailDriver implements OtpifyDriverInterface
      * @param array $data
      * @return OtpifyCode
      */
-    public function execute(Request $request, Otpifiable $otpifiable, array $data): OtpifyCode
+    public function execute(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
         $code = generateRandomCode(config('otpify.code_length'));
-        $otpifyCode = $this->createOtpifyCode($data, $code);
-        $otpifiable->notify(new OtpifyCodeMessage($code, $otpifyCode->expired_at));
+        $otpifyCode = $this->createOtpifyCode($code, $data);
+        $otpifiable->notify(new OtpifyCodeMessage($code, $otpifyCode->expiration_date));
         return $otpifyCode;
     }
 
@@ -40,12 +41,19 @@ class EmailDriver implements OtpifyDriverInterface
      * @param Request $request
      * @param $vid
      * @param $code
-     * @param $continue
+     * @param \Closure|null $additionalCheckCallback
      * @return bool
+     * @throws \Exception
      */
-    public function verify(Request $request, $vid, $code, $continue = null): bool
+    public function verify(Request $request, $vid, $code, \Closure $additionalCheckCallback = null): bool
     {
-        $otpifyCode = $this->getOtpifyCode($vid, $code);
-        return $this->codeIsValid($otpifyCode->expired_at);
+        $otpifyCode = $otpifyCode = $this->getOtpifyCode($vid);
+
+        $verificationMessage = $this->verifyOtpifyCode($otpifyCode, $code, $additionalCheckCallback);
+        if ($verificationMessage !== 'valid')
+            throw new OtpifyVerificationException($verificationMessage, 400, ['driver' => 'Email']);
+
+        $this->setOtpExpiredAt($otpifyCode);
+        return true;
     }
 }

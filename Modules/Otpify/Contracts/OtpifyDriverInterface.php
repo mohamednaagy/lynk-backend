@@ -15,10 +15,10 @@ interface OtpifyDriverInterface
      * @param array $data
      * @return mixed
      */
-    public function execute(Request $request, Otpifiable $model, array $data): OtpifyCode;
+    public function execute(Request $request, Otpifiable $model, array $data = []): OtpifyCode;
 
     public function shouldAsk(Request $request, Otpifiable $model): bool;
 
-    public function verify(Request $request, $vid, $code, $continue): bool;
+    public function verify(Request $request, $vid, $code, \Closure $additionalCheckCallback = null): bool;
 
 }

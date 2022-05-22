@@ -12,17 +12,18 @@ class OtpifyCodeMessage extends Notification
     use Queueable;
 
     protected $otpCode;
-    protected $expiredAt;
+    protected $expirationDate;
 
     /**
      * Create a new notification instance.
      *
-     * @return void
+     * @param $otpCode
+     * @param $expirationDate
      */
-    public function __construct($otpCode, $expiredAt)
+    public function __construct($otpCode, $expirationDate)
     {
         $this->otpCode = $otpCode;
-        $this->expiredAt = $expiredAt;
+        $this->expirationDate = $expirationDate;
     }
 
     /**
@@ -48,7 +49,7 @@ class OtpifyCodeMessage extends Notification
                     ->greeting(trans('otpify::email.greeting', ['name' => $notifiable->fullName]))
                     ->line(trans('otpify::email.otp_code', ['code' => $this->otpCode]))
                     ->action(trans('otpify::email.verify_here'), url('/'))
-                    ->line(trans('otpify::email.expire_at', ['time' => $this->expiredAt->diffInMinutes(now())]))
+                    ->line(trans('otpify::email.expire_at', ['time' => $this->expirationDate->diffInMinutes(now())]))
                     ->line(trans('otpify::email.ignore_message'));
     }
 

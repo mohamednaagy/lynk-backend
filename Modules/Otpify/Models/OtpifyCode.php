@@ -12,7 +12,7 @@ class OtpifyCode extends Model
     protected $fillable = [
         'id',
         'otp_code',
-        'expired_at',
+        'expiration_date',
         'data'
     ];
 
@@ -38,6 +38,7 @@ class OtpifyCode extends Model
     protected $casts = [
         'data' => 'array',
         'expired_at' => 'datetime',
+        'expiration_date' => 'datetime',
     ];
 
     public function getVid()

@@ -8,7 +8,7 @@ use Modules\Otpify\Models\OtpifyCode;
 
 trait OtpifiableCode
 {
-    public function createOtpifyCode(array $data, $code): OtpifyCode
+    public function createOtpifyCode($code, array $data = []): OtpifyCode
     {
         return OtpifyCode::create([
             'id' => (string)Str::uuid(),
@@ -18,13 +18,35 @@ trait OtpifiableCode
         ]);
     }
 
-    public function getOtpifyCode($vid, $code): OtpifyCode
+    public function verifyOtpifyCode(OtpifyCode $otpifyCode, $code, \Closure $additionalCheckCallback = null): string
+    {
+        if ($additionalCheckCallback == false)
+            return trans('otpify::verification.additional_check');
+
+        if(!Hash::check($code, $otpifyCode->otp_code))
+            return trans('otpify::verification.not_exist');
+
+        if ($otpifyCode->expired_at != null)
+            return trans('otpify::verification.used');
+
+        if($this->isCodeExpired($otpifyCode->expiration_date))
+            return trans('otpify::verification.expired');
+
+        return 'valid';
+    }
+
+    public function getOtpifyCode($vid): OtpifyCode
     {
         return OtpifyCode::where('id', $vid)->first();
     }
 
-    public function isCodeExpired($expiredAt): bool
+    public function isCodeExpired($expirationDate): bool
     {
-        return $expiredAt->lt(now());
+        return $expirationDate->lt(now());
+    }
+
+    public function setOtpExpiredAt(OtpifyCode $otpifyCode): void
+    {
+        $otpifyCode->update(['expired_at' => now()]);
     }
 }
