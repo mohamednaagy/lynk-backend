@@ -2,8 +2,6 @@
 
 namespace Modules\Permission\Enums;
 
-use App\Enums\Role as EnumsRole;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Customers\Http\Controllers\api\GetAuthUser;
@@ -22,7 +20,7 @@ use Modules\Customers\Http\Controllers\api\Auth\RegisterController;
 
 Route::post('/register', RegisterController::class);
 
-Route::middleware(['auth:api', 'role:' . EnumsRole::Customer])->group(function () {
+Route::middleware(['auth:api', 'role:' . Role::Customer])->group(function () {
     Route::get('/me', GetAuthUser::class);
 });
 
