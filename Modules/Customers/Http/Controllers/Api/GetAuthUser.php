@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Customers\Http\Controllers\api;
+namespace Modules\Customers\Http\Controllers\Api;
 
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;

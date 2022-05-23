@@ -4,8 +4,8 @@ namespace Modules\Permission\Enums;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Modules\Customers\Http\Controllers\api\GetAuthUser;
-use Modules\Customers\Http\Controllers\api\Auth\RegisterController;
+use Modules\Customers\Http\Controllers\Api\GetAuthUser;
+use Modules\Customers\Http\Controllers\Api\Auth\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,9 +21,5 @@ use Modules\Customers\Http\Controllers\api\Auth\RegisterController;
 Route::post('/register', RegisterController::class);
 
 Route::middleware(['auth:api', 'role:' . Role::Customer])->group(function () {
-    Route::get('/me', GetAuthUser::class);
-});
-
-Route::middleware('auth:api')->get('/customers', function (Request $request) {
-    return $request->user();
+    Route::get('/auth', GetAuthUser::class);
 });
