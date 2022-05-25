@@ -14,7 +14,7 @@ if (!function_exists('getOtpifiablePhoneNumber')) {
         $phoneNumber = $otpifiable->phone_number;
 
         if (method_exists($otpifiable, 'routeOtpForPhoneNumber'))
-            $phoneNumber = $otpifiable->routeOtpForPhoneNumber()->formatE164();
+            $phoneNumber = $otpifiable->routeOtpForPhoneNumber();
 
         return $phoneNumber;
     }

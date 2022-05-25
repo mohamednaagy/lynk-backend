@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Http\Request;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\Otpify\Contracts\Otpifiable;
@@ -46,5 +47,16 @@ class User extends Authenticatable implements Otpifiable
     public function routeOtpForPhoneNumber()
     {
         return phone($this->phone_number, $this->phone_country);
+    }
+
+    /**
+     * Execute the otpifiable logic.
+     *
+     * @param Request $request
+     * @return bool
+     */
+    public function shouldAsk(Request $request): bool
+    {
+        // TODO: Implement shouldAsk() method.
     }
 }

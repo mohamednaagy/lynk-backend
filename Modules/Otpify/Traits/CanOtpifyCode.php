@@ -2,11 +2,17 @@
 
 namespace Modules\Otpify\Traits;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
+use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
+use Modules\Otpify\Exceptions\OtpCodeExpiredException;
+use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
+use Modules\Otpify\Exceptions\OtpCodeNotExistException;
 use Modules\Otpify\Models\OtpifyCode;
 
-trait OtpifiableCode
+trait CanOtpifyCode
 {
     public function createOtpifyCode($code, array $data = []): OtpifyCode
     {
@@ -18,26 +24,29 @@ trait OtpifiableCode
         ]);
     }
 
-    public function verifyOtpifyCode(OtpifyCode $otpifyCode, $code, \Closure $additionalCheckCallback = null): string
+    public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, \Closure $additionalCheckCallback = null): void
     {
-        if ($additionalCheckCallback == false)
-            return trans('otpify::verification.additional_check');
-
         if(!Hash::check($code, $otpifyCode->otp_code))
-            return trans('otpify::verification.not_exist');
+            throw new OtpCodeIncorrectException();
 
         if ($otpifyCode->expired_at != null)
-            return trans('otpify::verification.used');
+            throw new OtpCodeAlreadyUsedException();
 
         if($this->isCodeExpired($otpifyCode->expiration_date))
-            return trans('otpify::verification.expired');
+            throw new OtpCodeExpiredException();
 
-        return 'valid';
+        if ($additionalCheckCallback)
+            if (!$additionalCheckCallback->__invoke($request, $code))
+                throw new OtpCodeAdditionalCheckException();
     }
 
     public function getOtpifyCode($vid): OtpifyCode
     {
-        return OtpifyCode::where('id', $vid)->first();
+        $otpifyCode = OtpifyCode::where('id', $vid)->first();
+        if (!$otpifyCode)
+            throw new OtpCodeNotExistException();
+
+        return $otpifyCode;
     }
 
     public function isCodeExpired($expirationDate): bool

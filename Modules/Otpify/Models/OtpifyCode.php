@@ -13,6 +13,7 @@ class OtpifyCode extends Model
         'id',
         'otp_code',
         'expiration_date',
+        'expired_at',
         'data'
     ];
 

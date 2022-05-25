@@ -5,14 +5,13 @@ namespace Modules\Otpify\Drivers;
 use Illuminate\Http\Request;
 use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
-use Modules\Otpify\Exceptions\OtpifyVerificationException;
 use Modules\Otpify\Models\OtpifyCode;
 use Modules\Otpify\Notifications\OtpifyCodeMessage;
-use Modules\Otpify\Traits\OtpifiableCode;
+use Modules\Otpify\Traits\CanOtpifyCode;
 
 class EmailDriver implements OtpifyDriverInterface
 {
-    use OtpifiableCode;
+    use CanOtpifyCode;
 
     /**
      * Execute the driver logic.
@@ -30,7 +29,7 @@ class EmailDriver implements OtpifyDriverInterface
         return $otpifyCode;
     }
 
-    public function shouldAsk(Request $request, Otpifiable $model): bool
+    public function shouldAsk(Request $request, Otpifiable $otpifiable): bool
     {
         // TODO: Implement shouldAsk() method.
     }
@@ -43,17 +42,18 @@ class EmailDriver implements OtpifyDriverInterface
      * @param $code
      * @param \Closure|null $additionalCheckCallback
      * @return bool
-     * @throws \Exception
+     * @throws \Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException
+     * @throws \Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException
+     * @throws \Modules\Otpify\Exceptions\OtpCodeExpiredException
+     * @throws \Modules\Otpify\Exceptions\OtpCodeIncorrectException
+     * @throws \Modules\Otpify\Exceptions\OtpCodeNotExistException
      */
     public function verify(Request $request, $vid, $code, \Closure $additionalCheckCallback = null): bool
     {
-        $otpifyCode = $otpifyCode = $this->getOtpifyCode($vid);
-
-        $verificationMessage = $this->verifyOtpifyCode($otpifyCode, $code, $additionalCheckCallback);
-        if ($verificationMessage !== 'valid')
-            throw new OtpifyVerificationException($verificationMessage, 400, ['driver' => 'Email']);
-
+        $otpifyCode = $this->getOtpifyCode($vid);
+        $this->verifyOtpifyCode($otpifyCode, $request, $code, $additionalCheckCallback);
         $this->setOtpExpiredAt($otpifyCode);
+
         return true;
     }
 }
