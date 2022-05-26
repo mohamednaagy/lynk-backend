@@ -1,5 +1,10 @@
 <?php
 
 return [
-    'name' => 'Permission'
+    'name' => 'Permission',
+
+    'guards' => [
+        'web',
+        'api',
+    ],
 ];

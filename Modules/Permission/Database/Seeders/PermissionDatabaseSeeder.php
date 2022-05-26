@@ -19,8 +19,13 @@ class PermissionDatabaseSeeder extends Seeder
         Model::unguard();
 
         // $this->call("OthersTableSeeder");
-        foreach (EnumsRole::asArray() as $value) {
-            Role::findOrCreate($value, 'web');
+        // reset cached roles and permissions
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        foreach (EnumsRole::asArray() as $role) {
+            foreach (config('permission.guards') as $guard) {
+                Role::findOrCreate($role, $guard);
+            }
         }
     }
 }
