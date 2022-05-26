@@ -9,7 +9,7 @@ use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
 use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
 use Modules\Otpify\Exceptions\OtpCodeExpiredException;
 use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
-use Modules\Otpify\Exceptions\OtpCodeNotExistException;
+use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
 use Modules\Otpify\Models\OtpifyCode;
 
 trait CanOtpifyCode
@@ -36,7 +36,7 @@ trait CanOtpifyCode
             throw new OtpCodeExpiredException();
 
         if ($additionalCheckCallback)
-            if (!$additionalCheckCallback->__invoke($request, $code))
+            if (!$additionalCheckCallback($request, $code))
                 throw new OtpCodeAdditionalCheckException();
     }
 
@@ -44,7 +44,7 @@ trait CanOtpifyCode
     {
         $otpifyCode = OtpifyCode::where('id', $vid)->first();
         if (!$otpifyCode)
-            throw new OtpCodeNotExistException();
+            throw new OtpCodeNotFoundException();
 
         return $otpifyCode;
     }

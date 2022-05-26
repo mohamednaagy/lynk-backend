@@ -25,7 +25,7 @@ interface OtpifyDriverInterface
      * @param Otpifiable $otpifiable
      * @return bool
      */
-    public function shouldAsk(Request $request, Otpifiable $otpifiable): bool;
+    public function doesRequireVerifyingByOtp(Request $request, Otpifiable $otpifiable): bool;
 
     /**
      * Execute the driver logic.

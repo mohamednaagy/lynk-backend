@@ -29,9 +29,9 @@ class EmailDriver implements OtpifyDriverInterface
         return $otpifyCode;
     }
 
-    public function shouldAsk(Request $request, Otpifiable $otpifiable): bool
+    public function doesRequireVerifyingByOtp(Request $request, Otpifiable $otpifiable): bool
     {
-        // TODO: Implement shouldAsk() method.
+        return $otpifiable->doesRequireVerifyingByOtp($request);
     }
 
     /**
@@ -46,7 +46,7 @@ class EmailDriver implements OtpifyDriverInterface
      * @throws \Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException
      * @throws \Modules\Otpify\Exceptions\OtpCodeExpiredException
      * @throws \Modules\Otpify\Exceptions\OtpCodeIncorrectException
-     * @throws \Modules\Otpify\Exceptions\OtpCodeNotExistException
+     * @throws \Modules\Otpify\Exceptions\OtpCodeNotFoundException
      */
     public function verify(Request $request, $vid, $code, \Closure $additionalCheckCallback = null): bool
     {

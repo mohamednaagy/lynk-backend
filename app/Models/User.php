@@ -50,12 +50,12 @@ class User extends Authenticatable implements Otpifiable
     }
 
     /**
-     * Execute the otpifiable logic.
+     * Check if this user requires verifying by OTP based on role.
      *
      * @param Request $request
      * @return bool
      */
-    public function shouldAsk(Request $request): bool
+    public function doesRequireVerifyingByOtp(Request $request): bool
     {
         // TODO: Implement shouldAsk() method.
     }
