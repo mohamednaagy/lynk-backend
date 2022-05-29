@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums;
+namespace Modules\Permission\Enums;
 
 use BenSampo\Enum\Enum;
 

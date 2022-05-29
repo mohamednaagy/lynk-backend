@@ -18,7 +18,7 @@ return [
     |
     */
 
-    'default' => env('OTPIFY_Default_DRIVER', 'email'),
+    'default' => env('OTPIFY_DEFAULT_DRIVER', 'email'),
 
     /*
     |--------------------------------------------------------------------------
@@ -38,7 +38,7 @@ return [
             'sid' => env('OTPIFY_TWILIO_SID'),
             'token' => env('OTPIFY_TWILIO_TOKEN'),
             'from_phone' => env('OTPIFY_TWILIO_FROM'),
-            'verify_sid' => env('TWILIO_VERIFY_SID', null),
+            'verify_sid' => env('OTPIFY_TWILIO_VERIFY_SID', null),
             'ssl_verify_host' => env('OTPIFY_TWILIO_SSL_VERIFY_HOST', false),
             'ssl_verify_peer' => env('OTPIFY_TWILIO_SSL_VERIFY_PEER', false)
         ]
