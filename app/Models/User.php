@@ -10,8 +10,9 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Spatie\Permission\Traits\HasRoles;
+use Modules\Otpify\Contracts\Otpifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements Otpifiable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
@@ -53,5 +54,10 @@ class User extends Authenticatable
         return Attribute::make(
             get: fn ($value) =>  "{$this->first_name} {$this->last_name}",
         );
+    }
+    
+    public function routeOtpForPhoneNumber()
+    {
+        return phone($this->phone_number, $this->phone_country);
     }
 }
