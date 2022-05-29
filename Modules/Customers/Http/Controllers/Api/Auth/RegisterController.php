@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Customers\Http\Controllers\api\auth;
+namespace Modules\Customers\Http\Controllers\Api\Auth;
 
 use App\Models\User;
 use Illuminate\Routing\Controller;

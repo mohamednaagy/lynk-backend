@@ -2,12 +2,10 @@
 
 namespace Modules\Permission\Database\Seeders;
 
-namespace  Modules\Permission\Enums;
-
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Permission\Enums\Role as EnumsRole;
-use spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Role;
 
 class PermissionDatabaseSeeder extends Seeder
 {
@@ -21,8 +19,13 @@ class PermissionDatabaseSeeder extends Seeder
         Model::unguard();
 
         // $this->call("OthersTableSeeder");
-        foreach (EnumsRole::asArray() as $value) {
-            Role::findOrCreate($value, 'api');
+        // reset cached roles and permissions
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        foreach (EnumsRole::asArray() as $role) {
+            foreach (config('permission.guards') as $guard) {
+                Role::findOrCreate($role, $guard);
+            }
         }
     }
 }
