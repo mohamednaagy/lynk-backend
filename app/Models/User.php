@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Http\Request;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
@@ -59,5 +60,16 @@ class User extends Authenticatable implements Otpifiable
     public function routeOtpForPhoneNumber()
     {
         return phone($this->phone_number, $this->phone_country);
+    }
+
+    /**
+     * Check if this user requires verifying by OTP based on role.
+     *
+     * @param Request $request
+     * @return bool
+     */
+    public function doesRequireVerifyingByOtp(Request $request): bool
+    {
+        // TODO: Implement shouldAsk() method.
     }
 }
