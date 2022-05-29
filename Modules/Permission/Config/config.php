@@ -3,8 +3,5 @@
 return [
     'name' => 'Permission',
 
-    'guards' => [
-        'web',
-        'api',
-    ],
+    'guards' => explode(',', env('GUARDS', 'web'))
 ];
