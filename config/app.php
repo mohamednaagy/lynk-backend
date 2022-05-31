@@ -191,7 +191,8 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
-        'Otpify' => Modules\Otpify\Facades\Otpify::class
+        'Otpify' => Modules\Otpify\Facades\Otpify::class,
+        'Grantify' => Modules\Permission\Facades\Grantify::class
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
 
