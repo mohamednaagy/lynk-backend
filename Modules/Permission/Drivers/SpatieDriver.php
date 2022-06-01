@@ -22,9 +22,15 @@ class SpatieDriver implements GrantifyDriverInterface
 
     public function getGrantifiablePermissions(Grantifiable $grantifiable): array
     {
-        return $grantifiable->roles->transform(function ($role) {
+        $roles_permissions = $grantifiable->roles->transform(function ($role) {
             $roles[$role->name] = $role->permissions->pluck('name')->toArray();
             return $roles;
-        })->toArray()[0];
+        })->toArray();
+
+        if (!empty($roles_permissions)) {
+            return $roles_permissions[0];
+        }
+
+        return [];
     }
 }
