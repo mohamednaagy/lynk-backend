@@ -2,7 +2,7 @@
 
 namespace Modules\Permission;
 
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Manager;
 use Modules\Permission\Contracts\Grantifiable;
 use Modules\Permission\Exceptions\PermissionNotFoundException;
@@ -33,7 +33,7 @@ class GrantifyManager extends Manager
      * @return array
      * @throws RoleNotFoundException
      */
-    public function getRolePermissions($role, string $guardName = null): array
+    public function getRolePermissions(Role|string $role, string $guardName = null): array
     {
         if (!$role instanceof Role)
             $role = $this->findRole($role, $guardName);
@@ -66,7 +66,7 @@ class GrantifyManager extends Manager
             $subjectAction = explode('.', $permission->name);
 
             if (array_key_exists(current($subjectAction), $permissionsInSubjectAction))
-                array_push($permissionsInSubjectAction[current($subjectAction)], end($subjectAction));
+                $permissionsInSubjectAction[current($subjectAction)][] = end($subjectAction);
             else
                 $permissionsInSubjectAction[current($subjectAction)] = [end($subjectAction)];
         }
@@ -84,7 +84,7 @@ class GrantifyManager extends Manager
      * @throws PermissionNotFoundException
      * @throws RoleNotFoundException
      */
-    public function assignPermissionToRole($role, $permission, string $guardName = null): void
+    public function assignPermissionToRole(Role|string $role, string|Permission $permission, string $guardName = null): void
     {
         if (!$role instanceof Role)
             $role = $this->findRole($role, $guardName);
@@ -105,7 +105,7 @@ class GrantifyManager extends Manager
      * @throws PermissionNotFoundException
      * @throws RoleNotFoundException
      */
-    public function removePermissionFromRole($role, $permission, string $guardName = null): void
+    public function removePermissionFromRole(Role|string $role, string|Permission $permission, string $guardName = null): void
     {
         if (!$role instanceof Role)
             $role = $this->findRole($role, $guardName);
