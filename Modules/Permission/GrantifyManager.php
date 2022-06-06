@@ -2,11 +2,14 @@
 
 namespace Modules\Permission;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Manager;
 use Modules\Permission\Contracts\Grantifiable;
 use Modules\Permission\Exceptions\PermissionNotFoundException;
 use Modules\Permission\Exceptions\RoleNotFoundException;
 use Modules\Permission\Traits\CanGrantify;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class GrantifyManager extends Manager
 {
@@ -25,14 +28,16 @@ class GrantifyManager extends Manager
     /**
      * get Role Permissions
      *
-     * @param string $roleName
+     * @param string|Role $role
      * @param string|null $guardName
      * @return array
      * @throws RoleNotFoundException
      */
-    public function getRolePermissions(string $roleName, string $guardName = null): array
+    public function getRolePermissions($role, string $guardName = null): array
     {
-        $role = $this->findRole($roleName, $guardName);
+        if (!$role instanceof Role)
+            $role = $this->findRole($role, $guardName);
+
         return $role->permissions->toArray();
     }
 
@@ -40,66 +45,74 @@ class GrantifyManager extends Manager
      * Get All Permissions for Model
      *
      * @param Grantifiable $grantifiable
-     * @return array
+     * @return Collection
      */
-    public function getAllPermissionsForModel(Grantifiable $grantifiable): array
+    public function getAllPermissionsForModel(Grantifiable $grantifiable): Collection
     {
-        return $grantifiable->getAllPermissions()->toArray();
+        return $grantifiable->getAllPermissions();
     }
 
     /**
      * Get All Permissions In Subject Action Format
      *
-     * @param array $permissions
+     * @param Collection $permissions
      * @return array
      */
-    public function getAllPermissionsInSubjectAction(array $permissions): array
+    public function transformPermissionsToSubjectAction(Collection $permissions): array
     {
-        $permissionsSubjectAction = [];
+        $permissionsInSubjectAction = [];
 
         foreach ($permissions as $permission) {
-            $subjectAction = explode('.', $permission['name']);
+            $subjectAction = explode('.', $permission->name);
 
-            if (array_key_exists(current($subjectAction), $permissionsSubjectAction))
-                array_push($permissionsSubjectAction[current($subjectAction)], end($subjectAction));
+            if (array_key_exists(current($subjectAction), $permissionsInSubjectAction))
+                array_push($permissionsInSubjectAction[current($subjectAction)], end($subjectAction));
             else
-                $permissionsSubjectAction[current($subjectAction)] = array(end($subjectAction));
+                $permissionsInSubjectAction[current($subjectAction)] = [end($subjectAction)];
         }
 
-        return $permissionsSubjectAction;
+        return $permissionsInSubjectAction;
     }
 
     /**
      * Assign a permission to a role.
      *
-     * @param string $roleName
-     * @param string $permissionName
+     * @param string|Role $role
+     * @param string|Permission $permission
      * @param string|null $guardName
      * @return void
      * @throws PermissionNotFoundException
      * @throws RoleNotFoundException
      */
-    public function assignPermissionToRole(string $roleName, string $permissionName, string $guardName = null): void
+    public function assignPermissionToRole($role, $permission, string $guardName = null): void
     {
-        $role = $this->findRole($roleName, $guardName);
-        $permission = $this->findPermission($permissionName, $guardName);
+        if (!$role instanceof Role)
+            $role = $this->findRole($role, $guardName);
+
+        if (!$permission instanceof Permission)
+            $permission = $this->findPermission($permission, $guardName);
+
         $role->givePermissionTo($permission);
     }
 
     /**
      * Remove a permission that is assigned to a role.
      *
-     * @param string $roleName
-     * @param string $permissionName
+     * @param string|Role $role
+     * @param string|Permission $permission
      * @param string|null $guardName
      * @return void
      * @throws PermissionNotFoundException
      * @throws RoleNotFoundException
      */
-    public function removePermissionFromRole(string $roleName, string $permissionName, string $guardName = null): void
+    public function removePermissionFromRole($role, $permission, string $guardName = null): void
     {
-        $role = $this->findRole($roleName, $guardName);
-        $permission = $this->findPermission($permissionName, $guardName);
+        if (!$role instanceof Role)
+            $role = $this->findRole($role, $guardName);
+
+        if (!$permission instanceof Permission)
+            $permission = $this->findPermission($permission, $guardName);
+
         $role->revokePermissionTo($permission);
     }
 
