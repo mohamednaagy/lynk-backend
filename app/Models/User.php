@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Modules\Permission\Contracts\Grantifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,7 @@ use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Spatie\Permission\Traits\HasRoles;
 use Modules\Otpify\Contracts\Otpifiable;
 
-class User extends Authenticatable implements Otpifiable
+class User extends Authenticatable implements Otpifiable, Grantifiable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
@@ -56,7 +57,7 @@ class User extends Authenticatable implements Otpifiable
             get: fn ($value) =>  "{$this->first_name} {$this->last_name}",
         );
     }
-    
+
     public function routeOtpForPhoneNumber()
     {
         return phone($this->phone_number, $this->phone_country);
