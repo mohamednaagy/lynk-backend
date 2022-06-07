@@ -1,5 +1,6 @@
 {
     "Customers": true,
     "Permission": true,
-    "Otpify": true
+    "Otpify": true,
+    "Admin": true
 }
