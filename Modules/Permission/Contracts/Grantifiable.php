@@ -4,5 +4,5 @@ namespace Modules\Permission\Contracts;
 
 interface Grantifiable
 {
-    //code ..
+    function getAllPermissions();
 }
