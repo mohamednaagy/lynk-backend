@@ -78,6 +78,6 @@ class CustomerController extends Controller
             return response()->jsonFormat(['message' => trans('admin::response.customer.not_found')], 404);
 
         $customer->delete();
-        return response()->jsonFormat(['message' => trans('admin::response.customer.deleted')], 200);
+        return response()->jsonFormat(['message' => trans('admin::response.customer.deleted')]);
     }
 }
