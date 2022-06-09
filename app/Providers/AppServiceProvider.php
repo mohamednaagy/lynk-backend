@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Response::macro('jsonFormat', function ($data, $statusCode) {
+        Response::macro('jsonFormat', function ($data, $statusCode = 200) {
             return response()->json([
                 'data' => $data
             ], $statusCode);
