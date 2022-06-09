@@ -116,4 +116,21 @@ class GrantifyManager extends Manager
         $role->revokePermissionTo($permission);
     }
 
+    /**
+     * Assign a direct permission to a model.
+     * The permission argument could be in type of string or Permission object or array of subject action format
+     *
+     * @param Grantifiable $grantifiable
+     * @param string|array|Permission $permission
+     * @param string|null $guardName
+     * @return void
+     */
+    public function assignPermissionToModel(Grantifiable $grantifiable, string|array|Permission $permission, string $guardName = null): void
+    {
+        if (is_array($permission))
+            $permission = $this->transformSubjectActionToPermissionName($permission);
+
+        $grantifiable->givePermissionTo($permission);
+    }
+
 }

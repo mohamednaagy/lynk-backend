@@ -34,4 +34,21 @@ trait CanGrantify
 
         return $permission;
     }
+
+    private function transformSubjectActionToPermissionName(array $permission): array
+    {
+        $permissions = [];
+
+        foreach ($permission as $subject => $actions) {
+            $permissionName = $subject.'.';
+
+            foreach ($actions as $action) {
+                $permissionNameEachAction = $permissionName;
+                $permissionNameEachAction .= $action;
+                $permissions[] = $permissionNameEachAction;
+            }
+        }
+
+        return $permissions;
+    }
 }
