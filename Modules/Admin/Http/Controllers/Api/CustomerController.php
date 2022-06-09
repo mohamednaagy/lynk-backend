@@ -49,7 +49,7 @@ class CustomerController extends Controller
         $customer = $this->customerService->findCustomerById($id);
 
         if (!$customer)
-            return response()->jsonFormat(trans('admin::response.customer.not_found'), 404);
+            return response()->jsonFormat(['message' => trans('admin::response.customer.not_found')], 404);
 
         return new CustomerResource($customer);
     }
@@ -75,9 +75,9 @@ class CustomerController extends Controller
         $customer = $this->customerService->findCustomerById($id);
 
         if (!$customer)
-            return response()->jsonFormat(trans('admin::response.customer.not_found'), 404);
+            return response()->jsonFormat(['message' => trans('admin::response.customer.not_found')], 404);
 
         $customer->delete();
-        return response()->jsonFormat(trans('admin::response.customer.deleted'), 200);
+        return response()->jsonFormat(['message' => trans('admin::response.customer.deleted')], 200);
     }
 }
