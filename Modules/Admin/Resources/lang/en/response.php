@@ -7,6 +7,8 @@ return [
     ],
     'customer' => [
         'not_found' => 'Customer not found',
-        'deleted' => 'Customer has been deleted successfully'
+        'deleted' => 'Customer has been deleted successfully',
+        'created' => 'Customer has been created successfully',
+        'updated' => 'Customer info has been updated successfully'
     ]
 ];

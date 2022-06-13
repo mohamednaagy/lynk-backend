@@ -5,8 +5,11 @@ namespace Modules\Admin\Http\Controllers\Api;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
-use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Modules\Admin\Actions\Api\CreateNewUser;
+use Modules\Admin\Actions\Api\UpdateUser;
+use Modules\Admin\Http\Requests\CreateUserRequest;
+use Modules\Admin\Http\Requests\UpdateUserRequest;
 use Modules\Admin\Http\Resources\CustomerResource;
 use Modules\Admin\Services\Api\CustomerService;
 
@@ -31,12 +34,14 @@ class CustomerController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Response
+     * @param CreateUserRequest $createUserRequest
+     * @param CreateNewUser $createNewUser
+     * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(CreateUserRequest $createUserRequest, CreateNewUser $createNewUser): JsonResponse
     {
-        //
+        $user = $createNewUser->handle($createUserRequest);
+        return response()->jsonFormat([ 'message' => trans('admin::response.customer.created')], 201);
     }
 
     /**
@@ -54,15 +59,23 @@ class CustomerController extends Controller
         return new CustomerResource($customer);
     }
 
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     */
-    public function update(Request $request, $id)
+/**
+ * Update the specified resource in storage.
+ * @param UpdateUserRequest $updateUserRequest
+ * @param int $id
+ * @param UpdateUser $updateUser
+ * @return JsonResponse
+ */
+    public function update(UpdateUserRequest $updateUserRequest, $id, UpdateUser $updateUser): JsonResponse
     {
-        //
+        $customer = $this->customerService->findCustomerById($id);
+
+        if (!$customer)
+            return response()->jsonFormat(['message' => trans('admin::response.customer.not_found')], 404);
+
+        $updateUser->handle($updateUserRequest, $customer);
+
+        return response()->jsonFormat([ 'message' => trans('admin::response.customer.updated')]);
     }
 
     /**
