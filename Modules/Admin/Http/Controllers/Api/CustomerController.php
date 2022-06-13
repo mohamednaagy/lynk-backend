@@ -59,13 +59,13 @@ class CustomerController extends Controller
         return new CustomerResource($customer);
     }
 
-/**
- * Update the specified resource in storage.
- * @param UpdateUserRequest $updateUserRequest
- * @param int $id
- * @param UpdateUser $updateUser
- * @return JsonResponse
- */
+    /**
+     * Update the specified resource in storage.
+     * @param UpdateUserRequest $updateUserRequest
+     * @param int $id
+     * @param UpdateUser $updateUser
+     * @return JsonResponse
+     */
     public function update(UpdateUserRequest $updateUserRequest, $id, UpdateUser $updateUser): JsonResponse
     {
         $customer = $this->customerService->findCustomerById($id);

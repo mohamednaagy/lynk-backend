@@ -22,7 +22,7 @@ use Modules\Permission\Enums\Role;
 Route::middleware(['auth:api', 'role:' . Role::Admin])->prefix('admin')->group(function () {
     Route::get('/auth', GetAuthUser::class);
 
-    Route::apiResource('admins', AdminController::class)->except(['show']);
+    Route::apiResource('admins', AdminController::class)->except(['show'])->parameters(['admins' => 'id']);
 
     Route::get('/roles', GetAllRoles::class);
     Route::get('/permissions', GetAllPermissions::class);
