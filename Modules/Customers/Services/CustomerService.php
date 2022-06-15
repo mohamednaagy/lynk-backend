@@ -1,9 +1,10 @@
 <?php
 
-namespace Modules\Admin\Services\Api;
+namespace Modules\Customers\Services;
 
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Modules\Permission\Enums\Role;
 
 class CustomerService
 {
@@ -12,15 +13,15 @@ class CustomerService
      * @return LengthAwarePaginator
      */
     public function getCustomers(): LengthAwarePaginator {
-        return User::role('customer')->paginate(10);
+        return User::role(Role::Customer)->paginate();
     }
 
     /**
      * Find a customer by id.
      * @param int $id
-     * @return User|null
+     * @return User
      */
-    public function findCustomerById(int $id): User|null {
-        return User::role('customer')->find($id);
+    public function findCustomerById(int $id): User {
+        return User::role(Role::Customer)->findOrFail($id);
     }
 }

@@ -1,17 +1,18 @@
 <?php
 
-namespace Modules\Admin\Http\Controllers\Api;
+namespace Modules\Admin\Http\Controllers\Api\Customers;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Routing\Controller;
-use Modules\Admin\Actions\Api\CreateNewUser;
-use Modules\Admin\Actions\Api\UpdateUser;
-use Modules\Admin\Http\Requests\CreateUserRequest;
+use Illuminate\Support\Facades\DB;
+use Modules\Customers\Actions\Customers\CreateCustomer;
+use Modules\Customers\Actions\Customers\UpdateCustomer;
+use Modules\Admin\Http\Requests\StoreUserRequest;
 use Modules\Admin\Http\Requests\UpdateUserRequest;
 use Modules\Admin\Http\Resources\CustomerResource;
-use Modules\Admin\Services\Api\CustomerService;
+use Modules\Customers\Services\CustomerService;
+use function response;
 
 class CustomerController extends Controller
 {
@@ -34,14 +35,18 @@ class CustomerController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * @param CreateUserRequest $createUserRequest
-     * @param CreateNewUser $createNewUser
+     * @param StoreUserRequest $storeUserRequest
+     * @param CreateCustomer $createCustomer
      * @return JsonResponse
      */
-    public function store(CreateUserRequest $createUserRequest, CreateNewUser $createNewUser): JsonResponse
+    public function store(StoreUserRequest $storeUserRequest, CreateCustomer $createCustomer): JsonResponse
     {
-        $user = $createNewUser->handle($createUserRequest);
-        return response()->jsonFormat([ 'message' => trans('admin::response.customer.created')], 201);
+        return DB::transaction(function () use($storeUserRequest, $createCustomer) {
+            $validated = $storeUserRequest->validated();
+            $user = $createCustomer->handle($validated);
+
+            return response()->jsonFormat([], 201);
+        });
     }
 
     /**
@@ -53,9 +58,6 @@ class CustomerController extends Controller
     {
         $customer = $this->customerService->findCustomerById($id);
 
-        if (!$customer)
-            return response()->jsonFormat(['message' => trans('admin::response.customer.not_found')], 404);
-
         return new CustomerResource($customer);
     }
 
@@ -63,19 +65,18 @@ class CustomerController extends Controller
      * Update the specified resource in storage.
      * @param UpdateUserRequest $updateUserRequest
      * @param int $id
-     * @param UpdateUser $updateUser
+     * @param UpdateCustomer $updateCustomer
      * @return JsonResponse
      */
-    public function update(UpdateUserRequest $updateUserRequest, $id, UpdateUser $updateUser): JsonResponse
+    public function update(UpdateUserRequest $updateUserRequest, $id, UpdateCustomer $updateCustomer): JsonResponse
     {
-        $customer = $this->customerService->findCustomerById($id);
+        return DB::transaction(function () use($updateUserRequest, $id, $updateCustomer) {
+            $customer = $this->customerService->findCustomerById($id);
+            $validated = $updateUserRequest->validated();
+            $updateCustomer->handle($validated, $customer);
 
-        if (!$customer)
-            return response()->jsonFormat(['message' => trans('admin::response.customer.not_found')], 404);
-
-        $updateUser->handle($updateUserRequest, $customer);
-
-        return response()->jsonFormat([ 'message' => trans('admin::response.customer.updated')]);
+            return response()->jsonFormat([]);
+        });
     }
 
     /**
@@ -86,11 +87,8 @@ class CustomerController extends Controller
     public function destroy($id): JsonResponse
     {
         $customer = $this->customerService->findCustomerById($id);
-
-        if (!$customer)
-            return response()->jsonFormat(['message' => trans('admin::response.customer.not_found')], 404);
-
         $customer->delete();
-        return response()->jsonFormat(['message' => trans('admin::response.customer.deleted')]);
+
+        return response()->jsonFormat([]);
     }
 }

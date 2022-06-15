@@ -4,5 +4,9 @@ namespace Modules\Permission\Contracts;
 
 interface Grantifiable
 {
-    function getAllPermissions();
+    public function getAllPermissions();
+    public function givePermissionTo($permission);
+    public function assignRole($role);
+    public function syncPermissions($permission);
+    public function syncRoles($role);
 }
