@@ -6,11 +6,11 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Modules\Admin\Http\Requests\Customers\StoreCustomerRequest;
+use Modules\Admin\Http\Requests\Customers\UpdateCustomerRequest;
+use Modules\Admin\Http\Resources\CustomerResource;
 use Modules\Customers\Actions\Customers\CreateCustomer;
 use Modules\Customers\Actions\Customers\UpdateCustomer;
-use Modules\Admin\Http\Requests\StoreUserRequest;
-use Modules\Admin\Http\Requests\UpdateUserRequest;
-use Modules\Admin\Http\Resources\CustomerResource;
 use Modules\Customers\Services\CustomerService;
 use function response;
 
@@ -35,14 +35,14 @@ class CustomerController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * @param StoreUserRequest $storeUserRequest
+     * @param StoreCustomerRequest $storeCustomerRequest
      * @param CreateCustomer $createCustomer
      * @return JsonResponse
      */
-    public function store(StoreUserRequest $storeUserRequest, CreateCustomer $createCustomer): JsonResponse
+    public function store(StoreCustomerRequest $storeCustomerRequest, CreateCustomer $createCustomer): JsonResponse
     {
-        return DB::transaction(function () use($storeUserRequest, $createCustomer) {
-            $validated = $storeUserRequest->validated();
+        return DB::transaction(function () use($storeCustomerRequest, $createCustomer) {
+            $validated = $storeCustomerRequest->validated();
             $user = $createCustomer->handle($validated);
 
             return response()->jsonFormat([], 201);
@@ -63,16 +63,16 @@ class CustomerController extends Controller
 
     /**
      * Update the specified resource in storage.
-     * @param UpdateUserRequest $updateUserRequest
+     * @param UpdateCustomerRequest $updateCustomerRequest
      * @param int $id
      * @param UpdateCustomer $updateCustomer
      * @return JsonResponse
      */
-    public function update(UpdateUserRequest $updateUserRequest, $id, UpdateCustomer $updateCustomer): JsonResponse
+    public function update(UpdateCustomerRequest $updateCustomerRequest, $id, UpdateCustomer $updateCustomer): JsonResponse
     {
-        return DB::transaction(function () use($updateUserRequest, $id, $updateCustomer) {
+        return DB::transaction(function () use($updateCustomerRequest, $id, $updateCustomer) {
             $customer = $this->customerService->findCustomerById($id);
-            $validated = $updateUserRequest->validated();
+            $validated = $updateCustomerRequest->validated();
             $updateCustomer->handle($validated, $customer);
 
             return response()->jsonFormat([]);
