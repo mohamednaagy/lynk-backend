@@ -1,6 +1,12 @@
 <?php
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Modules\Admin\Http\Controllers\Api\Admins\AdminController;
+use Modules\Admin\Http\Controllers\Api\Customers\CustomerController;
+use Modules\Admin\Http\Controllers\Api\GetAuthUser;
+use Modules\Admin\Http\Controllers\Api\Roles\GetAllPermissions;
+use Modules\Admin\Http\Controllers\Api\Roles\GetAllRoles;
+use Modules\Permission\Enums\Role;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +19,13 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/admin', function (Request $request) {
-    return $request->user();
+Route::middleware(['auth:api', 'role:' . Role::Admin])->prefix('admin')->group(function () {
+    Route::get('/auth', GetAuthUser::class);
+
+    Route::apiResource('admins', AdminController::class)->except(['show'])->parameters(['admins' => 'id']);
+
+    Route::get('/roles', GetAllRoles::class);
+    Route::get('/permissions', GetAllPermissions::class);
+
+    Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
 });

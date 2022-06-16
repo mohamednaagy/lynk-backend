@@ -20,6 +20,6 @@ use Modules\Customers\Http\Controllers\Api\Auth\RegisterController;
 
 Route::post('/register', RegisterController::class);
 
-Route::middleware(['auth:api', 'role:' . Role::Customer])->group(function () {
+Route::middleware(['auth:api', 'role:' . Role::Customer])->prefix('customer')->group(function () {
     Route::get('/auth', GetAuthUser::class);
 });

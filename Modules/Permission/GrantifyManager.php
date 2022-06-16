@@ -116,4 +116,65 @@ class GrantifyManager extends Manager
         $role->revokePermissionTo($permission);
     }
 
+    /**
+     * Assign a direct permission to a model.
+     * The permission argument could be in type of string or Permission object or array of subject action format
+     *
+     * @param Grantifiable $grantifiable
+     * @param string|array|Permission $permission
+     * @param string|null $guardName
+     * @return void
+     */
+    public function assignPermissionToModel(Grantifiable $grantifiable, string|array|Permission $permission, string $guardName = null): void
+    {
+        if (is_string($permission))
+            $permission = $this->findPermission($permission, $guardName);
+        else if (is_array($permission))
+            $permission = $this->transformSubjectActionToPermissionName($permission);
+
+        $grantifiable->givePermissionTo($permission);
+    }
+
+    /**
+     * Assign roles to a model.
+     * The role argument could be in type of string or Role object or array of roles
+     *
+     * @param Grantifiable $grantifiable
+     * @param string|array|Role $role
+     * @param string|null $guardName
+     * @return void
+     */
+    public function assignRoleToModel(Grantifiable $grantifiable, string|array|Role $role, string $guardName = null): void
+    {
+        if (is_string($role))
+            $role = $this->findRole($role, $guardName);
+
+        $grantifiable->assignRole($role);
+    }
+
+    /**
+     * Sync direct permissions to a model.
+     *
+     * @param Grantifiable $grantifiable
+     * @param array $permission
+     * @return void
+     */
+    public function syncPermissionToModel(Grantifiable $grantifiable, array $permission): void
+    {
+        $permission = $this->transformSubjectActionToPermissionName($permission);
+        $grantifiable->syncPermissions($permission);
+    }
+
+    /**
+     * Sync roles to a model.
+     *
+     * @param Grantifiable $grantifiable
+     * @param string|array|Role $role
+     * @return void
+     */
+    public function syncRoleToModel(Grantifiable $grantifiable, ...$role): void
+    {
+        $grantifiable->syncRoles($role);
+    }
+
 }
