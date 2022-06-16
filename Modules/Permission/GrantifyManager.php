@@ -63,8 +63,7 @@ class GrantifyManager extends Manager
         $permissionsInSubjectAction = [];
 
         foreach ($permissions as $permission) {
-            $subjectAction = explode('.', $permission->name);
-
+            $subjectAction = explode('.', $permission->name ?? $permission);
             if (array_key_exists(current($subjectAction), $permissionsInSubjectAction))
                 $permissionsInSubjectAction[current($subjectAction)][] = end($subjectAction);
             else
