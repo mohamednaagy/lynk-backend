@@ -10,6 +10,6 @@ use BenSampo\Enum\Enum;
  */
 final class Role extends Enum
 {
-    const Admin =   'Admin';
-    const Customer =   'Customer';
+    const Admin = 'Admin';
+    const Customer = 'Customer';
 }

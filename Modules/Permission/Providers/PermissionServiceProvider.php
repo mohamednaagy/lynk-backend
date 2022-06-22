@@ -5,6 +5,7 @@ namespace Modules\Permission\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 use Modules\Permission\GrantifyManager;
+use Modules\Permission\GrantifySeederManager;
 
 class PermissionServiceProvider extends ServiceProvider
 {
@@ -45,6 +46,10 @@ class PermissionServiceProvider extends ServiceProvider
         });
         $this->app->singleton('grantify.store', function ($app) {
             return $app->make('grantify')->driver();
+        });
+
+        $this->app->singleton('grantifySeeder', function ($app) {
+            return new GrantifySeederManager($app);
         });
     }
 
