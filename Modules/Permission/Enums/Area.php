@@ -18,8 +18,8 @@ final class Area extends Enum
     {
         return [
               self::SuperAdmin => [
-                  RoleUtil::$roleMap[Role::Admin]::$basePermissions,
-                  RoleUtil::$roleMap[Role::Customer]::$basePermissions
+                  RoleUtil::getPermissionsForRole(Role::Admin),
+                  RoleUtil::getPermissionsForRole(Role::Customer)
               ]
         ];
     }
