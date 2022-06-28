@@ -3,6 +3,7 @@
 namespace Modules\Permission\Enums;
 
 use BenSampo\Enum\Enum;
+use Modules\Permission\Support\GeneralPermissionUtil;
 use Modules\Permission\Support\RoleUtil;
 
 /**
@@ -19,7 +20,8 @@ final class Area extends Enum
         return [
               self::SuperAdmin => [
                   RoleUtil::getPermissionsForRole(Role::Admin),
-                  RoleUtil::getPermissionsForRole(Role::Customer)
+                  RoleUtil::getPermissionsForRole(Role::Customer),
+                  GeneralPermissionUtil::getGeneralPermissionsForArea(self::SuperAdmin)
               ]
         ];
     }

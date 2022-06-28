@@ -51,4 +51,17 @@ trait CanGrantify
 
         return $permissions;
     }
+
+    private function formatPermissionsToMiddleware(array $permissions): string
+    {
+        $permissionChain = '';
+        foreach ($permissions as $key => $permission){
+            $permissionChain .= $permission;
+            if ($key == array_key_last($permissions))
+                break;
+            $permissionChain .= '|';
+        }
+
+        return $permissionChain;
+    }
 }

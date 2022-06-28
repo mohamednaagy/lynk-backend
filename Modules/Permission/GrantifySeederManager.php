@@ -43,14 +43,25 @@ class GrantifySeederManager extends Manager
     public function seedPermissions(bool $withSync = false): void
     {
         $allPermissions = [];
+        $allRoles = [];
+        $defaultGuard = config('auth.defaults.guard');
         foreach (Area::Roles() as $area => $roles) {
-            foreach ($roles as $hasPermissions) {
-                foreach ($hasPermissions as $subject => $actions) {
-                    foreach ($actions as $action) {
-                        $permissionName = $area . '-' . $subject . '.' . $action;
-                        $allPermissions[] = $permissionName;
-                        foreach (config('permission.guards') as $guard) {
-                            Permission::findOrCreate($permissionName, $guard);
+            foreach ($roles as $role) {
+                foreach ($role as $roleName => $permissions) {
+                    if ($roleName !== 'General') {
+                        $role = Role::where(['name' => $roleName, 'guard_name' => $defaultGuard])->first();
+                        $allRoles[] = $role;
+                    }
+                    foreach ($permissions as $subject => $actions) {
+                        foreach ($actions as $action) {
+                            $permissionName = $area . '-' . $subject . '.' . $action;
+                            $allPermissions[] = $permissionName;
+                            foreach (config('permission.guards') as $guard) {
+                                $permission = Permission::findOrCreate($permissionName, $guard);
+
+                                if ($guard === $defaultGuard && $roleName !== 'General')
+                                    $role->givePermissionTo($permission);
+                            }
                         }
                     }
                 }
@@ -61,7 +72,14 @@ class GrantifySeederManager extends Manager
             $databasePermissions = Permission::all()->pluck('name')->toArray();
             $removedPermissions = array_diff($databasePermissions, $allPermissions);
 
-            Permission::query()->whereIn('name', $removedPermissions)->delete();
+            $permissions = Permission::query()
+                ->whereIn('name', $removedPermissions)
+                ->where('guard_name', $defaultGuard)
+                ->get();
+
+            foreach ($allRoles as $role) {
+                $role->revokePermissionTo($permissions);
+            }
         }
     }
 
