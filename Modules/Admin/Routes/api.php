@@ -6,6 +6,7 @@ use Modules\Admin\Http\Controllers\Api\Customers\CustomerController;
 use Modules\Admin\Http\Controllers\Api\GetAuthUser;
 use Modules\Admin\Http\Controllers\Api\Roles\GetAllPermissions;
 use Modules\Admin\Http\Controllers\Api\Roles\GetAllRoles;
+use Modules\Admin\Http\Controllers\Api\Settings\SettingsController;
 use Modules\Permission\Enums\Role;
 
 /*
@@ -28,4 +29,10 @@ Route::middleware(['auth:api', 'role:' . Role::Admin])->prefix('admin')->group(f
     Route::get('/permissions', GetAllPermissions::class);
 
     Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
+
+    Route::prefix('settings')->group(function () {
+        Route::get('/', [SettingsController::class, 'index']);
+        Route::put('/update', [SettingsController::class, 'update']);
+    });
+
 });

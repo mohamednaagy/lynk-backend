@@ -8,6 +8,9 @@ use Modules\Permission\Enums\Area;
 use Modules\Settings\Classes\Areas\CustomerSettings;
 use Modules\Settings\Classes\Areas\SuperAdminSettings;
 use Modules\Settings\Classes\GeneralSettings;
+use Modules\Settings\Services\CustomerSettingsService;
+use Modules\Settings\Services\GeneralSettingsService;
+use Modules\Settings\Services\SuperAdminSettingsService;
 use Modules\Settings\Support\SettingsRegistry;
 
 class SettingsServiceProvider extends ServiceProvider
@@ -36,11 +39,11 @@ class SettingsServiceProvider extends ServiceProvider
 
         // register all setting classes into settingRegister Class
         $this->app->make(SettingsRegistry::class)
-            ->register(Area::SuperAdmin, new SuperAdminSettings());
+            ->register(Area::SuperAdmin, new SuperAdminSettings(), new SuperAdminSettingsService());
         $this->app->make(SettingsRegistry::class)
-            ->register(Area::Customer, new CustomerSettings());
+            ->register(Area::Customer, new CustomerSettings(), new CustomerSettingsService());
         $this->app->make(SettingsRegistry::class)
-            ->register('General', new GeneralSettings());
+            ->register('General', new GeneralSettings(), new GeneralSettingsService());
     }
 
     /**
