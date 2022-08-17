@@ -15,6 +15,9 @@ use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Spatie\Permission\Traits\HasRoles;
 use Modules\Otpify\Contracts\Otpifiable;
 
+/**
+ * @method static create(array $data)
+ */
 class User extends Authenticatable implements Otpifiable, Grantifiable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;

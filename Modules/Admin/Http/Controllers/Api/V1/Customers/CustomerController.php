@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Admin\Http\Controllers\Api\Customers;
+namespace Modules\Admin\Http\Controllers\Api\V1\Customers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\ResourceCollection;

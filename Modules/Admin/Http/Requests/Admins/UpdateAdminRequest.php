@@ -12,7 +12,7 @@ class UpdateAdminRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -22,7 +22,7 @@ class UpdateAdminRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         $rules = [
             'first_name' => ['required', 'min:3', 'string', 'max:100'],
@@ -49,7 +49,7 @@ class UpdateAdminRequest extends FormRequest
      * @return array
      */
 
-    public function messages()
+    public function messages(): array
     {
         return [
             'phone_number.phone' => trans('customers::validation.phone'),

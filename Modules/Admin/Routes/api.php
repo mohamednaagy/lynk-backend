@@ -1,12 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Admin\Http\Controllers\Api\Admins\AdminController;
-use Modules\Admin\Http\Controllers\Api\Customers\CustomerController;
 use Modules\Admin\Http\Controllers\Api\GetAuthUser;
-use Modules\Admin\Http\Controllers\Api\Roles\GetAllPermissions;
-use Modules\Admin\Http\Controllers\Api\Roles\GetAllRoles;
-use Modules\Admin\Http\Controllers\Api\Settings\SettingsController;
+use Modules\Admin\Http\Controllers\Api\V1\Admins\AdminController;
+use Modules\Admin\Http\Controllers\Api\V1\Customers\CustomerController;
+use Modules\Admin\Http\Controllers\Api\V1\Roles\GetAllPermissions;
+use Modules\Admin\Http\Controllers\Api\V1\Roles\GetAllRoles;
+use Modules\Admin\Http\Controllers\Api\V1\Settings\SettingsController;
 use Modules\Permission\Enums\Role;
 
 /*

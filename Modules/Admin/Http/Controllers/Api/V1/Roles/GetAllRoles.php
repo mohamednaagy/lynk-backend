@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Admin\Http\Controllers\Api\Roles;
+namespace Modules\Admin\Http\Controllers\Api\V1\Roles;
 
 use Illuminate\Routing\Controller;
 use Spatie\Permission\Models\Role;
