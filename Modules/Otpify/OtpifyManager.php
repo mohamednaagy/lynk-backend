@@ -39,4 +39,14 @@ class OtpifyManager extends Manager
         return new TwilioSmsDriver();
     }
 
+    /**
+     * Get all the drivers.
+     *
+     * @return array
+     */
+    public function getOptifyDrivers(): array
+    {
+        return array_keys(config('otpify.drivers'));
+    }
+
 }

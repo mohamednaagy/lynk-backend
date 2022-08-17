@@ -2,5 +2,6 @@
     "Customers": true,
     "Permission": true,
     "Otpify": true,
-    "Admin": true
+    "Admin": true,
+    "Settings": true
 }

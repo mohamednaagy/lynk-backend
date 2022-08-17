@@ -14,6 +14,7 @@ final class Area extends Enum
 {
     const SuperAdmin = 'SuperAdmin';
     const Customer = 'Customer';
+    const General = 'General';
 
     public static function Roles()
     {
