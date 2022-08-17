@@ -24,15 +24,15 @@ Route::middleware(['auth:api', 'role:' . Role::Admin])->prefix('admin')->group(f
     Route::get('/auth', GetAuthUser::class);
 
     Route::apiResource('admins', AdminController::class)->except(['show'])->parameters(['admins' => 'id']);
-
-    Route::get('/roles', GetAllRoles::class);
-    Route::get('/permissions', GetAllPermissions::class);
-
     Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
+
+    Route::group(['middleware' => ['permission:'.\Grantify::getAuthUserPermissionsForMiddleware()]], function () {
+        Route::get('/roles', GetAllRoles::class);
+        Route::get('/permissions', GetAllPermissions::class);
+    });
 
     Route::prefix('settings')->group(function () {
         Route::get('/', [SettingsController::class, 'index']);
         Route::put('/update', [SettingsController::class, 'update']);
     });
-
 });

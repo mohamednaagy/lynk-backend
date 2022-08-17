@@ -3,6 +3,7 @@
 namespace Modules\Permission;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Manager;
 use Modules\Permission\Contracts\Grantifiable;
 use Modules\Permission\Exceptions\PermissionNotFoundException;
@@ -191,6 +192,21 @@ class GrantifyManager extends Manager
     public function syncRoleToModel(Grantifiable $grantifiable, ...$role): void
     {
         $grantifiable->syncRoles($role);
+    }
+
+    /**
+     * Get Direct Permissions of authenticated user for middleware check.
+     *
+     * @return string
+     */
+    public function getAuthUserPermissionsForMiddleware(): string
+    {
+        $permissions = [];
+
+        if (Auth::check())
+            $permissions = auth()->user()->permissions->pluck('name')->toArray();
+
+        return $this->formatPermissionsToMiddleware($permissions);
     }
 
 }

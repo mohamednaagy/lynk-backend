@@ -18,4 +18,6 @@ final class Action extends Enum
     const Show = 'Show';
     const Edit = 'Edit';
     const Delete = 'Delete';
+    Const getRoles = 'getRoles';
+    Const getPermissions = 'getPermissions';
 }
