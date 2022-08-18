@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Admin\Http\Controllers\Api\GetAuthUser;
 use Modules\Admin\Http\Controllers\Api\V1\Admins\AdminController;
-use Modules\Admin\Http\Controllers\Api\V1\Customers\CustomerController;
 use Modules\Admin\Http\Controllers\Api\V1\Roles\GetAllPermissions;
 use Modules\Admin\Http\Controllers\Api\V1\Roles\GetAllRoles;
 use Modules\Admin\Http\Controllers\Api\V1\Settings\SettingsController;
@@ -20,11 +19,11 @@ use Modules\Permission\Enums\Role;
 |
 */
 
-Route::middleware(['auth:api', 'role:' . Role::Admin])->prefix('admin')->group(function () {
+Route::middleware(['auth:api', 'role:' . Role::Admin])->prefix('v1/admin')->group(function () {
+//Route::prefix('v1/admin')->group(function () {
     Route::get('/auth', GetAuthUser::class);
 
     Route::apiResource('admins', AdminController::class)->except(['show'])->parameters(['admins' => 'id']);
-    Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
 
     Route::group(['middleware' => ['permission:'.\Grantify::getAuthUserPermissionsForMiddleware()]], function () {
         Route::get('/roles', GetAllRoles::class);

@@ -3,12 +3,13 @@
 namespace Modules\Admin\Http\Controllers\Api\V1\Admins;
 
 use Exception;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Modules\Permission\Enums\Role;
 use App\Http\Controllers\Controller;
 use Modules\Admin\Http\Resources\AuthResource;
+use App\Actions\Contracts\FindUserByIdAndRole;
+use App\Actions\Contracts\GetPaginatedUsersByRole;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Modules\Admin\Http\Requests\Admins\StoreAdminRequest;
 use Modules\Admin\Http\Requests\Admins\UpdateAdminRequest;
@@ -20,11 +21,11 @@ class AdminController extends Controller
     /**
      * @return ResourceCollection
      */
-    public function index() : ResourceCollection
+    public function index(GetPaginatedUsersByRole $getPaginatedUsersByRole): ResourceCollection
     {
-       $users = User::role(Role::Admin)->paginate();
+       $admins = $getPaginatedUsersByRole(Role::Admin);
 
-       return  AuthResource::collection($users);
+       return  AuthResource::collection($admins);
    }
 
     /**
@@ -58,12 +59,16 @@ class AdminController extends Controller
     public function update(
         UpdateAdminRequest $updateAdminRequest,
         int $id,
-        UpdateAdminWithRoleAndPermission $updateAdminWithRoleAndPermission
+        UpdateAdminWithRoleAndPermission $updateAdminWithRoleAndPermission,
+        FindUserByIdAndRole $findUserByIdAndRole
     ): JsonResponse
     {
         try {
-            return DB::transaction(function () use($updateAdminRequest, $id, $updateAdminWithRoleAndPermission) {
-                $admin = User::role(Role::Admin)->findOrFail($id);
+            return DB::transaction(function () use($updateAdminRequest, $id, $updateAdminWithRoleAndPermission, $findUserByIdAndRole) {
+                $admin = $findUserByIdAndRole($id, Role::Admin);
+                if (!$admin)
+                    return $this->errorResponse();
+
                 $updateAdminWithRoleAndPermission($updateAdminRequest->validated(), $admin);
                 return $this->successResponse();
             });
@@ -76,12 +81,15 @@ class AdminController extends Controller
      * @param int $id
      * @return JsonResponse
      */
-    public function destroy($id) : JsonResponse
+    public function destroy(int $id, FindUserByIdAndRole $findUserByIdAndRole): JsonResponse
    {
-        $user = User::role(Role::Admin)->findOrFail($id);
+       $admin = $findUserByIdAndRole($id, Role::Admin);
+       if (!$admin)
+           return $this->errorResponse();
 
-       $user->delete();
-       return  response()->jsonFormat([]);
+       $admin->delete();
+
+       return $this->successResponse();
    }
 
 }

@@ -5,7 +5,8 @@
     "keywords": [],
     "priority": 0,
     "providers": [
-        "Modules\\Customers\\Providers\\CustomersServiceProvider"
+        "Modules\\Customers\\Providers\\CustomersServiceProvider",
+        "Modules\\Customers\\Providers\\ActionsServiceProvider"
     ],
     "aliases": {},
     "files": [],

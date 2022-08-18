@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Actions;
+
+use App\Actions\Contracts\GetPaginatedUsersByRole;
+use App\Models\User;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
+class GetPaginatedUsersByRoleAction implements GetPaginatedUsersByRole
+{
+    /**
+     * @param string $role
+     * @return LengthAwarePaginator
+     */
+    public function __invoke(string $role): LengthAwarePaginator
+    {
+       return User::role($role)->paginate();
+    }
+}
