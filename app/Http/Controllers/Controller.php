@@ -20,7 +20,7 @@ class Controller extends BaseController
      */
     protected function successResponse(
         array $data = [],
-        int   $statusCode = Response::HTTP_OK
+        int $statusCode = Response::HTTP_OK
     ): JsonResponse
     {
         return response()->json([
@@ -36,13 +36,17 @@ class Controller extends BaseController
      */
     protected function errorResponse(
         string $message = 'something went wrong',
-        int    $code = 400,
-        int    $statusCode = Response::HTTP_BAD_REQUEST
+        int $statusCode = Response::HTTP_BAD_REQUEST,
+        int $code = null
     ): JsonResponse
     {
-        return response()->json([
+        $response = [
             'message' => $message,
-            'code' => $code
-        ], $statusCode);
+        ];
+
+        if (!is_null($code))
+            $response = array_merge($response, ['code' => $code]);
+
+        return response()->json($response, $statusCode);
     }
 }

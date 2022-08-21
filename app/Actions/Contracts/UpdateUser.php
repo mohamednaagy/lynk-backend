@@ -11,5 +11,5 @@ interface UpdateUser
      * @param array $data
      * @return bool
      */
-    public function __invoke(User $user, array $data): bool;
+    public function handle(User $user, array $data): bool;
 }

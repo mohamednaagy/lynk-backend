@@ -12,7 +12,7 @@ class CreateUserAction implements CreateUser
      * @param array $data
      * @return User
      */
-    public function __invoke(array $data): User
+    public function handle(array $data): User
     {
         $data['password'] = Hash::make($data['password']);
         $data['phone_number'] = phone($data['phone_number'], $data['phone_country_code']);

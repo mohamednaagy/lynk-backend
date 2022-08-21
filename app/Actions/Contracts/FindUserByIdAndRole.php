@@ -11,5 +11,5 @@ interface FindUserByIdAndRole
      * @param string $role
      * @return User|null
      */
-    public function __invoke(int $id, string $role): ?User;
+    public function handle(int $id, string $role): ?User;
 }

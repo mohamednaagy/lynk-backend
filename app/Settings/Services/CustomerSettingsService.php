@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Settings\Services;
+
+use Illuminate\Validation\Rule;
+use App\Settings\Services\Contracts\SettingsInterface;
+use App\Settings\Support\SettingsRegistry;
+
+class CustomerSettingsService implements SettingsInterface
+{
+    /**
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            'otp_driver' => ['required', 'string', Rule::in(\Otpify::getOptifyDrivers())],
+            'otp_enabled' => ['required', 'boolean']
+        ];
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function update(array $data): void
+    {
+        $settings = SettingsRegistry::getSettingInstanceByKey($data['area']);
+
+        $settings->otp_driver = $data['otp_driver'];
+        $settings->otp_enabled = $data['otp_enabled'];
+
+        $settings->save();
+
+    }
+}

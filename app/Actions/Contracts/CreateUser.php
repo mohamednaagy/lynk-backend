@@ -10,5 +10,5 @@ interface CreateUser
      * @param array $data
      * @return User
      */
-    public function __invoke(array $data): User;
+    public function handle(array $data): User;
 }

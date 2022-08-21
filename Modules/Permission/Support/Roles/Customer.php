@@ -2,7 +2,7 @@
 
 namespace Modules\Permission\Support\Roles;
 
-use Modules\Permission\Enums\Role;
+use App\Enums\Role;
 
 class Customer
 {

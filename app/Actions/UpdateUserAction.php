@@ -12,7 +12,7 @@ class UpdateUserAction implements UpdateUser
      * @param array $data
      * @return bool
      */
-    public function __invoke(User $user, array $data): bool
+    public function handle(User $user, array $data): bool
     {
         $data['phone_number'] = phone($data['phone_number'], $data['phone_country_code'])->formatE164();
         return $user->update($data);

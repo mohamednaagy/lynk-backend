@@ -2,7 +2,7 @@
 
 namespace Modules\Permission\Support;
 
-use Modules\Permission\Enums\Role;
+use App\Enums\Role;
 use Modules\Permission\Support\Roles\Admin;
 use Modules\Permission\Support\Roles\Customer;
 

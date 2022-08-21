@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Actions\Contracts\ListSettings;
+use App\Actions\Contracts\UpdateSettings;
 use App\Actions\CreateUserAction;
+use App\Actions\ListSettingsAction;
+use App\Actions\UpdateSettingsAction;
 use App\Actions\UpdateUserAction;
 use App\Actions\Contracts\UpdateUser;
 use App\Actions\Contracts\CreateUser;
@@ -19,6 +23,14 @@ use App\Actions\GetPaginatedUsersByRoleAction;
 use App\Actions\Contracts\SyncPermissionToUser;
 use App\Actions\Contracts\AssignPermissionToUser;
 use App\Actions\Contracts\GetPaginatedUsersByRole;
+use App\Actions\CreateAdminWithRoleAndPermissionAction;
+use App\Actions\UpdateAdminWithRoleAndPermissionAction;
+use App\Actions\CreateCustomerWithRoleAndPermissionAction;
+use App\Actions\UpdateCustomerWithRoleAndPermissionAction;
+use App\Actions\Contracts\CreateAdminWithRoleAndPermission;
+use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
+use App\Actions\Contracts\CreateCustomerWithRoleAndPermission;
+use App\Actions\Contracts\UpdateCustomerWithRoleAndPermission;
 
 class ActionsServiceProvider extends ServiceProvider
 {
@@ -33,5 +45,14 @@ class ActionsServiceProvider extends ServiceProvider
 
         FindUserByIdAndRole::class => FindUserByIdAndRoleAction::class,
         GetPaginatedUsersByRole::class => GetPaginatedUsersByRoleAction::class,
+
+        CreateAdminWithRoleAndPermission::class => CreateAdminWithRoleAndPermissionAction::class,
+        UpdateAdminWithRoleAndPermission::class => UpdateAdminWithRoleAndPermissionAction::class,
+
+        CreateCustomerWithRoleAndPermission::class => CreateCustomerWithRoleAndPermissionAction::class,
+        UpdateCustomerWithRoleAndPermission::class => UpdateCustomerWithRoleAndPermissionAction::class,
+
+        ListSettings::class => ListSettingsAction::class,
+        UpdateSettings::class => UpdateSettingsAction::class,
     ];
 }
