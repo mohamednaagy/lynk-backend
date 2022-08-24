@@ -13,7 +13,9 @@ class ListSettingsAction implements ListSettings
      * UpdateSettingsAction constructor.
      * @param GetSettingsClassInstance $getSettingsClassInstance
      */
-    public function __construct(protected GetSettingsClassInstance $getSettingsClassInstance)
+    public function __construct(
+        protected GetSettingsClassInstance $getSettingsClassInstance
+    )
     {
     }
 

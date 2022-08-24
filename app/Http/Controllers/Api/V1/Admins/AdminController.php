@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1\Admins;
 
+use App\Enums\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AuthResource;
 use App\Actions\Contracts\FindUserByIdAndRole;

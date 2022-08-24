@@ -5,8 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admins\AdminController;
 use App\Http\Controllers\Api\V1\Admins\Roles\GetAllRoles;
-use App\Http\Controllers\Api\V1\Settings\SettingsController;
 use App\Http\Controllers\Api\V1\Admins\Roles\GetAllPermissions;
+use App\Http\Controllers\Api\V1\Admins\Settings\SettingsController;
 use App\Http\Controllers\Api\V1\Admins\Customers\CustomerController;
 
 /*

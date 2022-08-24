@@ -2,10 +2,10 @@
 
 namespace App\Actions;
 
-use App\Actions\Contracts\SyncRoleToUser;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Modules\Permission\Facades\Grantify;
+use App\Actions\Contracts\SyncRoleToUser;
 
 class SyncRoleToUserAction implements SyncRoleToUser
 {

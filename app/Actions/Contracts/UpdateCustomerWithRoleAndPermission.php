@@ -3,9 +3,6 @@
 namespace App\Actions\Contracts;
 
 use App\Models\User;
-use App\Actions\Contracts\UpdateUser;
-use App\Actions\Contracts\SyncRoleToUser;
-use App\Actions\Contracts\SyncPermissionToUser;
 
 interface UpdateCustomerWithRoleAndPermission
 {

@@ -3,11 +3,13 @@
 namespace App\Http\Requests\Settings;
 
 use App\Enums\Area;
+use Exception;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
-use function Symfony\Component\String\match;
-use App\Actions\Contracts\GetSettingsRequestRule;
 
+/**
+ * @property string $area
+ */
 class UpdateSettingsRequest extends FormRequest
 {
     /**
@@ -46,6 +48,7 @@ class UpdateSettingsRequest extends FormRequest
                 'otp_driver' => ['required', 'string', Rule::in(\Otpify::getOtpifyDrivers())],
                 'otp_enabled' => ['required', 'boolean']
             ],
+            default => []
         };
     }
 

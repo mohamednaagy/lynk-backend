@@ -11,7 +11,9 @@ class GeneralSettingsAction implements SettingsInterface
      * UpdateSettingsAction constructor.
      * @param GetSettingsClassInstance $getSettingsClassInstance
      */
-    public function __construct(protected GetSettingsClassInstance $getSettingsClassInstance)
+    public function __construct(
+        protected GetSettingsClassInstance $getSettingsClassInstance
+    )
     {
     }
 

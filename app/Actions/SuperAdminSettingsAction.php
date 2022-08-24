@@ -7,14 +7,14 @@ use App\Actions\Contracts\GetSettingsClassInstance;
 
 class SuperAdminSettingsAction implements SettingsInterface
 {
-    protected GetSettingsClassInstance $getSettingsClassInstance;
     /**
      * UpdateSettingsAction constructor.
      * @param GetSettingsClassInstance $getSettingsClassInstance
      */
-    public function __construct(GetSettingsClassInstance $getSettingsClassInstance)
+    public function __construct(
+        protected GetSettingsClassInstance $getSettingsClassInstance
+    )
     {
-        $this->getSettingsClassInstance = $getSettingsClassInstance;
     }
 
     /**

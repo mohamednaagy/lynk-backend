@@ -8,7 +8,7 @@ interface GetSettingsArea
 {
     /**
      * @param string $key
-     * @return Settings
+     * @return SettingsInterface
      */
     public function handle(string $key): SettingsInterface;
 }

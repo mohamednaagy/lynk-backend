@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Actions\Contracts\CreateUser;
 use App\Actions\Contracts\AssignRoleToUser;
 use App\Actions\Contracts\AssignPermissionToUser;
-use Modules\Admin\Actions\Contracts\CreateAdminWithRoleAndPermission;
+use App\Actions\Contracts\CreateAdminWithRoleAndPermission;
 
 class CreateAdminWithRoleAndPermissionAction implements CreateAdminWithRoleAndPermission
 {

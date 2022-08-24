@@ -2,10 +2,10 @@
 
 namespace App\Actions;
 
-use App\Actions\Contracts\SyncPermissionToUser;
 use App\Models\User;
 use Spatie\Permission\Models\Permission;
 use Modules\Permission\Facades\Grantify;
+use App\Actions\Contracts\SyncPermissionToUser;
 
 class SyncPermissionToUserAction implements SyncPermissionToUser
 {

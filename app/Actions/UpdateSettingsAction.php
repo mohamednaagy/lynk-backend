@@ -11,7 +11,9 @@ class UpdateSettingsAction implements UpdateSettings
      * UpdateSettingsAction constructor.
      * @param GetSettingsArea $getSettingsArea
      */
-    public function __construct(protected GetSettingsArea $getSettingsArea)
+    public function __construct(
+        protected GetSettingsArea $getSettingsArea
+    )
     {
     }
 

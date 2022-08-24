@@ -2,8 +2,8 @@
 
 namespace App\Actions;
 
-use App\Actions\Contracts\FindUserByIdAndRole;
 use App\Models\User;
+use App\Actions\Contracts\FindUserByIdAndRole;
 
 class FindUserByIdAndRoleAction implements FindUserByIdAndRole
 {

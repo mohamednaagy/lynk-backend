@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Settings;
+namespace App\Http\Controllers\Api\V1\Admins\Settings;
 
-use App\Actions\Contracts\UpdateSettings;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Actions\Contracts\ListSettings;
 use App\Http\Resources\SettingsResource;
+use App\Actions\Contracts\UpdateSettings;
 use App\Http\Requests\Settings\UpdateSettingsRequest;
 
 class SettingsController extends Controller
@@ -17,7 +16,7 @@ class SettingsController extends Controller
      * @param ListSettings $listSettings
      * @return SettingsResource
      */
-    public function index(ListSettings $listSettings)
+    public function index(ListSettings $listSettings): SettingsResource
     {
         return new SettingsResource($listSettings->handle());
     }
@@ -34,5 +33,4 @@ class SettingsController extends Controller
 
         return $this->successResponse();
     }
-
 }

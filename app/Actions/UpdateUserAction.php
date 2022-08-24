@@ -2,8 +2,8 @@
 
 namespace App\Actions;
 
-use App\Actions\Contracts\UpdateUser;
 use App\Models\User;
+use App\Actions\Contracts\UpdateUser;
 
 class UpdateUserAction implements UpdateUser
 {

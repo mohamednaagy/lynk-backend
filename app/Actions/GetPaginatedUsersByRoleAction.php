@@ -2,8 +2,8 @@
 
 namespace App\Actions;
 
-use App\Actions\Contracts\GetPaginatedUsersByRole;
 use App\Models\User;
+use App\Actions\Contracts\GetPaginatedUsersByRole;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class GetPaginatedUsersByRoleAction implements GetPaginatedUsersByRole

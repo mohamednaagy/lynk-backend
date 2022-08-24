@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Actions\Contracts\UpdateUser;
 use App\Actions\Contracts\SyncRoleToUser;
 use App\Actions\Contracts\SyncPermissionToUser;
-use Modules\Admin\Actions\Contracts\UpdateAdminWithRoleAndPermission;
+use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
 
 class UpdateAdminWithRoleAndPermissionAction implements UpdateAdminWithRoleAndPermission
 {
