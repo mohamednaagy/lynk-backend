@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests\Settings;
 
-use Illuminate\Validation\Rule;
 use App\Enums\Area;
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Settings\Support\SettingsRegistry;
+use function Symfony\Component\String\match;
+use App\Actions\Contracts\GetSettingsRequestRule;
 
 class UpdateSettingsRequest extends FormRequest
 {
@@ -26,11 +27,26 @@ class UpdateSettingsRequest extends FormRequest
      */
     public function rules(): array
     {
-        $settingService = SettingsRegistry::getSettingServiceByKey($this->area);
-
         return array_merge([
             'area' => ['required', Rule::in(Area::getValues())]
-        ], $settingService->rules());
+        ], $this->getCustomRulesByArea($this->area));
+    }
+
+    private function getCustomRulesByArea(string $area): array
+    {
+        return match ($area) {
+            'General' => [
+                'default_otp_driver' => ['required', 'string', Rule::in(\Otpify::getOtpifyDrivers())]
+            ],
+            Area::SuperAdmin => [
+                'otp_driver' => ['required', 'string', Rule::in(\Otpify::getOtpifyDrivers())],
+                'otp_enabled' => ['required', 'boolean']
+            ],
+            Area::Customer => [
+                'otp_driver' => ['required', 'string', Rule::in(\Otpify::getOtpifyDrivers())],
+                'otp_enabled' => ['required', 'boolean']
+            ],
+        };
     }
 
 }

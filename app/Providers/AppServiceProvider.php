@@ -2,16 +2,8 @@
 
 namespace App\Providers;
 
-use App\Enums\Area;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Response;
-use App\Settings\Classes\GeneralSettings;
-use App\Settings\Support\SettingsRegistry;
-use App\Settings\Classes\Areas\CustomerSettings;
-use App\Settings\Services\GeneralSettingsService;
-use App\Settings\Classes\Areas\SuperAdminSettings;
-use App\Settings\Services\CustomerSettingsService;
-use App\Settings\Services\SuperAdminSettingsService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -50,13 +42,5 @@ class AppServiceProvider extends ServiceProvider
                 'code' => $code
             ], $statusCode);
         });
-
-        // register all setting classes into settingRegister Class
-        $this->app->make(SettingsRegistry::class)
-            ->register(Area::SuperAdmin, new SuperAdminSettings(), new SuperAdminSettingsService());
-        $this->app->make(SettingsRegistry::class)
-            ->register(Area::Customer, new CustomerSettings(), new CustomerSettingsService());
-        $this->app->make(SettingsRegistry::class)
-            ->register('General', new GeneralSettings(), new GeneralSettingsService());
     }
 }

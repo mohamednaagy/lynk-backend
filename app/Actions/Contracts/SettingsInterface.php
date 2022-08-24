@@ -2,13 +2,13 @@
 
 namespace App\Actions\Contracts;
 
-interface UpdateSettings
+interface SettingsInterface
 {
     /**
      * UpdateSettingsAction constructor.
-     * @param GetSettingsArea $getSettingsArea
+     * @param GetSettingsClassInstance $getSettingsClassInstance
      */
-    public function __construct(GetSettingsArea $getSettingsArea);
+    public function __construct(GetSettingsClassInstance $getSettingsClassInstance);
 
     /**
      * @param array $data

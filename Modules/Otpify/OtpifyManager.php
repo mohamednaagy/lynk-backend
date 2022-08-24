@@ -44,7 +44,7 @@ class OtpifyManager extends Manager
      *
      * @return array
      */
-    public function getOptifyDrivers(): array
+    public function getOtpifyDrivers(): array
     {
         return array_keys(config('otpify.drivers'));
     }

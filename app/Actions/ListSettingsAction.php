@@ -5,10 +5,18 @@ namespace App\Actions;
 use App\Enums\Area;
 use Modules\Otpify\Facades\Otpify;
 use App\Actions\Contracts\ListSettings;
-use App\Settings\Support\SettingsRegistry;
+use App\Actions\Contracts\GetSettingsClassInstance;
 
 class ListSettingsAction implements ListSettings
 {
+    /**
+     * UpdateSettingsAction constructor.
+     * @param GetSettingsClassInstance $getSettingsClassInstance
+     */
+    public function __construct(protected GetSettingsClassInstance $getSettingsClassInstance)
+    {
+    }
+
     /**
      * @return array
      */
@@ -18,10 +26,10 @@ class ListSettingsAction implements ListSettings
         $settings = [];
 
         foreach ($areas as $area) {
-            $settings[$area] = SettingsRegistry::getSettingInstanceByKey($area)->toArray();
+            $settings[$area] = $this->getSettingsClassInstance->handle($area)->toArray();
         }
 
-        $settings['otp_drivers'] = Otpify::getOptifyDrivers();
+        $settings['otp_drivers'] = Otpify::getOtpifyDrivers();
         $settings['areas'] = $areas;
 
         return $settings;

@@ -3,17 +3,25 @@
 namespace App\Actions;
 
 use App\Actions\Contracts\UpdateSettings;
-use App\Settings\Support\SettingsRegistry;
+use App\Actions\Contracts\GetSettingsArea;
 
 class UpdateSettingsAction implements UpdateSettings
 {
+    /**
+     * UpdateSettingsAction constructor.
+     * @param GetSettingsArea $getSettingsArea
+     */
+    public function __construct(protected GetSettingsArea $getSettingsArea)
+    {
+    }
+
     /**
      * @param array $data
      * @return void
      */
     public function handle(array $data): void
     {
-        $settingService = SettingsRegistry::getSettingServiceByKey($data['area']);
-        $settingService->update($data);
+        $settingAction = $this->getSettingsArea->handle($data['area']);
+        $settingAction->handle($data);
     }
 }
