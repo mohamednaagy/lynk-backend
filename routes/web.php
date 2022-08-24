@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    dd('jfjhvjh');
 //    dd(\Otpify::driver()->ex());
 //    return view('welcome');
 });

@@ -5,6 +5,8 @@ return [
 
     'code_length' => env('OTPIFY_CODE_LENGTH', 4),
 
+    'authorized_token_length' => env('AUTHORIZED_TOKEN_LENGTH', 40),
+
     'code_expiration_time' => env('OTPIFY_CODE_EXPIRATION_TIME', 10),
 
     /*
