@@ -6,7 +6,7 @@ use Spatie\LaravelSettings\Settings;
 
 class GeneralSettings extends Settings
 {
-    public string $default_otp_driver;
+    public string $otp_driver;
 
     public static function group(): string
     {

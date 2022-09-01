@@ -32,14 +32,14 @@ class UpdateAdminWithRoleAndPermissionAction implements UpdateAdminWithRoleAndPe
     public function handle(array $data, User $user): void
     {
         # update user
-        ($this->updateUser)($user, $data);
+        $this->updateUser->handle($user, $data);
 
         # sync role
         if (!empty($data['role']))
-            ($this->syncRoleToUser)($user, $data['role']);
+            $this->syncRoleToUser->handle($user, $data['role']);
 
         # sync permission
         if (!empty($data['permissions']))
-            ($this->syncPermissionToUser)($user, $data['permissions']);
+            $this->syncPermissionToUser->handle($user, $data['permissions']);
     }
 }

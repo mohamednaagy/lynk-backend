@@ -31,15 +31,15 @@ class CreateAdminWithRoleAndPermissionAction implements CreateAdminWithRoleAndPe
     public function handle(array $data): User
     {
         # create user
-        $user = ($this->createUser)($data);
+        $user = $this->createUser->handle($data);
 
         # assign role to user
         if (!empty($data['role']))
-            ($this->assignRoleToUser)($user, $data['role']);
+            $this->assignRoleToUser->handle($user, $data['role']);
 
         # assign permission to user
         if (!empty($data['permissions']))
-            ($this->assignPermissionToUser)($user, $data['permissions']);
+            $this->assignPermissionToUser->handle($user, $data['permissions']);
 
         # return user
         return $user;

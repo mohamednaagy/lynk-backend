@@ -1,6 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Modules\Otpify\Http\Controllers\OtpifyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +14,7 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/otpify', function (Request $request) {
-    return $request->user();
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/generate-otp', [OtpifyController::class, 'generateOtp']);
+    Route::post('/verify-otp', [OtpifyController::class, 'verifyOtpCode']);
 });

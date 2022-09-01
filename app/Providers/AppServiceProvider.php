@@ -34,13 +34,17 @@ class AppServiceProvider extends ServiceProvider
 
         Response::macro('errorResponse', function (
             string $message = 'something went wrong',
-            int    $code = 400,
-            int    $statusCode = \Symfony\Component\HttpFoundation\Response::HTTP_BAD_REQUEST
+            int    $statusCode = \Symfony\Component\HttpFoundation\Response::HTTP_BAD_REQUEST,
+            int    $code = null
         ) {
-            return response()->json([
+            $response = [
                 'message' => $message,
-                'code' => $code
-            ], $statusCode);
+            ];
+
+            if (!is_null($code))
+                $response = array_merge($response, ['code' => $code]);
+
+            return response()->json($response, $statusCode);
         });
     }
 }

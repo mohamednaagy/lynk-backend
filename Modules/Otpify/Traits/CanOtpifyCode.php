@@ -2,18 +2,24 @@
 
 namespace Modules\Otpify\Traits;
 
+use Closure;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
-use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
-use Modules\Otpify\Exceptions\OtpCodeExpiredException;
-use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
-use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
 use Modules\Otpify\Models\OtpifyCode;
+use Modules\Otpify\Exceptions\OtpCodeExpiredException;
+use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
+use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
+use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
+use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
 
 trait CanOtpifyCode
 {
+    /**
+     * @param $code
+     * @param array $data
+     * @return OtpifyCode
+     */
     public function createOtpifyCode($code, array $data = []): OtpifyCode
     {
         return OtpifyCode::create([
@@ -24,7 +30,18 @@ trait CanOtpifyCode
         ]);
     }
 
-    public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, \Closure $additionalCheckCallback = null): void
+    /**
+     * @param OtpifyCode $otpifyCode
+     * @param Request $request
+     * @param $code
+     * @param Closure|null $additionalCheckCallback
+     * @return void
+     * @throws OtpCodeAdditionalCheckException
+     * @throws OtpCodeAlreadyUsedException
+     * @throws OtpCodeExpiredException
+     * @throws OtpCodeIncorrectException
+     */
+    public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, Closure $additionalCheckCallback = null): void
     {
         if(!Hash::check($code, $otpifyCode->otp_code))
             throw new OtpCodeIncorrectException();
@@ -40,6 +57,11 @@ trait CanOtpifyCode
                 throw new OtpCodeAdditionalCheckException();
     }
 
+    /**
+     * @param $vid
+     * @return OtpifyCode
+     * @throws OtpCodeNotFoundException
+     */
     public function getOtpifyCode($vid): OtpifyCode
     {
         $otpifyCode = OtpifyCode::where('id', $vid)->first();
@@ -49,11 +71,19 @@ trait CanOtpifyCode
         return $otpifyCode;
     }
 
+    /**
+     * @param $expirationDate
+     * @return bool
+     */
     public function isCodeExpired($expirationDate): bool
     {
         return $expirationDate->lt(now());
     }
 
+    /**
+     * @param OtpifyCode $otpifyCode
+     * @return void
+     */
     public function setOtpExpiredAt(OtpifyCode $otpifyCode): void
     {
         $otpifyCode->update(['expired_at' => now()]);

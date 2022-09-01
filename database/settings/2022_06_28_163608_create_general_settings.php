@@ -6,6 +6,6 @@ return new class extends SettingsMigration
 {
     public function up(): void
     {
-        $this->migrator->add('general.default_otp_driver', 'email');
+        $this->migrator->add('general.otp_driver', 'email');
     }
 };

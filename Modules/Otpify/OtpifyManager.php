@@ -8,7 +8,6 @@ use Modules\Otpify\Traits\CanBeAuthorized;
 use Modules\Otpify\Drivers\TwilioSmsDriver;
 use Illuminate\Validation\ValidationException;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
-use Modules\Otpify\Exceptions\AuthorizedTokenNotFoundException;
 
 class OtpifyManager extends Manager
 {
@@ -68,10 +67,12 @@ class OtpifyManager extends Manager
     }
 
     /**
-     * @throws AuthorizedTokenNotFoundException
+     * @param string $token
+     * @return bool
      */
     public function verifyAuthorizationToken(string $token): bool
     {
-        return $this->verifyToken($token) ?? throw new AuthorizedTokenNotFoundException();
+//        return $this->verifyToken($token) ?? throw new AuthorizedTokenNotFoundException();
+        return $this->verifyToken($token);
     }
 }
