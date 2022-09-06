@@ -2,12 +2,18 @@
 
 namespace Modules\Otpify\Drivers;
 
+use Closure;
 use Illuminate\Http\Request;
-use Modules\Otpify\Contracts\Otpifiable;
-use Modules\Otpify\Contracts\OtpifyDriverInterface;
 use Modules\Otpify\Models\OtpifyCode;
-use Modules\Otpify\Notifications\OtpifyCodeMessage;
+use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Traits\CanOtpifyCode;
+use Modules\Otpify\Contracts\OtpifyDriverInterface;
+use Modules\Otpify\Notifications\OtpifyCodeMessage;
+use Modules\Otpify\Exceptions\OtpCodeExpiredException;
+use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
+use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
+use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
+use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
 
 class EmailDriver implements OtpifyDriverInterface
 {
@@ -40,15 +46,15 @@ class EmailDriver implements OtpifyDriverInterface
      * @param Request $request
      * @param $vid
      * @param $code
-     * @param \Closure|null $additionalCheckCallback
+     * @param Closure|null $additionalCheckCallback
      * @return bool
-     * @throws \Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException
-     * @throws \Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException
-     * @throws \Modules\Otpify\Exceptions\OtpCodeExpiredException
-     * @throws \Modules\Otpify\Exceptions\OtpCodeIncorrectException
-     * @throws \Modules\Otpify\Exceptions\OtpCodeNotFoundException
+     * @throws OtpCodeAlreadyUsedException
+     * @throws OtpCodeAdditionalCheckException
+     * @throws OtpCodeExpiredException
+     * @throws OtpCodeIncorrectException
+     * @throws OtpCodeNotFoundException
      */
-    public function verify(Request $request, $vid, $code, \Closure $additionalCheckCallback = null): bool
+    public function verify(Request $request, $vid, $code, Closure $additionalCheckCallback = null): bool
     {
         $otpifyCode = $this->getOtpifyCode($vid);
         $this->verifyOtpifyCode($otpifyCode, $request, $code, $additionalCheckCallback);

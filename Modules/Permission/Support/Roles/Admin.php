@@ -2,9 +2,9 @@
 
 namespace Modules\Permission\Support\Roles;
 
-use Modules\Permission\Enums\Action;
-use Modules\Permission\Enums\Role;
-use Modules\Permission\Enums\Subject;
+use App\Enums\Action;
+use App\Enums\Role;
+use App\Enums\Subject;
 
 class Admin
 {

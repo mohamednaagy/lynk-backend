@@ -5,6 +5,11 @@ namespace Modules\Otpify\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+/**
+ * @property mixed $expiration_date
+ * @property mixed $otp_code
+ * @property mixed $expired_at
+ */
 class OtpifyCode extends Model
 {
     use HasFactory;

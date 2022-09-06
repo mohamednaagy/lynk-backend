@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Otpify\Models\AuthorizationToken;
 use Modules\Permission\Contracts\Grantifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -15,6 +17,9 @@ use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Spatie\Permission\Traits\HasRoles;
 use Modules\Otpify\Contracts\Otpifiable;
 
+/**
+ * @method static create(array $data)
+ */
 class User extends Authenticatable implements Otpifiable, Grantifiable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;
@@ -55,7 +60,7 @@ class User extends Authenticatable implements Otpifiable, Grantifiable
     protected function fullName(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) =>  "{$this->first_name} {$this->last_name}",
+            get: fn($value) => "{$this->first_name} {$this->last_name}",
         );
     }
 
@@ -73,5 +78,13 @@ class User extends Authenticatable implements Otpifiable, Grantifiable
     public function doesRequireVerifyingByOtp(Request $request): bool
     {
         // TODO: Implement shouldAsk() method.
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function authorizationTokens(): HasMany
+    {
+        return $this->hasMany(AuthorizationToken::class);
     }
 }

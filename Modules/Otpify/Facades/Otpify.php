@@ -4,6 +4,10 @@ namespace Modules\Otpify\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
+/**
+ * @method static verifyAuthorizationToken(mixed $input)
+ * @method static driver($otp_driver)
+ */
 class Otpify extends Facade
 {
     /**
@@ -13,7 +17,7 @@ class Otpify extends Facade
      *
      * @throws \RuntimeException
      */
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         return 'otpify';
     }

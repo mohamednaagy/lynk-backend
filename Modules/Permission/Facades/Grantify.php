@@ -2,8 +2,17 @@
 
 namespace Modules\Permission\Facades;
 
+use App\Models\User;
+use RuntimeException;
 use Illuminate\Support\Facades\Facade;
 
+/**
+ * @method static assignRoleToModel($user, mixed $role)
+ * @method static assignPermissionToModel(User $user, mixed $permissions)
+ * @method static syncRoleToModel(User $user, mixed $role)
+ * @method static syncPermissionToModel(User $user, mixed $permissions)
+ * @method static getAuthUserPermissionsForMiddleware()
+ */
 class Grantify extends Facade
 {
     /**
@@ -11,9 +20,9 @@ class Grantify extends Facade
      *
      * @return string
      *
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         return 'grantify';
     }

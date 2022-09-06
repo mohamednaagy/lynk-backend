@@ -2,9 +2,9 @@
 
 namespace Modules\Permission\Support;
 
-use Modules\Permission\Enums\Action;
-use Modules\Permission\Enums\Area;
-use Modules\Permission\Enums\Subject;
+use App\Enums\Action;
+use App\Enums\Area;
+use App\Enums\Subject;
 
 class GeneralPermissionUtil
 {

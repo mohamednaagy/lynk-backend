@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Actions;
+
+use App\Actions\Contracts\SettingsInterface;
+use App\Actions\Contracts\GetSettingsClassInstance;
+
+class GeneralSettingsAction implements SettingsInterface
+{
+    /**
+     * UpdateSettingsAction constructor.
+     * @param GetSettingsClassInstance $getSettingsClassInstance
+     */
+    public function __construct(
+        protected GetSettingsClassInstance $getSettingsClassInstance
+    )
+    {
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function handle(array $data): void
+    {
+        $settingInstance = $this->getSettingsClassInstance->handle($data['area']);
+
+        $settingInstance->default_otp_driver = $data['default_otp_driver'];
+
+        $settingInstance->save();
+    }
+}

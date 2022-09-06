@@ -1,7 +1,10 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Enums\Area;
+use App\Enums\Role;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\Auth\GetAuthUser;
+use App\Http\Controllers\Api\V1\Customers\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +17,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::post('/register', RegisterController::class);
+
+Route::middleware(['auth:api', 'role:' . Role::Customer])->prefix('v1/customer')->group(function () {
+    Route::middleware(['authorized:' . Area::Customer])->group(function () {
+        Route::get('/auth', GetAuthUser::class);
+    });
 });

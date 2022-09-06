@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Providers;
+
+use App\Actions\Contracts\GetSettingsRequestRule;
+use App\Actions\CreateUserAction;
+use App\Actions\GetSettingsRequestRuleAction;
+use App\Actions\UpdateUserAction;
+use App\Actions\ListSettingsAction;
+use App\Actions\Contracts\UpdateUser;
+use App\Actions\Contracts\CreateUser;
+use App\Actions\SyncRoleToUserAction;
+use App\Actions\UpdateSettingsAction;
+use App\Actions\GetSettingsAreaAction;
+use App\Actions\Contracts\ListSettings;
+use Illuminate\Support\ServiceProvider;
+use App\Actions\AssignRoleToUserAction;
+use App\Actions\Contracts\UpdateSettings;
+use App\Actions\Contracts\SyncRoleToUser;
+use App\Actions\FindUserByIdAndRoleAction;
+use App\Actions\Contracts\GetSettingsArea;
+use App\Actions\SyncPermissionToUserAction;
+use App\Actions\Contracts\AssignRoleToUser;
+use App\Actions\AssignPermissionToUserAction;
+use App\Actions\Contracts\FindUserByIdAndRole;
+use App\Actions\GetPaginatedUsersByRoleAction;
+use App\Actions\Contracts\SyncPermissionToUser;
+use App\Actions\GetSettingsClassInstanceAction;
+use App\Actions\Contracts\AssignPermissionToUser;
+use App\Actions\Contracts\GetPaginatedUsersByRole;
+use App\Actions\Contracts\GetSettingsClassInstance;
+use App\Actions\CreateAdminWithRoleAndPermissionAction;
+use App\Actions\UpdateAdminWithRoleAndPermissionAction;
+use App\Actions\CreateCustomerWithRoleAndPermissionAction;
+use App\Actions\UpdateCustomerWithRoleAndPermissionAction;
+use App\Actions\Contracts\CreateAdminWithRoleAndPermission;
+use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
+use App\Actions\Contracts\CreateCustomerWithRoleAndPermission;
+use App\Actions\Contracts\UpdateCustomerWithRoleAndPermission;
+
+class ActionsServiceProvider extends ServiceProvider
+{
+    public array $bindings = [
+        CreateUser::class => CreateUserAction::class,
+        AssignRoleToUser::class => AssignRoleToUserAction::class,
+        AssignPermissionToUser::class => AssignPermissionToUserAction::class,
+
+        UpdateUser::class => UpdateUserAction::class,
+        SyncRoleToUser::class => SyncRoleToUserAction::class,
+        SyncPermissionToUser::class => SyncPermissionToUserAction::class,
+
+        FindUserByIdAndRole::class => FindUserByIdAndRoleAction::class,
+        GetPaginatedUsersByRole::class => GetPaginatedUsersByRoleAction::class,
+
+        CreateAdminWithRoleAndPermission::class => CreateAdminWithRoleAndPermissionAction::class,
+        UpdateAdminWithRoleAndPermission::class => UpdateAdminWithRoleAndPermissionAction::class,
+
+        CreateCustomerWithRoleAndPermission::class => CreateCustomerWithRoleAndPermissionAction::class,
+        UpdateCustomerWithRoleAndPermission::class => UpdateCustomerWithRoleAndPermissionAction::class,
+
+        ListSettings::class => ListSettingsAction::class,
+        UpdateSettings::class => UpdateSettingsAction::class,
+        GetSettingsArea::class => GetSettingsAreaAction::class,
+        GetSettingsClassInstance::class => GetSettingsClassInstanceAction::class,
+    ];
+}

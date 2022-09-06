@@ -2,27 +2,33 @@
 
 namespace Modules\Otpify\Drivers;
 
-use Illuminate\Http\Request;
-use Modules\Otpify\Contracts\Otpifiable;
-use Modules\Otpify\Contracts\OtpifyDriverInterface;
-use Modules\Otpify\Models\OtpifyCode;
-use Modules\Otpify\Traits\CanOtpifyCode;
-use Twilio\Http\CurlClient;
+use Closure;
 use Twilio\Rest\Client;
+use Twilio\Http\CurlClient;
+use Illuminate\Http\Request;
+use Modules\Otpify\Models\OtpifyCode;
+use Twilio\Exceptions\TwilioException;
+use Modules\Otpify\Traits\CanOtpifyCode;
+use Modules\Otpify\Contracts\Otpifiable;
+use Twilio\Exceptions\ConfigurationException;
+use Modules\Otpify\Contracts\OtpifyDriverInterface;
+use Modules\Otpify\Exceptions\OtpCodeExpiredException;
+use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
+use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
+use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
+use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
 
 class TwilioSmsDriver implements OtpifyDriverInterface
 {
     use CanOtpifyCode;
 
     /**
-     * Execute the driver logic.
-     *
      * @param Request $request
      * @param Otpifiable $otpifiable
      * @param array $data
      * @return OtpifyCode
-     * @throws \Twilio\Exceptions\ConfigurationException
-     * @throws \Twilio\Exceptions\TwilioException
+     * @throws ConfigurationException
+     * @throws TwilioException
      */
     public function execute(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
@@ -41,6 +47,7 @@ class TwilioSmsDriver implements OtpifyDriverInterface
             CURLOPT_SSL_VERIFYHOST => config('otpify.drivers.twilio.ssl_verify_host'),
             CURLOPT_SSL_VERIFYPEER => config('otpify.drivers.twilio.ssl_verify_peer')
         ];
+
         $client->setHttpClient(new CurlClient($curlOptions));
         $client->messages->create($receiverNumber, [
             'from' => $twilioNumber,
@@ -63,20 +70,18 @@ class TwilioSmsDriver implements OtpifyDriverInterface
     }
 
     /**
-     * Execute the driver logic.
-     *
      * @param Request $request
      * @param $vid
      * @param $code
-     * @param \Closure|null $additionalCheckCallback
+     * @param Closure|null $additionalCheckCallback
      * @return bool
-     * @throws \Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException
-     * @throws \Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException
-     * @throws \Modules\Otpify\Exceptions\OtpCodeExpiredException
-     * @throws \Modules\Otpify\Exceptions\OtpCodeIncorrectException
-     * @throws \Modules\Otpify\Exceptions\OtpCodeNotFoundException
+     * @throws OtpCodeAlreadyUsedException
+     * @throws OtpCodeAdditionalCheckException
+     * @throws OtpCodeExpiredException
+     * @throws OtpCodeIncorrectException
+     * @throws OtpCodeNotFoundException
      */
-    public function verify(Request $request, $vid, $code, \Closure $additionalCheckCallback = null): bool
+    public function verify(Request $request, $vid, $code, Closure $additionalCheckCallback = null): bool
     {
         $otpifyCode = $this->getOtpifyCode($vid);
         $this->verifyOtpifyCode($otpifyCode, $request, $code, $additionalCheckCallback);

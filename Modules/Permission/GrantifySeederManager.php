@@ -3,8 +3,8 @@
 namespace Modules\Permission;
 
 use Illuminate\Support\Manager;
-use Modules\Permission\Enums\Area;
-use Modules\Permission\Enums\Role as EnumsRole;
+use App\Enums\Area;
+use App\Enums\Role as EnumsRole;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
