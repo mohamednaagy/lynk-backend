@@ -192,7 +192,7 @@ class LoginTest extends TestCase
      * @return void
      * @covers \App\Http\Controllers\Api\Auth\LoginController::authenticate
      */
-    public function test_login_success_exception_for_exist_user(): void
+    public function test_login_success_for_exist_user(): void
     {
         $email = 'a@a.aa';
         $passwordPlainText = '12345678';
