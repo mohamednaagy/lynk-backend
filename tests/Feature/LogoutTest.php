@@ -16,27 +16,7 @@ class LogoutTest extends TestCase
      */
     public function test_logout_success_for_exist_user(): void
     {
-        $email = 'a@a.aa';
-        $passwordPlainText = '12345678';
-        $passwordEncrypted = bcrypt('12345678');
-        $source = 'admin';
-
-        # create user
-        User::factory()->create([
-            'email' => $email,
-            'password' => $passwordEncrypted
-        ]);
-
-        # login user
-        $loginResponse = $this->postJson('api/auth/login', [
-            'email' => $email,
-            'password' => $passwordPlainText,
-            'source' => $source
-        ]);
-        $token = $loginResponse->getOriginalContent()['token'];
-        $loginResponse->assertStatus(200)->assertExactJson([
-            "token" => $token
-        ]);
+        $token = $this->login();
 
         # get auth user data
         $getAuthUserResponse = $this->withToken($token)->getJson('api/auth');

@@ -22,7 +22,7 @@ use App\Http\Controllers\Api\V1\Admins\Customers\CustomerController;
 |
 */
 
-Route::middleware(['auth:api', 'role:' . Role::Admin])->prefix('v1/admin')->group(function () {
+Route::middleware(['auth:sanctum', 'role:' . Role::Admin])->prefix('v1/admin')->group(function () {
     Route::middleware(['authorized:' . Area::SuperAdmin])->group(function () {
         Route::get('/auth', GetAuthUser::class);
 

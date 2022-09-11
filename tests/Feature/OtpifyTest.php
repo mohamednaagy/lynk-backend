@@ -4,36 +4,12 @@ namespace Tests\Feature;
 
 use App\Enums\Area;
 use Tests\TestCase;
-use App\Models\User;
 use Modules\Otpify\Models\OtpifyCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class OtpifyTest extends TestCase
 {
     use RefreshDatabase;
-
-    private function login()
-    {
-        $email = 'a@a.aa';
-        $passwordPlainText = '12345678';
-        $passwordEncrypted = bcrypt('12345678');
-        $source = 'admin';
-
-        # create user
-        User::factory()->create([
-            'email' => $email,
-            'password' => $passwordEncrypted
-        ]);
-
-        # login user
-        $loginResponse = $this->postJson('api/auth/login', [
-            'email' => $email,
-            'password' => $passwordPlainText,
-            'source' => $source
-        ]);
-
-        return $loginResponse->getOriginalContent()['token'];
-    }
 
     /**
      * A basic feature test example.
