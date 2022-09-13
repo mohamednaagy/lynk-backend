@@ -2,7 +2,7 @@
 
 namespace Modules\Permission;
 
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Manager;
 use Modules\Permission\Contracts\Grantifiable;
@@ -16,11 +16,6 @@ class GrantifyManager extends Manager
 {
     use CanGrantify;
 
-    /**
-     * Get the default driver name.
-     *
-     * @return string
-     */
     public function getDefaultDriver()
     {
         //
@@ -141,6 +136,7 @@ class GrantifyManager extends Manager
      * @param string|array|Permission $permission
      * @param string|null $guardName
      * @return void
+     * @throws PermissionNotFoundException
      */
     public function assignPermissionToModel(Grantifiable $grantifiable, string|array|Permission $permission, string $guardName = null): void
     {
@@ -160,6 +156,7 @@ class GrantifyManager extends Manager
      * @param string|array|Role $role
      * @param string|null $guardName
      * @return void
+     * @throws RoleNotFoundException
      */
     public function assignRoleToModel(Grantifiable $grantifiable, string|array|Role $role, string $guardName = null): void
     {
@@ -195,18 +192,28 @@ class GrantifyManager extends Manager
     }
 
     /**
-     * Get Direct Permissions of authenticated user for middleware check.
+     * Transform Permissions for middleware check.
      *
+     * @param string $area
+     * @param string $subject
+     * @param array $actions
      * @return string
      */
-    public function getAuthUserPermissionsForMiddleware(): string
+    public function transformPermissionsForMiddleware(string $area, string $subject, array $actions): string
     {
-        $permissions = [];
+        $permissionChain = '';
 
-        if (Auth::check())
-            $permissions = auth()->user()->permissions->pluck('name')->toArray();
+        foreach ($actions as $key => $action){
+            $permission = $area . '-' . $subject . '.' . $action;
+            $permissionChain .= $permission;
 
-        return $this->formatPermissionsToMiddleware($permissions);
+            if ($key == array_key_last($actions))
+                break;
+
+            $permissionChain .= '|';
+        }
+
+        return $permissionChain;
     }
 
 }

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use Modules\Otpify\Facades\Otpify;
 use App\Actions\Contracts\GetSettingsClassInstance;
@@ -21,9 +22,9 @@ class VerifyAuthorization
      * @param Request $request
      * @param Closure $next
      * @param string $area
-     * @return JsonResponse
+     * @return JsonResponse|Response
      */
-    public function handle(Request $request, Closure $next, string $area): JsonResponse
+    public function handle(Request $request, Closure $next, string $area): JsonResponse|Response
     {
         $setting = $this->getSettingsClassInstance->handle($area);
 

@@ -1,14 +1,17 @@
 <?php
 namespace Modules\Permission\Traits;
 
-use Illuminate\Database\Eloquent\Model;
-use Modules\Permission\Exceptions\PermissionNotFoundException;
-use Modules\Permission\Exceptions\RoleNotFoundException;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Models\Permission;
+use Modules\Permission\Exceptions\RoleNotFoundException;
+use Modules\Permission\Exceptions\PermissionNotFoundException;
 
 trait CanGrantify
 {
+    /**
+     * @throws RoleNotFoundException
+     */
     private function findRole(string $roleName, string $guardName = null): Model
     {
         $guardName = $guardName ?? config('auth.defaults.guard');
@@ -22,6 +25,9 @@ trait CanGrantify
         return $role;
     }
 
+    /**
+     * @throws PermissionNotFoundException
+     */
     private function findPermission(string $permissionName, string $guardName = null): Model
     {
         $guardName = $guardName ?? config('auth.defaults.guard');
@@ -50,18 +56,5 @@ trait CanGrantify
         }
 
         return $permissions;
-    }
-
-    private function formatPermissionsToMiddleware(array $permissions): string
-    {
-        $permissionChain = '';
-        foreach ($permissions as $key => $permission){
-            $permissionChain .= $permission;
-            if ($key == array_key_last($permissions))
-                break;
-            $permissionChain .= '|';
-        }
-
-        return $permissionChain;
     }
 }

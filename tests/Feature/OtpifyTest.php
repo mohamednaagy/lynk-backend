@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Enums\Area;
 use Tests\TestCase;
-use Modules\Otpify\Models\OtpifyCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class OtpifyTest extends TestCase
@@ -82,17 +81,14 @@ class OtpifyTest extends TestCase
     {
         $token = $this->login();
 
-        # get auth user data
-        $getOtpCodeResponse = $this->withToken($token)->postJson('api/generate-otp', ['area' => Area::General]);
-
-        $vid = $getOtpCodeResponse->getOriginalContent()['data']['otp_code']->id;
-
-        OtpifyCode::query()->where('id', $vid )->update(['otp_code' => bcrypt(1000)]);
+        # create otp code
+        $code = 1000;
+        $otpifyCode = $this->createOtpifyCode($code);
 
         $getOtpCodeResponse = $this->withToken($token)->postJson('api/verify-otp', [
             'area' => Area::General,
-            'vid' => $vid,
-            'code' => 1000,
+            'vid' => $otpifyCode->id,
+            'code' => $code,
             ]);
 
         $getOtpCodeResponse->assertStatus(200)->assertJsonStructure([
@@ -104,14 +100,13 @@ class OtpifyTest extends TestCase
     {
         $token = $this->login();
 
-        # get auth user data
-        $getOtpCodeResponse = $this->withToken($token)->postJson('api/generate-otp', ['area' => Area::General]);
-
-        $vid = $getOtpCodeResponse->getOriginalContent()['data']['otp_code']->id;
+        # create otp code
+        $code = 1000;
+        $otpifyCode = $this->createOtpifyCode($code);
 
         $getOtpCodeResponse = $this->withToken($token)->postJson('api/verify-otp', [
             'area' => Area::General,
-            'vid' => $vid,
+            'vid' => $otpifyCode->id,
             'code' => 10005,
         ]);
 

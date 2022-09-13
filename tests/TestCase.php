@@ -2,25 +2,42 @@
 
 namespace Tests;
 
+use App\Enums\Area;
+use App\Enums\Role;
 use App\Models\User;
+use Illuminate\Support\Str;
+use Modules\Otpify\Facades\Otpify;
+use Illuminate\Support\Facades\Hash;
+use Modules\Otpify\Models\OtpifyCode;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Permission\Facades\Grantify;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
 
-    protected function login()
+    protected function login(string $role = Role::Admin, string $test = null): string
     {
+        $this->runModuleSeed();
+
         $email = 'a@a.aa';
         $passwordPlainText = '12345678';
         $passwordEncrypted = bcrypt('12345678');
         $source = 'admin';
 
         # create user
-        User::factory()->create([
+        $user = User::factory()->create([
             'email' => $email,
             'password' => $passwordEncrypted
         ]);
+
+        Grantify::assignRoleToModel($user, $role);
+
+        if ($test == null)
+            $this->actingAs($user);
 
         # login user
         $loginResponse = $this->postJson('api/auth/login', [
@@ -36,4 +53,26 @@ abstract class TestCase extends BaseTestCase
         return $loginResponse->getOriginalContent()['token'];
     }
 
+    protected function createOtpifyCode(int $code, array $data = []): Builder|Model
+    {
+        return OtpifyCode::query()->create([
+            'id' => (string)Str::uuid(),
+            'otp_code' => Hash::make($code),
+            'expiration_date' => now()->addMinutes(config('otpify.code_expiration_time')),
+            'data' => $data
+        ]);
+    }
+
+    protected function createUserAuthorizationToken(): string
+    {
+        return Otpify::generateAuthorizationToken([
+            'user_id' => auth()->user()->id,
+            'area' => Area::SuperAdmin
+        ]);
+    }
+
+    public function runModuleSeed(): void
+    {
+        Artisan::call('module:seed');
+    }
 }

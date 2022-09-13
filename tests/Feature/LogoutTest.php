@@ -16,7 +16,7 @@ class LogoutTest extends TestCase
      */
     public function test_logout_success_for_exist_user(): void
     {
-        $token = $this->login();
+        $token = $this->login(test: 'logout');
 
         # get auth user data
         $getAuthUserResponse = $this->withToken($token)->getJson('api/auth');
