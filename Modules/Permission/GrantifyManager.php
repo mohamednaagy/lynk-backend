@@ -192,14 +192,20 @@ class GrantifyManager extends Manager
     }
 
     /**
-     * Transform Permissions for middleware check.
+     * Transform TO Permissions Format (Area-Subject.Action).
      *
      * @param string $area
      * @param string $subject
      * @param array $actions
-     * @return string
+     * @param bool $forMiddleware
+     * @return string|array
      */
-    public function transformPermissionsForMiddleware(string $area, string $subject, array $actions): string
+    public function transformToPermissionsFormat(
+        string $area,
+        string $subject,
+        array $actions,
+        bool $forMiddleware = true
+    ): string|array
     {
         $permissionChain = '';
 
@@ -213,7 +219,31 @@ class GrantifyManager extends Manager
             $permissionChain .= '|';
         }
 
+        if (!$forMiddleware)
+            $permissionChain = explode('|',  $permissionChain);
+
         return $permissionChain;
+    }
+
+    /**
+     * @param array $permission
+     * @return array
+     */
+    public function transformSubjectActionToPermissionName(array $permission): array
+    {
+        $permissions = [];
+
+        foreach ($permission as $subject => $actions) {
+            $permissionName = $subject.'.';
+
+            foreach ($actions as $action) {
+                $permissionNameEachAction = $permissionName;
+                $permissionNameEachAction .= $action;
+                $permissions[] = $permissionNameEachAction;
+            }
+        }
+
+        return $permissions;
     }
 
 }

@@ -29,7 +29,7 @@ Route::middleware(['auth:sanctum', 'role:' . Role::Admin])->prefix('v1/admin')->
         Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
 
         Route::group(['middleware' => ['permission:'.
-            Grantify::transformPermissionsForMiddleware(Area::SuperAdmin, Subject::Admins, [
+            Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Admins, [
                 Action::getPermissions,
                 Action::getRoles
             ])
