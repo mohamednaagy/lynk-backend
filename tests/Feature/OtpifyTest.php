@@ -114,4 +114,46 @@ class OtpifyTest extends TestCase
             'message'
         ]);
     }
+
+    public function test_otp_verify_for_expiration_otp_code()
+    {
+        $token = $this->login();
+
+        # create otp code
+        $code = 1000;
+        $otpifyCode = $this->createOtpifyCode($code);
+
+        $otpifyCode->update(['expiration_date' => now()]);
+
+        $getOtpCodeResponse = $this->withToken($token)->postJson('api/verify-otp', [
+            'area' => Area::General,
+            'vid' => $otpifyCode->id,
+            'code' => $code,
+        ]);
+
+        $getOtpCodeResponse->assertStatus(401)->assertJsonStructure([
+            'message'
+        ]);
+    }
+
+    public function test_otp_verify_for_checking_otp_code_already_used()
+    {
+        $token = $this->login();
+
+        # create otp code
+        $code = 1000;
+        $otpifyCode = $this->createOtpifyCode($code);
+
+        $otpifyCode->update(['expired_at' => now()]);
+
+        $getOtpCodeResponse = $this->withToken($token)->postJson('api/verify-otp', [
+            'area' => Area::General,
+            'vid' => $otpifyCode->id,
+            'code' => $code,
+        ]);
+
+        $getOtpCodeResponse->assertStatus(401)->assertJsonStructure([
+            'message'
+        ]);
+    }
 }

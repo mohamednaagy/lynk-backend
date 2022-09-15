@@ -53,12 +53,11 @@ class OtpifyController extends Controller
     {
         $data = $otpifyRequest->validated();
         $setting = $this->getSettingsClassInstance->handle($data['area']);
-
-        $valid = false;
         $message = '';
 
         try {
             $valid = Otpify::driver($setting->otp_driver)->verify($otpifyRequest, $data['vid'], $data['code']);
+            return $this->successResponse([]);
         } catch (OtpCodeAlreadyUsedException) {
             $message = 'otp already used';
         } catch (OtpCodeAdditionalCheckException) {
@@ -69,6 +68,6 @@ class OtpifyController extends Controller
             $message = 'otp code invalid';
         }
 
-        return $valid ? $this->successResponse([]) : $this->errorResponse($message, Response::HTTP_UNAUTHORIZED);
+        return $this->errorResponse($message, Response::HTTP_UNAUTHORIZED);
     }
 }
