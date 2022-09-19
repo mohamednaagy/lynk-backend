@@ -14,7 +14,7 @@ trait CanGrantify
      */
     private function findRole(string $roleName, string $guardName = null): Model
     {
-        $guardName = $guardName ?? config('auth.defaults.guard');
+        $guardName = $guardName ?? config('permission.default_guard');
         $role = Role::query()
             ->where(['name' => $roleName, 'guard_name' => $guardName])
             ->first();
@@ -30,7 +30,7 @@ trait CanGrantify
      */
     private function findPermission(string $permissionName, string $guardName = null): Model
     {
-        $guardName = $guardName ?? config('auth.defaults.guard');
+        $guardName = $guardName ?? config('permission.default_guard');
         $permission = Permission::query()
             ->where(['name' => $permissionName, 'guard_name' => $guardName])
             ->first();

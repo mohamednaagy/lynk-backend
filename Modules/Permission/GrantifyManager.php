@@ -31,7 +31,7 @@ class GrantifyManager extends Manager
     public function getPermissionsByArea(string $area, string $guardName = null): Collection
     {
         $area = $area . '-';
-        $guardName = $guardName ?? config('auth.defaults.guard');
+        $guardName = $guardName ?? config('permission.default_guard');
 
         return Permission::query()->where('name', 'LIKE', $area .'%')
             ->where('guard_name', $guardName)
