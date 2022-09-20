@@ -24,7 +24,7 @@ trait CanBeAuthorized
         ]);
 
         if ($validator->fails()) {
-            throw ValidationException::withMessages(['token' => 'invalid token']);
+            throw ValidationException::withMessages(['token' => trans('response.invalid_token')]);
         }
 
         return AuthorizationToken::query()->create($data);
@@ -35,7 +35,7 @@ trait CanBeAuthorized
      */
     private function generateRandomToken(): string
     {
-        return hash('sha256', Str::random(config('otpify.authorized_token_length')));
+        return Str::random(config('otpify.authorized_token_length'));
     }
 
     /**

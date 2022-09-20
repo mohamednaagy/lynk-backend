@@ -2,7 +2,7 @@
 
 namespace Modules\Permission;
 
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Manager;
 use Modules\Permission\Contracts\Grantifiable;
@@ -16,11 +16,6 @@ class GrantifyManager extends Manager
 {
     use CanGrantify;
 
-    /**
-     * Get the default driver name.
-     *
-     * @return string
-     */
     public function getDefaultDriver()
     {
         //
@@ -36,7 +31,7 @@ class GrantifyManager extends Manager
     public function getPermissionsByArea(string $area, string $guardName = null): Collection
     {
         $area = $area . '-';
-        $guardName = $guardName ?? config('auth.defaults.guard');
+        $guardName = $guardName ?? config('permission.default_guard');
 
         return Permission::query()->where('name', 'LIKE', $area .'%')
             ->where('guard_name', $guardName)
@@ -141,6 +136,7 @@ class GrantifyManager extends Manager
      * @param string|array|Permission $permission
      * @param string|null $guardName
      * @return void
+     * @throws PermissionNotFoundException
      */
     public function assignPermissionToModel(Grantifiable $grantifiable, string|array|Permission $permission, string $guardName = null): void
     {
@@ -160,6 +156,7 @@ class GrantifyManager extends Manager
      * @param string|array|Role $role
      * @param string|null $guardName
      * @return void
+     * @throws RoleNotFoundException
      */
     public function assignRoleToModel(Grantifiable $grantifiable, string|array|Role $role, string $guardName = null): void
     {
@@ -195,18 +192,58 @@ class GrantifyManager extends Manager
     }
 
     /**
-     * Get Direct Permissions of authenticated user for middleware check.
+     * Transform TO Permissions Format (Area-Subject.Action).
      *
-     * @return string
+     * @param string $area
+     * @param string $subject
+     * @param array $actions
+     * @param bool $forMiddleware
+     * @return string|array
      */
-    public function getAuthUserPermissionsForMiddleware(): string
+    public function transformToPermissionsFormat(
+        string $area,
+        string $subject,
+        array $actions,
+        bool $forMiddleware = true
+    ): string|array
+    {
+        $permissionChain = '';
+
+        foreach ($actions as $key => $action){
+            $permission = $area . '-' . $subject . '.' . $action;
+            $permissionChain .= $permission;
+
+            if ($key == array_key_last($actions))
+                break;
+
+            $permissionChain .= '|';
+        }
+
+        if (!$forMiddleware)
+            $permissionChain = explode('|',  $permissionChain);
+
+        return $permissionChain;
+    }
+
+    /**
+     * @param array $permission
+     * @return array
+     */
+    public function transformSubjectActionToPermissionName(array $permission): array
     {
         $permissions = [];
 
-        if (Auth::check())
-            $permissions = auth()->user()->permissions->pluck('name')->toArray();
+        foreach ($permission as $subject => $actions) {
+            $permissionName = $subject.'.';
 
-        return $this->formatPermissionsToMiddleware($permissions);
+            foreach ($actions as $action) {
+                $permissionNameEachAction = $permissionName;
+                $permissionNameEachAction .= $action;
+                $permissions[] = $permissionNameEachAction;
+            }
+        }
+
+        return $permissions;
     }
 
 }

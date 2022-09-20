@@ -6,7 +6,9 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static verifyAuthorizationToken(mixed $input)
+ * @method static generateAuthorizationToken(array $data)
  * @method static driver($otp_driver)
+ * @method static getOtpifyDrivers()
  */
 class Otpify extends Facade
 {

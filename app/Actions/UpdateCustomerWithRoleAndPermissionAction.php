@@ -35,11 +35,13 @@ class UpdateCustomerWithRoleAndPermissionAction implements UpdateCustomerWithRol
         $this->updateUser->handle($user, $data);
 
         # sync role
-        if (!empty($data['role']))
+        if (!empty($data['role'])) {
             $this->syncRoleToUser->handle($user, $data['role']);
+        }
 
         # sync permission
-        if (!empty($data['permissions']))
+        if (!empty($data['permissions'])) {
             $this->syncPermissionToUser->handle($user, $data['permissions']);
+        }
     }
 }

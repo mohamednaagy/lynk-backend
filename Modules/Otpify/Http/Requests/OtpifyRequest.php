@@ -26,15 +26,15 @@ class OtpifyRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rule = [
+        $rules = [
             'area' => ['required', Rule::in(Area::getValues())],
         ];
 
         if ($this->request->has('vid')) {
-            $rule['vid'] = ['required', 'exists:otpify_codes,id'];
-            $rule['code'] = ['required'];
+            $rules['vid'] = ['required', 'exists:otpify_codes,id'];
+            $rules['code'] = ['required'];
         }
 
-        return $rule;
+        return $rules;
     }
 }

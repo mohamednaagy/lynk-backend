@@ -5,6 +5,9 @@ namespace Modules\Otpify\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Modules\Otpify\Facades\Otpify;
 use App\Http\Controllers\Controller;
+use Twilio\Exceptions\TwilioException;
+use Twilio\Exceptions\ConfigurationException;
+use Symfony\Component\HttpFoundation\Response;
 use Modules\Otpify\Http\Requests\OtpifyRequest;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use Modules\Otpify\Exceptions\OtpCodeExpiredException;
@@ -12,9 +15,6 @@ use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
 use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
 use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
 use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
-use Symfony\Component\HttpFoundation\Response;
-use Twilio\Exceptions\ConfigurationException;
-use Twilio\Exceptions\TwilioException;
 
 class OtpifyController extends Controller
 {
@@ -30,19 +30,19 @@ class OtpifyController extends Controller
         OtpifyRequest $otpifyRequest
     ): JsonResponse
     {
-        $setting = $this->getSettingsClassInstance->handle($otpifyRequest->validated('area'));
         try {
+            $setting = $this->getSettingsClassInstance->handle($otpifyRequest->validated('area'));
             $otpCode = Otpify::driver($setting->otp_driver)->execute($otpifyRequest, $otpifyRequest->user());
-        }catch (ConfigurationException|TwilioException){
-            return $this->errorResponse('something went wrong, try again later');
+
+            return $this->successResponse([
+                'message' => trans('response.OTP_generated_successfully'),
+                'vid' => $otpCode->id
+            ]);
+        } catch (ConfigurationException|TwilioException) {
+            return $this->errorResponse(trans('response.something_went_wrong'));
+        } catch (\Exception $exception) {
+            return $this->errorResponse($exception->getMessage());
         }
-
-        $data = [
-            'message' => 'OTP generated successfully',
-            'otp_code' => $otpCode
-        ];
-
-        return $this->successResponse($data);
     }
 
     /**
@@ -53,22 +53,21 @@ class OtpifyController extends Controller
     {
         $data = $otpifyRequest->validated();
         $setting = $this->getSettingsClassInstance->handle($data['area']);
-
-        $valid = false;
         $message = '';
 
         try {
             $valid = Otpify::driver($setting->otp_driver)->verify($otpifyRequest, $data['vid'], $data['code']);
+            return $this->successResponse([]);
         } catch (OtpCodeAlreadyUsedException) {
-            $message = 'otp already used';
+            $message = trans('response.otp_already_used');
         } catch (OtpCodeAdditionalCheckException) {
-            $message = 'otp code additional check error';
+            $message = trans('response.otp_code_additional_check_error');
         } catch (OtpCodeExpiredException) {
-            $message = 'otp code expired';
+            $message = trans('response.otp_code_expired');
         } catch (OtpCodeIncorrectException|OtpCodeNotFoundException) {
-            $message = 'otp code invalid';
+            $message = trans('response.otp_code_invalid');
         }
 
-        return $valid ? $this->successResponse([]) : $this->errorResponse($message, Response::HTTP_UNAUTHORIZED);
+        return $this->errorResponse($message, Response::HTTP_UNAUTHORIZED);
     }
 }

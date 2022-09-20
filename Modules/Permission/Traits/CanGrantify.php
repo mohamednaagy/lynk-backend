@@ -1,17 +1,20 @@
 <?php
 namespace Modules\Permission\Traits;
 
-use Illuminate\Database\Eloquent\Model;
-use Modules\Permission\Exceptions\PermissionNotFoundException;
-use Modules\Permission\Exceptions\RoleNotFoundException;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Models\Permission;
+use Modules\Permission\Exceptions\RoleNotFoundException;
+use Modules\Permission\Exceptions\PermissionNotFoundException;
 
 trait CanGrantify
 {
+    /**
+     * @throws RoleNotFoundException
+     */
     private function findRole(string $roleName, string $guardName = null): Model
     {
-        $guardName = $guardName ?? config('auth.defaults.guard');
+        $guardName = $guardName ?? config('permission.default_guard');
         $role = Role::query()
             ->where(['name' => $roleName, 'guard_name' => $guardName])
             ->first();
@@ -22,9 +25,12 @@ trait CanGrantify
         return $role;
     }
 
+    /**
+     * @throws PermissionNotFoundException
+     */
     private function findPermission(string $permissionName, string $guardName = null): Model
     {
-        $guardName = $guardName ?? config('auth.defaults.guard');
+        $guardName = $guardName ?? config('permission.default_guard');
         $permission = Permission::query()
             ->where(['name' => $permissionName, 'guard_name' => $guardName])
             ->first();
@@ -33,35 +39,5 @@ trait CanGrantify
             throw new PermissionNotFoundException();
 
         return $permission;
-    }
-
-    private function transformSubjectActionToPermissionName(array $permission): array
-    {
-        $permissions = [];
-
-        foreach ($permission as $subject => $actions) {
-            $permissionName = $subject.'.';
-
-            foreach ($actions as $action) {
-                $permissionNameEachAction = $permissionName;
-                $permissionNameEachAction .= $action;
-                $permissions[] = $permissionNameEachAction;
-            }
-        }
-
-        return $permissions;
-    }
-
-    private function formatPermissionsToMiddleware(array $permissions): string
-    {
-        $permissionChain = '';
-        foreach ($permissions as $key => $permission){
-            $permissionChain .= $permission;
-            if ($key == array_key_last($permissions))
-                break;
-            $permissionChain .= '|';
-        }
-
-        return $permissionChain;
     }
 }

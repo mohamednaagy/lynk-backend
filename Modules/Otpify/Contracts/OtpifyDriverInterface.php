@@ -16,7 +16,7 @@ interface OtpifyDriverInterface
      * @param array $data
      * @return OtpifyCode
      */
-    public function execute(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode;
+    public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode;
 
     /**
      * Execute the driver logic.

@@ -2,21 +2,20 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\Controller;
 
 class GetAuthUser extends Controller
 {
     /**
      * Handle an authentication attempt.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): JsonResponse
     {
-        return response()->json([
-            'data' => $request->user()
-        ]);
+        return $this->successResponse([$request->user()]);
     }
 }

@@ -6,6 +6,7 @@ use App\Enums\Area;
 use Exception;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use Modules\Otpify\Facades\Otpify;
 
 /**
  * @property string $area
@@ -34,18 +35,18 @@ class UpdateSettingsRequest extends FormRequest
         ], $this->getCustomRulesByArea($this->area));
     }
 
-    private function getCustomRulesByArea(string $area): array
+    private function getCustomRulesByArea(string $area = null): array
     {
         return match ($area) {
             'General' => [
-                'default_otp_driver' => ['required', 'string', Rule::in(\Otpify::getOtpifyDrivers())]
+                'otp_driver' => ['required', 'string', Rule::in(Otpify::getOtpifyDrivers())]
             ],
             Area::SuperAdmin => [
-                'otp_driver' => ['required', 'string', Rule::in(\Otpify::getOtpifyDrivers())],
+                'otp_driver' => ['required', 'string', Rule::in(Otpify::getOtpifyDrivers())],
                 'otp_enabled' => ['required', 'boolean']
             ],
             Area::Customer => [
-                'otp_driver' => ['required', 'string', Rule::in(\Otpify::getOtpifyDrivers())],
+                'otp_driver' => ['required', 'string', Rule::in(Otpify::getOtpifyDrivers())],
                 'otp_enabled' => ['required', 'boolean']
             ],
             default => []

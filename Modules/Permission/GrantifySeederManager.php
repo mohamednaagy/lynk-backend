@@ -44,7 +44,7 @@ class GrantifySeederManager extends Manager
     {
         $allPermissions = [];
         $allRoles = [];
-        $defaultGuard = config('auth.defaults.guard');
+        $defaultGuard = config('permission.default_guard');
         foreach (Area::Roles() as $area => $roles) {
             foreach ($roles as $role) {
                 foreach ($role as $roleName => $permissions) {
