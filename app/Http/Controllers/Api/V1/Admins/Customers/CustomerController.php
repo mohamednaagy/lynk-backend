@@ -55,8 +55,9 @@ class CustomerController extends Controller
     public function show(int $id, FindUserByIdAndRole $findUserByIdAndRole): CustomerResource|JsonResponse
     {
         $customer = $findUserByIdAndRole->handle($id, Role::Customer);
-        if (!$customer)
+        if (!$customer) {
             return $this->errorResponse();
+        }
 
         return new CustomerResource($customer);
     }
@@ -78,8 +79,9 @@ class CustomerController extends Controller
     {
         return DB::transaction(function () use($updateCustomerRequest, $id, $updateCustomerWithRoleAndPermission, $findUserByIdAndRole) {
             $customer = $findUserByIdAndRole->handle($id, Role::Customer);
-            if (!$customer)
+            if (!$customer) {
                 return $this->errorResponse("not found");
+            }
 
             $updateCustomerWithRoleAndPermission->handle($updateCustomerRequest->validated(), $customer);
             return $this->successResponse();
@@ -95,8 +97,9 @@ class CustomerController extends Controller
     public function destroy(int $id, FindUserByIdAndRole $findUserByIdAndRole): JsonResponse
     {
         $customer = $findUserByIdAndRole->handle($id, Role::Customer);
-        if (!$customer)
+        if (!$customer) {
             return $this->errorResponse();
+        }
 
         $customer->delete();
 

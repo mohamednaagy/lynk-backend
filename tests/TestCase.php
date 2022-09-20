@@ -44,8 +44,9 @@ abstract class TestCase extends BaseTestCase
 
         Grantify::assignRoleToModel($user, $role);
 
-        if ($test == null)
+        if ($test == null) {
             $this->actingAs($user);
+        }
 
         # login user
         $loginResponse = $this->postJson('api/auth/login', [

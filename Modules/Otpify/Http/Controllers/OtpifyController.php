@@ -35,11 +35,11 @@ class OtpifyController extends Controller
             $otpCode = Otpify::driver($setting->otp_driver)->execute($otpifyRequest, $otpifyRequest->user());
 
             return $this->successResponse([
-                'message' => 'OTP generated successfully',
-                'otp_code' => $otpCode
+                'message' => trans('response.OTP_generated_successfully'),
+                'vid' => $otpCode->id
             ]);
         } catch (ConfigurationException|TwilioException) {
-            return $this->errorResponse('something went wrong, try again later');
+            return $this->errorResponse(trans('response.something_went_wrong'));
         } catch (\Exception $exception) {
             return $this->errorResponse($exception->getMessage());
         }
@@ -59,13 +59,13 @@ class OtpifyController extends Controller
             $valid = Otpify::driver($setting->otp_driver)->verify($otpifyRequest, $data['vid'], $data['code']);
             return $this->successResponse([]);
         } catch (OtpCodeAlreadyUsedException) {
-            $message = 'otp already used';
+            $message = trans('response.otp_already_used');
         } catch (OtpCodeAdditionalCheckException) {
-            $message = 'otp code additional check error';
+            $message = trans('response.otp_code_additional_check_error');
         } catch (OtpCodeExpiredException) {
-            $message = 'otp code expired';
+            $message = trans('response.otp_code_expired');
         } catch (OtpCodeIncorrectException|OtpCodeNotFoundException) {
-            $message = 'otp code invalid';
+            $message = trans('response.otp_code_invalid');
         }
 
         return $this->errorResponse($message, Response::HTTP_UNAUTHORIZED);

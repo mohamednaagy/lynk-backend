@@ -62,8 +62,9 @@ class AdminController extends Controller
     {
         return DB::transaction(function () use($updateAdminRequest, $id, $updateAdminWithRoleAndPermission, $findUserByIdAndRole) {
             $admin = $findUserByIdAndRole->handle($id, Role::Admin);
-            if (!$admin)
+            if (!$admin) {
                 return $this->errorResponse();
+            }
 
             $updateAdminWithRoleAndPermission->handle($updateAdminRequest->validated(), $admin);
             return $this->successResponse();
@@ -78,8 +79,9 @@ class AdminController extends Controller
     public function destroy(int $id, FindUserByIdAndRole $findUserByIdAndRole): JsonResponse
    {
        $admin = $findUserByIdAndRole->handle($id, Role::Admin);
-       if (!$admin)
+       if (!$admin) {
            return $this->errorResponse();
+       }
 
        $admin->delete();
 

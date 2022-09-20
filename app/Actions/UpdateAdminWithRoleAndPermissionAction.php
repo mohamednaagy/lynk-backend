@@ -16,8 +16,8 @@ class UpdateAdminWithRoleAndPermissionAction implements UpdateAdminWithRoleAndPe
      * @param SyncPermissionToUser $syncPermissionToUser
      */
     public function __construct(
-        protected UpdateUser $updateUser,
-        protected SyncRoleToUser $syncRoleToUser,
+        protected UpdateUser           $updateUser,
+        protected SyncRoleToUser       $syncRoleToUser,
         protected SyncPermissionToUser $syncPermissionToUser
     )
     {
@@ -35,11 +35,13 @@ class UpdateAdminWithRoleAndPermissionAction implements UpdateAdminWithRoleAndPe
         $this->updateUser->handle($user, $data);
 
         # sync role
-        if (!empty($data['role']))
+        if (!empty($data['role'])) {
             $this->syncRoleToUser->handle($user, $data['role']);
+        }
 
         # sync permission
-        if (!empty($data['permissions']))
+        if (!empty($data['permissions'])) {
             $this->syncPermissionToUser->handle($user, $data['permissions']);
+        }
     }
 }

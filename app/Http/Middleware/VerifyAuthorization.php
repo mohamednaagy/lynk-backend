@@ -28,14 +28,17 @@ class VerifyAuthorization
     {
         $setting = $this->getSettingsClassInstance->handle($area);
 
-        if (!$setting->otp_enabled)
+        if (!$setting->otp_enabled) {
             return $next($request);
+        }
 
-        if ($request->has('authorized_token') && Otpify::verifyAuthorizationToken($request->input('authorized_token')))
+        if ($request->headers->has('authorized_token') && Otpify::verifyAuthorizationToken($request->header('authorized_token'))) {
             return $next($request);
+        }
 
-        if ($request->expectsJson())
+        if ($request->expectsJson()) {
             return response()->errorResponse('User not authorized', 403); // or return false
+        }
 
         abort(403);
     }

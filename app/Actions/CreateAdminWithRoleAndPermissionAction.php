@@ -16,8 +16,8 @@ class CreateAdminWithRoleAndPermissionAction implements CreateAdminWithRoleAndPe
      * @param AssignPermissionToUser $assignPermissionToUser
      */
     public function __construct(
-        protected CreateUser $createUser,
-        protected AssignRoleToUser $assignRoleToUser,
+        protected CreateUser             $createUser,
+        protected AssignRoleToUser       $assignRoleToUser,
         protected AssignPermissionToUser $assignPermissionToUser
     )
     {
@@ -34,12 +34,14 @@ class CreateAdminWithRoleAndPermissionAction implements CreateAdminWithRoleAndPe
         $user = $this->createUser->handle($data);
 
         # assign role to user
-        if (!empty($data['role']))
+        if (!empty($data['role'])) {
             $this->assignRoleToUser->handle($user, $data['role']);
+        }
 
         # assign permission to user
-        if (!empty($data['permissions']))
+        if (!empty($data['permissions'])) {
             $this->assignPermissionToUser->handle($user, $data['permissions']);
+        }
 
         # return user
         return $user;

@@ -30,7 +30,7 @@ class TwilioSmsDriver implements OtpifyDriverInterface
      * @throws ConfigurationException
      * @throws TwilioException
      */
-    public function execute(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
+    public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
         $code = generateRandomCode(config('otpify.code_length'));
         $otpifyCode = $this->createOtpifyCode($code, $data);

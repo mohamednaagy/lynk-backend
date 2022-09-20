@@ -61,9 +61,9 @@ class OtpifyManager extends Manager
     public function generateAuthorizationToken(array $data): string
     {
         $token = $this->generateRandomToken();
-        $data['token'] = $token;
-        $this->createAuthorizationToken($data);
-        return $token;
+        $data['token'] = hash('sha256', $token);
+        $authorizationToken = $this->createAuthorizationToken($data);
+        return $authorizationToken->id . '|' . $token;
     }
 
     /**

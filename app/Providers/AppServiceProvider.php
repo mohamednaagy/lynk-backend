@@ -41,8 +41,9 @@ class AppServiceProvider extends ServiceProvider
                 'message' => $message,
             ];
 
-            if (!is_null($code))
+            if (!is_null($code)) {
                 $response = array_merge($response, ['code' => $code]);
+            }
 
             return response()->json($response, $statusCode);
         });
