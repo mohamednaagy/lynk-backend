@@ -9,10 +9,12 @@ use Illuminate\Http\JsonResponse;
 use Modules\Otpify\Facades\Otpify;
 use App\Actions\Contracts\GetSettingsClassInstance;
 
-class VerifyAuthorization
+class CheckAreaOtp
 {
 
-    public function __construct(protected GetSettingsClassInstance $getSettingsClassInstance)
+    public function __construct(
+        protected GetSettingsClassInstance $getSettingsClassInstance
+    )
     {
     }
 
@@ -28,11 +30,11 @@ class VerifyAuthorization
     {
         $setting = $this->getSettingsClassInstance->handle($area);
 
-        if (!$setting->otp_enabled) {
-            return $next($request);
-        }
-
-        if ($request->headers->has('authorized_token') && Otpify::verifyAuthorizationToken($request->header('authorized_token'))) {
+        if (
+            (!$setting->otp_enabled)
+            ||
+            ($request->headers->has('authorized_token') && Otpify::verifyAuthorizationToken($request->header('authorized_token'), $area))
+        ) {
             return $next($request);
         }
 

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property mixed $expiration_date
  * @property mixed $otp_code
  * @property mixed $expired_at
+ * @property int $otpifiable_id
  */
 class OtpifyCode extends Model
 {

@@ -8,4 +8,5 @@ return [
     'otp_code_expired' => 'otp code expired',
     'otp_code_invalid' => 'otp code invalid',
     'invalid_token' => 'invalid token',
+    'otpifiable_not_equal_auth_user' => 'Invalid OTP',
 ];

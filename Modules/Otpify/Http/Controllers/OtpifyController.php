@@ -3,6 +3,7 @@
 namespace Modules\Otpify\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Modules\Otpify\Exceptions\OtpifiableNotEqualAuthUserException;
 use Modules\Otpify\Facades\Otpify;
 use App\Http\Controllers\Controller;
 use Twilio\Exceptions\TwilioException;
@@ -58,6 +59,8 @@ class OtpifyController extends Controller
         try {
             $valid = Otpify::driver($setting->otp_driver)->verify($otpifyRequest, $data['vid'], $data['code']);
             return $this->successResponse([]);
+        } catch (OtpifiableNotEqualAuthUserException) {
+            $message = trans('response.otpifiable_not_equal_auth_user');
         } catch (OtpCodeAlreadyUsedException) {
             $message = trans('response.otp_already_used');
         } catch (OtpCodeAdditionalCheckException) {

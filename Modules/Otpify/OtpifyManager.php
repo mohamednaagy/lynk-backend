@@ -2,6 +2,7 @@
 
 namespace Modules\Otpify;
 
+use Exception;
 use Illuminate\Support\Manager;
 use Modules\Otpify\Drivers\EmailDriver;
 use Modules\Otpify\Traits\CanBeAuthorized;
@@ -60,19 +61,23 @@ class OtpifyManager extends Manager
      */
     public function generateAuthorizationToken(array $data): string
     {
-        $token = $this->generateRandomToken();
-        $data['token'] = hash('sha256', $token);
-        $authorizationToken = $this->createAuthorizationToken($data);
-        return $authorizationToken->id . '|' . $token;
+        try {
+            $token = $this->generateRandomToken();
+            $data['token'] = hash('sha256', $token);
+            $authorizationToken = $this->createAuthorizationToken($data);
+            return $authorizationToken->id . '|' . $token;
+        } catch (Exception $exception) {
+            $this->generateAuthorizationToken($data);
+        }
     }
 
     /**
      * @param string $token
+     * @param string $area
      * @return bool
      */
-    public function verifyAuthorizationToken(string $token): bool
+    public function verifyAuthorizationToken(string $token, string $area): bool
     {
-//        return $this->verifyToken($token) ?? throw new AuthorizedTokenNotFoundException();
-        return $this->verifyToken($token);
+        return $this->verifyToken($token, $area);
     }
 }
