@@ -32,7 +32,7 @@ class OtpifyController extends Controller
     {
         try {
             $setting = $this->getSettingsClassInstance->handle($otpifyRequest->validated('area'));
-            $otpCode = Otpify::driver($setting->otp_driver)->execute($otpifyRequest, $otpifyRequest->user());
+            $otpCode = Otpify::driver($setting->otp_driver)->send($otpifyRequest, $otpifyRequest->user());
 
             return $this->successResponse([
                 'message' => trans('response.OTP_generated_successfully'),

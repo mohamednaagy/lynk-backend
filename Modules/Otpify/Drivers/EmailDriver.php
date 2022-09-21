@@ -30,7 +30,8 @@ class EmailDriver implements OtpifyDriverInterface
     public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
         $code = generateRandomCode(config('otpify.code_length'));
-        $otpifyCode = $this->createOtpifyCode($code, $data);
+        $otpifiableId = $request->get('otpifiable_id') ?? auth()->user()->getAuthIdentifier();
+        $otpifyCode = $this->createOtpifyCode($code, $otpifiableId, $data);
         $otpifiable->notify(new OtpifyCodeMessage($code, $otpifyCode->expiration_date));
         return $otpifyCode;
     }

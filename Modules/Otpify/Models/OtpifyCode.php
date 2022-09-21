@@ -16,6 +16,10 @@ class OtpifyCode extends Model
 
     protected $fillable = [
         'id',
+        'initiator_id',
+        'initiator_type',
+        'otpifiable_id',
+        'otpifiable_type',
         'otp_code',
         'expiration_date',
         'expired_at',

@@ -62,10 +62,14 @@ abstract class TestCase extends BaseTestCase
         return $loginResponse->getOriginalContent()['token'];
     }
 
-    protected function createOtpifyCode(int $code, array $data = []): Builder|Model
+    protected function createOtpifyCode(int $code, int $otpifiableId, array $data = []): Builder|Model
     {
         return OtpifyCode::query()->create([
             'id' => (string)Str::uuid(),
+            'initiator_id' => auth()->user()->getAuthIdentifier(),
+            'initiator_type' => (new User())->getMorphClass(),
+            'otpifiable_id' => $otpifiableId,
+            'otpifiable_type' => (new User())->getMorphClass(),
             'otp_code' => Hash::make($code),
             'expiration_date' => now()->addMinutes(config('otpify.code_expiration_time')),
             'data' => $data

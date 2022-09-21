@@ -2,6 +2,7 @@
 
 namespace Modules\Otpify\Traits;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -17,13 +18,18 @@ trait CanOtpifyCode
 {
     /**
      * @param $code
+     * @param int $otpifiableId
      * @param array $data
      * @return OtpifyCode
      */
-    public function createOtpifyCode($code, array $data = []): OtpifyCode
+    public function createOtpifyCode($code, int $otpifiableId, array $data = []): OtpifyCode
     {
         return OtpifyCode::create([
             'id' => (string)Str::uuid(),
+            'initiator_id' => auth()->user()->getAuthIdentifier(),
+            'initiator_type' => (new User())->getMorphClass(),
+            'otpifiable_id' => $otpifiableId,
+            'otpifiable_type' => (new User())->getMorphClass(),
             'otp_code' => Hash::make($code),
             'expiration_date' => now()->addMinutes(config('otpify.code_expiration_time')),
             'data' => $data

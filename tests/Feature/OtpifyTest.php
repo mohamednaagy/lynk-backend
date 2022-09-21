@@ -83,13 +83,13 @@ class OtpifyTest extends TestCase
 
         # create otp code
         $code = 1000;
-        $otpifyCode = $this->createOtpifyCode($code);
+        $otpifyCode = $this->createOtpifyCode($code, auth()->user()->getAuthIdentifier());
 
         $getOtpCodeResponse = $this->withToken($token)->postJson('api/verify-otp', [
             'area' => Area::General,
             'vid' => $otpifyCode->id,
             'code' => $code,
-            ]);
+        ]);
 
         $getOtpCodeResponse->assertStatus(200)->assertJsonStructure([
             'data'
@@ -102,7 +102,7 @@ class OtpifyTest extends TestCase
 
         # create otp code
         $code = 1000;
-        $otpifyCode = $this->createOtpifyCode($code);
+        $otpifyCode = $this->createOtpifyCode($code, auth()->user()->getAuthIdentifier());
 
         $getOtpCodeResponse = $this->withToken($token)->postJson('api/verify-otp', [
             'area' => Area::General,
@@ -121,7 +121,7 @@ class OtpifyTest extends TestCase
 
         # create otp code
         $code = 1000;
-        $otpifyCode = $this->createOtpifyCode($code);
+        $otpifyCode = $this->createOtpifyCode($code, auth()->user()->getAuthIdentifier());
 
         $otpifyCode->update(['expiration_date' => now()]);
 
@@ -142,7 +142,7 @@ class OtpifyTest extends TestCase
 
         # create otp code
         $code = 1000;
-        $otpifyCode = $this->createOtpifyCode($code);
+        $otpifyCode = $this->createOtpifyCode($code, auth()->user()->getAuthIdentifier());
 
         $otpifyCode->update(['expired_at' => now()]);
 

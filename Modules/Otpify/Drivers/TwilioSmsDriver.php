@@ -33,7 +33,8 @@ class TwilioSmsDriver implements OtpifyDriverInterface
     public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
         $code = generateRandomCode(config('otpify.code_length'));
-        $otpifyCode = $this->createOtpifyCode($code, $data);
+        $otpifiableId = $request->get('otpifiable_id') ?? auth()->user()->getAuthIdentifier();
+        $otpifyCode = $this->createOtpifyCode($code, $otpifiableId, $data);
 
         $receiverNumber = getOtpifiablePhoneNumber($otpifiable)->formatE164();
         $message = trans('otpify::phone.message', ['code' => $code, 'time' => $otpifyCode->expiration_date->diffInMinutes(now())]);
