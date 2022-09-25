@@ -67,7 +67,7 @@ class OtpifyManager extends Manager
             $authorizationToken = $this->createAuthorizationToken($data);
             return $authorizationToken->id . '|' . $token;
         } catch (Exception $exception) {
-            $this->generateAuthorizationToken($data);
+            return $this->generateAuthorizationToken($data);
         }
     }
 

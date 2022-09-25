@@ -5,7 +5,7 @@ use App\Enums\Role;
 use App\Enums\Action;
 use App\Enums\Subject;
 use Illuminate\Support\Facades\Route;
-use Modules\Permission\Facades\Grantify;
+use Modules\Grantify\Facades\Grantify;
 use App\Http\Controllers\Api\V1\Admins\AdminController;
 use App\Http\Controllers\Api\V1\Admins\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admins\Roles\GetAllPermissions;
@@ -28,15 +28,16 @@ Route::middleware(['auth:sanctum', 'role:' . Role::Admin])->prefix('v1/admin')->
         Route::apiResource('admins', AdminController::class)->except(['show'])->parameters(['admins' => 'id']);
         Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
 
-        Route::group(['middleware' => ['permission:'.
-            Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Admins, [
-                Action::getPermissions,
-                Action::getRoles
+        Route::get('/roles', GetAllRoles::class)->middleware('permission:'.
+            Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Roles, [
+                Action::Index
             ])
-        ]], function () {
-            Route::get('/roles', GetAllRoles::class);
-            Route::get('/permissions', GetAllPermissions::class);
-        });
+        );
+        Route::get('/permissions', GetAllPermissions::class)->middleware('permission:'.
+            Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Permissions, [
+                Action::Index
+            ])
+        );
 
         Route::prefix('settings')->group(function () {
             Route::get('/', [SettingsController::class, 'index']);

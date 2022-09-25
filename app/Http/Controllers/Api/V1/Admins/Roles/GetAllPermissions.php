@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Admins\Roles;
 
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use Modules\Permission\Facades\Grantify;
+use Modules\Grantify\Facades\Grantify;
 use Spatie\Permission\Models\Permission;
 
 class GetAllPermissions extends Controller

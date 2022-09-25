@@ -9,13 +9,13 @@ use App\Enums\Role;
 use App\Enums\Action;
 use App\Enums\Subject;
 use App\Actions\SyncRoleToUserAction;
+use Modules\Grantify\Facades\Grantify;
 use App\Actions\AssignRoleToUserAction;
-use Modules\Permission\Facades\Grantify;
 use App\Actions\SyncPermissionToUserAction;
 use App\Actions\AssignPermissionToUserAction;
 use Spatie\Permission\Exceptions\RoleDoesNotExist;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Permission\Exceptions\RoleNotFoundException;
+use Modules\Grantify\Exceptions\RoleNotFoundException;
 
 class GrantifyUnitTest extends TestCase
 {

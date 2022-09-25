@@ -1,0 +1,13 @@
+{
+    "name": "Grantify",
+    "alias": "grantify",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Grantify\\Providers\\GrantifyServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

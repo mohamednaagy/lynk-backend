@@ -3,8 +3,8 @@
 namespace App\Actions;
 
 use App\Models\User;
+use Modules\Grantify\Facades\Grantify;
 use Spatie\Permission\Models\Permission;
-use Modules\Permission\Facades\Grantify;
 use App\Actions\Contracts\SyncPermissionToUser;
 
 class SyncPermissionToUserAction implements SyncPermissionToUser

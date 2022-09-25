@@ -9,9 +9,9 @@ use Illuminate\Support\Str;
 use Modules\Otpify\Facades\Otpify;
 use Illuminate\Support\Facades\Hash;
 use Modules\Otpify\Models\OtpifyCode;
+use Modules\Grantify\Facades\Grantify;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Permission\Facades\Grantify;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 

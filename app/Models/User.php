@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Otpify\Models\AuthorizationToken;
-use Modules\Permission\Contracts\Grantifiable;
+use Modules\Grantify\Contracts\Grantifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

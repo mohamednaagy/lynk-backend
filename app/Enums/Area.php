@@ -3,8 +3,8 @@
 namespace App\Enums;
 
 use BenSampo\Enum\Enum;
-use Modules\Permission\Support\GeneralPermissionUtil;
-use Modules\Permission\Support\RoleUtil;
+use Modules\Grantify\Support\RoleUtil;
+use Modules\Grantify\Support\GeneralPermissionUtil;
 
 /**
  * @method static static SuperAdmin()
@@ -16,13 +16,11 @@ final class Area extends Enum
     const Customer = 'Customer';
     const General = 'General';
 
-    public static function Roles()
+    public static function getRolesPerAreaMap(): array
     {
         return [
               self::SuperAdmin => [
-                  RoleUtil::getPermissionsForRole(Role::Admin),
-                  RoleUtil::getPermissionsForRole(Role::Customer),
-                  GeneralPermissionUtil::getGeneralPermissionsForArea(self::SuperAdmin)
+                  Role::Admin,
               ]
         ];
     }
