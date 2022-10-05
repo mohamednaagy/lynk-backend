@@ -2,10 +2,13 @@
 
 namespace Modules\Otpify\Traits;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Modules\Otpify\Exceptions\OtpifiableNotEqualAuthUserException;
+use Modules\Otpify\Facades\Otpify;
 use Modules\Otpify\Models\OtpifyCode;
 use Modules\Otpify\Exceptions\OtpCodeExpiredException;
 use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
@@ -17,13 +20,18 @@ trait CanOtpifyCode
 {
     /**
      * @param $code
+     * @param int $otpifiableId
      * @param array $data
      * @return OtpifyCode
      */
-    public function createOtpifyCode($code, array $data = []): OtpifyCode
+    public function createOtpifyCode($code, int $otpifiableId, array $data = []): OtpifyCode
     {
         return OtpifyCode::create([
             'id' => (string)Str::uuid(),
+            'initiator_id' => auth()->user()->getAuthIdentifier(),
+            'initiator_type' => (new User())->getMorphClass(),
+            'otpifiable_id' => $otpifiableId,
+            'otpifiable_type' => (new User())->getMorphClass(),
             'otp_code' => Hash::make($code),
             'expiration_date' => now()->addMinutes(config('otpify.code_expiration_time')),
             'data' => $data
@@ -40,16 +48,21 @@ trait CanOtpifyCode
      * @throws OtpCodeAlreadyUsedException
      * @throws OtpCodeExpiredException
      * @throws OtpCodeIncorrectException
+     * @throws OtpifiableNotEqualAuthUserException
      */
     public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, Closure $additionalCheckCallback = null): void
     {
-        if(!Hash::check($code, $otpifyCode->otp_code))
+        if (auth()->user()->getAuthIdentifier() !== $otpifyCode->otpifiable_id) {
+            throw new OtpifiableNotEqualAuthUserException();
+        }
+
+        if (!Hash::check($code, $otpifyCode->otp_code))
             throw new OtpCodeIncorrectException();
 
         if ($otpifyCode->expired_at != null)
             throw new OtpCodeAlreadyUsedException();
 
-        if($this->isCodeExpired($otpifyCode->expiration_date))
+        if ($this->isCodeExpired($otpifyCode->expiration_date))
             throw new OtpCodeExpiredException();
 
         if ($additionalCheckCallback)
@@ -87,5 +100,10 @@ trait CanOtpifyCode
     public function setOtpExpiredAt(OtpifyCode $otpifyCode): void
     {
         $otpifyCode->update(['expired_at' => now()]);
+    }
+
+    public function createAuthorizationToken(array $data): void
+    {
+        Otpify::generateAuthorizationToken($data);
     }
 }

@@ -7,7 +7,7 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Enums\Action;
 use App\Enums\Subject;
-use Modules\Permission\Facades\Grantify;
+use Modules\Grantify\Facades\Grantify;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class GrantifyTest extends TestCase

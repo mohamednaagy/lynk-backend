@@ -7,7 +7,7 @@ use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
-use Modules\Permission\Facades\Grantify;
+use Modules\Grantify\Facades\Grantify;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CustomerTest extends TestCase

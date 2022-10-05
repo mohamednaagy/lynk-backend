@@ -4,7 +4,7 @@ namespace App\Actions;
 
 use App\Models\User;
 use Spatie\Permission\Models\Role;
-use Modules\Permission\Facades\Grantify;
+use Modules\Grantify\Facades\Grantify;
 use App\Actions\Contracts\SyncRoleToUser;
 
 class SyncRoleToUserAction implements SyncRoleToUser

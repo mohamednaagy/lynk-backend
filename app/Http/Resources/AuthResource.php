@@ -3,7 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use Modules\Permission\Facades\Grantify;
+use Modules\Grantify\Facades\Grantify;
 
 class AuthResource extends JsonResource
 {

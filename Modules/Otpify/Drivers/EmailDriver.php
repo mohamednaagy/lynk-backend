@@ -4,6 +4,7 @@ namespace Modules\Otpify\Drivers;
 
 use Closure;
 use Illuminate\Http\Request;
+use Modules\Otpify\Exceptions\OtpifiableNotEqualAuthUserException;
 use Modules\Otpify\Models\OtpifyCode;
 use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Traits\CanOtpifyCode;
@@ -30,7 +31,8 @@ class EmailDriver implements OtpifyDriverInterface
     public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
         $code = generateRandomCode(config('otpify.code_length'));
-        $otpifyCode = $this->createOtpifyCode($code, $data);
+        $otpifiableId = $request->get('otpifiable_id') ?? auth()->user()->getAuthIdentifier();
+        $otpifyCode = $this->createOtpifyCode($code, $otpifiableId, $data);
         $otpifiable->notify(new OtpifyCodeMessage($code, $otpifyCode->expiration_date));
         return $otpifyCode;
     }
@@ -53,12 +55,14 @@ class EmailDriver implements OtpifyDriverInterface
      * @throws OtpCodeExpiredException
      * @throws OtpCodeIncorrectException
      * @throws OtpCodeNotFoundException
+     * @throws OtpifiableNotEqualAuthUserException
      */
     public function verify(Request $request, $vid, $code, Closure $additionalCheckCallback = null): bool
     {
         $otpifyCode = $this->getOtpifyCode($vid);
         $this->verifyOtpifyCode($otpifyCode, $request, $code, $additionalCheckCallback);
         $this->setOtpExpiredAt($otpifyCode);
+        $this->createAuthorizationToken($request->all());
 
         return true;
     }

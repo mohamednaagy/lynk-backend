@@ -3,6 +3,7 @@
 namespace Modules\Otpify\Drivers;
 
 use Closure;
+use Modules\Otpify\Exceptions\OtpifiableNotEqualAuthUserException;
 use Twilio\Rest\Client;
 use Twilio\Http\CurlClient;
 use Illuminate\Http\Request;
@@ -33,7 +34,8 @@ class TwilioSmsDriver implements OtpifyDriverInterface
     public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
         $code = generateRandomCode(config('otpify.code_length'));
-        $otpifyCode = $this->createOtpifyCode($code, $data);
+        $otpifiableId = $request->get('otpifiable_id') ?? auth()->user()->getAuthIdentifier();
+        $otpifyCode = $this->createOtpifyCode($code, $otpifiableId, $data);
 
         $receiverNumber = getOtpifiablePhoneNumber($otpifiable)->formatE164();
         $message = trans('otpify::phone.message', ['code' => $code, 'time' => $otpifyCode->expiration_date->diffInMinutes(now())]);
@@ -80,12 +82,14 @@ class TwilioSmsDriver implements OtpifyDriverInterface
      * @throws OtpCodeExpiredException
      * @throws OtpCodeIncorrectException
      * @throws OtpCodeNotFoundException
+     * @throws OtpifiableNotEqualAuthUserException
      */
     public function verify(Request $request, $vid, $code, Closure $additionalCheckCallback = null): bool
     {
         $otpifyCode = $this->getOtpifyCode($vid);
         $this->verifyOtpifyCode($otpifyCode, $request, $code, $additionalCheckCallback);
         $this->setOtpExpiredAt($otpifyCode);
+        $this->createAuthorizationToken($request->all());
 
         return true;
     }

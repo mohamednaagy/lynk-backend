@@ -12,4 +12,6 @@ final class Subject extends Enum
 {
     const Admins = 'Admins';
     const Customers = 'Customers';
+    const Roles = 'Roles';
+    const Permissions = 'Permissions';
 }

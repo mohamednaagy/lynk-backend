@@ -1,7 +1,4 @@
 {
-    "Customers": true,
-    "Permission": true,
     "Otpify": true,
-    "Admin": true,
-    "Settings": true
+    "Grantify": true
 }

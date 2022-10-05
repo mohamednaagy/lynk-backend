@@ -9,9 +9,9 @@ use Illuminate\Support\Str;
 use Modules\Otpify\Facades\Otpify;
 use Illuminate\Support\Facades\Hash;
 use Modules\Otpify\Models\OtpifyCode;
+use Modules\Grantify\Facades\Grantify;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Permission\Facades\Grantify;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
@@ -62,10 +62,14 @@ abstract class TestCase extends BaseTestCase
         return $loginResponse->getOriginalContent()['token'];
     }
 
-    protected function createOtpifyCode(int $code, array $data = []): Builder|Model
+    protected function createOtpifyCode(int $code, int $otpifiableId, array $data = []): Builder|Model
     {
         return OtpifyCode::query()->create([
             'id' => (string)Str::uuid(),
+            'initiator_id' => auth()->user()->getAuthIdentifier(),
+            'initiator_type' => (new User())->getMorphClass(),
+            'otpifiable_id' => $otpifiableId,
+            'otpifiable_type' => (new User())->getMorphClass(),
             'otp_code' => Hash::make($code),
             'expiration_date' => now()->addMinutes(config('otpify.code_expiration_time')),
             'data' => $data

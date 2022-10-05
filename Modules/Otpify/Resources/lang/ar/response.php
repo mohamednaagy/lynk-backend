@@ -8,4 +8,5 @@ return [
     'otp_code_expired' => 'انتهت صلاحية كود otp',
     'otp_code_invalid' => 'كود otp غير صالح',
     'invalid_token' => 'رمز غير صالح',
+    'otpifiable_not_equal_auth_user' => 'OTP غير صحيح',
 ];

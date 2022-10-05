@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property mixed $expiration_date
  * @property mixed $otp_code
  * @property mixed $expired_at
+ * @property int $otpifiable_id
  */
 class OtpifyCode extends Model
 {
@@ -16,6 +17,10 @@ class OtpifyCode extends Model
 
     protected $fillable = [
         'id',
+        'initiator_id',
+        'initiator_type',
+        'otpifiable_id',
+        'otpifiable_type',
         'otp_code',
         'expiration_date',
         'expired_at',

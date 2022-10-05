@@ -40,10 +40,16 @@ trait CanBeAuthorized
 
     /**
      * @param string $token
+     * @param string $area
      * @return bool
      */
-    private function verifyToken(string $token): bool
+    private function verifyToken(string $token, string $area): bool
     {
-        return AuthorizationToken::query()->where('token', $token)->exists();
+        $token = explode('|', $token);
+        return AuthorizationToken::query()->where([
+            ['id', '=', $token[0]],
+            ['token', '=', hash('sha265', $token[1])],
+            ['area', '=', $area],
+        ])->exists();
     }
 }
