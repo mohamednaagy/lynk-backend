@@ -3,12 +3,11 @@
 namespace Modules\Otpify\Http\Requests;
 
 use App\Enums\Area;
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class OtpifyRequest extends FormRequest
 {
-
     /**
      * Determine if the user is authorized to make this request.
      *

@@ -23,14 +23,14 @@ class LoginController extends Controller
         $requestData = $request->validate([
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
-            'source' => ['required', 'string']
+            'source' => ['required', 'string'],
         ]);
 
         $user = User::where('email', $requestData['email'])->first();
 
-        if ($user === null || !Hash::check($requestData['password'], $user->password)) {
+        if ($user === null || ! Hash::check($requestData['password'], $user->password)) {
             throw ValidationException::withMessages([
-                'email' => __('auth.failed')
+                'email' => __('auth.failed'),
             ]);
         }
 

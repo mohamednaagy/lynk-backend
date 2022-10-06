@@ -13,6 +13,6 @@ return [
     |
     */
 
-    'message' => 'Your OTP Code is :code, It will be expired in :time minutes.'
+    'message' => 'Your OTP Code is :code, It will be expired in :time minutes.',
 
 ];

@@ -3,7 +3,6 @@
 namespace Modules\Otpify\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -12,6 +11,7 @@ class OtpifyCodeMessage extends Notification
     use Queueable;
 
     protected $otpCode;
+
     protected $expirationDate;
 
     /**

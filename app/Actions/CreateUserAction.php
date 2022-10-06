@@ -2,14 +2,14 @@
 
 namespace App\Actions;
 
+use App\Actions\Contracts\CreateUser;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use App\Actions\Contracts\CreateUser;
 
 class CreateUserAction implements CreateUser
 {
     /**
-     * @param array $data
+     * @param  array  $data
      * @return User
      */
     public function handle(array $data): User

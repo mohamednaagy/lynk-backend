@@ -2,23 +2,23 @@
 
 namespace App\Actions;
 
-use App\Actions\Contracts\UpdateSettings;
 use App\Actions\Contracts\GetSettingsArea;
+use App\Actions\Contracts\UpdateSettings;
 
 class UpdateSettingsAction implements UpdateSettings
 {
     /**
      * UpdateSettingsAction constructor.
-     * @param GetSettingsArea $getSettingsArea
+     *
+     * @param  GetSettingsArea  $getSettingsArea
      */
     public function __construct(
         protected GetSettingsArea $getSettingsArea
-    )
-    {
+    ) {
     }
 
     /**
-     * @param array $data
+     * @param  array  $data
      * @return void
      */
     public function handle(array $data): void

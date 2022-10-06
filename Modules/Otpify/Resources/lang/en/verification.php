@@ -16,6 +16,6 @@ return [
     'additional_check' => 'We can\'t processed with verification of this OTP.',
     'not_exist' => 'This OTP code not exist.',
     'used' => 'This OTP code has been used before.',
-    'expired' => 'This OTP is expired.'
+    'expired' => 'This OTP is expired.',
 
 ];

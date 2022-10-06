@@ -2,20 +2,20 @@
 
 namespace Tests\Unit;
 
-use Exception;
-use App\Enums\Area;
-use Tests\TestCase;
-use App\Enums\Role;
-use App\Enums\Action;
-use App\Enums\Subject;
-use App\Actions\SyncRoleToUserAction;
-use Modules\Grantify\Facades\Grantify;
+use App\Actions\AssignPermissionToUserAction;
 use App\Actions\AssignRoleToUserAction;
 use App\Actions\SyncPermissionToUserAction;
-use App\Actions\AssignPermissionToUserAction;
-use Spatie\Permission\Exceptions\RoleDoesNotExist;
+use App\Actions\SyncRoleToUserAction;
+use App\Enums\Action;
+use App\Enums\Area;
+use App\Enums\Role;
+use App\Enums\Subject;
+use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Grantify\Exceptions\RoleNotFoundException;
+use Modules\Grantify\Facades\Grantify;
+use Spatie\Permission\Exceptions\RoleDoesNotExist;
+use Tests\TestCase;
 
 class GrantifyUnitTest extends TestCase
 {
@@ -47,14 +47,14 @@ class GrantifyUnitTest extends TestCase
 
     public function test_assign_permission_to_user()
     {
-        # expected permission format from the font-end
+        // expected permission format from the font-end
         $permission = [
-            Area::SuperAdmin . '-' . Subject::Customers => [
+            Area::SuperAdmin.'-'.Subject::Customers => [
                 Action::Index,
-                Action::Create
-            ]
+                Action::Create,
+            ],
         ];
-        # assign the permissions to the user
+        // assign the permissions to the user
         $assignPermissionToUser = new AssignPermissionToUserAction();
         $assignPermissionToUser->handle($this->user, $permission);
 
@@ -65,9 +65,9 @@ class GrantifyUnitTest extends TestCase
     {
         $this->expectException(Exception::class);
 
-        # invalid permission format
+        // invalid permission format
         $permission = [
-            Area::SuperAdmin . '-' . Action::Create . '.' . Subject::Customers
+            Area::SuperAdmin.'-'.Action::Create.'.'.Subject::Customers,
         ];
         $assignPermissionToUser = new AssignPermissionToUserAction();
         $assignPermissionToUser->handle($this->user, $permission);
@@ -100,26 +100,26 @@ class GrantifyUnitTest extends TestCase
      */
     public function test_sync_permission_to_user()
     {
-        # expected permission format from the font-end
+        // expected permission format from the font-end
         $permissionAssign = [
-            Area::SuperAdmin . '-' . Subject::Customers => [
+            Area::SuperAdmin.'-'.Subject::Customers => [
                 Action::Index,
-                Action::Delete
-            ]
+                Action::Delete,
+            ],
         ];
 
         $permissionSync = [
-            Area::SuperAdmin . '-' . Subject::Customers => [
+            Area::SuperAdmin.'-'.Subject::Customers => [
                 Action::Index,
-                Action::Delete
+                Action::Delete,
             ],
-            Area::SuperAdmin . '-' . Subject::Admins => [
+            Area::SuperAdmin.'-'.Subject::Admins => [
                 Action::Index,
-                Action::Edit
-            ]
+                Action::Edit,
+            ],
         ];
 
-        # assign the permissions to the user
+        // assign the permissions to the user
         $assignPermissionToUser = new AssignPermissionToUserAction();
         $assignPermissionToUser->handle($this->user, $permissionAssign);
 
@@ -133,25 +133,25 @@ class GrantifyUnitTest extends TestCase
     {
         $this->expectException(Exception::class);
 
-        # expected permission format from the font-end
+        // expected permission format from the font-end
         $permissionAssign = [
-            Area::SuperAdmin . '-' . Subject::Customers => [
+            Area::SuperAdmin.'-'.Subject::Customers => [
                 Action::Index,
-                Action::Delete
-            ]
-        ];
-
-        # invalid permission
-        $permissionSync = [
-            Area::SuperAdmin . '-' . Action::Create => [
-                Subject::Customers
+                Action::Delete,
             ],
-            Area::SuperAdmin . '-' . Action::Delete => [
-                Subject::Admins
-            ]
         ];
 
-        # assign the permissions to the user
+        // invalid permission
+        $permissionSync = [
+            Area::SuperAdmin.'-'.Action::Create => [
+                Subject::Customers,
+            ],
+            Area::SuperAdmin.'-'.Action::Delete => [
+                Subject::Admins,
+            ],
+        ];
+
+        // assign the permissions to the user
         $assignPermissionToUser = new AssignPermissionToUserAction();
         $assignPermissionToUser->handle($this->user, $permissionAssign);
 

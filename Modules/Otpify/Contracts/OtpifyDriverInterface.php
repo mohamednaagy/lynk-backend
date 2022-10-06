@@ -3,7 +3,6 @@
 namespace Modules\Otpify\Contracts;
 
 use Illuminate\Http\Request;
-use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
 use Modules\Otpify\Models\OtpifyCode;
 
 interface OtpifyDriverInterface
@@ -11,9 +10,9 @@ interface OtpifyDriverInterface
     /**
      * Execute the driver logic.
      *
-     * @param Request $request
-     * @param Otpifiable $otpifiable
-     * @param array $data
+     * @param  Request  $request
+     * @param  Otpifiable  $otpifiable
+     * @param  array  $data
      * @return OtpifyCode
      */
     public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode;
@@ -21,8 +20,8 @@ interface OtpifyDriverInterface
     /**
      * Execute the driver logic.
      *
-     * @param Request $request
-     * @param Otpifiable $otpifiable
+     * @param  Request  $request
+     * @param  Otpifiable  $otpifiable
      * @return bool
      */
     public function doesRequireVerifyingByOtp(Request $request, Otpifiable $otpifiable): bool;
@@ -30,12 +29,11 @@ interface OtpifyDriverInterface
     /**
      * Execute the driver logic.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @param $vid
      * @param $code
-     * @param \Closure|null $additionalCheckCallback
+     * @param  \Closure|null  $additionalCheckCallback
      * @return bool
      */
     public function verify(Request $request, $vid, $code, \Closure $additionalCheckCallback = null): bool;
-
 }

@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Enums\Area;
-use Tests\TestCase;
-use App\Models\User;
 use App\Enums\Action;
+use App\Enums\Area;
 use App\Enums\Subject;
-use Modules\Grantify\Facades\Grantify;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Grantify\Facades\Grantify;
+use Tests\TestCase;
 
 class GrantifyTest extends TestCase
 {
@@ -18,12 +18,12 @@ class GrantifyTest extends TestCase
     {
         $token = $this->login();
         $authorizationToken = $this->createUserAuthorizationToken();
-        # get auth user data
+        // get auth user data
         $getOtpCodeResponse = $this->withToken($token)->getJson('api/v1/admin/roles', [
-            'authorized_token' => $authorizationToken
+            'authorized_token' => $authorizationToken,
         ]);
         $getOtpCodeResponse->assertStatus(403)->assertJsonStructure([
-            'message'
+            'message',
         ]);
     }
 
@@ -32,17 +32,17 @@ class GrantifyTest extends TestCase
         $token = $this->login();
         $authorizationToken = $this->createUserAuthorizationToken();
 
-        # get object of the user model and assign permission to it
+        // get object of the user model and assign permission to it
         $user = User::find(auth()->user()->id);
-        $permission = Area::SuperAdmin . '-' . Subject::Admins . '.' . Action::getRoles;
+        $permission = Area::SuperAdmin.'-'.Subject::Admins.'.'.Action::getRoles;
         Grantify::assignPermissionToModel($user, $permission);
 
-        # get auth user data
+        // get auth user data
         $getOtpCodeResponse = $this->withToken($token)->getJson('api/v1/admin/roles', [
-            'authorized_token' => $authorizationToken
+            'authorized_token' => $authorizationToken,
         ]);
         $getOtpCodeResponse->assertStatus(200)->assertJsonStructure([
-            'data'
+            'data',
         ]);
     }
 
@@ -50,13 +50,13 @@ class GrantifyTest extends TestCase
     {
         $token = $this->login();
         $authorizationToken = $this->createUserAuthorizationToken();
-        # get auth user data
+        // get auth user data
         $getOtpCodeResponse = $this->withToken($token)->getJson('api/v1/admin/roles', [
-            'authorized_token' => $authorizationToken
+            'authorized_token' => $authorizationToken,
         ]);
         $getOtpCodeResponse->assertStatus(403)->assertJsonStructure([
-            'message'
-        ]);;
+            'message',
+        ]);
     }
 
     public function test_get_permissions(): void
@@ -64,17 +64,17 @@ class GrantifyTest extends TestCase
         $token = $this->login();
         $authorizationToken = $this->createUserAuthorizationToken();
 
-        # get object of the user model and assign permission to it
+        // get object of the user model and assign permission to it
         $user = User::find(auth()->user()->id);
-        $permission = Area::SuperAdmin . '-' . Subject::Admins . '.' . Action::getRoles;
+        $permission = Area::SuperAdmin.'-'.Subject::Admins.'.'.Action::getRoles;
         Grantify::assignPermissionToModel($user, $permission);
 
-        # get auth user data
+        // get auth user data
         $getOtpCodeResponse = $this->withToken($token)->getJson('api/v1/admin/permissions', [
-            'authorized_token' => $authorizationToken
+            'authorized_token' => $authorizationToken,
         ]);
         $getOtpCodeResponse->assertStatus(200)->assertJsonStructure([
-            'data'
+            'data',
         ]);
     }
 }

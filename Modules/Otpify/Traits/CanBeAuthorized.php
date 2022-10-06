@@ -2,19 +2,20 @@
 
 namespace Modules\Otpify\Traits;
 
-use Illuminate\Support\Str;
-use Illuminate\Support\MessageBag;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Database\Eloquent\Builder;
-use Modules\Otpify\Models\AuthorizationToken;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Modules\Otpify\Models\AuthorizationToken;
 
 trait CanBeAuthorized
 {
     /**
-     * @param array $data
+     * @param  array  $data
      * @return Builder|Model|MessageBag
+     *
      * @throws ValidationException
      */
     private function createAuthorizationToken(array $data): Model|Builder|MessageBag
@@ -39,8 +40,8 @@ trait CanBeAuthorized
     }
 
     /**
-     * @param string $token
-     * @param string $area
+     * @param  string  $token
+     * @param  string  $area
      * @return bool
      */
     private function verifyToken(string $token, string $area): bool

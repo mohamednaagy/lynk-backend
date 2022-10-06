@@ -34,11 +34,11 @@ class StoreAdminRequest extends FormRequest
             'password_confirmation' => ['required', 'min:8'],
         ];
 
-        if (!empty($this->role)) {
+        if (! empty($this->role)) {
             $rules['role'] = ['required', 'string', 'exists:roles,name'];
         }
 
-        if (!empty($this->permissions)){
+        if (! empty($this->permissions)) {
             $rules['permissions.*'] = ['required', 'array', 'distinct'];
         }
 
@@ -50,7 +50,6 @@ class StoreAdminRequest extends FormRequest
      *
      * @return array
      */
-
     public function messages(): array
     {
         return [

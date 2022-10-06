@@ -6,12 +6,13 @@ interface SettingsInterface
 {
     /**
      * UpdateSettingsAction constructor.
-     * @param GetSettingsClassInstance $getSettingsClassInstance
+     *
+     * @param  GetSettingsClassInstance  $getSettingsClassInstance
      */
     public function __construct(GetSettingsClassInstance $getSettingsClassInstance);
 
     /**
-     * @param array $data
+     * @param  array  $data
      * @return void
      */
     public function handle(array $data): void;

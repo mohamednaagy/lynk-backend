@@ -13,20 +13,20 @@ class Admin
             Action::Create,
             Action::Show,
             Action::Edit,
-            Action::Delete
+            Action::Delete,
         ],
         Subject::Roles => [
-            Action::Index
+            Action::Index,
         ],
         Subject::Permissions => [
-            Action::Index
+            Action::Index,
         ],
         Subject::Customers => [
             Action::Index,
             Action::Create,
             Action::Show,
             Action::Edit,
-            Action::Delete
-        ]
+            Action::Delete,
+        ],
     ];
 }

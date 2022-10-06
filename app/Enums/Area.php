@@ -11,6 +11,7 @@ use BenSampo\Enum\Enum;
 final class Area extends Enum
 {
     const SuperAdmin = 'SuperAdmin';
+
     const Customer = 'Customer';
 
     public static function getRolesPerAreaMap(): array
@@ -18,7 +19,7 @@ final class Area extends Enum
         return [
             self::SuperAdmin => [
                 Role::Admin,
-            ]
+            ],
         ];
     }
 }

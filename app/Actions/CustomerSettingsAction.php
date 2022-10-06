@@ -2,21 +2,22 @@
 
 namespace App\Actions;
 
-use App\Actions\Contracts\SettingsInterface;
 use App\Actions\Contracts\GetSettingsClassInstance;
+use App\Actions\Contracts\SettingsInterface;
 
 class CustomerSettingsAction implements SettingsInterface
 {
     /**
      * UpdateSettingsAction constructor.
-     * @param GetSettingsClassInstance $getSettingsClassInstance
+     *
+     * @param  GetSettingsClassInstance  $getSettingsClassInstance
      */
     public function __construct(protected GetSettingsClassInstance $getSettingsClassInstance)
     {
     }
 
     /**
-     * @param array $data
+     * @param  array  $data
      * @return void
      */
     public function handle(array $data): void
@@ -27,6 +28,5 @@ class CustomerSettingsAction implements SettingsInterface
         $settingInstance->otp_enabled = $data['otp_enabled'];
 
         $settingInstance->save();
-
     }
 }

@@ -1,16 +1,16 @@
 <?php
 
+use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
-use App\Enums\Action;
 use App\Enums\Subject;
+use App\Http\Controllers\Api\V1\Admins\AdminController;
+use App\Http\Controllers\Api\V1\Admins\Customers\CustomerController;
+use App\Http\Controllers\Api\V1\Admins\Roles\GetAllPermissions;
+use App\Http\Controllers\Api\V1\Admins\Roles\GetAllRoles;
+use App\Http\Controllers\Api\V1\Admins\Settings\SettingsController;
 use Illuminate\Support\Facades\Route;
 use Modules\Grantify\Facades\Grantify;
-use App\Http\Controllers\Api\V1\Admins\AdminController;
-use App\Http\Controllers\Api\V1\Admins\Roles\GetAllRoles;
-use App\Http\Controllers\Api\V1\Admins\Roles\GetAllPermissions;
-use App\Http\Controllers\Api\V1\Admins\Settings\SettingsController;
-use App\Http\Controllers\Api\V1\Admins\Customers\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,19 +23,19 @@ use App\Http\Controllers\Api\V1\Admins\Customers\CustomerController;
 |
 */
 
-Route::middleware(['auth:sanctum', 'role:' . Role::Admin])->prefix('v1/admin')->group(function () {
-    Route::middleware(['checkAreaOtp:' . Area::SuperAdmin])->group(function () {
+Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->group(function () {
+    Route::middleware(['checkAreaOtp:'.Area::SuperAdmin])->group(function () {
         Route::apiResource('admins', AdminController::class)->except(['show'])->parameters(['admins' => 'id']);
         Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
 
         Route::get('/roles', GetAllRoles::class)->middleware('permission:'.
             Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Roles, [
-                Action::Index
+                Action::Index,
             ])
         );
         Route::get('/permissions', GetAllPermissions::class)->middleware('permission:'.
             Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Permissions, [
-                Action::Index
+                Action::Index,
             ])
         );
 

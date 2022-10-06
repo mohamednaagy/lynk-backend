@@ -3,12 +3,12 @@
 namespace Tests\Feature;
 
 use App\Enums\Role;
-use Tests\TestCase;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 use Modules\Grantify\Facades\Grantify;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class CustomerTest extends TestCase
 {
@@ -24,12 +24,12 @@ class CustomerTest extends TestCase
         $token = $this->login();
         $authorizationToken = $this->createUserAuthorizationToken();
 
-        # get all customers data
+        // get all customers data
         $response = $this->withToken($token)->getJson('api/v1/admin/customers', [
-            'authorized_token' => $authorizationToken
+            'authorized_token' => $authorizationToken,
         ]);
         $response->assertStatus(200)->assertJsonStructure([
-            'data'
+            'data',
         ]);
     }
 
@@ -43,12 +43,12 @@ class CustomerTest extends TestCase
         $token = $this->login();
         $authorizationToken = $this->createUserAuthorizationToken();
 
-        # create a customer
+        // create a customer
         $response = $this->withToken($token)->postJson('api/v1/admin/customers', array_merge([
-            'authorized_token' => $authorizationToken
+            'authorized_token' => $authorizationToken,
         ], $this->getCustomerData()));
         $response->assertStatus(200)->assertJsonStructure([
-            'data'
+            'data',
         ]);
     }
 
@@ -62,21 +62,21 @@ class CustomerTest extends TestCase
         $token = $this->login();
         $authorizationToken = $this->createUserAuthorizationToken();
 
-        # get all customers data
+        // get all customers data
         $response = $this->withToken($token)->postJson('api/v1/admin/customers', array_merge([
-            'authorized_token' => $authorizationToken
+            'authorized_token' => $authorizationToken,
         ], Arr::except($this->getCustomerData(), ['first_name', 'last_name'])));
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The first name field is required. (and 1 more error)",
-                "errors" => [
-                    "first_name" => [
-                        "The first name field is required."
+                'message' => 'The first name field is required. (and 1 more error)',
+                'errors' => [
+                    'first_name' => [
+                        'The first name field is required.',
                     ],
-                    "last_name" => [
-                        "The last name field is required."
-                    ]
-                ]
+                    'last_name' => [
+                        'The last name field is required.',
+                    ],
+                ],
             ]
         );
     }
@@ -91,18 +91,18 @@ class CustomerTest extends TestCase
         $token = $this->login();
         $authorizationToken = $this->createUserAuthorizationToken();
 
-        # get all customers data
+        // get all customers data
         $response = $this->withToken($token)->postJson('api/v1/admin/customers', array_merge([
-            'authorized_token' => $authorizationToken
+            'authorized_token' => $authorizationToken,
         ], Arr::except($this->getCustomerData(), ['email'])));
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The email field is required.",
-                "errors" => [
-                    "email" => [
-                        "The email field is required."
+                'message' => 'The email field is required.',
+                'errors' => [
+                    'email' => [
+                        'The email field is required.',
                     ],
-                ]
+                ],
             ]
         );
     }
@@ -117,18 +117,18 @@ class CustomerTest extends TestCase
         $token = $this->login();
         $authorizationToken = $this->createUserAuthorizationToken();
 
-        # get all customers data
+        // get all customers data
         $response = $this->withToken($token)->postJson('api/v1/admin/customers', array_merge([
-            'authorized_token' => $authorizationToken
+            'authorized_token' => $authorizationToken,
         ], Arr::except($this->getCustomerData(), ['phone_number'])));
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The phone number field is required.",
-                "errors" => [
-                    "phone_number" => [
-                        "The phone number field is required."
+                'message' => 'The phone number field is required.',
+                'errors' => [
+                    'phone_number' => [
+                        'The phone number field is required.',
                     ],
-                ]
+                ],
             ]
         );
     }
@@ -143,18 +143,18 @@ class CustomerTest extends TestCase
         $token = $this->login();
         $authorizationToken = $this->createUserAuthorizationToken();
 
-        # get all customers data
+        // get all customers data
         $response = $this->withToken($token)->postJson('api/v1/admin/customers', array_merge([
-            'authorized_token' => $authorizationToken
+            'authorized_token' => $authorizationToken,
         ], Arr::except($this->getCustomerData(), ['password'])));
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The password field is required.",
-                "errors" => [
-                    "password" => [
-                        "The password field is required."
+                'message' => 'The password field is required.',
+                'errors' => [
+                    'password' => [
+                        'The password field is required.',
                     ],
-                ]
+                ],
             ]
         );
     }
@@ -171,18 +171,18 @@ class CustomerTest extends TestCase
         $customerData = $this->getCustomerData();
         $customerData['role'] = 'Test Role';
 
-        # get all customers data
+        // get all customers data
         $response = $this->withToken($token)->postJson('api/v1/admin/customers', array_merge([
-            'authorized_token' => $authorizationToken
+            'authorized_token' => $authorizationToken,
         ], $customerData));
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The selected role is invalid.",
-                "errors" => [
-                    "role" => [
-                        "The selected role is invalid."
+                'message' => 'The selected role is invalid.',
+                'errors' => [
+                    'role' => [
+                        'The selected role is invalid.',
                     ],
-                ]
+                ],
             ]
         );
     }
@@ -201,13 +201,13 @@ class CustomerTest extends TestCase
         $customerData = $this->getCustomerData();
         $customerData['first_name'] = 'Sarah';
 
-        # create a customer
-        $response = $this->withToken($token)->putJson('api/v1/admin/customers/'. $customer->id,
+        // create a customer
+        $response = $this->withToken($token)->putJson('api/v1/admin/customers/'.$customer->id,
             array_merge([
-                'authorized_token' => $authorizationToken
+                'authorized_token' => $authorizationToken,
             ], $customerData));
         $response->assertStatus(200)->assertJsonStructure([
-            'data'
+            'data',
         ]);
     }
 
@@ -222,22 +222,22 @@ class CustomerTest extends TestCase
         $authorizationToken = $this->createUserAuthorizationToken();
         $customer = $this->createCustomer();
 
-        # get all customers data
-        $response = $this->withToken($token)->putJson('api/v1/admin/customers/'. $customer->id,
+        // get all customers data
+        $response = $this->withToken($token)->putJson('api/v1/admin/customers/'.$customer->id,
             array_merge([
-                'authorized_token' => $authorizationToken
+                'authorized_token' => $authorizationToken,
             ], Arr::except($this->getCustomerData(), ['first_name', 'last_name'])));
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The first name field is required. (and 1 more error)",
-                "errors" => [
-                    "first_name" => [
-                        "The first name field is required."
+                'message' => 'The first name field is required. (and 1 more error)',
+                'errors' => [
+                    'first_name' => [
+                        'The first name field is required.',
                     ],
-                    "last_name" => [
-                        "The last name field is required."
-                    ]
-                ]
+                    'last_name' => [
+                        'The last name field is required.',
+                    ],
+                ],
             ]
         );
     }
@@ -253,19 +253,19 @@ class CustomerTest extends TestCase
         $authorizationToken = $this->createUserAuthorizationToken();
         $customer = $this->createCustomer();
 
-        # get all customers data
-        $response = $this->withToken($token)->putJson('api/v1/admin/customers/'. $customer->id,
+        // get all customers data
+        $response = $this->withToken($token)->putJson('api/v1/admin/customers/'.$customer->id,
             array_merge([
-                'authorized_token' => $authorizationToken
+                'authorized_token' => $authorizationToken,
             ], Arr::except($this->getCustomerData(), ['email'])));
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The email field is required.",
-                "errors" => [
-                    "email" => [
-                        "The email field is required."
+                'message' => 'The email field is required.',
+                'errors' => [
+                    'email' => [
+                        'The email field is required.',
                     ],
-                ]
+                ],
             ]
         );
     }
@@ -281,19 +281,19 @@ class CustomerTest extends TestCase
         $authorizationToken = $this->createUserAuthorizationToken();
         $customer = $this->createCustomer();
 
-        # get all customers data
-        $response = $this->withToken($token)->putJson('api/v1/admin/customers/'. $customer->id,
+        // get all customers data
+        $response = $this->withToken($token)->putJson('api/v1/admin/customers/'.$customer->id,
             array_merge([
-                'authorized_token' => $authorizationToken
+                'authorized_token' => $authorizationToken,
             ], Arr::except($this->getCustomerData(), ['phone_number'])));
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The phone number field is required.",
-                "errors" => [
-                    "phone_number" => [
-                        "The phone number field is required."
+                'message' => 'The phone number field is required.',
+                'errors' => [
+                    'phone_number' => [
+                        'The phone number field is required.',
                     ],
-                ]
+                ],
             ]
         );
     }
@@ -312,19 +312,19 @@ class CustomerTest extends TestCase
         $customerData = $this->getCustomerData();
         $customerData['role'] = 'Test Role';
 
-        # get all customers data
-        $response = $this->withToken($token)->putJson('api/v1/admin/customers/'. $customer->id,
+        // get all customers data
+        $response = $this->withToken($token)->putJson('api/v1/admin/customers/'.$customer->id,
             array_merge([
-                'authorized_token' => $authorizationToken
+                'authorized_token' => $authorizationToken,
             ], $customerData));
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The selected role is invalid.",
-                "errors" => [
-                    "role" => [
-                        "The selected role is invalid."
+                'message' => 'The selected role is invalid.',
+                'errors' => [
+                    'role' => [
+                        'The selected role is invalid.',
                     ],
-                ]
+                ],
             ]
         );
     }
@@ -339,15 +339,15 @@ class CustomerTest extends TestCase
         $token = $this->login();
         $authorizationToken = $this->createUserAuthorizationToken();
 
-        # create customer
+        // create customer
         $customer = $this->createCustomer();
 
-        # get all customers data
-        $response = $this->withToken($token)->getJson('api/v1/admin/customers/'. $customer->id, [
-            'authorized_token' => $authorizationToken
+        // get all customers data
+        $response = $this->withToken($token)->getJson('api/v1/admin/customers/'.$customer->id, [
+            'authorized_token' => $authorizationToken,
         ]);
         $response->assertStatus(200)->assertJsonStructure([
-            'data'
+            'data',
         ]);
     }
 
@@ -361,17 +361,17 @@ class CustomerTest extends TestCase
         $token = $this->login();
         $authorizationToken = $this->createUserAuthorizationToken();
 
-        # create customer
+        // create customer
         $customer = $this->createCustomer();
 
         $wrongId = 1111;
 
-        # get all customers data
-        $response = $this->withToken($token)->getJson('api/v1/admin/customers/'. $wrongId, [
-            'authorized_token' => $authorizationToken
+        // get all customers data
+        $response = $this->withToken($token)->getJson('api/v1/admin/customers/'.$wrongId, [
+            'authorized_token' => $authorizationToken,
         ]);
         $response->assertStatus(400)->assertJsonStructure([
-            'message'
+            'message',
         ]);
     }
 
@@ -385,15 +385,15 @@ class CustomerTest extends TestCase
         $token = $this->login();
         $authorizationToken = $this->createUserAuthorizationToken();
 
-        # create customer
+        // create customer
         $customer = $this->createCustomer();
 
-        # get all customers data
-        $response = $this->withToken($token)->deleteJson('api/v1/admin/customers/'. $customer->id, [
-            'authorized_token' => $authorizationToken
+        // get all customers data
+        $response = $this->withToken($token)->deleteJson('api/v1/admin/customers/'.$customer->id, [
+            'authorized_token' => $authorizationToken,
         ]);
         $response->assertStatus(200)->assertJsonStructure([
-            'data'
+            'data',
         ]);
     }
 
@@ -407,17 +407,17 @@ class CustomerTest extends TestCase
         $token = $this->login();
         $authorizationToken = $this->createUserAuthorizationToken();
 
-        # create customer
+        // create customer
         $customer = $this->createCustomer();
 
         $wrongId = 1111;
 
-        # get all customers data
-        $response = $this->withToken($token)->deleteJson('api/v1/admin/customers/'. $wrongId, [
-            'authorized_token' => $authorizationToken
+        // get all customers data
+        $response = $this->withToken($token)->deleteJson('api/v1/admin/customers/'.$wrongId, [
+            'authorized_token' => $authorizationToken,
         ]);
         $response->assertStatus(400)->assertJsonStructure([
-            'message'
+            'message',
         ]);
     }
 

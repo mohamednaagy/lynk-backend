@@ -23,5 +23,4 @@ class Otpify extends Facade
     {
         return 'otpify';
     }
-
 }

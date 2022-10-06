@@ -32,11 +32,11 @@ class UpdateCustomerRequest extends FormRequest
             'email' => ['required', 'email', 'unique:users,email,'.$this->id],
         ];
 
-        if (!empty($this->role)) {
+        if (! empty($this->role)) {
             $rules['role'] = ['required', 'string', 'exists:roles,name'];
         }
 
-        if (!empty($this->permissions)){
+        if (! empty($this->permissions)) {
             $rules['permissions.*'] = ['required', 'array', 'distinct'];
         }
 
@@ -48,7 +48,6 @@ class UpdateCustomerRequest extends FormRequest
      *
      * @return array
      */
-
     public function messages(): array
     {
         return [

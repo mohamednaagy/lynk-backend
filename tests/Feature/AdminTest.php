@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class AdminTest extends TestCase
 {
@@ -18,10 +18,10 @@ class AdminTest extends TestCase
         $authorizationToken = $this->createUserAuthorizationToken();
 
         $response = $this->withToken($token)->get('/api/v1/admin/admins', [
-            'authorized_token' => $authorizationToken
+            'authorized_token' => $authorizationToken,
         ]);
         $response->assertStatus(200)->assertJsonStructure([
-            'data'
+            'data',
         ]);
     }
 
@@ -42,15 +42,15 @@ class AdminTest extends TestCase
             'password_confirmation' => '12345678',
         ]);
         $response->assertStatus(422)->assertExactJson([
-            "message" => "The first name field is required. (and 1 more error)",
-            "errors" => [
-                "first_name" => [
-                    "The first name field is required."
+            'message' => 'The first name field is required. (and 1 more error)',
+            'errors' => [
+                'first_name' => [
+                    'The first name field is required.',
                 ],
-                "last_name" => [
-                    "The last name field is required."
-                ]
-            ]
+                'last_name' => [
+                    'The last name field is required.',
+                ],
+            ],
         ]);
     }
 
@@ -72,15 +72,15 @@ class AdminTest extends TestCase
             'password_confirmation' => '12345678',
         ]);
         $response->assertStatus(422)->assertExactJson([
-            "message" => "The phone country code field is required when phone number is present. (and 1 more error)",
-            "errors" => [
-                "phone_country_code" => [
-                    "The phone country code field is required when phone number is present."
+            'message' => 'The phone country code field is required when phone number is present. (and 1 more error)',
+            'errors' => [
+                'phone_country_code' => [
+                    'The phone country code field is required when phone number is present.',
                 ],
-                "phone_number" => [
-                    "customers::validation.phone"
-                ]
-            ]
+                'phone_number' => [
+                    'customers::validation.phone',
+                ],
+            ],
         ]);
     }
 
@@ -102,12 +102,12 @@ class AdminTest extends TestCase
             'password_confirmation' => '12345678',
         ]);
         $response->assertStatus(422)->assertExactJson([
-            "message" => "The phone number field is required.",
-            "errors" => [
-                "phone_number" => [
-                    "The phone number field is required."
-                ]
-            ]
+            'message' => 'The phone number field is required.',
+            'errors' => [
+                'phone_number' => [
+                    'The phone number field is required.',
+                ],
+            ],
         ]);
     }
 
@@ -129,12 +129,12 @@ class AdminTest extends TestCase
             'password_confirmation' => '12345678',
         ]);
         $response->assertStatus(422)->assertExactJson([
-            "message" => "The email field is required.",
-            "errors" => [
-                "email" => [
-                    "The email field is required."
-                ]
-            ]
+            'message' => 'The email field is required.',
+            'errors' => [
+                'email' => [
+                    'The email field is required.',
+                ],
+            ],
         ]);
     }
 
@@ -155,15 +155,15 @@ class AdminTest extends TestCase
             'email' => 'aa@aa.aa',
         ]);
         $response->assertStatus(422)->assertExactJson([
-            "message" => "The password field is required. (and 1 more error)",
-            "errors" => [
-                "password" => [
-                    "The password field is required."
+            'message' => 'The password field is required. (and 1 more error)',
+            'errors' => [
+                'password' => [
+                    'The password field is required.',
                 ],
-                "password_confirmation" => [
-                    "The password confirmation field is required."
-                ]
-            ]
+                'password_confirmation' => [
+                    'The password confirmation field is required.',
+                ],
+            ],
         ]);
     }
 
@@ -186,7 +186,7 @@ class AdminTest extends TestCase
             'password_confirmation' => '12345678',
         ]);
         $response->assertStatus(200)->assertExactJson([
-            "data" => [],
+            'data' => [],
         ]);
     }
 
@@ -199,7 +199,7 @@ class AdminTest extends TestCase
         $authorizationToken = $this->createUserAuthorizationToken();
         $authUserId = auth()->user()->getAuthIdentifier();
 
-        $response = $this->withToken($token)->putJson('/api/v1/admin/admins/' . $authUserId, [
+        $response = $this->withToken($token)->putJson('/api/v1/admin/admins/'.$authUserId, [
             'authorized_token' => $authorizationToken,
             'phone_country_code' => 'BE',
             'phone_number' => '012345678',
@@ -208,15 +208,15 @@ class AdminTest extends TestCase
             'password_confirmation' => '12345678',
         ]);
         $response->assertStatus(422)->assertExactJson([
-            "message" => "The first name field is required. (and 1 more error)",
-            "errors" => [
-                "first_name" => [
-                    "The first name field is required."
+            'message' => 'The first name field is required. (and 1 more error)',
+            'errors' => [
+                'first_name' => [
+                    'The first name field is required.',
                 ],
-                "last_name" => [
-                    "The last name field is required."
-                ]
-            ]
+                'last_name' => [
+                    'The last name field is required.',
+                ],
+            ],
         ]);
     }
 
@@ -229,7 +229,7 @@ class AdminTest extends TestCase
         $authorizationToken = $this->createUserAuthorizationToken();
         $authUserId = auth()->user()->getAuthIdentifier();
 
-        $response = $this->withToken($token)->putJson('/api/v1/admin/admins/' . $authUserId, [
+        $response = $this->withToken($token)->putJson('/api/v1/admin/admins/'.$authUserId, [
             'authorized_token' => $authorizationToken,
             'first_name' => 'first_name',
             'last_name' => 'last_name',
@@ -239,15 +239,15 @@ class AdminTest extends TestCase
             'password_confirmation' => '12345678',
         ]);
         $response->assertStatus(422)->assertExactJson([
-            "message" => "The phone country code field is required when phone number is present. (and 1 more error)",
-            "errors" => [
-                "phone_country_code" => [
-                    "The phone country code field is required when phone number is present."
+            'message' => 'The phone country code field is required when phone number is present. (and 1 more error)',
+            'errors' => [
+                'phone_country_code' => [
+                    'The phone country code field is required when phone number is present.',
                 ],
-                "phone_number" => [
-                    "customers::validation.phone"
-                ]
-            ]
+                'phone_number' => [
+                    'customers::validation.phone',
+                ],
+            ],
         ]);
     }
 
@@ -260,7 +260,7 @@ class AdminTest extends TestCase
         $authorizationToken = $this->createUserAuthorizationToken();
         $authUserId = auth()->user()->getAuthIdentifier();
 
-        $response = $this->withToken($token)->putJson('/api/v1/admin/admins/' . $authUserId, [
+        $response = $this->withToken($token)->putJson('/api/v1/admin/admins/'.$authUserId, [
             'authorized_token' => $authorizationToken,
             'first_name' => 'first_name',
             'last_name' => 'last_name',
@@ -270,12 +270,12 @@ class AdminTest extends TestCase
             'password_confirmation' => '12345678',
         ]);
         $response->assertStatus(422)->assertExactJson([
-            "message" => "The phone number field is required.",
-            "errors" => [
-                "phone_number" => [
-                    "The phone number field is required."
-                ]
-            ]
+            'message' => 'The phone number field is required.',
+            'errors' => [
+                'phone_number' => [
+                    'The phone number field is required.',
+                ],
+            ],
         ]);
     }
 
@@ -288,7 +288,7 @@ class AdminTest extends TestCase
         $authorizationToken = $this->createUserAuthorizationToken();
         $authUserId = auth()->user()->getAuthIdentifier();
 
-        $response = $this->withToken($token)->putJson('/api/v1/admin/admins/' . $authUserId, [
+        $response = $this->withToken($token)->putJson('/api/v1/admin/admins/'.$authUserId, [
             'authorized_token' => $authorizationToken,
             'first_name' => 'first_name',
             'last_name' => 'last_name',
@@ -298,12 +298,12 @@ class AdminTest extends TestCase
             'password_confirmation' => '12345678',
         ]);
         $response->assertStatus(422)->assertExactJson([
-            "message" => "The email field is required.",
-            "errors" => [
-                "email" => [
-                    "The email field is required."
-                ]
-            ]
+            'message' => 'The email field is required.',
+            'errors' => [
+                'email' => [
+                    'The email field is required.',
+                ],
+            ],
         ]);
     }
 
@@ -316,17 +316,17 @@ class AdminTest extends TestCase
         $authorizationToken = $this->createUserAuthorizationToken();
         $authUserId = auth()->user()->getAuthIdentifier();
 
-        $response = $this->withToken($token)->putJson('/api/v1/admin/admins/' . $authUserId, [
+        $response = $this->withToken($token)->putJson('/api/v1/admin/admins/'.$authUserId, [
             'authorized_token' => $authorizationToken,
             'first_name' => 'first_name',
             'last_name' => 'last_name',
             'phone_country_code' => 'BE',
             'phone_number' => '012345678',
-            'email' => 'aaa@aaa.aaa'
+            'email' => 'aaa@aaa.aaa',
         ]);
 
         $response->assertStatus(200)->assertExactJson([
-            "data" => [],
+            'data' => [],
         ]);
     }
 
@@ -341,12 +341,12 @@ class AdminTest extends TestCase
         $authorizationToken = $this->createUserAuthorizationToken();
         $authUserId = auth()->user()->getAuthIdentifier();
 
-        # get all customers data
-        $response = $this->withToken($token)->deleteJson('api/v1/admin/admins/' . $authUserId, [
-            'authorized_token' => $authorizationToken
+        // get all customers data
+        $response = $this->withToken($token)->deleteJson('api/v1/admin/admins/'.$authUserId, [
+            'authorized_token' => $authorizationToken,
         ]);
         $response->assertStatus(200)->assertJsonStructure([
-            'data'
+            'data',
         ]);
     }
 
@@ -362,12 +362,12 @@ class AdminTest extends TestCase
 
         $wrongId = 1111;
 
-        # get all customers data
-        $response = $this->withToken($token)->deleteJson('api/v1/admin/admins/' . $wrongId, [
-            'authorized_token' => $authorizationToken
+        // get all customers data
+        $response = $this->withToken($token)->deleteJson('api/v1/admin/admins/'.$wrongId, [
+            'authorized_token' => $authorizationToken,
         ]);
         $response->assertStatus(400)->assertJsonStructure([
-            'message'
+            'message',
         ]);
     }
 }

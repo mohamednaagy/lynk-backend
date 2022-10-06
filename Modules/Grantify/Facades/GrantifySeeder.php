@@ -2,14 +2,13 @@
 
 namespace Modules\Grantify\Facades;
 
-use RuntimeException;
 use Illuminate\Support\Facades\Facade;
+use RuntimeException;
 
 /**
  * @method static seedRoles()
  * @method static seedPermissions(bool $withSync = false)
  */
-
 class GrantifySeeder extends Facade
 {
     /**
@@ -23,5 +22,4 @@ class GrantifySeeder extends Facade
     {
         return 'grantifySeeder';
     }
-
 }

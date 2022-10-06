@@ -7,9 +7,9 @@ use App\Models\User;
 interface UpdateCustomerWithRoleAndPermission
 {
     /**
-     * @param UpdateUser $updateUser
-     * @param SyncRoleToUser $syncRoleToUser
-     * @param SyncPermissionToUser $syncPermissionToUser
+     * @param  UpdateUser  $updateUser
+     * @param  SyncRoleToUser  $syncRoleToUser
+     * @param  SyncPermissionToUser  $syncPermissionToUser
      */
     public function __construct(
         UpdateUser $updateUser,
@@ -19,8 +19,9 @@ interface UpdateCustomerWithRoleAndPermission
 
     /**
      * Create new user.
-     * @param array $data
-     * @param User $user
+     *
+     * @param  array  $data
+     * @param  User  $user
      * @return void
      */
     public function handle(array $data, User $user): void;

@@ -4,17 +4,17 @@ namespace Modules\Otpify\Drivers;
 
 use Closure;
 use Illuminate\Http\Request;
+use Modules\Otpify\Contracts\Otpifiable;
+use Modules\Otpify\Contracts\OtpifyDriverInterface;
+use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
+use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
+use Modules\Otpify\Exceptions\OtpCodeExpiredException;
+use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
+use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
 use Modules\Otpify\Exceptions\OtpifiableNotEqualAuthUserException;
 use Modules\Otpify\Models\OtpifyCode;
-use Modules\Otpify\Contracts\Otpifiable;
-use Modules\Otpify\Traits\CanOtpifyCode;
-use Modules\Otpify\Contracts\OtpifyDriverInterface;
 use Modules\Otpify\Notifications\OtpifyCodeMessage;
-use Modules\Otpify\Exceptions\OtpCodeExpiredException;
-use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
-use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
-use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
-use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
+use Modules\Otpify\Traits\CanOtpifyCode;
 
 class EmailDriver implements OtpifyDriverInterface
 {
@@ -23,9 +23,9 @@ class EmailDriver implements OtpifyDriverInterface
     /**
      * Execute the driver logic.
      *
-     * @param Request $request
-     * @param Otpifiable $otpifiable
-     * @param array $data
+     * @param  Request  $request
+     * @param  Otpifiable  $otpifiable
+     * @param  array  $data
      * @return OtpifyCode
      */
     public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
@@ -34,6 +34,7 @@ class EmailDriver implements OtpifyDriverInterface
         $otpifiableId = $request->get('otpifiable_id') ?? auth()->user()->getAuthIdentifier();
         $otpifyCode = $this->createOtpifyCode($code, $otpifiableId, $data);
         $otpifiable->notify(new OtpifyCodeMessage($code, $otpifyCode->expiration_date));
+
         return $otpifyCode;
     }
 
@@ -45,11 +46,12 @@ class EmailDriver implements OtpifyDriverInterface
     /**
      * Execute the driver logic.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @param $vid
      * @param $code
-     * @param Closure|null $additionalCheckCallback
+     * @param  Closure|null  $additionalCheckCallback
      * @return bool
+     *
      * @throws OtpCodeAlreadyUsedException
      * @throws OtpCodeAdditionalCheckException
      * @throws OtpCodeExpiredException

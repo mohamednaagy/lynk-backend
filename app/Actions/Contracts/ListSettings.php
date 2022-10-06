@@ -6,7 +6,8 @@ interface ListSettings
 {
     /**
      * UpdateSettingsAction constructor.
-     * @param GetSettingsClassInstance $getSettingsClassInstance
+     *
+     * @param  GetSettingsClassInstance  $getSettingsClassInstance
      */
     public function __construct(GetSettingsClassInstance $getSettingsClassInstance);
 

@@ -17,6 +17,6 @@ return [
     'otp_code' => 'Your OTP Code is :code',
     'verify_here' => 'Verify Here',
     'expire_at' => 'The code will expire in :time minutes',
-    'ignore_message' => 'If you have not tried to login, ignore this message.'
+    'ignore_message' => 'If you have not tried to login, ignore this message.',
 
 ];

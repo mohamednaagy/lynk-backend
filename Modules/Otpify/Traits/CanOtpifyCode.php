@@ -4,46 +4,47 @@ namespace Modules\Otpify\Traits;
 
 use App\Models\User;
 use Closure;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
+use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
+use Modules\Otpify\Exceptions\OtpCodeExpiredException;
+use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
+use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
 use Modules\Otpify\Exceptions\OtpifiableNotEqualAuthUserException;
 use Modules\Otpify\Facades\Otpify;
 use Modules\Otpify\Models\OtpifyCode;
-use Modules\Otpify\Exceptions\OtpCodeExpiredException;
-use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
-use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
-use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
-use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
 
 trait CanOtpifyCode
 {
     /**
      * @param $code
-     * @param int $otpifiableId
-     * @param array $data
+     * @param  int  $otpifiableId
+     * @param  array  $data
      * @return OtpifyCode
      */
     public function createOtpifyCode($code, int $otpifiableId, array $data = []): OtpifyCode
     {
         return OtpifyCode::create([
-            'id' => (string)Str::uuid(),
+            'id' => (string) Str::uuid(),
             'initiator_id' => auth()->user()->getAuthIdentifier(),
             'initiator_type' => (new User())->getMorphClass(),
             'otpifiable_id' => $otpifiableId,
             'otpifiable_type' => (new User())->getMorphClass(),
             'otp_code' => Hash::make($code),
             'expiration_date' => now()->addMinutes(config('otpify.code_expiration_time')),
-            'data' => $data
+            'data' => $data,
         ]);
     }
 
     /**
-     * @param OtpifyCode $otpifyCode
-     * @param Request $request
+     * @param  OtpifyCode  $otpifyCode
+     * @param  Request  $request
      * @param $code
-     * @param Closure|null $additionalCheckCallback
+     * @param  Closure|null  $additionalCheckCallback
      * @return void
+     *
      * @throws OtpCodeAdditionalCheckException
      * @throws OtpCodeAlreadyUsedException
      * @throws OtpCodeExpiredException
@@ -56,30 +57,37 @@ trait CanOtpifyCode
             throw new OtpifiableNotEqualAuthUserException();
         }
 
-        if (!Hash::check($code, $otpifyCode->otp_code))
+        if (! Hash::check($code, $otpifyCode->otp_code)) {
             throw new OtpCodeIncorrectException();
+        }
 
-        if ($otpifyCode->expired_at != null)
+        if ($otpifyCode->expired_at != null) {
             throw new OtpCodeAlreadyUsedException();
+        }
 
-        if ($this->isCodeExpired($otpifyCode->expiration_date))
+        if ($this->isCodeExpired($otpifyCode->expiration_date)) {
             throw new OtpCodeExpiredException();
+        }
 
-        if ($additionalCheckCallback)
-            if (!$additionalCheckCallback($request, $code))
+        if ($additionalCheckCallback) {
+            if (! $additionalCheckCallback($request, $code)) {
                 throw new OtpCodeAdditionalCheckException();
+            }
+        }
     }
 
     /**
      * @param $vid
      * @return OtpifyCode
+     *
      * @throws OtpCodeNotFoundException
      */
     public function getOtpifyCode($vid): OtpifyCode
     {
         $otpifyCode = OtpifyCode::where('id', $vid)->first();
-        if (!$otpifyCode)
+        if (! $otpifyCode) {
             throw new OtpCodeNotFoundException();
+        }
 
         return $otpifyCode;
     }
@@ -94,7 +102,7 @@ trait CanOtpifyCode
     }
 
     /**
-     * @param OtpifyCode $otpifyCode
+     * @param  OtpifyCode  $otpifyCode
      * @return void
      */
     public function setOtpExpiredAt(OtpifyCode $otpifyCode): void

@@ -3,11 +3,11 @@
 namespace Modules\Grantify\Facades;
 
 use App\Models\User;
-use RuntimeException;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Facade;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Facade;
+use RuntimeException;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 /**
  * @method static assignRoleToModel($user, string|array|Role $role)
@@ -31,5 +31,4 @@ class Grantify extends Facade
     {
         return 'grantify';
     }
-
 }

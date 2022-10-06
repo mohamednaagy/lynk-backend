@@ -5,15 +5,15 @@ namespace Tests;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Models\User;
-use Illuminate\Support\Str;
-use Modules\Otpify\Facades\Otpify;
-use Illuminate\Support\Facades\Hash;
-use Modules\Otpify\Models\OtpifyCode;
-use Modules\Grantify\Facades\Grantify;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Modules\Grantify\Facades\Grantify;
+use Modules\Otpify\Facades\Otpify;
+use Modules\Otpify\Models\OtpifyCode;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -36,10 +36,10 @@ abstract class TestCase extends BaseTestCase
         $passwordEncrypted = bcrypt('12345678');
         $source = 'admin';
 
-        # create user
+        // create user
         $user = User::factory()->create([
             'email' => $email,
-            'password' => $passwordEncrypted
+            'password' => $passwordEncrypted,
         ]);
 
         Grantify::assignRoleToModel($user, $role);
@@ -48,15 +48,15 @@ abstract class TestCase extends BaseTestCase
             $this->actingAs($user);
         }
 
-        # login user
+        // login user
         $loginResponse = $this->postJson('api/auth/login', [
             'email' => $email,
             'password' => $passwordPlainText,
-            'source' => $source
+            'source' => $source,
         ]);
 
         $loginResponse->assertStatus(200)->assertJsonStructure([
-            "token"
+            'token',
         ]);
 
         return $loginResponse->getOriginalContent()['token'];
@@ -65,14 +65,14 @@ abstract class TestCase extends BaseTestCase
     protected function createOtpifyCode(int $code, int $otpifiableId, array $data = []): Builder|Model
     {
         return OtpifyCode::query()->create([
-            'id' => (string)Str::uuid(),
+            'id' => (string) Str::uuid(),
             'initiator_id' => auth()->user()->getAuthIdentifier(),
             'initiator_type' => (new User())->getMorphClass(),
             'otpifiable_id' => $otpifiableId,
             'otpifiable_type' => (new User())->getMorphClass(),
             'otp_code' => Hash::make($code),
             'expiration_date' => now()->addMinutes(config('otpify.code_expiration_time')),
-            'data' => $data
+            'data' => $data,
         ]);
     }
 
@@ -80,7 +80,7 @@ abstract class TestCase extends BaseTestCase
     {
         return Otpify::generateAuthorizationToken([
             'user_id' => auth()->user()->id,
-            'area' => Area::SuperAdmin
+            'area' => Area::SuperAdmin,
         ]);
     }
 }

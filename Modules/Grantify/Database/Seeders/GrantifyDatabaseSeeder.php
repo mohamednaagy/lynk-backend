@@ -2,10 +2,10 @@
 
 namespace Modules\Grantify\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Permission\PermissionRegistrar;
+use Illuminate\Database\Seeder;
 use Modules\Grantify\Facades\GrantifySeeder;
+use Spatie\Permission\PermissionRegistrar;
 
 class GrantifyDatabaseSeeder extends Seeder
 {

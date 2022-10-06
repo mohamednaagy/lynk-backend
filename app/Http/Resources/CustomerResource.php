@@ -19,8 +19,8 @@ class CustomerResource extends JsonResource
                 'first_name' => $this->first_name,
                 'last_name' => $this->last_name,
                 'phone_number' => $this->phone_number,
-                'created_at' => $this->created_at->format('Y-m-d H:i:s')
-            ]
+                'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            ],
         ];
     }
 }

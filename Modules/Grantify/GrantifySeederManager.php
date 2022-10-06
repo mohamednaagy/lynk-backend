@@ -2,9 +2,9 @@
 
 namespace Modules\Grantify;
 
-use Illuminate\Support\Manager;
 use App\Enums\Area;
 use App\Enums\Role as EnumsRole;
+use Illuminate\Support\Manager;
 use Modules\Grantify\Support\RoleUtil;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -38,7 +38,7 @@ class GrantifySeederManager extends Manager
     /**
      * Seed All Permissions into DB
      *
-     * @param bool $withSync
+     * @param  bool  $withSync
      * @return void
      */
     public function seedPermissions(bool $withSync = false): void
@@ -55,7 +55,7 @@ class GrantifySeederManager extends Manager
                 $permissions = RoleUtil::getPermissionsForRole($roleName);
                 foreach ($permissions as $subject => $actions) {
                     foreach ($actions as $action) {
-                        $permissionName = $area . '-' . $subject . '.' . $action;
+                        $permissionName = $area.'-'.$subject.'.'.$action;
                         $allPermissions[] = $permissionName;
                         foreach (config('grantify.guards') as $guard) {
                             $permission = Permission::findOrCreate($permissionName, $guard);
@@ -83,5 +83,4 @@ class GrantifySeederManager extends Manager
             }
         }
     }
-
 }

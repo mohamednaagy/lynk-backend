@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class LoginTest extends TestCase
 {
@@ -19,18 +19,18 @@ class LoginTest extends TestCase
         $response = $this->postJson('api/auth/login');
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The email field is required. (and 2 more errors)",
-                "errors" => [
-                    "email" => [
-                        "The email field is required."
+                'message' => 'The email field is required. (and 2 more errors)',
+                'errors' => [
+                    'email' => [
+                        'The email field is required.',
                     ],
-                    "password" => [
-                        "The password field is required."
+                    'password' => [
+                        'The password field is required.',
                     ],
-                    "source" => [
-                        "The source field is required."
-                    ]
-                ]
+                    'source' => [
+                        'The source field is required.',
+                    ],
+                ],
             ]
         );
     }
@@ -44,15 +44,15 @@ class LoginTest extends TestCase
         $response = $this->postJson('api/auth/login', ['email' => 'a@a.a']);
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The password field is required. (and 1 more error)",
-                "errors" => [
-                    "password" => [
-                        "The password field is required."
+                'message' => 'The password field is required. (and 1 more error)',
+                'errors' => [
+                    'password' => [
+                        'The password field is required.',
                     ],
-                    "source" => [
-                        "The source field is required."
-                    ]
-                ]
+                    'source' => [
+                        'The source field is required.',
+                    ],
+                ],
             ]
         );
     }
@@ -66,15 +66,15 @@ class LoginTest extends TestCase
         $response = $this->postJson('api/auth/login', ['password' => '12345678']);
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The email field is required. (and 1 more error)",
-                "errors" => [
-                    "email" => [
-                        "The email field is required."
+                'message' => 'The email field is required. (and 1 more error)',
+                'errors' => [
+                    'email' => [
+                        'The email field is required.',
                     ],
-                    "source" => [
-                        "The source field is required."
-                    ]
-                ]
+                    'source' => [
+                        'The source field is required.',
+                    ],
+                ],
             ]
         );
     }
@@ -88,15 +88,15 @@ class LoginTest extends TestCase
         $response = $this->postJson('api/auth/login', ['source' => 'admin']);
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The email field is required. (and 1 more error)",
-                "errors" => [
-                    "email" => [
-                        "The email field is required."
+                'message' => 'The email field is required. (and 1 more error)',
+                'errors' => [
+                    'email' => [
+                        'The email field is required.',
                     ],
-                    "password" => [
-                        "The password field is required."
+                    'password' => [
+                        'The password field is required.',
                     ],
-                ]
+                ],
             ]
         );
     }
@@ -109,16 +109,16 @@ class LoginTest extends TestCase
     {
         $response = $this->postJson('api/auth/login', [
             'password' => '12345678',
-            'source' => 'admin'
+            'source' => 'admin',
         ]);
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The email field is required.",
-                "errors" => [
-                    "email" => [
-                        "The email field is required."
-                    ]
-                ]
+                'message' => 'The email field is required.',
+                'errors' => [
+                    'email' => [
+                        'The email field is required.',
+                    ],
+                ],
             ]
         );
     }
@@ -131,16 +131,16 @@ class LoginTest extends TestCase
     {
         $response = $this->postJson('api/auth/login', [
             'email' => 'a@a.aa',
-            'source' => 'admin'
+            'source' => 'admin',
         ]);
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The password field is required.",
-                "errors" => [
-                    "password" => [
-                        "The password field is required."
-                    ]
-                ]
+                'message' => 'The password field is required.',
+                'errors' => [
+                    'password' => [
+                        'The password field is required.',
+                    ],
+                ],
             ]
         );
     }
@@ -153,16 +153,16 @@ class LoginTest extends TestCase
     {
         $response = $this->postJson('api/auth/login', [
             'email' => 'a@a.aa',
-            'password' => '12345678'
+            'password' => '12345678',
         ]);
         $response->assertStatus(422)->assertExactJson(
             [
-                "message" => "The source field is required.",
-                "errors" => [
-                    "source" => [
-                        "The source field is required."
-                    ]
-                ]
+                'message' => 'The source field is required.',
+                'errors' => [
+                    'source' => [
+                        'The source field is required.',
+                    ],
+                ],
             ]
         );
     }
@@ -176,15 +176,15 @@ class LoginTest extends TestCase
         $response = $this->postJson('api/auth/login', [
             'email' => 'a@a.aa',
             'password' => '12345678',
-            'source' => 'admin'
+            'source' => 'admin',
         ]);
         $response->assertStatus(422)->assertExactJson([
-            "message" => "These credentials do not match our records.",
-            "errors" => [
-                "email" => [
-                    "These credentials do not match our records."
-                ]
-            ]
+            'message' => 'These credentials do not match our records.',
+            'errors' => [
+                'email' => [
+                    'These credentials do not match our records.',
+                ],
+            ],
         ]);
     }
 
@@ -201,17 +201,17 @@ class LoginTest extends TestCase
 
         User::factory()->create([
             'email' => $email,
-            'password' => $passwordEncrypted
+            'password' => $passwordEncrypted,
         ]);
 
         $response = $this->postJson('api/auth/login', [
             'email' => $email,
             'password' => $passwordPlainText,
-            'source' => $source
+            'source' => $source,
         ]);
 
         $response->assertStatus(200)->assertExactJson([
-            "token" => $response->getOriginalContent()['token']
+            'token' => $response->getOriginalContent()['token'],
         ]);
     }
 }

@@ -3,31 +3,32 @@
 namespace Modules\Otpify\Drivers;
 
 use Closure;
-use Modules\Otpify\Exceptions\OtpifiableNotEqualAuthUserException;
-use Twilio\Rest\Client;
-use Twilio\Http\CurlClient;
 use Illuminate\Http\Request;
-use Modules\Otpify\Models\OtpifyCode;
-use Twilio\Exceptions\TwilioException;
-use Modules\Otpify\Traits\CanOtpifyCode;
 use Modules\Otpify\Contracts\Otpifiable;
-use Twilio\Exceptions\ConfigurationException;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
-use Modules\Otpify\Exceptions\OtpCodeExpiredException;
-use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
-use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
-use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
 use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
+use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
+use Modules\Otpify\Exceptions\OtpCodeExpiredException;
+use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
+use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
+use Modules\Otpify\Exceptions\OtpifiableNotEqualAuthUserException;
+use Modules\Otpify\Models\OtpifyCode;
+use Modules\Otpify\Traits\CanOtpifyCode;
+use Twilio\Exceptions\ConfigurationException;
+use Twilio\Exceptions\TwilioException;
+use Twilio\Http\CurlClient;
+use Twilio\Rest\Client;
 
 class TwilioSmsDriver implements OtpifyDriverInterface
 {
     use CanOtpifyCode;
 
     /**
-     * @param Request $request
-     * @param Otpifiable $otpifiable
-     * @param array $data
+     * @param  Request  $request
+     * @param  Otpifiable  $otpifiable
+     * @param  array  $data
      * @return OtpifyCode
+     *
      * @throws ConfigurationException
      * @throws TwilioException
      */
@@ -47,13 +48,13 @@ class TwilioSmsDriver implements OtpifyDriverInterface
         $client = new Client($accountSid, $authToken);
         $curlOptions = [
             CURLOPT_SSL_VERIFYHOST => config('otpify.drivers.twilio.ssl_verify_host'),
-            CURLOPT_SSL_VERIFYPEER => config('otpify.drivers.twilio.ssl_verify_peer')
+            CURLOPT_SSL_VERIFYPEER => config('otpify.drivers.twilio.ssl_verify_peer'),
         ];
 
         $client->setHttpClient(new CurlClient($curlOptions));
         $client->messages->create($receiverNumber, [
             'from' => $twilioNumber,
-            'body' => $message
+            'body' => $message,
         ]);
 
         return $otpifyCode;
@@ -62,8 +63,8 @@ class TwilioSmsDriver implements OtpifyDriverInterface
     /**
      * Execute the driver logic.
      *
-     * @param Request $request
-     * @param Otpifiable $otpifiable
+     * @param  Request  $request
+     * @param  Otpifiable  $otpifiable
      * @return bool
      */
     public function doesRequireVerifyingByOtp(Request $request, Otpifiable $otpifiable): bool
@@ -72,11 +73,12 @@ class TwilioSmsDriver implements OtpifyDriverInterface
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      * @param $vid
      * @param $code
-     * @param Closure|null $additionalCheckCallback
+     * @param  Closure|null  $additionalCheckCallback
      * @return bool
+     *
      * @throws OtpCodeAlreadyUsedException
      * @throws OtpCodeAdditionalCheckException
      * @throws OtpCodeExpiredException

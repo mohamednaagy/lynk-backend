@@ -2,13 +2,12 @@
 
 namespace Modules\Otpify;
 
-use Exception;
 use Illuminate\Support\Manager;
-use Modules\Otpify\Drivers\EmailDriver;
-use Modules\Otpify\Traits\CanBeAuthorized;
-use Modules\Otpify\Drivers\TwilioSmsDriver;
 use Illuminate\Validation\ValidationException;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
+use Modules\Otpify\Drivers\EmailDriver;
+use Modules\Otpify\Drivers\TwilioSmsDriver;
+use Modules\Otpify\Traits\CanBeAuthorized;
 
 class OtpifyManager extends Manager
 {
@@ -55,8 +54,9 @@ class OtpifyManager extends Manager
     }
 
     /**
-     * @param array $data
+     * @param  array  $data
      * @return string
+     *
      * @throws \Illuminate\Validation\ValidationException
      */
     public function generateAuthorizationToken(array $data): string
@@ -68,15 +68,15 @@ class OtpifyManager extends Manager
 
             $authorizationToken = $this->createAuthorizationToken($data);
 
-            return $authorizationToken->id . '|' . $plainTextToken;
+            return $authorizationToken->id.'|'.$plainTextToken;
         } catch (ValidationException $exception) {
             return $this->generateAuthorizationToken($data);
         }
     }
 
     /**
-     * @param string $token
-     * @param string $area
+     * @param  string  $token
+     * @param  string  $area
      * @return bool
      */
     public function verifyAuthorizationToken(string $token, string $area): bool

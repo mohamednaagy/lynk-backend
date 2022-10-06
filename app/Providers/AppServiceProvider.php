@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,22 +26,22 @@ class AppServiceProvider extends ServiceProvider
     {
         Response::macro('successResponse', function (
             array $data = [],
-            int   $statusCode = \Symfony\Component\HttpFoundation\Response::HTTP_OK) {
+            int $statusCode = \Symfony\Component\HttpFoundation\Response::HTTP_OK) {
             return response()->json([
-                'data' => $data
+                'data' => $data,
             ], $statusCode);
         });
 
         Response::macro('errorResponse', function (
             string $message = 'something went wrong',
-            int    $statusCode = \Symfony\Component\HttpFoundation\Response::HTTP_BAD_REQUEST,
-            int    $code = null
+            int $statusCode = \Symfony\Component\HttpFoundation\Response::HTTP_BAD_REQUEST,
+            int $code = null
         ) {
             $response = [
                 'message' => $message,
             ];
 
-            if (!is_null($code)) {
+            if (! is_null($code)) {
                 $response = array_merge($response, ['code' => $code]);
             }
 

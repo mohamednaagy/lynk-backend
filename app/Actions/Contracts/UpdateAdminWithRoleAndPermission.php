@@ -7,16 +7,17 @@ use App\Models\User;
 interface UpdateAdminWithRoleAndPermission
 {
     /**
-     * @param UpdateUser $updateUser
-     * @param SyncRoleToUser $syncRoleToUser
-     * @param SyncPermissionToUser $syncPermissionToUser
+     * @param  UpdateUser  $updateUser
+     * @param  SyncRoleToUser  $syncRoleToUser
+     * @param  SyncPermissionToUser  $syncPermissionToUser
      */
     public function __construct(UpdateUser $updateUser, SyncRoleToUser $syncRoleToUser, SyncPermissionToUser $syncPermissionToUser);
 
     /**
      * Create new user.
-     * @param array $data
-     * @param User $user
+     *
+     * @param  array  $data
+     * @param  User  $user
      * @return void
      */
     public function handle(array $data, User $user): void;

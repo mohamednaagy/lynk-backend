@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Enums\Area;
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class OtpifyTest extends TestCase
 {
@@ -19,17 +19,16 @@ class OtpifyTest extends TestCase
     {
         $token = $this->login();
 
-        # get auth user data
+        // get auth user data
         $getOtpCodeResponse = $this->withToken($token)->postJson('api/generate-otp');
         $getOtpCodeResponse->assertStatus(422)->assertJson([
-            "message" => "The area field is required.",
-            "errors" => [
-                "area" => [
-                    "The area field is required."
-                ]
-            ]
+            'message' => 'The area field is required.',
+            'errors' => [
+                'area' => [
+                    'The area field is required.',
+                ],
+            ],
         ]);
-
     }
 
     /**
@@ -41,17 +40,16 @@ class OtpifyTest extends TestCase
     {
         $token = $this->login();
 
-        # get auth user data
+        // get auth user data
         $getOtpCodeResponse = $this->withToken($token)->postJson('api/generate-otp', ['area' => 'test']);
         $getOtpCodeResponse->assertStatus(422)->assertJson([
-            "message" => "The selected area is invalid.",
-            "errors" => [
-                "area" => [
-                    "The selected area is invalid."
-                ]
-            ]
+            'message' => 'The selected area is invalid.',
+            'errors' => [
+                'area' => [
+                    'The selected area is invalid.',
+                ],
+            ],
         ]);
-
     }
 
     // TODO test twilio configuration
@@ -59,10 +57,10 @@ class OtpifyTest extends TestCase
     {
         $token = $this->login();
 
-        # get auth user data
+        // get auth user data
         $getOtpCodeResponse = $this->withToken($token)->postJson('api/generate-otp', ['area' => Area::Customer]);
         $getOtpCodeResponse->assertStatus(400)->assertJsonStructure([
-            'message'
+            'message',
         ]);
     }
 
@@ -70,10 +68,10 @@ class OtpifyTest extends TestCase
     {
         $token = $this->login();
 
-        # get auth user data
+        // get auth user data
         $getOtpCodeResponse = $this->withToken($token)->postJson('api/generate-otp', ['area' => Area::General]);
         $getOtpCodeResponse->assertStatus(200)->assertJsonStructure([
-            'data'
+            'data',
         ]);
     }
 
@@ -81,7 +79,7 @@ class OtpifyTest extends TestCase
     {
         $token = $this->login();
 
-        # create otp code
+        // create otp code
         $code = 1000;
         $otpifyCode = $this->createOtpifyCode($code, auth()->user()->getAuthIdentifier());
 
@@ -92,7 +90,7 @@ class OtpifyTest extends TestCase
         ]);
 
         $getOtpCodeResponse->assertStatus(200)->assertJsonStructure([
-            'data'
+            'data',
         ]);
     }
 
@@ -100,7 +98,7 @@ class OtpifyTest extends TestCase
     {
         $token = $this->login();
 
-        # create otp code
+        // create otp code
         $code = 1000;
         $otpifyCode = $this->createOtpifyCode($code, auth()->user()->getAuthIdentifier());
 
@@ -111,7 +109,7 @@ class OtpifyTest extends TestCase
         ]);
 
         $getOtpCodeResponse->assertStatus(401)->assertJsonStructure([
-            'message'
+            'message',
         ]);
     }
 
@@ -119,7 +117,7 @@ class OtpifyTest extends TestCase
     {
         $token = $this->login();
 
-        # create otp code
+        // create otp code
         $code = 1000;
         $otpifyCode = $this->createOtpifyCode($code, auth()->user()->getAuthIdentifier());
 
@@ -132,7 +130,7 @@ class OtpifyTest extends TestCase
         ]);
 
         $getOtpCodeResponse->assertStatus(401)->assertJsonStructure([
-            'message'
+            'message',
         ]);
     }
 
@@ -140,7 +138,7 @@ class OtpifyTest extends TestCase
     {
         $token = $this->login();
 
-        # create otp code
+        // create otp code
         $code = 1000;
         $otpifyCode = $this->createOtpifyCode($code, auth()->user()->getAuthIdentifier());
 
@@ -153,7 +151,7 @@ class OtpifyTest extends TestCase
         ]);
 
         $getOtpCodeResponse->assertStatus(401)->assertJsonStructure([
-            'message'
+            'message',
         ]);
     }
 }

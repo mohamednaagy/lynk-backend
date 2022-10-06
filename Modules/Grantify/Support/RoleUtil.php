@@ -14,14 +14,13 @@ class RoleUtil
     ];
 
     /**
-     * @param string $roleName
+     * @param  string  $roleName
      * @return array
      */
     public static function getPermissionsForRole(string $roleName): array
     {
         $role = self::$roleMap[$roleName];
 
-       return $role::$basePermissions;
+        return $role::$basePermissions;
     }
-
 }

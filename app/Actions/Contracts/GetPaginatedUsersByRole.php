@@ -7,7 +7,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 interface GetPaginatedUsersByRole
 {
     /**
-     * @param string $role
+     * @param  string  $role
      * @return LengthAwarePaginator
      */
     public function handle(string $role): LengthAwarePaginator;

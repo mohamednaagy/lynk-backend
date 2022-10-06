@@ -2,21 +2,21 @@
 
 namespace Modules\Otpify\Http\Controllers;
 
-use App\Enums\ErrorCode;
-use Illuminate\Http\JsonResponse;
-use Modules\Otpify\Facades\Otpify;
-use App\Http\Controllers\Controller;
-use Twilio\Exceptions\TwilioException;
-use Twilio\Exceptions\ConfigurationException;
-use Symfony\Component\HttpFoundation\Response;
-use Modules\Otpify\Http\Requests\OtpifyRequest;
 use App\Actions\Contracts\GetSettingsClassInstance;
-use Modules\Otpify\Exceptions\OtpCodeExpiredException;
-use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
-use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
-use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
+use App\Enums\ErrorCode;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
+use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
+use Modules\Otpify\Exceptions\OtpCodeExpiredException;
+use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
+use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
 use Modules\Otpify\Exceptions\OtpifiableNotEqualAuthUserException;
+use Modules\Otpify\Facades\Otpify;
+use Modules\Otpify\Http\Requests\OtpifyRequest;
+use Symfony\Component\HttpFoundation\Response;
+use Twilio\Exceptions\ConfigurationException;
+use Twilio\Exceptions\TwilioException;
 
 class OtpifyController extends Controller
 {
@@ -25,7 +25,7 @@ class OtpifyController extends Controller
     }
 
     /**
-     * @param OtpifyRequest $otpifyRequest
+     * @param  OtpifyRequest  $otpifyRequest
      * @return JsonResponse
      */
     public function generateOtp(
@@ -37,7 +37,7 @@ class OtpifyController extends Controller
 
             return $this->successResponse([
                 'message' => trans('response.otp_generated_successfully'),
-                'vid' => $otpCode->id
+                'vid' => $otpCode->id,
             ]);
         } catch (ConfigurationException | TwilioException) {
             return $this->errorResponse(
@@ -48,7 +48,7 @@ class OtpifyController extends Controller
     }
 
     /**
-     * @param OtpifyRequest $otpifyRequest
+     * @param  OtpifyRequest  $otpifyRequest
      * @return JsonResponse
      */
     public function verifyOtpCode(OtpifyRequest $otpifyRequest): JsonResponse
@@ -60,6 +60,7 @@ class OtpifyController extends Controller
 
         try {
             $valid = Otpify::driver($setting->otp_driver)->verify($otpifyRequest, $data['vid'], $data['code']);
+
             return $this->successResponse([]);
         } catch (OtpifiableNotEqualAuthUserException) {
             $message = trans('response.otpifiable_not_equal_auth_user');

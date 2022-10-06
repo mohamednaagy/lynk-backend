@@ -2,24 +2,25 @@
 
 namespace App\Http\Controllers\Api\V1\Admins\Customers;
 
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
-use App\Enums\Role;
-use App\Http\Controllers\Controller;
-use App\Http\Resources\CustomerResource;
-use App\Http\Requests\StoreCustomerRequest;
-use App\Http\Requests\UpdateCustomerRequest;
+use App\Actions\Contracts\CreateCustomerWithRoleAndPermission;
 use App\Actions\Contracts\FindUserByIdAndRole;
 use App\Actions\Contracts\GetPaginatedUsersByRole;
-use Illuminate\Http\Resources\Json\ResourceCollection;
-use App\Actions\Contracts\CreateCustomerWithRoleAndPermission;
 use App\Actions\Contracts\UpdateCustomerWithRoleAndPermission;
+use App\Enums\Role;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreCustomerRequest;
+use App\Http\Requests\UpdateCustomerRequest;
+use App\Http\Resources\CustomerResource;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
 {
     /**
      * Display a listing of the resource.
-     * @param GetPaginatedUsersByRole $getPaginatedUsersByRole
+     *
+     * @param  GetPaginatedUsersByRole  $getPaginatedUsersByRole
      * @return ResourceCollection
      */
     public function index(GetPaginatedUsersByRole $getPaginatedUsersByRole): ResourceCollection
@@ -31,31 +32,33 @@ class CustomerController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * @param StoreCustomerRequest $storeCustomerRequest
-     * @param CreateCustomerWithRoleAndPermission $createCustomerWithRoleAndPermission
+     *
+     * @param  StoreCustomerRequest  $storeCustomerRequest
+     * @param  CreateCustomerWithRoleAndPermission  $createCustomerWithRoleAndPermission
      * @return JsonResponse
      */
     public function store(
         StoreCustomerRequest $storeCustomerRequest,
         CreateCustomerWithRoleAndPermission $createCustomerWithRoleAndPermission
-    ): JsonResponse
-    {
-        return DB::transaction(function () use($storeCustomerRequest, $createCustomerWithRoleAndPermission) {
+    ): JsonResponse {
+        return DB::transaction(function () use ($storeCustomerRequest, $createCustomerWithRoleAndPermission) {
             $createCustomerWithRoleAndPermission->handle($storeCustomerRequest->validated());
+
             return $this->successResponse();
         });
     }
 
     /**
      * Show the specified resource.
-     * @param int $id
-     * @param FindUserByIdAndRole $findUserByIdAndRole
+     *
+     * @param  int  $id
+     * @param  FindUserByIdAndRole  $findUserByIdAndRole
      * @return CustomerResource|JsonResponse
      */
     public function show(int $id, FindUserByIdAndRole $findUserByIdAndRole): CustomerResource|JsonResponse
     {
         $customer = $findUserByIdAndRole->handle($id, Role::Customer);
-        if (!$customer) {
+        if (! $customer) {
             return $this->errorResponse();
         }
 
@@ -64,10 +67,11 @@ class CustomerController extends Controller
 
     /**
      * Update the specified resource in storage.
-     * @param UpdateCustomerRequest $updateCustomerRequest
-     * @param int $id
-     * @param UpdateCustomerWithRoleAndPermission $updateCustomerWithRoleAndPermission
-     * @param FindUserByIdAndRole $findUserByIdAndRole
+     *
+     * @param  UpdateCustomerRequest  $updateCustomerRequest
+     * @param  int  $id
+     * @param  UpdateCustomerWithRoleAndPermission  $updateCustomerWithRoleAndPermission
+     * @param  FindUserByIdAndRole  $findUserByIdAndRole
      * @return JsonResponse
      */
     public function update(
@@ -75,29 +79,30 @@ class CustomerController extends Controller
         int $id,
         UpdateCustomerWithRoleAndPermission $updateCustomerWithRoleAndPermission,
         FindUserByIdAndRole $findUserByIdAndRole
-    ): JsonResponse
-    {
-        return DB::transaction(function () use($updateCustomerRequest, $id, $updateCustomerWithRoleAndPermission, $findUserByIdAndRole) {
+    ): JsonResponse {
+        return DB::transaction(function () use ($updateCustomerRequest, $id, $updateCustomerWithRoleAndPermission, $findUserByIdAndRole) {
             $customer = $findUserByIdAndRole->handle($id, Role::Customer);
-            if (!$customer) {
-                return $this->errorResponse("not found");
+            if (! $customer) {
+                return $this->errorResponse('not found');
             }
 
             $updateCustomerWithRoleAndPermission->handle($updateCustomerRequest->validated(), $customer);
+
             return $this->successResponse();
         });
     }
 
     /**
      * Remove the specified resource from storage.
-     * @param int $id
-     * @param FindUserByIdAndRole $findUserByIdAndRole
+     *
+     * @param  int  $id
+     * @param  FindUserByIdAndRole  $findUserByIdAndRole
      * @return JsonResponse
      */
     public function destroy(int $id, FindUserByIdAndRole $findUserByIdAndRole): JsonResponse
     {
         $customer = $findUserByIdAndRole->handle($id, Role::Customer);
-        if (!$customer) {
+        if (! $customer) {
             return $this->errorResponse();
         }
 

@@ -2,8 +2,8 @@
 
 namespace Modules\Otpify\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property mixed $expiration_date
@@ -24,7 +24,7 @@ class OtpifyCode extends Model
         'otp_code',
         'expiration_date',
         'expired_at',
-        'data'
+        'data',
     ];
 
     /**

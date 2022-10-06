@@ -7,7 +7,7 @@ use App\Models\User;
 interface CreateUser
 {
     /**
-     * @param array $data
+     * @param  array  $data
      * @return User
      */
     public function handle(array $data): User;

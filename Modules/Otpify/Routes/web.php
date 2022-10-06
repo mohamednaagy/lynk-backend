@@ -11,6 +11,6 @@
 |
 */
 
-Route::prefix('otpify')->group(function() {
+Route::prefix('otpify')->group(function () {
     Route::get('/', 'OtpifyController@index');
 });

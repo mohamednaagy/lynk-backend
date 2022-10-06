@@ -14,8 +14,12 @@ use BenSampo\Enum\Enum;
 final class Action extends Enum
 {
     const Index = 'Index';
+
     const Create = 'Create';
+
     const Show = 'Show';
+
     const Edit = 'Edit';
+
     const Delete = 'Delete';
 }

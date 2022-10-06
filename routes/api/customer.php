@@ -2,8 +2,8 @@
 
 use App\Enums\Area;
 use App\Enums\Role;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Customers\RegisterController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,8 +18,8 @@ use App\Http\Controllers\Api\V1\Customers\RegisterController;
 
 Route::post('/register', RegisterController::class);
 
-Route::middleware(['auth:api', 'role:' . Role::Customer])->prefix('v1/customer')->group(function () {
-    Route::middleware(['checkAreaOtp:' . Area::Customer])->group(function () {
+Route::middleware(['auth:api', 'role:'.Role::Customer])->prefix('v1/customer')->group(function () {
+    Route::middleware(['checkAreaOtp:'.Area::Customer])->group(function () {
         // add the customer apis here
     });
 });

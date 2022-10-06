@@ -1,11 +1,12 @@
 <?php
+
 namespace Modules\Grantify\Traits;
 
-use Spatie\Permission\Models\Role;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Permission\Models\Permission;
-use Modules\Grantify\Exceptions\RoleNotFoundException;
 use Modules\Grantify\Exceptions\PermissionNotFoundException;
+use Modules\Grantify\Exceptions\RoleNotFoundException;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 trait CanGrantify
 {
@@ -19,7 +20,7 @@ trait CanGrantify
             ->where(['name' => $roleName, 'guard_name' => $guardName])
             ->first();
 
-        if (!$role) {
+        if (! $role) {
             throw new RoleNotFoundException();
         }
 
@@ -36,7 +37,7 @@ trait CanGrantify
             ->where(['name' => $permissionName, 'guard_name' => $guardName])
             ->first();
 
-        if (!$permission) {
+        if (! $permission) {
             throw new PermissionNotFoundException();
         }
 
