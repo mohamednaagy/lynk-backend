@@ -46,10 +46,13 @@ trait CanBeAuthorized
     private function verifyToken(string $token, string $area): bool
     {
         $token = explode('|', $token);
-        return AuthorizationToken::query()->where([
-            ['id', '=', $token[0]],
-            ['token', '=', hash('sha265', $token[1])],
-            ['area', '=', $area],
-        ])->exists();
+
+        return AuthorizationToken::query()
+            ->where([
+                ['id', '=', $token[0]],
+                ['token', '=', hash('sha265', $token[1])],
+                ['area', '=', $area],
+            ])
+            ->exists();
     }
 }

@@ -57,16 +57,19 @@ class OtpifyManager extends Manager
     /**
      * @param array $data
      * @return string
-     * @throws ValidationException
+     * @throws \Illuminate\Validation\ValidationException
      */
     public function generateAuthorizationToken(array $data): string
     {
         try {
-            $token = $this->generateRandomToken();
-            $data['token'] = hash('sha256', $token);
+            $plainTextToken = $this->generateRandomToken();
+
+            $data['token'] = hash('sha256', $plainTextToken);
+
             $authorizationToken = $this->createAuthorizationToken($data);
-            return $authorizationToken->id . '|' . $token;
-        } catch (Exception $exception) {
+
+            return $authorizationToken->id . '|' . $plainTextToken;
+        } catch (ValidationException $exception) {
             return $this->generateAuthorizationToken($data);
         }
     }

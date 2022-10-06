@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'OTP_generated_successfully' => 'otp generated successfully',
+    'otp_generated_successfully' => 'otp generated successfully',
     'something_went_wrong' => 'something went wrong, try again later',
     'otp_already_used' => 'otp already used',
     'otp_code_additional_check_error' => 'otp code additional check error',

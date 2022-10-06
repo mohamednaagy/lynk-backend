@@ -32,7 +32,7 @@ class GrantifyManager extends Manager
         $area = $area . '-';
         $guardName = $guardName ?? config('grantify.default_guard');
 
-        return Permission::query()->where('name', 'LIKE', $area .'%')
+        return Permission::query()->where('name', 'LIKE', $area . '%')
             ->where('guard_name', $guardName)
             ->get();
     }
@@ -77,19 +77,11 @@ class GrantifyManager extends Manager
 
         foreach ($permissions as $permission) {
             $subjectAction = explode('.', $permission->name ?? $permission);
-            $exits = false;
-            foreach ($permissionsInSubjectAction as $key => $permissionItem) {
-                if (in_array($subjectAction[0], $permissionItem)) {
-                    $permissionsInSubjectAction[$key]['action'][] = $subjectAction[1];
-                    $exits = true;
-                    break;
-                }
-            }
-            if (!$exits) {
-                $index = count($permissionsInSubjectAction);
-                $permissionsInSubjectAction[$index]['subject'] = $subjectAction[0];
-                $permissionsInSubjectAction[$index]['action'][] = $subjectAction[1];
-            }
+
+            $permissionsInSubjectAction[] = [
+                'subject' => $subjectAction[0],
+                'action' => $subjectAction[1]
+            ];
         }
 
         return $permissionsInSubjectAction;
@@ -155,8 +147,7 @@ class GrantifyManager extends Manager
     {
         if (is_string($permission)) {
             $permission = $this->findPermission($permission, $guardName);
-        }
-        else if (is_array($permission)) {
+        } else if (is_array($permission)) {
             $permission = $this->transformSubjectActionToPermissionName($permission);
         }
 
@@ -221,11 +212,10 @@ class GrantifyManager extends Manager
         string $subject,
         array $actions,
         bool $forMiddleware = true
-    ): string|array
-    {
+    ): string|array {
         $permissionChain = '';
 
-        foreach ($actions as $key => $action){
+        foreach ($actions as $key => $action) {
             $permission = $area . '-' . $subject . '.' . $action;
             $permissionChain .= $permission;
 
@@ -252,7 +242,7 @@ class GrantifyManager extends Manager
         $permissionsList = [];
 
         foreach ($permissions as $key => $permission) {
-            $permissionName = $permission['subject'].'.';
+            $permissionName = $permission['subject'] . '.';
 
             foreach ($permission['action'] as $action) {
                 $permissionsList[] = $permissionName . $action;
@@ -261,5 +251,4 @@ class GrantifyManager extends Manager
 
         return $permissionsList;
     }
-
 }

@@ -2,7 +2,7 @@
 
 namespace Modules\Otpify\Http\Controllers;
 
-use App\ResponseCodes\Codes;
+use App\Enums\ErrorCode;
 use Illuminate\Http\JsonResponse;
 use Modules\Otpify\Facades\Otpify;
 use App\Http\Controllers\Controller;
@@ -30,20 +30,20 @@ class OtpifyController extends Controller
      */
     public function generateOtp(
         OtpifyRequest $otpifyRequest
-    ): JsonResponse
-    {
+    ): JsonResponse {
         try {
             $setting = $this->getSettingsClassInstance->handle($otpifyRequest->validated('area'));
             $otpCode = Otpify::driver($setting->otp_driver)->send($otpifyRequest, $otpifyRequest->user());
 
             return $this->successResponse([
-                'message' => trans('response.OTP_generated_successfully'),
+                'message' => trans('response.otp_generated_successfully'),
                 'vid' => $otpCode->id
             ]);
-        } catch (ConfigurationException|TwilioException) {
-            return $this->errorResponse(trans('response.something_went_wrong'), code: Codes::OTPIFY_DRIVERS_CONFIGURATION);
-        } catch (\Exception $exception) {
-            return $this->errorResponse($exception->getMessage(), code: Codes::GENERAL_CODE);
+        } catch (ConfigurationException | TwilioException) {
+            return $this->errorResponse(
+                message: trans('response.something_went_wrong'),
+                code: ErrorCode::OTPIFY_DRIVERS_CONFIGURATION
+            );
         }
     }
 
@@ -63,19 +63,19 @@ class OtpifyController extends Controller
             return $this->successResponse([]);
         } catch (OtpifiableNotEqualAuthUserException) {
             $message = trans('response.otpifiable_not_equal_auth_user');
-            $code = Codes::OTPIFY_WRONG_USER;
+            $code = ErrorCode::OTPIFY_WRONG_USER;
         } catch (OtpCodeAlreadyUsedException) {
             $message = trans('response.otp_already_used');
-            $code = Codes::OTPIFY_ALREADY_USED;
+            $code = ErrorCode::OTPIFY_ALREADY_USED;
         } catch (OtpCodeAdditionalCheckException) {
             $message = trans('response.otp_code_additional_check_error');
-            $code = Codes::OTPIFY_ADDITIONAL_CHECK;
+            $code = ErrorCode::OTPIFY_ADDITIONAL_CHECK;
         } catch (OtpCodeExpiredException) {
             $message = trans('response.otp_code_expired');
-            $code = Codes::OTPIFY_EXPIRED;
-        } catch (OtpCodeIncorrectException|OtpCodeNotFoundException) {
+            $code = ErrorCode::OTPIFY_EXPIRED;
+        } catch (OtpCodeIncorrectException | OtpCodeNotFoundException) {
             $message = trans('response.otp_code_invalid');
-            $code = Codes::OTPIFY_INVALID;
+            $code = ErrorCode::OTPIFY_INVALID;
         }
 
         return $this->errorResponse($message, Response::HTTP_UNAUTHORIZED, $code);

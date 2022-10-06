@@ -24,7 +24,7 @@ use App\Http\Controllers\Api\V1\Admins\Customers\CustomerController;
 */
 
 Route::middleware(['auth:sanctum', 'role:' . Role::Admin])->prefix('v1/admin')->group(function () {
-    Route::middleware(['CheckAreaOtp:' . Area::SuperAdmin])->group(function () {
+    Route::middleware(['checkAreaOtp:' . Area::SuperAdmin])->group(function () {
         Route::apiResource('admins', AdminController::class)->except(['show'])->parameters(['admins' => 'id']);
         Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
 

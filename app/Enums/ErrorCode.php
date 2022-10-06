@@ -1,8 +1,8 @@
 <?php
 
-namespace App\ResponseCodes;
+namespace App\Enums;
 
-class Codes
+class ErrorCode
 {
     public const GENERAL_CODE = 0000;
     public const OTPIFY_WRONG_USER = 1001;
