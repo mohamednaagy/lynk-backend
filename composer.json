@@ -45,6 +45,7 @@
         }
     },
     "scripts": {
+        "cghooks": "vendor/bin/cghooks",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
@@ -66,7 +67,8 @@
         "hooks": {
             "pre-commit": [
                 "echo committing as $(git config user.name)",
-                "./vendor/bin/pint"
+                "./vendor/bin/pint $(git diff --name-only --cached --diff-filter=ACMR)",
+                "git add $(git diff --name-only --cached --diff-filter=ACMR)"
             ]
         }
     },
