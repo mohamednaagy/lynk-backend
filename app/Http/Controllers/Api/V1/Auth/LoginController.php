@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Api\Auth;
+namespace App\Http\Controllers\Api\V1\Auth;
 
+use App\Actions\Contracts\LoginUser;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -18,7 +20,7 @@ class LoginController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function authenticate(Request $request)
+    public function authenticate(Request $request, LoginUser $loginUser)
     {
         $requestData = $request->validate([
             'email' => ['required', 'string', 'email'],
@@ -34,16 +36,9 @@ class LoginController extends Controller
             ]);
         }
 
-        $responseData = [];
-
-        if (EnsureFrontendRequestsAreStateful::fromFrontend($request)) {
-            Auth::login($user);
-            $request->session()->regenerate();
-        } else {
-            $responseData['token'] = $user->createToken($requestData['source'])->plainTextToken;
-        }
-
-        return response()->json($responseData);
+        return $this->successResponse(
+            $loginUser->handle($user, $request->input('source'), $request)
+        );
     }
 
     /**
@@ -62,6 +57,6 @@ class LoginController extends Controller
             $request->user()->currentAccessToken()->delete();
         }
 
-        return response()->json([], 204);
+        return $this->successResponse(statusCode: Response::HTTP_NO_CONTENT);
     }
 }

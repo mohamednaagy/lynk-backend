@@ -1,7 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\Auth\GetAuthUser;
-use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Api\V1\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,8 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('/auth/login', [LoginController::class, 'authenticate']);
-Route::middleware('auth:sanctum')->group(function () {
+Route::post('v1/auth/login', [LoginController::class, 'authenticate']);
+Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::post('/auth/logout', [LoginController::class, 'logout']);
-    Route::get('/auth', GetAuthUser::class);
 });

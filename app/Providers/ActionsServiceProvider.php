@@ -14,6 +14,7 @@ use App\Actions\Contracts\GetPaginatedUsersByRole;
 use App\Actions\Contracts\GetSettingsArea;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Actions\Contracts\ListSettings;
+use App\Actions\Contracts\LoginUser;
 use App\Actions\Contracts\SyncPermissionToUser;
 use App\Actions\Contracts\SyncRoleToUser;
 use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
@@ -28,6 +29,7 @@ use App\Actions\GetPaginatedUsersByRoleAction;
 use App\Actions\GetSettingsAreaAction;
 use App\Actions\GetSettingsClassInstanceAction;
 use App\Actions\ListSettingsAction;
+use App\Actions\LoginUserAction;
 use App\Actions\SyncPermissionToUserAction;
 use App\Actions\SyncRoleToUserAction;
 use App\Actions\UpdateAdminWithRoleAndPermissionAction;
@@ -39,6 +41,8 @@ use Illuminate\Support\ServiceProvider;
 class ActionsServiceProvider extends ServiceProvider
 {
     public array $bindings = [
+        LoginUser::class => LoginUserAction::class,
+
         CreateUser::class => CreateUserAction::class,
         AssignRoleToUser::class => AssignRoleToUserAction::class,
         AssignPermissionToUser::class => AssignPermissionToUserAction::class,

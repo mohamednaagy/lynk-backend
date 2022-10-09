@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Actions\Contracts\CreateUser;
 use App\Models\User;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 
 class CreateUserAction implements CreateUser
@@ -17,6 +18,13 @@ class CreateUserAction implements CreateUser
         $data['password'] = Hash::make($data['password']);
         $data['phone_number'] = phone($data['phone_number'], $data['phone_country_code']);
 
-        return User::create($data);
+        return User::create(
+            Arr::only(
+                $data,
+                [
+                    'first_name', 'last_name', 'phone_number', 'email', 'password',
+                ]
+            )
+        );
     }
 }

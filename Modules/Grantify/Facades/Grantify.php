@@ -11,6 +11,7 @@ use Spatie\Permission\Models\Role;
 
 /**
  * @method static assignRoleToModel($user, string|array|Role $role)
+ * @method static getPermissionByArea(string $area, string $guardName = null)
  * @method static syncRoleToModel(User $user, string|array|Role $role)
  * @method static syncPermissionToModel(User $user, array $permissions)
  * @method static transformSubjectActionToPermissionName(array[] $permission)

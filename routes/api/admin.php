@@ -5,6 +5,7 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Api\V1\Admins\AdminController;
+use App\Http\Controllers\Api\V1\Admins\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admins\Customers\CustomerController;
 use App\Http\Controllers\Api\V1\Admins\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admins\Roles\GetAllRoles;
@@ -24,24 +25,26 @@ use Modules\Grantify\Facades\Grantify;
 */
 
 Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->group(function () {
-    Route::middleware(['checkAreaOtp:'.Area::SuperAdmin])->group(function () {
-        Route::apiResource('admins', AdminController::class)->except(['show'])->parameters(['admins' => 'id']);
-        Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
+    Route::get('auth', GetAuthUser::class);
 
-        Route::get('/roles', GetAllRoles::class)->middleware('permission:'.
+    Route::apiResource('admins', AdminController::class)->except(['show'])->parameters(['admins' => 'id']);
+    Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
+
+    Route::get('/roles', GetAllRoles::class)->middleware(
+        'permission:'.
             Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Roles, [
                 Action::Index,
             ])
-        );
-        Route::get('/permissions', GetAllPermissions::class)->middleware('permission:'.
+    );
+    Route::get('/permissions', GetAllPermissions::class)->middleware(
+        'permission:'.
             Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Permissions, [
                 Action::Index,
             ])
-        );
+    );
 
-        Route::prefix('settings')->group(function () {
-            Route::get('/', [SettingsController::class, 'index']);
-            Route::put('/update', [SettingsController::class, 'update']);
-        });
+    Route::prefix('settings')->group(function () {
+        Route::get('/', [SettingsController::class, 'index']);
+        Route::put('/update', [SettingsController::class, 'update']);
     });
 });
