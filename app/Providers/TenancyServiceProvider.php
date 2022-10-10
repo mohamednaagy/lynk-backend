@@ -104,14 +104,15 @@ class TenancyServiceProvider extends ServiceProvider
 
     public function register()
     {
-        BelongsToTenant::$tenantIdColumn = 'company_id';
-        InitializeTenancyByRequestData::$header = 'X-Company';
-        InitializeTenancyByRequestData::$queryParameter = 'company';
-
+        //
     }
 
     public function boot()
     {
+        BelongsToTenant::$tenantIdColumn = 'company_id';
+        InitializeTenancyByRequestData::$header = 'X-Company';
+        InitializeTenancyByRequestData::$queryParameter = 'company';
+
         $this->bootEvents();
         $this->mapRoutes();
 
