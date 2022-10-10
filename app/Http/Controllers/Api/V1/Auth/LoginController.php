@@ -28,7 +28,10 @@ class LoginController extends Controller
             'source' => ['required', 'string'],
         ]);
 
-        $user = User::where('email', $requestData['email'])->first();
+        $user = User::where([
+            'email' => $requestData['email'],
+            'company_id' => $requestData['company_id']
+        ])->first();
 
         if ($user === null || ! Hash::check($requestData['password'], $user->password)) {
             throw ValidationException::withMessages([
