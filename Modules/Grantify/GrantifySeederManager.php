@@ -53,6 +53,14 @@ class GrantifySeederManager extends Manager
                     $allRoles[] = $role;
                 }
                 $permissions = RoleUtil::getPermissionsForRole($roleName);
+
+                // If the permissions are only only star "*",
+                // then that means this role has all permissions of their area which
+                // which will be handled by the Gate::before in the AuthServiceProvider
+                if ($permissions === '*') {
+                    continue;
+                }
+
                 foreach ($permissions as $subject => $actions) {
                     foreach ($actions as $action) {
                         $permissionName = $area.'-'.$subject.'.'.$action;

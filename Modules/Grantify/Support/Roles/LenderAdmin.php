@@ -2,7 +2,7 @@
 
 namespace Modules\Grantify\Support\Roles;
 
-class Admin
+class LenderAdmin
 {
     public static string $basePermissions = '*';
 }
