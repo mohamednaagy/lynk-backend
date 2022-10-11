@@ -14,11 +14,16 @@ final class Area extends Enum
 
     const Customer = 'Customer';
 
+    const Lender = 'Lender';
+
     public static function getRolesPerAreaMap(): array
     {
         return [
             self::SuperAdmin => [
                 Role::Admin,
+            ],
+            self::Lender => [
+                Role::LenderAdmin,
             ],
         ];
     }

@@ -11,6 +11,7 @@ class RoleUtil
     public static array $roleMap = [
         Role::Admin => Admin::class,
         Role::Customer => Customer::class,
+        Role::LenderAdmin => Customer::class,
     ];
 
     /**
