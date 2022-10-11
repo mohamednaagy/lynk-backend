@@ -21,11 +21,11 @@ class RegisterRequest extends FormRequest
         return [
             'first_name' => ['required', 'min:3', 'string', 'max:100'],
             'last_name' => ['required', 'min:3', 'string', 'max:100'],
-            'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
-            'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'confirmed', 'min:8'],
             'password_confirmation' => ['required', 'string', 'min:8'],
+            'company_name' => ['required', 'string', 'min:3'],
+            'company_cr' => ['required', 'string', 'min:1'],
             'source' => ['required', 'string'],
         ];
     }

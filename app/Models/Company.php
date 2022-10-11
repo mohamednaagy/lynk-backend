@@ -12,6 +12,14 @@ class Company extends BaseTenant
     use HasFactory, HasScopedValidationRules;
 
     protected $table = 'companies';
-    
+
     public $incrementing = true;
+
+    public static function getCustomColumns(): array
+    {
+        return [
+            'id',
+            'name',
+        ];
+    }
 }
