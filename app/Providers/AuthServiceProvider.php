@@ -27,6 +27,10 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Gate::before(function ($user, $ability) {
+            // TODO: need to map the role to the request path.
+            // For example: /api/v1/admin => Role::Admin
+            // For example: /api/v1/lender => Role::LenderAdmin
+
             /** @var \App\Models\User $user */
             return $user->hasRole([Role::Admin, Role::LenderAdmin]) ? true : null;
         });
