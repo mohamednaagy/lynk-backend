@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Enums\Role;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -24,6 +26,13 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        Gate::before(function ($user, $ability) {
+            // TODO: need to map the role to the request path.
+            // For example: /api/v1/admin => Role::Admin
+            // For example: /api/v1/lender => Role::LenderAdmin
+
+            /** @var \App\Models\User $user */
+            return $user->hasRole([Role::Admin, Role::LenderAdmin]) ? true : null;
+        });
     }
 }
