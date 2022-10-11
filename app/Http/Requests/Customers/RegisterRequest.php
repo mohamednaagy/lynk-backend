@@ -25,6 +25,7 @@ class RegisterRequest extends FormRequest
             'password' => ['required', 'confirmed', 'min:8'],
             'password_confirmation' => ['required', 'string', 'min:8'],
             'company_name' => ['required', 'string', 'min:3'],
+            'company_unique_name' => ['required', 'string', 'unique:companies,unique_name', 'min:3', 'regex:/(^[a-zA-Z]+[a-zA-Z0-9\\-\\_]*$)/u'],
             'company_cr' => ['required', 'string', 'min:1'],
             'source' => ['required', 'string'],
         ];

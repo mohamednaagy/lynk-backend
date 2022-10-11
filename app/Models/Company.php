@@ -20,6 +20,8 @@ class Company extends BaseTenant
         return [
             'id',
             'name',
+            'unique_name',
+            'company_cr'
         ];
     }
 }

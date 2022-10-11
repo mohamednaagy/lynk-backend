@@ -23,6 +23,7 @@ class RegisterController extends Controller
         $company = Company::create(
             [
                 'name' => $validated->company_name,
+                'unique_name' => $validated->company_unique_name,
                 'company_cr' => $validated->company_cr
             ]
         );
