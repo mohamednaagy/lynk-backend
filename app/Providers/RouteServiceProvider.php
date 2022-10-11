@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Enums\Role;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -34,6 +35,7 @@ class RouteServiceProvider extends ServiceProvider
                 ->group(base_path('routes/api/auth.php'));
 
             Route::middleware('api')
+                ->middleware('role:'.Role::Admin)
                 ->prefix('api')
                 ->group(base_path('routes/api/admin.php'));
 
