@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Actions\Contracts\LoginUser;
 use App\Http\Controllers\Controller;
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -27,6 +28,8 @@ class LoginController extends Controller
             'password' => ['required', 'string'],
             'source' => ['required', 'string'],
         ]);
+        $company = Company::where('name', $request->company_name)->first();
+        tenancy()->initialize($company->id);
 
         $user = User::where([
             'email' => $requestData['email'],
