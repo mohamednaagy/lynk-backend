@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use App\Enums\FinancingOrderStatus;
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -21,6 +22,7 @@ class FinancingOrder extends Model implements HasMedia
         'national_id',
         'amount',
         'selling_price',
+        'status'
     ];
 
     public function registerMediaCollections(): void
@@ -47,5 +49,12 @@ class FinancingOrder extends Model implements HasMedia
     public function getContractAttribute()
     {
         return $this->getFirstMediaUrl('contract');
+    }
+
+    public function getStatusAttribute($value)
+    {
+        $status = FinancingOrderStatus::fromValue((int)$value);
+
+        return $status->description;
     }
 }

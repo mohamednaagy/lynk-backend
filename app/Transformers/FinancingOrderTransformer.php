@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Transformers;
 
 use App\Models\FinancingOrder;
@@ -7,10 +6,11 @@ use League\Fractal\TransformerAbstract;
 
 class FinancingOrderTransformer extends TransformerAbstract
 {
-        public function transform(FinancingOrder $financingOrder)
+    public function transform(FinancingOrder $financingOrder)
     {
         return [
             'id' => $financingOrder->id,
+            'status' => $financingOrder->status,
             'company_id' => $financingOrder->company_id,
             'reference_number' => $financingOrder->reference_number,
             'national_id' => $financingOrder->national_id,
