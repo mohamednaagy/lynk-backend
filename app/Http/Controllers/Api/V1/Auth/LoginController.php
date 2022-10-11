@@ -22,7 +22,7 @@ class LoginController extends Controller
      */
     public function authenticate(Request $request, LoginUser $loginUser)
     {
-        $requestData = $request->validate([
+        $requestData = $request->validate(['company_name' => ['nullable', 'string', 'exists:companies,name'],
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
             'source' => ['required', 'string'],
@@ -32,7 +32,7 @@ class LoginController extends Controller
             'email' => $requestData['email'],
         ])->first();
 
-        if ($user === null || ! Hash::check($requestData['password'], $user->password)) {
+        if ($user === null || !Hash::check($requestData['password'], $user->password)) {
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);
