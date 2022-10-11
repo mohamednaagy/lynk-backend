@@ -34,11 +34,10 @@ class RouteServiceProvider extends ServiceProvider
                 ->prefix('api')
                 ->group(base_path('routes/api/auth.php'));
 
-
             Route::middleware('api')
                 ->middleware(InitializeTenancyByRequestData::class)
                 ->prefix('api')
-                ->group(base_path('routes/api/company.php'));
+                ->group(base_path('routes/api/lender.php'));
 
             Route::middleware('api')
                 ->prefix('api')

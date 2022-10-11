@@ -12,5 +12,6 @@ class Company extends BaseTenant
     use HasFactory, HasScopedValidationRules;
 
     protected $table = 'companies';
+    
     public $incrementing = true;
 }

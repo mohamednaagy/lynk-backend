@@ -21,7 +21,8 @@ return new class extends Migration
                 ->after('remember_token')
                 ->constrained()
                 ->cascadeOnDelete();
-            $table->dropUnique('users_email_unique');
+                
+            $table->dropUnique(['email']);
             $table->unique(['email', (new Company())->getForeignKey()]);
         });
     }
@@ -36,7 +37,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeignIdFor(Company::class);
             $table->unique('email');
-            $table->dropUnique('users_email_company_id_unique');
+            $table->dropUnique(['email', (new Company())->getForeignKey()]);
         });
     }
 };
