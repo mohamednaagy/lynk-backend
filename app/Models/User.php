@@ -15,13 +15,15 @@ use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Models\AuthorizationToken;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Spatie\Permission\Traits\HasRoles;
+use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 /**
  * @method static create(array $data)
  */
 class User extends Authenticatable implements Otpifiable, Grantifiable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, BelongsToTenant;
+
 
     /**
      * The attributes that are mass assignable.

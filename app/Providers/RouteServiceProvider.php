@@ -7,6 +7,7 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -32,6 +33,11 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('api')
                 ->prefix('api')
                 ->group(base_path('routes/api/auth.php'));
+
+            Route::middleware('api')
+                ->middleware(InitializeTenancyByRequestData::class)
+                ->prefix('api')
+                ->group(base_path('routes/api/lender.php'));
 
             Route::middleware('api')
                 ->prefix('api')
