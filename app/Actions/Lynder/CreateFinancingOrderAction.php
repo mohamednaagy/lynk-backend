@@ -1,9 +1,9 @@
 <?php
-namespace App\Actions\Lynder;
+namespace App\Actions\lender;
 
 use Illuminate\Support\Arr;
 use App\Models\FinancingOrder;
-use App\Actions\Contracts\Lynder\CreateFinancingOrder;
+use App\Actions\Contracts\lender\CreateFinancingOrder;
 
 class CreateFinancingOrderAction implements CreateFinancingOrder
 {

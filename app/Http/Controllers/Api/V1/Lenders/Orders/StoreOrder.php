@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Lenders\Orders;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Transformers\FinancingOrderTransformer;
-use App\Actions\Contracts\Lynder\CreateFinancingOrder;
+use App\Actions\Contracts\lender\CreateFinancingOrder;
 use App\Http\Requests\Lenders\Orders\StoreOrderRequest;
 
 class StoreOrder extends Controller
