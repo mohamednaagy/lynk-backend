@@ -18,6 +18,8 @@ class CreateTenantsTable extends Migration
         Schema::create('companies', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('unique_name')->unique();
+            $table->string('company_cr')->unique();
             $table->json('data')->nullable();
             $table->timestamps();
         });

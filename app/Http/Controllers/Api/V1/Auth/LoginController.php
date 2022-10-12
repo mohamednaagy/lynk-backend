@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\AuthRequest;
 use App\Models\Company;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -20,8 +21,10 @@ class LoginController extends Controller
     /**
      * Handle an authentication attempt.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param Request $request
+     * @param LoginUser $loginUser
+     * @return JsonResponse
+     * @throws ValidationException
      */
     public function authenticate(AuthRequest $request, LoginUser $loginUser)
     {
