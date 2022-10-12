@@ -24,7 +24,7 @@ class AuthRequest extends FormRequest
     public function rules()
     {
         return [
-            'company_name' => ['nullable', 'string', 'exists:companies,name'],
+            'unqiue_name' => ['nullable', 'string', 'exists:companies,name'],
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
             'source' => ['required', 'string'],

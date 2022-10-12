@@ -25,8 +25,8 @@ class LoginController extends Controller
      */
     public function authenticate(AuthRequest $request, LoginUser $loginUser)
     {
-        if ($request->company_name != Null) {
-            $company = Company::where('name', $request->company_name)->first();
+        if ($request->unqiue_name != Null) {
+            $company = Company::where('name', $request->unqiue_name)->first();
             tenancy()->initialize($company->id);
         }
 
