@@ -1,7 +1,7 @@
 <?php
 
-if (!function_exists('ValidateSAID')) {
-    function ValidateSAID($id_number)
+if (!function_exists('validate_said')) {
+    function validate_said($id_number)
     {
         $id = trim($id_number);
         if (!is_numeric($id)) {
