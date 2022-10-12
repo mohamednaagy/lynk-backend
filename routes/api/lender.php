@@ -2,7 +2,6 @@
 
 use App\Enums\Role;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\V1\Lenders\Orders\StoreOrder;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,5 +16,5 @@ use App\Http\Controllers\Api\V1\Lenders\Orders\StoreOrder;
 
 Route::middleware(['auth:sanctum', 'role:' . Role::LenderAdmin])
 ->prefix('v1/lender')->name('lender.')->group(function () {
-    Route::post('orders', StoreOrder::class)->name('orders.store');
+    Route::apiResource('orders', OrderController::class);
 });
