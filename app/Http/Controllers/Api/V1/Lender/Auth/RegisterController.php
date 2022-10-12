@@ -19,6 +19,7 @@ class RegisterController extends Controller
         $validated = $request->safe();
 
         $validated['password'] = Hash::make($validated['password']);
+        $validated['phone_number'] = phone($validated['phone_number'], $validated['phone_country_code']);
 
         $company = Company::create(
             [
@@ -35,6 +36,7 @@ class RegisterController extends Controller
                 'first_name',
                 'last_name',
                 'email',
+                'phone_number',
                 'password',
                 'source',
             ])
