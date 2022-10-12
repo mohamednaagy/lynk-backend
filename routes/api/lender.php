@@ -3,6 +3,12 @@
 use App\Enums\Role;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Lenders\Orders\OrderController;
+use App\Enums\Area;
+use App\Enums\Role;
+use App\Http\Controllers\Api\V1\Customers\Auth\GetAuthUser;
+use App\Http\Controllers\Api\V1\Lender\Auth\RegisterController;
+use Illuminate\Support\Facades\Route;
+use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,7 +21,18 @@ use App\Http\Controllers\Api\V1\Lenders\Orders\OrderController;
 |
 */
 
-Route::middleware(['auth:sanctum', 'role:' . Role::LenderAdmin])
-->prefix('v1/lender')->name('lender.')->group(function () {
-    Route::apiResource('orders', OrderController::class);
+
+
+
+Route::prefix('v1/lender')->group(function () {
+    Route::post('/register', RegisterController::class);
+
+    Route::middleware(['auth:sanctum', 'role:'.Role::LenderAdmin, InitializeTenancyByRequestData::class])->group(function () {
+        Route::get('auth', GetAuthUser::class);
+        Route::middleware(['checkAreaOtp:'.Area::Lender])->group(function () {
+            // add the customer apis here that requires OTP verification before accessing
+            Route::apiResource('orders', OrderController::class);
+
+        });
+    });
 });
