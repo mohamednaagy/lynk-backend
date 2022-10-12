@@ -10,7 +10,7 @@ class ForgotPasswordController extends Controller
 {
     public function forgot(Request $request)
     {
-        $request->validate(['email' => ['required', 'email']]);
+        $request->validate(['email' => ['required', 'email', 'exists:users,email']]);
 
         $status = Password::sendResetLink(
             $request->only('email')
