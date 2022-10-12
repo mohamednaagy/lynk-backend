@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Actions\Contracts\LoginUser;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\AuthRequest;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
+
 class LoginController extends Controller
 {
     /**
@@ -21,21 +23,18 @@ class LoginController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function authenticate(Request $request, LoginUser $loginUser)
+    public function authenticate(AuthRequest $request, LoginUser $loginUser)
     {
-        $requestData = $request->validate(['company_name' => ['nullable', 'string', 'exists:companies,name'],
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
-            'source' => ['required', 'string'],
-        ]);
-        $company = Company::where('name', $request->company_name)->first();
-        tenancy()->initialize($company->id);
+        if ($request->company_name != Null) {
+            $company = Company::where('name', $request->company_name)->first();
+            tenancy()->initialize($company->id);
+        }
 
         $user = User::where([
-            'email' => $requestData['email'],
+            'email' => $request['email'],
         ])->first();
 
-        if ($user === null || !Hash::check($requestData['password'], $user->password)) {
+        if ($user === null || !Hash::check($request['password'], $user->password)) {
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);

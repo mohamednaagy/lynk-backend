@@ -8,6 +8,7 @@ use App\Actions\Contracts\AssignPermissionToUser;
 use App\Actions\Contracts\AssignRoleToUser;
 use App\Actions\Contracts\CreateAdminWithRoleAndPermission;
 use App\Actions\Contracts\CreateCustomerWithRoleAndPermission;
+use App\Actions\Contracts\CreateLenderWithRoleAndPermission;
 use App\Actions\Contracts\CreateUser;
 use App\Actions\Contracts\FindUserByIdAndRole;
 use App\Actions\Contracts\GetPaginatedUsersByRole;
@@ -23,6 +24,7 @@ use App\Actions\Contracts\UpdateSettings;
 use App\Actions\Contracts\UpdateUser;
 use App\Actions\CreateAdminWithRoleAndPermissionAction;
 use App\Actions\CreateCustomerWithRoleAndPermissionAction;
+use App\Actions\CreateLenderWithRoleAndPermissionAction;
 use App\Actions\CreateUserAction;
 use App\Actions\FindUserByIdAndRoleAction;
 use App\Actions\GetPaginatedUsersByRoleAction;
@@ -59,6 +61,9 @@ class ActionsServiceProvider extends ServiceProvider
 
         CreateCustomerWithRoleAndPermission::class => CreateCustomerWithRoleAndPermissionAction::class,
         UpdateCustomerWithRoleAndPermission::class => UpdateCustomerWithRoleAndPermissionAction::class,
+
+        CreateLenderWithRoleAndPermission::class => CreateLenderWithRoleAndPermissionAction::class,
+
 
         ListSettings::class => ListSettingsAction::class,
         UpdateSettings::class => UpdateSettingsAction::class,
