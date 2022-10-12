@@ -3,7 +3,7 @@ namespace App\Actions\lender;
 
 use Illuminate\Support\Arr;
 use App\Models\FinancingOrder;
-use App\Actions\Contracts\lender\CreateFinancingOrder;
+use App\Actions\Contracts\Lender\CreateFinancingOrder;
 
 class CreateFinancingOrderAction implements CreateFinancingOrder
 {
