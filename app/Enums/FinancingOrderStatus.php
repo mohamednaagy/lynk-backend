@@ -8,6 +8,6 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
 {
     const Pending = 0;
     const Holding = 1;
-    const Cansle = 2;
+    const Canceled = 2;
     const Completed = 3;
 }
