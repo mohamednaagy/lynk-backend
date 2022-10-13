@@ -7,6 +7,7 @@ use App\Actions\Contracts\AssignRoleToUser;
 use App\Actions\Contracts\CreateLenderWithRoleAndPermission;
 use App\Actions\Contracts\CreateUser;
 use App\Models\User;
+use DragonCode\Support\Facades\Helpers\Arr;
 
 class CreateLenderWithRoleAndPermissionAction implements CreateLenderWithRoleAndPermission
 {
@@ -30,6 +31,8 @@ class CreateLenderWithRoleAndPermissionAction implements CreateLenderWithRoleAnd
      */
     public function handle(array $data): User
     {
+        //data
+        $data = Arr::only('first_name', 'last_name', 'phone_country_code', 'phone_number', 'email', 'password', 'password_confirmation' . 'role');
         // create user
         $user = $this->createUser->handle($data);
 
@@ -38,10 +41,6 @@ class CreateLenderWithRoleAndPermissionAction implements CreateLenderWithRoleAnd
             $this->assignRoleToUser->handle($user, $data['role']);
         }
 
-        // assign permission to user
-        if (!empty($data['permissions'])) {
-            $this->assignPermissionToUser->handle($user, $data['permissions']);
-        }
 
         // return user
         return $user;

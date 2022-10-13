@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Lenders;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Spatie\Permission\Models\Role;
 
 class StoreLenderRequest extends FormRequest
 {
@@ -28,31 +30,13 @@ class StoreLenderRequest extends FormRequest
             'last_name' => ['required', 'min:3', 'string', 'max:100'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
-            'email' => ['required', 'email', 'unique:users,email'],
+            'email' => ['required', 'email'],
             'password' => ['required', 'confirmed', 'min:8'],
             'password_confirmation' => ['required', 'min:8'],
+            'role' => ['required', 'string', Rule::exists(Role::class, 'name')]
         ];
 
-        if (!empty($this->role)) {
-            $rules['role'] = ['required', 'string', 'exists:roles,name'];
-        }
-
-        if (!empty($this->permissions)) {
-            $rules['permissions.*'] = ['required', 'array', 'distinct'];
-        }
 
         return $rules;
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function messages(): array
-    {
-        return [
-            'phone_number.phone' => trans('customers::validation.phone'),
-        ];
     }
 }

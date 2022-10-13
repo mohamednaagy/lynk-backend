@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1\Admins\Lender;
+namespace App\Http\Controllers\Api\v1\Lender;
 
 use App\Actions\Contracts\CreateLenderWithRoleAndPermission;
 use App\Http\Controllers\Controller;
@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class LenderController extends Controller
+class UserController extends Controller
 {
     /**
      * Display a listing of the resource.

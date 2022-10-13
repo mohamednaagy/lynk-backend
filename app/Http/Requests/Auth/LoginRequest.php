@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\Company;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class AuthRequest extends FormRequest
+class LoginRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +26,7 @@ class AuthRequest extends FormRequest
     public function rules()
     {
         return [
-            'unqiue_name' => ['nullable', 'string', 'exists:companies,name'],
+            'unqiue_name' => ['nullable', 'string',  Rule::exists(Company::class, 'unique_name')],
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
             'source' => ['required', 'string'],
