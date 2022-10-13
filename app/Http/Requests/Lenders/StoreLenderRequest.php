@@ -31,8 +31,6 @@ class StoreLenderRequest extends FormRequest
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'email' => ['required', 'email'],
-            'password' => ['required', 'confirmed', 'min:8'],
-            'password_confirmation' => ['required', 'min:8'],
             'role' => ['required', 'string', Rule::exists(Role::class, 'name')]
         ];
 
