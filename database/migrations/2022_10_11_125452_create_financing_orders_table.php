@@ -17,9 +17,9 @@ return new class extends Migration
         Schema::create('financing_orders', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Company::class)
-                ->nullable()
                 ->constrained()
-                ->restrictOnDelete();
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
 
             $table->unsignedTinyInteger('status')->default(0);
             $table->bigInteger('reference_number')->unique()->nullable();
