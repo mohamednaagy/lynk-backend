@@ -30,6 +30,8 @@ class LoginUserAction implements LoginUser
             $auth['type'] = 'session';
         }
 
+        $auth['company_id'] = $user->company_id;
+
         return $auth;
     }
 }
