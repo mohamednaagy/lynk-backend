@@ -1,15 +1,16 @@
 <?php
 namespace App\Models;
 
-use App\Enums\FinancingOrderStatus;
 use Spatie\MediaLibrary\HasMedia;
+use App\Enums\FinancingOrderStatus;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class FinancingOrder extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, BelongsToTenant;
 
     /**
      * The attributes that are mass assignable.
@@ -17,7 +18,6 @@ class FinancingOrder extends Model implements HasMedia
      * @var array<int, string>
      */
     protected $fillable = [
-        'company_id',
         'reference_number',
         'national_id',
         'amount',

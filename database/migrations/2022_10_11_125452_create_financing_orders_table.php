@@ -22,7 +22,7 @@ return new class extends Migration
                 ->cascadeOnUpdate();
 
             $table->unsignedTinyInteger('status')->default(0);
-            $table->bigInteger('reference_number')->unique()->nullable();
+            $table->bigInteger('reference_number')->nullable();
             $table->bigInteger('national_id');
             $table->double('amount');
             $table->double('selling_price');
