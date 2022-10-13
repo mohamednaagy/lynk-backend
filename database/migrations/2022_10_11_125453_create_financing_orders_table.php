@@ -25,8 +25,11 @@ return new class extends Migration {
             $table->bigInteger('national_id');
             $table->double('amount');
             $table->double('selling_price');
-            $table->unique(['refrence_number', 'company_id']);
             $table->timestamps();
+        });
+
+        Schema::table('financing_orders', function (Blueprint $table) {
+            $table->unique(['reference_number', 'company_id']);
         });
     }
 
