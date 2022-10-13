@@ -5,8 +5,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -26,7 +25,7 @@ return new class extends Migration
             $table->bigInteger('national_id');
             $table->double('amount');
             $table->double('selling_price');
-
+            $table->unique(['refrence_number', 'company_id']);
             $table->timestamps();
         });
     }
