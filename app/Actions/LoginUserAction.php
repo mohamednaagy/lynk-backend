@@ -12,10 +12,10 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 class LoginUserAction implements LoginUser
 {
     /**
-     * @param  User  $user
-     * @param  string  $source
-     * @param  \Illuminate\Http\Request  $request
-     * @return bool
+     * @param User $user
+     * @param string|null $source
+     * @param Request|null $request
+     * @return array
      */
     public function handle(User $user, string $source = null, Request $request = null): array
     {
