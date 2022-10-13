@@ -29,7 +29,7 @@ class LoginController extends Controller
     public function authenticate(LoginRequest $request, LoginUser $loginUser)
     {
         if ($request->safeInput('unique_name') != Null) {
-            $company = Company::where('unqiue_name', $request->unqiue_name)->firstOrFail();
+            $company = Company::where('unique_name', $request->unique_name)->firstOrFail();
             tenancy()->initialize($company);
         }
 
