@@ -12,10 +12,10 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 class LoginUserAction implements LoginUser
 {
     /**
-     * @param  User  $user
-     * @param  string  $source
-     * @param  \Illuminate\Http\Request  $request
-     * @return bool
+     * @param User $user
+     * @param string|null $source
+     * @param Request|null $request
+     * @return array
      */
     public function handle(User $user, string $source = null, Request $request = null): array
     {
@@ -29,6 +29,8 @@ class LoginUserAction implements LoginUser
             request()->session()->regenerate();
             $auth['type'] = 'session';
         }
+
+        $auth['company_id'] = $user->company_id;
 
         return $auth;
     }

@@ -31,7 +31,7 @@ class RegisterRequest extends FormRequest
             'password_confirmation' => ['required', 'string', 'min:8'],
             'company_name' => ['required', 'string', 'min:3'],
             'company_unique_name' => ['required', 'string', Rule::unique(Company::class, 'unique_name'), 'min:3', 'regex:/(^[a-zA-Z]+[a-zA-Z0-9\\-\\_]*$)/u'],
-            'company_cr' => ['required', 'string', 'min:1'],
+            'company_cr' => ['required', 'string', Rule::unique(Company::class, 'company_cr'), 'min:1'],
             'source' => ['required', 'string'],
         ];
     }

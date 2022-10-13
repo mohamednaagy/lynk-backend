@@ -22,7 +22,12 @@ class CreateUserAction implements CreateUser
             Arr::only(
                 $data,
                 [
-                    'first_name', 'last_name', 'phone_number', 'email', 'password',
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'phone_number',
+                    'password',
+                    'source',
                 ]
             )
         );
