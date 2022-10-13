@@ -179,6 +179,7 @@ return [
         App\Providers\TelescopeServiceProvider::class,
         App\Providers\ActionsServiceProvider::class,
         App\Providers\TenancyServiceProvider::class,
+        App\Providers\MacroServiceProvider::class
     ],
 
     /*
