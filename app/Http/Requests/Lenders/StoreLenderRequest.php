@@ -25,7 +25,7 @@ class StoreLenderRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
+        return  [
             'first_name' => ['required', 'min:3', 'string', 'max:100'],
             'last_name' => ['required', 'min:3', 'string', 'max:100'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
@@ -33,8 +33,5 @@ class StoreLenderRequest extends FormRequest
             'email' => ['required', 'email'],
             'role' => ['required', 'string', Rule::exists(Role::class, 'name')]
         ];
-
-
-        return $rules;
     }
 }

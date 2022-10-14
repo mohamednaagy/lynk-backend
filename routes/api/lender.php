@@ -26,7 +26,7 @@ Route::prefix('v1/lender')->group(function () {
     Route::middleware(['auth:sanctum', 'role:' . Role::LenderAdmin, InitializeTenancyByRequestData::class])->group(function () {
         Route::get('auth', GetAuthUser::class);
 
-        Route::apiResource('lenders', UserController::class)->parameters(['lenders' => 'id']);
+        Route::apiResource('users', UserController::class);
 
         Route::middleware(['checkAreaOtp:' . Area::Lender])->group(function () {
             // add the customer apis here that requires OTP verification before accessing

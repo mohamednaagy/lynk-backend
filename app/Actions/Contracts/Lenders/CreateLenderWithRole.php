@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Actions\Contracts;
+namespace App\Actions\Contracts\Lenders;
 
+use App\Actions\Contracts\AssignPermissionToUser;
+use App\Actions\Contracts\AssignRoleToUser;
+use App\Actions\Contracts\CreateUser;
 use App\Models\User;
 
-interface CreateLenderWithRoleAndPermission
+interface CreateLenderWithRole
 {
     /**
      * @param  CreateUser  $createUser
