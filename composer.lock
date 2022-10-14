@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a14e65f6f72a42b6f4487ffe7ea96a57",
+    "content-hash": "8bb30ca5e1bb98aa0e1a0f1898440b68",
     "packages": [
         {
             "name": "bensampo/laravel-enum",
@@ -8124,6 +8124,72 @@
                 "source": "https://github.com/tijsverkoyen/CssToInlineStyles/tree/2.2.5"
             },
             "time": "2022-09-12T13:28:28+00:00"
+        },
+        {
+            "name": "tkaratug/laravel-domain-whitelist",
+            "version": "1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tkaratug/laravel-domain-whitelist.git",
+                "reference": "5813b39df329f7904d749d1286484c77bfcbe575"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tkaratug/laravel-domain-whitelist/zipball/5813b39df329f7904d749d1286484c77bfcbe575",
+                "reference": "5813b39df329f7904d749d1286484c77bfcbe575",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^8.0|^9.0",
+                "php": "^7.4|^8.0|^8.1",
+                "spatie/laravel-package-tools": "^1.4.3"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^6.0|^7.0",
+                "phpunit/phpunit": "^9.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Tkaratug\\LaravelDomainWhitelist\\LaravelDomainWhitelistServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Tkaratug\\LaravelDomainWhitelist\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Turan Karatuğ",
+                    "email": "tkaratug@hotmail.com.tr",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A domain wwhitelist checker middleware.",
+            "homepage": "https://github.com/tkaratug/laravel-domain-whitelist",
+            "keywords": [
+                "laravel",
+                "laravel-domain-whitelist",
+                "tkaratug"
+            ],
+            "support": {
+                "issues": "https://github.com/tkaratug/laravel-domain-whitelist/issues",
+                "source": "https://github.com/tkaratug/laravel-domain-whitelist/tree/1.1.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/tkaratug",
+                    "type": "github"
+                }
+            ],
+            "time": "2022-02-25T20:33:11+00:00"
         },
         {
             "name": "twilio/sdk",
