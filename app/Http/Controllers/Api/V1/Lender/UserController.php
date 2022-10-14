@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1\Lender;
 
-use App\Actions\Contracts\Lenders\CreateLenderWithRole;
+use App\Actions\Contracts\Lenders\CreateLenderWithRoleAndPermission;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Lenders\StoreLenderRequest;
 use Illuminate\Http\JsonResponse;
@@ -29,10 +29,10 @@ class UserController extends Controller
      */
     public function store(
         StoreLenderRequest $storeLenderRequest,
-        CreateLenderWithRole $CreateLenderWithRole
+        CreateLenderWithRoleAndPermission $CreateLenderWithRoleAndPermission
     ): JsonResponse {
-        return DB::transaction(function () use ($storeLenderRequest, $CreateLenderWithRole) {
-            $CreateLenderWithRole->handle($storeLenderRequest->validated());
+        return DB::transaction(function () use ($storeLenderRequest, $CreateLenderWithRoleAndPermission) {
+            $CreateLenderWithRoleAndPermission->handle($storeLenderRequest->validated());
 
             return $this->successResponse();
         });

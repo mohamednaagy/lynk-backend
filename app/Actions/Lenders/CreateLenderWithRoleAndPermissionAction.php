@@ -5,14 +5,13 @@ namespace App\Actions\Lenders;
 use App\Actions\Contracts\AssignPermissionToUser;
 use App\Actions\Contracts\AssignRoleToUser;
 use App\Actions\Contracts\CreateUser;
-use App\Actions\Contracts\Lenders\CreateLenderWithRole;
+use App\Actions\Contracts\Lenders\CreateLenderWithRoleAndPermission;
 use App\Models\User;
 use DragonCode\Support\Facades\Helpers\Arr;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 
-class CreateLenderWithRoleAction implements CreateLenderWithRole
+
+class CreateLenderWithRoleAndPermissionAction implements CreateLenderWithRoleAndPermission
 {
     /**
      * @param  CreateUser  $createUser
@@ -35,9 +34,8 @@ class CreateLenderWithRoleAction implements CreateLenderWithRole
     public function handle(array $data): User
     {
         // create user
-        $data['password'] = Hash::make($data['password']);
-        $data['phone_number'] = phone($data['phone_number'], $data['phone_country_code']);
-        $user = User::create(Arr::only(
+
+        $user = $this->createUser->handle(Arr::only(
             $data,
             [
                 'first_name',
@@ -51,6 +49,8 @@ class CreateLenderWithRoleAction implements CreateLenderWithRole
         if (!empty($data['role'])) {
             $this->assignRoleToUser->handle($user, $data['role']);
         }
+
+
 
         // return user
         return $user;

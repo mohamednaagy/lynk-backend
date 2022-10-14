@@ -14,7 +14,7 @@ use App\Actions\Contracts\FindUserByIdAndRole;
 use App\Actions\Contracts\GetPaginatedUsersByRole;
 use App\Actions\Contracts\GetSettingsArea;
 use App\Actions\Contracts\GetSettingsClassInstance;
-use App\Actions\Contracts\Lenders\CreateLenderWithRole;
+use App\Actions\Contracts\Lenders\CreateLenderWithRoleAndPermission;
 use App\Actions\Contracts\ListSettings;
 use App\Actions\Contracts\LoginUser;
 use App\Actions\Contracts\RegisterLender;
@@ -32,7 +32,7 @@ use App\Actions\FindUserByIdAndRoleAction;
 use App\Actions\GetPaginatedUsersByRoleAction;
 use App\Actions\GetSettingsAreaAction;
 use App\Actions\GetSettingsClassInstanceAction;
-use App\Actions\Lenders\CreateLenderWithRoleAction;
+use App\Actions\Lenders\CreateLenderWithRoleAndPermissionAction;
 use App\Actions\ListSettingsAction;
 use App\Actions\LoginUserAction;
 use App\Actions\RegisterLenderAction;
@@ -68,7 +68,7 @@ class ActionsServiceProvider extends ServiceProvider
         CreateCustomerWithRoleAndPermission::class => CreateCustomerWithRoleAndPermissionAction::class,
         UpdateCustomerWithRoleAndPermission::class => UpdateCustomerWithRoleAndPermissionAction::class,
 
-        CreateLenderWithRole::class => CreateLenderWithRoleAction::class,
+        CreateLenderWithRoleAndPermission::class => CreateLenderWithRoleAndPermissionAction::class,
 
 
         ListSettings::class => ListSettingsAction::class,

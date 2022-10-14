@@ -7,7 +7,7 @@ use App\Actions\Contracts\AssignRoleToUser;
 use App\Actions\Contracts\CreateUser;
 use App\Models\User;
 
-interface CreateLenderWithRole
+interface CreateLenderWithRoleAndPermission
 {
     /**
      * @param  CreateUser  $createUser
