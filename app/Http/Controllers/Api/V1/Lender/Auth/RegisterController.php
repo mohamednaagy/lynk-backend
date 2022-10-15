@@ -21,7 +21,7 @@ class RegisterController extends Controller
             $lender = $registerLender->handle($request->validated());
 
             return $this->successResponse(
-                $loginUser->handle($lender),
+                $loginUser->handle($lender, $request->source, $request),
                 Response::HTTP_CREATED
             );
         });
