@@ -2,10 +2,10 @@
 
 namespace App\Actions\Lenders;
 
-use App\Actions\Companies\Contracts\CreateCompany;
 use App\Actions\Contracts\AssignRoleToUser;
+use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\CreateUser;
-use App\Actions\Lenders\Contracts\RegisterLender;
+use App\Actions\Contracts\Lenders\RegisterLender;
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Models\User;

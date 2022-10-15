@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Lenders\Contracts;
+namespace App\Actions\Contracts\Lenders;
 
 use App\Models\User;
 

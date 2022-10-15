@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Auth;
 
+use App\Actions\Contracts\Lenders\RegisterLender;
 use App\Actions\Contracts\LoginUser;
-use App\Actions\Lenders\Contracts\RegisterLender;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Lenders\RegisterLenderRequest;
 use Illuminate\Http\JsonResponse;

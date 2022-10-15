@@ -2,7 +2,7 @@
 
 namespace App\Actions\Companies;
 
-use App\Actions\Companies\Contracts\CreateCompany;
+use App\Actions\Contracts\Companies\CreateCompany;
 use App\Models\Company;
 use Illuminate\Support\Arr;
 
