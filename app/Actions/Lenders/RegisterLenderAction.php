@@ -10,7 +10,6 @@ use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Support\Arr;
-use Modules\Grantify\Facades\Grantify;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
 
 class RegisterLenderAction implements RegisterLender
@@ -18,9 +17,9 @@ class RegisterLenderAction implements RegisterLender
     /**
      * RegisterLenderAction constructor.
      *
-     * @param CreateUser $createUser
-     * @param CreateCompany $createCompany
-     * @param AssignRoleToUser $assignRoleToUser
+     * @param  CreateUser  $createUser
+     * @param  CreateCompany  $createCompany
+     * @param  AssignRoleToUser  $assignRoleToUser
      */
     public function __construct(
         protected CreateUser $createUser,
@@ -41,7 +40,7 @@ class RegisterLenderAction implements RegisterLender
             'name' => $data['company_name'],
             'unique_name' => $data['company_unique_name'],
             'company_cr' => $data['company_cr'],
-            'status' => CompanyStatus::Approved
+            'status' => CompanyStatus::Approved,
         ]);
 
         tenancy()->initialize($company);

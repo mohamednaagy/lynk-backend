@@ -56,7 +56,7 @@ abstract class TestCase extends BaseTestCase
         ]);
 
         $loginResponse->assertStatus(200)->assertJsonStructure([
-            'data' => ['token']
+            'data' => ['token'],
         ]);
 
         return $loginResponse->getOriginalContent()['data']['token'];

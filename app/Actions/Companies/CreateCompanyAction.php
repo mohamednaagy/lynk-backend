@@ -3,7 +3,6 @@
 namespace App\Actions\Companies;
 
 use App\Actions\Companies\Contracts\CreateCompany;
-use App\Enums\CompanyStatus;
 use App\Models\Company;
 use Illuminate\Support\Arr;
 
