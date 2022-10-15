@@ -34,8 +34,8 @@ class GrantifyTest extends TestCase
 
         // get object of the user model and assign permission to it
         $user = User::find(auth()->id());
-        $permission = Area::SuperAdmin.'-'.Subject::Admins.'.'.Action::Index;
-        Grantify::assignPermissionToModel($user, $permission);
+//        $permission = Area::SuperAdmin.'-'.Subject::Admins.'.'.Action::Index;
+//        Grantify::assignPermissionToModel($user, $permission);
 
         // get auth user data
         $getOtpCodeResponse = $this->withToken($token)->getJson('api/v1/admin/roles', [
