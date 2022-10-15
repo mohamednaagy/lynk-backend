@@ -20,7 +20,7 @@ class CreateTenantsTable extends Migration
             $table->string('name');
             $table->string('unique_name')->unique();
             $table->string('company_cr')->unique();
-            $table->tinyInteger('status')->default(1);
+            $table->tinyInteger('status');
             $table->json('data')->nullable();
             $table->timestamps();
         });

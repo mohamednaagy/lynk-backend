@@ -13,7 +13,10 @@ use BenSampo\Enum\Enum;
 final class CompanyStatus extends Enum
 {
     const Pending = 1;
+
     const UnderReview = 2;
+
     const Approved = 3;
+
     const Rejected = 4;
 }

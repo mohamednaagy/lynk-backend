@@ -2,7 +2,7 @@
 
 use App\Enums\Area;
 use App\Enums\Role;
-use App\Http\Controllers\Api\V1\Customers\Auth\GetAuthUser;
+use App\Http\Controllers\Api\V1\Lender\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Lender\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
@@ -17,7 +17,6 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
 
 Route::prefix('v1/lender')->group(function () {
     Route::post('/register', RegisterController::class);

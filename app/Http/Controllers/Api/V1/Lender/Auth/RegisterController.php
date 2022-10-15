@@ -3,24 +3,27 @@
 namespace App\Http\Controllers\Api\V1\Lender\Auth;
 
 use App\Actions\Contracts\LoginUser;
-use App\Actions\Contracts\RegisterLender;
-use App\Enums\Role;
+use App\Actions\Lenders\Contracts\RegisterLender;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Customers\RegisterRequest;
-use App\Models\Company;
-use App\Models\User;
+use App\Http\Requests\Lenders\RegisterLenderRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Hash;
-use Modules\Grantify\Facades\Grantify;
+use Illuminate\Support\Facades\DB;
 
 class RegisterController extends Controller
 {
-    public function __invoke(RegisterRequest $request, RegisterLender $registerLender)
-    {
-        $validated = $request->safe();
-        return $this->successResponse(
-            $registerLender->handle($validated->toArray()),
-            Response::HTTP_CREATED
-        );
+    public function __invoke(
+        RegisterLenderRequest $request,
+        RegisterLender $registerLender,
+        LoginUser $loginUser
+    ): JsonResponse {
+        return DB::transaction(function () use ($loginUser, $request, $registerLender) {
+            $lender = $registerLender->handle($request->validated());
+
+            return $this->successResponse(
+                $loginUser->handle($lender),
+                Response::HTTP_CREATED
+            );
+        });
     }
 }

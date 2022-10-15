@@ -33,8 +33,8 @@ class GrantifyTest extends TestCase
         $authorizationToken = $this->createUserAuthorizationToken();
 
         // get object of the user model and assign permission to it
-        $user = User::find(auth()->user()->id);
-        $permission = Area::SuperAdmin.'-'.Subject::Admins.'.'.Action::getRoles;
+        $user = User::find(auth()->id());
+        $permission = Area::SuperAdmin.'-'.Subject::Admins.'.'.Action::Index;
         Grantify::assignPermissionToModel($user, $permission);
 
         // get auth user data
@@ -65,8 +65,8 @@ class GrantifyTest extends TestCase
         $authorizationToken = $this->createUserAuthorizationToken();
 
         // get object of the user model and assign permission to it
-        $user = User::find(auth()->user()->id);
-        $permission = Area::SuperAdmin.'-'.Subject::Admins.'.'.Action::getRoles;
+        $user = User::find(auth()->id());
+        $permission = Area::SuperAdmin.'-'.Subject::Admins.'.'.Action::Index;
         Grantify::assignPermissionToModel($user, $permission);
 
         // get auth user data

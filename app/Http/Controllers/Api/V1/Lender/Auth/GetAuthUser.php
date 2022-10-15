@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Customers\Auth;
+namespace App\Http\Controllers\Api\V1\Lender\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Transformers\UserTransformer;
