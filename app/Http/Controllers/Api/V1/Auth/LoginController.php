@@ -18,9 +18,10 @@ class LoginController extends Controller
     /**
      * Handle an authentication attempt.
      *
-     * @param Request $request
-     * @param LoginUser $loginUser
+     * @param  Request  $request
+     * @param  LoginUser  $loginUser
      * @return JsonResponse
+     *
      * @throws ValidationException
      */
     public function authenticate(Request $request, LoginUser $loginUser)

@@ -3,10 +3,9 @@
 namespace App\Models;
 
 use App\Enums\CompanyStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Stancl\Tenancy\Database\Concerns\HasScopedValidationRules;
 use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
 class Company extends BaseTenant
 {
@@ -17,7 +16,7 @@ class Company extends BaseTenant
     public $incrementing = true;
 
     protected $casts = [
-        'status' => CompanyStatus::class
+        'status' => CompanyStatus::class,
     ];
 
     public static function getCustomColumns(): array
@@ -27,7 +26,7 @@ class Company extends BaseTenant
             'name',
             'unique_name',
             'company_cr',
-            'status'
+            'status',
         ];
     }
 }

@@ -1,23 +1,13 @@
 <?php
 namespace App\Providers;
 
+
 use App\Actions\LoginUserAction;
 use App\Actions\CreateUserAction;
-use App\Actions\UpdateUserAction;
 use App\Actions\ListSettingsAction;
-use App\Actions\Contracts\LoginUser;
-use App\Actions\CreateCompanyAction;
-use App\Actions\Contracts\CreateUser;
 use App\Actions\Contracts\UpdateUser;
-use App\Actions\RegisterLenderAction;
 use App\Actions\SyncRoleToUserAction;
-use App\Actions\UpdateSettingsAction;
-use App\Actions\GetSettingsAreaAction;
-use App\Actions\AssignRoleToUserAction;
-use App\Actions\Contracts\ListSettings;
 use Illuminate\Support\ServiceProvider;
-use App\Actions\Contracts\CreateCompany;
-use App\Actions\Contracts\RegisterLender;
 use App\Actions\Contracts\SyncRoleToUser;
 use App\Actions\Contracts\UpdateSettings;
 use App\Actions\Contracts\GetSettingsArea;
@@ -25,6 +15,7 @@ use App\Actions\FindUserByIdAndRoleAction;
 use App\Actions\Contracts\AssignRoleToUser;
 use App\Actions\SyncPermissionToUserAction;
 use App\Actions\AssignPermissionToUserAction;
+use App\Actions\Lenders\RegisterLenderAction;
 use App\Actions\Contracts\FindUserByIdAndRole;
 use App\Actions\GetPaginatedUsersByRoleAction;
 use App\Actions\Contracts\SyncPermissionToUser;
