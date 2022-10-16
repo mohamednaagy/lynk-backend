@@ -22,7 +22,9 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 Route::prefix('v1/lender')->group(function () {
     Route::post('/register', RegisterController::class);
 
-    Route::middleware(['auth:sanctum', 'role:' . Role::LenderAdmin, InitializeTenancyByRequestData::class])->group(function () {
+// 'role:' . Role::LenderAdmin, InitializeTenancyByRequestData::class
+// temp remove middleware
+    Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::middleware(['checkAreaOtp:' . Area::Lender])->group(function () {
             // add the customer apis here that requires OTP verification before accessing

@@ -21,7 +21,6 @@ class GetSettingsClassInstanceAction implements GetSettingsClassInstance
             'General' => app(GeneralSettings::class),
             Area::SuperAdmin => app(SuperAdminSettings::class),
             Area::Customer => app(CustomerSettings::class),
-            Area::Lender => app(SuperAdminSettings::class),
         };
     }
 }
