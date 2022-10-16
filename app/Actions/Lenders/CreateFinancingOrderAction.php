@@ -9,7 +9,7 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
 {
     public function handle(array $data): FinancingOrder
     {
-        $financingOrder = FinancingOrder::create(Arr::except($data, ['contract', 'power_of_attorney']));
+        $financingOrder = FinancingOrder::create(Arr::only($data, ['national_id', 'amount', 'selling_price', 'status']));
 
         $financingOrder->addMedia($data['contract'])
          ->toMediaCollection('contract');

@@ -12,10 +12,6 @@ class FinancingOrder extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia, BelongsToTenant;
 
-    protected $casts = [
-        'status' => FinancingOrderStatus::class
-    ];
-
     /**
      * The attributes that are mass assignable.
      *
