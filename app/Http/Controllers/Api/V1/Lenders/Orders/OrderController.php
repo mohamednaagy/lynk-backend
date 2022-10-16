@@ -3,7 +3,7 @@ namespace App\Http\Controllers\Api\V1\Lenders\Orders;
 
 use App\Http\Controllers\Controller;
 use App\Transformers\FinancingOrderTransformer;
-use App\Actions\Contracts\lender\CreateFinancingOrder;
+use App\Actions\Contracts\Lender\CreateFinancingOrder;
 use App\Http\Requests\Lenders\Orders\StoreOrderRequest;
 
 class OrderController extends Controller

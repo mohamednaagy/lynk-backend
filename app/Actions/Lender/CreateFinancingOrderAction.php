@@ -1,5 +1,5 @@
 <?php
-namespace App\Actions\lender;
+namespace App\Actions\Lender;
 
 use Illuminate\Support\Arr;
 use App\Models\FinancingOrder;

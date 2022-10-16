@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Contracts\lender;
+namespace App\Actions\Contracts\Lender;
 
 use App\Models\FinancingOrder;
 
