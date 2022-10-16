@@ -46,13 +46,13 @@ class SettingsUnitTest extends TestCase
         $updateSettingsAction = new UpdateSettingsAction($getSettingAreaAction);
 
         $data = [
-            'area' => Area::General,
+            'area' => Area::SuperAdmin,
             'otp_driver' => 'email',
         ];
         $updateSettingsAction->handle($data);
 
         $getSettingsAction = new GetSettingsClassInstanceAction();
-        $generalSettings = $getSettingsAction->handle(Area::General);
+        $generalSettings = $getSettingsAction->handle(Area::SuperAdmin);
 
         $this->assertEquals($data['otp_driver'], $generalSettings->otp_driver);
     }

@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Actions;
+namespace App\Actions\Companies;
 
-use App\Actions\Contracts\CreateCompany;
-use App\Enums\CompanyStatus;
+use App\Actions\Contracts\Companies\CreateCompany;
 use App\Models\Company;
 use Illuminate\Support\Arr;
 
@@ -15,8 +14,6 @@ class CreateCompanyAction implements CreateCompany
      */
     public function handle(array $data): Company
     {
-        $data['status'] = CompanyStatus::Approved;
-
         return Company::create(
             Arr::only(
                 $data,

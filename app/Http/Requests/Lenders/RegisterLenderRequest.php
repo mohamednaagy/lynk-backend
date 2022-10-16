@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Customers;
+namespace App\Http\Requests\Lenders;
 
 use App\Models\Company;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class RegisterRequest extends FormRequest
+class RegisterLenderRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -20,7 +20,6 @@ class RegisterRequest extends FormRequest
 
     public function rules(): array
     {
-
         return [
             'first_name' => ['required', 'min:3', 'string', 'max:100'],
             'last_name' => ['required', 'min:3', 'string', 'max:100'],

@@ -58,7 +58,7 @@ class SettingsTest extends TestCase
     {
         $token = $this->login();
         $data = [
-            'area' => Area::General,
+            'area' => Area::SuperAdmin,
             'otp_driver' => 'twilio',
         ];
 

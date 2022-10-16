@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        $createAdminAction = app(CreateAdminWithRoleAndPermission::class);
+        $createAdminWithRoleAndPermission = app()->make(CreateAdminWithRoleAndPermission::class);
 
-        $createAdminAction->handle([
+        $createAdminWithRoleAndPermission->handle([
             'first_name' => 'First',
             'last_name' => 'Admin',
             'password' => '12345678',

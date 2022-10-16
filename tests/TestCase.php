@@ -49,17 +49,17 @@ abstract class TestCase extends BaseTestCase
         }
 
         // login user
-        $loginResponse = $this->postJson('api/auth/login', [
+        $loginResponse = $this->postJson('api/v1/auth/login', [
             'email' => $email,
             'password' => $passwordPlainText,
             'source' => $source,
         ]);
 
         $loginResponse->assertStatus(200)->assertJsonStructure([
-            'token',
+            'data' => ['token'],
         ]);
 
-        return $loginResponse->getOriginalContent()['token'];
+        return $loginResponse->getOriginalContent()['data']['token'];
     }
 
     protected function createOtpifyCode(int $code, int $otpifiableId, array $data = []): Builder|Model
@@ -79,7 +79,7 @@ abstract class TestCase extends BaseTestCase
     protected function createUserAuthorizationToken(): string
     {
         return Otpify::generateAuthorizationToken([
-            'user_id' => auth()->user()->id,
+            'user_id' => auth()->id(),
             'area' => Area::SuperAdmin,
         ]);
     }
