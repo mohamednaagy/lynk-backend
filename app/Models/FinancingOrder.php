@@ -29,6 +29,10 @@ class FinancingOrder extends Model implements HasMedia
         'status'
     ];
 
+    protected $casts = [
+        'status' => FinancingOrderStatus::class
+    ];
+
     public function registerMediaCollections(): void
     {
         $this

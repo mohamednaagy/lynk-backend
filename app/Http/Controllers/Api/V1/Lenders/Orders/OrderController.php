@@ -13,7 +13,7 @@ class OrderController extends Controller
      * Handle the incoming request.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreOrderRequest $request, CreateFinancingOrder $createFinancingOrder)
     {
