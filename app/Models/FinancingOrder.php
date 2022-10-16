@@ -25,6 +25,10 @@ class FinancingOrder extends Model implements HasMedia
         'status'
     ];
 
+    protected $casts = [
+        'status' => FinancingOrderStatus::class
+    ];
+
     public function registerMediaCollections(): void
     {
         $this
@@ -49,12 +53,5 @@ class FinancingOrder extends Model implements HasMedia
     public function getContractAttribute()
     {
         return $this->getFirstMediaUrl('contract');
-    }
-
-    public function getStatusAttribute($value)
-    {
-        $status = FinancingOrderStatus::fromValue((int)$value);
-
-        return $status->description;
     }
 }

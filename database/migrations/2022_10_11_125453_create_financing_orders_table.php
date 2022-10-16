@@ -20,7 +20,7 @@ return new class extends Migration {
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->unsignedTinyInteger('status')->default(0);
+            $table->unsignedTinyInteger('status');
             $table->bigInteger('reference_number')->nullable();
             $table->bigInteger('national_id');
             $table->double('amount');
