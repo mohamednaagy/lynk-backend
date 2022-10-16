@@ -42,7 +42,9 @@ use App\Actions\UpdateCustomerWithRoleAndPermissionAction;
 use App\Actions\Contracts\CreateAdminWithRoleAndPermission;
 use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
 use App\Actions\Contracts\CreateCustomerWithRoleAndPermission;
+use App\Actions\Contracts\Lenders\GetPaginatedOrders;
 use App\Actions\Contracts\UpdateCustomerWithRoleAndPermission;
+use App\Actions\Lenders\GetPaginatedOrders as LendersGetPaginatedOrders;
 
 class ActionsServiceProvider extends ServiceProvider
 {
@@ -66,6 +68,8 @@ class ActionsServiceProvider extends ServiceProvider
         UpdateSettings::class => UpdateSettingsAction::class,
         GetSettingsArea::class => GetSettingsAreaAction::class,
         GetSettingsClassInstance::class => GetSettingsClassInstanceAction::class,
+        // lenders
         CreateFinancingOrder::class => CreateFinancingOrderAction::class,
+        GetPaginatedOrders::class => LendersGetPaginatedOrders::class,
     ];
 }
