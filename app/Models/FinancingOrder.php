@@ -12,6 +12,10 @@ class FinancingOrder extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia, BelongsToTenant;
 
+    protected $casts = [
+        'status' => FinancingOrderStatus::class
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -49,12 +53,5 @@ class FinancingOrder extends Model implements HasMedia
     public function getContractAttribute()
     {
         return $this->getFirstMediaUrl('contract');
-    }
-
-    public function getStatusAttribute($value)
-    {
-        $status = FinancingOrderStatus::fromValue((int)$value);
-
-        return $status->description;
     }
 }

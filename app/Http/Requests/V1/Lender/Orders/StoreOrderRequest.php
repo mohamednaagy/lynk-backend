@@ -1,8 +1,7 @@
 <?php
-namespace App\Http\Requests\Lenders\Orders;
+namespace App\Http\Requests\V1\Lender\Orders;
 
 use App\Rules\ValidateSAID;
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreOrderRequest extends FormRequest
@@ -31,8 +30,8 @@ class StoreOrderRequest extends FormRequest
             'national_id' => ['required', 'digits:10', new ValidateSAID],
             'amount' => ['required', 'numeric'],
             'selling_price' => ['required', 'numeric'],
-            'contract' => ['file', 'required'],
-            'power_of_attorney' => ['file', 'required'],
+            'contract' => ['required', 'file'],
+            'power_of_attorney' => ['required', 'file'],
         ];
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Lenders;
+namespace App\Http\Requests\V1\Lender\Auth;
 
 use App\Models\Company;
 use Illuminate\Foundation\Http\FormRequest;

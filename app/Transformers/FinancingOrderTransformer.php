@@ -10,7 +10,7 @@ class FinancingOrderTransformer extends TransformerAbstract
     {
         return [
             'id' => $financingOrder->id,
-            'status' => $financingOrder->status,
+            'status' => $financingOrder->status->description,
             'company_id' => $financingOrder->company_id,
             'reference_number' => $financingOrder->reference_number,
             'national_id' => $financingOrder->national_id,

@@ -37,6 +37,6 @@ class ValidateSAID implements Rule
      */
     public function message()
     {
-        return __('validation.notional_id_wrong_format');
+        return __('validation.national_id_wrong_format');
     }
 }

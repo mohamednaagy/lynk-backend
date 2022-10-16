@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Auth;
 
-use App\Actions\Contracts\Lenders\RegisterLender;
+use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use App\Actions\Contracts\LoginUser;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Lenders\RegisterLenderRequest;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
+use App\Actions\Contracts\Lenders\RegisterLender;
+use App\Http\Requests\V1\Lender\Auth\RegisterLenderRequest;
 
 class RegisterController extends Controller
 {
