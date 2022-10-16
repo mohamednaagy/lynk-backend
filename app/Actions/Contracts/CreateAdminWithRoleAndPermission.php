@@ -3,6 +3,9 @@
 namespace App\Actions\Contracts;
 
 use App\Models\User;
+use App\Actions\Contracts\CreateUser;
+use App\Actions\Contracts\AssignRoleToUser;
+use App\Actions\Contracts\AssignPermissionToUser;
 
 interface CreateAdminWithRoleAndPermission
 {
