@@ -7,7 +7,7 @@ use App\Actions\Contracts\AssignRoleToUser;
 use App\Actions\Contracts\CreateUser;
 use App\Actions\Contracts\Lenders\CreateLenderWithRoleAndPermission;
 use App\Models\User;
-use DragonCode\Support\Facades\Helpers\Arr;
+use Illuminate\Support\Arr;
 
 
 
@@ -41,7 +41,10 @@ class CreateLenderWithRoleAndPermissionAction implements CreateLenderWithRoleAnd
                 'first_name',
                 'last_name',
                 'email',
+                'phone_country_code',
                 'phone_number',
+                'password',
+                'redirect_url'
             ]
         ));
 

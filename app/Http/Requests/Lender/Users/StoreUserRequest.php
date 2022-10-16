@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Lenders;
+namespace App\Http\Requests\Lender\Users;
 
+use App\Rules\WhiteListRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use Spatie\Permission\Models\Role;
 
-class StoreLenderRequest extends FormRequest
+
+class StoreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -31,7 +31,7 @@ class StoreLenderRequest extends FormRequest
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'email' => ['required', 'email'],
-            'role' => ['required', 'string', Rule::exists(Role::class, 'name')]
+            'redirect_url' => ['required', 'url', new WhiteListRule()]
         ];
     }
 }

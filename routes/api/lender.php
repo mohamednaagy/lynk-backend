@@ -4,7 +4,7 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Http\Controllers\Api\V1\Lender\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Lender\Auth\RegisterController;
-use App\Http\Controllers\Api\v1\Lender\UserController;
+use App\Http\Controllers\Api\v1\Lender\Users\UserController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
