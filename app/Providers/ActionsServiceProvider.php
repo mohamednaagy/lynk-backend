@@ -2,37 +2,37 @@
 namespace App\Providers;
 
 
-use App\Actions\LoginUserAction;
-use App\Actions\CreateUserAction;
-use App\Actions\ListSettingsAction;
-use App\Actions\Contracts\UpdateUser;
-use App\Actions\SyncRoleToUserAction;
-use Illuminate\Support\ServiceProvider;
-use App\Actions\Contracts\SyncRoleToUser;
-use App\Actions\Contracts\UpdateSettings;
-use App\Actions\Contracts\GetSettingsArea;
-use App\Actions\FindUserByIdAndRoleAction;
-use App\Actions\Contracts\AssignRoleToUser;
-use App\Actions\SyncPermissionToUserAction;
 use App\Actions\AssignPermissionToUserAction;
-use App\Actions\Lenders\RegisterLenderAction;
-use App\Actions\Contracts\FindUserByIdAndRole;
-use App\Actions\GetPaginatedUsersByRoleAction;
-use App\Actions\Contracts\SyncPermissionToUser;
-use App\Actions\GetSettingsClassInstanceAction;
 use App\Actions\Contracts\AssignPermissionToUser;
-use App\Actions\Contracts\GetPaginatedUsersByRole;
-use App\Actions\Lender\CreateFinancingOrderAction;
-use App\Actions\Contracts\GetSettingsClassInstance;
-use App\Actions\Contracts\Lender\CreateFinancingOrder;
-use App\Actions\CreateAdminWithRoleAndPermissionAction;
-use App\Actions\UpdateAdminWithRoleAndPermissionAction;
-use App\Actions\CreateCustomerWithRoleAndPermissionAction;
-use App\Actions\UpdateCustomerWithRoleAndPermissionAction;
+use App\Actions\Contracts\AssignRoleToUser;
 use App\Actions\Contracts\CreateAdminWithRoleAndPermission;
-use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
 use App\Actions\Contracts\CreateCustomerWithRoleAndPermission;
+use App\Actions\Contracts\FindUserByIdAndRole;
+use App\Actions\Contracts\GetPaginatedUsersByRole;
+use App\Actions\Contracts\GetSettingsArea;
+use App\Actions\Contracts\GetSettingsClassInstance;
+use App\Actions\Contracts\Lenders\CreateFinancingOrder;
+use App\Actions\Contracts\SyncPermissionToUser;
+use App\Actions\Contracts\SyncRoleToUser;
+use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
 use App\Actions\Contracts\UpdateCustomerWithRoleAndPermission;
+use App\Actions\Contracts\UpdateSettings;
+use App\Actions\Contracts\UpdateUser;
+use App\Actions\CreateAdminWithRoleAndPermissionAction;
+use App\Actions\CreateCustomerWithRoleAndPermissionAction;
+use App\Actions\CreateUserAction;
+use App\Actions\FindUserByIdAndRoleAction;
+use App\Actions\GetPaginatedUsersByRoleAction;
+use App\Actions\GetSettingsClassInstanceAction;
+use App\Actions\Lender\CreateFinancingOrderAction;
+use App\Actions\Lenders\RegisterLenderAction;
+use App\Actions\ListSettingsAction;
+use App\Actions\LoginUserAction;
+use App\Actions\SyncPermissionToUserAction;
+use App\Actions\SyncRoleToUserAction;
+use App\Actions\UpdateAdminWithRoleAndPermissionAction;
+use App\Actions\UpdateCustomerWithRoleAndPermissionAction;
+use Illuminate\Support\ServiceProvider;
 
 class ActionsServiceProvider extends ServiceProvider
 {

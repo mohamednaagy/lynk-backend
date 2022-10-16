@@ -1,10 +1,10 @@
 <?php
 namespace App\Http\Controllers\Api\V1\Lenders\Orders;
 
+use App\Actions\Contracts\Lenders\CreateFinancingOrder;
 use App\Http\Controllers\Controller;
-use App\Transformers\FinancingOrderTransformer;
-use App\Actions\Contracts\Lender\CreateFinancingOrder;
 use App\Http\Requests\Lenders\Orders\StoreOrderRequest;
+use App\Transformers\FinancingOrderTransformer;
 
 class OrderController extends Controller
 {
