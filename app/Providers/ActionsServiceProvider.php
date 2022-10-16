@@ -24,7 +24,7 @@ use App\Actions\CreateUserAction;
 use App\Actions\FindUserByIdAndRoleAction;
 use App\Actions\GetPaginatedUsersByRoleAction;
 use App\Actions\GetSettingsClassInstanceAction;
-use App\Actions\Lender\CreateFinancingOrderAction;
+use App\Actions\Lenders\CreateFinancingOrderAction;
 use App\Actions\Lenders\RegisterLenderAction;
 use App\Actions\ListSettingsAction;
 use App\Actions\LoginUserAction;

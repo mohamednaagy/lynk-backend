@@ -1,5 +1,5 @@
 <?php
-namespace App\Actions\Lender;
+namespace App\Actions\Lenders;
 
 use App\Actions\Contracts\Lenders\CreateFinancingOrder;
 use App\Models\FinancingOrder;
