@@ -21,5 +21,5 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 });
 
 
-Route::middleware('domain_whitelist')->post('v1/auth/send-reset-password-link', [ForgotPasswordController::class, 'sendResetPasswordLink']);
+Route::post('v1/auth/send-reset-password-link', [ForgotPasswordController::class, 'sendResetPasswordLink']);
 

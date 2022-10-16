@@ -7,7 +7,7 @@ use App\Models\Company;
 use App\Models\User;
 use Illuminate\Validation\Rule;
 
-class sendResetPasswordLinkRequest extends FormRequest
+class SendLinkRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,8 +28,9 @@ class sendResetPasswordLinkRequest extends FormRequest
     {
         return [
             'email' => ['required', 'email', Rule::exists(User::class, 'email')],
-            'unique_name' => ['nullable', 'string', Rule::exists(Company::class, 'unique_name')],
-            'redirect_URL' => ['required', 'url']
+            // 'company_unique_name' => ['nullable', 'string', Rule::exists(Company::class, 'unique_name')],
+            'company_name' => ['nullable', 'string', 'exists:companies,company_name'],
+            'redirect_url' => ['required', 'url']
         ];
     }
 }
