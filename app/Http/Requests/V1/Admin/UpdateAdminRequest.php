@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Admins;
+namespace App\Http\Requests\V1\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 use function trans;
 
-class StoreAdminRequest extends FormRequest
+class UpdateAdminRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -29,9 +29,7 @@ class StoreAdminRequest extends FormRequest
             'last_name' => ['required', 'min:3', 'string', 'max:100'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'confirmed', 'min:8'],
-            'password_confirmation' => ['required', 'min:8'],
+            'email' => ['required', 'email', 'unique:users,email,'.$this->id],
         ];
 
         if (! empty($this->role)) {

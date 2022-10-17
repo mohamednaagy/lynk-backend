@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1\Lender\Auth;
 use App\Actions\Contracts\Lenders\RegisterLender;
 use App\Actions\Contracts\LoginUser;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Lenders\RegisterLenderRequest;
+use App\Http\Requests\V1\Lender\Auth\RegisterLenderRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;

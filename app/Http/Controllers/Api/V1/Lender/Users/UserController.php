@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1\Lender\Users;
 
 use App\Actions\Contracts\FindUserByIdAndRole;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
+use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
@@ -18,18 +19,19 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(GetPaginatedLenderUsers $getPaginatedLenders)
     {
-        //
+        return fractal($getPaginatedLenders->handle(), new UserTransformer)->respond();
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  StoreUserRequest  $storeUserRequest
+     * @param  CreateLenderUserWithRoleAndPermission  $createLenderWithRoleAndPermission
+     * @return JsonResponse
      */
     public function store(
         StoreUserRequest $storeUserRequest,
@@ -46,7 +48,7 @@ class UserController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
     {
@@ -60,6 +62,7 @@ class UserController extends Controller
      * @param  int  $id
      * @param  UpdateLenderUserWithRoleAndPermission  $updateLenderUserWithRoleAndPermission
      * @param  FindUserByIdAndRole  $findUserByIdAndRole
+     * @return \Illuminate\Http\JsonResponse
      * @return JsonResponse
      */
     public function update(UpdateUserRequest $updateUserRequest, int $id, UpdateLenderUserWithRoleAndPermission $updateLenderUserWithRoleAndPermission, FindUserByIdAndRole $findUserByIdAndRole): JsonResponse
@@ -81,7 +84,7 @@ class UserController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
