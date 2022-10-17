@@ -2,11 +2,11 @@
 
 namespace App\Actions\Lenders;
 
-use App\Actions\Contracts\Lenders\GetPaginatedLenders;
+use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-class GetPaginatedLendersAction implements GetPaginatedLenders
+class GetPaginatedLenderUsersAction implements GetPaginatedLenderUsers
 {
     /**
      * @return LengthAwarePaginator

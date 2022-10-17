@@ -4,7 +4,7 @@ namespace App\Actions\Contracts\Lenders;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-interface GetPaginatedLenders
+interface GetPaginatedLenderUsers
 {
     /**
      * @return LengthAwarePaginator

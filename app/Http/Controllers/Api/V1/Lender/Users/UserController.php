@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\v1\Lender\Users;
 
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
-use App\Actions\Contracts\Lenders\GetPaginatedLenders;
+use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Users\StoreUserRequest;
 use App\Transformers\UserTransformer;
@@ -18,7 +18,7 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(GetPaginatedLenders $getPaginatedLenders)
+    public function index(GetPaginatedLenderUsers $getPaginatedLenders)
     {
         return fractal($getPaginatedLenders->handle(), new UserTransformer)->respond();
     }
