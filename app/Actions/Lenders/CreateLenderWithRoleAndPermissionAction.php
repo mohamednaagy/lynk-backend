@@ -9,8 +9,6 @@ use App\Actions\Contracts\Lenders\CreateLenderWithRoleAndPermission;
 use App\Models\User;
 use Illuminate\Support\Arr;
 
-
-
 class CreateLenderWithRoleAndPermissionAction implements CreateLenderWithRoleAndPermission
 {
     /**
@@ -24,7 +22,6 @@ class CreateLenderWithRoleAndPermissionAction implements CreateLenderWithRoleAnd
         protected AssignPermissionToUser $assignPermissionToUser
     ) {
     }
-
     /**
      * Create new user.
      *
@@ -34,7 +31,6 @@ class CreateLenderWithRoleAndPermissionAction implements CreateLenderWithRoleAnd
     public function handle(array $data): User
     {
         // create user
-
         $user = $this->createUser->handle(Arr::only(
             $data,
             [
@@ -44,7 +40,6 @@ class CreateLenderWithRoleAndPermissionAction implements CreateLenderWithRoleAnd
                 'phone_country_code',
                 'phone_number',
                 'password',
-                'redirect_url'
             ]
         ));
 
@@ -52,9 +47,6 @@ class CreateLenderWithRoleAndPermissionAction implements CreateLenderWithRoleAnd
         if (!empty($data['role'])) {
             $this->assignRoleToUser->handle($user, $data['role']);
         }
-
-
-
         // return user
         return $user;
     }

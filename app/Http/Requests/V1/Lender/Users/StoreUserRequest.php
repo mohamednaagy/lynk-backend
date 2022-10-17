@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Requests\Lender\Users;
+namespace App\Http\Requests\V1\Lender\Users;
 
+use App\Rules\DomainWhiteListRule;
 use App\Rules\WhiteListRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -31,7 +32,7 @@ class StoreUserRequest extends FormRequest
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'email' => ['required', 'email'],
-            'redirect_url' => ['required', 'url', new WhiteListRule()]
+            'redirect_url' => ['required', 'url', new DomainWhiteListRule()]
         ];
     }
 }

@@ -200,4 +200,16 @@ return [
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
 
+    /*
+    |--------------------------------------------------------------------------
+    | domain_whitelist
+    |--------------------------------------------------------------------------
+    |
+    | This array of the WhiteList Hosts to register the URL we need
+    | in the application and to restrict the incoming request to it
+    |
+    */
+
+    'domain_whitelist' => env('DOMAIN_WHITELIST'),
+
 ];

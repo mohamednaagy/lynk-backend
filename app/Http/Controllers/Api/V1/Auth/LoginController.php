@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Actions\Contracts\LoginUser;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\V1\Auth\LoginRequest;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-
 
 class LoginController extends Controller
 {
@@ -28,14 +27,13 @@ class LoginController extends Controller
      */
     public function authenticate(LoginRequest $request, LoginUser $loginUser)
     {
-        if ($request->safeInput('unique_name') != Null) {
+        if ($request->safeInput('unique_name') != null) {
             $company = Company::where('unique_name', $request->unique_name)->firstOrFail();
             tenancy()->initialize($company);
         }
 
-        $user = User::where(['email' => $request->safeInput('email'),
-        ])->first();
-
+        $user = User::where(['email' => $request->safeInput('email'),])->first();
+        
         if ($user === null || !Hash::check($request->safeInput('password'), $user->password)) {
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
