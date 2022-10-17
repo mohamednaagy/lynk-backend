@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Actions\Contracts\LoginUser;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Auth\LoginRequest;
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,19 +26,16 @@ class LoginController extends Controller
      *
      * @throws ValidationException
      */
-    public function authenticate(Request $request, LoginUser $loginUser)
+    public function authenticate(LoginRequest $request, LoginUser $loginUser)
     {
-        $requestData = $request->validate([
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
-            'source' => ['required', 'string'],
-        ]);
+        if (($companyUniqueName = $request->safeInput('unique_name')) != null) {
+            $company = Company::where('unique_name', $companyUniqueName)->firstOrFail();
+            tenancy()->initialize($company);
+        }
 
-        $user = User::where([
-            'email' => $requestData['email'],
-        ])->first();
+        $user = User::where('email', $request->safeInput('email'))->first();
 
-        if ($user === null || ! Hash::check($requestData['password'], $user->password)) {
+        if ($user === null || ! Hash::check($request->safeInput('password'), $user->password)) {
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);

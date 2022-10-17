@@ -1,14 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Auth;
+namespace App\Http\Requests\V1\Auth;
 
 use App\Models\Company;
-use App\Models\User;
-use App\Rules\DomainWhitelistRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class SendLinkRequest extends FormRequest
+class LoginRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,9 +26,10 @@ class SendLinkRequest extends FormRequest
     public function rules()
     {
         return [
-            'email' => ['required', 'email', Rule::exists(User::class, 'email')],
-            'company_unique_name' => ['nullable', 'string', Rule::exists(Company::class, 'unique_name')],
-            'redirect_url' => ['required', 'url', new DomainWhitelistRule()],
+            'unique_name' => ['nullable', 'string',  Rule::exists(Company::class, 'unique_name')],
+            'email' => ['required', 'string', 'email'],
+            'password' => ['required', 'string'],
+            'source' => ['required', 'string'],
         ];
     }
 }

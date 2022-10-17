@@ -62,6 +62,9 @@ class ActionsServiceProvider extends ServiceProvider
         UpdateAdminWithRoleAndPermission::class => UpdateAdminWithRoleAndPermissionAction::class,
         CreateCustomerWithRoleAndPermission::class => CreateCustomerWithRoleAndPermissionAction::class,
         UpdateCustomerWithRoleAndPermission::class => UpdateCustomerWithRoleAndPermissionAction::class,
+
+        CreateLenderUserWithRoleAndPermission::class => CreateLenderUserWithRoleAndPermissionAction::class,
+
         ListSettings::class => ListSettingsAction::class,
         UpdateSettings::class => UpdateSettingsAction::class,
         GetSettingsArea::class => GetSettingsAreaAction::class,

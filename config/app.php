@@ -179,6 +179,7 @@ return [
         App\Providers\TelescopeServiceProvider::class,
         App\Providers\ActionsServiceProvider::class,
         App\Providers\TenancyServiceProvider::class,
+        App\Providers\MacroServiceProvider::class,
     ],
 
     /*
@@ -198,5 +199,16 @@ return [
         'GrantifySeeder' => Modules\Grantify\Facades\GrantifySeeder::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
+
+    /*
+    |--------------------------------------------------------------------------
+    | domain_whitelist
+    |--------------------------------------------------------------------------
+    |
+    | This array of the WhiteList Hosts to register the URL we need
+    | in the application and to restrict the incoming request to it
+    |
+    */
+    'domain_whitelist' => explode(',', env('DOMAIN_WHITELIST')),
 
 ];
