@@ -27,12 +27,11 @@ class UpdateLenderUserWithRoleAndPermissionAction implements UpdateLenderUserWit
      * Update user.
      *
      * @param  array  $data
-     * @return User $user
-     * @return void
+     * @param  User  $user
+     * @return void $user
      */
     public function handle(array $data, User $user): void
     {
-        dd($user);
         // Update user
         $this->updateUser->handle($user, Arr::only(
             $data,

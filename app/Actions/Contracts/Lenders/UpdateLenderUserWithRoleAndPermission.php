@@ -24,7 +24,8 @@ interface UpdateLenderUserWithRoleAndPermission
      * Update user.
      *
      * @param  array  $data
-     * @return User   $user
+     * @param  User  $user
+     * @return void $user
      */
     public function handle(array $data, User $user): void;
 }
