@@ -7,14 +7,16 @@ use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
 use App\Transformers\FinancingOrderTransformer;
+use Illuminate\Http\JsonResponse;
 
 class OrderController extends Controller
 {
     /**
      * Handle the incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param  StoreOrderRequest  $request
+     * @param  CreateFinancingOrder  $createFinancingOrder
+     * @return JsonResponse
      */
     public function store(StoreOrderRequest $request, CreateFinancingOrder $createFinancingOrder)
     {
