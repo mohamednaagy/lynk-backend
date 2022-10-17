@@ -20,21 +20,22 @@ class LoginController extends Controller
     /**
      * Handle an authentication attempt.
      *
-     * @param Request $request
-     * @param LoginUser $loginUser
+     * @param  Request  $request
+     * @param  LoginUser  $loginUser
      * @return JsonResponse
+     *
      * @throws ValidationException
      */
     public function authenticate(LoginRequest $request, LoginUser $loginUser)
     {
-        if ($request->safeInput('unique_name') != null) {
-            $company = Company::where('unique_name', $request->unique_name)->firstOrFail();
+        if (($companyUniqueName = $request->safeInput('unique_name')) != null) {
+            $company = Company::where('unique_name', $companyUniqueName)->firstOrFail();
             tenancy()->initialize($company);
         }
 
-        $user = User::where(['email' => $request->safeInput('email'),])->first();
-        
-        if ($user === null || !Hash::check($request->safeInput('password'), $user->password)) {
+        $user = User::where('email', $request->safeInput('email'))->first();
+
+        if ($user === null || ! Hash::check($request->safeInput('password'), $user->password)) {
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);

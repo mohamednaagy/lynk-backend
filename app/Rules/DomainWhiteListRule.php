@@ -4,7 +4,7 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
-class DomainWhiteListRule implements Rule
+class DomainWhitelistRule implements Rule
 {
     /**
      * Create a new rule instance.
@@ -35,6 +35,6 @@ class DomainWhiteListRule implements Rule
      */
     public function message()
     {
-        return __('this Url do not match our records.');
+        return __('validation.domain_whitelist');
     }
 }

@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests\V1\Lender\Users;
 
+use App\Enums\Area;
+use App\Models\User;
 use App\Rules\DomainWhiteListRule;
-use App\Rules\WhiteListRule;
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
 {
@@ -31,8 +32,9 @@ class StoreUserRequest extends FormRequest
             'last_name' => ['required', 'min:3', 'string', 'max:100'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
-            'email' => ['required', 'email'],
-            'redirect_url' => ['required', 'url', new DomainWhiteListRule()]
+            'email' => ['required', 'email', tenant()->unique(User::class)],
+            'redirect_url' => ['required', 'url', new DomainWhitelistRule()],
+            'role' => ['required', Rule::in(Area::getRolesPerAreaMap()[Area::Lender])],
         ];
     }
 }

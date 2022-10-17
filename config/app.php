@@ -179,7 +179,7 @@ return [
         App\Providers\TelescopeServiceProvider::class,
         App\Providers\ActionsServiceProvider::class,
         App\Providers\TenancyServiceProvider::class,
-        App\Providers\MacroServiceProvider::class
+        App\Providers\MacroServiceProvider::class,
     ],
 
     /*
@@ -209,7 +209,6 @@ return [
     | in the application and to restrict the incoming request to it
     |
     */
-
-    'domain_whitelist' => env('DOMAIN_WHITELIST'),
+    'domain_whitelist' => explode(',', env('DOMAIN_WHITELIST')),
 
 ];

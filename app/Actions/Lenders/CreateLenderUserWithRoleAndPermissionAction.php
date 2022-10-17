@@ -5,11 +5,11 @@ namespace App\Actions\Lenders;
 use App\Actions\Contracts\AssignPermissionToUser;
 use App\Actions\Contracts\AssignRoleToUser;
 use App\Actions\Contracts\CreateUser;
-use App\Actions\Contracts\Lenders\CreateLenderWithRoleAndPermission;
+use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Models\User;
 use Illuminate\Support\Arr;
 
-class CreateLenderWithRoleAndPermissionAction implements CreateLenderWithRoleAndPermission
+class CreateLenderUserWithRoleAndPermissionAction implements CreateLenderUserWithRoleAndPermission
 {
     /**
      * @param  CreateUser  $createUser
@@ -22,6 +22,7 @@ class CreateLenderWithRoleAndPermissionAction implements CreateLenderWithRoleAnd
         protected AssignPermissionToUser $assignPermissionToUser
     ) {
     }
+
     /**
      * Create new user.
      *
@@ -44,9 +45,15 @@ class CreateLenderWithRoleAndPermissionAction implements CreateLenderWithRoleAnd
         ));
 
         // assign role to user
-        if (!empty($data['role'])) {
+        if (! empty($data['role'])) {
             $this->assignRoleToUser->handle($user, $data['role']);
         }
+
+        // assign permissions to user
+        if (! empty($data['permissions'])) {
+            $this->assignPermissionToUser->handle($user, $data['permissions']);
+        }
+
         // return user
         return $user;
     }
