@@ -1,11 +1,12 @@
 <?php
-namespace App\Http\Controllers\Api\V1\Lenders\Orders;
 
+namespace App\Http\Controllers\Api\V1\Lender\Orders;
+
+use App\Actions\Contracts\Lenders\CreateFinancingOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
-use App\Transformers\FinancingOrderTransformer;
-use App\Actions\Contracts\Lenders\CreateFinancingOrder;
 use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
+use App\Transformers\FinancingOrderTransformer;
 
 class OrderController extends Controller
 {
