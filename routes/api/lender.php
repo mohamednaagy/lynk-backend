@@ -1,12 +1,13 @@
 <?php
 
 use App\Enums\Role;
-use App\Http\Controllers\Api\V1\Lender\Auth\GetAuthUser;
-use App\Http\Controllers\Api\V1\Lender\Auth\RegisterController;
-use App\Http\Controllers\Api\v1\Lender\Users\UserController;
-use App\Http\Controllers\Api\V1\Lenders\Orders\OrderController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\Lender\Auth\GetAuthUser;
+use App\Http\Controllers\Api\v1\Lender\Users\UserController;
+use App\Http\Controllers\Api\V1\Lender\Auth\CompleteRegister;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
+use App\Http\Controllers\Api\V1\Lender\Auth\RegisterController;
+use App\Http\Controllers\Api\V1\Lenders\Orders\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,8 +20,9 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 |
 */
 
-Route::prefix('v1/lender')->group(function () {
+Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     Route::post('/register', RegisterController::class);
+    Route::post('{user}/complete-register', CompleteRegister::class)->name('lender.complete-register');
 
     Route::middleware([
         'auth:sanctum',

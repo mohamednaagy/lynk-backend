@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Api\v1\Lender\Users;
 
-use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Lender\Users\StoreUserRequest;
-use App\Transformers\UserTransformer;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use App\Transformers\UserTransformer;
+use App\Mail\CompleteRegisterInvitation;
+use App\Http\Requests\V1\Lender\Users\StoreUserRequest;
+use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 
 class UserController extends Controller
 {
@@ -34,7 +36,7 @@ class UserController extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($storeUserRequest, $createLenderWithRoleAndPermission) {
             $user = $createLenderWithRoleAndPermission->handle($storeUserRequest->validated());
-
+            Mail::to($user->email)->send(new CompleteRegisterInvitation($user));
             return fractal($user, new UserTransformer())->respond();
         });
     }
