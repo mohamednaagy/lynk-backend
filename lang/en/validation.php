@@ -128,7 +128,9 @@ return [
     'uploaded' => 'The :attribute failed to upload.',
     'url' => 'The :attribute must be a valid URL.',
     'uuid' => 'The :attribute must be a valid UUID.',
-    'national_id_wrong_format' => 'Notional id format is wrong',
+    'national_id_wrong_format' => 'National ID format is not valid',
+    'domain_whitelist' => 'The :attribute is not whitelisted.',
+
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Language Lines

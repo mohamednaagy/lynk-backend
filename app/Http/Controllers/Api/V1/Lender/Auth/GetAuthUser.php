@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Lenders\Auth;
+namespace App\Http\Controllers\Api\V1\Lender\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Transformers\UserTransformer;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class GetAuthUser extends Controller
