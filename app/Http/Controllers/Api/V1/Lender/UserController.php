@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Api\v1\Lender\Users;
 
+use App\Actions\Contracts\FindUserByIdAndRole;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
+use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Users\StoreUserRequest;
+use App\Http\Requests\V1\Lender\Users\UpdateUserRequest;
 use App\Transformers\UserTransformer;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
@@ -53,13 +56,25 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  UpdateUserRequest  $updateUserRequest
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  UpdateLenderUserWithRoleAndPermission  $updateLenderUserWithRoleAndPermission
+     * @param  FindUserByIdAndRole  $findUserByIdAndRole
+     * @return JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(UpdateUserRequest $updateUserRequest, int $id, UpdateLenderUserWithRoleAndPermission $updateLenderUserWithRoleAndPermission, FindUserByIdAndRole $findUserByIdAndRole): JsonResponse
     {
-        //
+        dd($updateUserRequest);
+
+        return DB::transaction((function () use ($updateUserRequest, $id, $updateLenderUserWithRoleAndPermission, $findUserByIdAndRole) {
+            $user = $findUserByIdAndRole->handle($id, Role::LenderAdmin);
+            if (! $user) {
+                return $this->errorResponse('not found');
+            }
+            $updateLenderUserWithRoleAndPermission->handle($updateUserRequest->validated(), $user);
+
+            return $this->successResponse();
+        }));
     }
 
     /**

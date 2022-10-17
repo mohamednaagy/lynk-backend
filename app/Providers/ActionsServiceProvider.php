@@ -18,6 +18,7 @@ use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Actions\Contracts\Lenders\CreateFinancingOrder;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\RegisterLender;
+use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\ListSettings;
 use App\Actions\Contracts\LoginUser;
 use App\Actions\Contracts\SyncPermissionToUser;
@@ -36,6 +37,7 @@ use App\Actions\GetSettingsClassInstanceAction;
 use App\Actions\Lenders\CreateFinancingOrderAction;
 use App\Actions\Lenders\CreateLenderUserWithRoleAndPermissionAction;
 use App\Actions\Lenders\RegisterLenderAction;
+use App\Actions\Lenders\UpdateLenderUserWithRoleAndPermissionAction;
 use App\Actions\ListSettingsAction;
 use App\Actions\LoginUserAction;
 use App\Actions\SyncPermissionToUserAction;
@@ -52,6 +54,7 @@ class ActionsServiceProvider extends ServiceProvider
         LoginUser::class => LoginUserAction::class,
         RegisterLender::class => RegisterLenderAction::class,
         CreateUser::class => CreateUserAction::class,
+        UpdateUserAction::class => UpdateUser::class,
         CreateCompany::class => CreateCompanyAction::class,
         AssignRoleToUser::class => AssignRoleToUserAction::class,
         AssignPermissionToUser::class => AssignPermissionToUserAction::class,
@@ -66,6 +69,7 @@ class ActionsServiceProvider extends ServiceProvider
         UpdateCustomerWithRoleAndPermission::class => UpdateCustomerWithRoleAndPermissionAction::class,
 
         CreateLenderUserWithRoleAndPermission::class => CreateLenderUserWithRoleAndPermissionAction::class,
+        UpdateLenderUserWithRoleAndPermission::class => UpdateLenderUserWithRoleAndPermissionAction::class,
 
         ListSettings::class => ListSettingsAction::class,
         UpdateSettings::class => UpdateSettingsAction::class,
