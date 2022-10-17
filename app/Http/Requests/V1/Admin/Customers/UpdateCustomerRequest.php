@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Admins;
+namespace App\Http\Requests\V1\Admin\Customers;
 
 use Illuminate\Foundation\Http\FormRequest;
 use function trans;
 
-class UpdateAdminRequest extends FormRequest
+class UpdateCustomerRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

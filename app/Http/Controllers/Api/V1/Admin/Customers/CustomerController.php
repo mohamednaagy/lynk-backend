@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admins\Customers;
+namespace App\Http\Controllers\Api\V1\Admin\Customers;
 
 use App\Actions\Contracts\CreateCustomerWithRoleAndPermission;
 use App\Actions\Contracts\FindUserByIdAndRole;
@@ -8,8 +8,8 @@ use App\Actions\Contracts\GetPaginatedUsersByRole;
 use App\Actions\Contracts\UpdateCustomerWithRoleAndPermission;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Customers\StoreCustomerRequest;
-use App\Http\Requests\Customers\UpdateCustomerRequest;
+use App\Http\Requests\V1\Admin\Customers\StoreCustomerRequest;
+use App\Http\Requests\V1\Admin\Customers\UpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\ResourceCollection;

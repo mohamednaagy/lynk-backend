@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admins\Settings;
+namespace App\Http\Controllers\Api\V1\Admin\Settings;
 
 use App\Actions\Contracts\ListSettings;
 use App\Actions\Contracts\UpdateSettings;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Settings\UpdateSettingsRequest;
+use App\Http\Requests\V1\Admin\Settings\UpdateSettingsRequest;
 use App\Http\Resources\SettingsResource;
 use Illuminate\Http\JsonResponse;
 

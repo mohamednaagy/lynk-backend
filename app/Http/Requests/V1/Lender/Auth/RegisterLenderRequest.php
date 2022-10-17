@@ -1,10 +1,6 @@
 <?php
 
-<<<<<<< HEAD:app/Http/Requests/V1/Lender/Auth/RegisterLenderRequest.php
 namespace App\Http\Requests\V1\Lender\Auth;
-=======
-namespace App\Http\Requests\Lenders;
->>>>>>> 05aa7fd2d2878028ad41da2152078aa487e1773b:app/Http/Requests/Lenders/RegisterLenderRequest.php
 
 use App\Models\Company;
 use Illuminate\Foundation\Http\FormRequest;
