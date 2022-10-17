@@ -1,11 +1,13 @@
 <?php
-namespace App\Actions\Lenders;
+namespace App\Actions\Lenders\Orders;
 
 use App\Models\FinancingOrder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use App\Actions\Contracts\Lenders\GetPaginatedOrders as LendersGetPaginatedOrders;
+use App\Actions\Contracts\Lenders\Orders\GetPaginatedFinancingOrder;
 
-class GetPaginatedOrders implements LendersGetPaginatedOrders
+
+
+class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
 {
     public function handle($paginate = 10): LengthAwarePaginator
     {

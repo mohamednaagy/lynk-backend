@@ -1,17 +1,17 @@
 <?php
 namespace App\Http\Controllers\Api\V1\Lenders\Orders;
 
+use App\Models\FinancingOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Transformers\FinancingOrderTransformer;
 use App\Actions\Contracts\Lenders\CreateFinancingOrder;
-use App\Actions\Contracts\Lenders\GetPaginatedOrders;
 use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
-use App\Models\FinancingOrder;
+use App\Actions\Contracts\Lenders\Orders\GetPaginatedFinancingOrder;
 
 class OrderController extends Controller
 {
-    public function index(GetPaginatedOrders $getPaginatedOrders)
+    public function index(GetPaginatedFinancingOrder $getPaginatedOrders)
     {
         $financingOrders = $getPaginatedOrders->handle();
         return fractal($financingOrders, new FinancingOrderTransformer())
@@ -21,7 +21,7 @@ class OrderController extends Controller
 
     public function show(FinancingOrder $order)
     {
-       return fractal($order, new FinancingOrderTransformer())->respond();
+        return fractal($order, new FinancingOrderTransformer())->respond();
     }
 
     /**

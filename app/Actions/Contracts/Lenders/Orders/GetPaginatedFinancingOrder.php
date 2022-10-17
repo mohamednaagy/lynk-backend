@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Actions\Contracts\Lenders;
+namespace App\Actions\Contracts\Lenders\Orders;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-interface GetPaginatedOrders
+interface GetPaginatedFinancingOrder
 {
     public function handle($paginate = 10): LengthAwarePaginator;
 }
