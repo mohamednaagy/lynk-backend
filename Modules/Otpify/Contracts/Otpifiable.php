@@ -4,6 +4,9 @@ namespace Modules\Otpify\Contracts;
 
 use Illuminate\Http\Request;
 
+/**
+ * @property string phone_number
+ */
 interface Otpifiable
 {
     /**

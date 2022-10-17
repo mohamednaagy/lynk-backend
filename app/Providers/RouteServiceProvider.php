@@ -2,13 +2,11 @@
 
 namespace App\Providers;
 
-use App\Enums\Role;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
-use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -36,17 +34,12 @@ class RouteServiceProvider extends ServiceProvider
                 ->group(base_path('routes/api/auth.php'));
 
             Route::middleware('api')
-                ->middleware(InitializeTenancyByRequestData::class)
                 ->prefix('api')
                 ->group(base_path('routes/api/lender.php'));
 
             Route::middleware('api')
                 ->prefix('api')
                 ->group(base_path('routes/api/admin.php'));
-
-            Route::middleware('api')
-                ->prefix('api')
-                ->group(base_path('routes/api/customer.php'));
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));

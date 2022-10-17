@@ -13,13 +13,13 @@ class LoginUserAction implements LoginUser
 {
     /**
      * @param  User  $user
-     * @param  string  $source
-     * @param  \Illuminate\Http\Request  $request
-     * @return bool
+     * @param  string|null  $source
+     * @param  Request|null  $request
+     * @return array
      */
     public function handle(User $user, string $source = null, Request $request = null): array
     {
-        $auth = ['type' => null];
+        $auth = [];
 
         if (App::runningInConsole() || false === EnsureFrontendRequestsAreStateful::fromFrontend(request())) {
             $auth['token'] = $user->createToken($source)->plainTextToken;
@@ -29,6 +29,8 @@ class LoginUserAction implements LoginUser
             request()->session()->regenerate();
             $auth['type'] = 'session';
         }
+
+        $auth['company_id'] = $user->company_id;
 
         return $auth;
     }

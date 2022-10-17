@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Actions\AssignPermissionToUserAction;
 use App\Actions\AssignRoleToUserAction;
+use App\Actions\Companies\CreateCompanyAction;
 use App\Actions\Contracts\AssignPermissionToUser;
 use App\Actions\Contracts\AssignRoleToUser;
+use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\CreateAdminWithRoleAndPermission;
 use App\Actions\Contracts\CreateCustomerWithRoleAndPermission;
 use App\Actions\Contracts\CreateUser;
@@ -13,6 +15,8 @@ use App\Actions\Contracts\FindUserByIdAndRole;
 use App\Actions\Contracts\GetPaginatedUsersByRole;
 use App\Actions\Contracts\GetSettingsArea;
 use App\Actions\Contracts\GetSettingsClassInstance;
+use App\Actions\Contracts\Lenders\CreateFinancingOrder;
+use App\Actions\Contracts\Lenders\RegisterLender;
 use App\Actions\Contracts\ListSettings;
 use App\Actions\Contracts\LoginUser;
 use App\Actions\Contracts\SyncPermissionToUser;
@@ -28,6 +32,8 @@ use App\Actions\FindUserByIdAndRoleAction;
 use App\Actions\GetPaginatedUsersByRoleAction;
 use App\Actions\GetSettingsAreaAction;
 use App\Actions\GetSettingsClassInstanceAction;
+use App\Actions\Lenders\CreateFinancingOrderAction;
+use App\Actions\Lenders\RegisterLenderAction;
 use App\Actions\ListSettingsAction;
 use App\Actions\LoginUserAction;
 use App\Actions\SyncPermissionToUserAction;
@@ -42,27 +48,24 @@ class ActionsServiceProvider extends ServiceProvider
 {
     public array $bindings = [
         LoginUser::class => LoginUserAction::class,
-
+        RegisterLender::class => RegisterLenderAction::class,
         CreateUser::class => CreateUserAction::class,
+        CreateCompany::class => CreateCompanyAction::class,
         AssignRoleToUser::class => AssignRoleToUserAction::class,
         AssignPermissionToUser::class => AssignPermissionToUserAction::class,
-
         UpdateUser::class => UpdateUserAction::class,
         SyncRoleToUser::class => SyncRoleToUserAction::class,
         SyncPermissionToUser::class => SyncPermissionToUserAction::class,
-
         FindUserByIdAndRole::class => FindUserByIdAndRoleAction::class,
         GetPaginatedUsersByRole::class => GetPaginatedUsersByRoleAction::class,
-
         CreateAdminWithRoleAndPermission::class => CreateAdminWithRoleAndPermissionAction::class,
         UpdateAdminWithRoleAndPermission::class => UpdateAdminWithRoleAndPermissionAction::class,
-
         CreateCustomerWithRoleAndPermission::class => CreateCustomerWithRoleAndPermissionAction::class,
         UpdateCustomerWithRoleAndPermission::class => UpdateCustomerWithRoleAndPermissionAction::class,
-
         ListSettings::class => ListSettingsAction::class,
         UpdateSettings::class => UpdateSettingsAction::class,
         GetSettingsArea::class => GetSettingsAreaAction::class,
         GetSettingsClassInstance::class => GetSettingsClassInstanceAction::class,
+        CreateFinancingOrder::class => CreateFinancingOrderAction::class,
     ];
 }

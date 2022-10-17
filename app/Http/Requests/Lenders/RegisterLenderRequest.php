@@ -1,10 +1,16 @@
 <?php
 
-namespace App\Http\Requests\Customers;
+<<<<<<< HEAD:app/Http/Requests/V1/Lender/Auth/RegisterLenderRequest.php
+namespace App\Http\Requests\V1\Lender\Auth;
+=======
+namespace App\Http\Requests\Lenders;
+>>>>>>> 05aa7fd2d2878028ad41da2152078aa487e1773b:app/Http/Requests/Lenders/RegisterLenderRequest.php
 
+use App\Models\Company;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class RegisterRequest extends FormRequest
+class RegisterLenderRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,11 +27,14 @@ class RegisterRequest extends FormRequest
         return [
             'first_name' => ['required', 'min:3', 'string', 'max:100'],
             'last_name' => ['required', 'min:3', 'string', 'max:100'],
+            'email' => ['required', 'email'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
-            'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'confirmed', 'min:8'],
             'password_confirmation' => ['required', 'string', 'min:8'],
+            'company_name' => ['required', 'string', 'min:3'],
+            'company_unique_name' => ['required', 'string', Rule::unique(Company::class, 'unique_name'), 'min:3', 'regex:/(^[a-zA-Z]+[a-zA-Z0-9\\-\\_]*$)/u'],
+            'company_cr' => ['required', 'string', Rule::unique(Company::class, 'company_cr'), 'min:1'],
             'source' => ['required', 'string'],
         ];
     }

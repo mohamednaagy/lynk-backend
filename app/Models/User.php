@@ -24,7 +24,6 @@ class User extends Authenticatable implements Otpifiable, Grantifiable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, BelongsToTenant;
 
-
     /**
      * The attributes that are mass assignable.
      *
@@ -78,7 +77,7 @@ class User extends Authenticatable implements Otpifiable, Grantifiable
      */
     public function doesRequireVerifyingByOtp(Request $request): bool
     {
-        // TODO: Implement shouldAsk() method.
+        return false;
     }
 
     /**

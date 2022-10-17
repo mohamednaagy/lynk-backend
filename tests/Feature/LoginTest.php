@@ -12,11 +12,11 @@ class LoginTest extends TestCase
 
     /**
      * @return void
-     * @covers \App\Http\Controllers\Api\Auth\LoginController::authenticate
+     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_body(): void
     {
-        $response = $this->postJson('api/auth/login');
+        $response = $this->postJson('api/v1/auth/login');
         $response->assertStatus(422)->assertExactJson(
             [
                 'message' => 'The email field is required. (and 2 more errors)',
@@ -37,11 +37,11 @@ class LoginTest extends TestCase
 
     /**
      * @return void
-     * @covers \App\Http\Controllers\Api\Auth\LoginController::authenticate
+     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_password_and_source(): void
     {
-        $response = $this->postJson('api/auth/login', ['email' => 'a@a.a']);
+        $response = $this->postJson('api/v1/auth/login', ['email' => 'a@a.a']);
         $response->assertStatus(422)->assertExactJson(
             [
                 'message' => 'The password field is required. (and 1 more error)',
@@ -59,11 +59,11 @@ class LoginTest extends TestCase
 
     /**
      * @return void
-     * @covers \App\Http\Controllers\Api\Auth\LoginController::authenticate
+     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_source_and_email(): void
     {
-        $response = $this->postJson('api/auth/login', ['password' => '12345678']);
+        $response = $this->postJson('api/v1/auth/login', ['password' => '12345678']);
         $response->assertStatus(422)->assertExactJson(
             [
                 'message' => 'The email field is required. (and 1 more error)',
@@ -81,11 +81,11 @@ class LoginTest extends TestCase
 
     /**
      * @return void
-     * @covers \App\Http\Controllers\Api\Auth\LoginController::authenticate
+     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_email_and_password(): void
     {
-        $response = $this->postJson('api/auth/login', ['source' => 'admin']);
+        $response = $this->postJson('api/v1/auth/login', ['source' => 'admin']);
         $response->assertStatus(422)->assertExactJson(
             [
                 'message' => 'The email field is required. (and 1 more error)',
@@ -103,11 +103,11 @@ class LoginTest extends TestCase
 
     /**
      * @return void
-     * @covers \App\Http\Controllers\Api\Auth\LoginController::authenticate
+     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_email(): void
     {
-        $response = $this->postJson('api/auth/login', [
+        $response = $this->postJson('api/v1/auth/login', [
             'password' => '12345678',
             'source' => 'admin',
         ]);
@@ -125,11 +125,11 @@ class LoginTest extends TestCase
 
     /**
      * @return void
-     * @covers \App\Http\Controllers\Api\Auth\LoginController::authenticate
+     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_password(): void
     {
-        $response = $this->postJson('api/auth/login', [
+        $response = $this->postJson('api/v1/auth/login', [
             'email' => 'a@a.aa',
             'source' => 'admin',
         ]);
@@ -147,11 +147,11 @@ class LoginTest extends TestCase
 
     /**
      * @return void
-     * @covers \App\Http\Controllers\Api\Auth\LoginController::authenticate
+     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_source(): void
     {
-        $response = $this->postJson('api/auth/login', [
+        $response = $this->postJson('api/v1/auth/login', [
             'email' => 'a@a.aa',
             'password' => '12345678',
         ]);
@@ -169,11 +169,11 @@ class LoginTest extends TestCase
 
     /**
      * @return void
-     * @covers \App\Http\Controllers\Api\Auth\LoginController::authenticate
+     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_not_exist_user(): void
     {
-        $response = $this->postJson('api/auth/login', [
+        $response = $this->postJson('api/v1/auth/login', [
             'email' => 'a@a.aa',
             'password' => '12345678',
             'source' => 'admin',
@@ -190,7 +190,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
-     * @covers \App\Http\Controllers\Api\Auth\LoginController::authenticate
+     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_success_for_exist_user(): void
     {
@@ -204,7 +204,7 @@ class LoginTest extends TestCase
             'password' => $passwordEncrypted,
         ]);
 
-        $response = $this->postJson('api/auth/login', [
+        $response = $this->postJson('api/v1/auth/login', [
             'email' => $email,
             'password' => $passwordPlainText,
             'source' => $source,

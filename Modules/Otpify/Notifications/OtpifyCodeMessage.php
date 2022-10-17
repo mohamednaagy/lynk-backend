@@ -46,10 +46,10 @@ class OtpifyCodeMessage extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->greeting(trans('otpify::email.greeting', ['name' => $notifiable->fullName]))
-                    ->line(trans('otpify::email.otp_code', ['code' => $this->otpCode]))
-                    ->line(trans('otpify::email.expire_at', ['time' => $this->expirationDate->diffInMinutes(now())]))
-                    ->line(trans('otpify::email.ignore_message'));
+            ->greeting(trans('otpify::email.greeting', ['name' => $notifiable->fullName]))
+            ->line(trans('otpify::email.otp_code', ['code' => $this->otpCode]))
+            ->line(trans('otpify::email.expire_at', ['time' => $this->expirationDate->diffInMinutes(now())]))
+            ->line(trans('otpify::email.ignore_message'));
     }
 
     /**
