@@ -29,8 +29,8 @@ if (!function_exists('validate_said')) {
     }
 }
 
-if (!function_exists('getSignatureFromUrl')) {
-    function getSignatureFromUrl($url, $key = 'signature=')
+if (!function_exists('get_signature_from_url')) {
+    function get_signature_from_url($url, $key = 'signature=')
     {
         return substr($url, (strpos($url, $key) + strlen($key)), strlen($url));
     }

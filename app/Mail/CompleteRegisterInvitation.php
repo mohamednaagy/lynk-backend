@@ -26,7 +26,7 @@ class CompleteRegisterInvitation extends Mailable
     {
         $this->user = $user;
         $sginedRoute = URL::signedRoute('api.v1.lender.complete-register', ['user' => $this->user->id]);
-        $signature = getSignatureFromUrl($sginedRoute);
+        $signature = get_signature_from_url($sginedRoute);
         $this->url = build_frontend_url('/complete-register', ['id' => $this->user->id, 'signature' => $signature], 'lender');
     }
 
