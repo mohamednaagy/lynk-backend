@@ -22,12 +22,10 @@ class CompleteRegisterInvitation extends Mailable
      *
      * @return void
      */
-    public function __construct(User $user)
+    public function __construct(User $user, string $externalUrl)
     {
         $this->user = $user;
-        $sginedRoute = URL::signedRoute('api.v1.lender.complete-register', ['user' => $this->user->id]);
-        $signature = get_signature_from_url($sginedRoute);
-        $this->url = build_frontend_url('/complete-register', ['id' => $this->user->id, 'signature' => $signature], 'lender');
+        $this->url = URL::signedExternalRoute($externalUrl, 'api.v1.lender.complete-register', ['user' => $user->id]);
     }
 
     /**
