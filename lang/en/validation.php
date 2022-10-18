@@ -129,7 +129,7 @@ return [
     'url' => 'The :attribute must be a valid URL.',
     'uuid' => 'The :attribute must be a valid UUID.',
     'national_id_wrong_format' => 'National ID format is not valid',
-    'domain_whitelist' => 'The :attribute is not whitelisted.',
+    'host_whitelist' => 'The :attribute is not whitelisted.',
 
     /*
     |--------------------------------------------------------------------------

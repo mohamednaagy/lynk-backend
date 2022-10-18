@@ -202,13 +202,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | domain_whitelist
+    | host_whitelist
     |--------------------------------------------------------------------------
     |
     | This array of the WhiteList Hosts to register the URL we need
     | in the application and to restrict the incoming request to it
     |
     */
-    'domain_whitelist' => explode(',', env('DOMAIN_WHITELIST')),
+    'host_whitelist' => explode(',', env('HOST_WHITELIST')),
 
 ];
