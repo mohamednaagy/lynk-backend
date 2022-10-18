@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Customers;
+namespace App\Http\Requests\V1\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 use function trans;
 
-class StoreCustomerRequest extends FormRequest
+class StoreAdminRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Settings;
+namespace App\Http\Requests\V1\Admin\Settings;
 
 use App\Enums\Area;
 use Illuminate\Foundation\Http\FormRequest;

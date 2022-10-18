@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admins;
+namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Actions\Contracts\CreateAdminWithRoleAndPermission;
 use App\Actions\Contracts\FindUserByIdAndRole;
@@ -8,8 +8,8 @@ use App\Actions\Contracts\GetPaginatedUsersByRole;
 use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admins\StoreAdminRequest;
-use App\Http\Requests\Admins\UpdateAdminRequest;
+use App\Http\Requests\V1\Admin\StoreAdminRequest;
+use App\Http\Requests\V1\Admin\UpdateAdminRequest;
 use App\Http\Resources\AuthResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\ResourceCollection;
