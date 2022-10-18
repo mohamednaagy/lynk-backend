@@ -25,7 +25,7 @@ class DomainWhitelistRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        return in_array(parse_url($value)['host'], explode(',', env('DOMAIN_WHITELIST')));
+        return in_array(parse_url($value)['host'], config('app.domain_whitelist'));
     }
 
     /**
