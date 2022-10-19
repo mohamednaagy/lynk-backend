@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Users;
 
-use App\Actions\Contracts\FindUserByIdAndRole;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
-use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Users\StoreUserRequest;
 use App\Http\Requests\V1\Lender\Users\UpdateUserRequest;
@@ -64,13 +62,12 @@ class UserController extends Controller
      * @param  UpdateLenderUserWithRoleAndPermission  $updateLenderUserWithRoleAndPermission
      * @return JsonResponse
      */
-    public function update(UpdateUserRequest $updateUserRequest, int $id, UpdateLenderUserWithRoleAndPermission $updateLenderUserWithRoleAndPermission, FindUserByIdAndRole $findUserByIdAndRole): JsonResponse
-    {
-        return DB::transaction((function () use ($updateUserRequest, $id, $updateLenderUserWithRoleAndPermission, $findUserByIdAndRole) {
-            $user = $findUserByIdAndRole->handle($id, Role::LenderAdmin);
-            if (! $user) {
-                return $this->errorResponse('not found');
-            }
+    public function update(
+        UpdateUserRequest $updateUserRequest,
+        User $user,
+        UpdateLenderUserWithRoleAndPermission $updateLenderUserWithRoleAndPermission,
+    ): JsonResponse {
+        return DB::transaction((function () use ($updateUserRequest, $user, $updateLenderUserWithRoleAndPermission) {
             $updateLenderUserWithRoleAndPermission->handle($updateUserRequest->validated(), $user);
 
             return $this->successResponse();

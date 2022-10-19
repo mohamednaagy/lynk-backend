@@ -33,14 +33,19 @@ class UpdateLenderUserWithRoleAndPermissionAction implements UpdateLenderUserWit
     public function handle(array $data, User $user): void
     {
         // Update user
-        $this->updateUser->handle($user, Arr::only(
-            $data,
-            [
-                'first_name',
-                'last_name',
-                'email',
-            ]
-        ));
+        $this->updateUser->handle(
+            $user,
+            Arr::only(
+                $data,
+                [
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'phone_number',
+                    'phone_country_code',
+                ]
+            )
+        );
 
         // sync role
         if (! empty($data['role'])) {

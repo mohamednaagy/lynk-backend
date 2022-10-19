@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\V1\Lender\Users;
 
+use App\Enums\Area;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -27,6 +29,9 @@ class UpdateUserRequest extends FormRequest
             'first_name' => ['required', 'min:3', 'string', 'max:100'],
             'last_name' => ['required', 'min:3', 'string', 'max:100'],
             'email' => ['required', 'email'],
+            'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
+            'phone_number' => ['required', 'phone:phone_country_code', 'string'],
+            'role' => ['required', Rule::in(Area::getRolesPerAreaMap()[Area::Lender])],
         ];
     }
 }

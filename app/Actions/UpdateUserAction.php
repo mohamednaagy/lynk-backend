@@ -28,16 +28,18 @@ class UpdateUserAction implements UpdateUser
             $data['phone_number'] = null;
         }
 
-        return $user->update(Arr::only(
-            $data,
-            [
-                'first_name',
-                'last_name',
-                'email',
-                'phone_number',
-                'password',
-                'source',
-            ]
-        ));
+        return $user->update(
+            Arr::only(
+                $data,
+                [
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'phone_number',
+                    'password',
+                    'source',
+                ]
+            )
+        );
     }
 }

@@ -209,6 +209,6 @@ return [
     | in the application and to restrict the incoming request to it
     |
     */
-    'domain_whitelist' => explode(',', env('DOMAIN_WHITELIST')),
+    'host_whitelist' => explode(',', env('HOST_WHITELIST')),
 
 ];
