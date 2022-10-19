@@ -15,11 +15,12 @@ use App\Actions\Contracts\FindUserByIdAndRole;
 use App\Actions\Contracts\GetPaginatedUsersByRole;
 use App\Actions\Contracts\GetSettingsArea;
 use App\Actions\Contracts\GetSettingsClassInstance;
+use App\Actions\Contracts\Lenders\Auth\RegisterLender;
+use App\Actions\Contracts\Lenders\Auth\UserCompleteRegister;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
 use App\Actions\Contracts\Lenders\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Lenders\Orders\GetPaginatedFinancingOrder;
-use App\Actions\Contracts\Lenders\RegisterLender;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\ListSettings;
 use App\Actions\Contracts\LoginUser;
@@ -36,11 +37,12 @@ use App\Actions\FindUserByIdAndRoleAction;
 use App\Actions\GetPaginatedUsersByRoleAction;
 use App\Actions\GetSettingsAreaAction;
 use App\Actions\GetSettingsClassInstanceAction;
+use App\Actions\Lenders\Auth\RegisterLenderAction;
+use App\Actions\Lenders\Auth\UserCompleteRegisterAction;
 use App\Actions\Lenders\CreateLenderUserWithRoleAndPermissionAction;
 use App\Actions\Lenders\GetPaginatedLenderUsersAction;
 use App\Actions\Lenders\Orders\CreateFinancingOrderAction;
 use App\Actions\Lenders\Orders\GetPaginatedFinancingOrderAction;
-use App\Actions\Lenders\RegisterLenderAction;
 use App\Actions\Lenders\UpdateLenderUserWithRoleAndPermissionAction;
 use App\Actions\ListSettingsAction;
 use App\Actions\LoginUserAction;
@@ -74,6 +76,7 @@ class ActionsServiceProvider extends ServiceProvider
         GetPaginatedLenderUsers::class => GetPaginatedLenderUsersAction::class,
         CreateLenderUserWithRoleAndPermission::class => CreateLenderUserWithRoleAndPermissionAction::class,
         UpdateLenderUserWithRoleAndPermission::class => UpdateLenderUserWithRoleAndPermissionAction::class,
+        UserCompleteRegister::class => UserCompleteRegisterAction::class,
 
         ListSettings::class => ListSettingsAction::class,
         UpdateSettings::class => UpdateSettingsAction::class,
