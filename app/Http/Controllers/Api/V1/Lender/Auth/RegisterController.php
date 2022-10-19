@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Auth;
 
-use App\Actions\Contracts\Lenders\RegisterLender;
+use App\Actions\Contracts\Lenders\Auth\RegisterLender;
 use App\Actions\Contracts\LoginUser;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\RegisterLenderRequest;

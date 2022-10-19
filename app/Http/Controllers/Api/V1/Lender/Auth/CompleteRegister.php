@@ -1,12 +1,13 @@
 <?php
+
 namespace App\Http\Controllers\Api\V1\Lender\Auth;
 
-use App\Models\User;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Transformers\UserTransformer;
 use App\Actions\Contracts\Lenders\Auth\UserCompleteRegister;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\CompleteRegisterRequest;
+use App\Models\User;
+use App\Transformers\UserTransformer;
+use Illuminate\Http\JsonResponse;
 
 class CompleteRegister extends Controller
 {
@@ -18,12 +19,18 @@ class CompleteRegister extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  User  $user
+     * @param  CompleteRegisterRequest  $request
+     * @param  UserCompleteRegister  $userCompleteRegister
+     * @return JsonResponse
      */
-    public function __invoke(User $user, CompleteRegisterRequest $request, UserCompleteRegister $userCompleteRegister)
-    {
+    public function __invoke(
+        User $user,
+        CompleteRegisterRequest $request,
+        UserCompleteRegister $userCompleteRegister
+    ): JsonResponse {
         $user = $userCompleteRegister->handle($user, $request->validated());
+
         return fractal($user, new UserTransformer)->respond();
     }
 }

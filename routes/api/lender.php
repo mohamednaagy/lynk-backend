@@ -1,12 +1,11 @@
 <?php
 
 use App\Enums\Role;
+use App\Http\Controllers\Api\V1\Lender\Auth\CompleteRegister;
 use App\Http\Controllers\Api\V1\Lender\Auth\GetAuthUser;
-use App\Http\Controllers\Api\V1\Lender\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Lender\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Users\UserController;
-use App\Http\Controllers\Api\V1\Lenders\Orders\OrderController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 

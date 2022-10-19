@@ -1,33 +1,37 @@
 <?php
+
 namespace App\Mixin;
 
-use Exception;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Config;
+use Closure;
+use Illuminate\Routing\UrlGenerator;
+use InvalidArgumentException;
 
+/**
+ * @mixin UrlGenerator
+ */
 class SignedExternalRouteMixin
 {
-    public function signedExternalRoute()
+    public function signedExternalRoute(): Closure
     {
         return function ($externalUrl, $name, $parameters = [], $expiration = null, $absolute = true) {
-            if (!filter_var($externalUrl, FILTER_VALIDATE_URL)) {
-                throw new Exception('Provided url not correct');
+            if (! filter_var($externalUrl, FILTER_VALIDATE_URL)) {
+                throw new InvalidArgumentException('Provided url not correct');
             }
 
-            $url = parse_url($externalUrl);
+            $parsedUrl = parse_url($externalUrl);
             // check trusted domain
-            if (!in_array($url['host'], Config::get('app.domain_whitelist', []))) {
-                throw new Exception('The domain not listed in whitelist');
+            if (! in_array($parsedUrl['host'], config('app.host_whitelist', []))) {
+                throw new InvalidArgumentException('The domain not listed in whitelist');
             }
 
-            foreach ($parameters as $key => $value) {
-                $externalUrl = Str::replace("{{$key}}", $value, $externalUrl);
-            }
+            $externalUrl = preg_replace_callback('/\{(.*?)(\?)?\}/', function ($m) use ($parameters) {
+                return isset($parameters[$m[1]]) && $parameters[$m[1]] !== '' ? $parameters[$m[1]] : $m[0];
+            }, $externalUrl);
 
-            $sginedRoute = $this->signedRoute($name, $parameters, $expiration, $absolute);
-            $sginedRouteParse = parse_url($sginedRoute);
-            parse_str($sginedRouteParse['query'], $sginedRouteQuery);
-            return $externalUrl . '?' . http_build_query($sginedRouteQuery);
+            $signedRoute = $this->signedRoute($name, $parameters, $expiration, $absolute);
+            $parsedSignedRoute = parse_url($signedRoute);
+
+            return $externalUrl.'?'.$parsedSignedRoute['query'] ?? '';
         };
     }
 }
