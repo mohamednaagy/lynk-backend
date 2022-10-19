@@ -25,7 +25,7 @@ class ValidateSAID implements Rule
      */
     public function passes($attribute, $value)
     {
-        if((int) validate_said($value) > 0) {
+        if ((int) validate_said($value) > 0) {
             return true;
         }
     }

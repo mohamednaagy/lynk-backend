@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Enums\Role;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -25,6 +26,10 @@ class AuthServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerPolicies();
+
+        ResetPassword::createUrlUsing(function ($user, string $token) {
+            return rtrim($this->app['request']->input('redirect_url'), '/').'/'.$token;
+        });
 
         Gate::before(function ($user, $ability) {
             // TODO: need to map the role to the request path.

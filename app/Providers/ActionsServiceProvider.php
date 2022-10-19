@@ -18,7 +18,11 @@ use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Actions\Contracts\Lenders\Auth\UserCompleteRegister;
 use App\Actions\Contracts\Lenders\CreateFinancingOrder;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
+use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
+use App\Actions\Contracts\Lenders\Orders\CreateFinancingOrder;
+use App\Actions\Contracts\Lenders\Orders\GetPaginatedFinancingOrder;
 use App\Actions\Contracts\Lenders\RegisterLender;
+use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\ListSettings;
 use App\Actions\Contracts\LoginUser;
 use App\Actions\Contracts\SyncPermissionToUser;
@@ -37,7 +41,11 @@ use App\Actions\GetSettingsClassInstanceAction;
 use App\Actions\Lenders\Auth\UserCompleteRegisterAction;
 use App\Actions\Lenders\CreateFinancingOrderAction;
 use App\Actions\Lenders\CreateLenderUserWithRoleAndPermissionAction;
+use App\Actions\Lenders\GetPaginatedLenderUsersAction;
+use App\Actions\Lenders\Orders\CreateFinancingOrderAction;
+use App\Actions\Lenders\Orders\GetPaginatedFinancingOrderAction;
 use App\Actions\Lenders\RegisterLenderAction;
+use App\Actions\Lenders\UpdateLenderUserWithRoleAndPermissionAction;
 use App\Actions\ListSettingsAction;
 use App\Actions\LoginUserAction;
 use App\Actions\SyncPermissionToUserAction;
@@ -67,13 +75,17 @@ class ActionsServiceProvider extends ServiceProvider
         CreateCustomerWithRoleAndPermission::class => CreateCustomerWithRoleAndPermissionAction::class,
         UpdateCustomerWithRoleAndPermission::class => UpdateCustomerWithRoleAndPermissionAction::class,
 
+        GetPaginatedLenderUsers::class => GetPaginatedLenderUsersAction::class,
         CreateLenderUserWithRoleAndPermission::class => CreateLenderUserWithRoleAndPermissionAction::class,
+        UpdateLenderUserWithRoleAndPermission::class => UpdateLenderUserWithRoleAndPermissionAction::class,
 
         ListSettings::class => ListSettingsAction::class,
         UpdateSettings::class => UpdateSettingsAction::class,
         GetSettingsArea::class => GetSettingsAreaAction::class,
         GetSettingsClassInstance::class => GetSettingsClassInstanceAction::class,
+        // lenders
         CreateFinancingOrder::class => CreateFinancingOrderAction::class,
+        GetPaginatedFinancingOrder::class => GetPaginatedFinancingOrderAction::class,
         UserCompleteRegister::class => UserCompleteRegisterAction::class,
     ];
 }

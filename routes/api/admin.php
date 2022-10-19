@@ -4,12 +4,12 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
-use App\Http\Controllers\Api\V1\Admins\AdminController;
-use App\Http\Controllers\Api\V1\Admins\Auth\GetAuthUser;
-use App\Http\Controllers\Api\V1\Admins\Customers\CustomerController;
-use App\Http\Controllers\Api\V1\Admins\Roles\GetAllPermissions;
-use App\Http\Controllers\Api\V1\Admins\Roles\GetAllRoles;
-use App\Http\Controllers\Api\V1\Admins\Settings\SettingsController;
+use App\Http\Controllers\Api\V1\Admin\AdminController;
+use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
+use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
+use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
+use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
+use App\Http\Controllers\Api\V1\Admin\Settings\SettingsController;
 use Illuminate\Support\Facades\Route;
 use Modules\Grantify\Facades\Grantify;
 

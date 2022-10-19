@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\v1\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V1\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,3 +19,5 @@ Route::post('v1/auth/login', [LoginController::class, 'authenticate']);
 Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::post('/auth/logout', [LoginController::class, 'logout']);
 });
+
+Route::post('v1/auth/send-reset-password-link', [ForgotPasswordController::class, 'sendResetPasswordLink']);
