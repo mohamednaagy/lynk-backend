@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
-use App\Actions\Contracts\Lenders\CreateFinancingOrder;
+use App\Actions\Contracts\Lenders\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Lenders\Orders\GetPaginatedFinancingOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
@@ -13,7 +13,11 @@ use Illuminate\Http\JsonResponse;
 
 class OrderController extends Controller
 {
-    public function index(GetPaginatedFinancingOrder $getPaginatedOrders)
+    /**
+     * @param  GetPaginatedFinancingOrder  $getPaginatedOrders
+     * @return JsonResponse
+     */
+    public function index(GetPaginatedFinancingOrder $getPaginatedOrders): JsonResponse
     {
         $financingOrders = $getPaginatedOrders->handle();
 
@@ -22,7 +26,11 @@ class OrderController extends Controller
             ->respond();
     }
 
-    public function show(FinancingOrder $order)
+    /**
+     * @param  FinancingOrder  $order
+     * @return JsonResponse
+     */
+    public function show(FinancingOrder $order): JsonResponse
     {
         return fractal($order, new FinancingOrderTransformer())->respond();
     }
@@ -34,8 +42,10 @@ class OrderController extends Controller
      * @param  CreateFinancingOrder  $createFinancingOrder
      * @return JsonResponse
      */
-    public function store(StoreOrderRequest $request, CreateFinancingOrder $createFinancingOrder)
-    {
+    public function store(
+        StoreOrderRequest $request,
+        CreateFinancingOrder $createFinancingOrder
+    ): JsonResponse {
         $requestData = array_merge(
             $request->validated(),
             ['status' => FinancingOrderStatus::Pending]

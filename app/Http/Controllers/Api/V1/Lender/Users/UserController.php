@@ -18,9 +18,10 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @param  GetPaginatedLenderUsers  $getPaginatedLenders
+     * @return JsonResponse
      */
-    public function index(GetPaginatedLenderUsers $getPaginatedLenders)
+    public function index(GetPaginatedLenderUsers $getPaginatedLenders): JsonResponse
     {
         return fractal($getPaginatedLenders->handle(), new UserTransformer)->respond();
     }
