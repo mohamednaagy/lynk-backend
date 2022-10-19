@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\v1\Auth\ForgotPasswordController;
+use App\Http\Controllers\Api\V1\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V1\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
