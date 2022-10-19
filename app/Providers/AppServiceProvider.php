@@ -29,7 +29,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Response::macro('successResponse', function (
             array $data = [],
-            int $statusCode = \Symfony\Component\HttpFoundation\Response::HTTP_OK) {
+            int $statusCode = \Symfony\Component\HttpFoundation\Response::HTTP_OK
+        ) {
             return response()->json([
                 'data' => $data,
             ], $statusCode);

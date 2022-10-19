@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Transformers;
 
 use App\Models\FinancingOrder;
@@ -15,7 +16,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'amount',
         'selling_price',
         'contract',
-        'power_of_attorney'
+        'power_of_attorney',
     ];
 
     public function transform(FinancingOrder $financingOrder)

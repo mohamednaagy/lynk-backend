@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Actions\Lenders;
 
-use App\Models\FinancingOrder;
 use App\Actions\Contracts\Lenders\CreateFinancingOrder;
+use App\Models\FinancingOrder;
 use Illuminate\Support\Arr;
 
 class CreateFinancingOrderAction implements CreateFinancingOrder
@@ -12,10 +13,10 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
         $financingOrder = FinancingOrder::create(Arr::only($data, ['national_id', 'amount', 'selling_price', 'status']));
 
         $financingOrder->addMedia($data['contract'])
-         ->toMediaCollection('contract');
+            ->toMediaCollection('contract');
 
         $financingOrder->addMedia($data['power_of_attorney'])
-         ->toMediaCollection('power_of_attorney');
+            ->toMediaCollection('power_of_attorney');
 
         return $financingOrder;
     }

@@ -158,9 +158,9 @@ return [
         Illuminate\Pipeline\PipelineServiceProvider::class,
         Illuminate\Queue\QueueServiceProvider::class,
         Illuminate\Redis\RedisServiceProvider::class,
-        Illuminate\Auth\Passwords\PasswordResetServiceProvider::class,
+        // Illuminate\Auth\Passwords\PasswordResetServiceProvider::class,
         Illuminate\Session\SessionServiceProvider::class,
-        Illuminate\Translation\TranslationServiceProvider::class,
+        LaravelLang\JsonFallbackHotfix\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
 
@@ -179,6 +179,8 @@ return [
         App\Providers\TelescopeServiceProvider::class,
         App\Providers\ActionsServiceProvider::class,
         App\Providers\TenancyServiceProvider::class,
+        App\Providers\MacroServiceProvider::class,
+        App\Providers\PasswordResetServiceProvider::class,
     ],
 
     /*
@@ -198,5 +200,16 @@ return [
         'GrantifySeeder' => Modules\Grantify\Facades\GrantifySeeder::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
+
+    /*
+    |--------------------------------------------------------------------------
+    | host_whitelist
+    |--------------------------------------------------------------------------
+    |
+    | This array of the WhiteList Hosts to register the URL we need
+    | in the application and to restrict the incoming request to it
+    |
+    */
+    'host_whitelist' => explode(',', env('HOST_WHITELIST')),
 
 ];
