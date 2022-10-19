@@ -1,12 +1,13 @@
 <?php
+
 namespace App\Models;
 
-use Spatie\MediaLibrary\HasMedia;
 use App\Enums\FinancingOrderStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class FinancingOrder extends Model implements HasMedia
 {
@@ -22,22 +23,22 @@ class FinancingOrder extends Model implements HasMedia
         'national_id',
         'amount',
         'selling_price',
-        'status'
+        'status',
     ];
 
     protected $casts = [
-        'status' => FinancingOrderStatus::class
+        'status' => FinancingOrderStatus::class,
     ];
 
     public function registerMediaCollections(): void
     {
         $this
-        ->addMediaCollection('contract')
-        ->singleFile();
+            ->addMediaCollection('contract')
+            ->singleFile();
 
         $this
-        ->addMediaCollection('power_of_attorney')
-        ->singleFile();
+            ->addMediaCollection('power_of_attorney')
+            ->singleFile();
     }
 
     public function company()

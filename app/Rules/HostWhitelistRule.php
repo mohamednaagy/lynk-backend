@@ -4,7 +4,7 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
-class DomainWhitelistRule implements Rule
+class HostWhitelistRule implements Rule
 {
     /**
      * Create a new rule instance.
@@ -25,7 +25,7 @@ class DomainWhitelistRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        return in_array(parse_url($value)['host'], explode(',', env('DOMAIN_WHITELIST')));
+        return in_array(parse_url($value)['host'], config('app.host_whitelist'));
     }
 
     /**
@@ -35,6 +35,6 @@ class DomainWhitelistRule implements Rule
      */
     public function message()
     {
-        return __('validation.domain_whitelist');
+        return __('validation.host_whitelist');
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-if (!function_exists('validate_said')) {
+if (! function_exists('validate_said')) {
     function validate_said($id_number)
     {
         $id = trim($id_number);
-        if (!is_numeric($id)) {
+        if (! is_numeric($id)) {
             return -1;
         }
         if (strlen($id) !== 10) {
@@ -15,7 +15,7 @@ if (!function_exists('validate_said')) {
             return -1;
         }
         $sum = 0;
-        for ($i = 0 ; $i < 10 ; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             if ($i % 2 == 0) {
                 $ZFOdd = str_pad((substr($id, $i, 1) * 2), 2, '0', STR_PAD_LEFT);
                 $sum += substr($ZFOdd, 0, 1) + substr($ZFOdd, 1, 1);
@@ -23,6 +23,7 @@ if (!function_exists('validate_said')) {
                 $sum += substr($id, $i, 1);
             }
         }
+
         return $sum % 10 ? -1 : $type;
     }
 }
