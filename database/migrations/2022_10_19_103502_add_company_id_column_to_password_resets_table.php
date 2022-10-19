@@ -13,12 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('password_resets', function (Blueprint $table) {
-            $table->string('email');
-            $table->unsignedBigInteger('company_id')->nullable();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
+        Schema::table('password_resets', function (Blueprint $table) {
+            $table->unsignedBigInteger('company_id')->nullable()->after('email');
 
+            $table->dropIndex(['email']);
             $table->index(['email', 'company_id']);
             $table->foreign('company_id')->references('id')->on('companies')->onUpdate('cascade')->onDelete('cascade');
         });
@@ -31,6 +29,12 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('password_resets');
+        Schema::table('password_resets', function (Blueprint $table) {
+            $table->dropForeign(['company_id']);
+            $table->dropIndex(['email', 'company_id']);
+            $table->dropColumn('company_id');
+
+            $table->index('email');
+        });
     }
 };

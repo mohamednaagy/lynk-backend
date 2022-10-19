@@ -11,14 +11,21 @@ class ForgotPasswordController extends Controller
 {
     public function sendResetPasswordLink(SendLinkRequest $request)
     {
+        $company = null;
+
         if (($companyUniqueName = $request->safeInput('company_unique_name')) != null) {
             $company = Company::where('unique_name', $companyUniqueName)->firstOrFail();
             tenancy()->initialize($company);
         }
 
-        Password::sendResetLink(
-            $request->only('email')
-        );
+        Password::sendResetLink([
+            'email' => $request->only('email'),
+            function ($query) use ($company) {
+                if ($company === null) {
+                    return $query->whereNull('company_id');
+                }
+            },
+        ]);
 
         return $this->successResponse();
     }

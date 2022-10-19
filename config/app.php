@@ -158,7 +158,7 @@ return [
         Illuminate\Pipeline\PipelineServiceProvider::class,
         Illuminate\Queue\QueueServiceProvider::class,
         Illuminate\Redis\RedisServiceProvider::class,
-        Illuminate\Auth\Passwords\PasswordResetServiceProvider::class,
+        // Illuminate\Auth\Passwords\PasswordResetServiceProvider::class,
         Illuminate\Session\SessionServiceProvider::class,
         LaravelLang\JsonFallbackHotfix\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
@@ -180,6 +180,7 @@ return [
         App\Providers\ActionsServiceProvider::class,
         App\Providers\TenancyServiceProvider::class,
         App\Providers\MacroServiceProvider::class,
+        App\Providers\PasswordResetServiceProvider::class,
     ],
 
     /*
