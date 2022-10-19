@@ -14,13 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('password_resets', function (Blueprint $table) {
-            $table->string('email');
-            $table->unsignedBigInteger('company_id')->nullable();
+            $table->string('email')->index();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
-
-            $table->index(['email', 'company_id']);
-            $table->foreign('company_id')->references('id')->on('companies')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 
