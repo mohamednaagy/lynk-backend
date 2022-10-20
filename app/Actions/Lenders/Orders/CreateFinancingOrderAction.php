@@ -12,11 +12,15 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
     {
         $financingOrder = FinancingOrder::create(Arr::only($data, ['national_id', 'amount', 'selling_price', 'status']));
 
-        $financingOrder->addMedia($data['contract'])
-            ->toMediaCollection('contract');
+        if (isset($data['contract'])) {
+            $financingOrder->addMedia($data['contract'])
+                ->toMediaCollection('contract');
+        }
 
-        $financingOrder->addMedia($data['power_of_attorney'])
-            ->toMediaCollection('power_of_attorney');
+        if (isset($data['power_of_attorney'])) {
+            $financingOrder->addMedia($data['power_of_attorney'])
+                ->toMediaCollection('power_of_attorney');
+        }
 
         return $financingOrder;
     }
