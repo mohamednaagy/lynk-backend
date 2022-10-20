@@ -2,11 +2,11 @@
 
 namespace App\Actions\Lenders\Auth;
 
-use App\Actions\Contracts\Lenders\Auth\UserCompleteRegister;
+use App\Actions\Contracts\Lenders\Auth\CompleteUserRegistration;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-class UserCompleteRegisterAction implements UserCompleteRegister
+class CompleteUserRegistrationAction implements CompleteUserRegistration
 {
     public function handle(User $user, $data): User
     {

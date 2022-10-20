@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
-use App\Actions\Contracts\Lenders\Orders\CreateFinancingOrder;
-use App\Actions\Contracts\Lenders\Orders\GetPaginatedFinancingOrder;
+use App\Actions\Contracts\Orders\CreateFinancingOrder;
+use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;

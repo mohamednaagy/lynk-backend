@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Actions\Lenders\Orders;
+namespace App\Actions\Orders;
 
-use App\Actions\Contracts\Lenders\Orders\GetPaginatedFinancingOrder;
+use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Models\FinancingOrder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 

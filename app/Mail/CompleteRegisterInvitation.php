@@ -1,13 +1,14 @@
 <?php
+
 namespace App\Mail;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Mail\Mailables\Content;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\URL;
 
 class CompleteRegisterInvitation extends Mailable
 {
@@ -36,7 +37,7 @@ class CompleteRegisterInvitation extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Compplete Register Invitation',
+            subject: __('emails/invitation-complete-register.complete_invitation_email_title'),
         );
     }
 

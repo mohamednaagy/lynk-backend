@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Auth;
 
-use App\Actions\Contracts\Lenders\Auth\UserCompleteRegister;
+use App\Actions\Contracts\Lenders\Auth\CompleteUserRegistration;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\CompleteRegisterRequest;
 use App\Models\User;
@@ -21,15 +21,15 @@ class CompleteRegister extends Controller
      *
      * @param  User  $user
      * @param  CompleteRegisterRequest  $request
-     * @param  UserCompleteRegister  $userCompleteRegister
+     * @param  CompleteUserRegistration  $CompleteUserRegistration
      * @return JsonResponse
      */
     public function __invoke(
         User $user,
         CompleteRegisterRequest $request,
-        UserCompleteRegister $userCompleteRegister
+        CompleteUserRegistration $CompleteUserRegistration
     ): JsonResponse {
-        $user = $userCompleteRegister->handle($user, $request->validated());
+        $user = $CompleteUserRegistration->handle($user, $request->validated());
 
         return fractal($user, new UserTransformer)->respond();
     }

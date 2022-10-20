@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Actions\Lenders\Orders;
+namespace App\Actions\Orders;
 
-use App\Actions\Contracts\Lenders\Orders\CreateFinancingOrder;
+use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Models\FinancingOrder;
 use Illuminate\Support\Arr;
 
