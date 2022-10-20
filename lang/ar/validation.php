@@ -129,6 +129,9 @@ return [
     'url' => 'صيغة رابط حقل :attribute غير صحيحة.',
     'uuid' => 'حقل :attribute يجب أن يكون بصيغة UUID سليمة.',
     'national_id_wrong_format' => 'رقم الهوية غير صحيح',
+    'host_whitelist' => 'حقل :attribute غير موثوق فيه.',
+    'phone' => 'حقل :attribute رقم هاتف غير صحيح.',
+
     'attributes' => [
         'address' => 'العنوان',
         'age' => 'العمر',
