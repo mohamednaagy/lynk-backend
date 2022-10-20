@@ -21,5 +21,5 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::post('/auth/logout', [LoginController::class, 'logout']);
 });
 
-Route::post('v1/auth/send-reset-password-link', [ForgotPasswordController::class, 'sendResetPasswordLink']);
-Route::post('v1/auth/reset-password', [ResetPasswordController::class, 'resetPassword']);
+Route::post('v1/auth/send-reset-password-link', ForgotPasswordController::class);
+Route::post('v1/auth/reset-password', ResetPasswordController::class);
