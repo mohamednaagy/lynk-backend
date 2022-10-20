@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1\Auth;
+namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\SendLinkRequest;
@@ -22,7 +22,7 @@ class ForgotPasswordController extends Controller
             'email' => $request->only('email'),
             function ($query) use ($company) {
                 if ($company === null) {
-                    return $query->whereNull('company_id');
+                    $query->whereNull('company_id');
                 }
             },
         ]);

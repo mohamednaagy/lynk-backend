@@ -1,24 +1,29 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1\Lender\Users;
+namespace App\Http\Controllers\Api\V1\Lender\Users;
 
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
+use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Users\StoreUserRequest;
+use App\Http\Requests\V1\Lender\Users\UpdateUserRequest;
+use App\Mail\CompleteRegisterInvitation;
+use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @param  GetPaginatedLenderUsers  $getPaginatedLenders
+     * @return JsonResponse
      */
-    public function index(GetPaginatedLenderUsers $getPaginatedLenders)
+    public function index(GetPaginatedLenderUsers $getPaginatedLenders): JsonResponse
     {
         return fractal($getPaginatedLenders->handle(), new UserTransformer)->respond();
     }
@@ -36,6 +41,8 @@ class UserController extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($storeUserRequest, $createLenderWithRoleAndPermission) {
             $user = $createLenderWithRoleAndPermission->handle($storeUserRequest->validated());
+            $invitationUrl = $storeUserRequest->safeInput('redirect_url');
+            Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
             return fractal($user, new UserTransformer())->respond();
         });
@@ -55,13 +62,21 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @param  User  $user
+     * @param  UpdateUserRequest  $updateUserRequest
+     * @param  UpdateLenderUserWithRoleAndPermission  $updateLenderUserWithRoleAndPermission
+     * @return JsonResponse
      */
-    public function update(Request $request, $id)
-    {
-        //
+    public function update(
+        UpdateUserRequest $updateUserRequest,
+        User $user,
+        UpdateLenderUserWithRoleAndPermission $updateLenderUserWithRoleAndPermission,
+    ): JsonResponse {
+        return DB::transaction((function () use ($updateUserRequest, $user, $updateLenderUserWithRoleAndPermission) {
+            $updateLenderUserWithRoleAndPermission->handle($updateUserRequest->validated(), $user);
+
+            return $this->successResponse();
+        }));
     }
 
     /**

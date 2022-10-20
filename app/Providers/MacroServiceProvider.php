@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Mixin\SignedExternalRouteMixin;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class MacroServiceProvider extends ServiceProvider
@@ -27,5 +29,7 @@ class MacroServiceProvider extends ServiceProvider
         FormRequest::macro('safeInput', function (string $key = null, $default = null) {
             return $this->validator->safe()->only($key)[$key] ?? $default;
         });
+
+        URL::mixin(new SignedExternalRouteMixin);
     }
 }

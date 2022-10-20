@@ -25,8 +25,8 @@ class UpdateAdminRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'first_name' => ['required', 'min:3', 'string', 'max:100'],
-            'last_name' => ['required', 'min:3', 'string', 'max:100'],
+            'first_name' => ['required', 'string', 'min:3', 'max:100'],
+            'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'email' => ['required', 'email', 'unique:users,email,'.$this->id],
@@ -51,7 +51,7 @@ class UpdateAdminRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'phone_number.phone' => trans('customers::validation.phone'),
+            'phone_number.phone' => trans('validation.phone'),
         ];
     }
 }
