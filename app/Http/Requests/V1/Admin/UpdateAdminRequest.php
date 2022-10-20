@@ -51,7 +51,7 @@ class UpdateAdminRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'phone_number.phone' => trans('customers::validation.phone'),
+            'phone_number.phone' => trans('validation.phone'),
         ];
     }
 }
