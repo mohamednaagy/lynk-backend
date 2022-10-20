@@ -18,14 +18,8 @@ class SignedExternalRouteMixin
                 throw new InvalidArgumentException('Provided url not correct');
             }
 
-            $parsedUrl = parse_url($externalUrl);
-            // check trusted domain
-            if (! in_array($parsedUrl['host'], config('app.host_whitelist', []))) {
-                throw new InvalidArgumentException('The domain not listed in whitelist');
-            }
-
-            $externalUrl = preg_replace_callback('/\{(.*?)(\?)?\}/', function ($m) use ($parameters) {
-                return isset($parameters[$m[1]]) && $parameters[$m[1]] !== '' ? $parameters[$m[1]] : $m[0];
+            $externalUrl = preg_replace_callback('/\{(.*?)(\?)?\}/', function ($matches) use ($parameters) {
+                return isset($parameters[$matches[1]]) && $parameters[$matches[1]] !== '' ? $parameters[$matches[1]] : $matches[0];
             }, $externalUrl);
 
             $signedRoute = $this->signedRoute($name, $parameters, $expiration, $absolute);

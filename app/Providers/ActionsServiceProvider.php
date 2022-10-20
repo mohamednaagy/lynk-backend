@@ -15,8 +15,8 @@ use App\Actions\Contracts\FindUserByIdAndRole;
 use App\Actions\Contracts\GetPaginatedUsersByRole;
 use App\Actions\Contracts\GetSettingsArea;
 use App\Actions\Contracts\GetSettingsClassInstance;
+use App\Actions\Contracts\Lenders\Auth\CompleteUserRegistration;
 use App\Actions\Contracts\Lenders\Auth\RegisterLender;
-use App\Actions\Contracts\Lenders\Auth\UserCompleteRegister;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
 use App\Actions\Contracts\Lenders\Orders\CreateFinancingOrder;
@@ -37,8 +37,8 @@ use App\Actions\FindUserByIdAndRoleAction;
 use App\Actions\GetPaginatedUsersByRoleAction;
 use App\Actions\GetSettingsAreaAction;
 use App\Actions\GetSettingsClassInstanceAction;
+use App\Actions\Lenders\Auth\CompleteUserRegistrationAction;
 use App\Actions\Lenders\Auth\RegisterLenderAction;
-use App\Actions\Lenders\Auth\UserCompleteRegisterAction;
 use App\Actions\Lenders\CreateLenderUserWithRoleAndPermissionAction;
 use App\Actions\Lenders\GetPaginatedLenderUsersAction;
 use App\Actions\Lenders\Orders\CreateFinancingOrderAction;
@@ -76,7 +76,7 @@ class ActionsServiceProvider extends ServiceProvider
         GetPaginatedLenderUsers::class => GetPaginatedLenderUsersAction::class,
         CreateLenderUserWithRoleAndPermission::class => CreateLenderUserWithRoleAndPermissionAction::class,
         UpdateLenderUserWithRoleAndPermission::class => UpdateLenderUserWithRoleAndPermissionAction::class,
-        UserCompleteRegister::class => UserCompleteRegisterAction::class,
+        CompleteUserRegistration::class => CompleteUserRegistrationAction::class,
 
         ListSettings::class => ListSettingsAction::class,
         UpdateSettings::class => UpdateSettingsAction::class,
