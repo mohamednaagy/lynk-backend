@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\v1\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V1\Auth\LoginController;
 use App\Http\Controllers\Api\V1\Auth\ResetPasswordController;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,3 +24,4 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
 Route::post('v1/auth/send-reset-password-link', [ForgotPasswordController::class, 'sendResetPasswordLink']);
 Route::post('v1/auth/reset-password', [ResetPasswordController::class, 'resetPassword']);
+

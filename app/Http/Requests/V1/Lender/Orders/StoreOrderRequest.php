@@ -31,8 +31,8 @@ class StoreOrderRequest extends FormRequest
             'national_id' => ['required', 'digits:10', new ValidateSAID],
             'amount' => ['required', 'numeric'],
             'selling_price' => ['required', 'numeric'],
-            'contract' => ['required', 'file'],
-            'power_of_attorney' => ['required', 'file'],
+            'contract' => ['sometimes', 'file'],
+            'power_of_attorney' => ['sometimes', 'file'],
         ];
     }
 }

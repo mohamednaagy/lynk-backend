@@ -15,10 +15,15 @@ use App\Actions\Contracts\FindUserByIdAndRole;
 use App\Actions\Contracts\GetPaginatedUsersByRole;
 use App\Actions\Contracts\GetSettingsArea;
 use App\Actions\Contracts\GetSettingsClassInstance;
-use App\Actions\Contracts\Lenders\CreateFinancingOrder;
-use App\Actions\Contracts\Lenders\RegisterLender;
+use App\Actions\Contracts\Lenders\Auth\CompleteUserRegistration;
+use App\Actions\Contracts\Lenders\Auth\RegisterLender;
+use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
+use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
+use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\ListSettings;
 use App\Actions\Contracts\LoginUser;
+use App\Actions\Contracts\Orders\CreateFinancingOrder;
+use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Actions\Contracts\SyncPermissionToUser;
 use App\Actions\Contracts\SyncRoleToUser;
 use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
@@ -32,10 +37,15 @@ use App\Actions\FindUserByIdAndRoleAction;
 use App\Actions\GetPaginatedUsersByRoleAction;
 use App\Actions\GetSettingsAreaAction;
 use App\Actions\GetSettingsClassInstanceAction;
-use App\Actions\Lenders\CreateFinancingOrderAction;
-use App\Actions\Lenders\RegisterLenderAction;
+use App\Actions\Lenders\Auth\CompleteUserRegistrationAction;
+use App\Actions\Lenders\Auth\RegisterLenderAction;
+use App\Actions\Lenders\CreateLenderUserWithRoleAndPermissionAction;
+use App\Actions\Lenders\GetPaginatedLenderUsersAction;
+use App\Actions\Lenders\UpdateLenderUserWithRoleAndPermissionAction;
 use App\Actions\ListSettingsAction;
 use App\Actions\LoginUserAction;
+use App\Actions\Orders\CreateFinancingOrderAction;
+use App\Actions\Orders\GetPaginatedFinancingOrderAction;
 use App\Actions\SyncPermissionToUserAction;
 use App\Actions\SyncRoleToUserAction;
 use App\Actions\UpdateAdminWithRoleAndPermissionAction;
@@ -63,12 +73,17 @@ class ActionsServiceProvider extends ServiceProvider
         CreateCustomerWithRoleAndPermission::class => CreateCustomerWithRoleAndPermissionAction::class,
         UpdateCustomerWithRoleAndPermission::class => UpdateCustomerWithRoleAndPermissionAction::class,
 
+        GetPaginatedLenderUsers::class => GetPaginatedLenderUsersAction::class,
         CreateLenderUserWithRoleAndPermission::class => CreateLenderUserWithRoleAndPermissionAction::class,
+        UpdateLenderUserWithRoleAndPermission::class => UpdateLenderUserWithRoleAndPermissionAction::class,
+        CompleteUserRegistration::class => CompleteUserRegistrationAction::class,
 
         ListSettings::class => ListSettingsAction::class,
         UpdateSettings::class => UpdateSettingsAction::class,
         GetSettingsArea::class => GetSettingsAreaAction::class,
         GetSettingsClassInstance::class => GetSettingsClassInstanceAction::class,
+        // lenders
         CreateFinancingOrder::class => CreateFinancingOrderAction::class,
+        GetPaginatedFinancingOrder::class => GetPaginatedFinancingOrderAction::class,
     ];
 }

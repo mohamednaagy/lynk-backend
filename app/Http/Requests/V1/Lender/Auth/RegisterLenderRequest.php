@@ -21,8 +21,8 @@ class RegisterLenderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => ['required', 'min:3', 'string', 'max:100'],
-            'last_name' => ['required', 'min:3', 'string', 'max:100'],
+            'first_name' => ['required', 'string', 'min:3', 'max:100'],
+            'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'email' => ['required', 'email'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
@@ -43,7 +43,7 @@ class RegisterLenderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'phone_number.phone' => trans('customers::validation.phone'),
+            'phone_number.phone' => trans('validation.phone'),
         ];
     }
 }

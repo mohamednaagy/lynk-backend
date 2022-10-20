@@ -9,7 +9,7 @@ return [
     */
     'domains' => [
         //'*.example.com',
-        env('APP_URL') . '.api/v1/reset-password',
+        env('APP_URL').'.api/v1/reset-password',
     ],
 
     /*

@@ -78,7 +78,7 @@ class AdminTest extends TestCase
                     'The phone country code field is required when phone number is present.',
                 ],
                 'phone_number' => [
-                    'customers::validation.phone',
+                    'validation.phone',
                 ],
             ],
         ]);
@@ -245,7 +245,7 @@ class AdminTest extends TestCase
                     'The phone country code field is required when phone number is present.',
                 ],
                 'phone_number' => [
-                    'customers::validation.phone',
+                    'validation.phone',
                 ],
             ],
         ]);

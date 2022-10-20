@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Actions\Lenders;
+namespace App\Actions\Lenders\Auth;
 
 use App\Actions\Contracts\AssignRoleToUser;
 use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\CreateUser;
-use App\Actions\Contracts\Lenders\RegisterLender;
+use App\Actions\Contracts\Lenders\Auth\RegisterLender;
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Models\User;
