@@ -31,7 +31,6 @@ class ResetPasswordRequest extends FormRequest
             'email' => ['required', 'email', Rule::exists(User::class, 'email')],
             'company_unique_name' => ['nullable', 'string', Rule::exists(Company::class, 'unique_name')],
             'password' => ['required', 'confirmed', 'min:8'],
-            'password_confirmation' => ['required', 'string', 'min:8', 'date_equals:password'],
         ];
     }
 }
