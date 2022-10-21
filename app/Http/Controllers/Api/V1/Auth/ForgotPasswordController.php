@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\SendLinkRequest;
 use App\Models\Company;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\ValidationException;
 
 class ForgotPasswordController extends Controller
 {
@@ -24,7 +25,7 @@ class ForgotPasswordController extends Controller
             tenancy()->initialize($company);
         }
 
-        Password::sendResetLink([
+        $status = Password::sendResetLink([
             'email' => $request->only('email'),
             function ($query) use ($company) {
                 if ($company === null) {
@@ -33,6 +34,12 @@ class ForgotPasswordController extends Controller
             },
         ]);
 
-        return $this->successResponse();
+        return $status === Password::RESET_LINK_SENT
+        ? $this->successResponse([
+            'message' => trans($status),
+        ])
+        : throw ValidationException::withMessages([
+            'email' => [trans($status)],
+        ]);
     }
 }
