@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\CompanyOrderApproval;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('companies', function (Blueprint $table) {
-            $table->boolean('is_order_require_approval')
-                ->default(CompanyOrderApproval::ApprovalNotRequired)
+            $table->boolean('does_order_require_approval')
+                ->default(false)
                 ->after('data');
         });
     }
@@ -28,8 +27,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('company', function (Blueprint $table) {
-            $table->dropColumn('is_order_require_approval');
+        Schema::table('companies', function (Blueprint $table) {
+            $table->dropColumn('does_order_require_approval');
         });
     }
 };

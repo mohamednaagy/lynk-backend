@@ -46,7 +46,7 @@ class OrderController extends Controller
         StoreOrderRequest $request,
         CreateFinancingOrder $createFinancingOrder
     ): JsonResponse {
-        $status = auth()->user()->isOrderRequireApproval()
+        $status = tenant()->does_order_require_approval
         ? FinancingOrderStatus::Pending
         : FinancingOrderStatus::InProgress;
 
