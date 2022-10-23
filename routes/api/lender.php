@@ -31,6 +31,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         Route::apiResource('users', UserController::class);
         Route::prefix('wallets')->group(function () {
             Route::post('/calculate', [WalletController::class, 'calculateOrders']);
+            Route::get('/transactions', [WalletController::class, 'getTransactions']);
         });
     });
 });
