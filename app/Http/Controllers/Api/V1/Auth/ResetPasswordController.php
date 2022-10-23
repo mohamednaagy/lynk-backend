@@ -31,7 +31,7 @@ class ResetPasswordController extends Controller
         }
 
         Password::broker('users')->reset(
-            $request->validated(
+            $request->safe(
                 ['email', 'password', 'password_confirmation', 'token']
             ) + [
                 function ($query) use ($company) {
