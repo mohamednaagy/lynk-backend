@@ -30,7 +30,7 @@ class ResetPasswordController extends Controller
             tenancy()->initialize($company);
         }
 
-        Password::reset(
+        Password::broker('users')->reset(
             $request->validated(
                 ['email', 'password', 'password_confirmation', 'token']
             ) + [
