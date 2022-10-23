@@ -30,6 +30,7 @@ use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
 use App\Actions\Contracts\UpdateCustomerWithRoleAndPermission;
 use App\Actions\Contracts\UpdateSettings;
 use App\Actions\Contracts\UpdateUser;
+use App\Actions\Contracts\Wallets\CalculateOrdersCost;
 use App\Actions\CreateAdminWithRoleAndPermissionAction;
 use App\Actions\CreateCustomerWithRoleAndPermissionAction;
 use App\Actions\CreateUserAction;
@@ -52,6 +53,7 @@ use App\Actions\UpdateAdminWithRoleAndPermissionAction;
 use App\Actions\UpdateCustomerWithRoleAndPermissionAction;
 use App\Actions\UpdateSettingsAction;
 use App\Actions\UpdateUserAction;
+use App\Actions\Wallets\CalculateOrdersCostAction;
 use Illuminate\Support\ServiceProvider;
 
 class ActionsServiceProvider extends ServiceProvider
@@ -85,5 +87,6 @@ class ActionsServiceProvider extends ServiceProvider
         // lenders
         CreateFinancingOrder::class => CreateFinancingOrderAction::class,
         GetPaginatedFinancingOrder::class => GetPaginatedFinancingOrderAction::class,
+        CalculateOrdersCost::class => CalculateOrdersCostAction::class,
     ];
 }

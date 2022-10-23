@@ -27,6 +27,7 @@ class Company extends BaseTenant
             'unique_name',
             'company_cr',
             'status',
+            'order_cost',
         ];
     }
 }

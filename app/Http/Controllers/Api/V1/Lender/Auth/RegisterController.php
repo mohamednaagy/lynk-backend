@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\RegisterLenderRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 
 class RegisterController extends Controller
@@ -18,7 +19,8 @@ class RegisterController extends Controller
         LoginUser $loginUser
     ): JsonResponse {
         return DB::transaction(function () use ($loginUser, $request, $registerLender) {
-            $lender = $registerLender->handle($request->validated());
+            $data = array_merge($request->validated(), ['order_cost' => Config::get('company.order_cost')]);
+            $lender = $registerLender->handle($data);
 
             return $this->successResponse(
                 $loginUser->handle($lender, $request->source, $request),

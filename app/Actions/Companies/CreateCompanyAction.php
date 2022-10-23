@@ -22,6 +22,7 @@ class CreateCompanyAction implements CreateCompany
                     'unique_name',
                     'company_cr',
                     'status',
+                    'order_cost',
                 ]
             )
         );
