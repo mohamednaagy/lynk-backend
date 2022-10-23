@@ -46,12 +46,14 @@ class OrderController extends Controller
         StoreOrderRequest $request,
         CreateFinancingOrder $createFinancingOrder
     ): JsonResponse {
-        $requestData = array_merge(
-            $request->validated(),
-            ['status' => FinancingOrderStatus::Pending]
-        );
+        $status = tenant()->does_order_require_approval
+            ? FinancingOrderStatus::PendingApproval
+            : FinancingOrderStatus::InProgress;
 
-        $financingOrder = $createFinancingOrder->handle($requestData);
+        $financingOrder = $createFinancingOrder->handle(array_merge(
+            $request->validated(),
+            ['status' => $status]
+        ));
 
         return fractal($financingOrder, new FinancingOrderTransformer())->respond();
     }
