@@ -47,8 +47,8 @@ class OrderController extends Controller
         CreateFinancingOrder $createFinancingOrder
     ): JsonResponse {
         $status = tenant()->does_order_require_approval
-        ? FinancingOrderStatus::Pending
-        : FinancingOrderStatus::InProgress;
+            ? FinancingOrderStatus::PendingApproval
+            : FinancingOrderStatus::InProgress;
 
         $financingOrder = $createFinancingOrder->handle(array_merge(
             $request->validated(),
