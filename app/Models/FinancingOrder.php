@@ -24,6 +24,8 @@ class FinancingOrder extends Model implements HasMedia
         'amount',
         'selling_price',
         'status',
+        'approved_at',
+        'approver_id',
     ];
 
     protected $casts = [
