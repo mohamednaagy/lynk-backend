@@ -28,7 +28,12 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         ResetPassword::createUrlUsing(function ($user, string $token) {
-            return rtrim($this->app['request']->input('redirect_url'), '/').'/'.$token;
+            $query = http_build_query([
+                'email' => $user->email,
+                'company_id' => $user->company_id,
+            ]);
+
+            return rtrim($this->app['request']->input('redirect_url'), '/').'/'.$token.'?'.$query;
         });
 
         Gate::before(function ($user, $ability) {
