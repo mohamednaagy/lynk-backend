@@ -19,7 +19,10 @@ class ApproveOrder extends Controller
     public function __invoke(ApproveOrderInterface $approveOrder, FinancingOrder $order)
     {
         if (! $order->status->is(FinancingOrderStatus::PendingApproval)) {
-            return $this->errorResponse(__('The order status is '.$order->status->description), Response::HTTP_UNPROCESSABLE_ENTITY);
+            return $this->errorResponse(
+                __('error.order_approved_before', ['status' => $order->status->description]),
+                Response::HTTP_UNPROCESSABLE_ENTITY
+            );
         }
 
         $approveOrder->handle($order, auth()->user());

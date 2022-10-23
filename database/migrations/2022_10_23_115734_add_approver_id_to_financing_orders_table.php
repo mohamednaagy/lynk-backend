@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::table('financing_orders', function (Blueprint $table) {
             $table->unsignedBigInteger('approver_id')->nullable()->after('company_id');
-            $table->timestamp('approved_at')->nullable()->after('selling_price');
+            $table->timestamp('approved_at')->nullable()->after('approver_id');
             $table->foreign('approver_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
         });
     }
