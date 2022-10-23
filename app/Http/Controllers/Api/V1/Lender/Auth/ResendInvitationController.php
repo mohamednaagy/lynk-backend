@@ -11,17 +11,16 @@ use Illuminate\Support\Facades\Mail;
 
 class ResendInvitationController extends Controller
 {
-    public function __invoke(ResendInvitationRequest $request)
+    public function __invoke(ResendInvitationRequest $request, User $user)
     {
-        $user = User::where('email', $request->safeInput('email'))->where('password', '=', null)->first();
+        $user = User::find($user->id)->where([['email', $user->email], ['password', null]])->first();
         if ($user != null) {
-            $user->email = $request->safeInput('email');
             $invitationUrl = $request->safeInput('redirect_url');
             Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
             return fractal($user, new UserTransformer())->respond();
         }
 
-        return $this->errorResponse(trans(' The user has accepted the invitation '));
+        return $this->errorResponse(trans('The user has accepted the invitation'));
     }
 }

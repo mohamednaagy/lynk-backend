@@ -29,6 +29,6 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::apiResource('orders', OrderController::class);
         Route::apiResource('users', UserController::class);
-        Route::post('resend-invetaion', ResendInvitationController::class);
+        Route::post('{user}/resend-invetaion', ResendInvitationController::class);
     });
 });

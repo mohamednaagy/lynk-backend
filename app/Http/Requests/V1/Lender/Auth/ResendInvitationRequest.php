@@ -25,9 +25,6 @@ class ResendInvitationRequest extends FormRequest
     public function rules()
     {
         return [
-            'first_name' => ['required', 'string', 'min:3', 'max:100'],
-            'last_name' => ['required', 'string', 'min:3', 'max:100'],
-            'email' => ['required', 'email'],
             'redirect_url' => ['required', 'url', new HostWhitelistRule()],
         ];
     }
