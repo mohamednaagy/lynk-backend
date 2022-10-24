@@ -55,4 +55,14 @@ class FinancingOrder extends Model implements HasMedia
     {
         return $this->getFirstMediaUrl('contract');
     }
+
+    public function traderOrder()
+    {
+        return $this->hasMany(TraderOrder::class, 'order_id', 'id');
+    }
+
+    public function traderHistory()
+    {
+        return $this->hasMany(TraderHistory::class, 'order_id', 'id');
+    }
 }
