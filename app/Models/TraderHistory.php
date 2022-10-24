@@ -15,13 +15,13 @@ class TraderHistory extends Model
     {
         return [
             'id',
-            'order_id',
+            'trader_order_id',
             'action',
         ];
     }
 
-    public function order(): BelongsTo
+    public function traderOrder(): BelongsTo
     {
-        return $this->belongsTo(FinancingOrder::class, 'id', 'order_id');
+        return $this->belongsTo(TraderOrder::class, 'id', 'trader_order_id');
     }
 }
