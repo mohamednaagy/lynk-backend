@@ -14,17 +14,19 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
 
 class LoginController extends Controller
 {
     /**
      * Handle an authentication attempt.
      *
-     * @param  Request  $request
+     * @param  LoginRequest  $request
      * @param  LoginUser  $loginUser
      * @return JsonResponse
      *
      * @throws ValidationException
+     * @throws TenantCouldNotBeIdentifiedById
      */
     public function authenticate(LoginRequest $request, LoginUser $loginUser)
     {
