@@ -32,8 +32,6 @@ class EdaatService
                 'ToDurationTime' => '23:59',
                 'ExportToSadad' => true,
                 'ExpiryDate' => now()->addDay()->toISOString(),
-                'SubBillerShareAmount' => 0,
-                'SubBillerSharePercentage' => 0,
             ]);
 
         if ($this->isSuccess($response)) {
@@ -45,11 +43,19 @@ class EdaatService
 
     public function registerWebhook(string $url)
     {
-        $response = Http::edaat()
+        $responsePayment = Http::edaat()
             ->withBody("\"$url\"", 'application/json')
             ->post(self::PREFIX.'endpoints/PaymentNotification');
 
-        return $this->isSuccess($response);
+        $responseBill = Http::edaat()
+            ->withBody("\"$url\"", 'application/json')
+            ->post(self::PREFIX.'endpoints/BillConfirmation');
+
+        $responseReco = Http::edaat()
+            ->withBody("\"$url\"", 'application/json')
+            ->post(self::PREFIX.'endpoints/Reconciliation');
+
+        return $this->isSuccess($responseBill) && $this->isSuccess($responsePayment) && $this->isSuccess($responseReco);
     }
 
     private function isSuccess(Response $response)
