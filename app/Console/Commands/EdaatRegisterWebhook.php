@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Support\Edaat\EdaatService;
+use Illuminate\Console\Command;
+
+class EdaatRegisterWebhook extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'edaat:register-webhook';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Register Edaat Webhook';
+
+    /**
+     * Execute the console command.
+     *
+     * @return int
+     */
+    public function handle(EdaatService $edaatService)
+    {
+        if ($edaatService->registerWebhook(config('edaat.webhook_url'))) {
+            $this->line('webhook registered successfully');
+
+            return Command::SUCCESS;
+        }
+        $this->error('unable to register webhook');
+
+        return Command::FAILURE;
+    }
+}
