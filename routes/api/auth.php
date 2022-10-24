@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\v1\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V1\Auth\LoginController;
 use App\Http\Controllers\Api\V1\Auth\ResetPasswordController;
+use App\Http\Controllers\Api\V1\Auth\VerifyEmail;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,5 +22,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::post('/auth/logout', [LoginController::class, 'logout']);
 });
 
-Route::post('v1/auth/send-reset-password-link', ForgotPasswordController::class);
-Route::post('v1/auth/reset-password', ResetPasswordController::class);
+Route::prefix('v1/auth')->group(function () {
+    Route::post('send-reset-password-link', ForgotPasswordController::class);
+    Route::post('reset-password', ResetPasswordController::class);
+    Route::post('verify-email/{company}/{user}', VerifyEmail::class);
+});
