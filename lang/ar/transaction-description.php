@@ -1,6 +1,5 @@
 <?php
 
 return [
-    'TopUp' => 'فوق حتى',
-    'OrderCreationFee' => 'رسوم إنشاء الطلب',
+    'order_creation_fee' => ':order_number رسوم إنشاء طلب',
 ];

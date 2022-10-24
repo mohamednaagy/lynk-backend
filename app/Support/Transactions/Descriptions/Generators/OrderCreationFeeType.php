@@ -8,12 +8,14 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Support\Arr;
 
-class TopUpType extends GeneratorBase
+class OrderCreationFeeType extends GeneratorBase
 {
     protected function generateMessage(Transaction $transaction, $locale): array|string|Translator|Application|null
     {
-        $description = Arr::get($transaction->meta, 'description');
+        $items = Arr::only($transaction->meta, ['type', 'order_number']);
 
-        return __("transaction-description.$description", [], $locale);
+        return __('transaction-description.order_creation_fee', [
+            'order_number' => $items['order_number'] ?? '',
+        ], $locale);
     }
 }

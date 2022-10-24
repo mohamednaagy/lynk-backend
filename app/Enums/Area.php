@@ -10,6 +10,8 @@ use BenSampo\Enum\Enum;
  */
 final class Area extends Enum
 {
+    const General = 'General';
+
     const SuperAdmin = 'SuperAdmin';
 
     const Customer = 'Customer';

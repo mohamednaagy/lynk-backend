@@ -2,31 +2,37 @@
 
 namespace App\Support\Transactions\Descriptions;
 
+use App\Enums\TransactionReason;
 use App\Support\Transactions\Descriptions\Generators\DefaultGenerator;
 use Bavix\Wallet\Models\Transaction;
-use Illuminate\Support\Arr;
 
 class DescriptionManager
 {
+    private static array $generators = [];
+
     /**
      * Undocumented function
      *
-     * @param  Transaction  $transaction
+     * @param  int  $reason
      * @return DefaultGenerator|GeneratorInterface
      */
-    protected static function getGenerator(Transaction $transaction): DefaultGenerator|GeneratorInterface
+    protected static function getGenerator(int $reason): DefaultGenerator|GeneratorInterface
     {
-        $className = DefaultGenerator::class;
-
-        if ($class = Arr::get($transaction->meta, 'description')) {
-            $className = 'App\\Support\\Transactions\\Descriptions\\Generators\\'.$class.'Type';
+        if (isset(self::$generators[$reason])) {
+            return self::$generators[$reason];
         }
+
+        $className = 'App\\Support\\Transactions\\Descriptions\\Generators\\'.TransactionReason::getKey($reason).'Type';
 
         if (! class_exists($className)) {
             $className = DefaultGenerator::class;
         }
 
-        return new $className;
+        $generator = new $className;
+
+        self::$generators[$reason] = $generator;
+
+        return $generator;
     }
 
     /**
@@ -38,6 +44,6 @@ class DescriptionManager
      */
     public static function getDescription(Transaction $transaction, $locale = null): string
     {
-        return self::getGenerator($transaction)->generate($transaction, $locale);
+        return self::getGenerator($transaction->meta['type'])->generate($transaction, $locale);
     }
 }

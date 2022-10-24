@@ -65,16 +65,16 @@ return [
      * Storage of the state of the balance of wallets.
      */
     'cache' => [
-        'driver' => 'array',
-        'ttl' => 24 * 3600,
+        'driver' => env('WALLET_CACHE_DRIVER'),
+        'ttl' => env('WALLET_CACHE_TTL'),
     ],
 
     /**
      * A system for dealing with race conditions.
      */
     'lock' => [
-        'driver' => 'array',
-        'seconds' => 1,
+        'driver' => env('WALLET_LOCK_DRIVER'),
+        'seconds' => env('WALLET_LOCK_SECONDS'),
     ],
 
     /**

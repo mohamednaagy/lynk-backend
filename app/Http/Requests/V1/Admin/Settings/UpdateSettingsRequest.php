@@ -39,6 +39,7 @@ class UpdateSettingsRequest extends FormRequest
         return match ($area) {
             'General' => [
                 'otp_driver' => ['required', 'string', Rule::in(Otpify::getOtpifyDrivers())],
+                'order_cost' => ['required', 'numeric'],
             ],
             Area::SuperAdmin => [
                 'otp_driver' => ['required', 'string', Rule::in(Otpify::getOtpifyDrivers())],

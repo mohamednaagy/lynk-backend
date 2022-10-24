@@ -1,6 +1,5 @@
 <?php
 
 return [
-    'TopUp' => 'Top up',
-    'OrderCreationFee' => 'Order creation fee',
+    'order_creation_fee' => 'order :order_number creation fee',
 ];
