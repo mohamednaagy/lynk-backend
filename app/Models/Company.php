@@ -19,6 +19,7 @@ class Company extends BaseTenant implements Wallet
 
     protected $casts = [
         'status' => CompanyStatus::class,
+        'does_order_require_approval' => 'boolean',
     ];
 
     public static function getCustomColumns(): array

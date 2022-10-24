@@ -9,7 +9,13 @@ use Illuminate\Support\Facades\Password;
 
 class ForgotPasswordController extends Controller
 {
-    public function sendResetPasswordLink(SendLinkRequest $request)
+    /**
+     * @param  SendLinkRequest  $request
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * @throws \Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById
+     */
+    public function __invoke(SendLinkRequest $request)
     {
         $company = null;
 

@@ -7,9 +7,11 @@ use BenSampo\Enum\Enum;
 
 final class FinancingOrderStatus extends Enum implements LocalizedEnum
 {
-    const Pending = 1;
+    const PendingApproval = 1;
 
-    const Canceled = 2;
+    const InProgress = 2;
 
-    const Completed = 3;
+    const Canceled = 3;
+
+    const Completed = 4;
 }
