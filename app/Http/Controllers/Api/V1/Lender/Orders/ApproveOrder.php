@@ -20,7 +20,7 @@ class ApproveOrder extends Controller
     {
         if (! $order->status->is(FinancingOrderStatus::PendingApproval)) {
             return $this->errorResponse(
-                __('error.order_cannot_be_approved_because_it_is_approved', ['status' => $order->status->description]),
+                __('error.order_cannot_be_approved_because_it_is_approved'),
                 Response::HTTP_BAD_REQUEST
             );
         }

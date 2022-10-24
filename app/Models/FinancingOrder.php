@@ -26,10 +26,13 @@ class FinancingOrder extends Model implements HasMedia
         'status',
         'approved_at',
         'approver_id',
+        'creator_id',
+        'creator_type',
     ];
 
     protected $casts = [
         'status' => FinancingOrderStatus::class,
+        'approved_at' => 'datetime',
     ];
 
     public function registerMediaCollections(): void
@@ -46,6 +49,16 @@ class FinancingOrder extends Model implements HasMedia
     public function company()
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function creator()
+    {
+        return $this->morphTo('creator');
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approver_id', 'id');
     }
 
     public function getPowerOfAttorneyAttribute()
