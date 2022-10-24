@@ -31,7 +31,7 @@ class EdaatService
                 'FromDurationTime' => '00:00',
                 'ToDurationTime' => '23:59',
                 'ExportToSadad' => true,
-                'ExpiryDate' => now()->addDay()->toISOString(),
+                'ExpiryDate' => now()->addDays(30)->toISOString(),
             ]);
 
         if ($this->isSuccess($response)) {
