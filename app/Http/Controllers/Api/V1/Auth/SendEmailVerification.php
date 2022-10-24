@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Auth\SendEmailVerificationRequest;
 use App\Mail\VerifyEmail;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
 class SendEmailVerification extends Controller
