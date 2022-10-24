@@ -28,6 +28,7 @@ class VerifyEmail extends Controller
         if ($user->company_id !== $company->id) {
             return $this->errorResponse(__('auth.failed'));
         }
+
         $verifyEmail->handle($user);
 
         return $this->successResponse();
