@@ -181,6 +181,8 @@ return [
         App\Providers\TenancyServiceProvider::class,
         App\Providers\MacroServiceProvider::class,
         App\Providers\PasswordResetServiceProvider::class,
+        // sms provider
+        App\Providers\SmsServiceProvider::class,
     ],
 
     /*
@@ -199,6 +201,7 @@ return [
         'Grantify' => Modules\Grantify\Facades\Grantify::class,
         'GrantifySeeder' => Modules\Grantify\Facades\GrantifySeeder::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
+        'Sms' => App\Support\Sms\SmsFacade::class,
     ])->toArray(),
 
     /*
@@ -211,5 +214,12 @@ return [
     |
     */
     'host_whitelist' => explode(',', env('HOST_WHITELIST')),
+    // Sms providers + service
+
+    'sms_providers' => [
+        'name' => env('SMS_SERVICE_PROVIDER_NAME'),
+        'username' => env('SMS_SERVICE_PROVIDER_USERNAME'),
+        'api_key' => env('SMS_SERVICE_PROVIDER_API_KEY'),
+    ],
 
 ];
