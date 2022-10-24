@@ -14,7 +14,7 @@ class TransactionTransformer extends TransformerAbstract
     {
         return [
             'id' => $transaction->id,
-            'date' => Carbon::parse($transaction->created_at)->format('d/m/Y'),
+            'date' => Carbon::parse($transaction->created_at)->format('Y-m-d'),
             'description' => ! is_null($transaction->meta) && ! is_null($transaction->meta['description'])
                 ? DescriptionManager::getDescription($transaction)
                 : null,

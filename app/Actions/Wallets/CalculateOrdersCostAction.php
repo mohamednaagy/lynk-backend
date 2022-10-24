@@ -6,8 +6,8 @@ use App\Actions\Contracts\Wallets\CalculateOrdersCost;
 
 class CalculateOrdersCostAction implements CalculateOrdersCost
 {
-    public function handle(array $data): float|int
+    public function handle(int $ordersCount, $orderCost): float|int
     {
-        return $data['order_cost'] * $data['orders'];
+        return $ordersCount * $orderCost;
     }
 }

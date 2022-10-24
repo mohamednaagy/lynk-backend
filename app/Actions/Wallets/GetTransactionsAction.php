@@ -6,8 +6,11 @@ use App\Actions\Contracts\Wallets\GetTransactions;
 
 class GetTransactionsAction implements GetTransactions
 {
-    public function handle(array $data)
+    /**
+     * @return mixed
+     */
+    public function handle(): mixed
     {
-        return auth()->user()->company->transactions()->paginate();
+        return tenant()->transactions()->paginate();
     }
 }

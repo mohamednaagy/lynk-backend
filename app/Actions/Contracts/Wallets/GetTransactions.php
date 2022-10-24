@@ -4,5 +4,8 @@ namespace App\Actions\Contracts\Wallets;
 
 interface GetTransactions
 {
-    public function handle(array $data);
+    /**
+     * @return mixed
+     */
+    public function handle(): mixed;
 }

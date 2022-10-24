@@ -19,7 +19,6 @@ class DescriptionManager
         $className = DefaultGenerator::class;
 
         if ($class = Arr::get($transaction->meta, 'description')) {
-//            dd($class);
             $className = 'App\\Support\\Transactions\\Descriptions\\Generators\\'.$class.'Type';
         }
 
