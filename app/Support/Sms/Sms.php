@@ -22,23 +22,20 @@ class Sms
                 'msg' => $message,
             ]);
             $code = $response->object()->code;
+            $e = '';
             if ($code == 1) {
                 return response()->json(['message' => $message]);
             } elseif ($code == 1020) {
-                //1020 - Invalid login info
-                throw new InvalidLoginInfoException();
+                $e = throw new InvalidLoginInfoException();
             } elseif ($code == 1060) {
-                //1060 - Balance is not enough
-                throw new BalanceIsNotEnoughException();
+                $e = throw new BalanceIsNotEnoughException();
             } elseif ($code == 1061) {
-                //1061 - MSG duplicated
-                throw new MSGDuplicatedException();
+                $e = throw new MSGDuplicatedException();
             } elseif ($code == 1120) {
-                //1120 - Mobile numbers is not correct
-                throw new MobileNumbersIsNotCorrectException();
+                $e = throw new MobileNumbersIsNotCorrectException();
             }
 
-            return $code;
+            return  $e;
         }
         // return $response;
     }

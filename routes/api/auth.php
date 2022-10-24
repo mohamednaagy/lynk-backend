@@ -24,4 +24,5 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
 Route::post('v1/auth/send-reset-password-link', ForgotPasswordController::class);
 Route::post('v1/auth/reset-password', ResetPasswordController::class);
+//to do test
 Route::post('v1/auth/Send-Sms', [SmsController::class, 'sendMessage']);

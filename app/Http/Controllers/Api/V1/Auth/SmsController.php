@@ -11,7 +11,7 @@ class SmsController extends Controller
     public function sendMessage(SendMessageRequest $request)
     {
         //need it to do test
-        $sms = Sms::sendSMS('$request', '966532702700');
+        $sms = Sms::sendSMS('Pin Code is: 1020', '966532702700');
 
         return  $sms;
     }
