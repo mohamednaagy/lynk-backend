@@ -17,6 +17,12 @@ class FinancingOrderTransformer extends TransformerAbstract
         'selling_price',
         'contract',
         'power_of_attorney',
+        'is_approved',
+    ];
+
+    protected array $availableIncludes = [
+        'creator',
+        'approver',
     ];
 
     public function transform(FinancingOrder $financingOrder)
@@ -31,7 +37,10 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeStatus(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->status->description);
+        return $this->primitive([
+            'description' => $financingOrder->status->description,
+            'value' => $financingOrder->status->value,
+        ]);
     }
 
     public function includeCompanyId(FinancingOrder $financingOrder)
@@ -67,5 +76,20 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includePowerOfAttorney(FinancingOrder $financingOrder)
     {
         return $this->primitive($financingOrder->power_of_attorney);
+    }
+
+    public function includeCreator(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->creator->full_name);
+    }
+
+    public function includeApprover(FinancingOrder $financingOrder)
+    {
+        return $this->primitive(optional($financingOrder->approver)->full_name);
+    }
+
+    public function includeIsApproved(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->approved_at !== null);
     }
 }

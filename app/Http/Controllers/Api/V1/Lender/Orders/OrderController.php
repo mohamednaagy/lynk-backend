@@ -32,7 +32,11 @@ class OrderController extends Controller
      */
     public function show(FinancingOrder $order): JsonResponse
     {
-        return fractal($order, new FinancingOrderTransformer())->respond();
+        $order->load('creator', 'approver');
+
+        return fractal($order, new FinancingOrderTransformer())
+            ->parseIncludes(['creator', 'approver'])
+            ->respond();
     }
 
     /**
@@ -50,10 +54,17 @@ class OrderController extends Controller
             ? FinancingOrderStatus::PendingApproval
             : FinancingOrderStatus::InProgress;
 
-        $financingOrder = $createFinancingOrder->handle(array_merge(
-            $request->validated(),
-            ['status' => $status]
-        ));
+        $financingOrder = $createFinancingOrder->handle(
+            array_merge(
+                $request->validated(),
+                [
+                    'status' => $status,
+                    'creator_id' => auth()->user()->id,
+                    'creator_type' => auth()->user()->getMorphClass(),
+                    'approved_at' => $status === FinancingOrderStatus::InProgress ? now() : null,
+                ]
+            )
+        );
 
         return fractal($financingOrder, new FinancingOrderTransformer())->respond();
     }
