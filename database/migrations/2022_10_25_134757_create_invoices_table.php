@@ -22,7 +22,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
             $table->foreignIdFor(User::class, 'creator_id')
                 ->constrained();
-            $table->string('invoice_number');
+            $table->string('invoice_number')->nullable();
             $table->decimal('amount');
             $table->unsignedTinyInteger('status');
             $table->timestamps();
