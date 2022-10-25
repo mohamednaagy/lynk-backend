@@ -26,6 +26,7 @@ use App\Actions\Contracts\LoginUser;
 use App\Actions\Contracts\Orders\ApproveOrder;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
+use App\Actions\Contracts\Orders\RejectOrder;
 use App\Actions\Contracts\SyncPermissionToUser;
 use App\Actions\Contracts\SyncRoleToUser;
 use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
@@ -53,6 +54,7 @@ use App\Actions\LoginUserAction;
 use App\Actions\Orders\ApproveOrderAction;
 use App\Actions\Orders\CreateFinancingOrderAction;
 use App\Actions\Orders\GetPaginatedFinancingOrderAction;
+use App\Actions\Orders\RejectOrderAction;
 use App\Actions\SyncPermissionToUserAction;
 use App\Actions\SyncRoleToUserAction;
 use App\Actions\UpdateAdminWithRoleAndPermissionAction;
@@ -96,6 +98,7 @@ class ActionsServiceProvider extends ServiceProvider
         CreateFinancingOrder::class => CreateFinancingOrderAction::class,
         GetPaginatedFinancingOrder::class => GetPaginatedFinancingOrderAction::class,
         ApproveOrder::class => ApproveOrderAction::class,
+        RejectOrder::class => RejectOrderAction::class,
         CalculateOrdersCost::class => CalculateOrdersCostAction::class,
         GetTransactions::class => GetTransactionsAction::class,
         GetLenderBalance::class => GetLenderBalanceAction::class,
