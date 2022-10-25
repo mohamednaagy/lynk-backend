@@ -5,9 +5,11 @@ namespace App\Providers;
 use App\Actions\AssignPermissionToUserAction;
 use App\Actions\AssignRoleToUserAction;
 use App\Actions\Companies\CreateCompanyAction;
+use App\Actions\Companies\GetCompaniesAction;
 use App\Actions\Contracts\AssignPermissionToUser;
 use App\Actions\Contracts\AssignRoleToUser;
 use App\Actions\Contracts\Companies\CreateCompany;
+use App\Actions\Contracts\Companies\GetCompanies;
 use App\Actions\Contracts\CreateAdminWithRoleAndPermission;
 use App\Actions\Contracts\CreateCustomerWithRoleAndPermission;
 use App\Actions\Contracts\CreateUser;
@@ -102,5 +104,6 @@ class ActionsServiceProvider extends ServiceProvider
 
         //auth
         VerifyEmail::class => VerifyEmailAction::class,
+        GetCompanies::class => GetCompaniesAction::class,
     ];
 }
