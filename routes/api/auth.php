@@ -26,5 +26,5 @@ Route::prefix('v1/auth')->name('api.v1.')->group(function () {
     Route::post('login', [LoginController::class, 'authenticate']);
     Route::post('send-reset-password-link', SendEmailVerification::class);
     Route::post('reset-password', ResetPasswordController::class);
-    Route::post('verify-email/{company}/{user}', VerifyEmail::class)->name('verify.email');
+    Route::post('verify-email/{user}', VerifyEmail::class)->name('verify.email');
 });

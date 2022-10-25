@@ -23,9 +23,9 @@ class VerifyEmail extends Mailable
      */
     public function __construct(User $user, $externalUrl)
     {
-        $parameters = ['company' => $user->tenant->id, 'user' => $user->id];
+        $parameters = ['company_id' => $user->company_id, 'user' => $user->id];
         $url = URL::signedExternalRoute($externalUrl, 'api.v1.verify.email', $parameters);
-        $this->url = $url.'&'.http_build_query($parameters);
+        $this->url = $url;
     }
 
     /**
@@ -36,7 +36,7 @@ class VerifyEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Verify Email',
+            subject: __('Verify Your Email'),
         );
     }
 

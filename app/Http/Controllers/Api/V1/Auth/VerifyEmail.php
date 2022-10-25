@@ -7,12 +7,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class VerifyEmail extends Controller
 {
     public function __construct()
     {
-        $this->middleware('signed', (array) 'throttle:6,1');
+        $this->middleware(['signed', 'throttle:6,1']);
     }
 
     /**
@@ -23,9 +24,9 @@ class VerifyEmail extends Controller
      * @param  User  $user
      * @return JsonResponse
      */
-    public function __invoke(VerifyEmailInterface $verifyEmail, Company $company, User $user)
+    public function __invoke(Request $request, VerifyEmailInterface $verifyEmail, User $user)
     {
-        if ($user->company_id !== $company->id) {
+        if ($user->company_id !== (int) $request->query('company_id') || $user->email_verified_at) {
             return $this->errorResponse(__('auth.failed'));
         }
 

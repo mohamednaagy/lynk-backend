@@ -19,9 +19,9 @@ class SendEmailVerification extends Controller
     public function __invoke(SendEmailVerificationRequest $request)
     {
         $user = auth()->user();
+
         if ($request->has('email')) {
             $user->update($request->safe(['email']));
-            $user->save();
         }
 
         Mail::to($user->email)->send(new VerifyEmail($user, $request->safeInput('redirect_url')));
