@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
+use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
@@ -32,19 +33,24 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
 
     Route::get('/roles', GetAllRoles::class)->middleware(
         'permission:'.
-            Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Roles, [
-                Action::Index,
-            ])
+        Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Roles, [
+            Action::Index,
+        ])
     );
     Route::get('/permissions', GetAllPermissions::class)->middleware(
         'permission:'.
-            Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Permissions, [
-                Action::Index,
-            ])
+        Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Permissions, [
+            Action::Index,
+        ])
     );
 
     Route::prefix('settings')->group(function () {
         Route::get('/', [SettingsController::class, 'index']);
+        Route::put('/update', [SettingsController::class, 'update']);
+    });
+
+    Route::prefix('companies')->group(function () {
+        Route::get('/{company_id}/users', [CompanyController::class, 'getCompanyUsers']);
         Route::put('/update', [SettingsController::class, 'update']);
     });
 });
