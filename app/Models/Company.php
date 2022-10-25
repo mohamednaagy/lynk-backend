@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\CompanyStatus;
 use Bavix\Wallet\Interfaces\Wallet;
 use Bavix\Wallet\Traits\HasWallet;
+use Bavix\Wallet\Traits\HasWalletFloat;
 use Bavix\Wallet\Traits\HasWallets;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Stancl\Tenancy\Database\Concerns\HasScopedValidationRules;
@@ -12,7 +13,7 @@ use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
 class Company extends BaseTenant implements Wallet
 {
-    use HasFactory, HasScopedValidationRules, HasWallet, HasWallets;
+    use HasFactory, HasScopedValidationRules, HasWallet, HasWallets, HasWalletFloat;
 
     protected $table = 'companies';
 
