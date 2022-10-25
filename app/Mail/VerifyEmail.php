@@ -10,46 +10,45 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\URL;
 
-class CompleteRegisterInvitation extends Mailable
+class VerifyEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $user;
-
-    public $url;
+    public string $url;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(User $user, string $externalUrl)
+    public function __construct(User $user, $externalUrl)
     {
-        $this->user = $user;
-        $this->url = URL::signedExternalRoute($externalUrl, 'api.v1.lender.complete-register', ['user' => $user->id]);
+        $parameters = ['company_id' => $user->company_id, 'user' => $user->id];
+        $url = URL::signedExternalRoute($externalUrl, 'api.v1.verify.email', $parameters);
+        $this->url = $url;
     }
 
     /**
      * Get the message envelope.
      *
-     * @return \Illuminate\Mail\Mailables\Envelope
+     * @return Envelope
      */
-    public function envelope()
+    public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('emails/invitation-complete-register.subject', ['app_name' => config('app.name')]),
+            subject: __('Verify Your Email'),
         );
     }
 
     /**
      * Get the message content definition.
      *
-     * @return \Illuminate\Mail\Mailables\Content
+     * @return Content
      */
-    public function content()
+    public function content(): Content
     {
         return new Content(
-            markdown: 'emails.invitation-complete-register',
+            markdown: 'emails.verify-email'
         );
     }
 
@@ -58,7 +57,7 @@ class CompleteRegisterInvitation extends Mailable
      *
      * @return array
      */
-    public function attachments()
+    public function attachments(): array
     {
         return [];
     }

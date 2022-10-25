@@ -31,6 +31,7 @@ use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
 use App\Actions\Contracts\UpdateCustomerWithRoleAndPermission;
 use App\Actions\Contracts\UpdateSettings;
 use App\Actions\Contracts\UpdateUser;
+use App\Actions\Contracts\VerifyEmail;
 use App\Actions\Contracts\Wallets\CalculateOrdersCost;
 use App\Actions\Contracts\Wallets\GetTransactions;
 use App\Actions\CreateAdminWithRoleAndPermissionAction;
@@ -56,6 +57,7 @@ use App\Actions\UpdateAdminWithRoleAndPermissionAction;
 use App\Actions\UpdateCustomerWithRoleAndPermissionAction;
 use App\Actions\UpdateSettingsAction;
 use App\Actions\UpdateUserAction;
+use App\Actions\VerifyEmailAction;
 use App\Actions\Wallets\CalculateOrdersCostAction;
 use App\Actions\Wallets\GetTransactionsAction;
 use Illuminate\Support\ServiceProvider;
@@ -94,5 +96,8 @@ class ActionsServiceProvider extends ServiceProvider
         ApproveOrder::class => ApproveOrderAction::class,
         CalculateOrdersCost::class => CalculateOrdersCostAction::class,
         GetTransactions::class => GetTransactionsAction::class,
+
+        //auth
+        VerifyEmail::class => VerifyEmailAction::class,
     ];
 }

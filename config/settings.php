@@ -1,6 +1,7 @@
 <?php
 
 use App\Settings\Classes\Areas\CustomerSettings;
+use App\Settings\Classes\Areas\LenderSettings;
 use App\Settings\Classes\Areas\SuperAdminSettings;
 use App\Settings\Classes\GeneralSettings;
 
@@ -14,6 +15,7 @@ return [
         GeneralSettings::class,
         SuperAdminSettings::class,
         CustomerSettings::class,
+        LenderSettings::class,
     ],
 
     /*
