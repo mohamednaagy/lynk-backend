@@ -31,7 +31,6 @@ class StoreAdminRequest extends FormRequest
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'confirmed', 'min:8'],
-            'password_confirmation' => ['required', 'min:8'],
         ];
 
         if (! empty($this->role)) {

@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Providers;
 
-use Illuminate\Support\Facades\URL;
 use App\Mixin\SignedExternalRouteMixin;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\ServiceProvider;
 
 class MacroServiceProvider extends ServiceProvider
 {

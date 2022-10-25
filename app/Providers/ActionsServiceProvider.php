@@ -18,10 +18,12 @@ use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Actions\Contracts\Lenders\Auth\CompleteUserRegistration;
 use App\Actions\Contracts\Lenders\Auth\RegisterLender;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
+use App\Actions\Contracts\Lenders\GetLenderBalance;
 use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\ListSettings;
 use App\Actions\Contracts\LoginUser;
+use App\Actions\Contracts\Orders\ApproveOrder;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Actions\Contracts\SyncPermissionToUser;
@@ -30,6 +32,9 @@ use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
 use App\Actions\Contracts\UpdateCustomerWithRoleAndPermission;
 use App\Actions\Contracts\UpdateSettings;
 use App\Actions\Contracts\UpdateUser;
+use App\Actions\Contracts\VerifyEmail;
+use App\Actions\Contracts\Wallets\CalculateOrdersCost;
+use App\Actions\Contracts\Wallets\GetTransactions;
 use App\Actions\CreateAdminWithRoleAndPermissionAction;
 use App\Actions\CreateCustomerWithRoleAndPermissionAction;
 use App\Actions\CreateUserAction;
@@ -40,10 +45,12 @@ use App\Actions\GetSettingsClassInstanceAction;
 use App\Actions\Lenders\Auth\CompleteUserRegistrationAction;
 use App\Actions\Lenders\Auth\RegisterLenderAction;
 use App\Actions\Lenders\CreateLenderUserWithRoleAndPermissionAction;
+use App\Actions\Lenders\GetLenderBalanceAction;
 use App\Actions\Lenders\GetPaginatedLenderUsersAction;
 use App\Actions\Lenders\UpdateLenderUserWithRoleAndPermissionAction;
 use App\Actions\ListSettingsAction;
 use App\Actions\LoginUserAction;
+use App\Actions\Orders\ApproveOrderAction;
 use App\Actions\Orders\CreateFinancingOrderAction;
 use App\Actions\Orders\GetPaginatedFinancingOrderAction;
 use App\Actions\SyncPermissionToUserAction;
@@ -52,6 +59,9 @@ use App\Actions\UpdateAdminWithRoleAndPermissionAction;
 use App\Actions\UpdateCustomerWithRoleAndPermissionAction;
 use App\Actions\UpdateSettingsAction;
 use App\Actions\UpdateUserAction;
+use App\Actions\VerifyEmailAction;
+use App\Actions\Wallets\CalculateOrdersCostAction;
+use App\Actions\Wallets\GetTransactionsAction;
 use Illuminate\Support\ServiceProvider;
 
 class ActionsServiceProvider extends ServiceProvider
@@ -85,5 +95,12 @@ class ActionsServiceProvider extends ServiceProvider
         // lenders
         CreateFinancingOrder::class => CreateFinancingOrderAction::class,
         GetPaginatedFinancingOrder::class => GetPaginatedFinancingOrderAction::class,
+        ApproveOrder::class => ApproveOrderAction::class,
+        CalculateOrdersCost::class => CalculateOrdersCostAction::class,
+        GetTransactions::class => GetTransactionsAction::class,
+        GetLenderBalance::class => GetLenderBalanceAction::class,
+
+        //auth
+        VerifyEmail::class => VerifyEmailAction::class,
     ];
 }

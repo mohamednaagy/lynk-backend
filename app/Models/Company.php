@@ -3,13 +3,17 @@
 namespace App\Models;
 
 use App\Enums\CompanyStatus;
+use Bavix\Wallet\Interfaces\Wallet;
+use Bavix\Wallet\Traits\HasWallet;
+use Bavix\Wallet\Traits\HasWalletFloat;
+use Bavix\Wallet\Traits\HasWallets;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Stancl\Tenancy\Database\Concerns\HasScopedValidationRules;
 use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
-class Company extends BaseTenant
+class Company extends BaseTenant implements Wallet
 {
-    use HasFactory, HasScopedValidationRules;
+    use HasFactory, HasScopedValidationRules, HasWallet, HasWallets, HasWalletFloat;
 
     protected $table = 'companies';
 
@@ -17,6 +21,7 @@ class Company extends BaseTenant
 
     protected $casts = [
         'status' => CompanyStatus::class,
+        'does_order_require_approval' => 'boolean',
     ];
 
     public static function getCustomColumns(): array
@@ -27,6 +32,7 @@ class Company extends BaseTenant
             'unique_name',
             'company_cr',
             'status',
+            'order_cost',
         ];
     }
 }
