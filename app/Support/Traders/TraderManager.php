@@ -8,6 +8,6 @@ class TraderManager extends Manager
 {
     public function getDefaultDriver()
     {
-        return env('DEFAULT_TRADER');
+        return config('trader.default');
     }
 }
