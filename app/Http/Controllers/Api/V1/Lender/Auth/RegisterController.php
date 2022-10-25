@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Auth;
 
+use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Actions\Contracts\Lenders\Auth\RegisterLender;
 use App\Actions\Contracts\LoginUser;
 use App\Http\Controllers\Controller;
@@ -15,10 +16,16 @@ class RegisterController extends Controller
     public function __invoke(
         RegisterLenderRequest $request,
         RegisterLender $registerLender,
-        LoginUser $loginUser
+        LoginUser $loginUser,
+        GetSettingsClassInstance $getSettingsClassInstance
     ): JsonResponse {
-        return DB::transaction(function () use ($loginUser, $request, $registerLender) {
-            $lender = $registerLender->handle($request->validated());
+        return DB::transaction(function () use ($loginUser, $request, $registerLender, $getSettingsClassInstance) {
+            $data = array_merge(
+                $request->validated(),
+                ['order_cost' => $getSettingsClassInstance->handle('General')->order_cost]
+            );
+
+            $lender = $registerLender->handle($data);
 
             return $this->successResponse(
                 $loginUser->handle($lender, $request->source, $request),

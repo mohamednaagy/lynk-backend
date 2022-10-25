@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Support\Transactions\Descriptions;
+
+use App\Enums\TransactionReason;
+use App\Support\Transactions\Descriptions\Generators\DefaultGenerator;
+use Bavix\Wallet\Models\Transaction;
+
+class DescriptionManager
+{
+    private static array $generators = [];
+
+    /**
+     * Undocumented function
+     *
+     * @param  int  $reason
+     * @return DefaultGenerator|GeneratorInterface
+     */
+    protected static function getGenerator(int $reason): DefaultGenerator|GeneratorInterface
+    {
+        if (isset(self::$generators[$reason])) {
+            return self::$generators[$reason];
+        }
+
+        $className = 'App\\Support\\Transactions\\Descriptions\\Generators\\'.TransactionReason::getKey($reason).'Type';
+
+        if (! class_exists($className)) {
+            $className = DefaultGenerator::class;
+        }
+
+        $generator = new $className;
+
+        self::$generators[$reason] = $generator;
+
+        return $generator;
+    }
+
+    /**
+     * Get transaction description
+     *
+     * @param  Transaction  $transaction
+     * @param  null  $locale
+     * @return string
+     */
+    public static function getDescription(Transaction $transaction, $locale = null): string
+    {
+        return self::getGenerator($transaction->meta['type'])->generate($transaction, $locale);
+    }
+}

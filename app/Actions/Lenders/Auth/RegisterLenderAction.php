@@ -41,6 +41,7 @@ class RegisterLenderAction implements RegisterLender
             'unique_name' => $data['company_unique_name'],
             'company_cr' => $data['company_cr'],
             'status' => CompanyStatus::Approved,
+            'order_cost' => $data['order_cost'],
         ]);
 
         tenancy()->initialize($company);

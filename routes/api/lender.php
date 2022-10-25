@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\V1\Lender\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Users\UserController;
+use App\Http\Controllers\Api\V1\Lender\Wallets\CalculateOrderCost;
+use App\Http\Controllers\Api\V1\Lender\Wallets\GetWalletTransactions;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
@@ -30,5 +32,9 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         Route::apiResource('orders', OrderController::class);
         Route::put('orders/{order}/approve', ApproveOrder::class);
         Route::apiResource('users', UserController::class);
+        Route::prefix('wallet')->group(function () {
+            Route::post('/calculate', CalculateOrderCost::class);
+            Route::get('/transactions', GetWalletTransactions::class);
+        });
     });
 });
