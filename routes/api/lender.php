@@ -28,7 +28,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     Route::post('/register', RegisterController::class);
     Route::post('{user}/complete-register', CompleteRegister::class)->name('lender.complete-register');
 
-    Route::middleware(['auth:sanctum', 'role:'.Role::LenderAdmin, InitializeTenancyByRequestData::class])->group(function () {
+    Route::middleware(['auth:sanctum', 'role:'.Role::LenderAdmin, 'isAreaRequireVerifiedEmail:Lender', InitializeTenancyByRequestData::class])->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::apiResource('orders', OrderController::class);
         Route::put('orders/{order}/approve', ApproveOrder::class);
