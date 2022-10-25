@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Lender\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Lender\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
+use App\Http\Controllers\Api\V1\Lender\Settings\GetLenderAreaSettings;
 use App\Http\Controllers\Api\V1\Lender\Users\UserController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CalculateOrderCost;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetBalance;
@@ -25,6 +26,7 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 */
 
 Route::prefix('v1/lender')->name('api.v1.')->group(function () {
+    Route::get('settings/area', GetLenderAreaSettings::class);
     Route::post('/register', RegisterController::class);
     Route::post('{user}/complete-register', CompleteRegister::class)->name('lender.complete-register');
 
