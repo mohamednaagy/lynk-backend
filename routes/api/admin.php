@@ -51,6 +51,5 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
 
     Route::prefix('companies')->group(function () {
         Route::get('/{company_id}/users', [CompanyController::class, 'getCompanyUsers']);
-        Route::put('/update', [SettingsController::class, 'update']);
     });
 });
