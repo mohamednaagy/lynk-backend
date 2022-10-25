@@ -31,8 +31,7 @@ class MsegatDriver implements SmsDriverInterface
             ]
         );
 
-        $code = $response->object()->code;
-
+        // $code = $response->object()->code;
         // store the response data of the sms for tracking
         SmsReport::create([
             'response_data' => $response,

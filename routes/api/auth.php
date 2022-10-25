@@ -3,7 +3,6 @@
 use App\Http\Controllers\Api\v1\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V1\Auth\LoginController;
 use App\Http\Controllers\Api\V1\Auth\ResetPasswordController;
-use App\Support\Sms\Sms;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,7 +23,3 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
 Route::post('v1/auth/send-reset-password-link', ForgotPasswordController::class);
 Route::post('v1/auth/reset-password', ResetPasswordController::class);
-//to do test
-Route::post('v1/auth/Send-Sms', function () {
-    return Sms::send('Pin Code is: 1234', '966599882631');
-});

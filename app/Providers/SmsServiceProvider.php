@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use App\Services\SmsDriverManger;
-use App\Support\Sms\Sms;
 use App\Support\Sms\SmsManger;
 use Illuminate\Support\ServiceProvider;
 
@@ -17,6 +15,9 @@ class SmsServiceProvider extends ServiceProvider
     public function register()
     {
         //
+        $this->app->singleton('sms', function ($app) {
+            return new SmsManger($app);
+        });
     }
 
     /**
@@ -27,10 +28,5 @@ class SmsServiceProvider extends ServiceProvider
     public function boot()
     {
         //
-        $this->app->singleton('Sms', function ($app) {
-            // return new Sms();
-            return new SmsManger($app);
-            // return new SmsDriverManger($app);
-        });
     }
 }

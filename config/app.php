@@ -201,7 +201,7 @@ return [
         'Grantify' => Modules\Grantify\Facades\Grantify::class,
         'GrantifySeeder' => Modules\Grantify\Facades\GrantifySeeder::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
-        'Sms' => App\Support\Sms\SmsFacade::class,
+        'Sms' => App\Support\Sms\Sms::class,
     ])->toArray(),
 
     /*
@@ -226,6 +226,11 @@ return [
     */
     'sms_providers' => [
         'msegat' => [
+            'url' => 'https://www.msegat.com/gw/sendsms.php',
+            'username' => env('MSEGAT_USERNAME'),
+            'api_key' => env('MSEGAT_API_KEY'),
+        ],
+        'kool' => [
             'url' => 'https://www.msegat.com/gw/sendsms.php',
             'username' => env('MSEGAT_USERNAME'),
             'api_key' => env('MSEGAT_API_KEY'),

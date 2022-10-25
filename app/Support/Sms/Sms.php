@@ -1,18 +1,13 @@
 <?php
 
-namespace App\Support\Sms;
+namespace App\Support\SmsFacade;
 
-class Sms
+use Illuminate\Support\Facades\Facade;
+
+class Sms extends Facade
 {
-    /**
-     * @param  string  $message
-     * @param  string  $phoneNumber
-     * @return void
-     */
-    public static function send($message, $phoneNumber): void
+    public static function getFacadeAccessor()
     {
-        // $this->send();
-        $manager = app('Sms');
-        $manager->driver('msegat')->send($message, $phoneNumber);
+        return 'sms';
     }
 }
