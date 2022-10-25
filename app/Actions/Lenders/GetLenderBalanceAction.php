@@ -19,7 +19,7 @@ class GetLenderBalanceAction implements GetLenderBalance
     {
         return [
             'balance' => $company->balanceFloat,
-            'available_orders' => floor($company->balanceFloat / $company->order_cost),
+            'availableOrders' => floor($company->balanceFloat / $company->order_cost),
         ];
     }
 }

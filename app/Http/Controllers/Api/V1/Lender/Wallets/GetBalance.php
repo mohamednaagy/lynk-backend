@@ -11,6 +11,11 @@ class GetBalance extends Controller
 {
     public function __invoke(Request $request, GetLenderBalance $getBalance): JsonResponse
     {
-        return $this->successResponse(data: $getBalance->handle(tenant()));
+        $balances = $getBalance->handle(tenant());
+
+        return $this->successResponse(data: [
+            'balance' => number_format($getBalance['balance'], 2),
+            'available_orders' => number_format($getBalance['availableOrders'], 2),
+        ]);
     }
 }
