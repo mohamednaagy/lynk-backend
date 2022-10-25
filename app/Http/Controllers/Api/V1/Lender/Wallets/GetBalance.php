@@ -15,7 +15,7 @@ class GetBalance extends Controller
 
         return $this->successResponse(data: [
             'balance' => number_format($balances['balance'], 2),
-            'available_orders' => number_format($balances['availableOrders'], 2),
+            'available_orders' => $balances['availableOrders'],
         ]);
     }
 }
