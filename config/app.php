@@ -181,6 +181,7 @@ return [
         App\Providers\TenancyServiceProvider::class,
         App\Providers\MacroServiceProvider::class,
         App\Providers\PasswordResetServiceProvider::class,
+        App\Providers\EdaatServiceProvider::class,
     ],
 
     /*
