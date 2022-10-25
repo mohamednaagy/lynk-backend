@@ -18,6 +18,7 @@ use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Actions\Contracts\Lenders\Auth\CompleteUserRegistration;
 use App\Actions\Contracts\Lenders\Auth\RegisterLender;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
+use App\Actions\Contracts\Lenders\GetLenderBalance;
 use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\ListSettings;
@@ -44,6 +45,7 @@ use App\Actions\GetSettingsClassInstanceAction;
 use App\Actions\Lenders\Auth\CompleteUserRegistrationAction;
 use App\Actions\Lenders\Auth\RegisterLenderAction;
 use App\Actions\Lenders\CreateLenderUserWithRoleAndPermissionAction;
+use App\Actions\Lenders\GetLenderBalanceAction;
 use App\Actions\Lenders\GetPaginatedLenderUsersAction;
 use App\Actions\Lenders\UpdateLenderUserWithRoleAndPermissionAction;
 use App\Actions\ListSettingsAction;
@@ -96,6 +98,7 @@ class ActionsServiceProvider extends ServiceProvider
         ApproveOrder::class => ApproveOrderAction::class,
         CalculateOrdersCost::class => CalculateOrdersCostAction::class,
         GetTransactions::class => GetTransactionsAction::class,
+        GetLenderBalance::class => GetLenderBalanceAction::class,
 
         //auth
         VerifyEmail::class => VerifyEmailAction::class,
