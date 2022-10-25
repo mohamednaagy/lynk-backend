@@ -13,7 +13,7 @@ class RejectOrderAction implements RejectOrder
     public function handle(FinancingOrder $financingOrder, User|Authenticatable $user, array $data): void
     {
         $financingOrder->status = FinancingOrderStatus::Rejected;
-        $financingOrder->reason = $data['reason'];
+        $financingOrder->reason = $data['reason'] ?? null;
         $financingOrder->save();
     }
 }
