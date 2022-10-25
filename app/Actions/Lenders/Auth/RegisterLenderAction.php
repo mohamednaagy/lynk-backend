@@ -8,6 +8,7 @@ use App\Actions\Contracts\CreateUser;
 use App\Actions\Contracts\Lenders\Auth\RegisterLender;
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
+use App\Enums\WalletType;
 use App\Models\User;
 use Illuminate\Support\Arr;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
@@ -45,6 +46,11 @@ class RegisterLenderAction implements RegisterLender
         ]);
 
         tenancy()->initialize($company);
+
+        $company->createWallet([
+            'name' => WalletType::CompanyWallet,
+            'slug' => WalletType::CompanyWallet,
+        ]);
 
         $user = $this->createUser->handle(
             Arr::only($data, [

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Lender\Auth;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Actions\Contracts\Lenders\Auth\RegisterLender;
 use App\Actions\Contracts\LoginUser;
+use App\Enums\Area;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\RegisterLenderRequest;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +23,7 @@ class RegisterController extends Controller
         return DB::transaction(function () use ($loginUser, $request, $registerLender, $getSettingsClassInstance) {
             $data = array_merge(
                 $request->validated(),
-                ['order_cost' => $getSettingsClassInstance->handle('General')->order_cost]
+                ['order_cost' => $getSettingsClassInstance->handle(Area::Lender)->order_cost]
             );
 
             $lender = $registerLender->handle($data);

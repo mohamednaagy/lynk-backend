@@ -6,6 +6,6 @@ return new class extends SettingsMigration
 {
     public function up(): void
     {
-        $this->migrator->add('general.order_cost', '0');
+        $this->migrator->add('area_lender.order_cost', '0');
     }
 };
