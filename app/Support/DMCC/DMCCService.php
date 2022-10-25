@@ -13,10 +13,10 @@ class DMCCService
 
     public function __construct()
     {
-        $this->soap = Soap::withBasicAuth(config('dmcc.username'), config('dmcc.password'));
+        $this->soap = Soap::buildClient('dmcc');
     }
 
-    public function acceptAgreemt()
+    public function acceptAgreemt(): bool
     {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('getClickThroughAgreement'))
@@ -35,9 +35,28 @@ class DMCCService
         return $this->isSuccess($response);
     }
 
+    public function getTTI(string $costPrice, string $profit)
+    {
+        $response = $this->soap
+            ->baseWsdl($this->prefixUrl('getTTIIDForIssuePTP'))
+            ->call('getTTIIDForIssuePTP', [
+                'currency' => 'SAR',
+                'costPrice' => $costPrice,
+                'profit' => $profit,
+                'paymentTerms' => config('dmcc.tti.payment_terms'),
+                'unitOfDuration' => config('dmcc.tti.unit_of_duration'),
+                'product' => null,
+                'registeredMember' => 'BOLFT',
+                'client' => null,
+            ]);
+
+        return $response->body();
+    }
+
     private function prefixUrl($url)
     {
-        return 'https://na2.ai.dm-us.informaticacloud.com/active-bpel/soap/'.$url.'?wsdl';
+        return 'https://'.config('dmcc.username').':'.config('dmcc.password').'@na2.ai.dm-us.informaticacloud.com/active-bpel/soap/'.$url.'?wsdl';
+//        return 'https://na2.ai.dm-us.informaticacloud.com/active-bpel/soap/'.$url.'?wsdl';
     }
 
     private function isSuccess(Response $response)
