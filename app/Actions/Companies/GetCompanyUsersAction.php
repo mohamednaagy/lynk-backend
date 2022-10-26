@@ -3,17 +3,17 @@
 namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\GetCompanyUsers;
-use App\Models\User;
+use App\Models\Company;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class GetCompanyUsersAction implements GetCompanyUsers
 {
     /**
-     * @param  int  $companyId
+     * @param  Company  $company
      * @return LengthAwarePaginator
      */
-    public function handle(int $companyId): LengthAwarePaginator
+    public function handle(Company $company): LengthAwarePaginator
     {
-        return User::query()->where('company_id', $companyId)->paginate();
+        return $company->users()->paginate();
     }
 }

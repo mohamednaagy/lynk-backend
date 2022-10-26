@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Companies;
 
-use App\Models\Company;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 /**
  * @property string $area
@@ -28,9 +26,7 @@ class GetCompanyUsersRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'company_id' => ['required', Rule::exists(Company::class, 'id')],
-        ];
+        return [];
     }
 
     public function all($keys = null): ?array
