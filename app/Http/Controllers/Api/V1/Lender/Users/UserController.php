@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api\V1\Lender\Users;
 
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
+use App\Actions\Contracts\Lenders\GetUser;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Lender\Users\GetUserRequest;
 use App\Http\Requests\V1\Lender\Users\StoreUserRequest;
 use App\Http\Requests\V1\Lender\Users\UpdateUserRequest;
 use App\Mail\CompleteRegisterInvitation;
@@ -51,12 +53,22 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
+     * @param  GetUserRequest  $getUserRequest
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @param  GetUser  $getUser
+     * @return JsonResponse
      */
-    public function show($id)
-    {
-        //
+    public function show(
+        GetUserRequest $getUserRequest,
+        int $id,
+        GetUser $getUser
+    ): JsonResponse {
+        return fractal($getUser->handle($id), new UserTransformer)->parseIncludes([
+            'role',
+            'formatted_phone_number',
+            'phone_number',
+            'country_code',
+        ])->respond();
     }
 
     /**
@@ -83,7 +95,7 @@ class UserController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy($id)
     {
