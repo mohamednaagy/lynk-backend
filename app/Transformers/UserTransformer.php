@@ -4,6 +4,7 @@ namespace App\Transformers;
 
 use App\Enums\Area;
 use App\Models\User;
+use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 use Modules\Grantify\Facades\Grantify;
 use Spatie\Permission\Models\Permission;
@@ -16,6 +17,9 @@ class UserTransformer extends TransformerAbstract
         'roles',
         'is_email_verified',
         'permissions',
+        'formatted_phone_number',
+        'phone_number',
+        'country_code',
     ];
 
     public function __construct(string $area = null)
@@ -55,6 +59,21 @@ class UserTransformer extends TransformerAbstract
         );
 
         return $this->primitive($subjectPermissions);
+    }
+
+    public function includeFormattedPhoneNumber(User $user): Primitive
+    {
+        return $this->primitive($user->phone_number);
+    }
+
+    public function includePhoneNumber(User $user): Primitive
+    {
+        return $this->primitive($user->mobileDialingPhoneNumber);
+    }
+
+    public function includeCountryCode(User $user): Primitive
+    {
+        return $this->primitive($user->phoneNumberCountryCode);
     }
 
     protected function getRolesQueryBasedOnArea(User $user)
