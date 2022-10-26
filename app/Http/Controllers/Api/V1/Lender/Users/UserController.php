@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Lender\Users;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
+use App\Enums\Area;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Users\StoreUserRequest;
 use App\Http\Requests\V1\Lender\Users\UpdateUserRequest;
@@ -57,8 +58,8 @@ class UserController extends Controller
     public function show(
         User $user
     ): JsonResponse {
-        return fractal($user, new UserTransformer)->parseIncludes([
-            'role',
+        return fractal($user, new UserTransformer(Area::Lender))->parseIncludes([
+            'roles',
             'formatted_phone_number',
             'phone_number',
             'country_code',
