@@ -70,7 +70,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeContract(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->selling_price);
+        return $this->primitive($financingOrder->contract);
     }
 
     public function includePowerOfAttorney(FinancingOrder $financingOrder)
