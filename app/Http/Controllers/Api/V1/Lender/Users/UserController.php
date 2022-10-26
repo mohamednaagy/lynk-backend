@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Api\V1\Lender\Users;
 
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
-use App\Actions\Contracts\Lenders\GetUser;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Lender\Users\GetUserRequest;
 use App\Http\Requests\V1\Lender\Users\StoreUserRequest;
 use App\Http\Requests\V1\Lender\Users\UpdateUserRequest;
 use App\Mail\CompleteRegisterInvitation;
@@ -53,17 +51,13 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  GetUserRequest  $getUserRequest
-     * @param  int  $id
-     * @param  GetUser  $getUser
+     * @param  User  $user
      * @return JsonResponse
      */
     public function show(
-        GetUserRequest $getUserRequest,
-        int $id,
-        GetUser $getUser
+        User $user
     ): JsonResponse {
-        return fractal($getUser->handle($id), new UserTransformer)->parseIncludes([
+        return fractal($user, new UserTransformer)->parseIncludes([
             'role',
             'formatted_phone_number',
             'phone_number',

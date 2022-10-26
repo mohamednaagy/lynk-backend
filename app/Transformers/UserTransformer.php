@@ -27,7 +27,7 @@ class UserTransformer extends TransformerAbstract
 
     public function includeRole(User $user): Primitive
     {
-        return $this->primitive($user->getRoleNames());
+        return $this->primitive($user->getRoleNames()->first());
     }
 
     public function includeFormattedPhoneNumber(User $user): Primitive

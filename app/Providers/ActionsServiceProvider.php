@@ -20,7 +20,6 @@ use App\Actions\Contracts\Lenders\Auth\RegisterLender;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\GetLenderBalance;
 use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
-use App\Actions\Contracts\Lenders\GetUser;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\ListSettings;
 use App\Actions\Contracts\LoginUser;
@@ -48,7 +47,6 @@ use App\Actions\Lenders\Auth\RegisterLenderAction;
 use App\Actions\Lenders\CreateLenderUserWithRoleAndPermissionAction;
 use App\Actions\Lenders\GetLenderBalanceAction;
 use App\Actions\Lenders\GetPaginatedLenderUsersAction;
-use App\Actions\Lenders\GetUserAction;
 use App\Actions\Lenders\UpdateLenderUserWithRoleAndPermissionAction;
 use App\Actions\ListSettingsAction;
 use App\Actions\LoginUserAction;
@@ -104,6 +102,5 @@ class ActionsServiceProvider extends ServiceProvider
 
         //auth
         VerifyEmail::class => VerifyEmailAction::class,
-        GetUser::class => GetUserAction::class,
     ];
 }
