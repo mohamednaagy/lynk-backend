@@ -39,6 +39,18 @@ class EdaatService
         return false;
     }
 
+    public function isPaidInvoice($invoiceId)
+    {
+        $response = Http::edaat()
+            ->get($this->prefixedPath('Invoices/'.$invoiceId.'/Details'));
+
+        if ($this->isSuccess($response)) {
+            return $response->json('Body.StatusEn') === 'Paid';
+        }
+
+        return false;
+    }
+
     public function registerWebhook(string $paymentUrl, string $billUrl, string $reconcileUrl)
     {
         $responsePayment = Http::edaat()
