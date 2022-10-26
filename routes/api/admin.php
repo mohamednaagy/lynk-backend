@@ -50,6 +50,6 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
     });
 
     Route::prefix('companies')->group(function () {
-        Route::get('/', [CompanyController::class, 'getCompanies']);
+        Route::get('/', [CompanyController::class, 'index']);
     });
 });

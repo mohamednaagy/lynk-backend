@@ -10,6 +10,6 @@ class GetCompaniesAction implements GetCompanies
 {
     public function handle(): LengthAwarePaginator
     {
-        return Company::query()->paginate();
+        return Company::query()->withCount('orders')->paginate();
     }
 }

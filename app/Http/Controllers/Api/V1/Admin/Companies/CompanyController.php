@@ -10,7 +10,7 @@ use Illuminate\Http\JsonResponse;
 
 class CompanyController extends Controller
 {
-    public function getCompanies(
+    public function index(
         GetCompaniesRequest $getCompaniesRequest,
         GetCompanies $getCompanies
     ): JsonResponse {
