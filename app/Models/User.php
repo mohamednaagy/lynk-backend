@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,7 +23,7 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 /**
  * @method static create(array $data)
  */
-class User extends Authenticatable implements Otpifiable, Grantifiable, MustVerifyEmail
+class User extends Authenticatable implements Otpifiable, Grantifiable, MustVerifyEmail, HasLocalePreference
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, BelongsToTenant;
 
@@ -37,6 +38,7 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
         'phone_number',
         'email',
         'password',
+        'locale',
     ];
 
     /**
@@ -93,5 +95,10 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function preferredLocale()
+    {
+        return $this->locale;
     }
 }
