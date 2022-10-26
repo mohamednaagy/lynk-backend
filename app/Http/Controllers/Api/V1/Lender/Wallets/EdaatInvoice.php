@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Wallets\CalculateOrdersRequest;
 use Illuminate\Http\JsonResponse;
 
-class EdaatInvoiceController extends Controller
+class EdaatInvoice extends Controller
 {
     public function __invoke(
         CalculateOrdersRequest $request,
