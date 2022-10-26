@@ -35,4 +35,9 @@ class Company extends BaseTenant implements Wallet
             'order_cost',
         ];
     }
+
+    public function orders()
+    {
+        return $this->hasMany(FinancingOrder::class);
+    }
 }
