@@ -9,10 +9,11 @@ use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
 use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
+use App\Http\Controllers\Api\V1\Admin\Orders\GetBalance;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\SettingsController;
-use App\Http\Controllers\Api\V1\Admin\Transaction\TransactionController;
+use App\Http\Controllers\Api\V1\Admin\Transactions\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Modules\Grantify\Facades\Grantify;
 
@@ -53,6 +54,7 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
 
     Route::prefix('companies')->group(function () {
         Route::get('/', [CompanyController::class, 'index']);
+        Route::get('/{company}/balance ', GetBalance::class);
         Route::get('/{company}/users', [UserController::class, 'index']);
         Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
     });
