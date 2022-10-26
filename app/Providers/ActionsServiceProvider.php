@@ -30,6 +30,7 @@ use App\Actions\Contracts\LoginUser;
 use App\Actions\Contracts\Orders\ApproveOrder;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
+use App\Actions\Contracts\Orders\RejectOrder;
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
 use App\Actions\Contracts\SyncPermissionToUser;
 use App\Actions\Contracts\SyncRoleToUser;
@@ -58,6 +59,7 @@ use App\Actions\LoginUserAction;
 use App\Actions\Orders\ApproveOrderAction;
 use App\Actions\Orders\CreateFinancingOrderAction;
 use App\Actions\Orders\GetPaginatedFinancingOrderAction;
+use App\Actions\Orders\RejectOrderAction;
 use App\Actions\Orders\UpdateFinancingOrderAction;
 use App\Actions\SyncPermissionToUserAction;
 use App\Actions\SyncRoleToUserAction;
@@ -103,6 +105,7 @@ class ActionsServiceProvider extends ServiceProvider
         UpdateFinancingOrder::class => UpdateFinancingOrderAction::class,
         GetPaginatedFinancingOrder::class => GetPaginatedFinancingOrderAction::class,
         ApproveOrder::class => ApproveOrderAction::class,
+        RejectOrder::class => RejectOrderAction::class,
         CalculateOrdersCost::class => CalculateOrdersCostAction::class,
         GetTransactions::class => GetTransactionsAction::class,
         CreateEdaatInvoice::class => CreateEdaatInvoiceAction::class,
