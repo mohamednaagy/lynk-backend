@@ -27,7 +27,7 @@ class RejectOrder extends Controller
             );
         }
 
-        $rejectOrder->handle($order, auth()->user(), $rejectOrderRequest->validated());
+        $rejectOrder->handle($order, $rejectOrderRequest->user(), $rejectOrderRequest->validated());
 
         return $this->successResponse();
     }
