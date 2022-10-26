@@ -47,12 +47,12 @@ class UserTransformer extends TransformerAbstract
 
     public function includePhoneNumber(User $user): Primitive
     {
-        return $this->primitive($user->phone_number->formatNational());
+        return $this->primitive($user->mobileDialingPhoneNumber);
     }
 
     public function includeCountryCode(User $user): Primitive
     {
-        return $this->primitive($user->phone_number->getCountry());
+        return $this->primitive($user->phoneNumberCountryCode);
     }
 
     protected function getRolesQueryBasedOnArea(User $user)
