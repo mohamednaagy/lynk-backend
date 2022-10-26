@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Users\UserController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CalculateOrderCost;
+use App\Http\Controllers\Api\V1\Lender\Wallets\EdaatInvoiceController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetBalance;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetWalletTransactions;
 use Illuminate\Support\Facades\Route;
@@ -27,8 +28,11 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     Route::post('/register', RegisterController::class);
     Route::post('{user}/complete-register', CompleteRegister::class)->name('lender.complete-register');
-
-    Route::middleware(['auth:sanctum', 'role:'.Role::LenderAdmin, InitializeTenancyByRequestData::class])->group(function () {
+    Route::middleware([
+        'auth:sanctum',
+        'role:'.implode('|', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator]),
+        InitializeTenancyByRequestData::class,
+    ])->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::apiResource('orders', OrderController::class);
         Route::put('orders/{order}/approve', ApproveOrder::class);
@@ -37,6 +41,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
             Route::get('/balance', GetBalance::class);
             Route::post('/calculate', CalculateOrderCost::class);
             Route::get('/transactions', GetWalletTransactions::class);
+            Route::post('/invoice', EdaatInvoiceController::class);
         });
     });
 });

@@ -24,6 +24,9 @@ final class Area extends Enum
             ],
             self::Lender => [
                 Role::LenderAdmin,
+                Role::LenderBilling,
+                Role::LenderSupervisor,
+                Role::LenderOrderCreator,
             ],
         ];
     }

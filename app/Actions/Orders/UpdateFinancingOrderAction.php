@@ -2,16 +2,21 @@
 
 namespace App\Actions\Orders;
 
-use App\Actions\Contracts\Orders\CreateFinancingOrder;
+use App\Actions\Contracts\Orders\UpdateFinancingOrder;
 use App\Models\FinancingOrder;
 use Illuminate\Support\Arr;
 
-class CreateFinancingOrderAction implements CreateFinancingOrder
+class UpdateFinancingOrderAction implements UpdateFinancingOrder
 {
-    public function handle(array $data): FinancingOrder
+    /**
+     * @param  \App\Models\FinancingOrder  $financingOrder
+     * @param  mixed  $data
+     * @return mixed
+     */
+    public function update(FinancingOrder $financingOrder, array $data): FinancingOrder
     {
-        $financingOrder = FinancingOrder::create(
-            Arr::only($data, ['reference_number', 'national_id', 'amount', 'selling_price', 'status', 'creator_id', 'creator_type'])
+        $financingOrder->update(
+            Arr::only($data, ['reference_number', 'national_id', 'amount', 'selling_price'])
         );
 
         if (isset($data['contract'])) {

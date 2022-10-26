@@ -6,6 +6,8 @@ use App\Enums\Area;
 use App\Models\User;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
+use Modules\Grantify\Facades\Grantify;
+use Spatie\Permission\Models\Permission;
 
 class UserTransformer extends TransformerAbstract
 {
@@ -13,6 +15,8 @@ class UserTransformer extends TransformerAbstract
 
     protected array $availableIncludes = [
         'roles',
+        'is_email_verified',
+        'permissions',
         'formatted_phone_number',
         'phone_number',
         'country_code',
@@ -30,7 +34,13 @@ class UserTransformer extends TransformerAbstract
             'first_name' => $user->first_name,
             'last_name' => $user->last_name,
             'email' => $user->email,
+            'phone_number' => $user->phone_number,
         ];
+    }
+
+    public function includeIsEmailVerified(User $user)
+    {
+        return $this->primitive($user->hasVerifiedEmail());
     }
 
     public function includeRoles(User $user)
@@ -38,6 +48,17 @@ class UserTransformer extends TransformerAbstract
         $query = $this->getRolesQueryBasedOnArea($user);
 
         return $this->primitive($query->get()->pluck('name'));
+    }
+
+    public function includePermissions(User $user)
+    {
+        $rolesQuery = $this->getRolesQueryBasedOnArea($user);
+
+        $subjectPermissions = Grantify::transformPermissionsToSubjectAction(
+            Permission::role($rolesQuery->get())->get()
+        );
+
+        return $this->primitive($subjectPermissions);
     }
 
     public function includeFormattedPhoneNumber(User $user): Primitive

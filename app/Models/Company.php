@@ -8,6 +8,7 @@ use Bavix\Wallet\Traits\HasWallet;
 use Bavix\Wallet\Traits\HasWalletFloat;
 use Bavix\Wallet\Traits\HasWallets;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Stancl\Tenancy\Database\Concerns\HasScopedValidationRules;
 use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
@@ -34,5 +35,15 @@ class Company extends BaseTenant implements Wallet
             'status',
             'order_cost',
         ];
+    }
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class, 'company_id', 'id');
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(FinancingOrder::class);
     }
 }
