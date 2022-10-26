@@ -51,7 +51,8 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
     });
 
     Route::prefix('companies')->group(function () {
-        Route::get('/', [CompanyController::class, 'index']);
+        Route::apiResource('/', CompanyController::class);
+
         Route::get('/{company}/users', [UserController::class, 'index']);
     });
 });
