@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\SettingsController;
+use App\Http\Controllers\Api\V1\Admin\Settings\UpdateCompanySettingsController;
 use Illuminate\Support\Facades\Route;
 use Modules\Grantify\Facades\Grantify;
 
@@ -46,5 +47,6 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
     Route::prefix('settings')->group(function () {
         Route::get('/', [SettingsController::class, 'index']);
         Route::put('/update', [SettingsController::class, 'update']);
+        Route::put('company/{company}/update', UpdateCompanySettingsController::class);
     });
 });
