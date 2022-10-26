@@ -19,6 +19,7 @@ class ResendInvitationController extends Controller
 
             return fractal($user, new UserTransformer())->respond();
         }
+
         return $this->errorResponse(trans('The user has accepted the invitation before'));
     }
 }
