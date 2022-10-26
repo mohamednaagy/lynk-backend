@@ -13,13 +13,15 @@ use BenSampo\Enum\Enum;
  */
 final class Action extends Enum
 {
-    const Index = 'Index';
+    const Manage = 'manage';
 
-    const Create = 'Create';
+    const Index = 'index';
 
-    const Show = 'Show';
+    const Create = 'create';
 
-    const Edit = 'Edit';
+    const Show = 'show';
 
-    const Delete = 'Delete';
+    const Edit = 'edit';
+
+    const Delete = 'delete';
 }

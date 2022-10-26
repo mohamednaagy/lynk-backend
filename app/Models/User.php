@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,7 +23,7 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 /**
  * @method static create(array $data)
  */
-class User extends Authenticatable implements Otpifiable, Grantifiable, HasLocalePreference
+class User extends Authenticatable implements Otpifiable, Grantifiable, MustVerifyEmail, HasLocalePreference
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, BelongsToTenant;
 
