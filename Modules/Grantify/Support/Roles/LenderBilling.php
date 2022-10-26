@@ -5,10 +5,10 @@ namespace Modules\Grantify\Support\Roles;
 use App\Enums\Action;
 use App\Enums\Subject;
 
-class LenderAdmin
+class LenderBilling
 {
     public static array $basePermissions = [
-        Subject::All => [
+        Subject::LenderWallet => [
             Action::Manage,
         ],
     ];

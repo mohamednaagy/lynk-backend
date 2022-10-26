@@ -5,13 +5,15 @@ namespace App\Models;
 use App\Enums\FinancingOrderStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 class FinancingOrder extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, BelongsToTenant;
+    use HasFactory, InteractsWithMedia, BelongsToTenant, LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -35,6 +37,12 @@ class FinancingOrder extends Model implements HasMedia
         'status' => FinancingOrderStatus::class,
         'approved_at' => 'datetime',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->logAll();
+        // Chain fluent methods for configuration options
+    }
 
     public function registerMediaCollections(): void
     {

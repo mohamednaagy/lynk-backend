@@ -5,7 +5,7 @@ namespace App\Http\Requests\V1\Lender\Orders;
 use App\Rules\ValidateSAID;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreOrderRequest extends FormRequest
+class UpdateOrderRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,7 +27,7 @@ class StoreOrderRequest extends FormRequest
         $tenant = tenant();
 
         return [
-            'reference_number' => ['nullable', $tenant->unique('financing_orders', 'reference_number')],
+            'reference_number' => ['nullable', $tenant->unique('financing_orders', 'reference_number')->ignore($this->route('order'))],
             'national_id' => ['required', 'digits:10', new ValidateSAID],
             'amount' => ['required', 'numeric'],
             'selling_price' => ['required', 'numeric'],
