@@ -20,7 +20,7 @@ final class Subject extends Enum
 
     const Permissions = 'permissions';
 
-    const LenderOrders = 'lenderOrders';
+    const FinancingOrders = 'financingOrders';
 
     const LenderWallet = 'lenderWallet';
 
