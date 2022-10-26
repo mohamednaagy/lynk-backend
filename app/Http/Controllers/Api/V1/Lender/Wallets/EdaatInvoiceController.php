@@ -26,10 +26,7 @@ class EdaatInvoiceController extends Controller
             'amount' => $invoice->amount,
             'invoice_number' => $invoice->invoice_number,
             'company_number' => 903,
-            'company_name' => [
-                'ar' => 'ايداعات',
-                'en' => 'Edaat',
-            ],
+            'company_name' => trans('global.edaat'),
         ]);
     }
 }
