@@ -28,10 +28,9 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     Route::post('/register', RegisterController::class);
     Route::post('{user}/complete-register', CompleteRegister::class)->name('lender.complete-register');
-
     Route::middleware([
         'auth:sanctum',
-        'role:'.implode(',', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator]),
+        'role:'.implode('|', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator]),
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);

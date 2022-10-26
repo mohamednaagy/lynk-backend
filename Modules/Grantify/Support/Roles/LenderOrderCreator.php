@@ -8,7 +8,7 @@ use App\Enums\Subject;
 class LenderOrderCreator
 {
     public static array $basePermissions = [
-        Subject::LenderOrders => [
+        Subject::FinancingOrders => [
             Action::Create,
         ],
     ];
