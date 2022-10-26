@@ -2,15 +2,11 @@
 
 namespace App\Providers;
 
-use App\Actions\Contracts\LoginUser;
-use App\Actions\LoginUserAction;
 use Illuminate\Support\ServiceProvider;
 
 class ActionsServiceProvider extends ServiceProvider
 {
-    public array $customBindings = [
-        LoginUser::class => LoginUserAction::class,
-    ];
+    public array $customBindings = [];
 
     /**
      * Bootstrap any application services.
