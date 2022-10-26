@@ -41,4 +41,9 @@ class Company extends BaseTenant implements Wallet
     {
         return $this->hasMany(User::class, 'company_id', 'id');
     }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(FinancingOrder::class);
+    }
 }
