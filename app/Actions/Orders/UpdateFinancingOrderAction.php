@@ -13,7 +13,7 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
      * @param  mixed  $data
      * @return mixed
      */
-    public function update(FinancingOrder $financingOrder, $data): FinancingOrder
+    public function update(FinancingOrder $financingOrder, array $data): FinancingOrder
     {
         $financingOrder->update(
             Arr::only($data, ['reference_number', 'national_id', 'amount', 'selling_price'])
