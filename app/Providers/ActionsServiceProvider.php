@@ -2,10 +2,16 @@
 
 namespace App\Providers;
 
+use App\Actions\Contracts\LoginUser;
+use App\Actions\LoginUserAction;
 use Illuminate\Support\ServiceProvider;
 
 class ActionsServiceProvider extends ServiceProvider
 {
+    public array $customBindings = [
+        LoginUser::class => LoginUserAction::class,
+    ];
+
     /**
      * Bootstrap any application services.
      *
@@ -22,7 +28,8 @@ class ActionsServiceProvider extends ServiceProvider
                     strlen($prefix),
                     strlen($class) - strlen($prefix.$suffix)
                 );
-                $this->app->bind($abstract, $class);
+
+                $this->app->bind($abstract, $this->customBindings[$abstract] ?? $class);
             }
         }
     }
