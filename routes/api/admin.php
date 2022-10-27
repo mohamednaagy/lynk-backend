@@ -7,6 +7,7 @@ use App\Enums\Subject;
 use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
+use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
 use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
@@ -61,5 +62,6 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
         Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
         Route::get('{company}/orders', [OrderController::class, 'index']);
         Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
+        Route::get('/{company}/settings ', GetCompanySetting::class);
     });
 });
