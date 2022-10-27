@@ -114,4 +114,10 @@ return [
         ],
     ],
 
+    'log_channel' => env('MAIL_LOG_CHANNEL'),
+
+    'salutation_name' => env('MAIL_SALUTATION_NAME'),
+
+    'copyright_name' => env('MAIL_COPYRIGHT_NAME'),
+
 ];

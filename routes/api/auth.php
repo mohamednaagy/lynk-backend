@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\Api\v1\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V1\Auth\LoginController;
-use App\Http\Controllers\Api\V1\Auth\ResetPasswordController;
+use App\Http\Controllers\Api\V1\Auth\ResetPassword;
+use App\Http\Controllers\Api\V1\Auth\SendEmailVerification;
+use App\Http\Controllers\Api\V1\Auth\VerifyEmail;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,10 +17,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('v1/auth/login', [LoginController::class, 'authenticate']);
-Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
-    Route::post('/auth/logout', [LoginController::class, 'logout']);
+Route::middleware('auth:sanctum')->prefix('v1/auth')->group(function () {
+    Route::post('logout', [LoginController::class, 'logout']);
+    Route::post('send-email-verification', SendEmailVerification::class);
 });
 
-Route::post('v1/auth/send-reset-password-link', ForgotPasswordController::class);
-Route::post('v1/auth/reset-password', ResetPasswordController::class);
+Route::prefix('v1/auth')->name('api.v1.')->group(function () {
+    Route::post('login', [LoginController::class, 'authenticate']);
+    Route::post('send-reset-password-link', SendEmailVerification::class);
+    Route::post('reset-password', ResetPassword::class);
+    Route::post('verify-email/{user}', VerifyEmail::class)->name('verify.email');
+});

@@ -27,7 +27,7 @@ class StoreOrderRequest extends FormRequest
         $tenant = tenant();
 
         return [
-            'reference_number' => ['nullable', $tenant->unique('financing_orders', 'refrence_number')],
+            'reference_number' => ['nullable', $tenant->unique('financing_orders', 'reference_number')],
             'national_id' => ['required', 'digits:10', new ValidateSAID],
             'amount' => ['required', 'numeric'],
             'selling_price' => ['required', 'numeric'],

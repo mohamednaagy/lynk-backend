@@ -15,4 +15,10 @@ final class Role extends Enum
     const Customer = 'Customer';
 
     const LenderAdmin = 'LenderAdmin';
+
+    const LenderSupervisor = 'LenderSupervisor';
+
+    const LenderBilling = 'LenderBilling';
+
+    const LenderOrderCreator = 'LenderOrderCreator';
 }

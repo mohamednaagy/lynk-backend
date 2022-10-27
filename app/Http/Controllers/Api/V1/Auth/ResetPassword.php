@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
 
-class ResetPasswordController extends Controller
+class ResetPassword extends Controller
 {
     /**
      * @param  ResetPasswordRequest  $request
