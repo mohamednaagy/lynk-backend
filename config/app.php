@@ -230,11 +230,6 @@ return [
             'username' => env('MSEGAT_USERNAME'),
             'api_key' => env('MSEGAT_API_KEY'),
         ],
-        'kool' => [
-            'url' => 'https://www.msegat.com/gw/sendsms.php',
-            'username' => env('MSEGAT_USERNAME'),
-            'api_key' => env('MSEGAT_API_KEY'),
-        ],
     ],
 
 ];
