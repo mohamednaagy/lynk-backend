@@ -44,9 +44,10 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
             ])
     );
 
+    Route::put('company/{company}/settings', UpdateCompanySettingsController::class);
+
     Route::prefix('settings')->group(function () {
         Route::get('/', [SettingsController::class, 'index']);
         Route::put('/update', [SettingsController::class, 'update']);
-        Route::put('company/{company}/update', UpdateCompanySettingsController::class);
     });
 });
