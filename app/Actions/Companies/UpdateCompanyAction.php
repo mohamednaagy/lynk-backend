@@ -2,19 +2,20 @@
 
 namespace App\Actions\Companies;
 
-use App\Actions\Contracts\Companies\CreateCompany;
+use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Models\Company;
 use Illuminate\Support\Arr;
 
-class CreateCompanyAction implements CreateCompany
+class UpdateCompanyAction implements UpdateCompany
 {
     /**
+     * @param  Company  $company
      * @param  array  $data
      * @return Company
      */
-    public function handle(array $data): Company
+    public function handle(Company $company, array $data): Company
     {
-        return Company::create(
+        $company->update(
             Arr::only(
                 $data,
                 [
@@ -27,5 +28,7 @@ class CreateCompanyAction implements CreateCompany
                 ]
             )
         );
+
+        return $company;
     }
 }
