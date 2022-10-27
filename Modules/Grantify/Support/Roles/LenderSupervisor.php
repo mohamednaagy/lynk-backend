@@ -11,7 +11,7 @@ class LenderSupervisor
         Subject::Dashboard => [
             Action::Show,
         ],
-        Subject::LenderOrders => [
+        Subject::FinancingOrders => [
             Action::Manage,
         ],
     ];

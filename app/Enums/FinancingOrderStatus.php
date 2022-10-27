@@ -14,4 +14,6 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
     const Canceled = 3;
 
     const Completed = 4;
+
+    const Rejected = 5;
 }
