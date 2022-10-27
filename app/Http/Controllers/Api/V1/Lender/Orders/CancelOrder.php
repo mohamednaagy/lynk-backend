@@ -24,7 +24,6 @@ class CancelOrder extends Controller
         if ($order->status->is(FinancingOrderStatus::PendingApproval || FinancingOrderStatus::Rejected)) {
             $order->update(['status' => 3]);
         }
-
         $cancelOrder->handle(
             $order,
             $cancelOrderRequest->user(),
