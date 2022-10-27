@@ -24,6 +24,6 @@ class OrderCreationFeeType extends GeneratorBase
     {
         $wallet->withdrawFloat($amount, $meta);
 
-        return $wallet->balanceFloat();
+        return $wallet->balanceFloat;
     }
 }
