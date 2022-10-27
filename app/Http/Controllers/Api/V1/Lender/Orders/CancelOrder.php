@@ -21,7 +21,7 @@ class CancelOrder extends Controller
      */
     public function __invoke(CancelOrderRequest $cancelOrderRequest, CancelOrderInterface $cancelOrder, FinancingOrder $order): JsonResponse
     {
-        if ($order->status->is(FinancingOrderStatus::PendingApproval)) {
+        if ($order->status->is(FinancingOrderStatus::PendingApproval || FinancingOrderStatus::Rejected)) {
             $order->update(['status' => 3]);
         }
 
