@@ -24,13 +24,13 @@ class VerifyEmail extends Controller
      * @param  User  $user
      * @return JsonResponse
      */
-    public function __invoke(Request $request, VerifyEmailInterface $verifyEmail, User $user)
+    public function __invoke(Request $request, User $user)
     {
         if ($user->company_id !== (int) $request->query('company_id') || $user->email_verified_at) {
             return $this->errorResponse(__('auth.failed'));
         }
 
-        $verifyEmail->handle($user);
+        $user->markEmailAsVerified();
 
         return $this->successResponse();
     }

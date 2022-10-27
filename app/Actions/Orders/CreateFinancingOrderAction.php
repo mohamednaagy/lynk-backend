@@ -11,7 +11,7 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
     public function handle(array $data): FinancingOrder
     {
         $financingOrder = FinancingOrder::create(
-            Arr::only($data, ['national_id', 'amount', 'selling_price', 'status', 'creator_id', 'creator_type'])
+            Arr::only($data, ['reference_number', 'national_id', 'amount', 'selling_price', 'status', 'creator_id', 'creator_type'])
         );
 
         if (isset($data['contract'])) {
