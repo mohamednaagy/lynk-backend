@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\Lender\Auth\RegisterController;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Orders\RejectOrder;
+use App\Http\Controllers\Api\V1\Lender\Settings\GetLenderAreaSettings;
 use App\Http\Controllers\Api\V1\Lender\Users\UserController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CalculateOrderCost;
 use App\Http\Controllers\Api\V1\Lender\Wallets\EdaatInvoiceController;
@@ -27,6 +28,7 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 */
 
 Route::prefix('v1/lender')->name('api.v1.')->group(function () {
+    Route::get('/area-settings', GetLenderAreaSettings::class);
     Route::post('/register', RegisterController::class);
     Route::post('{user}/complete-register', CompleteRegister::class)->name('lender.complete-register');
     Route::middleware([
