@@ -199,6 +199,7 @@ return [
         'Otpify' => Modules\Otpify\Facades\Otpify::class,
         'Grantify' => Modules\Grantify\Facades\Grantify::class,
         'GrantifySeeder' => Modules\Grantify\Facades\GrantifySeeder::class,
+        'Otp' => \App\Support\OTP\Core\OtpFacade::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
 

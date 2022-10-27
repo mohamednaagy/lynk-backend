@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Support\OTP\Core;
+
+use Illuminate\Support\Facades\Facade;
+
+class OtpFacade extends Facade
+{
+    protected static function getFacadeAccessor()
+    {
+        return 'otp';
+    }
+}
