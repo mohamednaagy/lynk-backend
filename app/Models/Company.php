@@ -35,6 +35,9 @@ class Company extends BaseTenant implements Wallet
             'status',
             'does_order_require_approval',
             'order_cost',
+            'does_order_require_approval',
+            'created_at',
+            'updated_at',
         ];
     }
 
