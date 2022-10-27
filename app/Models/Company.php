@@ -33,7 +33,10 @@ class Company extends BaseTenant implements Wallet
             'unique_name',
             'company_cr',
             'status',
+            'does_order_require_approval',
             'order_cost',
+            'created_at',
+            'updated_at',
         ];
     }
 
