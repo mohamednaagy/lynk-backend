@@ -54,8 +54,8 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
     });
 
     Route::prefix('companies')->group(function () {
-        Route::put('{company}', [CompanyController::class, 'update']);
-        Route::get('/', [CompanyController::class, 'index']);
+        Route::apiResource('/', CompanyController::class);
+
         Route::put('/{company}/settings', UpdateCompanySettingsController::class);
         Route::get('/{company}/users', [UserController::class, 'index']);
         Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
