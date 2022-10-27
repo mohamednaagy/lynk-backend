@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Orders\RejectOrder;
 use App\Http\Controllers\Api\V1\Lender\Users\UserController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CalculateOrderCost;
-use App\Http\Controllers\Api\V1\Lender\Wallets\EdaatInvoice;
+use App\Http\Controllers\Api\V1\Lender\Wallets\CreateEdaatInvoice;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetBalance;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetWalletTransactions;
 use Illuminate\Support\Facades\Route;
@@ -43,7 +43,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
             Route::get('/balance', GetBalance::class);
             Route::post('/calculate', CalculateOrderCost::class);
             Route::get('/transactions', GetWalletTransactions::class);
-            Route::post('/invoice', EdaatInvoice::class);
+            Route::post('/invoice', CreateEdaatInvoice::class);
         });
     });
 });
