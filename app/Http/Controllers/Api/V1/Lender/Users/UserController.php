@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Lender\Users;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
+use App\Enums\Area;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Users\StoreUserRequest;
 use App\Http\Requests\V1\Lender\Users\UpdateUserRequest;
@@ -51,12 +52,18 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @param  User  $user
+     * @return JsonResponse
      */
-    public function show($id)
-    {
-        //
+    public function show(
+        User $user
+    ): JsonResponse {
+        return fractal($user, new UserTransformer(Area::Lender))->parseIncludes([
+            'roles',
+            'formatted_phone_number',
+            'phone_number',
+            'country_code',
+        ])->respond();
     }
 
     /**
@@ -83,7 +90,7 @@ class UserController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy($id)
     {
