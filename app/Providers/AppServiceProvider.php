@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Support\OTP\AbsherDriver;
+use App\Support\OTP\Core\Otp;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\ServiceProvider;
 
@@ -50,6 +52,10 @@ class AppServiceProvider extends ServiceProvider
             }
 
             return response()->json($response, $statusCode);
+        });
+
+        $this->app->bind('otp', function () {
+            return new Otp(new AbsherDriver);
         });
     }
 }
