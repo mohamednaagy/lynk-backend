@@ -19,6 +19,6 @@ class DepositByEdaatType extends GeneratorBase
     {
         $wallet->depositFloat($amount, $meta);
 
-        return $wallet->balanceFloat();
+        return $wallet->balanceFloat;
     }
 }
