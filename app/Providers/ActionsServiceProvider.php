@@ -15,17 +15,15 @@ class ActionsServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $prefix = 'App\\Actions';
-        $suffix = 'Action';
-        foreach (get_declared_classes() as $class) {
-            if (str_starts_with($class, $prefix)) {
-                $abstract = $prefix.'\\Contracts'.substr(
-                    $class,
-                    strlen($prefix),
-                    strlen($class) - strlen($prefix.$suffix)
-                );
+        $contractPrefix = 'App\\Actions\\Contracts';
+        $actionPrefix = 'App\\Actions';
+        $actionSuffix = 'Action';
 
-                $this->app->bind($abstract, $this->customBindings[$abstract] ?? $class);
+        foreach (get_declared_interfaces() as $contract) {
+            if (str_starts_with($contract, $contractPrefix)) {
+                $action = $actionPrefix.explode('Contracts', $contract)[1].$actionSuffix;
+
+                $this->app->bind($contract, $this->customBindings[$contract] ?? $action);
             }
         }
     }
