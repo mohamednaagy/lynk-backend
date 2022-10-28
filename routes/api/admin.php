@@ -55,7 +55,9 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
 
     Route::prefix('companies')->group(function () {
         Route::get('/', [CompanyController::class, 'index']);
-        Route::delete('/{company} ', [CompanyController::class, 'destroy']);
+        Route::delete('/{company}/delete ', [CompanyController::class, 'destroy']);
+
+        Route::put('/{company}/settings', UpdateCompanySettingsController::class);
         Route::get('/{company}/users', [UserController::class, 'index']);
         Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
         Route::get('{company}/orders', [OrderController::class, 'index']);

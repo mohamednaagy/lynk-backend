@@ -56,9 +56,7 @@ class CompanyController extends Controller
      */
     public function destroy(int $id): JsonResponse
     {
-        Company::withTrashed()
-            ->where('id', $id)
-            ->update(['unique_name' => null]);
+        Company::withTrashed()->where('id', $id)->update(['unique_name' => null]);
 
         return $this->successResponse();
     }
