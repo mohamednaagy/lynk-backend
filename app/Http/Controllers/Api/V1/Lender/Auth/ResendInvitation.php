@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Support\Facades\Mail;
 
-class ResendInvitationController extends Controller
+class ResendInvitation extends Controller
 {
     public function __invoke(ResendInvitationRequest $request, User $user)
     {

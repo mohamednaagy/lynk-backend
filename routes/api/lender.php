@@ -4,7 +4,7 @@ use App\Enums\Role;
 use App\Http\Controllers\Api\V1\Lender\Auth\CompleteRegister;
 use App\Http\Controllers\Api\V1\Lender\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Lender\Auth\RegisterController;
-use App\Http\Controllers\Api\V1\Lender\Auth\ResendInvitationController;
+use App\Http\Controllers\Api\V1\Lender\Auth\ResendInvitation;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Users\UserController;
@@ -31,6 +31,6 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         Route::apiResource('orders', OrderController::class);
         Route::put('orders/{order}/approve', ApproveOrder::class);
         Route::apiResource('users', UserController::class);
-        Route::post('{user}/resend-invetaion', ResendInvitationController::class);
+        Route::post('{user}/resend-invetaion', ResendInvitation::class);
     });
 });
