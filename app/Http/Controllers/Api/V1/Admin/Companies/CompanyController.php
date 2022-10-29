@@ -13,6 +13,7 @@ use App\Http\Requests\V1\Company\CreateCompanyRequest;
 use App\Models\Company;
 use App\Transformers\CompanyTransformer;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class CompanyController extends Controller
 {
@@ -54,9 +55,12 @@ class CompanyController extends Controller
      * @param  int  $id
      * @return JsonResponse
      */
-    public function destroy(int $id): JsonResponse
+    public function destroy(Company $company): JsonResponse
     {
-        Company::withTrashed()->where('id', $id)->update(['unique_name' => null]);
+        DB::transaction(function () use ($company) {
+            $company->update(['unique_name' => null]);
+            $company->delete();
+        });
 
         return $this->successResponse();
     }
