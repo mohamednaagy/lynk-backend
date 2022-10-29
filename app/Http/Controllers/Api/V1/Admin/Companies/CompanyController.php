@@ -13,6 +13,7 @@ use App\Http\Requests\V1\Company\CreateCompanyRequest;
 use App\Models\Company;
 use App\Transformers\CompanyTransformer;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class CompanyController extends Controller
 {
@@ -44,6 +45,22 @@ class CompanyController extends Controller
     public function update(UpdateCompanyRequest $updateCompanyRequest, UpdateCompany $updateCompany, Company $company)
     {
         $updateCompany->handle($company, $updateCompanyRequest->validated());
+
+        return $this->successResponse();
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return JsonResponse
+     */
+    public function destroy(Company $company): JsonResponse
+    {
+        DB::transaction(function () use ($company) {
+            $company->update(['unique_name' => null]);
+            $company->delete();
+        });
 
         return $this->successResponse();
     }

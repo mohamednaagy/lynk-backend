@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('financing_orders', function (Blueprint $table) {
-            $table->string('reason')->nullable()->after('status');
+        Schema::table('companies', function (Blueprint $table) {
+            $table->softDeletes();
         });
     }
 
@@ -25,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('financing_orders', function (Blueprint $table) {
-            $table->dropColumn('reason');
+        Schema::table('companies', function (Blueprint $table) {
+            $table->dropSoftDeletes();
         });
     }
 };

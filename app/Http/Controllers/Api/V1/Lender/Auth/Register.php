@@ -12,7 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
-class RegisterController extends Controller
+class Register extends Controller
 {
     public function __invoke(
         RegisterLenderRequest $request,
