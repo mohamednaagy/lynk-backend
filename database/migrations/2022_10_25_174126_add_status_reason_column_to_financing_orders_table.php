@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('financing_orders', function (Blueprint $table) {
-            $table->string('reason')->nullable()->after('status');
+            $table->string('status_reason')->nullable()->after('status');
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('financing_orders', function (Blueprint $table) {
-            $table->dropColumn('reason');
+            $table->dropColumn('status_reason');
         });
     }
 };
