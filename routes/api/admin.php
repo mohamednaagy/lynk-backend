@@ -38,15 +38,15 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
 
     Route::get('/roles', GetAllRoles::class)->middleware(
         'permission:'.
-        Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Roles, [
-            Action::Index,
-        ])
+            Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Roles, [
+                Action::Index,
+            ])
     );
     Route::get('/permissions', GetAllPermissions::class)->middleware(
         'permission:'.
-        Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Permissions, [
-            Action::Index,
-        ])
+            Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Permissions, [
+                Action::Index,
+            ])
     );
 
     Route::prefix('settings')->group(function () {
@@ -55,7 +55,9 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
     });
 
     Route::prefix('companies')->group(function () {
-        Route::apiResource('/', CompanyController::class);
+        Route::get('/', [CompanyController::class, 'index']);
+        Route::post('/', [CompanyController::class, 'store']);
+        Route::delete('/{company}', [CompanyController::class, 'destroy']);
 
         Route::put('/{company}/settings', UpdateCompanySettingsController::class);
         Route::get('/{company}/users', [UserController::class, 'index']);
