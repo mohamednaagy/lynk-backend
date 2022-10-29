@@ -7,7 +7,7 @@ use App\Http\Requests\Auth\SendLinkRequest;
 use App\Models\Company;
 use Illuminate\Support\Facades\Password;
 
-class ForgotPasswordController extends Controller
+class ForgotPassword extends Controller
 {
     /**
      * @param  SendLinkRequest  $request

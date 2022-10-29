@@ -22,6 +22,8 @@ class CreateCompanyAction implements CreateCompany
                     'unique_name',
                     'company_cr',
                     'status',
+                    'order_cost',
+                    'does_order_require_approval',
                 ]
             )
         );

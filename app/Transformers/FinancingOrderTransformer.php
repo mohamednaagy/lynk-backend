@@ -23,6 +23,7 @@ class FinancingOrderTransformer extends TransformerAbstract
     protected array $availableIncludes = [
         'creator',
         'approver',
+        'created_at',
     ];
 
     public function transform(FinancingOrder $financingOrder)
@@ -70,7 +71,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeContract(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->selling_price);
+        return $this->primitive($financingOrder->contract);
     }
 
     public function includePowerOfAttorney(FinancingOrder $financingOrder)
@@ -78,9 +79,17 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive($financingOrder->power_of_attorney);
     }
 
-    public function includeCreator(FinancingOrder $financingOrder)
+    public function includeCreatorName(FinancingOrder $financingOrder)
     {
         return $this->primitive($financingOrder->creator->full_name);
+    }
+
+    public function includeCreator(FinancingOrder $financingOrder)
+    {
+        return $this->primitive([
+            'id' => $financingOrder->creator->id,
+            'name' => $financingOrder->creator->full_name,
+        ]);
     }
 
     public function includeApprover(FinancingOrder $financingOrder)
@@ -91,5 +100,10 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeIsApproved(FinancingOrder $financingOrder)
     {
         return $this->primitive($financingOrder->approved_at !== null);
+    }
+
+    public function includeCreatedAt(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->created_at->format('Y-m-d h:mA'));
     }
 }

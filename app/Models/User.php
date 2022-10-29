@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -20,7 +23,7 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 /**
  * @method static create(array $data)
  */
-class User extends Authenticatable implements Otpifiable, Grantifiable
+class User extends Authenticatable implements Otpifiable, Grantifiable, MustVerifyEmail, HasLocalePreference
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, BelongsToTenant;
 
@@ -35,6 +38,7 @@ class User extends Authenticatable implements Otpifiable, Grantifiable
         'phone_number',
         'email',
         'password',
+        'locale',
     ];
 
     /**
@@ -64,6 +68,20 @@ class User extends Authenticatable implements Otpifiable, Grantifiable
         );
     }
 
+    protected function mobileDialingPhoneNumber(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => "{$this->phone_number->formatForMobileDialingInCountry($this->phone_number->getCountry())}",
+        );
+    }
+
+    protected function phoneNumberCountryCode(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => "{$this->phone_number->getCountry()}",
+        );
+    }
+
     public function routeOtpForPhoneNumber()
     {
         return phone($this->phone_number, $this->phone_country);
@@ -86,5 +104,15 @@ class User extends Authenticatable implements Otpifiable, Grantifiable
     public function authorizationTokens(): HasMany
     {
         return $this->hasMany(AuthorizationToken::class);
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function preferredLocale()
+    {
+        return $this->locale;
     }
 }

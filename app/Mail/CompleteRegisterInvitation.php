@@ -37,7 +37,7 @@ class CompleteRegisterInvitation extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: __('emails/invitation-complete-register.complete_invitation_email_title'),
+            subject: __('emails/invitation-complete-register.subject', ['app_name' => config('app.name')]),
         );
     }
 
