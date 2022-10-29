@@ -7,8 +7,10 @@ use App\Enums\Subject;
 use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
+use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
 use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
+use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\SettingsController;
@@ -53,9 +55,13 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
     });
 
     Route::prefix('companies')->group(function () {
-        Route::get('/', [CompanyController::class, 'index']);
+        Route::apiResource('/', CompanyController::class);
+
         Route::put('/{company}/settings', UpdateCompanySettingsController::class);
         Route::get('/{company}/users', [UserController::class, 'index']);
+        Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
+        Route::get('{company}/orders', [OrderController::class, 'index']);
         Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
+        Route::get('/{company}/settings ', GetCompanySetting::class);
     });
 });
