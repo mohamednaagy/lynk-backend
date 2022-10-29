@@ -18,6 +18,7 @@ class GetSettingsAreaAction implements GetSettingsArea
             'General' => app(GeneralSettingsAction::class),
             Area::SuperAdmin => app(SuperAdminSettingsAction::class),
             Area::Customer => app(CustomerSettingsAction::class),
+            Area::Lender => app(LenderSettingsAction::class),
         };
     }
 }
