@@ -3,10 +3,11 @@
 namespace App\Http\Middleware;
 
 use App\Actions\Contracts\GetSettingsClassInstance;
+use App\Enums\ErrorCode;
 use Closure;
 use Illuminate\Http\Request;
 
-class IsAreaRequireVerifiedEmail
+class IsEmailVerified
 {
     protected $getSettingsClassInstance;
 
@@ -24,9 +25,9 @@ class IsAreaRequireVerifiedEmail
      */
     public function handle(Request $request, Closure $next, string $area)
     {
-        $user = auth()->user();
+        $user = $request->user();
 
-        if (! $user || $this->isEmailVerifiedRequired($area) && ! $user->hasVerifiedEmail()) {
+        if (! $user || ($this->isEmailVerifiedRequired($area) && ! $user->hasVerifiedEmail())) {
             return $this->notAuthorizedResponse($request);
         }
 
@@ -43,7 +44,7 @@ class IsAreaRequireVerifiedEmail
     private function notAuthorizedResponse(Request $request)
     {
         if ($request->expectsJson()) {
-            return response()->errorResponse(__('Must Verify Email'), 403);
+            return response()->errorResponse(__('Must Verify Email'), ErrorCode::EMAIL_NOT_VERIFIED);
         }
 
         abort(403);

@@ -36,7 +36,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     Route::middleware([
         'auth:sanctum',
         'role:'.implode('|', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator]),
-        'isAreaRequireVerifiedEmail:'.Area::Lender
+        'IsEmailVerified:'.Area::Lender,
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
