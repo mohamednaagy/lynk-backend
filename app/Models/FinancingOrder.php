@@ -107,7 +107,7 @@ class FinancingOrder extends Model implements HasMedia
         if (! is_null($model)) {
             $query->whereHasMorph(
                 'creator',
-                get_class($model),
+                $model->getMorphClass(),
                 function ($query) use ($model) {
                     $query->where('creator_id', $model->getKey());
                 }
