@@ -14,7 +14,8 @@ class ResendInvitation extends Controller
     public function __invoke(ResendInvitationRequest $request, User $user)
     {
         if (is_null($user->password)) {
-            $invitationUrl = $request->safeInput('redirect_url');
+            $invitationUrl = $request->validated('redirect_url');
+
             Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
             return fractal($user, new UserTransformer())->respond();

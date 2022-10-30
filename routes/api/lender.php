@@ -44,7 +44,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         Route::put('orders/{order}/reject', RejectOrder::class);
         Route::put('orders/{order}/cancel', CancelOrder::class);
         Route::apiResource('users', UserController::class);
-        Route::post('{user}/resend-invetaion', ResendInvitation::class);
+        Route::post('{user}/resend-invitation', ResendInvitation::class);
 
         Route::prefix('wallet')->group(function () {
             Route::get('/balance', GetBalance::class);
