@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Auth\CheckOtp;
 use App\Http\Controllers\Api\V1\Auth\LoginController;
 use App\Http\Controllers\Api\V1\Auth\ResetPassword;
 use App\Http\Controllers\Api\V1\Auth\SendEmailVerification;
@@ -29,4 +30,5 @@ Route::prefix('v1/auth')->name('api.v1.')->group(function () {
     Route::post('reset-password', ResetPassword::class);
     Route::post('verify-email/{user}', VerifyEmail::class)->name('verify.email');
     Route::post('send-otp', SendOtp::class)->name('verify.email');
+    Route::post('check-otp', CheckOtp::class)->name('verify.email');
 });
