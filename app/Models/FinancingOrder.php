@@ -48,12 +48,18 @@ class FinancingOrder extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this
-            ->addMediaCollection('contract')
-            ->singleFile();
+            ->addMediaCollection(
+                'contract'
+            )
+            ->singleFile(
+            );
 
         $this
-            ->addMediaCollection('power_of_attorney')
-            ->singleFile();
+            ->addMediaCollection(
+                'power_of_attorney'
+            )
+            ->singleFile(
+            );
     }
 
     public function company()
@@ -79,5 +85,31 @@ class FinancingOrder extends Model implements HasMedia
     public function getContractAttribute()
     {
         return $this->getFirstMediaUrl('contract');
+    }
+
+    public function scopeCanceled($query)
+    {
+        return $query->whereStatus(FinancingOrderStatus::Canceled);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->whereIn('status', [FinancingOrderStatus::PendingApproval, FinancingOrderStatus::InProgress]);
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->whereStatus(FinancingOrderStatus::Completed);
+    }
+
+    public function scopeByCreator($query, Model $model)
+    {
+        return $query->whereHasMorph(
+            'creator',
+            get_class($model),
+            function ($query) use ($model) {
+                return $query->where('creator_id', $model->getKey());
+            }
+        );
     }
 }
