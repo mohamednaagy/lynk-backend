@@ -20,8 +20,8 @@ class UpdateCompanyStatusAction implements UpdateCompanyStatus
                 $data,
                 [
                     'status',
-                    'to_company_comment',
-                    'internal_comment',
+                    'public_status_comment',
+                    'internal_status_comment',
                 ]
             )
         );

@@ -14,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('companies', function (Blueprint $table) {
-            $table->string('to_company_comment')->nullable()->after('status');
-            $table->string('internal_comment')->nullable()->after('status');
+            $table->string('public_status_comment')->nullable()->after('status');
+            $table->string('internal_status_comment')->nullable()->after('status');
         });
     }
 
@@ -27,8 +27,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('companies', function (Blueprint $table) {
-            $table->dropColumn('visible');
-            $table->dropColumn('internal');
+            $table->dropColumn(['public_status_comment', 'internal_status_comment']);
         });
     }
 };

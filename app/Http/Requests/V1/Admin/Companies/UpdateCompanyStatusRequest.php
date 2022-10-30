@@ -27,8 +27,8 @@ class UpdateCompanyStatusRequest extends FormRequest
     {
         return [
             'status' => ['required', Rule::in(CompanyStatus::getValues())],
-            'to_company_comment' => ['required', 'string', 'max:255'],
-            'internal_comment' => ['required', 'string', 'max:255'],
+            'public_status_comment' => ['required', 'string', 'max:255'],
+            'internal_status_comment' => ['required', 'string', 'max:255'],
         ];
     }
 }
