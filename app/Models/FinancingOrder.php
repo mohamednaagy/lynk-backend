@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\FinancingOrderStatus;
+use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
@@ -13,7 +14,7 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 class FinancingOrder extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, BelongsToTenant, LogsActivity;
+    use HasFactory, InteractsWithMedia, BelongsToTenant, LogsActivity, HasScopes;
 
     /**
      * The attributes that are mass assignable.
