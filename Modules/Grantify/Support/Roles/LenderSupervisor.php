@@ -14,5 +14,8 @@ class LenderSupervisor
         Subject::FinancingOrders => [
             Action::Manage,
         ],
+        Subject::LenderEdaatInvoices => [
+            Action::Manage,
+        ],
     ];
 }

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Requests\V1\Lender\Users;
+namespace App\Http\Requests\V1\Admin\Companies\Users;
 
 use App\Enums\Area;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -32,7 +33,7 @@ class UpdateUserRequest extends FormRequest
                 'required', 'email',
                 Rule::unique(User::class, 'email')
                     ->ignore($this->route('user')->id)
-                    ->where('company_id', tenant('id')),
+                    ->where('company_id', $this->route('user')->company_id),
             ],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
