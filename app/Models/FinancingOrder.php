@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\FinancingOrderStatus;
 use App\Support\QueryScoper\HasScopes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
@@ -41,6 +42,13 @@ class FinancingOrder extends Model implements HasMedia
         'approved_at' => 'datetime',
         'phone_number' => E164PhoneNumberCast::class,
     ];
+
+    protected function phoneNumberCountryCode(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => "{$this->phone_number->getCountry()}",
+        );
+    }
 
     public function getActivitylogOptions(): LogOptions
     {
