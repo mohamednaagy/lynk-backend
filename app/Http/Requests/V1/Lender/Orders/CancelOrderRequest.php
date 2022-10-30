@@ -4,7 +4,7 @@ namespace App\Http\Requests\V1\Lender\Orders;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class RejectOrderRequest extends FormRequest
+class CancelOrderRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
