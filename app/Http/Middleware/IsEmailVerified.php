@@ -44,7 +44,7 @@ class IsEmailVerified
     private function notAuthorizedResponse(Request $request)
     {
         if ($request->expectsJson()) {
-            return response()->errorResponse(__('Must Verify Email'), ErrorCode::EMAIL_NOT_VERIFIED);
+            return response()->errorResponse(__('Must Verify Email'), 403, ErrorCode::EMAIL_NOT_VERIFIED);
         }
 
         abort(403);
