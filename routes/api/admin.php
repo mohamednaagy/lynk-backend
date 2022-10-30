@@ -15,7 +15,6 @@ use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\SettingsController;
-use App\Http\Controllers\Api\V1\Admin\Settings\UpdateCompanySettingsController;
 use App\Http\Controllers\Api\V1\Admin\Transaction\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Modules\Grantify\Facades\Grantify;
@@ -55,8 +54,8 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
         Route::put('/update', [SettingsController::class, 'update']);
     });
 
+    Route::apiResource('companies', CompanyController::class);
     Route::prefix('companies')->group(function () {
-        Route::apiResource('/', CompanyController::class);
         Route::get('/{company}/balance ', GetBalance::class);
         Route::get('/{company}/users', [UserController::class, 'index']);
         Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);

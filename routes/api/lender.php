@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Area;
 use App\Enums\Role;
 use App\Http\Controllers\Api\V1\Lender\Auth\CompleteRegister;
 use App\Http\Controllers\Api\V1\Lender\Auth\GetAuthUser;
@@ -32,9 +33,11 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     Route::get('/area-settings', GetLenderAreaSettings::class);
     Route::post('/register', Register::class);
     Route::post('{user}/complete-register', CompleteRegister::class)->name('lender.complete-register');
+
     Route::middleware([
         'auth:sanctum',
         'role:'.implode('|', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator]),
+        'IsEmailVerified:'.Area::Lender,
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
