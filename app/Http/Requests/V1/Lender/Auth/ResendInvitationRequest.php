@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests\V1\Company;
+namespace App\Http\Requests\V1\Lender\Auth;
 
+use App\Rules\HostWhitelistRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateCompanyRequest extends FormRequest
+class ResendInvitationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,10 +25,7 @@ class CreateCompanyRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required', 'string', 'min:3'],
-            'unique_name' => ['required', 'string', 'min:3', 'unique:companies,unique_name'],
-            'company_cr' => ['required', 'string', 'min:3', 'unique:companies,company_cr'],
-            'order_cost' => ['required'],
+            'redirect_url' => ['required', 'url', new HostWhitelistRule()],
         ];
     }
 }
