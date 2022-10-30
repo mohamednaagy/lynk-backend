@@ -24,4 +24,10 @@ final class Action extends Enum
     const Edit = 'edit';
 
     const Delete = 'delete';
+
+    const Approve = 'approve';
+
+    const Reject = 'reject';
+
+    const Charge = 'reject';
 }
