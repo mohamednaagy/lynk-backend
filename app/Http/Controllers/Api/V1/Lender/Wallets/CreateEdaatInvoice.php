@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Api\V1\Lender\Wallets;
 
 use App\Actions\Contracts\Wallets\CalculateOrdersCost;
-use App\Actions\Contracts\Wallets\CreateEdaatInvoice;
+use App\Actions\Contracts\Wallets\CreateEdaatInvoice as CreateEdaatInvoiceInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Wallets\CalculateOrdersRequest;
 use Illuminate\Http\JsonResponse;
 
-class EdaatInvoiceController extends Controller
+class CreateEdaatInvoice extends Controller
 {
     public function __invoke(
         CalculateOrdersRequest $request,
         CalculateOrdersCost $calculateOrderCost,
-        CreateEdaatInvoice $createEdaatInvoice
+        CreateEdaatInvoiceInterface $createEdaatInvoice
     ): JsonResponse {
         $amount = $calculateOrderCost->handle(
             $request->input('orders_count'),
@@ -26,7 +26,7 @@ class EdaatInvoiceController extends Controller
             'amount' => $invoice->amount,
             'invoice_number' => $invoice->invoice_number,
             'company_number' => 903,
-            'company_name' => trans('global.edaat'),
+            'company_name' => trans('common.edaat'),
         ]);
     }
 }
