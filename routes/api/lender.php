@@ -1,10 +1,12 @@
 <?php
 
+use App\Enums\Area;
 use App\Enums\Role;
 use App\Http\Controllers\Api\V1\Lender\Auth\CompleteRegister;
 use App\Http\Controllers\Api\V1\Lender\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Lender\Auth\Register;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
+use App\Http\Controllers\Api\V1\Lender\Orders\CancelOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Orders\RejectOrder;
 use App\Http\Controllers\Api\V1\Lender\Settings\GetLenderAreaSettings;
@@ -31,15 +33,18 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     Route::get('/area-settings', GetLenderAreaSettings::class);
     Route::post('/register', Register::class);
     Route::post('{user}/complete-register', CompleteRegister::class)->name('lender.complete-register');
+
     Route::middleware([
         'auth:sanctum',
         'role:'.implode('|', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator]),
+        'IsEmailVerified:'.Area::Lender,
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::apiResource('orders', OrderController::class);
         Route::put('orders/{order}/approve', ApproveOrder::class);
         Route::put('orders/{order}/reject', RejectOrder::class);
+        Route::put('orders/{order}/cancel', CancelOrder::class);
         Route::apiResource('users', UserController::class);
         Route::prefix('wallet')->group(function () {
             Route::get('/balance', GetBalance::class);
