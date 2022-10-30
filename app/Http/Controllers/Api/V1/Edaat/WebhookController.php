@@ -24,7 +24,14 @@ class WebhookController extends Controller
                 $invoice = EdaatInvoice::where('id', $invoice['InternalCode'])->lockForUpdate()->first();
                 $wallet = $invoice->company->getWallet(WalletType::CompanyWallet);
                 $invoice->update(['status' => EdaatInvoiceStatus::Paid]);
-                $createTransactions->handle($wallet, TransactionReason::DepositByEdaat, $invoice->amount, []);
+                $createTransactions->handle(
+                    $wallet,
+                    TransactionReason::DepositByEdaat,
+                    $invoice->amount,
+                    [
+                        'invoice_number' => $invoice->invoice_number,
+                    ]
+                );
             }
         }
     }
