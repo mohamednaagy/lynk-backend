@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
+use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
 use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
@@ -54,7 +55,10 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
     });
 
     Route::apiResource('companies', CompanyController::class);
+
     Route::prefix('companies')->group(function () {
+        Route::post('/{company}/status', UpdateCompanyStatus::class);
+
         Route::get('/{company}/users', [UserController::class, 'index']);
         Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
         Route::get('{company}/orders', [OrderController::class, 'index']);
