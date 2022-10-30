@@ -2,10 +2,9 @@
 
 namespace App\Actions\Contracts\Orders;
 
-use App\Models\Company;
-use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 interface GetOrdersStatsByCreator
 {
-    public function handle(Company $company, User $user);
+    public function handle(Model $model);
 }

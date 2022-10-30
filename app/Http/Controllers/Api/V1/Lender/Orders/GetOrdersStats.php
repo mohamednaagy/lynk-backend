@@ -19,9 +19,9 @@ class GetOrdersStats extends Controller
     public function __invoke(OrdersGetOrdersStats $getOrdersStats, GetOrdersStatsByCreator $getOrdersStatsByCreator)
     {
         if (auth()->user()->hasRole(Role::LenderOrderCreator)) {
-            return $this->successResponse($getOrdersStatsByCreator->handle(tenant(), auth()->user()));
+            return $this->successResponse($getOrdersStatsByCreator->handle(auth()->user()));
         }
 
-        return $this->successResponse($getOrdersStats->handle(tenant()));
+        return $this->successResponse($getOrdersStats->handle());
     }
 }
