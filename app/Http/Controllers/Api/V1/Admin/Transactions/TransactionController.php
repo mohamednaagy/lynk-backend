@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Transaction;
+namespace App\Http\Controllers\Api\V1\Admin\Transactions;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
