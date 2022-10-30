@@ -4,25 +4,19 @@ namespace App\Actions\Lenders;
 
 use App\Actions\Contracts\Lenders\GetEdaatInvoices;
 use App\Models\EdaatInvoice;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 class GetEdaatInvoicesAction implements GetEdaatInvoices
 {
     /**
      * Get edaat invoices for tenant (company) or admin
      *
-     * @param  array|null  $scopes
+     * @param  array  $scopes
      * @param  int  $paginate
-     * @return LengthAwarePaginator
+     * @return  Builder
      */
-    public function handle(array $scopes = null, int $paginate = 10): LengthAwarePaginator
+    public function handle(array $scopes = [], int $paginate = 10): Builder
     {
-        $edaatInvoices = EdaatInvoice::with(['company', 'creator']);
-
-        if ($scopes) {
-            $edaatInvoices->toScopes($scopes);
-        }
-
-        return $edaatInvoices->paginate($paginate);
+        return EdaatInvoice::query()->toScopes($scopes);
     }
 }

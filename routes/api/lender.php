@@ -49,7 +49,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         Route::put('orders/{order}/cancel', CancelOrder::class);
         Route::apiResource('users', UserController::class);
         Route::post('{user}/resend-invitation', ResendInvitation::class);
-        Route::get('invoices', GetEdaatInvoices::class);
+        Route::get('edaat-invoices', GetEdaatInvoices::class);
 
         Route::prefix('wallet')->group(function () {
             Route::get('/balance', GetBalance::class);

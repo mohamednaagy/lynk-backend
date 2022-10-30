@@ -2,11 +2,14 @@
 
 namespace App\Support\QueryScoper\Scopes\Lender\Edaat;
 
+use App\Models\Company;
 use App\Support\QueryScoper\QueryScoper;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
-class CompanyInvoiceScope extends QueryScoper
+class InvoiceCompanyScope extends QueryScoper
 {
     /**
      * Prepare data for violation
@@ -15,7 +18,9 @@ class CompanyInvoiceScope extends QueryScoper
      */
     public function prepareData(): array
     {
-        return [];
+        return [
+            'company_id' => Request::query('company_id'),
+        ];
     }
 
     /**
@@ -29,7 +34,7 @@ class CompanyInvoiceScope extends QueryScoper
         return Validator::make(
             $data,
             [
-
+                'company_id' => ['nullable', 'int', Rule::exists(Company::class, 'id')],
             ]
         );
     }
@@ -43,6 +48,9 @@ class CompanyInvoiceScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data): Builder
     {
-        return $builder->where('company_id', tenant()->id);
+        return ! empty($data['company_id']) ? $builder->where(function ($query) use ($data) {
+            $query->orWhere('company_id', $data['company_id']);
+        }
+        ) : $builder;
     }
 }

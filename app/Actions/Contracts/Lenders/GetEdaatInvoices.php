@@ -2,7 +2,7 @@
 
 namespace App\Actions\Contracts\Lenders;
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 interface GetEdaatInvoices
 {
@@ -11,7 +11,7 @@ interface GetEdaatInvoices
      *
      * @param  array|null  $scopes
      * @param  int  $paginate
-     * @return LengthAwarePaginator
+     * @return  Builder
      */
-    public function handle(array $scopes = null, int $paginate = 10): LengthAwarePaginator;
+    public function handle(array $scopes = [], int $paginate = 10): Builder;
 }
