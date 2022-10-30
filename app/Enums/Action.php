@@ -29,5 +29,5 @@ final class Action extends Enum
 
     const Reject = 'reject';
 
-    const Charge = 'reject';
+    const Charge = 'charge';
 }
