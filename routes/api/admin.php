@@ -32,43 +32,45 @@ use Modules\Grantify\Facades\Grantify;
 |
 */
 
-Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->group(function () {
-    Route::get('auth', GetAuthUser::class);
+Route::prefix('v1/admin')->group(function () {
+    Route::post('/admin-register', CreateAdmin::class);
+    Route::post('/{admin}/admin-complete-register', CompleteAdminRegister::class)->name('admin.complete-register');
 
-    Route::apiResource('admins', AdminController::class)->except(['show'])->parameters(['admins' => 'id']);
-    Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
+    Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->group(function () {
+        Route::get('auth', GetAuthUser::class);
 
-    Route::get('/roles', GetAllRoles::class)->middleware(
-        'permission:'.
+        Route::apiResource('admins', AdminController::class)->except(['show'])->parameters(['admins' => 'id']);
+        Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
+
+        Route::get('/roles', GetAllRoles::class)->middleware(
+            'permission:'.
             Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Roles, [
                 Action::Index,
             ])
-    );
-    Route::get('/permissions', GetAllPermissions::class)->middleware(
-        'permission:'.
+        );
+        Route::get('/permissions', GetAllPermissions::class)->middleware(
+            'permission:'.
             Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Permissions, [
                 Action::Index,
             ])
-    );
+        );
 
-    Route::prefix('settings')->group(function () {
-        Route::get('/', [SettingsController::class, 'index']);
-        Route::put('/update', [SettingsController::class, 'update']);
+        Route::prefix('settings')->group(function () {
+            Route::get('/', [SettingsController::class, 'index']);
+            Route::put('/update', [SettingsController::class, 'update']);
+        });
+
+        Route::prefix('companies')->group(function () {
+            Route::get('/', [CompanyController::class, 'index']);
+            Route::post('/', [CompanyController::class, 'store']);
+            Route::delete('/{company}', [CompanyController::class, 'destroy']);
+
+            Route::put('/{company}/settings', UpdateCompanySettingsController::class);
+            Route::get('/{company}/users', [UserController::class, 'index']);
+            Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
+            Route::get('{company}/orders', [OrderController::class, 'index']);
+            Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
+            Route::get('/{company}/settings ', GetCompanySetting::class);
+        });
     });
-
-    Route::prefix('companies')->group(function () {
-        Route::get('/', [CompanyController::class, 'index']);
-        Route::post('/', [CompanyController::class, 'store']);
-        Route::delete('/{company}', [CompanyController::class, 'destroy']);
-
-        Route::put('/{company}/settings', UpdateCompanySettingsController::class);
-        Route::get('/{company}/users', [UserController::class, 'index']);
-        Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
-        Route::get('{company}/orders', [OrderController::class, 'index']);
-        Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
-        Route::get('/{company}/settings ', GetCompanySetting::class);
-    });
-
-    Route::post('/admin-register', CreateAdmin::class);
-    Route::post('/{admin}/admin-complete-register', CompleteAdminRegister::class)->name('admin.complete-register');
 });

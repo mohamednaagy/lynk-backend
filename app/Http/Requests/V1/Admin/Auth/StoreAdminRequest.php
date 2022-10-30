@@ -2,9 +2,13 @@
 
 namespace App\Http\Requests\V1\Admin\Auth;
 
+use App\Enums\Action;
+use App\Enums\Subject;
+use App\Rules\verifyPermissionStructure;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class CreateAdminRequest extends FormRequest
+class StoreAdminRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,14 +27,16 @@ class CreateAdminRequest extends FormRequest
      */
     public function rules()
     {
-        $rules = [
+        return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'email' => ['required', 'email', 'unique:users,email'],
-            'permissions' => ['required', 'array'],
+            'permissions' => ['required', 'array', 'min:1'],
+            'permissions.*' => ['required', 'array', new verifyPermissionStructure()],
+            'permissions.*.subject' => ['required', 'string', Rule::in(Subject::getValues())],
+            'permissions.*.actions' => ['required', 'array'],
+            'permissions.*.actions.*' => [Rule::in(Action::getValues())],
             'redirect_url' => ['required'],
         ];
-
-        return $rules;
     }
 }
