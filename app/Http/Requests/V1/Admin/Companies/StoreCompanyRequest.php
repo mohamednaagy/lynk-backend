@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests\V1\Admin\Companies;
 
+use App\Models\Company;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateCompanyRequest extends FormRequest
+class StoreCompanyRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -35,14 +36,14 @@ class UpdateCompanyRequest extends FormRequest
                 'string',
                 'min:3',
                 'regex:/(^[a-zA-Z]+[a-zA-Z0-9\\-\\_]*$)/u',
-                Rule::unique('companies', 'unique_name')
-                    ->ignore($this->route('company')),
+                Rule::unique(Company::class, 'unique_name'),
+
             ],
             'company_cr' => [
+                'required',
                 'string',
                 'min:1',
-                Rule::unique('companies', 'company_cr')
-                    ->ignore($this->route('company')),
+                Rule::unique(Company::class, 'company_cr'),
             ],
             'does_order_require_approval' => [
                 'required',
@@ -52,6 +53,7 @@ class UpdateCompanyRequest extends FormRequest
                 'required',
                 'numeric',
             ],
+
         ];
     }
 }
