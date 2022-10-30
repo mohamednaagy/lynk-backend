@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
+use App\Actions\Contracts\Orders\UpdateFinancingOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
+use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
 use Illuminate\Http\JsonResponse;
@@ -32,7 +34,11 @@ class OrderController extends Controller
      */
     public function show(FinancingOrder $order): JsonResponse
     {
-        return fractal($order, new FinancingOrderTransformer())->respond();
+        $order->load('creator', 'approver');
+
+        return fractal($order, new FinancingOrderTransformer())
+            ->parseIncludes(['creator', 'approver'])
+            ->respond();
     }
 
     /**
@@ -50,10 +56,35 @@ class OrderController extends Controller
             ? FinancingOrderStatus::PendingApproval
             : FinancingOrderStatus::InProgress;
 
-        $financingOrder = $createFinancingOrder->handle(array_merge(
-            $request->validated(),
-            ['status' => $status]
-        ));
+        $financingOrder = $createFinancingOrder->handle(
+            array_merge(
+                $request->validated(),
+                [
+                    'status' => $status,
+                    'creator_id' => auth()->user()->id,
+                    'creator_type' => auth()->user()->getMorphClass(),
+                    'approved_at' => $status === FinancingOrderStatus::InProgress ? now() : null,
+                ]
+            )
+        );
+
+        return fractal($financingOrder, new FinancingOrderTransformer())->respond();
+    }
+
+    /**
+     * Summary of update
+     *
+     * @param  UpdateOrderRequest  $updateOrderRequest
+     * @param  UpdateFinancingOrder  $updateFinancingOrder
+     * @param  FinancingOrder  $order
+     * @return JsonResponse
+     */
+    public function update(
+        UpdateOrderRequest $updateOrderRequest,
+        UpdateFinancingOrder $updateFinancingOrder,
+        FinancingOrder $order
+    ): JsonResponse {
+        $financingOrder = $updateFinancingOrder->update($order, $updateOrderRequest->validated());
 
         return fractal($financingOrder, new FinancingOrderTransformer())->respond();
     }

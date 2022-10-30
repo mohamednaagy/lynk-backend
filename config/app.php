@@ -183,6 +183,7 @@ return [
         App\Providers\PasswordResetServiceProvider::class,
         // sms provider
         App\Providers\SmsServiceProvider::class,
+        App\Providers\EdaatServiceProvider::class,
     ],
 
     /*
