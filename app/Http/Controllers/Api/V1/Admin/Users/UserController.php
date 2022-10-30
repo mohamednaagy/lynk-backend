@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api\V1\Admin\Users;
 
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
+use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Admin\Companies\Users\UpdateUserRequest;
 use App\Http\Requests\V1\Lender\Users\StoreCompanyUserRequest;
 use App\Mail\CompleteRegisterInvitation;
+use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -31,5 +34,25 @@ class UserController extends Controller
 
             return fractal($user, new UserTransformer())->respond();
         });
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  UpdateUserRequest  $updateUserRequest
+     * @param  User  $user
+     * @param  UpdateLenderUserWithRoleAndPermission  $updateUserWithRoleAndPermission
+     * @return JsonResponse
+     */
+    public function update(
+        UpdateUserRequest $updateUserRequest,
+        User $user,
+        UpdateLenderUserWithRoleAndPermission $updateUserWithRoleAndPermission,
+    ): JsonResponse {
+        return DB::transaction((function () use ($updateUserRequest, $user, $updateUserWithRoleAndPermission) {
+            $updateUserWithRoleAndPermission->handle($updateUserRequest->validated(), $user);
+
+            return $this->successResponse();
+        }));
     }
 }

@@ -61,11 +61,15 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
         Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
         Route::get('{company}/orders', [OrderController::class, 'index']);
         Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
-        Route::get('/{company}/settings ', GetCompanySetting::class);        
+        Route::get('/{company}/settings ', GetCompanySetting::class);
         Route::put('/{company}/settings', UpdateCompanySettingsController::class);
     });
 
     Route::prefix('users')->group(function () {
         Route::post('/', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'store']);
+    });
+
+    Route::prefix('users')->group(function () {
+        Route::put('/{user}', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'update']);
     });
 });
