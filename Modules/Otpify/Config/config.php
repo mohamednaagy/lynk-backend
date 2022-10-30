@@ -40,8 +40,7 @@ return [
         ],
         'absher' => [
             'api_key' => env('ABSHER_API_KEY'),
-            'send_url' => env('ABSHER_SEND_URL'),
-            'check_url' => env('ABSHER_CHECK_URL'),
+            'base_url' => env('ABSHER_SEND_URL'),
         ],
     ],
 ];

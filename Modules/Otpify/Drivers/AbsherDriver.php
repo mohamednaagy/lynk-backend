@@ -22,15 +22,14 @@ class AbsherDriver implements OtpifyDriverInterface
      */
     public function send(\Illuminate\Http\Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
-        $sendUrl = config('otpify.absher.send_url');
+        $sendUrl = config('otpify.absher.base_url').'/send';
         $data = [
             'apiKey' => config('otpify.absher.api_key'),
-            'personId' => $request->safeInput('notional_id'),
+            'personId' => $request->validated('notional_id'),
         ];
         $response = Http::post($sendUrl, $data)->toPsrResponse();
-        $code = $response['code'];
 
-        return $this->createOtpifyCode($code, 1, []);
+        return $this->createOtpifyCode(null, $otpifiable->id, ['tcn' => $response['tcn'], 'code' => $response['code']]);
     }
 
     /**
@@ -54,13 +53,13 @@ class AbsherDriver implements OtpifyDriverInterface
      * @param  \Closure|null  $additionalCheckCallback
      * @return bool
      */
-    public function verify(\Illuminate\Http\Request $request, $tcn, $otp, \Closure $additionalCheckCallback = null): bool
+    public function verify(\Illuminate\Http\Request $request, $vid, $code, \Closure $additionalCheckCallback = null): bool
     {
-        $checkUrl = config('otpify.absher.check_url');
+        $checkUrl = config('otpify.absher.base_url').'/check';
         $data = [
             'apiKey' => config('otpify.absher.api_key'),
-            'tcn' => $tcn,
-            'otp' => $otp,
+            'tcn' => $vid,
+            'otp' => $code,
         ];
         $response = Http::post($checkUrl, $data)->toPsrResponse();
 
