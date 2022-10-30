@@ -5,6 +5,8 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Api\V1\Admin\AdminController;
+use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
+use App\Http\Controllers\Api\V1\Admin\Auth\CreateAdmin;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
@@ -62,4 +64,7 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
         Route::get('{company}/orders', [OrderController::class, 'index']);
         Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
     });
+
+    Route::post('/admin-register', CreateAdmin::class);
+    Route::post('/{admin}/admin-complete-register', CompleteAdminRegister::class)->name('admin.complete-register');
 });
