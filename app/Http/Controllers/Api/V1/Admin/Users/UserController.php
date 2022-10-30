@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Admin\Users;
 
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Lender\Users\UpdateUserRequest;
+use App\Http\Requests\V1\Admin\Companies\Users\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
