@@ -27,9 +27,4 @@ class EdaatInvoice extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-    public function wallet(): BelongsTo
-    {
-        return $this->belongsTo(Wallet::class);
-    }
 }
