@@ -6,6 +6,7 @@ use App\Actions\Contracts\Wallets\CalculateOrdersCost;
 use App\Actions\Contracts\Wallets\CreateEdaatInvoice as CreateEdaatInvoiceInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Wallets\CalculateOrdersRequest;
+use App\Models\Company;
 use Illuminate\Http\JsonResponse;
 
 class CreateEdaatInvoice extends Controller
@@ -15,9 +16,12 @@ class CreateEdaatInvoice extends Controller
         CalculateOrdersCost $calculateOrderCost,
         CreateEdaatInvoiceInterface $createEdaatInvoice
     ): JsonResponse {
+        /** @var Company $company */
+        $company = tenant();
+
         $amount = $calculateOrderCost->handle(
             $request->input('orders_count'),
-            tenant()->order_cost
+            $company->order_cost
         );
 
         $invoice = $createEdaatInvoice->handle($amount);
