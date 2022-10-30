@@ -28,7 +28,11 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function transform(FinancingOrder $financingOrder)
     {
-        return [];
+        return [
+            'phone_country_code' => $financingOrder->phone_number->getCountry(),
+            'phone_number' => $financingOrder->phone_number->formatNational(),
+            'phone_number_formatted' => $financingOrder->phone_number,
+        ];
     }
 
     public function includeId(FinancingOrder $financingOrder)
