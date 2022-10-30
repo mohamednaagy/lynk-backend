@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\V1\Lender\Wallets;
 
 use App\Actions\Contracts\Wallets\CalculateOrdersCost;
 use App\Actions\Contracts\Wallets\CreateEdaatInvoice as CreateEdaatInvoiceInterface;
-use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Wallets\CalculateOrdersRequest;
 use App\Models\Company;
@@ -25,9 +24,7 @@ class CreateEdaatInvoice extends Controller
             $company->order_cost
         );
 
-        $wallet = $company->getWallet(WalletType::CompanyWallet);
-
-        $invoice = $createEdaatInvoice->handle($wallet, $amount);
+        $invoice = $createEdaatInvoice->handle($amount);
 
         return $this->successResponse([
             'amount' => $invoice->amount,
