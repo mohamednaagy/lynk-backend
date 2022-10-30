@@ -89,6 +89,9 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive([
             'id' => $financingOrder->creator->id,
             'name' => $financingOrder->creator->full_name,
+            'Phone_country_code' => $financingOrder->creator->phone_number->getCountry(),
+            'phone_number' => $financingOrder->creator->phone_number->formatNational(),
+            'phone_number_formatted' => $financingOrder->creator->phone_number,
         ]);
     }
 
