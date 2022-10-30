@@ -16,10 +16,10 @@ class GetOrdersStats extends Controller
      * @param  GetOrdersStatsByCreator  $getOrdersStatsByCreator
      * @return \Illuminate\Http\JsonResponse
      */
-    public function __invoke(OrdersGetOrdersStats $getOrdersStats, GetOrdersStatsByCreator $getOrdersStatsByCreator)
+    public function __invoke(OrdersGetOrdersStats $getOrdersStats)
     {
         if (auth()->user()->hasRole(Role::LenderOrderCreator)) {
-            return $this->successResponse($getOrdersStatsByCreator->handle(auth()->user()));
+            $getOrdersStats->setCreator(auth()->user());
         }
 
         return $this->successResponse($getOrdersStats->handle());

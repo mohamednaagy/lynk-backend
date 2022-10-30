@@ -102,14 +102,16 @@ class FinancingOrder extends Model implements HasMedia
         return $query->whereStatus(FinancingOrderStatus::Completed);
     }
 
-    public function scopeByCreator($query, Model $model)
+    public function scopeByCreator($query, ?Model $model)
     {
-        return $query->whereHasMorph(
-            'creator',
-            get_class($model),
-            function ($query) use ($model) {
-                return $query->where('creator_id', $model->getKey());
-            }
-        );
+        if (! is_null($model)) {
+            $query->whereHasMorph(
+                'creator',
+                get_class($model),
+                function ($query) use ($model) {
+                    $query->where('creator_id', $model->getKey());
+                }
+            );
+        }
     }
 }
