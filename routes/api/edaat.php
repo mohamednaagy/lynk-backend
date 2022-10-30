@@ -14,4 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+/**
+ * status values : [payment, bill, reconcile]
+ */
 Route::post('edaat/webhook/{status}', WebhookController::class);
