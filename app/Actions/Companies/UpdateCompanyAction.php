@@ -23,6 +23,8 @@ class UpdateCompanyAction implements UpdateCompany
                     'unique_name',
                     'company_cr',
                     'status',
+                    'visible',
+                    'internal',
                     'order_cost',
                     'does_order_require_approval',
                 ]
