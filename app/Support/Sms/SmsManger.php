@@ -32,7 +32,7 @@ class SmsManger extends Manager
      *
      * @throws \InvalidArgumentException
      */
-    public function driver($driver = 'sms')
+    public function driver($driver = null)
     {
         $driver = $driver ?: $this->getDefaultDriver();
 

@@ -6,7 +6,6 @@ use App\Exceptions\BalanceIsNotEnoughException;
 use App\Exceptions\InvalidLoginInfoException;
 use App\Exceptions\MobileNumbersIsNotCorrectException;
 use App\Exceptions\MSGDuplicatedException;
-use App\Models\SmsReport;
 use Illuminate\Support\Facades\Http;
 
 class MsegatDriver implements SmsDriverInterface
@@ -33,9 +32,10 @@ class MsegatDriver implements SmsDriverInterface
 
         // $code = $response->object()->code;
         // store the response data of the sms for tracking
-        SmsReport::create([
-            'response_data' => $response,
-        ]);
+
+        activity()
+            ->event('verified')
+            ->log($response);
 
         // switch ($code) {
         //     case '1':
