@@ -3,11 +3,18 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
+use App\Actions\Contracts\Wallets\CreateTransactions;
+use App\Enums\TransactionReason;
+use App\Enums\WalletType;
 use App\Models\FinancingOrder;
 use Illuminate\Support\Arr;
 
 class CreateFinancingOrderAction implements CreateFinancingOrder
 {
+    public function __construct(protected CreateTransactions $createTransactions)
+    {
+    }
+
     public function handle(array $data): FinancingOrder
     {
         $financingOrder = FinancingOrder::create(
@@ -23,6 +30,18 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
             $financingOrder->addMedia($data['power_of_attorney'])
                 ->toMediaCollection('power_of_attorney');
         }
+
+        $company = tenant();
+        $this->createTransactions->handle(
+            $company->getWallet(WalletType::CompanyWallet),
+            TransactionReason::OrderCreationFee,
+            $company->order_cost,
+            [
+                'financing_order_id' => $financingOrder->id,
+                'reference_number ' => $financingOrder->reference_number,
+                'amount' => $financingOrder->amount,
+            ]
+        );
 
         return $financingOrder;
     }
