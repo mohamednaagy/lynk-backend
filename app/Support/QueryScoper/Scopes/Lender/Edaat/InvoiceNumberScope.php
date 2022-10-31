@@ -32,7 +32,7 @@ class InvoiceNumberScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'invoice_number' => ['nullable', 'string', 'max:255'],
+                'invoice_number' => ['required', 'string', 'max:255'],
             ]
         );
     }
@@ -46,8 +46,10 @@ class InvoiceNumberScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data): Builder
     {
-        return ! empty($data['invoice_number']) ? $builder->where(function ($query) use ($data) {
-            $query->orWhere('invoice_number', $data['invoice_number']);
-        }) : $builder;
+        return $builder->where(
+            function ($query) use ($data) {
+                $query->orWhere('invoice_number', $data['invoice_number']);
+            }
+        );
     }
 }

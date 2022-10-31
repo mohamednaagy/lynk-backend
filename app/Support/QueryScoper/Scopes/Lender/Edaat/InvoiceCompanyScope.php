@@ -34,7 +34,7 @@ class InvoiceCompanyScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'company_id' => ['nullable', 'int', Rule::exists(Company::class, 'id')],
+                'company_id' => ['required', 'int', Rule::exists(Company::class, 'id')],
             ]
         );
     }
@@ -48,9 +48,10 @@ class InvoiceCompanyScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data): Builder
     {
-        return ! empty($data['company_id']) ? $builder->where(function ($query) use ($data) {
-            $query->orWhere('company_id', $data['company_id']);
-        }
-        ) : $builder;
+        return $builder->where(
+            function ($query) use ($data) {
+                $query->orWhere('company_id', $data['company_id']);
+            }
+        );
     }
 }

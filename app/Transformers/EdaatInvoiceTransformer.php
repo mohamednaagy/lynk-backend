@@ -41,7 +41,10 @@ class EdaatInvoiceTransformer extends TransformerAbstract
 
     public function includeStatus(EdaatInvoice $edaatInvoice): Primitive
     {
-        return $this->primitive($edaatInvoice->status);
+        return $this->primitive([
+            'value' => $edaatInvoice->status->value,
+            'description' => $edaatInvoice->status->description,
+        ]);
     }
 
     public function includeAmount(EdaatInvoice $edaatInvoice): Primitive
