@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
 use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
 use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
+use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Orders\GetBalance;
 use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
@@ -67,11 +68,11 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
         Route::get('/{company}/settings ', GetCompanySetting::class);
     });
 
-    Route::prefix('users')->group(function () {
-        Route::post('/', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'store']);
-    });
+    Route::get('edaat-invoices', GetEdaatInvoices::class);
 
     Route::prefix('users')->group(function () {
-        Route::put('/{user}', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'update']);
+        Route::post('/', [UserController::class, 'store']);
+        Route::post('/{user}', [UserController::class, 'store']);
+        Route::get('/{user}', [UserController::class, 'show']);
     });
 });

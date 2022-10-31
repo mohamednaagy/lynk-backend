@@ -30,6 +30,7 @@ class StoreCompanyUserRequest extends FormRequest
         return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
+            'company_id' => ['required', 'integer', Rule::exists(User::class, 'id')],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'email' => ['required', 'email', Rule::unique(User::class, 'email')],
