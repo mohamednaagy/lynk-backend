@@ -14,7 +14,7 @@ class SendOtpRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return (int) $this->route('order')->national_id == (int) $this->national_id;
     }
 
     /**

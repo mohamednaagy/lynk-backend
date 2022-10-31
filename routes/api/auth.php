@@ -28,5 +28,5 @@ Route::prefix('v1/auth')->name('api.v1.')->group(function () {
     Route::post('send-reset-password-link', SendEmailVerification::class);
     Route::post('reset-password', ResetPassword::class);
     Route::post('verify-email/{user}', VerifyEmail::class)->name('verify.email');
-    Route::post('send-otp', SendOtp::class)->name('otp.send');
+    Route::post('{order}/send-otp', SendOtp::class)->name('otp.send');
 });

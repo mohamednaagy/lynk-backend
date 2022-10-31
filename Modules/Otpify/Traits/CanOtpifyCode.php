@@ -2,11 +2,12 @@
 
 namespace Modules\Otpify\Traits;
 
-use App\Models\User;
 use Closure;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
 use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
 use Modules\Otpify\Exceptions\OtpCodeExpiredException;
@@ -19,20 +20,23 @@ use Modules\Otpify\Models\OtpifyCode;
 trait CanOtpifyCode
 {
     /**
-     * @param $code
-     * @param  int  $otpifiableId
+     *  createOtpifyCode
+     *
+     * @param  mixed  $code
+     * @param  Otpifiable  $otpifiable
+     * @param  Model|null  $initiator
      * @param  array  $data
      * @return OtpifyCode
      */
-    public function createOtpifyCode($code, int $otpifiableId, array $data = []): OtpifyCode
+    public function createOtpifyCode($code, Otpifiable $otpifiable, Model $initiator = null, array $data = []): OtpifyCode
     {
         return OtpifyCode::create([
             'id' => (string) Str::uuid(),
-            'initiator_id' => auth()->user()->getAuthIdentifier(),
-            'initiator_type' => (new User())->getMorphClass(),
-            'otpifiable_id' => $otpifiableId,
-            'otpifiable_type' => (new User())->getMorphClass(),
-            'otp_code' => Hash::make($code),
+            'initiator_id' => optional($initiator)->getKey(),
+            'initiator_type' => optional($initiator)->getMorphClass(),
+            'otpifiable_id' => $otpifiable->getKey(),
+            'otpifiable_type' => $otpifiable->getMorphClass(),
+            'otp_code' => $code,
             'expiration_date' => now()->addMinutes(config('otpify.code_expiration_time')),
             'data' => $data,
         ]);

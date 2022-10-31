@@ -6,13 +6,15 @@ use App\Enums\FinancingOrderStatus;
 use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Modules\Otpify\Contracts\Otpifiable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
-class FinancingOrder extends Model implements HasMedia
+class FinancingOrder extends Model implements HasMedia, Otpifiable
 {
     use HasFactory, InteractsWithMedia, BelongsToTenant, LogsActivity, HasScopes;
 
@@ -32,11 +34,13 @@ class FinancingOrder extends Model implements HasMedia
         'creator_id',
         'creator_type',
         'reason',
+        'customer_details',
     ];
 
     protected $casts = [
         'status' => FinancingOrderStatus::class,
         'approved_at' => 'datetime',
+        'data' => 'array',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -48,12 +52,18 @@ class FinancingOrder extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this
-            ->addMediaCollection('contract')
-            ->singleFile();
+            ->addMediaCollection(
+                'contract'
+            )
+            ->singleFile(
+            );
 
         $this
-            ->addMediaCollection('power_of_attorney')
-            ->singleFile();
+            ->addMediaCollection(
+                'power_of_attorney'
+            )
+            ->singleFile(
+            );
     }
 
     public function company()
@@ -79,5 +89,16 @@ class FinancingOrder extends Model implements HasMedia
     public function getContractAttribute()
     {
         return $this->getFirstMediaUrl('contract');
+    }
+
+    /**
+     * Check if this user requires verifying by OTP based on role.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool
+     */
+    public function doesRequireVerifyingByOtp(Request $request): bool
+    {
+        return true;
     }
 }

@@ -56,4 +56,9 @@ class OtpifyCode extends Model
     {
         return $this->id;
     }
+
+    public function otpifiable()
+    {
+        return $this->morphTo('otpifiable');
+    }
 }
