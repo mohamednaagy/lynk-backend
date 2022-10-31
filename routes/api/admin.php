@@ -68,10 +68,8 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
     Route::get('edaat-invoices', GetEdaatInvoices::class);
 
     Route::prefix('users')->group(function () {
-        Route::post('/', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'store']);
-    });
-
-    Route::prefix('users')->group(function () {
-        Route::put('/{user}', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'update']);
+        Route::post('/', [UserController::class, 'store']);
+        Route::post('/{user}', [UserController::class, 'store']);
+        Route::get('/{user}', [UserController::class, 'show']);
     });
 });
