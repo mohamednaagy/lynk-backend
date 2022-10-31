@@ -17,7 +17,7 @@ class CompanyTransformer extends TransformerAbstract
                 'description' => $company->status->description,
             ],
             'orders_count' => $company->orders_count,
-            'created_at' => $company->created_at->format('Y-m-d'),
+            'created_at' => optional($company->created_at)->format('Y-m-d'),
         ];
     }
 }
