@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Lender\Auth\ResendInvitation;
 use App\Http\Controllers\Api\V1\Lender\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CancelOrder;
+use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersStats;
 use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Orders\RejectOrder;
 use App\Http\Controllers\Api\V1\Lender\Settings\GetLenderAreaSettings;
@@ -43,6 +44,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
+        Route::get('orders/stats', GetOrdersStats::class);
         Route::apiResource('orders', OrderController::class);
         Route::put('orders/{order}/approve', ApproveOrder::class);
         Route::put('orders/{order}/reject', RejectOrder::class);
