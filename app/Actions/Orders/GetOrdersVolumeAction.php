@@ -32,12 +32,12 @@ class GetOrdersVolumeAction implements GetOrdersVolume
             )
             ->when(
                 $period == DatePeriod::YEAR, function ($query) {
-                    $query->selectRaw("DATE_FORMAT(created_at, '%Y') label");
+                    $query->selectRaw("DATE_FORMAT(created_at, '%Y') as label");
                 }
             )
             ->when(
                 $period == DatePeriod::MONTH, function ($query) {
-                    $query->selectRaw("DATE_FORMAT(created_at, '%Y-%m') label");
+                    $query->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as label");
                 }
             )
             ->when(

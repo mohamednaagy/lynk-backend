@@ -10,12 +10,13 @@ use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
 use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
+use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Orders\GetBalance;
 use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\SettingsController;
-use App\Http\Controllers\Api\V1\Admin\Transaction\TransactionController;
+use App\Http\Controllers\Api\V1\Admin\Transactions\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Modules\Grantify\Facades\Grantify;
 
@@ -63,6 +64,8 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
         Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
         Route::get('/{company}/settings ', GetCompanySetting::class);
     });
+
+    Route::get('edaat-invoices', GetEdaatInvoices::class);
 
     Route::prefix('users')->group(function () {
         Route::post('/', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'store']);
