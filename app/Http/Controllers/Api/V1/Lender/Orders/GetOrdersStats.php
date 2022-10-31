@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Orders\GetOrdersStats as OrdersGetOrdersStats;
-use App\Actions\Contracts\Orders\GetOrdersStatsByCreator;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
 

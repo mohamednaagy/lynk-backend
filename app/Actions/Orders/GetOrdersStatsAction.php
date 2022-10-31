@@ -25,10 +25,19 @@ class GetOrdersStatsAction implements GetOrdersStats
     public function handle()
     {
         return [
-            'total_orders' => FinancingOrder::byCreator($this->creator)->count(),
-            'total_cancelled_orders' => FinancingOrder::byCreator($this->creator)->canceled()->count(),
-            'total_active_orders' => FinancingOrder::byCreator($this->creator)->active()->count(),
-            'total_completed_orders' => FinancingOrder::byCreator($this->creator)->completed()->count(),
+            'total_orders' => $this->baseQuery()->count(),
+            'total_cancelled_orders' => $this->baseQuery()->canceled()->count(),
+            'total_active_orders' => $this->baseQuery()->active()->count(),
+            'total_completed_orders' => $this->baseQuery()->completed()->count(),
         ];
+    }
+
+    protected function baseQuery()
+    {
+        return FinancingOrder::when(
+            $this->creator, function ($query) {
+                $query->byCreator($this->creator);
+            }
+        );
     }
 }
