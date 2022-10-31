@@ -29,9 +29,9 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function transform(FinancingOrder $financingOrder)
     {
         return [
-            'phone_country_code' => $financingOrder->phone_number->getCountry(),
-            'phone_number' => $financingOrder->phone_number->formatNational(),
-            'phone_number_formatted' => $financingOrder->phone_number,
+            'phone_country_code' => $financingOrder->phone_number_country_code,
+            'phone_number' => $financingOrder->mobile_dialing_phone_number,
+            'phone_number_formatted' => $financingOrder->phone_number->formatInternational(),
         ];
     }
 
@@ -98,9 +98,6 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive([
             'id' => $financingOrder->creator->id,
             'name' => $financingOrder->creator->full_name,
-            'Phone_country_code' => $financingOrder->creator->phone_number->getCountry(),
-            'phone_number' => $financingOrder->creator->phone_number->formatNational(),
-            'phone_number_formatted' => $financingOrder->creator->phone_number,
         ]);
     }
 

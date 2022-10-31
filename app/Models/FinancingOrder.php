@@ -50,6 +50,13 @@ class FinancingOrder extends Model implements HasMedia
         );
     }
 
+    protected function mobileDialingPhoneNumber(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => "{$this->phone_number->formatForMobileDialingInCountry($this->phone_number->getCountry())}",
+        );
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->logAll();
