@@ -17,9 +17,19 @@ class GetOrdersVolumeAction implements GetOrdersVolume
     public function handle(array $data = [])
     {
         $period = Arr::get($data, 'period') ?: DatePeriod::YEAR;
+        $startingDate = Arr::get($data, 'starting_date');
+        $endingDate = Arr::get($data, 'ending_date');
 
-        $ordersQuery = $this->baseQuery($data);
-        $orders = $ordersQuery
+        $orders = FinancingOrder::query()
+            ->when(
+                $startingDate, function ($query) use ($startingDate) {
+                    $query->whereDate('created_at', '>=', $startingDate);
+                }
+            )->when(
+                $endingDate, function ($query) use ($endingDate) {
+                    $query->whereDate('created_at', '<=', $endingDate);
+                }
+            )
             ->when(
                 $period == DatePeriod::YEAR, function ($query) {
                     $query->selectRaw("DATE_FORMAT(created_at, '%Y') label");
@@ -34,6 +44,9 @@ class GetOrdersVolumeAction implements GetOrdersVolume
                 $period == DatePeriod::WEEK, function ($query) {
                     $query->selectRaw("DATE_FORMAT(created_at, '%Y-%m-%U') as label");
                 }
+            )
+            ->selectRaw(
+                'COUNT(*) as count'
             )
             ->groupBy(
                 'label'
@@ -56,26 +69,14 @@ class GetOrdersVolumeAction implements GetOrdersVolume
         return array_replace(array_fill_keys($period, 0), $orders->toArray());
     }
 
-    protected function baseQuery(array $data = [])
-    {
-        $startingDate = Arr::get($data, 'starting_date');
-        $endingDate = Arr::get($data, 'ending_date');
-
-        return FinancingOrder::query()
-            ->when(
-                $startingDate, function ($query) use ($startingDate) {
-                    $query->whereDate('created_at', '>=', $startingDate);
-                }
-            )->when(
-                $endingDate, function ($query) use ($endingDate) {
-                    $query->whereDate('created_at', '<=', $endingDate);
-                }
-            )
-            ->selectRaw(
-                'COUNT(*) as count'
-            );
-    }
-
+    /**
+     * get period between two dates
+     *
+     * @param  mixed  $fromYear
+     * @param  mixed  $toYear
+     * @param  mixed  $format
+     * @return array<string>
+     */
     protected function getPeriodBetween($fromYear, $toYear, $format = DatePeriod::YEAR)
     {
         if ($format == 'weeks') {
@@ -91,6 +92,13 @@ class GetOrdersVolumeAction implements GetOrdersVolume
         return $months;
     }
 
+    /**
+     * get weeks between two dates
+     *
+     * @param  mixed  $from
+     * @param  mixed  $to
+     * @return array<string>
+     */
     protected function weeksFormat($from, $to)
     {
         $arrayOfDateFrom = explode('-', $from);
@@ -109,6 +117,12 @@ class GetOrdersVolumeAction implements GetOrdersVolume
         return $yearInWeeks;
     }
 
+    /**
+     * determine format by period
+     *
+     * @param  mixed  $period
+     * @return string
+     */
     protected function getFormatByPeriod($period)
     {
         switch ($period) {
