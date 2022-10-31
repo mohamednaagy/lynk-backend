@@ -26,7 +26,7 @@ class OrderVolumeRequest extends FormRequest
     public function rules()
     {
         return [
-            'filter' => ['sometimes', Rule::in(DatePeriod::getValues())],
+            'period' => ['sometimes', Rule::in(DatePeriod::getValues())],
             'starting_date' => ['sometimes', 'date_format:Y-m-d'],
             'ending_date' => ['sometimes', 'date_format:Y-m-d'],
         ];
