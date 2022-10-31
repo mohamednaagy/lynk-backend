@@ -48,10 +48,6 @@ class InvoiceCompanyScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data): Builder
     {
-        return $builder->where(
-            function ($query) use ($data) {
-                $query->orWhere('company_id', $data['company_id']);
-            }
-        );
+        return $builder->where('company_id', $data['company_id']);
     }
 }

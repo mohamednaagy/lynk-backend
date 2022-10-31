@@ -46,10 +46,6 @@ class InvoiceNumberScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data): Builder
     {
-        return $builder->where(
-            function ($query) use ($data) {
-                $query->orWhere('invoice_number', $data['invoice_number']);
-            }
-        );
+        return $builder->Where('invoice_number', $data['invoice_number']);
     }
 }

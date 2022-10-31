@@ -12,6 +12,7 @@ class EdaatInvoiceTransformer extends TransformerAbstract
         'id',
         'invoice_number',
         'amount',
+        'amount_formatted',
         'creator',
         'company_name',
         'company_number',
@@ -50,6 +51,11 @@ class EdaatInvoiceTransformer extends TransformerAbstract
     public function includeAmount(EdaatInvoice $edaatInvoice): Primitive
     {
         return $this->primitive($edaatInvoice->amount);
+    }
+
+    public function includeAmountFormatted(EdaatInvoice $edaatInvoice): Primitive
+    {
+        return $this->primitive(number_format($edaatInvoice->amount, 2));
     }
 
     public function includeCompanyName(): Primitive
