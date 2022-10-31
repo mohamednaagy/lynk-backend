@@ -13,7 +13,7 @@ use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
-class TCCDriver implements MobileVerifyDriverInterface
+class TccDriver implements MobileVerifyDriverInterface
 {
     /**
      * @param  string  $mobileNumber
@@ -31,7 +31,7 @@ class TCCDriver implements MobileVerifyDriverInterface
             $this->prepareRequestData($mobileNumber, $personId)
         );
 
-        $response = json_decode($response->content(), true);
+        $response = $response->json();
 
         activity()
             ->withProperties(['response' => $response])

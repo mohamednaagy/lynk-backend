@@ -4,7 +4,7 @@ namespace App\Support\MobileVerification\Drivers;
 
 use App\Support\MobileVerification\Contracts\MobileVerifyDriverInterface;
 
-class TestTCCDriver implements MobileVerifyDriverInterface
+class TestTccDriver implements MobileVerifyDriverInterface
 {
     /**
      * @param  string  $mobileNumber
@@ -13,6 +13,6 @@ class TestTCCDriver implements MobileVerifyDriverInterface
      */
     public function verify(string $mobileNumber, string $personId): bool
     {
-        return true;
+        return $mobileNumber == '0500112233';
     }
 }
