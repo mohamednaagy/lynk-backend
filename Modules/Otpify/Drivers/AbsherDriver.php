@@ -2,16 +2,32 @@
 
 namespace Modules\Otpify\Drivers;
 
+use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
+use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
+use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
+use Modules\Otpify\Exceptions\OtpCodeExpiredException;
+use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
 use Modules\Otpify\Models\OtpifyCode;
 use Modules\Otpify\Traits\CanOtpifyCode;
 
 class AbsherDriver implements OtpifyDriverInterface
 {
     use CanOtpifyCode;
+
+    protected $baseUrl;
+
+    protected $apiKey;
+
+    public function __construct($baseUrl, $apiKey)
+    {
+        $this->baseUrl = rtrim($baseUrl, '/');
+        $this->apiKey = $apiKey;
+    }
 
     /**
      * Execute the driver logic.
@@ -23,18 +39,18 @@ class AbsherDriver implements OtpifyDriverInterface
      */
     public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
-        $tcn = 'ahmed';
+        $sendUrl = $this->url('send');
 
-        return $this->createOtpifyCode($tcn, $otpifiable, null, ['tcn' => $tcn, 'code' => $tcn]);
+        $body = [
+            'apiKey' => $this->apiKey,
+            'personId' => $otpifiable->getNationalId(),
+        ];
 
-        // $sendUrl = config('otpify.absher.base_url').'/send';
-        // $data = [
-        //     'apiKey' => config('otpify.absher.api_key'),
-        //     'personId' => $request->validated('notional_id'),
-        // ];
-        // $response = Http::post($sendUrl, $data)->toPsrResponse();
-        // $tcn = $response['tcn'];
-        // return $this->createOtpifyCode($tcn, $otpifiable, null, ['tcn' => $tcn, 'code' => $response['code']]);
+        $response = Http::post($sendUrl, $body)->toPsrResponse();
+
+        $tcn = $response['tcn'];
+
+        return $this->createOtpifyCode(null, $otpifiable, $otpifiable, ['tcn' => $tcn]);
     }
 
     /**
@@ -56,22 +72,51 @@ class AbsherDriver implements OtpifyDriverInterface
      * @param  mixed  $vid
      * @param  mixed  $code
      * @param  \Closure|null  $additionalCheckCallback
-     * @return bool
+     * @return string
      */
-    public function verify(Request $request, $vid, $code, \Closure $additionalCheckCallback = null): bool
+    public function verify(Request $request, $vid, $code, Closure $additionalCheckCallback = null): string
     {
-        $checkUrl = config('otpify.absher.base_url').'/check';
+        $otpifyCode = $this->getOtpifyCode($vid);
+
+        if ($otpifyCode->expired_at != null) {
+            throw new OtpCodeAlreadyUsedException();
+        }
+
+        if ($this->isCodeExpired($otpifyCode->expiration_date)) {
+            throw new OtpCodeExpiredException();
+        }
+
+        if ($additionalCheckCallback instanceof Closure && ! $additionalCheckCallback($request, $code)) {
+            throw new OtpCodeAdditionalCheckException();
+        }
+
+        $checkUrl = $this->url('check');
+
         $data = [
-            'apiKey' => config('otpify.absher.api_key'),
+            'apiKey' => $this->apiKey,
             'tcn' => $vid,
             'otp' => $code,
         ];
-        $response = Http::post($checkUrl, $data)->toPsrResponse();
-        if (isset($response['userDetails']) && $userDetails = $response['userDetails']) {
-            $otpify = OtpifyCode::where('otp_code', $vid)->orWhere('otp_code', $code)->first();
-            $otpify->otpifiable->update(['customer_details' => $userDetails]);
 
-            return true;
+        $response = Http::post($checkUrl, $data)->toPsrResponse();
+
+        if (
+            Arr::get($response, 'code') === 600 &&
+            isset($response['userDetails']) &&
+            $userDetails = $response['userDetails']
+        ) {
+            $otpifyCode->otpifiable->update(['customer_details' => $userDetails]);
+
+            $this->setOtpExpiredAt($otpifyCode);
+
+            return $this->createAuthorizationToken($request->all());
+        } else {
+            throw new OtpCodeIncorrectException();
         }
+    }
+
+    protected function url($path)
+    {
+        return $this->baseUrl.'/'.ltrim($path, '/');
     }
 }

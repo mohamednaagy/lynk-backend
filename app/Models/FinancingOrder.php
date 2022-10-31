@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Modules\Otpify\Contracts\Otpifiable;
+use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
@@ -89,6 +90,16 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function getContractAttribute()
     {
         return $this->getFirstMediaUrl('contract');
+    }
+
+    public function getPhoneNumber(): PhoneNumber
+    {
+        return $this->phone_number;
+    }
+
+    public function getNationalId(): string
+    {
+        return $this->national_id;
     }
 
     /**

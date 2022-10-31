@@ -51,7 +51,10 @@ class OtpifyManager extends Manager
      */
     public function createAbsherDriver(): OtpifyDriverInterface
     {
-        return new AbsherDriver();
+        return new AbsherDriver(
+            baseUrl: config('otpify.absher.base_url'),
+            apiKey: config('otpify.absher.api_key')
+        );
     }
 
     /**

@@ -28,8 +28,12 @@ trait CanOtpifyCode
      * @param  array  $data
      * @return OtpifyCode
      */
-    public function createOtpifyCode($code, Otpifiable $otpifiable, Model $initiator = null, array $data = []): OtpifyCode
-    {
+    public function createOtpifyCode(
+        $code,
+        Otpifiable $otpifiable,
+        Model|Otpifiable $initiator = null,
+        array $data = []
+    ): OtpifyCode {
         return OtpifyCode::create([
             'id' => (string) Str::uuid(),
             'initiator_id' => optional($initiator)->getKey(),
@@ -89,6 +93,7 @@ trait CanOtpifyCode
     public function getOtpifyCode($vid): OtpifyCode
     {
         $otpifyCode = OtpifyCode::where('id', $vid)->first();
+
         if (! $otpifyCode) {
             throw new OtpCodeNotFoundException();
         }
@@ -114,8 +119,8 @@ trait CanOtpifyCode
         $otpifyCode->update(['expired_at' => now()]);
     }
 
-    public function createAuthorizationToken(array $data): void
+    public function createAuthorizationToken(array $data): string
     {
-        Otpify::generateAuthorizationToken($data);
+        return Otpify::generateAuthorizationToken($data);
     }
 }

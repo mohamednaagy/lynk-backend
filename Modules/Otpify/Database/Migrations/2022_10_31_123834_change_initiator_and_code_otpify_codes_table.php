@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::table('otpify_codes', function (Blueprint $table) {
             $table->unsignedBigInteger('initiator_id')->nullable()->change();
             $table->string('initiator_type')->nullable()->change();
+            $table->string('otp_code')->nullable()->change();
         }
         );
     }
