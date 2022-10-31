@@ -2,21 +2,23 @@
 
 namespace App\Support\Traders\Drivers;
 
+use App\Support\DMCC\DMCCService;
+
 class DmccDriver
 {
     public function createTTI(): string
     {
-        return 'createTTI';
+        return (new DMCCService())->getTTI('', '', '');
     }
 
     public function createPTP(): string
     {
-        return 'createPTP';
+        return (new DMCCService())->respondPTPService('');
     }
 
     public function createMPO(): string
     {
-        return 'createMPO';
+        return (new DMCCService())->issueMurabahaPurchaseOffer('');
     }
 
     public function processNotifications(): string
