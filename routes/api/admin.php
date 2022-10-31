@@ -11,11 +11,12 @@ use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
 use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
 use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
+use App\Http\Controllers\Api\V1\Admin\Orders\GetBalance;
 use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\SettingsController;
-use App\Http\Controllers\Api\V1\Admin\Transaction\TransactionController;
+use App\Http\Controllers\Api\V1\Admin\Transactions\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Modules\Grantify\Facades\Grantify;
 
@@ -57,12 +58,20 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
     Route::apiResource('companies', CompanyController::class);
 
     Route::prefix('companies')->group(function () {
-        Route::post('/{company}/status', UpdateCompanyStatus::class);
-
+        Route::put('/{company}/status', UpdateCompanyStatus::class);
+        Route::get('/{company}/balance ', GetBalance::class);
         Route::get('/{company}/users', [UserController::class, 'index']);
         Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
         Route::get('{company}/orders', [OrderController::class, 'index']);
         Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
         Route::get('/{company}/settings ', GetCompanySetting::class);
+    });
+
+    Route::prefix('users')->group(function () {
+        Route::post('/', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'store']);
+    });
+
+    Route::prefix('users')->group(function () {
+        Route::put('/{user}', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'update']);
     });
 });

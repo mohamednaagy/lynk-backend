@@ -15,6 +15,10 @@ return new class extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('edaat_invoices')) {
+            return;
+        }
+
         Schema::create('edaat_invoices', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Company::class)
@@ -36,6 +40,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('inovices');
+        Schema::dropIfExists('edaat_invoices');
     }
 };
