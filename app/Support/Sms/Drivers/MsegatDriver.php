@@ -6,10 +6,24 @@ use App\Exceptions\BalanceIsNotEnoughException;
 use App\Exceptions\InvalidLoginInfoException;
 use App\Exceptions\MobileNumbersIsNotCorrectException;
 use App\Exceptions\MSGDuplicatedException;
+use App\Support\Sms\SmsDriverInterface;
+use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\Facades\Http;
 
 class MsegatDriver implements SmsDriverInterface
 {
+    protected $baseUrl;
+
+    public function __construct(UrlGenerator $baseUrl)
+    {
+        $this->baseUrl = $baseUrl;
+    }
+
+    public function smsURL()
+    {
+        $this->baseUrl->to('https://www.msegat.com/gw/sendsms.php');
+    }
+
     /**
      * Execute the driver logic.
      *
@@ -20,7 +34,7 @@ class MsegatDriver implements SmsDriverInterface
     public function send($message, $phoneNumber): void
     {
         $response = Http::post(
-            config('sms.msegat.url'),
+            $this->baseUrl,
             [
                 'user_name' => config('sms.msegat.user_name'),
                 'numbers' => $phoneNumber,
@@ -31,6 +45,8 @@ class MsegatDriver implements SmsDriverInterface
         );
         // store the response data of the sms for tracking
         activity()
+            ->causedBy('msegat')
+            ->withProperties(['sms' => 'value'])
             ->event('verified')
             ->log($response);
 
