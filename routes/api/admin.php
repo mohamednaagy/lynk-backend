@@ -15,7 +15,7 @@ use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\SettingsController;
-use App\Http\Controllers\Api\V1\Admin\Transaction\TransactionController;
+use App\Http\Controllers\Api\V1\Admin\Transactions\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Modules\Grantify\Facades\Grantify;
 
