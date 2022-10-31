@@ -182,6 +182,7 @@ return [
         App\Providers\MacroServiceProvider::class,
         App\Providers\PasswordResetServiceProvider::class,
         App\Providers\EdaatServiceProvider::class,
+        App\Providers\PdfGeneratorServiceProvider::class,
     ],
 
     /*
