@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
-use App\Http\Controllers\Api\V1\Admin\Auth\CreateAdmin;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
@@ -33,13 +32,12 @@ use Modules\Grantify\Facades\Grantify;
 */
 
 Route::prefix('v1/admin')->group(function () {
-    Route::post('/admin-register', CreateAdmin::class);
-    Route::post('/{admin}/admin-complete-register', CompleteAdminRegister::class)->name('admin.complete-register');
+    Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.complete-register');
 
     Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->group(function () {
         Route::get('auth', GetAuthUser::class);
 
-        Route::apiResource('admins', AdminController::class)->except(['show'])->parameters(['admins' => 'id']);
+        Route::apiResource('admins', AdminController::class);
         Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
 
         Route::get('/roles', GetAllRoles::class)->middleware(
@@ -60,21 +58,22 @@ Route::prefix('v1/admin')->group(function () {
             Route::put('/update', [SettingsController::class, 'update']);
         });
 
-    Route::apiResource('companies', CompanyController::class);
-    Route::prefix('companies')->group(function () {
-        Route::get('/{company}/balance ', GetBalance::class);
-        Route::get('/{company}/users', [UserController::class, 'index']);
-        Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
-        Route::get('{company}/orders', [OrderController::class, 'index']);
-        Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
-        Route::get('/{company}/settings ', GetCompanySetting::class);
-    });
+        Route::apiResource('companies', CompanyController::class);
+        Route::prefix('companies')->group(function () {
+            Route::get('/{company}/balance ', GetBalance::class);
+            Route::get('/{company}/users', [UserController::class, 'index']);
+            Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
+            Route::get('{company}/orders', [OrderController::class, 'index']);
+            Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
+            Route::get('/{company}/settings ', GetCompanySetting::class);
+        });
 
-    Route::prefix('users')->group(function () {
-        Route::post('/', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'store']);
-    });
+        Route::prefix('users')->group(function () {
+            Route::post('/', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'store']);
+        });
 
-    Route::prefix('users')->group(function () {
-        Route::put('/{user}', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'update']);
+        Route::prefix('users')->group(function () {
+            Route::put('/{user}', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'update']);
+        });
     });
 });
