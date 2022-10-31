@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Enums\FinancingOrderStatus;
 use App\Support\QueryScoper\HasScopes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
@@ -24,6 +26,7 @@ class FinancingOrder extends Model implements HasMedia
     protected $fillable = [
         'reference_number',
         'national_id',
+        'phone_number',
         'amount',
         'selling_price',
         'status',
@@ -37,7 +40,15 @@ class FinancingOrder extends Model implements HasMedia
     protected $casts = [
         'status' => FinancingOrderStatus::class,
         'approved_at' => 'datetime',
+        'phone_number' => E164PhoneNumberCast::class,
     ];
+
+    protected function phoneNumberCountryCode(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => "{$this->phone_number->getCountry()}",
+        );
+    }
 
     public function getActivitylogOptions(): LogOptions
     {
