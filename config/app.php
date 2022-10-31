@@ -184,6 +184,7 @@ return [
         // sms provider
         App\Providers\SmsServiceProvider::class,
         App\Providers\EdaatServiceProvider::class,
+        App\Providers\MobileVerifyServiceProvider::class,
     ],
 
     /*
@@ -201,6 +202,7 @@ return [
         'Otpify' => Modules\Otpify\Facades\Otpify::class,
         'Grantify' => Modules\Grantify\Facades\Grantify::class,
         'GrantifySeeder' => Modules\Grantify\Facades\GrantifySeeder::class,
+        'MobileVerify' => App\Support\MobileVerification\Facades\MobileVerify::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
         'Sms' => App\Support\Sms\Sms::class,
     ])->toArray(),
