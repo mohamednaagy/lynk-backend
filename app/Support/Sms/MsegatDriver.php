@@ -2,10 +2,6 @@
 
 namespace App\Support\Sms;
 
-use App\Exceptions\BalanceIsNotEnoughException;
-use App\Exceptions\InvalidLoginInfoException;
-use App\Exceptions\MobileNumbersIsNotCorrectException;
-use App\Exceptions\MSGDuplicatedException;
 use Illuminate\Support\Facades\Http;
 
 class MsegatDriver implements SmsDriverInterface
@@ -29,37 +25,8 @@ class MsegatDriver implements SmsDriverInterface
                 'msg' => $message,
             ]
         );
-
-        // $code = $response->object()->code;
-        // store the response data of the sms for tracking
-
         activity()
             ->event('verified')
             ->log($response);
-
-        // switch ($code) {
-        //     case '1':
-        //         // message sent successfuly
-        //         break;
-        //     case '1020':
-        //         throw new InvalidLoginInfoException();
-        //         break;
-        //     case '1060':
-        //         throw new BalanceIsNotEnoughException();
-        //         break;
-        //     case '1061':
-        //         throw new MSGDuplicatedException();
-        //         break;
-        //     case '1120':
-        //         throw new MobileNumbersIsNotCorrectException();
-        //         break;
-        //     case '1110':
-        //         throw new MobileNumbersIsNotCorrectException();
-        //         break;
-        //     default:
-        //         // throw error
-        //         throw new \ErrorException('Error found');
-        //         break;
-        // }
     }
 }
