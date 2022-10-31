@@ -22,7 +22,7 @@ class OrderCreationFeeType extends GeneratorBase
 
     public function handleTransaction(Wallet $wallet, string $amount, array $meta)
     {
-        $wallet->withdrawFloat($amount, $meta);
+        $wallet->withdraw($amount, $meta);
 
         return $wallet->balanceFloat;
     }

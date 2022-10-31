@@ -28,6 +28,8 @@ final class Subject extends Enum
 
     const LenderSettings = 'lenderSettings';
 
+    const LenderTransactions = 'lenderTransactions';
+
     const Dashboard = 'dashboard';
 
     const LenderEdaatInvoices = 'lenderEdaatInvoices';
