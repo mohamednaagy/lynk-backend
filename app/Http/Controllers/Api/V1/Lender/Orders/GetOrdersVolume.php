@@ -6,8 +6,8 @@ use App\Enums\DatePeriod;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\OrderVolumeRequest;
 use App\Models\FinancingOrder;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class GetOrdersVolume extends Controller
 {
@@ -22,7 +22,7 @@ class GetOrdersVolume extends Controller
         $filter = $orderVolumeRequest->validated('filter') ?: DatePeriod::YEAR;
         $startingDate = $orderVolumeRequest->validated('starting_date');
         $endingDate = $orderVolumeRequest->validated('ending_date');
-        $orders = FinancingOrder::query()
+        $ordersQuery = FinancingOrder::query()
             ->when(
                 $orderVolumeRequest->validated('starting_date'), function ($query) use ($startingDate) {
                     $query->whereDate('created_at', '>=', $startingDate);
@@ -31,96 +31,116 @@ class GetOrdersVolume extends Controller
                 $endingDate, function ($query) use ($endingDate) {
                     $query->whereDate('created_at', '<=', $endingDate);
                 }
-            )->select(
-                DB::raw('COUNT(*) as count'),
-                DB::raw('Month(created_at) as month_name'),
-            )->groupBy(
-                'month_name'
-            )
-            ->pluck(
-                'count',
-                'month_name'
             );
-        $dates = range(1, 12);
-        $new = [];
-        foreach ($dates as $index => $value) {
-            $new[$value] = 0;
-            if (isset($orders[$value])) {
-                $new[$value] = $orders[$value];
-            }
-            // code...
-        }
 
-        return $new;
-
-        return $orders;
         switch ($filter) {
             case DatePeriod::YEAR:
-                $orders = $this->queryFilterByYear($orders);
+                $chart = $this->queryYearlyChart($ordersQuery);
                 break;
             case DatePeriod::MONTH:
-                // code...
+                $chart = $this->getMonthlyChart($ordersQuery);
                 break;
 
             case DatePeriod::WEEK:
-                // code...
+                $chart = $this->queryWeeklyChart($ordersQuery);
                 break;
             default:
-                // code...
+                $chart = $this->queryYearlyChart($ordersQuery);
                 break;
         }
 
-        return $orders->get();
-        // ->select(
-        //     DB::raw("COUNT(*) as count"),
-        //     DB::raw("DATE_FORMAT(created_at, '%d-%m-%Y') new_date_formate"),
-        //     DB::raw("Year(created_at) as year"),
-        //     DB::raw("MONTHNAME(created_at) as month_name"),
-        //     DB::raw('WEEK(created_at) as week'),
-        // )
-
-        // ->orderBy(
-        //     'year'
-        // )
-        // ->groupBy(
-        //     [
-        //         'new_date_formate',
-        //         'year',
-        //         'month_name',
-        //         'week'
-        //     ]
-        // )
-        // ->get(
-        // );
-
-        return $orders;
-
-        // $orders = FinancingOrder::select(
-        //     DB::raw("COUNT(*) as count"),
-        //     DB::raw("Year(created_at) as year"),
-        //     DB::raw("MONTHNAME(created_at) as month_name"),
-        //       DB::raw('WEEK(created_at) as week'),
-        // )->groupBy(
-        //         'year',
-        //         'month_name',
-        //         'week'
-        //     )->get(
-        //     );
-
-        // return $orders;
+        return $this->successResponse(['AXIS_Y' => array_keys($chart), 'AXIS_X' => array_values($chart)]);
     }
 
-    private function queryFilterByYear($query)
+    private function getMonthlyChart($query)
     {
-        return $query->select(
-            DB::raw('COUNT(*) as count'),
-            DB::raw('Year(created_at) as year'),
-            DB::raw('MONTHNAME(created_at) as month_name'),
-            DB::raw('WEEK(created_at) as week'),
-        )->groupBy(
-            'year',
-            'month_name',
-            'week'
-        );
+        $ordersQuery = $query->selectRaw('COUNT(*) as count')
+            ->selectRaw(
+                "DATE_FORMAT(created_at, '%Y-%m') label"
+            )
+            ->groupBy(
+                'label'
+            )->pluck(
+                'count',
+                'label'
+            );
+
+        $yearMonth = $this->getPeriodBetween($ordersQuery->keys()->first(), $ordersQuery->keys()->last());
+        $chart = array_replace(array_fill_keys($yearMonth, 0), $ordersQuery->toArray());
+
+        return $chart;
+    }
+
+    private function queryYearlyChart($query)
+    {
+        $ordersQuery = $query->selectRaw('COUNT(*) as count')
+            ->selectRaw(
+                "DATE_FORMAT(created_at, '%Y') label"
+            )
+            ->groupBy(
+                'label'
+            )
+            ->pluck(
+                'count',
+                'label'
+            );
+
+        $yearMonth = $this->getPeriodBetween($ordersQuery->keys()->first(), $ordersQuery->keys()->last(), 'Y');
+        $chart = array_replace(array_fill_keys($yearMonth, 0), $ordersQuery->toArray());
+
+        return $chart;
+    }
+
+    private function queryWeeklyChart($query)
+    {
+        $ordersQuery = $query->selectRaw('COUNT(*) as count')
+            ->selectRaw(
+                "DATE_FORMAT(created_at, '%Y-%m-%U') as label",
+            )
+            ->groupBy(
+                'label',
+            )->pluck(
+                'count',
+                'label'
+            );
+
+        $yearMonth = $this->getPeriodBetween($ordersQuery->keys()->first(), $ordersQuery->keys()->last(), 'weeks');
+
+        $chart = array_replace(array_fill_keys($yearMonth, 0), $ordersQuery->toArray());
+
+        return $chart;
+    }
+
+    private function getPeriodBetween($fromYear, $toYear, $format = 'Y-m')
+    {
+        if ($format == 'weeks') {
+            return $this->weeksFormat($fromYear, $toYear);
+        }
+
+        $range = CarbonPeriod::create(date($fromYear), date($toYear));
+        $months = [];
+        foreach ($range as $month) {
+            $months[] = $month->format($format);
+        }
+
+        return $months;
+    }
+
+    public function weeksFormat($from, $to)
+    {
+        $arrayOfDateFrom = explode('-', $from);
+        $arrayOfDateTo = explode('-', $to);
+        $yearMonthFrom = $arrayOfDateFrom[0].'-'.$arrayOfDateFrom[1];
+        $yearMonthTo = $arrayOfDateTo[0].'-'.$arrayOfDateTo[1];
+        $range = CarbonPeriod::create(date($yearMonthFrom), date($yearMonthTo));
+        $yearInWeeks = [];
+        foreach ($range as $month) {
+            $month = $month->format('Y-m-W');
+            if (! in_array($month, $yearInWeeks)) {
+                $yearInWeeks[] = $month;
+            }
+        }
+
+        return $yearInWeeks;
     }
 }
