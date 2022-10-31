@@ -44,8 +44,6 @@ class UpdateCompanyRequest extends FormRequest
                 Rule::unique('companies', 'company_cr')
                     ->ignore($this->route('company')),
             ],
-            'visible' => ['required', 'boolean'],
-            'internal' => ['required', 'boolean'],
             'does_order_require_approval' => [
                 'required',
                 'boolean',

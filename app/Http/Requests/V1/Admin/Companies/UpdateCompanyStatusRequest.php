@@ -3,8 +3,8 @@
 namespace App\Http\Requests\V1\Admin\Companies;
 
 use App\Enums\CompanyStatus;
+use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateCompanyStatusRequest extends FormRequest
 {
@@ -26,9 +26,9 @@ class UpdateCompanyStatusRequest extends FormRequest
     public function rules()
     {
         return [
-            'status' => ['required', Rule::in(CompanyStatus::getValues())],
-            'public_status_comment' => ['required', 'string', 'max:255'],
-            'internal_status_comment' => ['required', 'string', 'max:255'],
+            'status' => ['required', new EnumValue(CompanyStatus::class)],
+            'public_status_comment' => ['required', 'string', 'max:2000'],
+            'internal_status_comment' => ['required', 'string', 'max:2000'],
         ];
     }
 }

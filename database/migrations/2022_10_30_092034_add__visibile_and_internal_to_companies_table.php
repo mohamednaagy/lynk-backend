@@ -14,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('companies', function (Blueprint $table) {
-            $table->string('public_status_comment')->nullable()->after('status');
-            $table->string('internal_status_comment')->nullable()->after('status');
+            $table->text('public_status_comment')->nullable()->after('status');
+            $table->text('internal_status_comment')->nullable()->after('public_status_comment');
         });
     }
 
