@@ -15,6 +15,8 @@ class UserTransformer extends TransformerAbstract
 
     protected array $availableIncludes = [
         'roles',
+        'role',
+        'company',
         'is_email_verified',
         'permissions',
         'formatted_phone_number',
@@ -43,11 +45,23 @@ class UserTransformer extends TransformerAbstract
         return $this->primitive($user->hasVerifiedEmail());
     }
 
+    public function includeRole(User $user)
+    {
+        $query = $this->getRolesQueryBasedOnArea($user);
+
+        return $this->primitive($query->first()->name);
+    }
+
     public function includeRoles(User $user)
     {
         $query = $this->getRolesQueryBasedOnArea($user);
 
         return $this->primitive($query->get()->pluck('name'));
+    }
+
+    public function includeCompany(User $user)
+    {
+        return $this->item($user->company, new CompanyTransformer());
     }
 
     public function includePermissions(User $user)

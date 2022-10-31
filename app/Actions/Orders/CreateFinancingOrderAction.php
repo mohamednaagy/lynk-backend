@@ -8,6 +8,7 @@ use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Models\FinancingOrder;
 use Illuminate\Support\Arr;
+use Propaganistas\LaravelPhone\PhoneNumber;
 
 class CreateFinancingOrderAction implements CreateFinancingOrder
 {
@@ -17,8 +18,18 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
 
     public function handle(array $data): FinancingOrder
     {
+        $data['phone_number'] = PhoneNumber::make($data['phone_number'], $data['phone_country_code']);
         $financingOrder = FinancingOrder::create(
-            Arr::only($data, ['reference_number', 'national_id', 'amount', 'selling_price', 'status', 'creator_id', 'creator_type'])
+            Arr::only($data, [
+                'reference_number',
+                'national_id',
+                'phone_number',
+                'amount',
+                'selling_price',
+                'status',
+                'creator_id',
+                'creator_type',
+            ])
         );
 
         if (isset($data['contract'])) {
