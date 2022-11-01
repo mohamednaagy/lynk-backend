@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
+use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
 use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
@@ -61,6 +62,7 @@ Route::prefix('v1/admin')->group(function () {
 
         Route::apiResource('companies', CompanyController::class);
         Route::prefix('companies')->group(function () {
+            Route::put('/{company}/status', UpdateCompanyStatus::class);
             Route::get('/{company}/balance ', GetBalance::class);
             Route::get('/{company}/users', [UserController::class, 'index']);
             Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
@@ -69,13 +71,6 @@ Route::prefix('v1/admin')->group(function () {
             Route::get('/{company}/settings ', GetCompanySetting::class);
         });
 
-        Route::prefix('users')->group(function () {
-            Route::post('/', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'store']);
-        });
-
-        Route::prefix('users')->group(function () {
-            Route::put('/{user}', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'update']);
-        });
         Route::get('edaat-invoices', GetEdaatInvoices::class);
 
         Route::prefix('users')->group(function () {
