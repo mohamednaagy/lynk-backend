@@ -18,7 +18,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'contract',
         'power_of_attorney',
         'is_approved',
-        'reject_reason',
+        'status_reason',
     ];
 
     protected array $availableIncludes = [
@@ -103,9 +103,9 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive($financingOrder->approved_at !== null);
     }
 
-    public function includeRejectReason(FinancingOrder $financingOrder)
+    public function includeStatusReason(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->reason);
+        return $this->primitive($financingOrder->status_reason);
     }
 
     public function includeCreatedAt(FinancingOrder $financingOrder)
