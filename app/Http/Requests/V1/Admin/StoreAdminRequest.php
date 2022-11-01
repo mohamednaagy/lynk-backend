@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 use function trans;
 
 class StoreAdminRequest extends FormRequest
@@ -30,7 +31,7 @@ class StoreAdminRequest extends FormRequest
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'confirmed', 'min:8'],
+            'password' => ['required', 'confirmed', Password::defaults()],
         ];
 
         if (! empty($this->role)) {
