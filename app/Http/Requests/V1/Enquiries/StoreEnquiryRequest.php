@@ -30,8 +30,8 @@ class StoreEnquiryRequest extends FormRequest
 
         if (isset($this->email)) {
             $rules = array_merge($rules, [
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'max:255'],
+                'name' => ['required', 'string', 'min:3', 'max:100'],
+                'email' => ['required', 'email', 'max:255'],
                 'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
                 'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             ]);
