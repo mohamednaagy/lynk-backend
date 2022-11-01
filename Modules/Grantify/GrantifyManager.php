@@ -249,11 +249,22 @@ class GrantifyManager extends Manager
         foreach ($permissions as $key => $permission) {
             $permissionName = $permission['subject'].'.';
 
-            foreach ($permission['action'] as $action) {
+            foreach ($permission['actions'] as $action) {
                 $permissionsList[] = $permissionName.$action;
             }
         }
 
         return $permissionsList;
+    }
+
+    public function transformToAreaSubject(string $area, array $permissions): array
+    {
+        $transformedPermissions = collect($permissions)->map(function ($permission) use ($area) {
+            $permission['subject'] = $area.'-'.$permission['subject'];
+
+            return $permission;
+        });
+
+        return $transformedPermissions->toArray();
     }
 }

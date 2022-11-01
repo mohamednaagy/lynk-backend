@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Contracts\Lenders;
+namespace App\Actions\Contracts\Wallets;
 
 use Illuminate\Database\Eloquent\Builder;
 

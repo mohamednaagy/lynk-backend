@@ -2,7 +2,12 @@
 
 namespace App\Http\Requests\V1\Admin;
 
+use App\Enums\Action;
+use App\Enums\Subject;
+use App\Rules\HostWhitelistRule;
+use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
+<<<<<<< app/Http/Requests/V1/Admin/StoreAdminRequest.php
 use Illuminate\Validation\Rules\Password;
 use function trans;
 
@@ -13,7 +18,7 @@ class StoreAdminRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize(): bool
+    public function authorize()
     {
         return true;
     }
@@ -21,17 +26,21 @@ class StoreAdminRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array
+     * @return array<string, mixed>
      */
-    public function rules(): array
+    public function rules()
     {
-        $rules = [
+        return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
-            'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
-            'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::defaults()],
+            'permissions' => ['required', 'array', 'min:1'],
+            'permissions.*' => ['required', 'array'],
+            'permissions.*.subject' => ['required', 'string', new EnumValue(Subject::class)],
+            'permissions.*.actions' => ['required', 'array'],
+            'permissions.*.actions.*' => ['required', 'string', new EnumValue(Action::class)],
+            'redirect_url' => ['required', 'url', new HostWhitelistRule()],
         ];
 
         if (! empty($this->role)) {
@@ -54,6 +63,7 @@ class StoreAdminRequest extends FormRequest
     {
         return [
             'phone_number.phone' => trans('validation.phone'),
+
         ];
     }
 }

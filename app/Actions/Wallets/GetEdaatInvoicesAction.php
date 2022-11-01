@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Actions\Lenders;
+namespace App\Actions\Wallets;
 
-use App\Actions\Contracts\Lenders\GetEdaatInvoices;
+use App\Actions\Contracts\Wallets\GetEdaatInvoices;
 use App\Models\EdaatInvoice;
 use Illuminate\Database\Eloquent\Builder;
 

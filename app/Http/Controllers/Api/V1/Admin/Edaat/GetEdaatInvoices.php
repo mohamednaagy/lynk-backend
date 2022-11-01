@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Edaat;
 
-use App\Actions\Contracts\Lenders\GetEdaatInvoices as GetEdaatInvoicesInterface;
+use App\Actions\Contracts\Wallets\GetEdaatInvoices as GetEdaatInvoicesInterface;
 use App\Http\Controllers\Controller;
 use App\Support\QueryScoper\Scopes\Lender\Edaat\InvoiceCompanyScope;
 use App\Support\QueryScoper\Scopes\Lender\Edaat\InvoiceNumberScope;
