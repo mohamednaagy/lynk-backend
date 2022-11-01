@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Auth;
 
-use App\Actions\Contracts\Admins\Auth\UpdateAdminUser;
+use App\Actions\Contracts\Admins\UpdateAdminUser;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Auth\UpdateAdminProfileRequest;
+use App\Http\Requests\V1\Admin\Auth\UpdateMyProfileRequest;
 use App\Transformers\UserTransformer;
 use Illuminate\Http\JsonResponse;
 
-class UpdateAuthUserProfile extends Controller
+class UpdateMyProfile extends Controller
 {
     /**
      * Handle an authentication attempt.
@@ -18,11 +19,15 @@ class UpdateAuthUserProfile extends Controller
      * @return JsonResponse
      */
     public function __invoke(
-        UpdateAdminProfileRequest $updateAdminProfileRequest,
+        UpdateMyProfileRequest $updateAdminProfileRequest,
         UpdateAdminUser $updateAdminUser
     ): JsonResponse {
-        $updateAdminUser->handle($updateAdminProfileRequest->user(), $updateAdminProfileRequest->validated());
+        $user = $updateAdminProfileRequest->user();
 
-        return fractal($updateAdminProfileRequest->user(), new UserTransformer)->parseIncludes(['email'])->respond();
+        $updateAdminUser->handle($user, $updateAdminProfileRequest->validated());
+
+        return fractal($user, new UserTransformer)
+            ->parseIncludes(['email'])
+            ->respond();
     }
 }

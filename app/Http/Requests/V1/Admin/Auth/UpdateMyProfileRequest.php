@@ -3,8 +3,9 @@
 namespace App\Http\Requests\V1\Admin\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class UpdateAdminProfileRequest extends FormRequest
+class UpdateMyProfileRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,7 +27,12 @@ class UpdateAdminProfileRequest extends FormRequest
         return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
-            'email' => ['required', 'email', 'unique:users,email,'.auth()->user()->getAuthIdentifier()],
+            'email' => [
+                'required',
+                'email',
+                Rule::unique(User::class, 'email')
+                    ->ignore($this->user()->getAuthIdentifier(), 'id'),
+            ],
             'password' => ['nullable', 'string', 'confirmed'],
         ];
     }

@@ -40,7 +40,7 @@ Route::prefix('v1/admin')->group(function () {
 
     Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->group(function () {
         Route::get('auth', GetAuthUser::class);
-        Route::put('auth/my-profile', UpdateAuthUserProfile::class);
+        Route::put('auth/profile', UpdateAuthUserProfile::class);
 
         Route::apiResource('admins', AdminController::class)->parameters(['admins' => 'id']);
         Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);

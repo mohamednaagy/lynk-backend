@@ -28,7 +28,6 @@ class UpdateAdminUserAction implements UpdateAdminUser
                     'last_name',
                     'email',
                     'password',
-                    'source',
                 ]
             )
         );
