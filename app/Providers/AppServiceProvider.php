@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Support\Traders\Drivers\DmccDriver;
 use App\Support\Traders\TraderManager;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\ServiceProvider;
@@ -24,10 +23,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('trader', function ($app) {
             return new TraderManager($app);
         });
-
-        $trader = app('trader');
-        $trader->extend('dmcc', function ($app) {
-            return new DmccDriver($app);
+        $this->app->singleton('trader.store', function ($app) {
+            return $app->make('dmcc')->driver();
         });
     }
 

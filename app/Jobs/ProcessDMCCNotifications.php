@@ -2,8 +2,7 @@
 
 namespace App\Jobs;
 
-use CodeDredd\Soap\Facades\Soap;
-use CodeDredd\Soap\SoapClient;
+use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -14,18 +13,6 @@ class ProcessDMCCNotifications implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected SoapClient $soap;
-
-    /**
-     * Create a new job instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->soap = Soap::buildClient('dmcc');
-    }
-
     /**
      * Execute the job.
      *
@@ -33,16 +20,10 @@ class ProcessDMCCNotifications implements ShouldQueue
      */
     public function handle(): void
     {
-        $response = $this->soap
-            ->baseWsdl($this->prefixUrl('notificationDetailsRequest'))
-            ->call('notificationDetailsRequest', [
-                'notificationType' => 'ACTIONABLE',
-            ]);
+        $response = Trader::driver()->fetchNotification();
 
-        collect($response->object()
-            ->NotificationAllDetailsResponse[0]
-            ->notificationAllDetailsResponse
-            ->notificationDetails
+        collect(
+            $response->NotificationAllDetailsResponse[0]->notificationAllDetailsResponse->notificationDetails
         )->each(function ($notification) {
             if (
                 $notification->notificationHeaderAndEntity->notification
@@ -58,10 +39,5 @@ class ProcessDMCCNotifications implements ShouldQueue
                 ProcessDMCCMPONotification::dispatch($notification);
             }
         });
-    }
-
-    private function prefixUrl($url): string
-    {
-        return 'https://'.config('dmcc.username').':'.config('dmcc.password').'@na2.ai.dm-us.informaticacloud.com/active-bpel/soap/'.$url.'?wsdl';
     }
 }

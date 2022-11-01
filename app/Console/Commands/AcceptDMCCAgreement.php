@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Support\DMCC\DMCCService;
+use App\Support\Traders\Facades\Trader;
 use Illuminate\Console\Command;
 
 class AcceptDMCCAgreement extends Command
@@ -19,16 +19,16 @@ class AcceptDMCCAgreement extends Command
      *
      * @var string
      */
-    protected $description = 'Accpet DMCC Agreement';
+    protected $description = 'Accept DMCC Agreement';
 
     /**
      * Execute the console command.
      *
      * @return int
      */
-    public function handle(DMCCService $DMCCService)
+    public function handle(): int
     {
-        if ($DMCCService->acceptAgreemt()) {
+        if (Trader::driver()->acceptAgreement()) {
             $this->line('Agreement Successfully Accepted');
 
             return Command::SUCCESS;

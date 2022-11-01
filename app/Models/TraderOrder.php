@@ -12,6 +12,15 @@ class TraderOrder extends Model
 {
     use HasFactory, VirtualColumn;
 
+    protected $fillable = [
+        'id',
+        'order_id',
+        'provider',
+        'type',
+        'reference',
+        'data',
+    ];
+
     public static function getCustomColumns(): array
     {
         return [
