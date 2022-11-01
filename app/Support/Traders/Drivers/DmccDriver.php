@@ -2,9 +2,11 @@
 
 namespace App\Support\Traders\Drivers;
 
+use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
+use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
 use CodeDredd\Soap\Client\Response;
 use CodeDredd\Soap\Facades\Soap;
@@ -80,6 +82,19 @@ class DmccDriver implements TraderInterface
             ]);
 
         if ($this->isSuccess($response)) {
+            // generate internal doc - selling commodity to customer
+            $html = view('selling-commodity-to-customer')->render();
+            PdfGenerator::outputFromHtml($html, 'test.pdf', [
+                'gotoOptions' => ['waitUntil' => 'networkidle0'],
+            ]);
+
+            $traderOrder = TraderOrder::query()
+                ->where('type', 'TTIID')
+                ->where('reference', $ttiId)
+                ->first();
+
+            $traderOrder->order->update(['status' => FinancingOrderStatus::CommodityPurchased]);
+
             // request PTP document
             $response = $this->soap
                 ->baseWsdl($this->prefixUrl('getDocumentByTypeAndTransaction'))
@@ -88,10 +103,13 @@ class DmccDriver implements TraderInterface
                     'documentType' => 'Promise to Purchase',
                 ]);
 
-            $traderOrder = TraderOrder::query()
-                ->where('type', 'TTIID')
-                ->where('reference', $ttiId)
-                ->first();
+            // generate internal doc - transfer ownership to lender
+            $html = view('transfer-ownership-to-lender')->render();
+            PdfGenerator::outputFromHtml($html, 'test.pdf', [
+                'gotoOptions' => ['waitUntil' => 'networkidle0'],
+            ]);
+
+            $traderOrder->order->update(['status' => FinancingOrderStatus::SellingCommodityToCustomer]);
 
             // store in PTP path with ttiId filename
             Storage::put(
@@ -143,6 +161,8 @@ class DmccDriver implements TraderInterface
                     ->where('reference', $ttiId)
                     ->first();
 
+                $traderOrder->order->update(['status' => FinancingOrderStatus::IssueMurabahaOffer]);
+
                 // store in PTP path with ttiId filename
                 Storage::put(
                     $traderOrder->order_id.'/MPO/'.$ttiId.'.pdf',
@@ -171,6 +191,30 @@ class DmccDriver implements TraderInterface
             return $response->json();
         }
         throw new RuntimeException();
+    }
+
+    public function fetchMurabahaNotification(): ?array
+    {
+        $response = $this->soap
+            ->baseWsdl($this->prefixUrl('notificationDetailsRequest'))
+            ->call('notificationDetailsRequest', [
+                'notificationType' => 'FYI',
+            ]);
+
+        if ($this->isSuccess($response)) {
+            return $response->json();
+        }
+        throw new RuntimeException();
+    }
+
+    public function completeOrder(string $ttiId)
+    {
+        $traderOrder = TraderOrder::query()
+            ->where('type', 'TTIID')
+            ->where('reference', $ttiId)
+            ->first();
+
+        $traderOrder->order->update(['status' => FinancingOrderStatus::MurabahaSaleCompleted]);
     }
 
     private function prefixUrl($url): string

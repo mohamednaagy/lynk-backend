@@ -20,6 +20,7 @@ class ProcessDMCCNotifications implements ShouldQueue
      */
     public function handle(): void
     {
+        // regular notifications (PTP - TTIID)
         $response = Trader::driver()->fetchNotification();
 
         collect(
@@ -37,6 +38,21 @@ class ProcessDMCCNotifications implements ShouldQueue
                 'Action Required for Issue Murabaha Purchase Offer'
             ) {
                 ProcessDMCCMPONotification::dispatch($notification);
+            }
+        });
+
+        // Murabaha completed
+        $response = Trader::driver()->fetchMurabahaNotification();
+
+        collect(
+            $response->NotificationAllDetailsResponse[0]->notificationAllDetailsResponse->notificationDetails
+        )->each(function ($notification) {
+            if (
+                $notification->notificationHeaderAndEntity->notification
+                ==
+                'Murabaha Sale Completed'
+            ) {
+                ProcessDMCCMPOSaleCompleteNotification::dispatch($notification);
             }
         });
     }
