@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EdaatInvoiceStatus;
+use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 class EdaatInvoice extends Model
 {
-    use HasFactory, BelongsToTenant;
+    use HasFactory, BelongsToTenant, HasScopes;
 
     protected $fillable = [
         'amount',

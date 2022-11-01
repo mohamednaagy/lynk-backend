@@ -39,6 +39,7 @@ class CreateLenderUserWithRoleAndPermissionAction implements CreateLenderUserWit
                 'last_name',
                 'email',
                 'phone_country_code',
+                'company_id',
                 'phone_number',
                 'password',
             ]
