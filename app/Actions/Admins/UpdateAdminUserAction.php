@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Actions;
+namespace App\Actions\Admins;
 
-use App\Actions\Contracts\UpdateUser;
+use App\Actions\Contracts\Admins\UpdateAdminUser;
 use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 
-class UpdateUserAction implements UpdateUser
+class UpdateAdminUserAction implements UpdateAdminUser
 {
     /**
      * @param  User  $user
@@ -20,10 +20,6 @@ class UpdateUserAction implements UpdateUser
             $data['password'] = Hash::make($data['password']);
         }
 
-        if (array_key_exists('phone_number', $data) && array_key_exists('phone_country_code', $data)) {
-            $data['phone_number'] = phone($data['phone_number'], $data['phone_country_code']);
-        }
-
         return $user->update(
             Arr::only(
                 $data,
@@ -31,9 +27,7 @@ class UpdateUserAction implements UpdateUser
                     'first_name',
                     'last_name',
                     'email',
-                    'phone_number',
                     'password',
-                    'source',
                 ]
             )
         );
