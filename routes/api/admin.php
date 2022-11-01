@@ -7,6 +7,7 @@ use App\Enums\Subject;
 use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
+use App\Http\Controllers\Api\V1\Admin\Auth\UpdateAuthUserProfile;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
 use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
@@ -39,8 +40,9 @@ Route::prefix('v1/admin')->group(function () {
 
     Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->group(function () {
         Route::get('auth', GetAuthUser::class);
+        Route::put('auth/profile', UpdateAuthUserProfile::class);
 
-        Route::apiResource('admins', AdminController::class);
+        Route::apiResource('admins', AdminController::class)->parameters(['admins' => 'id']);
         Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
 
         Route::get('/roles', GetAllRoles::class)->middleware(
@@ -72,14 +74,14 @@ Route::prefix('v1/admin')->group(function () {
             Route::get('/{company}/settings ', GetCompanySetting::class);
         });
 
-    Route::prefix('wallet')->group(function () {
-        Route::get('/edaat-invoices', GetEdaatInvoices::class);
-        Route::post('/edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
-    });
+        Route::prefix('wallet')->group(function () {
+            Route::get('/edaat-invoices', GetEdaatInvoices::class);
+            Route::post('/edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
+        });
 
-    Route::prefix('users')->group(function () {
-        Route::post('/', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'store']);
-    });
+        Route::prefix('users')->group(function () {
+            Route::post('/', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'store']);
+        });
 
         Route::prefix('users')->group(function () {
             Route::post('/', [UserController::class, 'store']);
