@@ -1,19 +1,17 @@
 <?php
 
-namespace App\Http\Requests\V1\Lender\Auth;
+namespace App\Http\Requests\V1\Admin\Auth;
 
-use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Password;
 
-class CompleteRegisterRequest extends FormRequest
+class UpdateAdminProfileRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -21,14 +19,15 @@ class CompleteRegisterRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, mixed>
+     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
-            'password' => ['required', 'confirmed', Password::defaults()],
+            'email' => ['required', 'email', 'unique:users,email,'.auth()->user()->getAuthIdentifier()],
+            'password' => ['nullable', 'string', 'confirmed'],
         ];
     }
 }

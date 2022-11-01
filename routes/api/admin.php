@@ -7,6 +7,7 @@ use App\Enums\Subject;
 use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
+use App\Http\Controllers\Api\V1\Admin\Auth\UpdateAuthUserProfile;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
 use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
@@ -39,6 +40,7 @@ Route::prefix('v1/admin')->group(function () {
 
     Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->group(function () {
         Route::get('auth', GetAuthUser::class);
+        Route::put('auth/my-profile', UpdateAuthUserProfile::class);
 
         Route::apiResource('admins', AdminController::class)->parameters(['admins' => 'id']);
         Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
