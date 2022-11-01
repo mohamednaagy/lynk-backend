@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateLenderRequest extends FormRequest
+class UpdateMyProfileRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -30,7 +30,7 @@ class UpdateLenderRequest extends FormRequest
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'phone_country_code' => ['required', 'string', 'size:2'],
-            'password' => ['sometimes', 'string', 'min:8', 'max:100'],
+            'password' => ['nullable', 'string', 'min:8', 'max:100'],
             'email' => [
                 'required',
                 'email',
