@@ -5,6 +5,7 @@ namespace App\Http\Requests\V1\Lender\Auth;
 use App\Models\Company;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class RegisterLenderRequest extends FormRequest
 {
@@ -26,7 +27,7 @@ class RegisterLenderRequest extends FormRequest
             'email' => ['required', 'email'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
-            'password' => ['required', 'confirmed', 'min:8'],
+            'password' => ['required', 'confirmed', Password::defaults()],
             'company_name' => ['required', 'string', 'min:3'],
             'company_unique_name' => ['required', 'string', Rule::unique(Company::class, 'unique_name'), 'min:3', 'regex:/(^[a-zA-Z]+[a-zA-Z0-9\\-\\_]*$)/u'],
             'company_cr' => ['required', 'string', Rule::unique(Company::class, 'company_cr'), 'min:1'],
