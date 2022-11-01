@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Lender\Edaat;
+namespace App\Http\Controllers\Api\V1\Lender\Wallets;
 
-use App\Actions\Contracts\Lenders\GetEdaatInvoices as GetEdaatInvoicesInterface;
+use App\Actions\Contracts\Wallets\GetEdaatInvoices as GetEdaatInvoicesInterface;
 use App\Http\Controllers\Controller;
 use App\Transformers\EdaatInvoiceTransformer;
 use Illuminate\Http\JsonResponse;

@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\SettingsController;
 use App\Http\Controllers\Api\V1\Admin\Transactions\TransactionController;
+use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
 use Modules\Grantify\Facades\Grantify;
 
@@ -68,7 +69,14 @@ Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->prefix('v1/admin')->gr
         Route::get('/{company}/settings ', GetCompanySetting::class);
     });
 
-    Route::get('edaat-invoices', GetEdaatInvoices::class);
+    Route::prefix('wallet')->group(function () {
+        Route::get('/edaat-invoices', GetEdaatInvoices::class);
+        Route::post('/edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
+    });
+
+    Route::prefix('users')->group(function () {
+        Route::post('/', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'store']);
+    });
 
     Route::prefix('users')->group(function () {
         Route::post('/', [UserController::class, 'store']);
