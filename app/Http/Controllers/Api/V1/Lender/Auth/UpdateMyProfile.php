@@ -18,12 +18,13 @@ class UpdateMyProfile extends Controller
      */
     public function __invoke(UpdateUser $updateUser, UpdateMyProfileRequest $updateLenderRequest)
     {
-        $vaLidated = $updateLenderRequest->validated();
-        if (array_key_exists('password', $vaLidated) && is_null($vaLidated['password'])) {
-            $vaLidated = Arr::except($vaLidated, 'password');
+        $validated = $updateLenderRequest->validated();
+
+        if (array_key_exists('password', $validated) && is_null($validated['password'])) {
+            $validated = Arr::except($validated, 'password');
         }
 
-        $updateUser->handle(auth()->user(), $vaLidated);
+        $updateUser->handle(auth()->user(), $validated);
 
         return $this->successResponse();
     }

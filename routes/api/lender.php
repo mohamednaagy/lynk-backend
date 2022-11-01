@@ -45,7 +45,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
-        Route::post('update-profile', UpdateMyProfile::class);
+        Route::put('auth/profile', UpdateMyProfile::class);
         Route::get('orders/stats', GetOrdersStats::class);
         Route::apiResource('orders', OrderController::class);
         Route::put('orders/{order}/approve', ApproveOrder::class);
