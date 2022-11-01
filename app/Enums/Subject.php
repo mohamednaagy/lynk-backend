@@ -10,11 +10,27 @@ use BenSampo\Enum\Enum;
  */
 final class Subject extends Enum
 {
-    const Admins = 'Admins';
+    const All = 'all';
 
-    const Customers = 'Customers';
+    const Admins = 'admins';
 
-    const Roles = 'Roles';
+    const Customers = 'customers';
 
-    const Permissions = 'Permissions';
+    const Roles = 'roles';
+
+    const Permissions = 'permissions';
+
+    const FinancingOrders = 'financingOrders';
+
+    const LenderWallet = 'lenderWallet';
+
+    const LenderUsers = 'lenderUsers';
+
+    const LenderSettings = 'lenderSettings';
+
+    const LenderTransactions = 'lenderTransactions';
+
+    const Dashboard = 'dashboard';
+
+    const LenderEdaatInvoices = 'lenderEdaatInvoices';
 }

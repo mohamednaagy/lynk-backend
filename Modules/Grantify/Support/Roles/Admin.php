@@ -2,7 +2,14 @@
 
 namespace Modules\Grantify\Support\Roles;
 
+use App\Enums\Action;
+use App\Enums\Subject;
+
 class Admin
 {
-    public static string $basePermissions = '*';
+    public static array $basePermissions = [
+        Subject::All => [
+            Action::Manage,
+        ],
+    ];
 }
