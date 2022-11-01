@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Lender\Auth\CompleteRegister;
 use App\Http\Controllers\Api\V1\Lender\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Lender\Auth\Register;
 use App\Http\Controllers\Api\V1\Lender\Auth\ResendInvitation;
+use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CancelOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersStats;
@@ -59,5 +60,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
             Route::get('/transactions', GetWalletTransactions::class);
             Route::post('/invoice', CreateEdaatInvoice::class);
         });
+
+        Route::apiResource('enquiries', EnquiryController::class);
     });
 });
