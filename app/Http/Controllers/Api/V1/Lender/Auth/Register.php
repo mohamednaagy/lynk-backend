@@ -23,7 +23,10 @@ class Register extends Controller
         return DB::transaction(function () use ($loginUser, $request, $registerLender, $getSettingsClassInstance) {
             $data = array_merge(
                 $request->validated(),
-                ['order_cost' => $getSettingsClassInstance->handle(Area::Lender)->order_cost]
+                [
+                    'company_status' => $getSettingsClassInstance->handle(Area::Lender)->company_registration_status,
+                    'order_cost' => $getSettingsClassInstance->handle(Area::Lender)->order_cost,
+                ]
             );
 
             $lender = $registerLender->handle($data);
