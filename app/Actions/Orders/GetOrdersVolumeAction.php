@@ -29,7 +29,7 @@ class GetOrdersVolumeAction implements GetOrdersVolume
 
         $orders = FinancingOrder::query()
             ->selectRaw(
-                'COUNT(*) as count'
+                'COUNT(*) as orders_total'
             )
             ->when(
                 $startingDate, function ($query) use ($startingDate) {
@@ -59,7 +59,7 @@ class GetOrdersVolumeAction implements GetOrdersVolume
                 'label'
             )
             ->pluck(
-                'count',
+                'orders_total',
                 'label'
             );
 
@@ -67,17 +67,19 @@ class GetOrdersVolumeAction implements GetOrdersVolume
             return [];
         }
 
+        // get all periods even if not contain values
         $period = $this->getPeriodBetween(
             $orders->keys()->first(),
             $orders->keys()->last(),
             $this->getFormatByPeriod($period)
         );
 
+        // fill empty periods with 0
         return array_replace(array_fill_keys($period, 0), $orders->toArray());
     }
 
     /**
-     * get period between two dates
+     * get period between two dates depend on the format
      *
      * @param  mixed  $fromYear
      * @param  mixed  $toYear
