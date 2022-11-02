@@ -131,7 +131,10 @@ return [
     'national_id_wrong_format' => 'رقم الهوية غير صحيح',
     'host_whitelist' => 'حقل :attribute غير موثوق فيه.',
     'phone' => 'حقل :attribute رقم هاتف غير صحيح.',
+    'custom_validation' => [
+        'phone_number_does_not_belong_to_national_id' => 'رقم الجوال المدخل لا ينتمي إلى رقم الهوية/الإقامة',
 
+    ],
     'attributes' => [
         'address' => 'العنوان',
         'age' => 'العمر',

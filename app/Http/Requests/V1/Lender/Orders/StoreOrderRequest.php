@@ -3,7 +3,9 @@
 namespace App\Http\Requests\V1\Lender\Orders;
 
 use App\Rules\ValidateSAID;
+use App\Support\MobileVerification\Facades\MobileVerify;
 use Illuminate\Foundation\Http\FormRequest;
+use Propaganistas\LaravelPhone\PhoneNumber;
 
 class StoreOrderRequest extends FormRequest
 {
@@ -36,5 +38,34 @@ class StoreOrderRequest extends FormRequest
             'contract' => ['sometimes', 'file'],
             'power_of_attorney' => ['sometimes', 'file'],
         ];
+    }
+
+    /**
+     * Configure the validator instance.
+     *
+     * @param  \Illuminate\Validation\Validator  $validator
+     * @return void
+     */
+    public function withValidator($validator)
+    {
+        $validator->after(
+            function ($validator) {
+                $this->checkMobileVerification($validator);
+            }
+        );
+    }
+
+    private function checkMobileVerification($validator)
+    {
+        try {
+            $phone = PhoneNumber::make($this->validated('phone_number'), $this->validated('phone_country_code'));
+            $phone = str_replace(' ', '', $phone->formatNational());
+            MobileVerify::verify($phone, $this->validated('national_id'));
+        } catch (\Throwable $th) {
+            $validator->errors()->add(
+                'national_id',
+                __('validation.custom_validation.phone_number_does_not_belong_to_national_id')
+            );
+        }
     }
 }
