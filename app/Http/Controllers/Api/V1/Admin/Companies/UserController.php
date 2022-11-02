@@ -36,7 +36,7 @@ class UserController extends Controller
      * @param  CreateLenderUserWithRoleAndPermission  $createUserWithRoleAndPermission
      * @return JsonResponse
      */
-    public function show(Request $request, User $user): JsonResponse
+    public function show(Request $request, $company, User $user): JsonResponse
     {
         return fractal($user, new UserTransformer(Area::Lender))
             ->parseIncludes(['role'])
@@ -73,6 +73,7 @@ class UserController extends Controller
      */
     public function update(
         UpdateUserRequest $updateUserRequest,
+        $company,
         User $user,
         UpdateLenderUserWithRoleAndPermission $updateUserWithRoleAndPermission,
     ): JsonResponse {
