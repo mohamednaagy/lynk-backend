@@ -1,0 +1,15 @@
+<?php
+
+namespace App\Support\Sms;
+
+interface SmsDriverInterface
+{
+    /**
+     * Execute the driver logic.
+     *
+     * @param  string  $message
+     * @param  string  $phoneNumber
+     * @return void
+     */
+    public function send($message, $phoneNumber): void;
+}
