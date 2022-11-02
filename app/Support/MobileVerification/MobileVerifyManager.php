@@ -34,7 +34,7 @@ class MobileVerifyManager extends Manager
      *
      * @return MobileVerifyDriverInterface
      */
-    public function createTestTccDriver(): MobileVerifyDriverInterface
+    public function createFakeTccDriver(): MobileVerifyDriverInterface
     {
         return new FakeTccDriver();
     }

@@ -30,7 +30,7 @@ class TccDriver implements MobileVerifyDriverInterface
     {
         $response = Http::post(
             'https://IP:PORT/TCC-Web/api/mobile/verify',
-            $this->prepareRequestData($mobileNumber->formatE164(), $personId)
+            $this->prepareRequestData(ltrim($mobileNumber->formatE164(), '+'), $personId)
         );
 
         $response = $response->json();

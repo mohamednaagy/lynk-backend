@@ -131,10 +131,10 @@ return [
     'host_whitelist' => 'The :attribute is not whitelisted.',
     'phone' => 'The :attribute is not valid phone number.',
     'custom_validation' => [
-        'phone_number_not_matched' => 'رقم الجوال المدخل لا ينتمي إلى رقم الهوية/الإقامة',
-        'invalid_person_id' => 'رقم الهوية/الإقامة غير صحيح',
-        'person_id_not_found' => 'رقم الهوية/الإقامة غير موجود',
-        'invalid_mobile_number' => 'رقم الهاتف غير صحيح',
+        'phone_number_not_matched' => 'Phone number does\'t belong to national ID/Iqama',
+        'invalid_person_id' => 'Invalid national ID/Iqama',
+        'person_id_not_found' => 'Invalid national ID/Iqama',
+        'invalid_mobile_number' => 'Invalid phone number',
 
     ],
     /*
