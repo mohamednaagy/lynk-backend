@@ -7,6 +7,7 @@ use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Modules\Otpify\Contracts\Otpifiable;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Propaganistas\LaravelPhone\PhoneNumber;
