@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\Lender\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CancelOrder;
+use App\Http\Controllers\Api\V1\Lender\Orders\DirectOrderToCommodityTrading;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersStats;
 use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Orders\RejectOrder;
@@ -52,6 +53,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         Route::put('orders/{order}/approve', ApproveOrder::class);
         Route::put('orders/{order}/reject', RejectOrder::class);
         Route::put('orders/{order}/cancel', CancelOrder::class);
+        Route::post('direct-order', DirectOrderToCommodityTrading::class);
         Route::apiResource('users', UserController::class);
         Route::post('{user}/resend-invitation', ResendInvitation::class);
         Route::get('edaat-invoices', GetEdaatInvoices::class);
