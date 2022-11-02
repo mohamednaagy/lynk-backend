@@ -4,8 +4,6 @@ namespace Modules\Otpify\Drivers;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Http;
 use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
 use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
@@ -15,19 +13,9 @@ use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
 use Modules\Otpify\Models\OtpifyCode;
 use Modules\Otpify\Traits\CanOtpifyCode;
 
-class AbsherDriver implements OtpifyDriverInterface
+class FakeAbsherDriver implements OtpifyDriverInterface
 {
     use CanOtpifyCode;
-
-    protected $baseUrl;
-
-    protected $apiKey;
-
-    public function __construct($baseUrl, $apiKey)
-    {
-        $this->baseUrl = rtrim($baseUrl, '/');
-        $this->apiKey = $apiKey;
-    }
 
     /**
      * Execute the driver logic.
@@ -39,18 +27,7 @@ class AbsherDriver implements OtpifyDriverInterface
      */
     public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
-        $sendUrl = $this->url('send');
-
-        $body = [
-            'apiKey' => $this->apiKey,
-            'personId' => $otpifiable->getNationalId(),
-        ];
-
-        $response = Http::post($sendUrl, $body)->toPsrResponse();
-
-        $tcn = $response['tcn'];
-
-        return $this->createOtpifyCode(null, $otpifiable, $otpifiable, ['tcn' => $tcn]);
+        return $this->createOtpifyCode(null, $otpifiable, $otpifiable);
     }
 
     /**
@@ -90,22 +67,35 @@ class AbsherDriver implements OtpifyDriverInterface
             throw new OtpCodeAdditionalCheckException();
         }
 
-        $checkUrl = $this->url('check');
-
-        $data = [
-            'apiKey' => $this->apiKey,
-            'tcn' => $vid,
-            'otp' => $code,
-        ];
-
-        $response = Http::post($checkUrl, $data)->toPsrResponse();
-
-        if (
-            Arr::get($response, 'code') === 600 &&
-            isset($response['userDetails']) &&
-            $userDetails = $response['userDetails']
-        ) {
-            $otpifyCode->otpifiable->update(['customer_details' => $userDetails]);
+        if ($code === '2023') {
+            $otpifyCode->otpifiable->update([
+                'customer_details' => [
+                    'issueLocationAr' => '',
+                    'englishName' => 'Mahmod Mohammed Fahed Ali',
+                    'arabicFatherName' => 'محمد',
+                    'englishFatherName' => 'Mohammed',
+                    'gender' => 'Male',
+                    'dobHijri' => '1430/11/09',
+                    'cardIssueDateHijri' => '1439/02/27',
+                    'englishFirstName' => 'Mahmod',
+                    'issueLocationEn' => '',
+                    'cardIssueDateGregorian' => '2017/11/16',
+                    'englishGrandFatherName' => 'Fahed',
+                    'userid' => '2309470215',
+                    'arabicGrandFatherName' => 'فهد',
+                    'idVersionNo' => '4',
+                    'arabicNationality' => 'الفلبين',
+                    'arabicName' => 'محمود محمد فهد علي',
+                    'arabicFirstName' => 'محمود',
+                    'nationalityCode' => '315',
+                    'nationality' => 'Philippines',
+                    'dob' => '2009/10/28',
+                    'englishFamilyName' => 'Ali',
+                    'idExpiryDateHijri' => '1448/09/11',
+                    'arabicFamilyName' => 'علي',
+                    'idExpiryDateGregorian' => '2027/02/18',
+                ],
+            ]);
 
             $this->setOtpExpiredAt($otpifyCode);
 
@@ -114,10 +104,5 @@ class AbsherDriver implements OtpifyDriverInterface
         } else {
             throw new OtpCodeIncorrectException();
         }
-    }
-
-    protected function url($path)
-    {
-        return $this->baseUrl.'/'.ltrim($path, '/');
     }
 }

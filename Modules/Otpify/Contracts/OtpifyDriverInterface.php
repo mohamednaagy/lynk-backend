@@ -35,5 +35,5 @@ interface OtpifyDriverInterface
      * @param  \Closure|null  $additionalCheckCallback
      * @return string
      */
-    public function verify(Request $request, $vid, $code, \Closure $additionalCheckCallback = null): string;
+    public function verify(Request $request, $vid, $code, \Closure $additionalCheckCallback = null): string|bool;
 }

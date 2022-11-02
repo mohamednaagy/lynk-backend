@@ -59,7 +59,7 @@ class EmailDriver implements OtpifyDriverInterface
      * @throws OtpCodeNotFoundException
      * @throws OtpifiableNotEqualAuthUserException
      */
-    public function verify(Request $request, $vid, $code, Closure $additionalCheckCallback = null): bool
+    public function verify(Request $request, $vid, $code, Closure $additionalCheckCallback = null): bool|string
     {
         $otpifyCode = $this->getOtpifyCode($vid);
         $this->verifyOtpifyCode($otpifyCode, $request, $code, $additionalCheckCallback);
