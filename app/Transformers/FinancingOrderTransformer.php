@@ -18,6 +18,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'contract',
         'power_of_attorney',
         'is_approved',
+        'status_reason',
     ];
 
     protected array $availableIncludes = [
@@ -28,7 +29,11 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function transform(FinancingOrder $financingOrder)
     {
-        return [];
+        return [
+            'phone_country_code' => $financingOrder->phone_number_country_code,
+            'phone_number' => $financingOrder->mobile_dialing_phone_number,
+            'phone_number_formatted' => $financingOrder->phone_number->formatInternational(),
+        ];
     }
 
     public function includeId(FinancingOrder $financingOrder)
@@ -57,6 +62,11 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeNationalId(FinancingOrder $financingOrder)
     {
         return $this->primitive($financingOrder->national_id);
+    }
+
+    public function includePhoneNumber(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->phone_number);
     }
 
     public function includeAmount(FinancingOrder $financingOrder)
@@ -100,6 +110,11 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeIsApproved(FinancingOrder $financingOrder)
     {
         return $this->primitive($financingOrder->approved_at !== null);
+    }
+
+    public function includeStatusReason(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->status_reason);
     }
 
     public function includeCreatedAt(FinancingOrder $financingOrder)

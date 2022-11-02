@@ -11,6 +11,8 @@ use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
+use Bavix\Wallet\Internal\Exceptions\ExceptionInterface;
+use Bavix\Wallet\Internal\Service\DatabaseServiceInterface;
 use Illuminate\Http\JsonResponse;
 
 class OrderController extends Controller
@@ -47,28 +49,32 @@ class OrderController extends Controller
      * @param  StoreOrderRequest  $request
      * @param  CreateFinancingOrder  $createFinancingOrder
      * @return JsonResponse
+     *
+     * @throws ExceptionInterface
      */
     public function store(
         StoreOrderRequest $request,
         CreateFinancingOrder $createFinancingOrder
     ): JsonResponse {
-        $status = tenant()->does_order_require_approval
-            ? FinancingOrderStatus::PendingApproval
-            : FinancingOrderStatus::InProgress;
+        return app(DatabaseServiceInterface::class)->transaction(static function () use ($createFinancingOrder, $request) {
+            $status = tenant()->does_order_require_approval
+                ? FinancingOrderStatus::PendingApproval
+                : FinancingOrderStatus::InProgress;
 
-        $financingOrder = $createFinancingOrder->handle(
-            array_merge(
-                $request->validated(),
-                [
-                    'status' => $status,
-                    'creator_id' => auth()->user()->id,
-                    'creator_type' => auth()->user()->getMorphClass(),
-                    'approved_at' => $status === FinancingOrderStatus::InProgress ? now() : null,
-                ]
-            )
-        );
+            $financingOrder = $createFinancingOrder->handle(
+                array_merge(
+                    $request->validated(),
+                    [
+                        'status' => $status,
+                        'creator_id' => auth()->user()->id,
+                        'creator_type' => auth()->user()->getMorphClass(),
+                        'approved_at' => $status === FinancingOrderStatus::InProgress ? now() : null,
+                    ]
+                )
+            );
 
-        return fractal($financingOrder, new FinancingOrderTransformer())->respond();
+            return fractal($financingOrder, new FinancingOrderTransformer())->respond();
+        });
     }
 
     /**

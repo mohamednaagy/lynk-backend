@@ -4,11 +4,13 @@ namespace App\Models;
 
 use App\Enums\FinancingOrderStatus;
 use App\Support\QueryScoper\HasScopes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
+<<<<<<< app/Models/FinancingOrder.php
 use Modules\Otpify\Contracts\Otpifiable;
 use Propaganistas\LaravelPhone\PhoneNumber;
+use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
@@ -27,6 +29,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     protected $fillable = [
         'reference_number',
         'national_id',
+        'phone_number',
         'amount',
         'selling_price',
         'status',
@@ -34,15 +37,30 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'approver_id',
         'creator_id',
         'creator_type',
-        'reason',
         'customer_details',
+        'status_reason',
     ];
 
     protected $casts = [
         'status' => FinancingOrderStatus::class,
         'approved_at' => 'datetime',
         'data' => 'array',
+        'phone_number' => E164PhoneNumberCast::class,
     ];
+
+    protected function phoneNumberCountryCode(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => "{$this->phone_number->getCountry()}",
+        );
+    }
+
+    protected function mobileDialingPhoneNumber(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => "{$this->phone_number->formatForMobileDialingInCountry($this->phone_number->getCountry())}",
+        );
+    }
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -111,5 +129,31 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function doesRequireVerifyingByOtp(Request $request): bool
     {
         return true;
+    }
+
+    public function scopeCanceled($query)
+    {
+        return $query->whereStatus(FinancingOrderStatus::Canceled);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->whereIn('status', [FinancingOrderStatus::PendingApproval, FinancingOrderStatus::InProgress]);
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->whereStatus(FinancingOrderStatus::Completed);
+    }
+
+    public function scopeByCreator($query, Model $model)
+    {
+        $query->whereHasMorph(
+            'creator',
+            $model->getMorphClass(),
+            function ($query) use ($model) {
+                $query->where('creator_id', $model->getKey());
+            }
+        );
     }
 }

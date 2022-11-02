@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1\Lender\Auth;
+
+use App\Actions\Contracts\UpdateUser;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Lender\Auth\UpdateMyProfileRequest;
+use Illuminate\Support\Arr;
+
+class UpdateMyProfile extends Controller
+{
+    /**
+     * Handle the incoming request.
+     *
+     * @param  UpdateUser  $updateUser
+     * @param  UpdateLenderRequest  $updateLenderRequest
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function __invoke(UpdateUser $updateUser, UpdateMyProfileRequest $updateLenderRequest)
+    {
+        $validated = $updateLenderRequest->validated();
+
+        if (array_key_exists('password', $validated) && is_null($validated['password'])) {
+            $validated = Arr::except($validated, 'password');
+        }
+
+        $updateUser->handle(auth()->user(), $validated);
+
+        return $this->successResponse();
+    }
+}

@@ -22,7 +22,9 @@ class CreateEdaatInvoiceAction implements CreateEdaatInvoice
             $invoice->fill([
                 'amount' => $amount,
                 'status' => EdaatInvoiceStatus::Pending,
-            ])->creator()->associate(auth()->user())->save();
+            ]);
+            $invoice->creator()->associate(auth()->user());
+            $invoice->save();
 
             $invoiceNumber = $this->edaatService->createInvoice($invoice->id, $amount);
 

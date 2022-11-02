@@ -28,7 +28,12 @@ class UpdateUserRequest extends FormRequest
         return  [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
-            'email' => ['required', 'email'],
+            'email' => [
+                'required', 'email',
+                Rule::unique(User::class, 'email')
+                    ->ignore($this->route('user')->id)
+                    ->where('company_id', tenant('id')),
+            ],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'role' => ['required', Rule::in(Area::getRolesPerAreaMap()[Area::Lender])],

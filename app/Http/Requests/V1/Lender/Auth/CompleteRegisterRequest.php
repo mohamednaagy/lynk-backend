@@ -4,6 +4,7 @@ namespace App\Http\Requests\V1\Lender\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 class CompleteRegisterRequest extends FormRequest
 {
@@ -27,7 +28,7 @@ class CompleteRegisterRequest extends FormRequest
         return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
-            'password' => ['required', 'string', 'confirmed'],
+            'password' => ['required', 'confirmed', Password::defaults()],
         ];
     }
 }
