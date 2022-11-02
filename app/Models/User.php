@@ -126,4 +126,12 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
     {
         return $this->locale;
     }
+
+    /**
+     * @return HasMany
+     */
+    public function enquiries(): HasMany
+    {
+        return $this->hasMany(Enquiry::class);
+    }
 }
