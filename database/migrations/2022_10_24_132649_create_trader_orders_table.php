@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('reference');
             $table->string('provider');
             $table->string('type');
-            $table->json('data');
+            $table->json('data')->nullable();
             $table->timestamps();
         });
     }

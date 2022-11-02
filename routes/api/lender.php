@@ -46,6 +46,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::get('orders/stats', GetOrdersStats::class);
         Route::apiResource('orders', OrderController::class);
+        Route::put('orders/{order}/contract-signed', ApproveOrder::class);
         Route::put('orders/{order}/approve', ApproveOrder::class);
         Route::put('orders/{order}/reject', RejectOrder::class);
         Route::put('orders/{order}/cancel', CancelOrder::class);

@@ -9,7 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ProcessDMCCMPONotification implements ShouldQueue
+class ProcessDmccMpoNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -33,6 +33,6 @@ class ProcessDMCCMPONotification implements ShouldQueue
     public function handle(): void
     {
         $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
-        Trader::driver()->issueMurabaha($ttiId);
+        Trader::driver('dmcc')->issueMurabaha($ttiId);
     }
 }

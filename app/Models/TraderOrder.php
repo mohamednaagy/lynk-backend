@@ -14,7 +14,7 @@ class TraderOrder extends Model
 
     protected $fillable = [
         'id',
-        'order_id',
+        'financing_order_id',
         'provider',
         'type',
         'reference',
@@ -25,7 +25,7 @@ class TraderOrder extends Model
     {
         return [
             'id',
-            'order_id',
+            'financing_order_id',
             'provider',
             'type',
             'reference',

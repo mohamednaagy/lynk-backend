@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -10,6 +11,8 @@ use App\Support\Traders\Contracts\TraderInterface;
 use CodeDredd\Soap\Client\Response;
 use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -43,7 +46,91 @@ class DmccDriver implements TraderInterface
 
     public function getTTI(FinancingOrder $financingOrder): object
     {
-        // create TTIID
+        $ttiId = $this->getTtiId($financingOrder);
+        $traderOrder = $this->createTraderOrder($financingOrder);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+
+        return $ttiId;
+    }
+
+    public function respondPTP(string $ttiId)
+    {
+        if (! $this->respondPTPService($ttiId)) {
+            throw new UnprocessableEntityHttpException();
+        }
+        $traderOrder = $this->getTraderOrderByTtiId($ttiId);
+
+        $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Promise to Purchase');
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetPtpDocument);
+
+        $this->attachDocumentToOrder($traderOrder, $document, 'promise_to_purchase', 'base64');
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachPtpDocumentToOrder);
+
+        $this->createTransferOwnershipToLenderDocument($traderOrder, $ttiId);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+
+        $this->updateOrderStatus($traderOrder, FinancingOrderStatus::CommodityPurchased);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CommodityPurchased);
+    }
+
+    public function issueMurabaha(string $ttiId)
+    {
+        $versionNumber = $this->uploadTTIDocumentAndGetVersionNumber($ttiId);
+
+        $this->issueMurabahaPurchaseOffer($ttiId, $versionNumber);
+
+        $traderOrder = $this->getTraderOrderByTtiId($ttiId);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::IssueMurabahaPurchaseOffer);
+
+        $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Murabaha Purchase Offer Document');
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetMurabahaPurchaseOfferDocument);
+
+        $this->attachDocumentToOrder($traderOrder, $document, 'murabaha_purchase_order', 'base64');
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachMpoDocument);
+
+        $this->updateOrderStatus($traderOrder, FinancingOrderStatus::IssueMurabahaOffer);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::IssueMurabahaOffer);
+    }
+
+    public function fetchNotification(string $type): ?array
+    {
+        $response = $this->soap
+            ->baseWsdl($this->prefixUrl('notificationDetailsRequest'))
+            ->call('notificationDetailsRequest', [
+                'notificationType' => $type,
+            ]);
+
+        if (! $this->isSuccess($response)) {
+            throw new UnprocessableEntityHttpException();
+        }
+
+        return $response->object()->NotificationAllDetailsResponse[0]->notificationAllDetailsResponse->notificationDetails;
+    }
+
+    /**
+     * @param $url
+     * @return string
+     */
+    private function prefixUrl($url): string
+    {
+        return 'https://'.config('dmcc.username').':'.config('dmcc.password').'@na2.ai.dm-us.informaticacloud.com/active-bpel/soap/'.$url.'?wsdl';
+    }
+
+    /**
+     * @param  Response  $response
+     * @return bool
+     */
+    private function isSuccess(Response $response): bool
+    {
+        return $response->successful() && $response->json()['successCode'] === '0000';
+    }
+
+    /**
+     * @param  FinancingOrder  $financingOrder
+     * @return mixed
+     */
+    private function getTtiId(FinancingOrder $financingOrder): mixed
+    {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('getTTIIDForIssuePTP'))
             ->call('getTTIIDForIssuePTP', [
@@ -55,22 +142,33 @@ class DmccDriver implements TraderInterface
                 'product' => null,
                 'registeredMember' => 'BOLFT',
                 'client' => null,
-            ]);
+            ])->object();
 
-        $ttiId = $response->object()->ttiId;
+        if (! isset($response->ttiId)) {
+            throw new UnprocessableEntityHttpException();
+        }
 
-        // store in trader order
-        $financingOrder->traderOrder()->create([
-            'order_id' => $financingOrder->id,
-            'provider' => 'DMCC',
-            'type' => 'TTIID',
-            'reference' => $ttiId,
-        ]);
-
-        return $ttiId;
+        return $response->ttiId;
     }
 
-    public function respondPTP(string $ttiId)
+    /**
+     * @param  FinancingOrder  $financingOrder
+     * @return Model
+     */
+    private function createTraderOrder(FinancingOrder $financingOrder): Model
+    {
+        return $financingOrder->traderOrders()->create([
+            'provider' => 'DMCC',
+            'type' => 'TTIID',
+            'reference' => 100,
+        ]);
+    }
+
+    /**
+     * @param  string  $ttiId
+     * @return bool
+     */
+    private function respondPTPService(string $ttiId): bool
     {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('respondPTPService'))
@@ -79,51 +177,127 @@ class DmccDriver implements TraderInterface
                 'comments' => 'create PTP',
                 'submitAction' => 'true',
             ]);
-
-        if ($this->isSuccess($response)) {
-            $traderOrder = TraderOrder::query()
-                ->where('type', 'TTIID')
-                ->where('reference', $ttiId)
-                ->first();
-
-            // generate internal doc - selling commodity to customer
-            $html = view('selling-commodity-to-customer')->render();
-            $path = $traderOrder->order_id.'/SCTC/'.$ttiId.'.pdf';
-            PdfGenerator::outputFromHtml($html, $path, [
-                'gotoOptions' => ['waitUntil' => 'networkidle0'],
-            ]);
-            $traderOrder->order->addMedia(storage_path($path))->toMediaCollection('selling-commodity-to-customer');
-
-            // request PTP document
-            $response = $this->soap
-                ->baseWsdl($this->prefixUrl('getDocumentByTypeAndTransaction'))
-                ->call('getDocumentByTypeAndTransaction', [
-                    'ttiId' => $ttiId,
-                    'documentType' => 'Promise to Purchase',
-                ]);
-
-            $traderOrder->order->addMediaFromBase64(
-                base64_decode($response->object()->getdocument[0]->getDocumentByTypeResponse[0]->document)
-            )->toMediaCollection('promise_to_purchase');
-
-            // generate internal doc - transfer ownership to lender
-            $html = view('transfer-ownership-to-lender')->render();
-            $path = $traderOrder->order_id.'/TOTL/'.$ttiId.'.pdf';
-            PdfGenerator::outputFromHtml($html, $path, [
-                'gotoOptions' => ['waitUntil' => 'networkidle0'],
-            ]);
-            $traderOrder->order->addMedia(storage_path($path))->toMediaCollection('transfer-ownership-to-lender');
-
-            $traderOrder->order->update(['status' => FinancingOrderStatus::SellingCommodityToCustomer]);
-
-            $traderOrder->traderHistory()->create([
-                'action' => 'response PTP and store document',
-            ]);
+        if (! $this->isSuccess($response)) {
+            throw new UnprocessableEntityHttpException();
         }
-        throw new UnprocessableEntityHttpException();
+
+        return true;
     }
 
-    public function issueMurabaha(string $ttiId)
+    /**
+     * @param  string  $ttiId
+     * @return Model|Builder|null
+     */
+    private function getTraderOrderByTtiId(string $ttiId): Model|Builder|null
+    {
+        return TraderOrder::query()
+            ->where('type', 'TTIID')
+            ->where('reference', $ttiId)
+            ->first();
+    }
+
+    /**
+     * @param $traderOrder
+     * @param  string  $ttiId
+     * @return void
+     */
+    public function createSellingCommodityToCustomerDocument($traderOrder, string $ttiId): void
+    {
+        $html = view('selling-commodity-to-customer')->render();
+        $path = $traderOrder->financing_order_id.'/SCTC/'.$ttiId.'.pdf';
+        PdfGenerator::outputFromHtml($html, $path, [
+            'gotoOptions' => ['waitUntil' => 'networkidle0'],
+        ]);
+
+        $this->attachDocumentToOrder($traderOrder, storage_path($path), 'selling_commodity_to_customer');
+    }
+
+    /**
+     * @param  string  $ttiId
+     * @param  string  $documentType
+     * @return mixed
+     */
+    private function getDocumentByTypeAndTransaction(string $ttiId, string $documentType): mixed
+    {
+        // request PTP document
+        $response = $this->soap
+            ->baseWsdl($this->prefixUrl('getDocumentByTypeAndTransaction'))
+            ->call('getDocumentByTypeAndTransaction', [
+                'ttiId' => $ttiId,
+                'documentType' => $documentType,
+            ]);
+
+        if (! isset($response->object()->getdocument[0]->getDocumentByTypeResponse[0]->document)) {
+            throw new UnprocessableEntityHttpException();
+        }
+
+        return $response->object()->getdocument[0]->getDocumentByTypeResponse[0]->document;
+    }
+
+    /**
+     * @param $traderOrder
+     * @param $document
+     * @param $collectionName
+     * @param $type
+     * @return void
+     */
+    private function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
+    {
+        if (! is_null($type)) {
+            $traderOrder->order->addMediaFromBase64(
+                base64_decode($document)
+            )->toMediaCollection($collectionName);
+        } else {
+            $traderOrder->order->addMedia(
+                $document
+            )->toMediaCollection($collectionName);
+        }
+    }
+
+    /**
+     * @param $traderOrder
+     * @param  int  $status
+     * @return void
+     */
+    private function updateOrderStatus($traderOrder, FinancingOrderStatus $status): void
+    {
+        $traderOrder->order->update([
+            'status' => $status,
+        ]);
+    }
+
+    /**
+     * @param $traderOrder
+     * @param  string  $ttiId
+     * @return void
+     */
+    private function createTransferOwnershipToLenderDocument($traderOrder, string $ttiId): void
+    {
+        $html = view('transfer-ownership-to-lender')->render();
+        $path = $traderOrder->order_id.'/TOTL/'.$ttiId.'.pdf';
+        PdfGenerator::outputFromHtml($html, $path, [
+            'gotoOptions' => ['waitUntil' => 'networkidle0'],
+        ]);
+        $this->attachDocumentToOrder($traderOrder, storage_path($path), 'transfer_ownership_to_lender');
+    }
+
+    /**
+     * @param $traderOrder
+     * @param  int  $action
+     * @return void
+     */
+    public function createTraderOrderHistory($traderOrder, int $action): void
+    {
+        $traderOrder->traderHistories()->create([
+            'action' => $action,
+        ]);
+    }
+
+    /**
+     * @param  string  $ttiId
+     * @return mixed
+     */
+    private function uploadTTIDocumentAndGetVersionNumber(string $ttiId): mixed
     {
         // upload TTIDocument for now it sample PDF to get version
         $response = $this->soap
@@ -132,90 +306,48 @@ class DmccDriver implements TraderInterface
                 'ttiDocumentName' => $ttiId,
                 'ttiDocument' => 'JVBERi0xLjMNCiXi48/TDQoNCjEgMCBvYmoNCjw8DQovVHlwZSAvQ2F0YWxvZw0KL091dGxpbmVzIDIgMCBSDQovUGFnZXMgMyAwIFINCj4+DQplbmRvYmoNCg0KMiAwIG9iag0KPDwNCi9UeXBlIC9PdXRsaW5lcw0KL0NvdW50IDANCj4+DQplbmRvYmoNCg0KMyAwIG9iag0KPDwNCi9UeXBlIC9QYWdlcw0KL0NvdW50IDINCi9LaWRzIFsgNCAwIFIgNiAwIFIgXSANCj4+DQplbmRvYmoNCg0KNCAwIG9iag0KPDwNCi9UeXBlIC9QYWdlDQovUGFyZW50IDMgMCBSDQovUmVzb3VyY2VzIDw8DQovRm9udCA8PA0KL0YxIDkgMCBSIA0KPj4NCi9Qcm9jU2V0IDggMCBSDQo+Pg0KL01lZGlhQm94IFswIDAgNjEyLjAwMDAgNzkyLjAwMDBdDQovQ29udGVudHMgNSAwIFINCj4+DQplbmRvYmoNCg0KNSAwIG9iag0KPDwgL0xlbmd0aCAxMDc0ID4+DQpzdHJlYW0NCjIgSg0KQlQNCjAgMCAwIHJnDQovRjEgMDAyNyBUZg0KNTcuMzc1MCA3MjIuMjgwMCBUZA0KKCBBIFNpbXBsZSBQREYgRmlsZSApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY4OC42MDgwIFRkDQooIFRoaXMgaXMgYSBzbWFsbCBkZW1vbnN0cmF0aW9uIC5wZGYgZmlsZSAtICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNjY0LjcwNDAgVGQNCigganVzdCBmb3IgdXNlIGluIHRoZSBWaXJ0dWFsIE1lY2hhbmljcyB0dXRvcmlhbHMuIE1vcmUgdGV4dC4gQW5kIG1vcmUgKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA2NTIuNzUyMCBUZA0KKCB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDYyOC44NDgwIFRkDQooIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNjE2Ljg5NjAgVGQNCiggdGV4dC4gQW5kIG1vcmUgdGV4dC4gQm9yaW5nLCB6enp6ei4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNjA0Ljk0NDAgVGQNCiggbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDU5Mi45OTIwIFRkDQooIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNTY5LjA4ODAgVGQNCiggQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA1NTcuMTM2MCBUZA0KKCB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBFdmVuIG1vcmUuIENvbnRpbnVlZCBvbiBwYWdlIDIgLi4uKSBUag0KRVQNCmVuZHN0cmVhbQ0KZW5kb2JqDQoNCjYgMCBvYmoNCjw8DQovVHlwZSAvUGFnZQ0KL1BhcmVudCAzIDAgUg0KL1Jlc291cmNlcyA8PA0KL0ZvbnQgPDwNCi9GMSA5IDAgUiANCj4+DQovUHJvY1NldCA4IDAgUg0KPj4NCi9NZWRpYUJveCBbMCAwIDYxMi4wMDAwIDc5Mi4wMDAwXQ0KL0NvbnRlbnRzIDcgMCBSDQo+Pg0KZW5kb2JqDQoNCjcgMCBvYmoNCjw8IC9MZW5ndGggNjc2ID4+DQpzdHJlYW0NCjIgSg0KQlQNCjAgMCAwIHJnDQovRjEgMDAyNyBUZg0KNTcuMzc1MCA3MjIuMjgwMCBUZA0KKCBTaW1wbGUgUERGIEZpbGUgMiApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY4OC42MDgwIFRkDQooIC4uLmNvbnRpbnVlZCBmcm9tIHBhZ2UgMS4gWWV0IG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA2NzYuNjU2MCBUZA0KKCBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY2NC43MDQwIFRkDQooIHRleHQuIE9oLCBob3cgYm9yaW5nIHR5cGluZyB0aGlzIHN0dWZmLiBCdXQgbm90IGFzIGJvcmluZyBhcyB3YXRjaGluZyApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY1Mi43NTIwIFRkDQooIHBhaW50IGRyeS4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA2NDAuODAwMCBUZA0KKCBCb3JpbmcuICBNb3JlLCBhIGxpdHRsZSBtb3JlIHRleHQuIFRoZSBlbmQsIGFuZCBqdXN0IGFzIHdlbGwuICkgVGoNCkVUDQplbmRzdHJlYW0NCmVuZG9iag0KDQo4IDAgb2JqDQpbL1BERiAvVGV4dF0NCmVuZG9iag0KDQo5IDAgb2JqDQo8PA0KL1R5cGUgL0ZvbnQNCi9TdWJ0eXBlIC9UeXBlMQ0KL05hbWUgL0YxDQovQmFzZUZvbnQgL0hlbHZldGljYQ0KL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcNCj4+DQplbmRvYmoNCg0KMTAgMCBvYmoNCjw8DQovQ3JlYXRvciAoUmF2ZSBcKGh0dHA6Ly93d3cubmV2cm9uYS5jb20vcmF2ZVwpKQ0KL1Byb2R1Y2VyIChOZXZyb25hIERlc2lnbnMpDQovQ3JlYXRpb25EYXRlIChEOjIwMDYwMzAxMDcyODI2KQ0KPj4NCmVuZG9iag0KDQp4cmVmDQowIDExDQowMDAwMDAwMDAwIDY1NTM1IGYNCjAwMDAwMDAwMTkgMDAwMDAgbg0KMDAwMDAwMDA5MyAwMDAwMCBuDQowMDAwMDAwMTQ3IDAwMDAwIG4NCjAwMDAwMDAyMjIgMDAwMDAgbg0KMDAwMDAwMDM5MCAwMDAwMCBuDQowMDAwMDAxNTIyIDAwMDAwIG4NCjAwMDAwMDE2OTAgMDAwMDAgbg0KMDAwMDAwMjQyMyAwMDAwMCBuDQowMDAwMDAyNDU2IDAwMDAwIG4NCjAwMDAwMDI1NzQgMDAwMDAgbg0KDQp0cmFpbGVyDQo8PA0KL1NpemUgMTENCi9Sb290IDEgMCBSDQovSW5mbyAxMCAwIFINCj4+DQoNCnN0YXJ0eHJlZg0KMjcxNA0KJSVFT0YNCg==',
                 'title' => $ttiId,
-            ]);
+            ])->object();
 
-        if (isset($response->object()->versionNo)) {
-            // request MPO
-            $response = $this->soap
-                ->baseWsdl($this->prefixUrl('issueMurabahaPurchaseOffer'))
-                ->call('issueMurabahaPurchaseOffer', [
-                    'ttiId' => $ttiId,
-                    'comments' => 'create MPO',
-                    'ttiDocumentVersionNo' => $response->object()->versionNo,
-                ]);
-
-            if ($this->isSuccess($response)) {
-                $traderOrder = TraderOrder::query()
-                    ->where('type', 'TTIID')
-                    ->where('reference', $ttiId)
-                    ->first();
-
-                // request MPO document
-                $response = $this->soap
-                    ->baseWsdl($this->prefixUrl('getDocumentByTypeAndTransaction'))
-                    ->call('getDocumentByTypeAndTransaction', [
-                        'ttiId' => $ttiId,
-                        'documentType' => 'Murabaha Purchase Offer Document',
-                    ]);
-
-                $traderOrder->order->addMediaFromBase64(
-                    base64_decode($response->object()->getdocument[0]->getDocumentByTypeResponse[0]->document)
-                )->toMediaCollection('murabaha_purchase_order');
-
-                $traderOrder->order->update(['status' => FinancingOrderStatus::IssueMurabahaOffer]);
-
-                $traderOrder->traderHistory()->create([
-                    'action' => 'issue MPO and store document',
-                ]);
-            }
+        if (! isset($response->versionNo)) {
+            throw new UnprocessableEntityHttpException();
         }
+
+        return $response->versionNo;
     }
 
-    public function fetchNotification(): ?array
+    /**
+     * @param  string  $ttiId
+     * @param  string  $versionNo
+     * @return void
+     */
+    private function issueMurabahaPurchaseOffer(string $ttiId, string $versionNo): void
     {
         $response = $this->soap
-            ->baseWsdl($this->prefixUrl('notificationDetailsRequest'))
-            ->call('notificationDetailsRequest', [
-                'notificationType' => 'ACTIONABLE',
+            ->baseWsdl($this->prefixUrl('issueMurabahaPurchaseOffer'))
+            ->call('issueMurabahaPurchaseOffer', [
+                'ttiId' => $ttiId,
+                'comments' => 'create MPO',
+                'ttiDocumentVersionNo' => $versionNo,
             ]);
 
-        if ($this->isSuccess($response)) {
-            return $response->json();
+        if (! $this->isSuccess($response)) {
+            throw new UnprocessableEntityHttpException();
         }
-        throw new RuntimeException();
     }
 
-    public function fetchMurabahaNotification(): ?array
+    /**
+     * @param  string  $ttiId
+     * @return void
+     */
+    public function murabahaSaleCompleted(string $ttiId): void
     {
-        $response = $this->soap
-            ->baseWsdl($this->prefixUrl('notificationDetailsRequest'))
-            ->call('notificationDetailsRequest', [
-                'notificationType' => 'FYI',
-            ]);
+        $traderOrder = $this->getTraderOrderByTtiId($ttiId);
 
-        if ($this->isSuccess($response)) {
-            return $response->json();
-        }
-        throw new RuntimeException();
-    }
+        $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Warrant Amendment Except Warrant No');
+        $this->attachDocumentToOrder($traderOrder, $document, 'warrant_amendment_except_warrant_no', 'base64');
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
 
-    public function completeOrder(string $ttiId)
-    {
-        $traderOrder = TraderOrder::query()
-            ->where('type', 'TTIID')
-            ->where('reference', $ttiId)
-            ->first();
-
-        $traderOrder->order->update(['status' => FinancingOrderStatus::MurabahaSaleCompleted]);
-    }
-
-    private function prefixUrl($url): string
-    {
-        return 'https://'.config('dmcc.username').':'.config('dmcc.password').'@na2.ai.dm-us.informaticacloud.com/active-bpel/soap/'.$url.'?wsdl';
-    }
-
-    private function isSuccess(Response $response): bool
-    {
-        return $response->successful() && $response->json()['successCode'] === '0000';
+        $this->updateOrderStatus($traderOrder, FinancingOrderStatus::MurabahaSaleCompleted);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::MurabahaSaleCompleted);
     }
 }

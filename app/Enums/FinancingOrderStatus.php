@@ -24,4 +24,6 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
     const IssueMurabahaOffer = 8;
 
     const MurabahaSaleCompleted = 9;
+
+    const ContractSigned = 10;
 }

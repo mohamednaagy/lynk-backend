@@ -95,14 +95,21 @@ class FinancingOrder extends Model implements HasMedia
 
         $this
             ->addMediaCollection(
-                'transfer-ownership-to-lender'
+                'transfer_ownership_to_lender'
             )
             ->singleFile(
             );
 
         $this
             ->addMediaCollection(
-                'selling-commodity-to-customer'
+                'selling_commodity_to_customer'
+            )
+            ->singleFile(
+            );
+
+        $this
+            ->addMediaCollection(
+                'warrant_amendment_except_warrant_no'
             )
             ->singleFile(
             );
@@ -133,12 +140,12 @@ class FinancingOrder extends Model implements HasMedia
         return $this->getFirstMediaUrl('contract');
     }
 
-    public function traderOrder()
+    public function traderOrders()
     {
-        return $this->hasMany(TraderOrder::class, 'order_id', 'id');
+        return $this->hasMany(TraderOrder::class, 'financing_order_id', 'id');
     }
 
-    public function traderHistory()
+    public function traderHistories()
     {
         return $this->hasMany(TraderHistory::class, 'order_id', 'id');
     }

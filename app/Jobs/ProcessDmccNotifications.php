@@ -9,7 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ProcessDMCCNotifications implements ShouldQueue
+class ProcessDmccNotifications implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -20,39 +20,33 @@ class ProcessDMCCNotifications implements ShouldQueue
      */
     public function handle(): void
     {
-        // regular notifications (PTP - TTIID)
-        $response = Trader::driver()->fetchNotification();
-
         collect(
-            $response->NotificationAllDetailsResponse[0]->notificationAllDetailsResponse->notificationDetails
+            Trader::driver('dmcc')->fetchNotification('ACTIONABLE')
         )->each(function ($notification) {
             if (
                 $notification->notificationHeaderAndEntity->notification
                 ==
                 'Action Required for Promise to Purchase'
             ) {
-                ProcessDMCCPTPNotification::dispatch($notification);
+                ProcessDmccPtpNotification::dispatch($notification);
             } elseif (
                 $notification->notificationHeaderAndEntity->notification
                 ==
                 'Action Required for Issue Murabaha Purchase Offer'
             ) {
-                ProcessDMCCMPONotification::dispatch($notification);
+                ProcessDmccMpoNotification::dispatch($notification);
             }
         });
 
-        // Murabaha completed
-        $response = Trader::driver()->fetchMurabahaNotification();
-
         collect(
-            $response->NotificationAllDetailsResponse[0]->notificationAllDetailsResponse->notificationDetails
+            Trader::driver('dmcc')->fetchNotification('FYI')
         )->each(function ($notification) {
             if (
                 $notification->notificationHeaderAndEntity->notification
                 ==
                 'Murabaha Sale Completed'
             ) {
-                ProcessDMCCMPOSaleCompleteNotification::dispatch($notification);
+                ProcessDmccMpoSaleCompleteNotification::dispatch($notification);
             }
         });
     }

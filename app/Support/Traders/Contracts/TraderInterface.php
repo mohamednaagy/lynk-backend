@@ -14,5 +14,5 @@ interface TraderInterface
 
     public function issueMurabaha(string $ttiId);
 
-    public function fetchNotification();
+    public function fetchNotification(string $type);
 }

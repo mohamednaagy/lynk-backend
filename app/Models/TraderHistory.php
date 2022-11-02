@@ -11,6 +11,11 @@ class TraderHistory extends Model
 {
     use HasFactory, VirtualColumn;
 
+    protected $fillable = [
+        'trader_order_id',
+        'action',
+    ];
+
     public static function getCustomColumns(): array
     {
         return [
