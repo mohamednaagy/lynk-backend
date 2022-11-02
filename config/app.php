@@ -218,22 +218,5 @@ return [
     |
     */
     'host_whitelist' => explode(',', env('HOST_WHITELIST')),
-
-    /*
-    |--------------------------------------------------------------------------
-    | sms_provider
-    |--------------------------------------------------------------------------
-    |
-    | This object has the sms details that constains data we need
-    | in the application to use for authentications for SMS service provider
-    |
-    */
-    'sms_providers' => [
-        'msegat' => [
-            'url' => 'https://www.msegat.com/gw/sendsms.php',
-            'username' => env('MSEGAT_USERNAME'),
-            'api_key' => env('MSEGAT_API_KEY'),
-        ],
-    ],
-
+    
 ];
