@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\V1\Lender\Auth\Register;
 use App\Http\Controllers\Api\V1\Lender\Auth\ResendInvitation;
 use App\Http\Controllers\Api\V1\Lender\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryController;
+use App\Http\Controllers\Api\V1\Lender\Enquiries\Replies\ListEnquiryReplies;
+use App\Http\Controllers\Api\V1\Lender\Enquiries\Replies\ReplyToEnquiry;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CancelOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersStats;
@@ -41,8 +43,8 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
 
     Route::middleware([
         'auth:sanctum',
-        'role:'.implode('|', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator]),
-        'IsEmailVerified:'.Area::Lender,
+        'role:' . implode('|', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator]),
+        'IsEmailVerified:' . Area::Lender,
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
@@ -64,5 +66,11 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         });
 
         Route::apiResource('enquiries', EnquiryController::class);
+
+        Route::prefix('enquiries')->group(function () {
+            Route::post('/{enquiry}/reply', ReplyToEnquiry::class);
+            Route::get('/{enquiry}/replies', ListEnquiryReplies::class);
+        });
+
     });
 });
