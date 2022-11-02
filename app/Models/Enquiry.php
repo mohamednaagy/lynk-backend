@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EnquiryStatus;
+use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ use Spatie\Permission\Models\Role;
 
 class Enquiry extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasScopes;
 
     /**
      * The attributes that are mass assignable.

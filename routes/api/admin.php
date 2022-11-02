@@ -14,6 +14,9 @@ use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
 use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
+use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
+use App\Http\Controllers\Api\V1\Admin\Enquiries\GetEnquiryReplies;
+use App\Http\Controllers\Api\V1\Admin\Enquiries\ReplyToEnquiry;
 use App\Http\Controllers\Api\V1\Admin\Orders\GetBalance;
 use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
@@ -80,6 +83,12 @@ Route::prefix('v1/admin')->group(function () {
         Route::prefix('wallet')->group(function () {
             Route::get('/edaat-invoices', GetEdaatInvoices::class);
             Route::post('/edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
+        });
+
+        Route::apiResource('enquiries', EnquiryController::class);
+        Route::prefix('enquiries')->group(function () {
+            Route::get('/{enquiry}/replies', GetEnquiryReplies::class);
+            Route::post('/{enquiry}/reply', ReplyToEnquiry::class);
         });
     });
 });
