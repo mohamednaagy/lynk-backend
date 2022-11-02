@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\EnquiryStatus;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -22,6 +23,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->string('email')->nullable();
             $table->string('phone_number', '50')->nullable();
+            $table->unsignedTinyInteger('status')->default(EnquiryStatus::UnderReview);
             $table->foreignIdFor(User::class)
                 ->nullable()
                 ->constrained()
@@ -30,8 +32,6 @@ return new class extends Migration
                 ->nullable()
                 ->constrained()
                 ->cascadeOnDelete();
-
-            $table->unique([(new User())->getForeignKey(), (new Role())->getForeignKey()]);
             $table->softDeletes();
             $table->timestamps();
         });

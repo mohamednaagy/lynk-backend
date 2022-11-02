@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\EnquiryStatus;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,6 +23,7 @@ class Enquiry extends Model
     protected $fillable = [
         'subject',
         'body',
+        'status',
         'name',
         'email',
         'phone_number',
@@ -35,6 +37,7 @@ class Enquiry extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'status' => EnquiryStatus::class,
         'phone_number' => E164PhoneNumberCast::class,
     ];
 

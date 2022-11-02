@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Api\V1\Lender\Enquiries;
 use App\Actions\Contracts\Enquiries\CreateEnquiry;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Enquiries\StoreEnquiryRequest;
+use App\Http\Requests\V1\Lender\Enquiries\StoreEnquiryRequest;
+use App\Transformers\EnquiryTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -27,15 +28,23 @@ class EnquiryController extends Controller
      * @param  StoreEnquiryRequest  $storeEnquiryRequest
      * @return JsonResponse
      */
-    public function store(StoreEnquiryRequest $storeEnquiryRequest, CreateEnquiry $createEnquiry)
+    public function store(StoreEnquiryRequest $storeEnquiryRequest, CreateEnquiry $createEnquiry): JsonResponse
     {
         $data = $storeEnquiryRequest->validated();
-        $data['user_id'] = $storeEnquiryRequest->user()->id;
-        $data['role'] = Role::LenderAdmin;
+        $data['user_id'] = ($user = $storeEnquiryRequest->user())->id;
+        $data['role_id'] = $user->roles()
+            ->whereIn('name', [
+                Role::LenderAdmin,
+                Role::LenderSupervisor,
+                Role::LenderBilling,
+                Role::LenderOrderCreator,
+            ])
+            ->firstOrFail()
+            ->id;
 
         $enquiry = $createEnquiry->handle($data);
 
-        return $this->successResponse([$enquiry]);
+        return fractal($enquiry, new EnquiryTransformer())->respond();
     }
 
     /**

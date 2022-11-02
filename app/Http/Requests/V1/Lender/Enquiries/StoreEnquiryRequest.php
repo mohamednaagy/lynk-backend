@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\V1\Enquiries;
+namespace App\Http\Requests\V1\Lender\Enquiries;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -23,20 +23,9 @@ class StoreEnquiryRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
+        return [
             'subject' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string', 'max:1000'],
         ];
-
-        if (isset($this->email)) {
-            $rules = array_merge($rules, [
-                'name' => ['required', 'string', 'min:3', 'max:100'],
-                'email' => ['required', 'email', 'max:255'],
-                'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
-                'phone_number' => ['required', 'phone:phone_country_code', 'string'],
-            ]);
-        }
-
-        return $rules;
     }
 }

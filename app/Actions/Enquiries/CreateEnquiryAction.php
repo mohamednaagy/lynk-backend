@@ -3,8 +3,9 @@
 namespace App\Actions\Enquiries;
 
 use App\Actions\Contracts\Enquiries\CreateEnquiry;
+use App\Enums\EnquiryStatus;
 use App\Models\Enquiry;
-use Modules\Grantify\Facades\Grantify;
+use Illuminate\Support\Arr;
 
 class CreateEnquiryAction implements CreateEnquiry
 {
@@ -16,15 +17,25 @@ class CreateEnquiryAction implements CreateEnquiry
      */
     public function handle(array $data): Enquiry
     {
-        if (! empty($data['role'])) {
-            $data['role_id'] = Grantify::findRole($data['role'])->id;
-        }
+        $data['status'] = EnquiryStatus::UnderReview;
 
         if (! empty($data['phone_number'])) {
             $data['phone_number'] = phone($data['phone_number'], $data['phone_country_code']);
         }
 
         // create Enquiry
-        return Enquiry::create($data);
+        return Enquiry::create(Arr::only(
+            $data,
+            [
+                'subject',
+                'body',
+                'status',
+                'name',
+                'email',
+                'phone_number',
+                'user_id',
+                'role_id',
+            ]
+        ));
     }
 }
