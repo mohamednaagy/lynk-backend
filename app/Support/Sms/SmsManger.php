@@ -2,6 +2,7 @@
 
 namespace App\Support\Sms;
 
+use App\Support\Sms\Drivers\MsegatDriver;
 use Illuminate\Support\Manager;
 
 class SmsManger extends Manager
@@ -21,7 +22,10 @@ class SmsManger extends Manager
      */
     public function createMsegatDriver()
     {
-        return new MsegatDriver();
+        return new MsegatDriver(
+            baseUrl: config('sms.msegat.url'),
+            apiKey: config('sms.msegat.api_key')
+        );
     }
 
     /**

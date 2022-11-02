@@ -7,21 +7,18 @@ use App\Exceptions\InvalidLoginInfoException;
 use App\Exceptions\MobileNumbersIsNotCorrectException;
 use App\Exceptions\MSGDuplicatedException;
 use App\Support\Sms\SmsDriverInterface;
-use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\Facades\Http;
 
 class MsegatDriver implements SmsDriverInterface
 {
     protected $baseUrl;
 
-    public function __construct(UrlGenerator $baseUrl)
-    {
-        $this->baseUrl = $baseUrl;
-    }
+    protected $apiKey;
 
-    public function smsURL()
+    public function __construct($baseUrl, $apiKey)
     {
-        $this->baseUrl->to('https://www.msegat.com/gw/sendsms.php');
+        $this->baseUrl = rtrim($baseUrl, '/');
+        $this->apiKey = $apiKey;
     }
 
     /**
@@ -33,20 +30,18 @@ class MsegatDriver implements SmsDriverInterface
      */
     public function send($message, $phoneNumber): void
     {
-        $response = Http::post(
-            $this->baseUrl,
-            [
-                'user_name' => config('sms.msegat.user_name'),
-                'numbers' => $phoneNumber,
-                'user_sender' => config('sms.msegat.sender_name'),
-                'api_key' => config('sms.msegat.api_key'),
-                'msg' => $message,
-            ]
-        );
+        $body = [
+            'userName' => config('sms.msegat.user_name'),
+            'numbers' => $phoneNumber,
+            'userSender' => config('sms.msegat.sender_name'),
+            'apiKey' => $this->apiKey,
+            'msg' => $message,
+        ];
+
+        $response = Http::post($this->baseUrl, $body);
+
         // store the response data of the sms for tracking
         activity()
-            ->causedBy('msegat')
-            ->withProperties(['sms' => 'value'])
             ->event('verified')
             ->log($response);
 
@@ -71,5 +66,10 @@ class MsegatDriver implements SmsDriverInterface
                 throw new \ErrorException('Error found');
                 break;
         }
+    }
+
+    protected function url($path)
+    {
+        return $this->baseUrl.'/'.ltrim($path, '/');
     }
 }
