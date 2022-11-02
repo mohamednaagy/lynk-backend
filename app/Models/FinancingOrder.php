@@ -78,6 +78,34 @@ class FinancingOrder extends Model implements HasMedia
             )
             ->singleFile(
             );
+
+        $this
+            ->addMediaCollection(
+                'promise_to_purchase'
+            )
+            ->singleFile(
+            );
+
+        $this
+            ->addMediaCollection(
+                'murabaha_purchase_order'
+            )
+            ->singleFile(
+            );
+
+        $this
+            ->addMediaCollection(
+                'transfer-ownership-to-lender'
+            )
+            ->singleFile(
+            );
+
+        $this
+            ->addMediaCollection(
+                'selling-commodity-to-customer'
+            )
+            ->singleFile(
+            );
     }
 
     public function company()

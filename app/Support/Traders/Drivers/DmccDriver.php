@@ -4,15 +4,14 @@ namespace App\Support\Traders\Drivers;
 
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
-use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
 use CodeDredd\Soap\Client\Response;
 use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
-use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class DmccDriver implements TraderInterface
 {
@@ -82,18 +81,18 @@ class DmccDriver implements TraderInterface
             ]);
 
         if ($this->isSuccess($response)) {
-            // generate internal doc - selling commodity to customer
-            $html = view('selling-commodity-to-customer')->render();
-            PdfGenerator::outputFromHtml($html, 'test.pdf', [
-                'gotoOptions' => ['waitUntil' => 'networkidle0'],
-            ]);
-
             $traderOrder = TraderOrder::query()
                 ->where('type', 'TTIID')
                 ->where('reference', $ttiId)
                 ->first();
 
-            $traderOrder->order->update(['status' => FinancingOrderStatus::CommodityPurchased]);
+            // generate internal doc - selling commodity to customer
+            $html = view('selling-commodity-to-customer')->render();
+            $path = $traderOrder->order_id.'/SCTC/'.$ttiId.'.pdf';
+            PdfGenerator::outputFromHtml($html, $path, [
+                'gotoOptions' => ['waitUntil' => 'networkidle0'],
+            ]);
+            $traderOrder->order->addMedia(storage_path($path))->toMediaCollection('selling-commodity-to-customer');
 
             // request PTP document
             $response = $this->soap
@@ -103,27 +102,25 @@ class DmccDriver implements TraderInterface
                     'documentType' => 'Promise to Purchase',
                 ]);
 
+            $traderOrder->order->addMediaFromBase64(
+                base64_decode($response->object()->getdocument[0]->getDocumentByTypeResponse[0]->document)
+            )->toMediaCollection('promise_to_purchase');
+
             // generate internal doc - transfer ownership to lender
             $html = view('transfer-ownership-to-lender')->render();
-            PdfGenerator::outputFromHtml($html, 'test.pdf', [
+            $path = $traderOrder->order_id.'/TOTL/'.$ttiId.'.pdf';
+            PdfGenerator::outputFromHtml($html, $path, [
                 'gotoOptions' => ['waitUntil' => 'networkidle0'],
             ]);
+            $traderOrder->order->addMedia(storage_path($path))->toMediaCollection('transfer-ownership-to-lender');
 
             $traderOrder->order->update(['status' => FinancingOrderStatus::SellingCommodityToCustomer]);
 
-            // store in PTP path with ttiId filename
-            Storage::put(
-                $traderOrder->order_id.'/PTP/'.$ttiId.'.pdf',
-                base64_decode($response->object()->getdocument[0]->getDocumentByTypeResponse[0]->document)
-            );
-
-            if ($traderOrder) {
-                TraderHistory::query()->create([
-                    'trader_order_id' => $traderOrder->id,
-                    'action' => 'response PTP and store document',
-                ]);
-            }
+            $traderOrder->traderHistory()->create([
+                'action' => 'response PTP and store document',
+            ]);
         }
+        throw new UnprocessableEntityHttpException();
     }
 
     public function issueMurabaha(string $ttiId)
@@ -148,6 +145,11 @@ class DmccDriver implements TraderInterface
                 ]);
 
             if ($this->isSuccess($response)) {
+                $traderOrder = TraderOrder::query()
+                    ->where('type', 'TTIID')
+                    ->where('reference', $ttiId)
+                    ->first();
+
                 // request MPO document
                 $response = $this->soap
                     ->baseWsdl($this->prefixUrl('getDocumentByTypeAndTransaction'))
@@ -156,25 +158,15 @@ class DmccDriver implements TraderInterface
                         'documentType' => 'Murabaha Purchase Offer Document',
                     ]);
 
-                $traderOrder = TraderOrder::query()
-                    ->where('type', 'TTIID')
-                    ->where('reference', $ttiId)
-                    ->first();
+                $traderOrder->order->addMediaFromBase64(
+                    base64_decode($response->object()->getdocument[0]->getDocumentByTypeResponse[0]->document)
+                )->toMediaCollection('murabaha_purchase_order');
 
                 $traderOrder->order->update(['status' => FinancingOrderStatus::IssueMurabahaOffer]);
 
-                // store in PTP path with ttiId filename
-                Storage::put(
-                    $traderOrder->order_id.'/MPO/'.$ttiId.'.pdf',
-                    base64_decode($response->object()->getdocument[0]->getDocumentByTypeResponse[0]->document)
-                );
-
-                if ($traderOrder) {
-                    TraderHistory::query()->create([
-                        'trader_order_id' => $traderOrder->id,
-                        'action' => 'issue MPO and store document',
-                    ]);
-                }
+                $traderOrder->traderHistory()->create([
+                    'action' => 'issue MPO and store document',
+                ]);
             }
         }
     }
