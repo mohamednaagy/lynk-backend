@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -10,7 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
+class ProcessUnprocessedDmccNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -33,9 +32,6 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
      */
     public function handle(): void
     {
-        $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
-        if (TraderOrder::query()->where('reference', $ttiId)->exists()) {
-            Trader::driver('dmcc')->murabahaSaleCompleted($ttiId);
-        }
+        Trader::driver('dmcc')->processFetchNotification($this->notification->notificationHeaderAndEntity->notificationId);
     }
 }

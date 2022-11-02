@@ -145,11 +145,6 @@ class FinancingOrder extends Model implements HasMedia
         return $this->hasMany(TraderOrder::class, 'financing_order_id', 'id');
     }
 
-    public function traderHistories()
-    {
-        return $this->hasMany(TraderHistory::class, 'order_id', 'id');
-    }
-
     public function scopeCanceled($query)
     {
         return $query->whereStatus(FinancingOrderStatus::Canceled);

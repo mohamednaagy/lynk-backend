@@ -46,7 +46,9 @@ class ProcessDmccNotifications implements ShouldQueue
                 ==
                 'Murabaha Sale Completed'
             ) {
-                ProcessDmccMpoSaleCompleteNotification::dispatch($notification);
+                ProcessDmccMpoSaleCompleteNotification::dispatch($notification)->chain([
+                    new ProcessUnprocessedDmccNotification($notification),
+                ]);
             }
         });
     }

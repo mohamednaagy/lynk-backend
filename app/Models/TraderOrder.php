@@ -34,10 +34,10 @@ class TraderOrder extends Model
 
     public function order(): BelongsTo
     {
-        return $this->belongsTo(FinancingOrder::class, 'id', 'order_id');
+        return $this->belongsTo(FinancingOrder::class, 'financing_order_id', 'id');
     }
 
-    public function traderHistory(): HasMany
+    public function traderHistories(): HasMany
     {
         return $this->hasMany(TraderHistory::class, 'trader_order_id', 'id');
     }

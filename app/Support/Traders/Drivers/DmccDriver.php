@@ -44,10 +44,10 @@ class DmccDriver implements TraderInterface
         return $this->isSuccess($response);
     }
 
-    public function getTTI(FinancingOrder $financingOrder): object
+    public function getTTI(FinancingOrder $financingOrder): string
     {
         $ttiId = $this->getTtiId($financingOrder);
-        $traderOrder = $this->createTraderOrder($financingOrder);
+        $traderOrder = $this->createTraderOrder($financingOrder, $ttiId);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $ttiId;
@@ -55,9 +55,8 @@ class DmccDriver implements TraderInterface
 
     public function respondPTP(string $ttiId)
     {
-        if (! $this->respondPTPService($ttiId)) {
-            throw new UnprocessableEntityHttpException();
-        }
+        $this->respondPTPService($ttiId);
+
         $traderOrder = $this->getTraderOrderByTtiId($ttiId);
 
         $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Promise to Purchase');
@@ -100,11 +99,24 @@ class DmccDriver implements TraderInterface
                 'notificationType' => $type,
             ]);
 
-        if (! $this->isSuccess($response)) {
+        if (! $response->successful()) {
             throw new UnprocessableEntityHttpException();
         }
 
-        return $response->object()->NotificationAllDetailsResponse[0]->notificationAllDetailsResponse->notificationDetails;
+        return $response->object()->NotificationAllDetailsResponse[0]->notificationAllDetailsResponse->notificationDetails ?? [];
+    }
+
+    public function processFetchNotification($notificationId): void
+    {
+        $response = $this->soap
+            ->baseWsdl($this->prefixUrl('processNotification'))
+            ->call('processNotification', [
+                'notificationId' => $notificationId,
+            ]);
+
+        if (! $response->successful()) {
+            throw new UnprocessableEntityHttpException();
+        }
     }
 
     /**
@@ -153,22 +165,23 @@ class DmccDriver implements TraderInterface
 
     /**
      * @param  FinancingOrder  $financingOrder
-     * @return Model
+     * @param  string  $ttiId
+     * @return TraderOrder|Model
      */
-    private function createTraderOrder(FinancingOrder $financingOrder): Model
+    private function createTraderOrder(FinancingOrder $financingOrder, string $ttiId): Model|TraderOrder
     {
         return $financingOrder->traderOrders()->create([
             'provider' => 'DMCC',
             'type' => 'TTIID',
-            'reference' => 100,
+            'reference' => $ttiId,
         ]);
     }
 
     /**
      * @param  string  $ttiId
-     * @return bool
+     * @return void
      */
-    private function respondPTPService(string $ttiId): bool
+    private function respondPTPService(string $ttiId): void
     {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('respondPTPService'))
@@ -177,11 +190,10 @@ class DmccDriver implements TraderInterface
                 'comments' => 'create PTP',
                 'submitAction' => 'true',
             ]);
+
         if (! $this->isSuccess($response)) {
             throw new UnprocessableEntityHttpException();
         }
-
-        return true;
     }
 
     /**
@@ -259,7 +271,7 @@ class DmccDriver implements TraderInterface
      * @param  int  $status
      * @return void
      */
-    private function updateOrderStatus($traderOrder, FinancingOrderStatus $status): void
+    private function updateOrderStatus($traderOrder, int $status): void
     {
         $traderOrder->order->update([
             'status' => $status,
@@ -282,11 +294,11 @@ class DmccDriver implements TraderInterface
     }
 
     /**
-     * @param $traderOrder
+     * @param  TraderOrder  $traderOrder
      * @param  int  $action
      * @return void
      */
-    public function createTraderOrderHistory($traderOrder, int $action): void
+    public function createTraderOrderHistory(TraderOrder $traderOrder, int $action): void
     {
         $traderOrder->traderHistories()->create([
             'action' => $action,
