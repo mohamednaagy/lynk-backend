@@ -3,8 +3,8 @@
 namespace App\Support\MobileVerification;
 
 use App\Support\MobileVerification\Contracts\MobileVerifyDriverInterface;
+use App\Support\MobileVerification\Drivers\FakeTccDriver;
 use App\Support\MobileVerification\Drivers\TccDriver;
-use App\Support\MobileVerification\Drivers\TestTccDriver;
 use Illuminate\Support\Manager;
 
 class MobileVerifyManager extends Manager
@@ -36,7 +36,7 @@ class MobileVerifyManager extends Manager
      */
     public function createTestTccDriver(): MobileVerifyDriverInterface
     {
-        return new TestTccDriver();
+        return new FakeTccDriver();
     }
 
     /**

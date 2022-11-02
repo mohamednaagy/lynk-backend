@@ -9,17 +9,18 @@ use App\Exceptions\MobileVerification\MobileNumberNotMatchedException;
 use App\Exceptions\MobileVerification\PersonNotFoundException;
 use App\Support\MobileVerification\Contracts\MobileVerifyDriverInterface;
 use Exception;
+use Propaganistas\LaravelPhone\PhoneNumber;
 
-class TestTccDriver implements MobileVerifyDriverInterface
+class FakeTccDriver implements MobileVerifyDriverInterface
 {
     /**
      * @param  string  $mobileNumber
      * @param  string  $personId
      * @return bool
      */
-    public function verify(string $mobileNumber, string $personId): bool
+    public function verify(PhoneNumber $mobileNumber, string $personId): bool
     {
-        $responseCode = $mobileNumber == '0500112233'
+        $responseCode = $mobileNumber == '+966500112233'
             ? TccResponseCode::MobileNumberMatched
             : TccResponseCode::MobileNumberUnMatched;
 

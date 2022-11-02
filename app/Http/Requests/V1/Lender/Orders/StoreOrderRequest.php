@@ -2,8 +2,13 @@
 
 namespace App\Http\Requests\V1\Lender\Orders;
 
+use App\Exceptions\MobileVerification\InvalidMobileNumberException;
+use App\Exceptions\MobileVerification\InvalidPersonIdException;
+use App\Exceptions\MobileVerification\MobileNumberNotMatchedException;
+use App\Exceptions\MobileVerification\PersonNotFoundException;
 use App\Rules\ValidateSAID;
 use App\Support\MobileVerification\Facades\MobileVerify;
+use Exception;
 use Illuminate\Foundation\Http\FormRequest;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
@@ -59,13 +64,33 @@ class StoreOrderRequest extends FormRequest
     {
         try {
             $phone = PhoneNumber::make($this->validated('phone_number'), $this->validated('phone_country_code'));
-            $phone = str_replace(' ', '', $phone->formatNational());
             MobileVerify::verify($phone, $this->validated('national_id'));
-        } catch (\Throwable $th) {
-            $validator->errors()->add(
-                'national_id',
-                __('validation.custom_validation.phone_number_does_not_belong_to_national_id')
-            );
+        } catch (\Throwable $exception) {
+            $errors = [];
+            switch ($exception) {
+                case $exception instanceof MobileNumberNotMatchedException:
+                    $errors['national_id'] = __('validation.custom_validation.phone_number_not_matched');
+                    break;
+
+                case $exception instanceof InvalidPersonIdException:
+                    $errors['national_id'] = __('validation.custom_validation.invalid_person_id');
+                    break;
+
+                case $exception instanceof PersonNotFoundException:
+                    $errors['national_id'] = __('validation.custom_validation.person_id_not_found');
+                    break;
+
+                case $exception instanceof InvalidMobileNumberException:
+                    $errors['phone_number'] = __('validation.custom_validation.invalid_mobile_number');
+                    break;
+
+                default:
+                    throw new Exception($exception->getMessage());
+            }
+
+            foreach ($errors as $key => $message) {
+                $validator->errors()->add($key, $message);
+            }
         }
     }
 }

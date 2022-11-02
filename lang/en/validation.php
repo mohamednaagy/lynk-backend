@@ -131,7 +131,10 @@ return [
     'host_whitelist' => 'The :attribute is not whitelisted.',
     'phone' => 'The :attribute is not valid phone number.',
     'custom_validation' => [
-        'phone_number_does_not_belong_to_national_id' => 'رقم الجوال المدخل لا ينتمي إلى رقم الهوية/الإقامة',
+        'phone_number_not_matched' => 'رقم الجوال المدخل لا ينتمي إلى رقم الهوية/الإقامة',
+        'invalid_person_id' => 'رقم الهوية/الإقامة غير صحيح',
+        'person_id_not_found' => 'رقم الهوية/الإقامة غير موجود',
+        'invalid_mobile_number' => 'رقم الهاتف غير صحيح',
 
     ],
     /*

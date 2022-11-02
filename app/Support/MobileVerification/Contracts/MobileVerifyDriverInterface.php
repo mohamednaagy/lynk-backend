@@ -2,6 +2,8 @@
 
 namespace App\Support\MobileVerification\Contracts;
 
+use Propaganistas\LaravelPhone\PhoneNumber;
+
 interface MobileVerifyDriverInterface
 {
     /**
@@ -11,5 +13,5 @@ interface MobileVerifyDriverInterface
      * @param  string  $personId
      * @return bool
      */
-    public function verify(string $mobileNumber, string $personId): bool;
+    public function verify(PhoneNumber $mobileNumber, string $personId): bool;
 }
