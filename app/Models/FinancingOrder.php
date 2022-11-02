@@ -7,10 +7,10 @@ use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-<<<<<<< app/Models/FinancingOrder.php
+use Illuminate\Http\Request;
 use Modules\Otpify\Contracts\Otpifiable;
-use Propaganistas\LaravelPhone\PhoneNumber;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
+use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
@@ -120,17 +120,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return $this->national_id;
     }
 
-    /**
-     * Check if this user requires verifying by OTP based on role.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return bool
-     */
-    public function doesRequireVerifyingByOtp(Request $request): bool
-    {
-        return true;
-    }
-
     public function scopeCanceled($query)
     {
         return $query->whereStatus(FinancingOrderStatus::Canceled);
@@ -155,5 +144,16 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
                 $query->where('creator_id', $model->getKey());
             }
         );
+    }
+
+    /**
+     * Check if this user requires verifying by OTP based on role.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool
+     */
+    public function doesRequireVerifyingByOtp(Request $request): bool
+    {
+        return true;
     }
 }

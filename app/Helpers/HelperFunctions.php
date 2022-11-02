@@ -1,5 +1,7 @@
 <?php
 
+use Modules\Grantify\Facades\Grantify;
+
 if (! function_exists('validate_said')) {
     function validate_said($id_number)
     {
@@ -25,5 +27,12 @@ if (! function_exists('validate_said')) {
         }
 
         return $sum % 10 ? -1 : $type;
+    }
+}
+
+if (! function_exists('perm')) {
+    function perm(string $area, string $subject, array $action)
+    {
+        return Grantify::transformToPermissionsFormat($area, $subject, $action);
     }
 }
