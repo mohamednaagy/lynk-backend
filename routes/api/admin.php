@@ -68,6 +68,9 @@ Route::prefix('v1/admin')->group(function () {
             Route::put('/{company}/status', UpdateCompanyStatus::class);
             Route::get('/{company}/balance ', GetBalance::class);
             Route::get('/{company}/users', [UserController::class, 'index']);
+            Route::post('/{company}/users', [UserController::class, 'store']);
+            Route::post('/{company}/users/{user}', [UserController::class, 'store']);
+            Route::get('/{company}/users/{user}', [UserController::class, 'show']);
             Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
             Route::get('{company}/orders', [OrderController::class, 'index']);
             Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
@@ -77,16 +80,6 @@ Route::prefix('v1/admin')->group(function () {
         Route::prefix('wallet')->group(function () {
             Route::get('/edaat-invoices', GetEdaatInvoices::class);
             Route::post('/edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
-        });
-
-        Route::prefix('users')->group(function () {
-            Route::post('/', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'store']);
-        });
-
-        Route::prefix('users')->group(function () {
-            Route::post('/', [UserController::class, 'store']);
-            Route::post('/{user}', [UserController::class, 'store']);
-            Route::get('/{user}', [UserController::class, 'show']);
         });
     });
 });
