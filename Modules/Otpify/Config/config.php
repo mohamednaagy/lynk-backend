@@ -38,10 +38,9 @@ return [
             'ssl_verify_host' => env('OTPIFY_TWILIO_SSL_VERIFY_HOST', false),
             'ssl_verify_peer' => env('OTPIFY_TWILIO_SSL_VERIFY_PEER', false),
         ],
-        'absher' => [
+        'absher_otp' => [
             'api_key' => env('ABSHER_API_KEY'),
             'base_url' => env('ABSHER_SEND_URL'),
-            'test_base_url' => env('ABSHER_TEST_URL', 'http://test.com'),
         ],
     ],
 ];
