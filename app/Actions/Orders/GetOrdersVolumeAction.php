@@ -6,10 +6,17 @@ use App\Actions\Contracts\Orders\GetOrdersVolume;
 use App\Enums\DatePeriod;
 use App\Models\FinancingOrder;
 use Carbon\CarbonPeriod;
+use Exception;
 use Illuminate\Support\Arr;
 
 class GetOrdersVolumeAction implements GetOrdersVolume
 {
+    const FORMAT_WEEKS = 'weeks';
+
+    const FORMAT_MONTH = 'Y-m';
+
+    const FORMAT_YEAR = 'Y';
+
     /**
      * @param  array  $data
      * @return mixed
@@ -21,6 +28,9 @@ class GetOrdersVolumeAction implements GetOrdersVolume
         $endingDate = Arr::get($data, 'ending_date');
 
         $orders = FinancingOrder::query()
+            ->selectRaw(
+                'COUNT(*) as count'
+            )
             ->when(
                 $startingDate, function ($query) use ($startingDate) {
                     $query->whereDate('created_at', '>=', $startingDate);
@@ -44,9 +54,6 @@ class GetOrdersVolumeAction implements GetOrdersVolume
                 $period == DatePeriod::WEEK, function ($query) {
                     $query->selectRaw("DATE_FORMAT(created_at, '%Y-%m-%U') as label");
                 }
-            )
-            ->selectRaw(
-                'COUNT(*) as count'
             )
             ->groupBy(
                 'label'
@@ -77,19 +84,19 @@ class GetOrdersVolumeAction implements GetOrdersVolume
      * @param  mixed  $format
      * @return array<string>
      */
-    protected function getPeriodBetween($fromYear, $toYear, $format = DatePeriod::YEAR)
+    protected function getPeriodBetween($fromYear, $toYear, $format)
     {
-        if ($format == 'weeks') {
+        if ($format == self::FORMAT_WEEKS) {
             return $this->weeksFormat($fromYear, $toYear);
         }
 
         $range = CarbonPeriod::create(date($fromYear), date($toYear));
-        $months = [];
+        $periods = [];
         foreach ($range as $month) {
-            $months[] = $month->format($format);
+            $periods[] = $month->format($format);
         }
 
-        return $months;
+        return $periods;
     }
 
     /**
@@ -127,18 +134,19 @@ class GetOrdersVolumeAction implements GetOrdersVolume
     {
         switch ($period) {
             case DatePeriod::WEEK:
-                $format = 'weeks';
+                $format = self::FORMAT_WEEKS;
                 break;
+
             case DatePeriod::MONTH:
-                $format = 'Y-m';
+                $format = self::FORMAT_MONTH;
                 break;
+
             case DatePeriod::YEAR:
-                $format = 'Y';
+                $format = self::FORMAT_YEAR;
                 break;
 
             default:
-                $format = DatePeriod::YEAR;
-                break;
+                throw new Exception('wrong format');
         }
 
         return $format;
