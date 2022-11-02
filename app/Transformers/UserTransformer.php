@@ -13,15 +13,17 @@ class UserTransformer extends TransformerAbstract
 {
     protected string|null $area = null;
 
+    protected array $defaultIncludes = [
+        'phone_number',
+        'phone_country_code',
+        'formatted_phone_number',
+    ];
+
     protected array $availableIncludes = [
-        'roles',
         'role',
         'company',
         'is_email_verified',
         'permissions',
-        'formatted_phone_number',
-        'phone_number',
-        'country_code',
     ];
 
     public function __construct(string $area = null)
@@ -36,7 +38,6 @@ class UserTransformer extends TransformerAbstract
             'first_name' => $user->first_name,
             'last_name' => $user->last_name,
             'email' => $user->email,
-            'phone_number' => $user->phone_number,
         ];
     }
 
@@ -85,7 +86,7 @@ class UserTransformer extends TransformerAbstract
         return $this->primitive($user->mobileDialingPhoneNumber);
     }
 
-    public function includeCountryCode(User $user): Primitive
+    public function includePhoneCountryCode(User $user): Primitive
     {
         return $this->primitive($user->phoneNumberCountryCode);
     }

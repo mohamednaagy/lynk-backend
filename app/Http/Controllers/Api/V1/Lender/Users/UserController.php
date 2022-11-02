@@ -59,10 +59,7 @@ class UserController extends Controller
         User $user
     ): JsonResponse {
         return fractal($user, new UserTransformer(Area::Lender))->parseIncludes([
-            'roles',
-            'formatted_phone_number',
-            'phone_number',
-            'country_code',
+            'role',
         ])->respond();
     }
 
