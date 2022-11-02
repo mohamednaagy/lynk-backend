@@ -7,10 +7,9 @@ use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-<<<<<<< app/Models/FinancingOrder.php
 use Modules\Otpify\Contracts\Otpifiable;
-use Propaganistas\LaravelPhone\PhoneNumber;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
+use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
