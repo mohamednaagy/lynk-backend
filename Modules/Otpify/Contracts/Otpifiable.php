@@ -4,9 +4,6 @@ namespace Modules\Otpify\Contracts;
 
 use Illuminate\Http\Request;
 
-/**
- * @property string phone_number
- */
 interface Otpifiable
 {
     /**
@@ -16,4 +13,12 @@ interface Otpifiable
      * @return bool
      */
     public function doesRequireVerifyingByOtp(Request $request): bool;
+
+    public function getPhoneNumber(): \Propaganistas\LaravelPhone\PhoneNumber;
+
+    public function getNationalId(): string;
+
+    public function getMorphClass();
+
+    public function getKey();
 }

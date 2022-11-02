@@ -5,7 +5,9 @@ namespace Modules\Otpify;
 use Illuminate\Support\Manager;
 use Illuminate\Validation\ValidationException;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
+use Modules\Otpify\Drivers\AbsherDriver;
 use Modules\Otpify\Drivers\EmailDriver;
+use Modules\Otpify\Drivers\TestAbsherDriver;
 use Modules\Otpify\Drivers\TwilioSmsDriver;
 use Modules\Otpify\Traits\CanBeAuthorized;
 
@@ -41,6 +43,32 @@ class OtpifyManager extends Manager
     public function createTwilioDriver(): OtpifyDriverInterface
     {
         return new TwilioSmsDriver();
+    }
+
+    /**
+     * Send OTP via absher.
+     *
+     * @return OtpifyDriverInterface
+     */
+    public function createAbsherDriver(): OtpifyDriverInterface
+    {
+        return new AbsherDriver(
+            baseUrl: config('otpify.drivers.absher.base_url'),
+            apiKey: config('otpify.drivers.absher.api_key')
+        );
+    }
+
+    /**
+     * Send OTP via absher.
+     *
+     * @return OtpifyDriverInterface
+     */
+    public function createTestAbsherDriver(): OtpifyDriverInterface
+    {
+        return new TestAbsherDriver(
+            baseUrl: config('otpify.drivers.absher.test_base_url'),
+            apiKey: config('otpify.drivers.absher.test_api_key')
+        );
     }
 
     /**
