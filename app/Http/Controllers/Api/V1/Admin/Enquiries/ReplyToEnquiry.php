@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Admin\Enquiries;
 
 use App\Actions\Contracts\Orders\ReplyToEnquiry as ReplyToEnquiryInterface;
+use App\Enums\EnquiryStatus;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Enquiries\ReplyToEnquiryRequest;
@@ -26,6 +27,14 @@ class ReplyToEnquiry extends Controller
     public function __invoke(ReplyToEnquiryRequest $replyToEnquiryRequest, ReplyToEnquiryInterface $replyToEnquiry, Enquiry $enquiry): JsonResponse
     {
         return DB::transaction(function () use ($replyToEnquiryRequest, $replyToEnquiry, $enquiry) {
+            // check if the enquiry is closed already
+            if ($enquiry->status->is(EnquiryStatus::Closed)) {
+                return $this->errorResponse(
+                    __('error.enquiry_closed_already')
+                );
+            }
+
+            // create the enquiry reply
             $data = $replyToEnquiryRequest->validated();
             $data['enquiry_id'] = $enquiry->id;
             $data['user_id'] = ($user = $replyToEnquiryRequest->user())->id;
@@ -37,6 +46,14 @@ class ReplyToEnquiry extends Controller
                 ->id;
             $enquiryReply = $replyToEnquiry->handle($data);
 
+            // change the enquiry status to be resolved
+            if ($enquiry->status->is(EnquiryStatus::UnderReview)) {
+                $enquiry->update([
+                    'status' => ! empty($data['status']) ? $data['status'] : EnquiryStatus::Resolved,
+                ]);
+            }
+
+            // send email to notify the user with the reply
             if (! empty($data['redirect_url'])) {
                 $invitationUrl = $replyToEnquiryRequest->safeInput('redirect_url');
                 Mail::to($enquiry->email)->send(new ReplyToVisitorEnquiry($enquiry, $invitationUrl));
