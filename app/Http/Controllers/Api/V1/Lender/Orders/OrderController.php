@@ -21,10 +21,10 @@ class OrderController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:'.perm(Area::Lender, Subject::FinancingOrders, [Action::Index]))->only('index');
-        $this->middleware('permission:'.perm(Area::Lender, Subject::FinancingOrders, [Action::Show]))->only('show');
-        $this->middleware('permission:'.perm(Area::Lender, Subject::FinancingOrders, [Action::Create]))->only('store');
-        $this->middleware('permission:'.perm(Area::Lender, Subject::FinancingOrders, [Action::Edit]))->only('update');
+        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Index]))->only('index');
+        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Show]))->only('show');
+        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Create]))->only('store');
+        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Edit]))->only('update');
     }
 
     /**
@@ -36,11 +36,8 @@ class OrderController extends Controller
         $financingOrders = $getPaginatedOrders->handle();
 
         return fractal($financingOrders, new FinancingOrderTransformer())
-            ->parseExcludes(
-                ['contract', 'power_of_attorney']
-            )
-            ->respond(
-            );
+            ->parseExcludes(['contract', 'power_of_attorney'])
+            ->respond();
     }
 
     /**
@@ -52,11 +49,8 @@ class OrderController extends Controller
         $order->load('creator', 'approver');
 
         return fractal($order, new FinancingOrderTransformer())
-            ->parseIncludes(
-                ['creator', 'approver']
-            )
-            ->respond(
-            );
+            ->parseIncludes(['creator', 'approver'])
+            ->respond();
     }
 
     /**
