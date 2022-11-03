@@ -69,7 +69,7 @@ class FakeAbsherDriver implements OtpifyDriverInterface
             throw new OtpCodeExpiredException();
         }
 
-        if ($additionalCheckCallback instanceof Closure && ! $additionalCheckCallback($request, $code)) {
+        if ($additionalCheckCallback instanceof Closure && ! $additionalCheckCallback($request, $otpifyCode)) {
             throw new OtpCodeAdditionalCheckException();
         }
 

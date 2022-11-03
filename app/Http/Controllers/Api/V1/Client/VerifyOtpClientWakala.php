@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Client\VerifyOtpRequest;
 use App\Models\FinancingOrder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class VerifyOtpClientWakala extends Controller
 {
@@ -23,19 +24,18 @@ class VerifyOtpClientWakala extends Controller
      */
     public function __invoke(
         VerifyOtpRequest $request,
-        FinancingOrder $order,
-        string $nationalId,
         VerifyOtpClientWakalaInterface $verifyOtpClientWakala,
         VerifiedClientWakala $verifiedClientWakala
     ) {
-        abort_if($order->getNationalId() !== $nationalId, 404);
+        return DB::transaction(function () use ($request, $verifiedClientWakala, $verifyOtpClientWakala) {
+            $order = FinancingOrder::lockForUpdate()
+                ->findOrFail($request->validated('order_id'));
 
-        try {
-            $verifyOtpClientWakala->handle($request, $request->validated('vid'), $request->validated('code'));
+            abort_if($order->getNationalId() !== $request->validated('national_id'), 404);
+
+            $verifyOtpClientWakala->handle($request, $request->validated('vid'), $request->validated('code'), $order);
 
             return $this->successResponse($verifiedClientWakala->handle($order));
-        } catch (\Exception $exception) {
-            return $this->errorResponse($exception->getMessage());
-        }
+        });
     }
 }

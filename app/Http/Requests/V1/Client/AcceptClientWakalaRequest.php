@@ -5,7 +5,7 @@ namespace App\Http\Requests\V1\Client;
 use App\Rules\ValidateSAID;
 use Illuminate\Foundation\Http\FormRequest;
 
-class VerifyOtpRequest extends FormRequest
+class AcceptClientWakalaRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,8 +25,6 @@ class VerifyOtpRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'vid' => ['required', 'exists:otpify_codes,id'],
-            'code' => ['required', 'string'],
             'national_id' => ['required', 'string', new ValidateSAID],
             'order_id' => ['required', 'integer', 'gt:0'],
         ];

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Support\SMS\Drivers;
+namespace App\Support\Sms\Drivers;
 
-use App\Support\SMS\SMSDriverInterface;
+use App\Support\Sms\SmsDriverInterface;
 
-class FakeSMSDriver implements SMSDriverInterface
+class FakeSmsDriver implements SMSDriverInterface
 {
     /**
      * Execute the driver logic.

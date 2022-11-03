@@ -17,7 +17,8 @@ return [
      */
 
     'default' => env('OTPIFY_DEFAULT_DRIVER', 'email'),
-    'absher_default' => env('OTPIFY_ABSHER_DEFAULT_DRIVER', 'absher'),
+
+    'default_ni_driver' => env('OTPIFY_NATIONAL_ID_DEFAULT_DRIVER', 'absher'),
     /*
      |--------------------------------------------------------------------------
      | Configuration options for each driver

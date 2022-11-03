@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\SMS\Drivers;
+namespace App\Support\Sms\Drivers;
 
 use App\Exceptions\BalanceIsNotEnoughException;
 use App\Exceptions\InvalidLoginInfoException;

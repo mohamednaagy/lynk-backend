@@ -8,7 +8,7 @@ interface VerifiedClientWakala
 {
     /**
      * @param  FinancingOrder  $order
-     * @return bool
+     * @return array
      */
     public function handle(FinancingOrder $order): array;
 }

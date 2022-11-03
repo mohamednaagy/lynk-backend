@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api\V1\Client;
 
 use App\Actions\Contracts\Clients\SendOtpClientWakala as SendOTPClientWakalaInterface;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Client\SendOtpRequest;
 use App\Models\FinancingOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SendOtpClientWakala extends Controller
 {
@@ -20,21 +22,23 @@ class SendOtpClientWakala extends Controller
      * @return JsonResponse
      */
     public function __invoke(
-        Request $request,
-        FinancingOrder $order,
-        string $nationalId,
+        SendOtpRequest $request,
         SendOTPClientWakalaInterface $sendOTPClientWakala
     ) {
-        abort_if($order->getNationalId() !== $nationalId, 404);
+        return DB::transaction(function () use ($request, $sendOTPClientWakala) {
+            $order = FinancingOrder::lockForUpdate()
+                ->findOrFail($request->validated('order_id'));
 
-        try {
+            $canProceed = $order->getNationalId() !== $request->validated('national_id')
+                || $order->client_wakala_accepted_at === null;
+
+            abort_if(! $canProceed, 404);
+
             $vid = $sendOTPClientWakala->handle($request, $order);
 
             return $this->successResponse([
                 'vid' => $vid,
             ]);
-        } catch (\Exception $exception) {
-            return $this->errorResponse($exception->getMessage());
-        }
+        });
     }
 }

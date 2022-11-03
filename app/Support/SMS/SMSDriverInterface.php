@@ -2,7 +2,7 @@
 
 namespace App\Support\SMS;
 
-interface SMSDriverInterface
+interface SmsDriverInterface
 {
     /**
      * Execute the driver logic.

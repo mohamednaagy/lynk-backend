@@ -6,7 +6,7 @@ use App\Support\SMS\Drivers\FakeSMSDriver;
 use App\Support\SMS\Drivers\MsegatDriver;
 use Illuminate\Support\Manager;
 
-class SMSManager extends Manager
+class SmsManager extends Manager
 {
     /**
      * Get the default driver name.

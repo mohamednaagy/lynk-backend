@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Api\V1\Client;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala as AcceptWakalaInterface;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Client\AcceptClientWakalaRequest;
 use App\Models\FinancingOrder;
 use Illuminate\Http\JsonResponse;
-use  Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AcceptClientWakala extends Controller
 {
@@ -19,12 +20,20 @@ class AcceptClientWakala extends Controller
      * @return JsonResponse
      */
     public function __invoke(
-        Request $request,
-        FinancingOrder $order,
+        AcceptClientWakalaRequest $request,
         AcceptWakalaInterface $acceptClientWakala
     ) {
-        $acceptClientWakala->handle($order, $request->bearerToken());
+        return DB::transaction(function () use ($request, $acceptClientWakala) {
+            $order = FinancingOrder::lockForUpdate()
+                ->findOrFail($request->validated('order_id'));
 
-        return $this->successResponse();
+            abort_if($order->getNationalId() !== $request->validated('national_id'), 404);
+
+            $media = $acceptClientWakala->handle($order, $request->bearerToken());
+
+            return $this->successResponse([
+                'wakala_file_url' => $media->previewUrl,
+            ]);
+        });
     }
 }

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Support\SMS;
+namespace App\Support\Sms;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static bool send(string $message, string $phoneNumber)
  */
-class SMS extends Facade
+class Sms extends Facade
 {
     public static function getFacadeAccessor()
     {

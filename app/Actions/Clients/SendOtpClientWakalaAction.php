@@ -5,13 +5,13 @@ namespace App\Actions\Clients;
 use App\Actions\Contracts\Clients\SendOtpClientWakala;
 use App\Models\FinancingOrder;
 use Illuminate\Http\Request;
-use Otpify;
+use Modules\Otpify\Facades\Otpify;
 
 class SendOtpClientWakalaAction implements SendOtpClientWakala
 {
     public function handle(Request $request, FinancingOrder $order): string
     {
-        $otpCode = Otpify::driver(config('otpify.absher_default'))->send($request, $order);
+        $otpCode = Otpify::driver(config('otpify.default_ni_driver'))->send($request, $order);
 
         return $otpCode->id;
     }

@@ -8,12 +8,15 @@ use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\UnauthorizedException;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AcceptClientWakalaAction implements AcceptClientWakala
 {
-    public function handle(FinancingOrder $order, string $token): bool
+    public function handle(FinancingOrder $order, string $token): Media
     {
-        $hashedToken = Cache::pull(sprintf('client_wakala_token_%s_%s', $order->id, $order->getNationalId()));
+        $hashedToken = Cache::pull(
+            sprintf('client_wakala_token_%s_%s', $order->id, $order->getNationalId())
+        );
 
         if (! Hash::check($token, $hashedToken)) {
             throw new UnauthorizedException();
@@ -29,8 +32,10 @@ class AcceptClientWakalaAction implements AcceptClientWakala
             'gotoOptions' => ['waitUntil' => 'networkidle0'],
         ]);
 
-        $order->addMedia(storage_path('app/'.$path))->toMediaCollection('client_wakala');
+        $order->update([
+            'client_wakala_accepted_at' => now(),
+        ]);
 
-        return true;
+        return $order->addMedia(storage_path('app/'.$path))->toMediaCollection('client_wakala');
     }
 }
