@@ -7,10 +7,10 @@ use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-<<<<<<< app/Models/FinancingOrder.php
+use Illuminate\Http\Request;
 use Modules\Otpify\Contracts\Otpifiable;
-use Propaganistas\LaravelPhone\PhoneNumber;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
+use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
@@ -39,12 +39,15 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'creator_type',
         'customer_details',
         'status_reason',
+        'client_wakala_accepted_at',
     ];
 
     protected $casts = [
         'status' => FinancingOrderStatus::class,
         'approved_at' => 'datetime',
+        'client_wakala_accepted_at' => 'datetime',
         'data' => 'array',
+        'customer_details' => 'array',
         'phone_number' => E164PhoneNumberCast::class,
     ];
 
@@ -70,6 +73,19 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function registerMediaCollections(): void
     {
+        $this
+            ->addMediaCollection(
+                'client_wakala'
+            )
+            ->singleFile(
+            );
+        $this
+            ->addMediaCollection(
+                'bank_wakala'
+            )
+            ->singleFile(
+            );
+
         $this
             ->addMediaCollection(
                 'contract'

@@ -181,9 +181,12 @@ return [
         App\Providers\TenancyServiceProvider::class,
         App\Providers\MacroServiceProvider::class,
         App\Providers\PasswordResetServiceProvider::class,
+        // sms provider
+        App\Providers\SmsServiceProvider::class,
         App\Providers\EdaatServiceProvider::class,
         App\Providers\PdfGeneratorServiceProvider::class,
         App\Providers\MobileVerifyServiceProvider::class,
+        // \Shivella\Bitly\BitlyServiceProvider::class,
     ],
 
     /*
@@ -203,6 +206,7 @@ return [
         'GrantifySeeder' => Modules\Grantify\Facades\GrantifySeeder::class,
         'MobileVerify' => App\Support\MobileVerification\Facades\MobileVerify::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
+        'Sms' => App\Support\Sms\Sms::class,
     ])->toArray(),
 
     /*
