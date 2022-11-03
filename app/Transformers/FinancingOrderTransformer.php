@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Models\FinancingOrder;
+use League\Fractal\Resource\Collection;
 use League\Fractal\TransformerAbstract;
 
 class FinancingOrderTransformer extends TransformerAbstract
@@ -19,6 +20,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'power_of_attorney',
         'is_approved',
         'status_reason',
+        'history',
     ];
 
     protected array $availableIncludes = [
@@ -120,5 +122,17 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeCreatedAt(FinancingOrder $financingOrder)
     {
         return $this->primitive($financingOrder->created_at->format('Y-m-d h:mA'));
+    }
+
+    public function includeHistory(FinancingOrder $financingOrder): Collection
+    {
+        return $this->collection(collect([
+            'ClientWakala' => 0,
+            'CommodityPurchased' => 5,
+            'ContractSigned' => 13,
+            'SellingCommodityToCustomer' => 2,
+            'IssueMurabahaOffer' => 10,
+            'MurabahaSaleCompleted' => 11,
+        ]), new TraderHistoryTransformer($financingOrder, $financingOrder->traderOrders->last()->traderHistories));
     }
 }

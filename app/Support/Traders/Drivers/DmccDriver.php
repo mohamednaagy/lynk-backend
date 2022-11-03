@@ -55,9 +55,10 @@ class DmccDriver implements TraderInterface
 
     public function respondPtp(string $ttiId)
     {
-        $this->respondPTPService($ttiId);
-
         $traderOrder = $this->getTraderOrderByTtiId($ttiId);
+
+        $this->respondPTPService($ttiId);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::RespondPtp);
 
         $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Promise to Purchase');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetPtpDocument);

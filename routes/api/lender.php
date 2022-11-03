@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryReplyController;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CancelOrder;
+use App\Http\Controllers\Api\V1\Lender\Orders\ContractSigned;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersStats;
 use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Orders\RejectOrder;
@@ -42,16 +43,16 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
 
     Route::middleware([
         'auth:sanctum',
-        'role:' . implode('|', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator]),
+        'role:'.implode('|', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator]),
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
 
-        Route::middleware('IsEmailVerified:' . Area::Lender)->group(function () {
+        Route::middleware('IsEmailVerified:'.Area::Lender)->group(function () {
             Route::put('auth/profile', UpdateMyProfile::class);
             Route::get('orders/stats', GetOrdersStats::class);
             Route::apiResource('orders', OrderController::class);
-            Route::put('orders/{order}/contract-signed', ApproveOrder::class);
+            Route::put('orders/{order}/contract-signed', ContractSigned::class);
             Route::put('orders/{order}/approve', ApproveOrder::class);
             Route::put('orders/{order}/reject', RejectOrder::class);
             Route::put('orders/{order}/cancel', CancelOrder::class);
@@ -68,7 +69,6 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
 
             Route::apiResource('enquiries', EnquiryController::class);
             Route::apiResource('enquiries.replies', EnquiryReplyController::class);
-
         });
     });
 });

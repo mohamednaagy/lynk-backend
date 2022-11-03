@@ -25,9 +25,9 @@ class ContractSigned extends Controller
         ]);
 
         $traderOrder = $order->traderOrders->last();
-        UpdateFinancialOrderStatus::dispatch($traderOrder, FinancingOrderStatus::SellingCommodityToCustomer)->delay(now()->addMinutes(2));
+        Trader::driver('dmcc')->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
 
-        Trader::driver('dmcc')->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ResponsePtp);
+        UpdateFinancialOrderStatus::dispatch($traderOrder, FinancingOrderStatus::SellingCommodityToCustomer)->delay(now()->addMinutes(2));
 
         return $this->successResponse();
     }
