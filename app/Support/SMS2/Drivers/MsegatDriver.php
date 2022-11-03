@@ -6,10 +6,10 @@ use App\Exceptions\BalanceIsNotEnoughException;
 use App\Exceptions\InvalidLoginInfoException;
 use App\Exceptions\MobileNumbersIsNotCorrectException;
 use App\Exceptions\MSGDuplicatedException;
-use App\Support\SMS\SMSDriverInterface;
+use App\Support\Sms\SmsDriverInterface;
 use Illuminate\Support\Facades\Http;
 
-class MsegatDriver implements SMSDriverInterface
+class MsegatDriver implements SmsDriverInterface
 {
     protected string $baseUrl;
 

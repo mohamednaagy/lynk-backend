@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Support\SMS;
+namespace App\Support\Sms;
 
-use App\Support\SMS\Drivers\FakeSMSDriver;
-use App\Support\SMS\Drivers\MsegatDriver;
+use App\Support\Sms\Drivers\FakeDriver;
+use App\Support\Sms\Drivers\MsegatDriver;
 use Illuminate\Support\Manager;
 
 class SmsManager extends Manager
@@ -32,9 +32,9 @@ class SmsManager extends Manager
     /**
      * Send SMS via Fake.
      */
-    public function createFakeSMSDriver()
+    public function createFakeDriver()
     {
-        return new FakeSMSDriver();
+        return new FakeDriver();
     }
 
     /**

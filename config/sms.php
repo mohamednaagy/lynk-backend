@@ -12,7 +12,7 @@ return [
       |
       */
 
-    'provider' => env('SMS_DEFAULT_DRIVER'),
+    'provider' => env('SMS_DEFAULT_DRIVER', 'fake'),
     'msegat' => [
         'url' => 'https://www.msegat.com/gw/sendsms.php',
         'user_name' => env('MSEGAT_USERNAME', ''),

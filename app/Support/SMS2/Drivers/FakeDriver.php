@@ -4,7 +4,7 @@ namespace App\Support\Sms\Drivers;
 
 use App\Support\Sms\SmsDriverInterface;
 
-class FakeSmsDriver implements SMSDriverInterface
+class FakeDriver implements SmsDriverInterface
 {
     /**
      * Execute the driver logic.

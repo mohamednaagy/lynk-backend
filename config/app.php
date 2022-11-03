@@ -206,7 +206,7 @@ return [
         'GrantifySeeder' => Modules\Grantify\Facades\GrantifySeeder::class,
         'MobileVerify' => App\Support\MobileVerification\Facades\MobileVerify::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
-        'SMS' => App\Support\SMS\SMS::class,
+        'Sms' => App\Support\Sms\Sms::class,
     ])->toArray(),
 
     /*

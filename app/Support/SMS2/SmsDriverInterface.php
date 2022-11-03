@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\SMS;
+namespace App\Support\Sms;
 
 interface SmsDriverInterface
 {
