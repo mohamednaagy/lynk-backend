@@ -37,8 +37,8 @@ class UpdateFinancialOrderStatus implements ShouldQueue
      */
     public function handle(): void
     {
-        Trader::driver('dmcc')->createSellingCommodityToCustomerDocument($traderOrder, $ttiId);
-        Trader::driver('dmcc')->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
+        Trader::driver('dmcc')->createSellingCommodityToCustomerDocument($this->traderOrder, $this->traderOrder->reference);
+        Trader::driver('dmcc')->createTraderOrderHistory($this->traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
 
         $this->traderOrder->order->update([
             'status' => $this->financingOrderStatus,
