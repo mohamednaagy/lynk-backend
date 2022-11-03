@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -24,7 +23,7 @@ class UpdateFinancialOrderStatus implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($traderOrder, FinancingOrderStatus $financingOrderStatus)
+    public function __construct($traderOrder, int $financingOrderStatus)
     {
         $this->traderOrder = $traderOrder;
         $this->financingOrderStatus = $financingOrderStatus;

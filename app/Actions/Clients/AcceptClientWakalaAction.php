@@ -12,7 +12,7 @@ class AcceptClientWakalaAction implements AcceptClientWakala
     public function handle(FinancingOrder $order): Media
     {
         $wakalaTemplate = view('templates.client-wakala', [
-            'clientName' => $order->customer_details['englishName'],
+            'clientName' => $order->customer_details['englishName'] ?? '',
         ])->render();
 
         $path = $order->id.'/client-wakala/'.$order->getNationalId().'.pdf';

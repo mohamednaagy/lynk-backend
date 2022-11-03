@@ -1,7 +1,9 @@
 <?php
 
+use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
+use App\Enums\Subject;
 use App\Http\Controllers\Api\V1\Lender\Auth\CompleteRegister;
 use App\Http\Controllers\Api\V1\Lender\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Lender\Auth\Register;
@@ -45,7 +47,6 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     Route::middleware([
         'auth:sanctum',
         'role:'.implode('|', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator, Role::LenderApiUser]),
-        'IsEmailVerified:'.Area::Lender,
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
@@ -54,11 +55,12 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
             Route::put('auth/profile', UpdateMyProfile::class);
             Route::get('orders/stats', GetOrdersStats::class);
             Route::apiResource('orders', OrderController::class);
-            Route::put('orders/{order}/proceed', MakeOrderProceed::class);
+            Route::post('orders/{order}/proceed', MakeOrderProceed::class);
             Route::put('orders/{order}/approve', ApproveOrder::class);
             Route::put('orders/{order}/reject', RejectOrder::class);
             Route::put('orders/{order}/cancel', CancelOrder::class);
-            Route::post('orders/no-verification', CreateOrderWithoutVerification::class);
+            Route::post('orders/no-verification', CreateOrderWithoutVerification::class)
+                ->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Create]));
             Route::apiResource('users', UserController::class);
             Route::post('{user}/resend-invitation', ResendInvitation::class);
             Route::get('edaat-invoices', GetEdaatInvoices::class);

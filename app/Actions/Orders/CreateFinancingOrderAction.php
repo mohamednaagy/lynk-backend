@@ -29,6 +29,7 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
                 'status',
                 'creator_id',
                 'creator_type',
+                'approved_at',
             ])
         );
 

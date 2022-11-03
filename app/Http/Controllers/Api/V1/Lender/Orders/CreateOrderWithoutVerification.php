@@ -18,25 +18,29 @@ class CreateOrderWithoutVerification extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function __invoke(CreateOrderWithoutVerificationRequest $request, CreateFinancingOrder $createFinancingOrder, GenerateClientWakala $generateWakala)
-    {
-        DB::transaction(function () use ($createFinancingOrder, $request, $generateWakala) {
-            $financingOrder = $createFinancingOrder->handle(
-                array_merge(
-                    $request->validated(),
-                    [
-                        'status' => FinancingOrderStatus::WaitingClientWakala,
-                        'creator_id' => $request->user()->id,
-                        'creator_type' => $request->user()->getMorphClass(),
-                        'approved_at' => now(),
-                    ]
-                )
-            );
+    public function __invoke(
+        CreateOrderWithoutVerificationRequest $request,
+        CreateFinancingOrder $createFinancingOrder,
+        GenerateClientWakala $generateWakala
+    ) {
+        return DB::transaction(
+            function () use ($createFinancingOrder, $request, $generateWakala) {
+                $financingOrder = $createFinancingOrder->handle(
+                    array_merge(
+                        $request->validated(),
+                        [
+                            'status' => FinancingOrderStatus::WaitingClientWakala,
+                            'creator_id' => $request->user()->id,
+                            'creator_type' => $request->user()->getMorphClass(),
+                            'approved_at' => now(),
+                        ]
+                    )
+                );
 
-            $generateWakala->handle($financingOrder);
+                $generateWakala->handle($financingOrder);
 
-            return fractal($financingOrder, new FinancingOrderTransformer())->respond();
-        }
+                return fractal($financingOrder, new FinancingOrderTransformer())->respond();
+            }
         );
     }
 }

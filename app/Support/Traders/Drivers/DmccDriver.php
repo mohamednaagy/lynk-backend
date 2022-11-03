@@ -13,6 +13,7 @@ use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -100,6 +101,8 @@ class DmccDriver implements TraderInterface
                 'notificationType' => $type,
             ]);
 
+        Log::debug('tes', [$response]);
+
         if (! $response->successful()) {
             throw new UnprocessableEntityHttpException();
         }
@@ -172,7 +175,7 @@ class DmccDriver implements TraderInterface
     private function createTraderOrder(FinancingOrder $financingOrder, string $ttiId): Model|TraderOrder
     {
         return $financingOrder->traderOrders()->create([
-            'provider' => 'DMCC',
+            'provider' => 'dmcc',
             'type' => 'TTIID',
             'reference' => $ttiId,
         ]);

@@ -11,6 +11,7 @@ class LenderApiUser
         Subject::FinancingOrders => [
             Action::Create,
             Action::Index,
+            Action::Show,
         ],
     ];
 }

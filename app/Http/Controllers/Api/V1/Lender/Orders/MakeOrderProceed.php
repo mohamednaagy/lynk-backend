@@ -37,10 +37,14 @@ class MakeOrderProceed extends Controller
             if ($request->validated('case') === FinancingOrderProceedCase::ClientWakalaAccepted) {
                 $media = $acceptClientWakala->handle($order);
 
+                $order->update([
+                    'status' => FinancingOrderStatus::WaitingPurchasingCommodity,
+                ]);
+
                 Trader::driver('dmcc')->getTti($order);
 
                 return $this->successResponse([
-                    'wakala_file_url' => $media->previewUrl,
+                    'wakala_file_url' => $media->getUrl(),
                 ]);
             } elseif ($request->validated('case') === FinancingOrderProceedCase::ContractSigned) {
                 $order->update([

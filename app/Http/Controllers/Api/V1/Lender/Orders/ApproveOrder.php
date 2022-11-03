@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\FinancingOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Response;
 
 class ApproveOrder extends Controller
 {
