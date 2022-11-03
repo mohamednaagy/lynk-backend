@@ -12,7 +12,6 @@ class GetOrdersStats extends Controller
      * Handle the incoming request.
      *
      * @param  OrdersGetOrdersStats  $getOrdersStats
-     * @param  GetOrdersStatsByCreator  $getOrdersStatsByCreator
      * @return \Illuminate\Http\JsonResponse
      */
     public function __invoke(OrdersGetOrdersStats $getOrdersStats)

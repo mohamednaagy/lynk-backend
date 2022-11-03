@@ -1,17 +1,16 @@
 <?php
 
 return [
-
     /*
-    |--------------------------------------------------------------------------
-    | Validation Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines contain the default error messages used by
-    | the validator class. Some of these rules have multiple versions such
-    | as the size rules. Feel free to tweak each of these messages here.
-    |
-    */
+     |--------------------------------------------------------------------------
+     | Validation Language Lines
+     |--------------------------------------------------------------------------
+     |
+     | The following language lines contain the default error messages used by
+     | the validator class. Some of these rules have multiple versions such
+     | as the size rules. Feel free to tweak each of these messages here.
+     |
+     */
 
     'accepted' => 'The :attribute must be accepted.',
     'accepted_if' => 'The :attribute must be accepted when :other is :value.',
@@ -131,34 +130,39 @@ return [
     'national_id_wrong_format' => 'National ID format is not valid',
     'host_whitelist' => 'The :attribute is not whitelisted.',
     'phone' => 'The :attribute is not valid phone number.',
+    'custom_validation' => [
+        'phone_number_not_matched' => 'Phone number does\'t belong to national ID/Iqama',
+        'invalid_person_id' => 'Invalid national ID/Iqama',
+        'person_id_not_found' => 'Invalid national ID/Iqama',
+        'invalid_mobile_number' => 'Invalid phone number',
 
+    ],
     /*
-    |--------------------------------------------------------------------------
-    | Custom Validation Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify custom validation messages for attributes using the
-    | convention "attribute.rule" to name the lines. This makes it quick to
-    | specify a specific custom language line for a given attribute rule.
-    |
-    */
+     |--------------------------------------------------------------------------
+     | Custom Validation Language Lines
+     |--------------------------------------------------------------------------
+     |
+     | Here you may specify custom validation messages for attributes using the
+     | convention "attribute.rule" to name the lines. This makes it quick to
+     | specify a specific custom language line for a given attribute rule.
+     |
+     */
 
     'custom' => [
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
     ],
-
     /*
-    |--------------------------------------------------------------------------
-    | Custom Validation Attributes
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines are used to swap our attribute placeholder
-    | with something more reader friendly such as "E-Mail Address" instead
-    | of "email". This simply helps us make our message more expressive.
-    |
-    */
+     |--------------------------------------------------------------------------
+     | Custom Validation Attributes
+     |--------------------------------------------------------------------------
+     |
+     | The following language lines are used to swap our attribute placeholder
+     | with something more reader friendly such as "E-Mail Address" instead
+     | of "email". This simply helps us make our message more expressive.
+     |
+     */
 
     'attributes' => [],
 

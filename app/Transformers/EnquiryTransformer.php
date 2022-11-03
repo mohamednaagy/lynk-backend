@@ -13,7 +13,7 @@ class EnquiryTransformer extends TransformerAbstract
     protected array $availableIncludes = [
         'body',
         'creator',
-        'comments',
+        'replies',
     ];
 
     public function transform(Enquiry $enquiry): array

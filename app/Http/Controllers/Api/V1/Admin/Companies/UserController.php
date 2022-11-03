@@ -32,8 +32,8 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  StoreCompanyUserRequest  $storeCompanyUserRequest
-     * @param  CreateLenderUserWithRoleAndPermission  $createUserWithRoleAndPermission
+     * @param  Request  $request
+     * @param  User  $user
      * @return JsonResponse
      */
     public function show(Request $request, User $user): JsonResponse
@@ -47,15 +47,24 @@ class UserController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  StoreCompanyUserRequest  $storeCompanyUserRequest
+     * @param  Company  $company
      * @param  CreateLenderUserWithRoleAndPermission  $createUserWithRoleAndPermission
      * @return JsonResponse
+     *
+     * @throws \Throwable
      */
     public function store(
         StoreCompanyUserRequest $storeCompanyUserRequest,
+        Company $company,
         CreateLenderUserWithRoleAndPermission $createUserWithRoleAndPermission
     ): JsonResponse {
-        return DB::transaction(function () use ($storeCompanyUserRequest, $createUserWithRoleAndPermission) {
-            $user = $createUserWithRoleAndPermission->handle($storeCompanyUserRequest->validated());
+        return DB::transaction(function () use ($company, $storeCompanyUserRequest, $createUserWithRoleAndPermission) {
+            $user = $createUserWithRoleAndPermission->handle(
+                $storeCompanyUserRequest->validated() +
+                [
+                    'company_id' => $company->id,
+                ]
+            );
             $invitationUrl = $storeCompanyUserRequest->validated('redirect_url');
             Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 

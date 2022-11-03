@@ -39,12 +39,15 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'creator_type',
         'customer_details',
         'status_reason',
+        'client_wakala_accepted_at',
     ];
 
     protected $casts = [
         'status' => FinancingOrderStatus::class,
         'approved_at' => 'datetime',
+        'client_wakala_accepted_at' => 'datetime',
         'data' => 'array',
+        'customer_details' => 'array',
         'phone_number' => E164PhoneNumberCast::class,
     ];
 
@@ -72,6 +75,19 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     {
         $this
             ->addMediaCollection(
+                'client_wakala'
+            )
+            ->singleFile(
+            );
+        $this
+            ->addMediaCollection(
+                'bank_wakala'
+            )
+            ->singleFile(
+            );
+
+        $this
+            ->addMediaCollection(
                 'contract'
             )
             ->singleFile(
@@ -80,6 +96,41 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         $this
             ->addMediaCollection(
                 'power_of_attorney'
+            )
+            ->singleFile(
+            );
+
+        $this
+            ->addMediaCollection(
+                'promise_to_purchase'
+            )
+            ->singleFile(
+            );
+
+        $this
+            ->addMediaCollection(
+                'murabaha_purchase_order'
+            )
+            ->singleFile(
+            );
+
+        $this
+            ->addMediaCollection(
+                'transfer_ownership_to_lender'
+            )
+            ->singleFile(
+            );
+
+        $this
+            ->addMediaCollection(
+                'selling_commodity_to_customer'
+            )
+            ->singleFile(
+            );
+
+        $this
+            ->addMediaCollection(
+                'warrant_amendment_except_warrant_no'
             )
             ->singleFile(
             );
@@ -108,6 +159,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function getContractAttribute()
     {
         return $this->getFirstMediaUrl('contract');
+    }
+
+    public function traderOrders()
+    {
+        return $this->hasMany(TraderOrder::class, 'financing_order_id', 'id');
     }
 
     public function getPhoneNumber(): PhoneNumber
