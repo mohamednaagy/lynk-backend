@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Client;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala as AcceptWakalaInterface;
+use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Client\AcceptClientWakalaRequest;
 use App\Models\FinancingOrder;
@@ -42,6 +43,10 @@ class AcceptClientWakala extends Controller
             abort_if($order->getNationalId() !== $request->validated('national_id'), 404);
 
             $media = $acceptClientWakala->handle($order);
+
+            $order->update([
+                'status' => FinancingOrderStatus::WaitingPurchasingCommodity,
+            ]);
 
             Trader::driver('dmcc')->getTti($order);
 
