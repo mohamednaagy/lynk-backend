@@ -64,7 +64,7 @@ Route::prefix('v1/admin')->group(function () {
         });
 
         Route::apiResource('companies', CompanyController::class);
-        Route::apiResource('companies.users', UserController::class);
+        Route::apiResource('companies.users', UserController::class)->shallow();
         Route::prefix('companies')->group(function () {
             Route::put('/{company}/status', UpdateCompanyStatus::class);
             Route::get('/{company}/balance ', GetBalance::class);

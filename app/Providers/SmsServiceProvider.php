@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Support\Sms\SmsManger;
+use App\Support\Sms\SmsManager;
 use Illuminate\Support\ServiceProvider;
 
 class SmsServiceProvider extends ServiceProvider
@@ -14,9 +14,8 @@ class SmsServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
-        $this->app->singleton('sms', function ($app) {
-            return new SmsManger($app);
+        $this->app->singleton('sms.manager', function ($app) {
+            return new SmsManager($app);
         });
     }
 

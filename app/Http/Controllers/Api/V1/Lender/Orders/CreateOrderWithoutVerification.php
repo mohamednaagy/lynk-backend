@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
-use App\Actions\Contracts\Wakala\GenerateWakala;
+use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\CreateOrderWithoutVerificationRequest;
@@ -18,7 +18,7 @@ class CreateOrderWithoutVerification extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function __invoke(CreateOrderWithoutVerificationRequest $request, CreateFinancingOrder $createFinancingOrder, GenerateWakala $generateWakala)
+    public function __invoke(CreateOrderWithoutVerificationRequest $request, CreateFinancingOrder $createFinancingOrder, GenerateClientWakala $generateWakala)
     {
         DB::transaction(function () use ($createFinancingOrder, $request, $generateWakala) {
             $financingOrder = $createFinancingOrder->handle(
@@ -26,8 +26,8 @@ class CreateOrderWithoutVerification extends Controller
                     $request->validated(),
                     [
                         'status' => FinancingOrderStatus::InProgress,
-                        'creator_id' => auth()->id(),
-                        'creator_type' => auth()->user()->getMorphClass(),
+                        'creator_id' => $request->user()->id,
+                        'creator_type' => $request->user()->getMorphClass(),
                         'approved_at' => now(),
                     ]
                 )

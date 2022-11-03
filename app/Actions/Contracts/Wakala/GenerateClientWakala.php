@@ -4,7 +4,7 @@ namespace App\Actions\Contracts\Wakala;
 
 use App\Models\FinancingOrder;
 
-interface GenerateWakala
+interface GenerateClientWakala
 {
     public function handle(FinancingOrder $financingOrder);
 }

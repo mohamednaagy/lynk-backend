@@ -8,8 +8,44 @@ use App\Enums\Subject;
 class Admin
 {
     public static array $basePermissions = [
-        Subject::All => [
-            Action::Manage,
+        Subject::Lenders => [
+            Action::Index,
+            Action::Create,
+            Action::Edit,
+            Action::Show,
+            Action::Delete,
+        ],
+        Subject::Dashboard => [
+            Action::Show,
+        ],
+        Subject::LenderWallet => [
+            Action::Show,
+        ],
+        Subject::LenderUsers => [
+            Action::Index,
+            Action::Create,
+            Action::Edit,
+            Action::Show,
+            Action::Delete,
+        ],
+        Subject::FinancingOrders => [
+            Action::Index,
+            Action::Create,
+            Action::Edit,
+            Action::Show,
+            Action::Delete,
+        ],
+        Subject::LenderEdaatInvoices => [
+            Action::Index,
+            Action::Show,
+            Action::SyncStatusWithEdaat,
+        ],
+        Subject::Admins => [
+            Action::Index,
+            Action::Create,
+            Action::Edit,
+            Action::Show,
+            Action::Delete,
         ],
     ];
 }

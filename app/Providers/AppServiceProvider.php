@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\Traders\TraderManager;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -19,6 +20,13 @@ class AppServiceProvider extends ServiceProvider
             $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
             $this->app->register(TelescopeServiceProvider::class);
         }
+
+        $this->app->singleton('trader', function ($app) {
+            return new TraderManager($app);
+        });
+        $this->app->singleton('trader.store', function ($app) {
+            return $app->make('dmcc')->driver();
+        });
     }
 
     /**
