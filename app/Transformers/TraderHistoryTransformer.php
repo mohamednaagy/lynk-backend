@@ -35,80 +35,50 @@ class TraderHistoryTransformer extends TransformerAbstract
             'client_wakala' => [
                 'step' => 'client_wakala',
                 'is_complete' => (bool) $this->financingOrder->client_wakala_accepted_at,
-                'completed_at' => $this->financingOrder->client_wakala_accepted_at ?? null,
-                'document' => $this->financingOrder->getMedia('client_wakala')->first()
-                    ? $this->financingOrder->getMedia('client_wakala')->first()->getUrl()
-                    : null,
+                'completed_at' => optional($this->financingOrder->client_wakala_accepted_at)->format('Y-m-d h:m A'),
+                'document' => optional($this->financingOrder->getMedia('client_wakala')->first())->getUrl(),
             ],
             FinancingOrderHistory::CommodityPurchased => [
                 'step' => 'commodity_purchased',
                 'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => $traderOrderHistoryExist
-                    ? $traderOrderHistoryExist->created_at
-                    : null,
+                'completed_at' => optional(optional($traderOrderHistoryExist)->created_at)->format('Y-m-d h:m A'),
                 'cert_document' => [
-                    'url' => $this->financingOrder->getMedia('client_wakala')->first()
-                        ? $this->financingOrder->getMedia('client_wakala')->first()->getUrl()
-                        : null,
-                    'date' => $getPtpDocument
-                        ? $getPtpDocument->created_at
-                        : null,
+                    'url' => optional($this->financingOrder->getMedia('client_wakala')->first())->getUrl(),
+                    'date' => optional(optional($getPtpDocument)->created_at)->format('Y-m-d h:m A'),
                 ],
                 'ownership_document' => [
-                    'url' => $this->financingOrder->getMedia('transfer_ownership_to_lender')->first()
-                        ? $this->financingOrder->getMedia('transfer_ownership_to_lender')->first()->getUrl()
-                        : null,
-                    'date' => $transferOwnershipToLender
-                        ? $transferOwnershipToLender->created_at
-                        : null,
+                    'url' => optional($this->financingOrder->getMedia('transfer_ownership_to_lender')->first())->getUrl(),
+                    'date' => optional(optional($transferOwnershipToLender)->created_at)->format('Y-m-d h:m A'),
                 ],
             ],
             FinancingOrderHistory::ContractSigned => [
                 'step' => 'contract_singed',
                 'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => $traderOrderHistoryExist
-                    ? $traderOrderHistoryExist->created_at
-                    : null,
+                'completed_at' => optional(optional($traderOrderHistoryExist)->created_at)->format('Y-m-d h:m A'),
             ],
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => [
                 'step' => 'selling_commodity_to_customer',
                 'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => $traderOrderHistoryExist
-                    ? $traderOrderHistoryExist->created_at
-                    : null,
-                'document' => $this->financingOrder->getMedia('selling_commodity_to_customer')->first()
-                    ? $this->financingOrder->getMedia('selling_commodity_to_customer')->first()->getUrl()
-                    : null,
+                'completed_at' => optional(optional($traderOrderHistoryExist)->created_at)->format('Y-m-d h:m A'),
+                'document' => optional($this->financingOrder->getMedia('selling_commodity_to_customer')->first())->getUrl(),
             ],
             FinancingOrderHistory::IssueMurabahaOffer => [
                 'step' => 'selling_commodity_to_open_market',
                 'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => $traderOrderHistoryExist
-                    ? $traderOrderHistoryExist->created_at
-                    : null,
+                'completed_at' => optional(optional($traderOrderHistoryExist)->created_at)->format('Y-m-d h:m A'),
                 'mpo_document' => [
-                    'url' => $this->financingOrder->getMedia('murabaha_purchase_order')->first()
-                        ? $this->financingOrder->getMedia('murabaha_purchase_order')->first()->getUrl()
-                        : null,
-                    'date' => $getMurabahaPurchaseOfferDocument
-                        ? $getMurabahaPurchaseOfferDocument->created_at
-                        : null,
+                    'url' => optional($this->financingOrder->getMedia('murabaha_purchase_order')->first())->getUrl(),
+                    'date' => optional(optional($getMurabahaPurchaseOfferDocument)->created_at)->format('Y-m-d h:m A'),
                 ],
                 'warranty_document' => [
-                    'url' => $this->financingOrder->getMedia('warrant_amendment_except_warrant_no')->first()
-                        ? $this->financingOrder->getMedia('warrant_amendment_except_warrant_no')->first()->getUrl()
-                        : null,
-                    'date' => $getWarrantAmendmentExceptWarrantNoDocument
-                        ? $getWarrantAmendmentExceptWarrantNoDocument->created_at
-                        : null,
+                    'url' => optional($this->financingOrder->getMedia('warrant_amendment_except_warrant_no')->first())->getUrl(),
+                    'date' => optional(optional($getWarrantAmendmentExceptWarrantNoDocument)->created_at)->format('Y-m-d h:m A'),
                 ],
             ],
             FinancingOrderHistory::MurabahaSaleCompleted => [
                 'step' => 'murabha_sale_completed',
                 'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => $traderOrderHistoryExist
-                    ? $traderOrderHistoryExist->created_at
-                    : null,
+                'completed_at' => optional(optional($traderOrderHistoryExist)->created_at)->format('Y-m-d h:m A'),
             ],
             default => null,
         };
