@@ -17,6 +17,6 @@ class ApproveOrderAction implements ApproveOrder
         $financingOrder->approved_at = now();
         $financingOrder->save();
 
-        Trader::driver()->getTTI($financingOrder);
+        Trader::driver('dmcc')->getTti($financingOrder);
     }
 }

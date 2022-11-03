@@ -5,11 +5,10 @@ namespace App\Http\Controllers\Api\V1\Lender\Orders;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
-use App\Jobs\UpdateFinancialOrderStatusWithDelay;
+use App\Jobs\UpdateFinancialOrderStatus;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class ContractSigned extends Controller
 {
@@ -26,7 +25,7 @@ class ContractSigned extends Controller
         ]);
 
         $traderOrder = $order->traderOrders->last();
-        UpdateFinancialOrderStatusWithDelay::dispatch($traderOrder, FinancingOrderStatus::SellingCommodityToCustomer)->delay(now()->addMinutes(2));
+        UpdateFinancialOrderStatus::dispatch($traderOrder, FinancingOrderStatus::SellingCommodityToCustomer)->delay(now()->addMinutes(2));
 
         Trader::driver('dmcc')->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ResponsePtp);
 

@@ -8,9 +8,9 @@ interface TraderInterface
 {
     public function acceptAgreement();
 
-    public function getTTI(FinancingOrder $financingOrder);
+    public function getTti(FinancingOrder $financingOrder);
 
-    public function respondPTP(string $ttiId);
+    public function respondPtp(string $ttiId);
 
     public function issueMurabaha(string $ttiId);
 

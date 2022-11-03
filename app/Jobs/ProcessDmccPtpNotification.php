@@ -33,6 +33,6 @@ class ProcessDmccPtpNotification implements ShouldQueue
     public function handle(): void
     {
         $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
-        Trader::driver('dmcc')->respondPTP($ttiId);
+        Trader::driver('dmcc')->respondPtp($ttiId);
     }
 }

@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Console\Command;
 
-class AcceptDMCCAgreement extends Command
+class AcceptDmccAgreement extends Command
 {
     /**
      * The name and signature of the console command.
@@ -28,7 +28,7 @@ class AcceptDMCCAgreement extends Command
      */
     public function handle(): int
     {
-        if (Trader::driver()->acceptAgreement()) {
+        if (Trader::driver('dmcc')->acceptAgreement()) {
             $this->line('Agreement Successfully Accepted');
 
             return Command::SUCCESS;

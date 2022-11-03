@@ -44,7 +44,7 @@ class DmccDriver implements TraderInterface
         return $this->isSuccess($response);
     }
 
-    public function getTTI(FinancingOrder $financingOrder): string
+    public function getTti(FinancingOrder $financingOrder): string
     {
         $ttiId = $this->getTtiId($financingOrder);
         $traderOrder = $this->createTraderOrder($financingOrder, $ttiId);
@@ -53,7 +53,7 @@ class DmccDriver implements TraderInterface
         return $ttiId;
     }
 
-    public function respondPTP(string $ttiId)
+    public function respondPtp(string $ttiId)
     {
         $this->respondPTPService($ttiId);
 
@@ -74,12 +74,13 @@ class DmccDriver implements TraderInterface
 
     public function issueMurabaha(string $ttiId)
     {
+        $traderOrder = $this->getTraderOrderByTtiId($ttiId);
+        if ($traderOrder->order->status->value !== FinancingOrderStatus::ContractSigned) {
+            throw new UnprocessableEntityHttpException();
+        }
         $versionNumber = $this->uploadTTIDocumentAndGetVersionNumber($ttiId);
 
         $this->issueMurabahaPurchaseOffer($ttiId, $versionNumber);
-
-        $traderOrder = $this->getTraderOrderByTtiId($ttiId);
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::IssueMurabahaPurchaseOffer);
 
         $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Murabaha Purchase Offer Document');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetMurabahaPurchaseOfferDocument);
@@ -125,7 +126,7 @@ class DmccDriver implements TraderInterface
      */
     private function prefixUrl($url): string
     {
-        return 'https://'.config('dmcc.username').':'.config('dmcc.password').'@na2.ai.dm-us.informaticacloud.com/active-bpel/soap/'.$url.'?wsdl';
+        return 'https://'.config('trader.providers.dmcc.username').':'.config('trader.providers.dmcc.password').'@na2.ai.dm-us.informaticacloud.com/active-bpel/soap/'.$url.'?wsdl';
     }
 
     /**
@@ -149,10 +150,10 @@ class DmccDriver implements TraderInterface
                 'currency' => 'SAR',
                 'costPrice' => $financingOrder->amount,
                 'profit' => $financingOrder->selling_price - $financingOrder->amount,
-                'paymentTerms' => config('dmcc.tti.payment_terms'),
-                'unitOfDuration' => config('dmcc.tti.unit_of_duration'),
+                'paymentTerms' => config('trader.providers.dmcc.tti.payment_terms'),
+                'unitOfDuration' => config('trader.providers.dmcc.tti.unit_of_duration'),
                 'product' => null,
-                'registeredMember' => 'BOLFT',
+                'registeredMember' => config('trader.providers.dmcc.tti.registered_member'),
                 'client' => null,
             ])->object();
 
@@ -216,7 +217,7 @@ class DmccDriver implements TraderInterface
     public function createSellingCommodityToCustomerDocument($traderOrder, string $ttiId): void
     {
         $html = view('selling-commodity-to-customer')->render();
-        $path = $traderOrder->financing_order_id.'/SCTC/'.$ttiId.'.pdf';
+        $path = $traderOrder->financing_order_id.'/DMCC-SCTC/'.$ttiId.'.pdf';
         PdfGenerator::outputFromHtml($html, $path, [
             'gotoOptions' => ['waitUntil' => 'networkidle0'],
         ]);
@@ -286,7 +287,7 @@ class DmccDriver implements TraderInterface
     private function createTransferOwnershipToLenderDocument($traderOrder, string $ttiId): void
     {
         $html = view('transfer-ownership-to-lender')->render();
-        $path = $traderOrder->order_id.'/TOTL/'.$ttiId.'.pdf';
+        $path = $traderOrder->order_id.'/DMCC-TOTL/'.$ttiId.'.pdf';
         PdfGenerator::outputFromHtml($html, $path, [
             'gotoOptions' => ['waitUntil' => 'networkidle0'],
         ]);
