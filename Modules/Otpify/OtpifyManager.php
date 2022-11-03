@@ -63,7 +63,7 @@ class OtpifyManager extends Manager
      *
      * @return OtpifyDriverInterface
      */
-    public function createTestAbsherDriver(): OtpifyDriverInterface
+    public function createFakeAbsherDriver(): OtpifyDriverInterface
     {
         return new FakeAbsherDriver();
     }
