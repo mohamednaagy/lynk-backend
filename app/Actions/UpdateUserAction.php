@@ -18,14 +18,10 @@ class UpdateUserAction implements UpdateUser
     {
         if (array_key_exists('password', $data) && $data['password'] !== null) {
             $data['password'] = Hash::make($data['password']);
-        } else {
-            $data['password'] = null;
         }
 
         if (array_key_exists('phone_number', $data) && array_key_exists('phone_country_code', $data)) {
             $data['phone_number'] = phone($data['phone_number'], $data['phone_country_code']);
-        } else {
-            $data['phone_number'] = null;
         }
 
         return $user->update(

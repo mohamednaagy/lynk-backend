@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Support\Traders\TraderManager;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -58,6 +59,15 @@ class AppServiceProvider extends ServiceProvider
             }
 
             return response()->json($response, $statusCode);
+        });
+
+        Password::defaults(function () {
+            return Password::min(8)
+                ->mixedCase()
+                ->letters()
+                ->numbers()
+                ->symbols()
+                ->uncompromised();
         });
     }
 }

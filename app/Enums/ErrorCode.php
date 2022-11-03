@@ -18,5 +18,7 @@ class ErrorCode
 
     public const OTPIFY_DRIVERS_CONFIGURATION = 1006;
 
-    public const EMAIL_NOT_VERIFIED = 100077;
+    public const OTPIFY_CODE_INVALID = 1007;
+
+    public const EMAIL_NOT_VERIFIED = 1008;
 }

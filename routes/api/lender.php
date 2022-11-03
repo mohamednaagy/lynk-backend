@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\V1\Lender\Auth\CompleteRegister;
 use App\Http\Controllers\Api\V1\Lender\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Lender\Auth\Register;
 use App\Http\Controllers\Api\V1\Lender\Auth\ResendInvitation;
+use App\Http\Controllers\Api\V1\Lender\Auth\UpdateMyProfile;
+use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CancelOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersStats;
@@ -40,25 +42,30 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     Route::middleware([
         'auth:sanctum',
         'role:'.implode('|', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator]),
-        'IsEmailVerified:'.Area::Lender,
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
-        Route::get('orders/stats', GetOrdersStats::class);
-        Route::apiResource('orders', OrderController::class);
-        Route::put('orders/{order}/contract-signed', ApproveOrder::class);
-        Route::put('orders/{order}/approve', ApproveOrder::class);
-        Route::put('orders/{order}/reject', RejectOrder::class);
-        Route::put('orders/{order}/cancel', CancelOrder::class);
-        Route::apiResource('users', UserController::class);
-        Route::post('{user}/resend-invitation', ResendInvitation::class);
-        Route::get('edaat-invoices', GetEdaatInvoices::class);
 
-        Route::prefix('wallet')->group(function () {
-            Route::get('/balance', GetBalance::class);
-            Route::post('/calculate', CalculateOrderCost::class);
-            Route::get('/transactions', GetWalletTransactions::class);
-            Route::post('/invoice', CreateEdaatInvoice::class);
+        Route::middleware('IsEmailVerified:'.Area::Lender)->group(function () {
+            Route::put('auth/profile', UpdateMyProfile::class);
+            Route::get('orders/stats', GetOrdersStats::class);
+            Route::apiResource('orders', OrderController::class);
+            Route::put('orders/{order}/contract-signed', ApproveOrder::class);
+            Route::put('orders/{order}/approve', ApproveOrder::class);
+            Route::put('orders/{order}/reject', RejectOrder::class);
+            Route::put('orders/{order}/cancel', CancelOrder::class);
+            Route::apiResource('users', UserController::class);
+            Route::post('{user}/resend-invitation', ResendInvitation::class);
+            Route::get('edaat-invoices', GetEdaatInvoices::class);
+
+            Route::prefix('wallet')->group(function () {
+                Route::get('/balance', GetBalance::class);
+                Route::post('/calculate', CalculateOrderCost::class);
+                Route::get('/transactions', GetWalletTransactions::class);
+                Route::post('/invoice', CreateEdaatInvoice::class);
+            });
+
+            Route::apiResource('enquiries', EnquiryController::class);
         });
     });
 });

@@ -13,7 +13,7 @@ trait CanGrantify
     /**
      * @throws RoleNotFoundException
      */
-    private function findRole(string $roleName, string $guardName = null): Model
+    public function findRole(string $roleName, string $guardName = null): Model
     {
         $guardName = $guardName ?? config('grantify.default_guard');
         $role = Role::query()

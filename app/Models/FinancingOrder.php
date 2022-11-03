@@ -7,14 +7,17 @@ use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Modules\Otpify\Contracts\Otpifiable;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
+use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
-class FinancingOrder extends Model implements HasMedia
+class FinancingOrder extends Model implements HasMedia, Otpifiable
 {
     use HasFactory, InteractsWithMedia, BelongsToTenant, LogsActivity, HasScopes;
 
@@ -34,12 +37,17 @@ class FinancingOrder extends Model implements HasMedia
         'approver_id',
         'creator_id',
         'creator_type',
+        'customer_details',
         'status_reason',
+        'client_wakala_accepted_at',
     ];
 
     protected $casts = [
         'status' => FinancingOrderStatus::class,
         'approved_at' => 'datetime',
+        'client_wakala_accepted_at' => 'datetime',
+        'data' => 'array',
+        'customer_details' => 'array',
         'phone_number' => E164PhoneNumberCast::class,
     ];
 
@@ -65,6 +73,19 @@ class FinancingOrder extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
+        $this
+            ->addMediaCollection(
+                'client_wakala'
+            )
+            ->singleFile(
+            );
+        $this
+            ->addMediaCollection(
+                'bank_wakala'
+            )
+            ->singleFile(
+            );
+
         $this
             ->addMediaCollection(
                 'contract'
@@ -143,6 +164,27 @@ class FinancingOrder extends Model implements HasMedia
     public function traderOrders()
     {
         return $this->hasMany(TraderOrder::class, 'financing_order_id', 'id');
+    }
+
+    public function getPhoneNumber(): PhoneNumber
+    {
+        return $this->phone_number;
+    }
+
+    public function getNationalId(): string
+    {
+        return $this->national_id;
+    }
+
+    /**
+     * Check if this user requires verifying by OTP based on role.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool
+     */
+    public function doesRequireVerifyingByOtp(Request $request): bool
+    {
+        return true;
     }
 
     public function scopeCanceled($query)

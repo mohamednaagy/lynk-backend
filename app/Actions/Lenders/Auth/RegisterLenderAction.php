@@ -6,7 +6,6 @@ use App\Actions\Contracts\AssignRoleToUser;
 use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\CreateUser;
 use App\Actions\Contracts\Lenders\Auth\RegisterLender;
-use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Enums\WalletType;
 use App\Models\User;
@@ -41,7 +40,7 @@ class RegisterLenderAction implements RegisterLender
             'name' => $data['company_name'],
             'unique_name' => $data['company_unique_name'],
             'company_cr' => $data['company_cr'],
-            'status' => CompanyStatus::Approved,
+            'status' => $data['company_status'],
             'order_cost' => $data['order_cost'],
         ]);
 

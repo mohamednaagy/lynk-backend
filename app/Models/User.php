@@ -17,6 +17,7 @@ use Modules\Grantify\Contracts\Grantifiable;
 use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Models\AuthorizationToken;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
+use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\Permission\Traits\HasRoles;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
@@ -82,6 +83,16 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
         );
     }
 
+    public function getPhoneNumber(): PhoneNumber
+    {
+        return $this->phone_number;
+    }
+
+    public function getNationalId(): string
+    {
+        return $this->national_id;
+    }
+
     public function routeOtpForPhoneNumber()
     {
         return phone($this->phone_number, $this->phone_country);
@@ -114,5 +125,13 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
     public function preferredLocale()
     {
         return $this->locale;
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function enquiries(): HasMany
+    {
+        return $this->hasMany(Enquiry::class);
     }
 }

@@ -12,11 +12,12 @@ use App\Support\MobileVerification\Contracts\MobileVerifyDriverInterface;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Propaganistas\LaravelPhone\PhoneNumber;
 
 class TccDriver implements MobileVerifyDriverInterface
 {
     /**
-     * @param  string  $mobileNumber
+     * @param  PhoneNumber  $mobileNumber
      * @param  string  $personId
      * @return bool
      *
@@ -25,17 +26,22 @@ class TccDriver implements MobileVerifyDriverInterface
      * @throws InvalidMobileNumberException
      * @throws MobileNumberNotMatchedException
      */
-    public function verify(string $mobileNumber, string $personId): bool
+    public function verify(PhoneNumber $mobileNumber, string $personId): bool
     {
-        $response = Http::post('https://IP:PORT/TCC-Web/api/mobile/verify',
-            $this->prepareRequestData($mobileNumber, $personId)
+        $response = Http::post(
+            'https://IP:PORT/TCC-Web/api/mobile/verify',
+            $this->prepareRequestData(ltrim($mobileNumber->formatE164(), '+'), $personId)
         );
 
         $response = $response->json();
 
         activity()
-            ->withProperties(['response' => $response])
-            ->log('Mobile Number Verification');
+            ->withProperties(
+                ['response' => $response]
+            )
+            ->log(
+                'Mobile Number Verification'
+            );
 
         return $this->verifyResponse($response);
     }
@@ -49,7 +55,7 @@ class TccDriver implements MobileVerifyDriverInterface
      */
     private function prepareRequestData(string $mobileNumber, string $personId): array
     {
-        return  [
+        return [
             'apiKey' => config('mobile-verify.drivers.tcc.api_key'),
             'operatorTCN' => Str::random(25),
             'mobileNumber' => $mobileNumber,

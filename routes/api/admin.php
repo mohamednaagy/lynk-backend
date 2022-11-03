@@ -7,6 +7,7 @@ use App\Enums\Subject;
 use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
+use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
 use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
@@ -39,8 +40,9 @@ Route::prefix('v1/admin')->group(function () {
 
     Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->group(function () {
         Route::get('auth', GetAuthUser::class);
+        Route::put('auth/profile', UpdateMyProfile::class);
 
-        Route::apiResource('admins', AdminController::class);
+        Route::apiResource('admins', AdminController::class)->parameters(['admins' => 'id']);
         Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
 
         Route::get('/roles', GetAllRoles::class)->middleware(
@@ -62,10 +64,10 @@ Route::prefix('v1/admin')->group(function () {
         });
 
         Route::apiResource('companies', CompanyController::class);
+        Route::apiResource('companies.users', UserController::class)->shallow();
         Route::prefix('companies')->group(function () {
             Route::put('/{company}/status', UpdateCompanyStatus::class);
             Route::get('/{company}/balance ', GetBalance::class);
-            Route::get('/{company}/users', [UserController::class, 'index']);
             Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
             Route::get('{company}/orders', [OrderController::class, 'index']);
             Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
@@ -75,16 +77,6 @@ Route::prefix('v1/admin')->group(function () {
         Route::prefix('wallet')->group(function () {
             Route::get('/edaat-invoices', GetEdaatInvoices::class);
             Route::post('/edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
-        });
-
-        Route::prefix('users')->group(function () {
-            Route::post('/', [\App\Http\Controllers\Api\V1\Admin\Users\UserController::class, 'store']);
-        });
-
-        Route::prefix('users')->group(function () {
-            Route::post('/', [UserController::class, 'store']);
-            Route::post('/{user}', [UserController::class, 'store']);
-            Route::get('/{user}', [UserController::class, 'show']);
         });
     });
 });
