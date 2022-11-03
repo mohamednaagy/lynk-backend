@@ -33,4 +33,6 @@ final class Subject extends Enum
     const Dashboard = 'dashboard';
 
     const LenderEdaatInvoices = 'lenderEdaatInvoices';
+
+    const Lenders = 'lenders';
 }
