@@ -9,7 +9,6 @@ use App\Http\Requests\V1\Lender\Enquiries\Replies\StoreReplyToEnquiryRequest;
 use App\Models\Enquiry;
 use App\Transformers\EnquiryReplyTransformer;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class EnquiryReplyController extends Controller
@@ -17,7 +16,8 @@ class EnquiryReplyController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @param  Enquiry  $enquiry
+     * @return JsonResponse
      */
     public function index(Enquiry $enquiry): JsonResponse
     {
@@ -30,8 +30,12 @@ class EnquiryReplyController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param  Enquiry  $enquiry
+     * @param  StoreReplyToEnquiryRequest  $storeReplyToEnquiryRequest
+     * @param  ReplyToEnquiryInterface  $replyToEnquiry
+     * @return JsonResponse
+     *
+     * @throws \Throwable
      */
     public function store(
         Enquiry $enquiry,
@@ -41,16 +45,14 @@ class EnquiryReplyController extends Controller
         $data = $storeReplyToEnquiryRequest->validated();
         $data['user_id'] = $storeReplyToEnquiryRequest->user()->id;
         $data['enquiry_id'] = $enquiry->id;
-        $enquiryReply =  DB::transaction(function () use ($data, $replyToEnquiry, $enquiry) {
-
+        $enquiryReply = DB::transaction(function () use ($data, $replyToEnquiry, $enquiry) {
             $enquiryReply = $replyToEnquiry->handle($data);
             $enquiry->update([
-                'status'=> EnquiryStatus::UnderReview
+                'status' => EnquiryStatus::UnderReview,
             ]);
 
             return $enquiryReply;
         });
-
 
         return fractal($enquiryReply, new EnquiryReplyTransformer())->respond();
     }

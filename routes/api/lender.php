@@ -42,12 +42,12 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
 
     Route::middleware([
         'auth:sanctum',
-        'role:' . implode('|', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator]),
+        'role:'.implode('|', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator]),
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
 
-        Route::middleware('IsEmailVerified:' . Area::Lender)->group(function () {
+        Route::middleware('IsEmailVerified:'.Area::Lender)->group(function () {
             Route::put('auth/profile', UpdateMyProfile::class);
             Route::get('orders/stats', GetOrdersStats::class);
             Route::apiResource('orders', OrderController::class);
@@ -67,8 +67,8 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
             });
 
             Route::apiResource('enquiries', EnquiryController::class);
-            Route::apiResource('enquiries.replies', EnquiryReplyController::class);
-
+            Route::apiResource('enquiries.replies', EnquiryReplyController::class)
+                ->only('index', 'store');
         });
     });
 });

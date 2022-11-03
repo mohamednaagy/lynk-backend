@@ -15,11 +15,11 @@ class SendOtpClientWakala extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  Request  $request
-     * @param  FinancingOrder  $order
-     * @param  string  $nationalId
+     * @param  SendOtpRequest  $request
      * @param  SendOTPClientWakalaInterface  $sendOTPClientWakala
      * @return JsonResponse
+     *
+     * @throws \Throwable
      */
     public function __invoke(
         SendOtpRequest $request,
