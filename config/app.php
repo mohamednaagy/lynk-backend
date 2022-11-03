@@ -186,6 +186,7 @@ return [
         App\Providers\EdaatServiceProvider::class,
         App\Providers\PdfGeneratorServiceProvider::class,
         App\Providers\MobileVerifyServiceProvider::class,
+        // \Shivella\Bitly\BitlyServiceProvider::class,
     ],
 
     /*
@@ -218,5 +219,5 @@ return [
     |
     */
     'host_whitelist' => explode(',', env('HOST_WHITELIST')),
-    
+
 ];

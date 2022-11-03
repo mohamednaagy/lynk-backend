@@ -2,10 +2,11 @@
 
 namespace App\Support\Sms;
 
+use App\Support\Sms\Drivers\FakeDriver;
 use App\Support\Sms\Drivers\MsegatDriver;
 use Illuminate\Support\Manager;
 
-class SmsManger extends Manager
+class SmsManager extends Manager
 {
     /**
      * Get the default driver name.
@@ -14,7 +15,7 @@ class SmsManger extends Manager
      */
     public function getDefaultDriver(): string
     {
-        return config('sms_providers.msegat', 'msegat');
+        return config('sms.provider', 'msegat');
     }
 
     /**
@@ -26,6 +27,14 @@ class SmsManger extends Manager
             baseUrl: config('sms.msegat.url'),
             apiKey: config('sms.msegat.api_key')
         );
+    }
+
+    /**
+     * Send SMS via Fake.
+     */
+    public function createFakeDriver()
+    {
+        return new FakeDriver();
     }
 
     /**

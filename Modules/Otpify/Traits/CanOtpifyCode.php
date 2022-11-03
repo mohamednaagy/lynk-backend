@@ -78,7 +78,7 @@ trait CanOtpifyCode
         }
 
         if ($additionalCheckCallback) {
-            if (! $additionalCheckCallback($request, $code)) {
+            if (! $additionalCheckCallback($request, $otpifyCode)) {
                 throw new OtpCodeAdditionalCheckException();
             }
         }
