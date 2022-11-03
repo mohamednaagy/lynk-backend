@@ -3,8 +3,10 @@
 namespace App\Http\Requests\V1\Admin\Companies\Users;
 
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
@@ -37,7 +39,10 @@ class UpdateUserRequest extends FormRequest
             ],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
-            'role' => ['required', Rule::in(Area::getRolesPerAreaMap()[Area::Lender])],
+            'role' => [
+                'required',
+                Arr::except(Rule::in(Area::getRolesPerAreaMap()[Area::Lender]), [Role::LenderApiUser]),
+            ],
         ];
     }
 }

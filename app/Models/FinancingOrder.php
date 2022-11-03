@@ -176,17 +176,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return $this->national_id;
     }
 
-    /**
-     * Check if this user requires verifying by OTP based on role.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return bool
-     */
-    public function doesRequireVerifyingByOtp(Request $request): bool
-    {
-        return true;
-    }
-
     public function scopeCanceled($query)
     {
         return $query->whereStatus(FinancingOrderStatus::Canceled);
@@ -211,5 +200,16 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
                 $query->where('creator_id', $model->getKey());
             }
         );
+    }
+
+    /**
+     * Check if this user requires verifying by OTP based on role.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool
+     */
+    public function doesRequireVerifyingByOtp(Request $request): bool
+    {
+        return true;
     }
 }
