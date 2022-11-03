@@ -20,6 +20,8 @@ class VerifiedClientWakalaAction implements VerifiedClientWakala
             now()->addMinutes(10)
         );
 
+        $order->refresh();
+
         $wakalaTemplate = view('templates.client-wakala', [
             'clientName' => $order->customer_details['englishName'],
         ])->render();
