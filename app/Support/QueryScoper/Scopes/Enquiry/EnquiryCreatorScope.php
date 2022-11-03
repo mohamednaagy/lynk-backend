@@ -48,9 +48,11 @@ class EnquiryCreatorScope extends QueryScoper
     {
         $creator = $data['creator'];
 
-        return $builder->where('name', 'LIKE', '%'.$creator.'%')
-            ->orWhere('email', 'LIKE', '%'.$creator.'%')
-            ->orWhere('phone_number', 'LIKE', '%'.$creator.'%')
+        return $builder->where(function ($query) use ($creator) {
+            $query->where('name', 'LIKE', '%'.$creator.'%')
+                ->orWhere('email', 'LIKE', '%'.$creator.'%')
+                ->orWhere('phone_number', 'LIKE', '%'.$creator.'%');
+        })
             ->orWhereHas('user', function ($q) use ($creator) {
                 $q->where('first_name', 'LIKE', '%'.$creator.'%')
                     ->orWhere('last_name', 'LIKE', '%'.$creator.'%');

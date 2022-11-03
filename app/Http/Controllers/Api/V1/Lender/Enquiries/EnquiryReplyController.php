@@ -9,7 +9,6 @@ use App\Http\Requests\V1\Lender\Enquiries\Replies\StoreReplyToEnquiryRequest;
 use App\Models\Enquiry;
 use App\Transformers\EnquiryReplyTransformer;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class EnquiryReplyController extends Controller
@@ -30,7 +29,7 @@ class EnquiryReplyController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(
@@ -38,20 +37,28 @@ class EnquiryReplyController extends Controller
         StoreReplyToEnquiryRequest $storeReplyToEnquiryRequest,
         ReplyToEnquiryInterface $replyToEnquiry
     ): JsonResponse {
-        $data = $storeReplyToEnquiryRequest->validated();
-        $data['user_id'] = $storeReplyToEnquiryRequest->user()->id;
-        $data['enquiry_id'] = $enquiry->id;
-        $enquiryReply =  DB::transaction(function () use ($data, $replyToEnquiry, $enquiry) {
+        return DB::transaction(function () use ($storeReplyToEnquiryRequest, $replyToEnquiry, $enquiry) {
+            // check if the enquiry is closed already
+            if ($enquiry->status->is(EnquiryStatus::Closed)) {
+                return $this->errorResponse(
+                    __('error.enquiry_closed_already')
+                );
+            }
+
+            $data = $storeReplyToEnquiryRequest->validated();
+            $data['user_id'] = $storeReplyToEnquiryRequest->user()->id;
+            $data['enquiry_id'] = $enquiry->id;
 
             $enquiryReply = $replyToEnquiry->handle($data);
-            $enquiry->update([
-                'status'=> EnquiryStatus::UnderReview
-            ]);
 
-            return $enquiryReply;
+            // change the enquiry status to be under review
+            if ($enquiry->status->is(EnquiryStatus::Resolved)) {
+                $enquiry->update([
+                    'status' => EnquiryStatus::UnderReview,
+                ]);
+            }
+
+            return fractal($enquiryReply, new EnquiryReplyTransformer())->respond();
         });
-
-
-        return fractal($enquiryReply, new EnquiryReplyTransformer())->respond();
     }
 }

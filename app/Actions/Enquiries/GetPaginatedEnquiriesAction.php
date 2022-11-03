@@ -11,12 +11,13 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 class GetPaginatedEnquiriesAction implements GetPaginatedEnquiries
 {
     /**
-     * @param  int  $paginate
+     * @param  int|null  $paginate
      * @return LengthAwarePaginator
      */
-    public function handle(int $paginate = 9): LengthAwarePaginator
+    public function handle(int $paginate = null): LengthAwarePaginator
     {
         return Enquiry::query()
+            ->with('user')
             ->toScopes($this->scopes())
             ->latest()
             ->paginate($paginate);

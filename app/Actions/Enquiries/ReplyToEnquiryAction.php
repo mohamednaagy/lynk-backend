@@ -11,7 +11,7 @@ class ReplyToEnquiryAction implements ReplyToEnquiry
     /**
      * Create new enquiry.
      *
-     * @param array $data
+     * @param  array  $data
      * @return EnquiryReplies
      */
     public function handle(array $data): EnquiryReplies
@@ -22,6 +22,7 @@ class ReplyToEnquiryAction implements ReplyToEnquiry
                 'body',
                 'user_id',
                 'enquiry_id',
+                'role_id',
             ]
         ));
     }

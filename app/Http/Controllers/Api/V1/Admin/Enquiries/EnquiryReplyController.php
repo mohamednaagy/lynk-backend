@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Enquiries;
 
-use App\Actions\Contracts\Orders\ReplyToEnquiry as ReplyToEnquiryInterface;
+use App\Actions\Contracts\Enquiries\ReplyToEnquiry as ReplyToEnquiryInterface;
+use App\Enums\Area;
 use App\Enums\EnquiryStatus;
-use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Enquiries\ReplyToEnquiryRequest;
 use App\Mail\ReplyToVisitorEnquiry;
@@ -14,18 +14,36 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
-class ReplyToEnquiry extends Controller
+class EnquiryReplyController extends Controller
 {
     /**
-     * Handle the incoming request.
+     * Display a listing of the resource.
+     *
+     * @param  Enquiry  $enquiry
+     * @return JsonResponse
+     */
+    public function index(Enquiry $enquiry): JsonResponse
+    {
+        $enquiryReplies = $enquiry->replies()->latest()->get();
+
+        return fractal($enquiryReplies, new EnquiryReplyTransformer())
+            ->parseIncludes(['creator'])
+            ->respond();
+    }
+
+    /**
+     * Store a newly created resource in storage.
      *
      * @param  ReplyToEnquiryRequest  $replyToEnquiryRequest
      * @param  ReplyToEnquiryInterface  $replyToEnquiry
      * @param  Enquiry  $enquiry
      * @return JsonResponse
      */
-    public function __invoke(ReplyToEnquiryRequest $replyToEnquiryRequest, ReplyToEnquiryInterface $replyToEnquiry, Enquiry $enquiry): JsonResponse
-    {
+    public function store(
+        ReplyToEnquiryRequest $replyToEnquiryRequest,
+        ReplyToEnquiryInterface $replyToEnquiry,
+        Enquiry $enquiry
+    ): JsonResponse {
         return DB::transaction(function () use ($replyToEnquiryRequest, $replyToEnquiry, $enquiry) {
             // check if the enquiry is closed already
             if ($enquiry->status->is(EnquiryStatus::Closed)) {
@@ -39,9 +57,7 @@ class ReplyToEnquiry extends Controller
             $data['enquiry_id'] = $enquiry->id;
             $data['user_id'] = ($user = $replyToEnquiryRequest->user())->id;
             $data['role_id'] = $user->roles()
-                ->whereIn('name', [
-                    Role::Admin,
-                ])
+                ->whereIn('name', Area::getRolesPerAreaMap()[Area::SuperAdmin])
                 ->firstOrFail()
                 ->id;
             $enquiryReply = $replyToEnquiry->handle($data);
@@ -54,10 +70,8 @@ class ReplyToEnquiry extends Controller
             }
 
             // send email to notify the user with the reply
-            if (! empty($data['redirect_url'])) {
-                $invitationUrl = $replyToEnquiryRequest->safeInput('redirect_url');
-                Mail::to($enquiry->email)->send(new ReplyToVisitorEnquiry($enquiry, $invitationUrl));
-            }
+            $invitationUrl = $replyToEnquiryRequest->safeInput('redirect_url');
+            Mail::to($enquiry->email)->send(new ReplyToVisitorEnquiry($enquiry, $invitationUrl));
 
             return fractal($enquiryReply, new EnquiryReplyTransformer())
                 ->parseIncludes(['creator'])

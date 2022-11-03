@@ -4,10 +4,10 @@ namespace App\Support\QueryScoper\Scopes\Enquiry;
 
 use App\Enums\EnquiryStatus;
 use App\Support\QueryScoper\QueryScoper;
+use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class EnquiryStatusScope extends QueryScoper
 {
@@ -34,7 +34,7 @@ class EnquiryStatusScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'status' => ['required', 'int', Rule::in(EnquiryStatus::getValues())],
+                'status' => ['required', 'int', new EnumValue(EnquiryStatus::class)],
             ]
         );
     }
