@@ -17,6 +17,7 @@ return [
      */
 
     'default' => env('OTPIFY_DEFAULT_DRIVER', 'email'),
+    'absher_default' => env('OTPIFY_ABSHER_DEFAULT_DRIVER', 'absher'),
     /*
      |--------------------------------------------------------------------------
      | Configuration options for each driver
@@ -38,7 +39,7 @@ return [
             'ssl_verify_host' => env('OTPIFY_TWILIO_SSL_VERIFY_HOST', false),
             'ssl_verify_peer' => env('OTPIFY_TWILIO_SSL_VERIFY_PEER', false),
         ],
-        'absher_otp' => [
+        'absher' => [
             'api_key' => env('ABSHER_API_KEY'),
             'base_url' => env('ABSHER_SEND_URL'),
         ],

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Support\Sms;
+namespace App\Support\SMS;
 
-interface SmsDriverInterface
+interface SMSDriverInterface
 {
     /**
      * Execute the driver logic.
@@ -11,5 +11,5 @@ interface SmsDriverInterface
      * @param  string  $phoneNumber
      * @return void
      */
-    public function send($message, $phoneNumber): void;
+    public function send(string $message, string $phoneNumber): void;
 }

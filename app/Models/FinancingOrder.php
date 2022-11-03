@@ -45,6 +45,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'status' => FinancingOrderStatus::class,
         'approved_at' => 'datetime',
         'data' => 'array',
+        'customer_details' => 'array',
         'phone_number' => E164PhoneNumberCast::class,
     ];
 
@@ -70,6 +71,19 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function registerMediaCollections(): void
     {
+        $this
+            ->addMediaCollection(
+                'client_wakala'
+            )
+            ->singleFile(
+            );
+        $this
+            ->addMediaCollection(
+                'bank_wakala'
+            )
+            ->singleFile(
+            );
+
         $this
             ->addMediaCollection(
                 'contract'

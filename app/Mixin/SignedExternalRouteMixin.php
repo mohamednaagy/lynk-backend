@@ -23,6 +23,7 @@ class SignedExternalRouteMixin
             }, $externalUrl);
 
             $signedRoute = $this->signedRoute($name, $parameters, $expiration, $absolute);
+
             $parsedSignedRoute = parse_url($signedRoute);
 
             return $externalUrl.'?'.$parsedSignedRoute['query'] ?? '';

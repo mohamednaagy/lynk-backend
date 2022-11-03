@@ -10,6 +10,7 @@ use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
 use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
 use Modules\Otpify\Exceptions\OtpCodeExpiredException;
 use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
+use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
 use Modules\Otpify\Models\OtpifyCode;
 use Modules\Otpify\Traits\CanOtpifyCode;
 
@@ -45,16 +46,21 @@ class FakeAbsherDriver implements OtpifyDriverInterface
     /**
      * Execute the driver logic.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @param  mixed  $vid
      * @param  mixed  $code
      * @param  \Closure|null  $additionalCheckCallback
-     * @return string
+     * @return string|bool
+     *
+     * @throws OtpCodeAdditionalCheckException
+     * @throws OtpCodeAlreadyUsedException
+     * @throws OtpCodeExpiredException
+     * @throws OtpCodeIncorrectException
+     * @throws OtpCodeNotFoundException
      */
     public function verify(Request $request, $vid, $code, Closure $additionalCheckCallback = null): string|bool
     {
         $otpifyCode = $this->getOtpifyCode($vid);
-
         if ($otpifyCode->expired_at != null) {
             throw new OtpCodeAlreadyUsedException();
         }

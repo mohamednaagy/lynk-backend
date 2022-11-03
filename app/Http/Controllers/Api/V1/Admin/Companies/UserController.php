@@ -32,8 +32,9 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  StoreCompanyUserRequest  $storeCompanyUserRequest
-     * @param  CreateLenderUserWithRoleAndPermission  $createUserWithRoleAndPermission
+     * @param  Request  $request
+     * @param $company
+     * @param  User  $user
      * @return JsonResponse
      */
     public function show(Request $request, $company, User $user): JsonResponse

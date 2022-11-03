@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Support\Sms\Drivers;
+namespace App\Support\SMS\Drivers;
 
 use App\Exceptions\BalanceIsNotEnoughException;
 use App\Exceptions\InvalidLoginInfoException;
 use App\Exceptions\MobileNumbersIsNotCorrectException;
 use App\Exceptions\MSGDuplicatedException;
-use App\Support\Sms\SmsDriverInterface;
+use App\Support\SMS\SMSDriverInterface;
 use Illuminate\Support\Facades\Http;
 
-class MsegatDriver implements SmsDriverInterface
+class MsegatDriver implements SMSDriverInterface
 {
-    protected $baseUrl;
+    protected string $baseUrl;
 
-    protected $apiKey;
+    protected string $apiKey;
 
     public function __construct($baseUrl, $apiKey)
     {
@@ -27,8 +27,14 @@ class MsegatDriver implements SmsDriverInterface
      * @param  string  $message
      * @param  string  $phoneNumber
      * @return void
+     *
+     * @throws BalanceIsNotEnoughException
+     * @throws InvalidLoginInfoException
+     * @throws MSGDuplicatedException
+     * @throws MobileNumbersIsNotCorrectException
+     * @throws \ErrorException
      */
-    public function send($message, $phoneNumber): void
+    public function send(string $message, string $phoneNumber): void
     {
         $body = [
             'userName' => config('sms.msegat.user_name'),
@@ -46,26 +52,13 @@ class MsegatDriver implements SmsDriverInterface
             ->log($response);
 
         $code = $response->object()->code;
-        switch ($code) {
-            case '1':
-                // message sent successfuly
-                break;
-            case '1020':
-                throw new InvalidLoginInfoException();
-                break;
-            case '1060':
-                throw new BalanceIsNotEnoughException();
-                break;
-            case '1061':
-                throw new MSGDuplicatedException();
-                break;
-            case '1120':
-                throw new MobileNumbersIsNotCorrectException();
-            default:
-                // throw error
-                throw new \ErrorException('Error found');
-                break;
-        }
+        throw match ($code) {
+            '1020' => new InvalidLoginInfoException(),
+            '1060' => new BalanceIsNotEnoughException(),
+            '1061' => new MSGDuplicatedException(),
+            '1120' => new MobileNumbersIsNotCorrectException(),
+            default => new \ErrorException('Error found'),
+        };
     }
 
     protected function url($path)

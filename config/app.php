@@ -186,6 +186,7 @@ return [
         App\Providers\EdaatServiceProvider::class,
         App\Providers\PdfGeneratorServiceProvider::class,
         App\Providers\MobileVerifyServiceProvider::class,
+        \Shivella\Bitly\BitlyServiceProvider::class,
     ],
 
     /*
@@ -205,7 +206,7 @@ return [
         'GrantifySeeder' => Modules\Grantify\Facades\GrantifySeeder::class,
         'MobileVerify' => App\Support\MobileVerification\Facades\MobileVerify::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
-        'Sms' => App\Support\Sms\Sms::class,
+        'SMS' => App\Support\SMS\SMS::class,
     ])->toArray(),
 
     /*
@@ -218,5 +219,5 @@ return [
     |
     */
     'host_whitelist' => explode(',', env('HOST_WHITELIST')),
-    
+
 ];
