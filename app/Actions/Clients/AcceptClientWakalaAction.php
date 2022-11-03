@@ -14,9 +14,9 @@ class AcceptClientWakalaAction implements AcceptClientWakala
 {
     public function handle(FinancingOrder $order, string $token): Media
     {
-        $hashedToken = Cache::pull(
-            sprintf('client_wakala_token_%s_%s', $order->id, $order->getNationalId())
-        );
+        $tokenCacheKey = sprintf('client_wakala_token_%s_%s', $order->id, $order->getNationalId());
+
+        $hashedToken = Cache::get($tokenCacheKey);
 
         if (! Hash::check($token, $hashedToken)) {
             throw new UnauthorizedException();
@@ -35,6 +35,8 @@ class AcceptClientWakalaAction implements AcceptClientWakala
         $order->update([
             'client_wakala_accepted_at' => now(),
         ]);
+
+        Cache::forget($tokenCacheKey);
 
         return $order->addMedia(storage_path('app/'.$path))->toMediaCollection('client_wakala');
     }
