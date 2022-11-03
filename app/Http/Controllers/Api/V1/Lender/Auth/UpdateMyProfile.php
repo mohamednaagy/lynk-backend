@@ -13,7 +13,7 @@ class UpdateMyProfile extends Controller
      * Handle the incoming request.
      *
      * @param  UpdateUser  $updateUser
-     * @param  UpdateLenderRequest  $updateLenderRequest
+     * @param  UpdateMyProfileRequest  $updateLenderRequest
      * @return \Illuminate\Http\JsonResponse
      */
     public function __invoke(UpdateUser $updateUser, UpdateMyProfileRequest $updateLenderRequest)
@@ -24,7 +24,7 @@ class UpdateMyProfile extends Controller
             $validated = Arr::except($validated, 'password');
         }
 
-        $updateUser->handle(auth()->user(), $validated);
+        $updateUser->handle($updateLenderRequest->user(), $validated);
 
         return $this->successResponse();
     }

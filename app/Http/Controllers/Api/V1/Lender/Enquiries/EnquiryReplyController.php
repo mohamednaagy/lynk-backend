@@ -16,7 +16,8 @@ class EnquiryReplyController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @param  Enquiry  $enquiry
+     * @return JsonResponse
      */
     public function index(Enquiry $enquiry): JsonResponse
     {
@@ -29,8 +30,10 @@ class EnquiryReplyController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param  Enquiry  $enquiry
+     * @param  StoreReplyToEnquiryRequest  $storeReplyToEnquiryRequest
+     * @param  ReplyToEnquiryInterface  $replyToEnquiry
+     * @return JsonResponse
      */
     public function store(
         Enquiry $enquiry,

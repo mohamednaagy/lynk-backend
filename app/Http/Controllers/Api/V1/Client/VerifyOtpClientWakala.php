@@ -16,11 +16,11 @@ class VerifyOtpClientWakala extends Controller
      * Handle the incoming request.
      *
      * @param  VerifyOtpRequest  $request
-     * @param  FinancingOrder  $order
-     * @param  string  $nationalId
      * @param  VerifyOtpClientWakalaInterface  $verifyOtpClientWakala
      * @param  VerifiedClientWakala  $verifiedClientWakala
      * @return JsonResponse
+     *
+     * @throws \Throwable
      */
     public function __invoke(
         VerifyOtpRequest $request,

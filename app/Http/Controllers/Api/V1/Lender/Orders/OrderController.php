@@ -61,13 +61,15 @@ class OrderController extends Controller
                 ? FinancingOrderStatus::PendingApproval
                 : FinancingOrderStatus::InProgress;
 
+            $user = $request->user();
+
             $financingOrder = $createFinancingOrder->handle(
                 array_merge(
                     $request->validated(),
                     [
                         'status' => $status,
-                        'creator_id' => auth()->user()->id,
-                        'creator_type' => auth()->user()->getMorphClass(),
+                        'creator_id' => $user->id,
+                        'creator_type' => $user->getMorphClass(),
                         'approved_at' => $status === FinancingOrderStatus::InProgress ? now() : null,
                     ]
                 )
