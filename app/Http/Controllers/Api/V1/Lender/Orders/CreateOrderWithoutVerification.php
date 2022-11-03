@@ -34,7 +34,6 @@ class CreateOrderWithoutVerification extends Controller
             );
 
             $generateWakala->handle($financingOrder);
-            // -2 start commodity trading process
 
             return fractal($financingOrder, new FinancingOrderTransformer())->respond();
         }
