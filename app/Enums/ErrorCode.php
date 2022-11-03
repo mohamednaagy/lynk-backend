@@ -21,4 +21,6 @@ class ErrorCode
     public const OTPIFY_CODE_INVALID = 1007;
 
     public const EMAIL_NOT_VERIFIED = 1008;
+
+    public const FILE_NOT_FOUND = 1009;
 }
