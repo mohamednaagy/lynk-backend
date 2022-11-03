@@ -3,9 +3,11 @@
 namespace App\Http\Requests\V1\Lender\Users;
 
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Models\User;
 use App\Rules\HostWhitelistRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
@@ -34,7 +36,12 @@ class StoreUserRequest extends FormRequest
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'email' => ['required', 'email', tenant()->unique(User::class)],
             'redirect_url' => ['required', 'url', new HostWhitelistRule()],
-            'role' => ['required', Rule::in(Area::getRolesPerAreaMap()[Area::Lender])],
+            'role' => [
+                'required',
+                Rule::in(
+                    Arr::except(Area::getRolesPerAreaMap()[Area::Lender], [Role::LenderApiUser])
+                ),
+            ],
         ];
     }
 }

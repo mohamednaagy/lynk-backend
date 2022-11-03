@@ -6,12 +6,14 @@ use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Users\StoreUserRequest;
 use App\Http\Requests\V1\Lender\Users\UpdateUserRequest;
 use App\Mail\CompleteRegisterInvitation;
 use App\Models\User;
 use App\Transformers\UserTransformer;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -80,6 +82,10 @@ class UserController extends Controller
         UpdateLenderUserWithRoleAndPermission $updateLenderUserWithRoleAndPermission,
     ): JsonResponse {
         return DB::transaction((function () use ($updateUserRequest, $user, $updateLenderUserWithRoleAndPermission) {
+            if ($user->hasRole(Role::LenderApiUser)) {
+                throw new AuthorizationException();
+            }
+
             $updateLenderUserWithRoleAndPermission->handle($updateUserRequest->validated(), $user);
 
             return $this->successResponse();
