@@ -13,8 +13,8 @@ class UpdateMyProfile extends Controller
     /**
      * Handle an authentication attempt.
      *
-     * @param UpdateMyProfileRequest $updateMyProfileRequest
-     * @param UpdateAdminUser $updateAdminUser
+     * @param  UpdateMyProfileRequest  $updateMyProfileRequest
+     * @param  UpdateAdminUser  $updateAdminUser
      * @return JsonResponse
      */
     public function __invoke(
