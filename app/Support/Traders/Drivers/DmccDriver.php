@@ -13,7 +13,6 @@ use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -100,8 +99,6 @@ class DmccDriver implements TraderInterface
             ->call('notificationDetailsRequest', [
                 'notificationType' => $type,
             ]);
-
-        Log::debug('tes', [$response]);
 
         if (! $response->successful()) {
             throw new UnprocessableEntityHttpException();

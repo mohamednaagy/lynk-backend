@@ -8,7 +8,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 
 class ProcessDmccNotifications implements ShouldQueue
 {
@@ -21,11 +20,9 @@ class ProcessDmccNotifications implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::debug('tes', ['h']);
         collect(
             Trader::driver('dmcc')->fetchNotification('ACTIONABLE')
         )->each(function ($notification) {
-            Log::debug('tes', [$notification]);
             if (
                 $notification->notificationHeaderAndEntity->notification
                 ==
