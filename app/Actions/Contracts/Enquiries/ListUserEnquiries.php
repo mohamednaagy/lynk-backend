@@ -9,7 +9,7 @@ interface ListUserEnquiries
     /**
      * Create new enquiry.
      *
-     * @param int $userId
+     * @param  int  $userId
      * @return LengthAwarePaginator
      */
     public function handle(int $userId): LengthAwarePaginator;

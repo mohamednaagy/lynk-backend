@@ -3,7 +3,9 @@
 namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\GetCompanyUsers;
+use App\Enums\Role;
 use App\Models\Company;
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class GetCompanyUsersAction implements GetCompanyUsers
@@ -14,6 +16,16 @@ class GetCompanyUsersAction implements GetCompanyUsers
      */
     public function handle(Company $company): LengthAwarePaginator
     {
-        return $company->users()->paginate();
+        return User::query()
+            ->whereHas('roles', function ($query) {
+                return $query->whereIn('name', [
+                    Role::LenderAdmin,
+                    Role::LenderOrderCreator,
+                    Role::LenderBilling,
+                    Role::LenderSupervisor,
+                ]);
+            })
+            ->where('company_id', $company->id)
+            ->paginate();
     }
 }

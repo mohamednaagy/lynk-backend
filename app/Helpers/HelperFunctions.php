@@ -1,5 +1,7 @@
 <?php
 
+use Modules\Grantify\Facades\Grantify;
+
 if (! function_exists('validate_said')) {
     function validate_said($id_number)
     {
@@ -25,5 +27,20 @@ if (! function_exists('validate_said')) {
         }
 
         return $sum % 10 ? -1 : $type;
+    }
+}
+
+if (! function_exists('perm')) {
+    function perm(string $area, ...$permissions)
+    {
+        $permissionsArray = [];
+
+        foreach ($permissions as $subjectWithPermissions) {
+            $subject = $subjectWithPermissions[0];
+            unset($subjectWithPermissions[0]);
+            array_push($permissionsArray, Grantify::transformToPermissionsFormat($area, $subject, $subjectWithPermissions));
+        }
+
+        return 'permission:'.implode('|', $permissionsArray);
     }
 }
