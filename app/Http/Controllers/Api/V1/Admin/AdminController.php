@@ -47,7 +47,8 @@ class AdminController extends Controller
             return $this->errorResponse();
         }
 
-        return fractal($admin, new UserTransformer())
+        return fractal($admin, new UserTransformer(Area::SuperAdmin))
+            ->parseIncludes(['permissions'])
             ->respond();
     }
 
