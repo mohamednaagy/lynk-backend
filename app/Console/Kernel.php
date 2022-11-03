@@ -2,7 +2,7 @@
 
 namespace App\Console;
 
-use App\Jobs\ProcessDMCCNotifications;
+use App\Jobs\ProcessDmccNotifications;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
