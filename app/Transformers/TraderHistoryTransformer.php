@@ -23,7 +23,7 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     protected array $availableIncludes = [];
 
-    public function transform(int $traderHistoryKey): array
+    public function transform($traderHistoryKey): array
     {
         $traderOrderHistoryExist = $this->traderHistories->where('action', $traderHistoryKey)->first();
         $getPtpDocument = $this->traderHistories->where('action', FinancingOrderHistory::GetPtpDocument)->first();
@@ -32,7 +32,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $getWarrantAmendmentExceptWarrantNoDocument = $this->traderHistories->where('action', FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)->first();
 
         $data = match ($traderHistoryKey) {
-            0 => [
+            'client_wakala' => [
                 'step' => 'client_wakala',
                 'is_complete' => (bool) $this->financingOrder->client_wakala_accepted_at,
                 'completed_at' => $this->financingOrder->client_wakala_accepted_at ?? null,
@@ -40,7 +40,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                     ? $this->financingOrder->getMedia('client_wakala')->first()->getUrl()
                     : null,
             ],
-            5 => [
+            FinancingOrderHistory::CommodityPurchased => [
                 'step' => 'commodity_purchased',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => $traderOrderHistoryExist
@@ -63,14 +63,14 @@ class TraderHistoryTransformer extends TransformerAbstract
                         : null,
                 ],
             ],
-            13 => [
+            FinancingOrderHistory::ContractSigned => [
                 'step' => 'contract_singed',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => $traderOrderHistoryExist
                     ? $traderOrderHistoryExist->created_at
                     : null,
             ],
-            2 => [
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => [
                 'step' => 'selling_commodity_to_customer',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => $traderOrderHistoryExist
@@ -80,7 +80,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                     ? $this->financingOrder->getMedia('selling_commodity_to_customer')->first()->getUrl()
                     : null,
             ],
-            10 => [
+            FinancingOrderHistory::IssueMurabahaOffer => [
                 'step' => 'selling_commodity_to_open_market',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => $traderOrderHistoryExist
@@ -103,7 +103,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                         : null,
                 ],
             ],
-            11 => [
+            FinancingOrderHistory::MurabahaSaleCompleted => [
                 'step' => 'murabha_sale_completed',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => $traderOrderHistoryExist
