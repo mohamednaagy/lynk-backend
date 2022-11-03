@@ -25,7 +25,7 @@ class CreateOrderWithoutVerification extends Controller
                 array_merge(
                     $request->validated(),
                     [
-                        'status' => FinancingOrderStatus::InProgress,
+                        'status' => FinancingOrderStatus::WaitingClientWakala,
                         'creator_id' => $request->user()->id,
                         'creator_type' => $request->user()->getMorphClass(),
                         'approved_at' => now(),
