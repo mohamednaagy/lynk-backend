@@ -2,15 +2,15 @@
 
 namespace App\Actions\Wakala;
 
-use App\Actions\Contracts\HasMedia;
 use App\Actions\Contracts\Wakala\GenerateWakala;
+use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 
 class GenerateWakalaAction implements GenerateWakala
 {
-    const FILE_PATH = 'lender/wakala/';
+    const FILE_PATH = 'client_wakala';
 
-    const COLLECTION_NAME = 'lender_wakala';
+    const COLLECTION_NAME = 'client_wakala';
 
     const BASE_TEMPLATE = 'pdf-template.lender-wakala';
 
@@ -20,19 +20,15 @@ class GenerateWakalaAction implements GenerateWakala
 
     protected string $filePath = '';
 
-    public function handle(HasMedia $hasMedia)
+    public function handle(FinancingOrder $financingOrder)
     {
         $html = view($this->getTemplate())->render();
-        $path = $this->getFilePath().rand(1000, 20000).'.pdf';
+        $path = $this->getFilePath($financingOrder).'.pdf';
         PdfGenerator::outputFromHtml($html, $path);
 
-        return $hasMedia
-            ->addMediaFromDisk(
-                $path
-            )
-            ->toMediaCollection(
-                $this->getCollectionName()
-            );
+        return $financingOrder
+            ->addMediaFromDisk($path)
+            ->toMediaCollection($this->getCollectionName());
     }
 
     public function setTemplate(string $template)
@@ -56,10 +52,10 @@ class GenerateWakalaAction implements GenerateWakala
         return $this;
     }
 
-    public function getFilePath()
+    public function getFilePath(FinancingOrder $financingOrder)
     {
         if (empty($this->filePath)) {
-            return self::FILE_PATH;
+            return $financingOrder->getKey().DIRECTORY_SEPARATOR.self::FILE_PATH.DIRECTORY_SEPARATOR.$financingOrder->getNationalId();
         }
 
         return $this->filePath;

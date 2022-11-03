@@ -2,9 +2,9 @@
 
 namespace App\Actions\Contracts\Wakala;
 
-use App\Actions\Contracts\HasMedia;
+use App\Models\FinancingOrder;
 
 interface GenerateWakala
 {
-    public function handle(HasMedia $hasMedia);
+    public function handle(FinancingOrder $financingOrder);
 }

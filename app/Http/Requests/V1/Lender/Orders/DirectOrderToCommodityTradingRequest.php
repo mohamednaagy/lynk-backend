@@ -5,7 +5,7 @@ namespace App\Http\Requests\V1\Lender\Orders;
 use App\Rules\ValidateSAID;
 use Illuminate\Foundation\Http\FormRequest;
 
-class DirectOrderToCommodityTradingRequest extends FormRequest
+class CreateOrderWithoutVerificationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
