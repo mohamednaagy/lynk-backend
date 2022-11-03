@@ -99,6 +99,41 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             )
             ->singleFile(
             );
+
+        $this
+            ->addMediaCollection(
+                'promise_to_purchase'
+            )
+            ->singleFile(
+            );
+
+        $this
+            ->addMediaCollection(
+                'murabaha_purchase_order'
+            )
+            ->singleFile(
+            );
+
+        $this
+            ->addMediaCollection(
+                'transfer_ownership_to_lender'
+            )
+            ->singleFile(
+            );
+
+        $this
+            ->addMediaCollection(
+                'selling_commodity_to_customer'
+            )
+            ->singleFile(
+            );
+
+        $this
+            ->addMediaCollection(
+                'warrant_amendment_except_warrant_no'
+            )
+            ->singleFile(
+            );
     }
 
     public function company()
@@ -124,6 +159,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function getContractAttribute()
     {
         return $this->getFirstMediaUrl('contract');
+    }
+
+    public function traderOrders()
+    {
+        return $this->hasMany(TraderOrder::class, 'financing_order_id', 'id');
     }
 
     public function getPhoneNumber(): PhoneNumber
