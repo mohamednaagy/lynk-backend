@@ -24,7 +24,7 @@ class StoreReplyToEnquiryRequest extends FormRequest
     public function rules()
     {
         return [
-            'body' => ['required','string','max:2000'],
+            'body' => ['required', 'string', 'max:2000'],
         ];
     }
 }

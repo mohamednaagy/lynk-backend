@@ -2,17 +2,17 @@
 
 namespace App\Actions\Enquiries;
 
-use App\Models\Enquiry;
 use App\Actions\Contracts\Enquiries\ListUserEnquiries;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Models\Enquiry;
 use App\Support\QueryScoper\Scopes\Enquiry\EnquiryStatusScope;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ListUserEnquiriesAction implements ListUserEnquiries
 {
     /**
      * Create new enquiry.
      *
-     * @param int $userId
+     * @param  int  $userId
      * @return
      */
     public function handle(int $userId): LengthAwarePaginator

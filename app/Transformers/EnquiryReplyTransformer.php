@@ -19,7 +19,7 @@ class EnquiryReplyTransformer extends TransformerAbstract
         return [
             'id' => $enquiryReplies->id,
             'body' => $enquiryReplies->body,
-            'creation_date' => $enquiryReplies->created_at->format('Y-m-d h:m A')
+            'creation_date' => $enquiryReplies->created_at->format('Y-m-d h:m A'),
         ];
     }
 

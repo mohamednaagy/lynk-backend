@@ -31,5 +31,4 @@ class EnquiryReplies extends Model
     {
         return $this->belongsTo(Enquiry::class);
     }
-
 }

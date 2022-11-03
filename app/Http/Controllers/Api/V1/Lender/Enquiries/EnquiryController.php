@@ -17,8 +17,8 @@ class EnquiryController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param Request $request
-     * @param ListUserEnquiries $listUserEnquiries
+     * @param  Request  $request
+     * @param  ListUserEnquiries  $listUserEnquiries
      * @return JsonResponse
      */
     public function index(
@@ -33,8 +33,8 @@ class EnquiryController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param StoreEnquiryRequest $storeEnquiryRequest
-     * @param CreateEnquiry $createEnquiry
+     * @param  StoreEnquiryRequest  $storeEnquiryRequest
+     * @param  CreateEnquiry  $createEnquiry
      * @return JsonResponse
      */
     public function store(StoreEnquiryRequest $storeEnquiryRequest, CreateEnquiry $createEnquiry): JsonResponse
@@ -59,7 +59,7 @@ class EnquiryController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param Enquiry $enquiry
+     * @param  Enquiry  $enquiry
      * @return JsonResponse
      */
     public function show(Enquiry $enquiry): JsonResponse
@@ -68,7 +68,6 @@ class EnquiryController extends Controller
             ->parseIncludes(['creator', 'body'])
             ->respond();
     }
-
 
     /**
      * Update the specified resource in storage.
