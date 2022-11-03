@@ -8,8 +8,7 @@ use App\Http\Controllers\Api\V1\Lender\Auth\Register;
 use App\Http\Controllers\Api\V1\Lender\Auth\ResendInvitation;
 use App\Http\Controllers\Api\V1\Lender\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryController;
-use App\Http\Controllers\Api\V1\Lender\Enquiries\Replies\ListEnquiryReplies;
-use App\Http\Controllers\Api\V1\Lender\Enquiries\Replies\ReplyToEnquiry;
+use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryReplyController;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CancelOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersStats;
@@ -68,11 +67,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
             });
 
             Route::apiResource('enquiries', EnquiryController::class);
-
-            Route::prefix('enquiries')->group(function () {
-                Route::post('/{enquiry}/reply', ReplyToEnquiry::class);
-                Route::get('/{enquiry}/replies', ListEnquiryReplies::class);
-            });
+            Route::apiResource('enquiries.replies', EnquiryReplyController::class);
 
         });
     });
