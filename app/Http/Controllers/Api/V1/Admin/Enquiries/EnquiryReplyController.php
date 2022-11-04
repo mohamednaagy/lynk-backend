@@ -69,9 +69,11 @@ class EnquiryReplyController extends Controller
                 ]);
             }
 
-            // send email to notify the user with the reply
-            $invitationUrl = $replyToEnquiryRequest->safeInput('redirect_url');
-            Mail::to($enquiry->email)->send(new ReplyToVisitorEnquiry($enquiry, $invitationUrl));
+            // send email to notify the visitor with the reply
+            if ($enquiry->email) {
+                $invitationUrl = $replyToEnquiryRequest->safeInput('redirect_url');
+                Mail::to($enquiry->email)->send(new ReplyToVisitorEnquiry($enquiry, $invitationUrl));
+            }
 
             return fractal($enquiryReply, new EnquiryReplyTransformer())
                 ->parseIncludes(['creator'])
