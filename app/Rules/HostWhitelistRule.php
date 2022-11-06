@@ -25,7 +25,7 @@ class HostWhitelistRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        return in_array(parse_url($value)['host'], config('app.host_whitelist'));
+        return in_array(parse_url($value)['host'], whitelist_hosts());
     }
 
     /**
