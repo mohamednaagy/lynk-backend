@@ -63,8 +63,8 @@ Route::prefix('v1/admin')->group(function () {
         Route::prefix('settings')->group(function () {
             Route::get('/', [SettingsController::class, 'index']);
             Route::put('/update', [SettingsController::class, 'update']);
-            Route::put('/update-company-wakala', UpdateCompanyWakala::class);
-            Route::put('/update-client-wakala', UpdateClientWakala::class);
+            Route::put('/templates/company-wakala', UpdateCompanyWakala::class);
+            Route::put('/templates/client-wakala', UpdateClientWakala::class);
         });
 
         Route::apiResource('companies', CompanyController::class);

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1\Admin\Settings;
 
 use App\Actions\Contracts\Wakala\UpdateWakalaTemplate;
-use App\Enums\Area;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Settings\UpdateWakalaTemplateRequest;
 use Illuminate\Http\JsonResponse;
@@ -22,8 +21,7 @@ class UpdateClientWakala extends Controller
         UpdateWakalaTemplate $updateWakalaTemplate
     ): JsonResponse {
         $data = $updateWakalaTemplateRequest->validated();
-        $data['area'] = Area::SuperAdmin;
-        $data['templateType'] = 'client';
+        $data['template_type'] = 'client';
 
         $updateWakalaTemplate->handle($data);
 

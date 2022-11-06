@@ -4,10 +4,11 @@ namespace App\Actions\Wakala;
 
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Actions\Contracts\Wakala\UpdateWakalaTemplate;
+use App\Enums\Area;
 
 class UpdateWakalaTemplateAction implements UpdateWakalaTemplate
 {
-    protected string $templateName = '_wakala_template';
+    protected string $templateNameSuffix = '_wakala_template';
 
     /**
      * UpdateWakalaTemplateAction constructor.
@@ -21,8 +22,8 @@ class UpdateWakalaTemplateAction implements UpdateWakalaTemplate
 
     public function handle(array $data): void
     {
-        $wakalaTemplateName = $data['templateType'].$this->templateName;
-        $settingInstance = $this->getSettingsClassInstance->handle($data['area']);
+        $wakalaTemplateName = $data['template_type'].$this->templateNameSuffix;
+        $settingInstance = $this->getSettingsClassInstance->handle(Area::SuperAdmin);
 
         $settingInstance->$wakalaTemplateName = $data['wakala_template'];
 
