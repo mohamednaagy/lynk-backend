@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
 use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
+use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Orders\GetBalance;
 use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
@@ -78,5 +79,10 @@ Route::prefix('v1/admin')->group(function () {
             Route::get('/edaat-invoices', GetEdaatInvoices::class);
             Route::post('/edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
         });
+
+        Route::prefix('media')
+            ->group(function () {
+                Route::get('/download-file', DownloadMedia::class);
+            });
     });
 });
