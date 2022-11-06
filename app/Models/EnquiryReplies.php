@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Permission\Models\Role;
 
 class EnquiryReplies extends Model
 {
@@ -14,6 +15,7 @@ class EnquiryReplies extends Model
         'body',
         'user_id',
         'enquiry_id',
+        'role_id',
     ];
 
     /**
@@ -30,5 +32,13 @@ class EnquiryReplies extends Model
     public function enquiry(): BelongsTo
     {
         return $this->belongsTo(Enquiry::class);
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
     }
 }

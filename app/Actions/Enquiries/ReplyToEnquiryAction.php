@@ -22,6 +22,7 @@ class ReplyToEnquiryAction implements ReplyToEnquiry
                 'body',
                 'user_id',
                 'enquiry_id',
+                'role_id',
             ]
         ));
     }

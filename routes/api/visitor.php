@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Visitor\Enquiries\CreateVisitorEnquiry;
+use App\Http\Controllers\Api\V1\Visitor\Enquiries\CreateVisitorEnquiryReply;
 use App\Http\Controllers\Api\V1\Visitor\Enquiries\GetVisitorEnquiry;
 use Illuminate\Support\Facades\Route;
 
@@ -18,4 +19,5 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1/visitor')->name('api.v1.')->group(function () {
     Route::get('enquiries', GetVisitorEnquiry::class)->name('visitor.enquiry');
     Route::post('enquiries', CreateVisitorEnquiry::class);
+    Route::post('enquiries/{enquiry}/reply', CreateVisitorEnquiryReply::class)->name('visitor.enquiry.reply');
 });

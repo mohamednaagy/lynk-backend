@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\Lender\Auth\ResendInvitation;
 use App\Http\Controllers\Api\V1\Lender\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryReplyController;
+use App\Http\Controllers\Api\V1\Lender\Media\DownloadMediaFile;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CancelOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CreateOrderWithoutVerification;
@@ -72,9 +73,11 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
                 Route::post('/invoice', CreateEdaatInvoice::class);
             });
 
+            Route::get('media/{media}/download', DownloadMediaFile::class);
             Route::apiResource('enquiries', EnquiryController::class);
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)
                 ->only('index', 'store');
+            Route::apiResource('enquiries.replies', EnquiryReplyController::class);
         });
     });
 });

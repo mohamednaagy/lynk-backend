@@ -19,17 +19,17 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
 
     const CreateTransferOwnershipToLenderDocument = 6;
 
-    const ResponsePtp = 7;
+    const RespondPtp = 7;
 
-    const IssueMurabahaPurchaseOffer = 8;
+    const GetMurabahaPurchaseOfferDocument = 8;
 
-    const GetMurabahaPurchaseOfferDocument = 9;
+    const AttachMpoDocument = 9;
 
-    const AttachMpoDocument = 10;
+    const IssueMurabahaOffer = 10;
 
-    const IssueMurabahaOffer = 11;
+    const MurabahaSaleCompleted = 11;
 
-    const MurabahaSaleCompleted = 12;
+    const GetWarrantAmendmentExceptWarrantNoDocument = 12;
 
-    const GetWarrantAmendmentExceptWarrantNoDocument = 13;
+    const ContractSigned = 13;
 }

@@ -34,26 +34,34 @@ class EnquiryReplyController extends Controller
      * @param  StoreReplyToEnquiryRequest  $storeReplyToEnquiryRequest
      * @param  ReplyToEnquiryInterface  $replyToEnquiry
      * @return JsonResponse
-     *
-     * @throws \Throwable
      */
     public function store(
         Enquiry $enquiry,
         StoreReplyToEnquiryRequest $storeReplyToEnquiryRequest,
         ReplyToEnquiryInterface $replyToEnquiry
     ): JsonResponse {
-        $data = $storeReplyToEnquiryRequest->validated();
-        $data['user_id'] = $storeReplyToEnquiryRequest->user()->id;
-        $data['enquiry_id'] = $enquiry->id;
-        $enquiryReply = DB::transaction(function () use ($data, $replyToEnquiry, $enquiry) {
+        return DB::transaction(function () use ($storeReplyToEnquiryRequest, $replyToEnquiry, $enquiry) {
+            // check if the enquiry is closed already
+            if ($enquiry->status->is(EnquiryStatus::Closed)) {
+                return $this->errorResponse(
+                    __('error.enquiry_closed_already')
+                );
+            }
+
+            $data = $storeReplyToEnquiryRequest->validated();
+            $data['user_id'] = $storeReplyToEnquiryRequest->user()->id;
+            $data['enquiry_id'] = $enquiry->id;
+
             $enquiryReply = $replyToEnquiry->handle($data);
-            $enquiry->update([
-                'status' => EnquiryStatus::UnderReview,
-            ]);
 
-            return $enquiryReply;
+            // change the enquiry status to be under review
+            if ($enquiry->status->is(EnquiryStatus::Resolved)) {
+                $enquiry->update([
+                    'status' => EnquiryStatus::UnderReview,
+                ]);
+            }
+
+            return fractal($enquiryReply, new EnquiryReplyTransformer())->respond();
         });
-
-        return fractal($enquiryReply, new EnquiryReplyTransformer())->respond();
     }
 }
