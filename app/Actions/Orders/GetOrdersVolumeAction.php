@@ -8,14 +8,15 @@ use App\Models\FinancingOrder;
 use Carbon\CarbonPeriod;
 use Exception;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class GetOrdersVolumeAction implements GetOrdersVolume
 {
-    const FORMAT_WEEKS = 'weeks';
+    public const FORMAT_WEEKS = 'weeks';
 
-    const FORMAT_MONTH = 'Y-m';
+    public const FORMAT_MONTH = 'Y-m';
 
-    const FORMAT_YEAR = 'Y';
+    public const FORMAT_YEAR = 'Y';
 
     /**
      * @param  array  $data
@@ -28,40 +29,38 @@ class GetOrdersVolumeAction implements GetOrdersVolume
         $endingDate = Arr::get($data, 'ending_date');
 
         $orders = FinancingOrder::query()
-            ->selectRaw(
-                'COUNT(*) as orders_total'
-            )
+            ->selectRaw('COUNT(*) as orders_total')
             ->when(
-                $startingDate, function ($query) use ($startingDate) {
+                $startingDate,
+                function ($query) use ($startingDate) {
                     $query->whereDate('created_at', '>=', $startingDate);
                 }
             )->when(
-                $endingDate, function ($query) use ($endingDate) {
+                $endingDate,
+                function ($query) use ($endingDate) {
                     $query->whereDate('created_at', '<=', $endingDate);
                 }
             )
             ->when(
-                $period == DatePeriod::YEAR, function ($query) {
+                $period == DatePeriod::YEAR,
+                function ($query) {
                     $query->selectRaw("DATE_FORMAT(created_at, '%Y') as label");
                 }
             )
             ->when(
-                $period == DatePeriod::MONTH, function ($query) {
+                $period == DatePeriod::MONTH,
+                function ($query) {
                     $query->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as label");
                 }
             )
             ->when(
-                $period == DatePeriod::WEEK, function ($query) {
+                $period == DatePeriod::WEEK,
+                function ($query) {
                     $query->selectRaw("DATE_FORMAT(created_at, '%Y-%m-%U') as label");
                 }
             )
-            ->groupBy(
-                'label'
-            )
-            ->pluck(
-                'orders_total',
-                'label'
-            );
+            ->groupBy('label')
+            ->pluck('orders_total', 'label');
 
         if ($orders->isEmpty()) {
             return [];
@@ -115,9 +114,11 @@ class GetOrdersVolumeAction implements GetOrdersVolume
         $yearMonthFrom = $arrayOfDateFrom[0].'-'.$arrayOfDateFrom[1];
         $yearMonthTo = $arrayOfDateTo[0].'-'.$arrayOfDateTo[1];
         $range = CarbonPeriod::create(date($yearMonthFrom), date($yearMonthTo));
+
         $yearInWeeks = [];
         foreach ($range as $month) {
-            $month = $month->format('Y-m-W');
+            $formattedMonth = $month->format('Y-m (W)');
+            $month = Str::of($formattedMonth)->replace('(', '(week ');
             if (! in_array($month, $yearInWeeks)) {
                 $yearInWeeks[] = $month;
             }

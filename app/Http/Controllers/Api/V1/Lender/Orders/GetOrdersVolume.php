@@ -20,6 +20,6 @@ class GetOrdersVolume extends Controller
     {
         $volumes = $getOrdersVolume->handle($orderVolumeRequest->validated());
 
-        return $this->successResponse(['y_axis' => array_keys($volumes), 'x_axis' => array_values($volumes)]);
+        return $this->successResponse(['y_axis' => array_values($volumes), 'x_axis' => array_keys($volumes)]);
     }
 }
