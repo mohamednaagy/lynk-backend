@@ -17,6 +17,10 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
+/**
+ * @property mixed $status
+ * @property mixed $traderOrders
+ */
 class FinancingOrder extends Model implements HasMedia, Otpifiable
 {
     use HasFactory, InteractsWithMedia, BelongsToTenant, LogsActivity, HasScopes;
@@ -109,7 +113,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
         $this
             ->addMediaCollection(
-                'murabaha_purchase_order'
+                'murabha_purchase_order'
             )
             ->singleFile(
             );

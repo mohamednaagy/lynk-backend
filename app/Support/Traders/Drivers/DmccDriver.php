@@ -142,7 +142,7 @@ class DmccDriver implements TraderInterface
      * @param  FinancingOrder  $financingOrder
      * @return mixed
      */
-    private function getTtiId(FinancingOrder $financingOrder): mixed
+    public function getTtiId(FinancingOrder $financingOrder): mixed
     {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('getTTIIDForIssuePTP'))
@@ -182,7 +182,7 @@ class DmccDriver implements TraderInterface
      * @param  string  $ttiId
      * @return void
      */
-    private function respondPTPService(string $ttiId): void
+    public function respondPtpService(string $ttiId): void
     {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('respondPTPService'))
@@ -230,7 +230,7 @@ class DmccDriver implements TraderInterface
      * @param  string  $documentType
      * @return mixed
      */
-    private function getDocumentByTypeAndTransaction(string $ttiId, string $documentType): mixed
+    public function getDocumentByTypeAndTransaction(string $ttiId, string $documentType): mixed
     {
         // request PTP document
         $response = $this->soap
@@ -254,7 +254,7 @@ class DmccDriver implements TraderInterface
      * @param $type
      * @return void
      */
-    private function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
+    public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
     {
         if (! is_null($type)) {
             $traderOrder->order->addMediaFromBase64(
@@ -284,7 +284,7 @@ class DmccDriver implements TraderInterface
      * @param  string  $ttiId
      * @return void
      */
-    private function createTransferOwnershipToLenderDocument($traderOrder, string $ttiId): void
+    public function createTransferOwnershipToLenderDocument($traderOrder, string $ttiId): void
     {
         $html = view('transfer-ownership-to-lender')->render();
         $path = $traderOrder->order_id.'/DMCC-TOTL/'.$ttiId.'.pdf';
@@ -333,7 +333,7 @@ class DmccDriver implements TraderInterface
      * @param  string  $versionNo
      * @return void
      */
-    private function issueMurabahaPurchaseOffer(string $ttiId, string $versionNo): void
+    public function issueMurabahaPurchaseOffer(string $ttiId, string $versionNo): void
     {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('issueMurabahaPurchaseOffer'))
