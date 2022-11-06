@@ -17,6 +17,8 @@ class DownloadMediaFile extends Controller
      */
     public function __invoke(Media $media)
     {
+        $this->authorize('view', $media);
+
         try {
             return response()->download($media->getPath());
         } catch (\Throwable $th) {
