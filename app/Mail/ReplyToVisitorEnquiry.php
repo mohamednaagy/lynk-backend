@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\URL;
 
-class AccessVisitorEnquiry extends Mailable
+class ReplyToVisitorEnquiry extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -49,7 +49,7 @@ class AccessVisitorEnquiry extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.visitor-enquiry',
+            markdown: 'emails.enquiry-reply',
         );
     }
 

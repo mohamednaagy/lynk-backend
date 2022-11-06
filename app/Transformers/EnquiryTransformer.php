@@ -46,6 +46,7 @@ class EnquiryTransformer extends TransformerAbstract
         return $this->primitive([
             'email' => $enquiry->email,
             'name' => $enquiry->name,
+            'phone_number' => $enquiry->phone_number,
         ]);
     }
 }
