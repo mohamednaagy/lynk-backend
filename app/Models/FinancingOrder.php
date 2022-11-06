@@ -138,6 +138,13 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             )
             ->singleFile(
             );
+
+        $this
+            ->addMediaCollection(
+                'tti_holding_certificate'
+            )
+            ->singleFile(
+            );
     }
 
     public function company()

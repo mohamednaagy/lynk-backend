@@ -36,7 +36,8 @@ class ProcessDmccOrders implements ShouldQueue
                         FinancingOrderStatus::RespondedToPtp => $this->handleRespondedToPtpOrder($order),
                         FinancingOrderStatus::PtpDocumentRetrieved => $this->handlePtpDocumentRetrievedOrder($order),
                         FinancingOrderStatus::ContractSigned => $this->handleContractSignedOrder($order),
-                        FinancingOrderStatus::CommoditySoldToCustomer => $this->handleCommoditySoldToCustomerOrder($order)
+                        FinancingOrderStatus::CommoditySoldToCustomer => $this->handleCommoditySoldToCustomerOrder($order),
+                        FinancingOrderStatus::MurabhaOfferIssued => $this->handleMurabhaOfferIssuedOrder($order),
                     };
                 });
             });
@@ -53,10 +54,10 @@ class ProcessDmccOrders implements ShouldQueue
     private function handleClientWakalaCompletedOrder(FinancingOrder $financingOrder): void
     {
         DB::transaction(function () use ($financingOrder) {
-            if (! $financingOrder->traderOrders()->whereIn('status', [
+            if ($financingOrder->traderOrders()->whereIn('status', [
                 TraderOrderStatus::InProgress,
                 TraderOrderStatus::Completed,
-            ]) > 0) {
+            ])->count() > 0) {
                 return;
             }
 
@@ -82,15 +83,27 @@ class ProcessDmccOrders implements ShouldQueue
         DB::transaction(function () use ($financingOrder) {
             $lastTraderOrder = $financingOrder->traderOrders->last();
 
-            $document = Trader::driver('dmcc')->getDocumentByTypeAndTransaction(
+            $ptpDocument = Trader::driver('dmcc')->getDocumentByTypeAndTransaction(
                 $lastTraderOrder->reference,
                 'Promise to Purchase'
             );
 
             Trader::driver('dmcc')->attachDocumentToOrder(
                 $lastTraderOrder,
-                $document,
+                $ptpDocument,
                 'promise_to_purchase',
+                'base64'
+            );
+
+            $ttiDocument = Trader::driver('dmcc')->getDocumentByTypeAndTransaction(
+                $lastTraderOrder->reference,
+                'TTI - Holding certificate'
+            );
+
+            Trader::driver('dmcc')->attachDocumentToOrder(
+                $lastTraderOrder,
+                $ttiDocument,
+                'tti_holding_certificate',
                 'base64'
             );
 
@@ -107,6 +120,7 @@ class ProcessDmccOrders implements ShouldQueue
                 $lastTraderOrder,
                 $lastTraderOrder->reference
             );
+
             $this->updateOrderStatus($financingOrder, FinancingOrderStatus::CommodityPurchased);
         });
     }
@@ -140,6 +154,39 @@ class ProcessDmccOrders implements ShouldQueue
             );
 
             $this->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);
+        });
+    }
+
+    private function handleMurabhaOfferIssuedOrder(FinancingOrder $financingOrder): void
+    {
+        DB::transaction(function () use ($financingOrder) {
+            $lastTraderOrder = $financingOrder->traderOrders->last();
+
+            $mpoDocument = Trader::driver('dmcc')->getDocumentByTypeAndTransaction(
+                $lastTraderOrder->reference,
+                'Murabaha Purchase Offer Document'
+            );
+
+            Trader::driver('dmcc')->attachDocumentToOrder(
+                $lastTraderOrder,
+                $mpoDocument,
+                'murabha_purchase_order',
+                'base64'
+            );
+
+            $warrantDocument = Trader::driver('dmcc')->getDocumentByTypeAndTransaction(
+                $lastTraderOrder->reference,
+                'Warrant Amendment Except Warrant No'
+            );
+
+            Trader::driver('dmcc')->attachDocumentToOrder(
+                $lastTraderOrder,
+                $warrantDocument,
+                'warrant_amendment_except_warrant_no',
+                'base64'
+            );
+
+            $this->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabahaSaleCompleted);
         });
     }
 
