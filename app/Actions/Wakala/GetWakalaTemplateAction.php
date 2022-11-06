@@ -3,11 +3,10 @@
 namespace App\Actions\Wakala;
 
 use App\Actions\Contracts\GetSettingsClassInstance;
-use App\Actions\Contracts\Wakala\UpdateWakalaTemplate;
+use App\Actions\Contracts\Wakala\GetWakalaTemplate;
 use App\Enums\Area;
-use Mews\Purifier\Facades\Purifier;
 
-class UpdateWakalaTemplateAction implements UpdateWakalaTemplate
+class GetWakalaTemplateAction implements GetWakalaTemplate
 {
     protected string $templateNameSuffix = '_wakala_template';
 
@@ -21,13 +20,13 @@ class UpdateWakalaTemplateAction implements UpdateWakalaTemplate
     ) {
     }
 
-    public function handle(array $data): void
+    public function handle(string $templateType): array
     {
-        $wakalaTemplateName = $data['template_type'].$this->templateNameSuffix;
+        $wakalaTemplateName = $templateType.$this->templateNameSuffix;
         $settingInstance = $this->getSettingsClassInstance->handle(Area::SuperAdmin);
 
-        $settingInstance->$wakalaTemplateName = purifier::clean($data['wakala_template']);
-
-        $settingInstance->save();
+        return [
+            'wakala_template' => $settingInstance->$wakalaTemplateName,
+        ];
     }
 }
