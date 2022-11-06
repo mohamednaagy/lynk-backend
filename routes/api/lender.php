@@ -77,6 +77,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
             Route::apiResource('enquiries', EnquiryController::class);
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)
                 ->only('index', 'store');
+            Route::apiResource('enquiries.replies', EnquiryReplyController::class);
         });
     });
 });
