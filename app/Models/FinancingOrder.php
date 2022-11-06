@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollection;
 use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -74,66 +75,32 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function registerMediaCollections(): void
     {
         $this
-            ->addMediaCollection(
-                'client_wakala'
-            )
-            ->singleFile(
-            );
+            ->addMediaCollection(MediaCollection::ClientWakala)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'bank_wakala'
-            )
-            ->singleFile(
-            );
-
+            ->addMediaCollection(MediaCollection::BankWakala)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'contract'
-            )
-            ->singleFile(
-            );
-
+            ->addMediaCollection(MediaCollection::Contract)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'power_of_attorney'
-            )
-            ->singleFile(
-            );
-
+            ->addMediaCollection(MediaCollection::PowerOfAttorney)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'promise_to_purchase'
-            )
-            ->singleFile(
-            );
-
+            ->addMediaCollection(MediaCollection::PromiseToPurchase)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'murabaha_purchase_order'
-            )
-            ->singleFile(
-            );
-
+            ->addMediaCollection(MediaCollection::MurabahaPurchaseOrder)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'transfer_ownership_to_lender'
-            )
-            ->singleFile(
-            );
-
+            ->addMediaCollection(MediaCollection::TransferOwnershipToLender)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'selling_commodity_to_customer'
-            )
-            ->singleFile(
-            );
-
+            ->addMediaCollection(MediaCollection::SellingCommodityToCustomer)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'warrant_amendment_except_warrant_no'
-            )
-            ->singleFile(
-            );
+            ->addMediaCollection(MediaCollection::WarrantAmendmentExceptWarrantNo)
+            ->singleFile();
     }
 
     public function company()
@@ -153,12 +120,12 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function getPowerOfAttorneyAttribute()
     {
-        return $this->getFirstMediaUrl('power_of_attorney');
+        return $this->getFirstMediaUrl(MediaCollection::PowerOfAttorney);
     }
 
     public function getContractAttribute()
     {
-        return $this->getFirstMediaUrl('contract');
+        return $this->getFirstMediaUrl(MediaCollection::Contract);
     }
 
     public function traderOrders()
