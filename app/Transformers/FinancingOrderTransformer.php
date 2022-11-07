@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use League\Fractal\Resource\Collection;
 use League\Fractal\TransformerAbstract;
@@ -128,7 +129,7 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeHistory(FinancingOrder $financingOrder): Collection
     {
         return $this->collection(collect([
-            'client_wakala',
+            FinancingOrderMediaCollection::ClientWakala,
             FinancingOrderHistory::CommodityPurchased,
             FinancingOrderHistory::ContractSigned,
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,

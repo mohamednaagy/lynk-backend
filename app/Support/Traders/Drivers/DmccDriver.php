@@ -3,6 +3,7 @@
 namespace App\Support\Traders\Drivers;
 
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderMediaCollection;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -63,7 +64,7 @@ class DmccDriver implements TraderInterface
         $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Promise to Purchase');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetPtpDocument);
 
-        $this->attachDocumentToOrder($traderOrder, $document, 'promise_to_purchase', 'base64');
+        $this->attachDocumentToOrder($traderOrder, $document, FinancingOrderMediaCollection::PromiseToPurchase, 'base64');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachPtpDocumentToOrder);
 
         $this->createTransferOwnershipToLenderDocument($traderOrder, $ttiId);
@@ -86,7 +87,7 @@ class DmccDriver implements TraderInterface
         $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Murabaha Purchase Offer Document');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetMurabahaPurchaseOfferDocument);
 
-        $this->attachDocumentToOrder($traderOrder, $document, 'murabaha_purchase_order', 'base64');
+        $this->attachDocumentToOrder($traderOrder, $document, FinancingOrderMediaCollection::MurabahaPurchaseOrder, 'base64');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachMpoDocument);
 
         $this->updateOrderStatus($traderOrder, FinancingOrderStatus::IssueMurabahaOffer);
@@ -223,7 +224,7 @@ class DmccDriver implements TraderInterface
             'gotoOptions' => ['waitUntil' => 'networkidle0'],
         ]);
 
-        $this->attachDocumentToOrder($traderOrder, storage_path($path), 'selling_commodity_to_customer');
+        $this->attachDocumentToOrder($traderOrder, storage_path($path), FinancingOrderMediaCollection::SellingCommodityToCustomer);
     }
 
     /**
@@ -292,7 +293,7 @@ class DmccDriver implements TraderInterface
         PdfGenerator::outputFromHtml($html, $path, [
             'gotoOptions' => ['waitUntil' => 'networkidle0'],
         ]);
-        $this->attachDocumentToOrder($traderOrder, storage_path($path), 'transfer_ownership_to_lender');
+        $this->attachDocumentToOrder($traderOrder, storage_path($path), FinancingOrderMediaCollection::TransferOwnershipToLender);
     }
 
     /**
@@ -358,7 +359,7 @@ class DmccDriver implements TraderInterface
         $traderOrder = $this->getTraderOrderByTtiId($ttiId);
 
         $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Warrant Amendment Except Warrant No');
-        $this->attachDocumentToOrder($traderOrder, $document, 'warrant_amendment_except_warrant_no', 'base64');
+        $this->attachDocumentToOrder($traderOrder, $document, FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo, 'base64');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
 
         $this->updateOrderStatus($traderOrder, FinancingOrderStatus::MurabahaSaleCompleted);
