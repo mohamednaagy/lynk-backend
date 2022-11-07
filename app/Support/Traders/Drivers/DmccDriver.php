@@ -175,6 +175,7 @@ class DmccDriver implements TraderInterface
         return $financingOrder->traderOrders()->create([
             'provider' => 'dmcc',
             'reference' => $ttiId,
+            'status' => TraderOrderStatus::InProgress,
         ]);
     }
 
