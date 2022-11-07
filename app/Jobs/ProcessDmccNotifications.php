@@ -23,32 +23,40 @@ class ProcessDmccNotifications implements ShouldQueue
         collect(
             Trader::driver('dmcc')->fetchNotification('ACTIONABLE')
         )->each(function ($notification) {
-            if (
-                $notification->notificationHeaderAndEntity->notification
-                ==
-                'Action Required for Promise to Purchase'
-            ) {
-                ProcessDmccPtpNotification::dispatch($notification);
-            } elseif (
-                $notification->notificationHeaderAndEntity->notification
-                ==
-                'Action Required for Issue Murabaha Purchase Offer'
-            ) {
-                ProcessDmccMpoNotification::dispatch($notification);
+            try {
+                if (
+                    $notification->notificationHeaderAndEntity->notification
+                    ==
+                    'Action Required for Promise to Purchase'
+                ) {
+                    ProcessDmccPtpNotification::dispatch($notification);
+                } elseif (
+                    $notification->notificationHeaderAndEntity->notification
+                    ==
+                    'Action Required for Issue Murabaha Purchase Offer'
+                ) {
+                    ProcessDmccMpoNotification::dispatch($notification);
+                }
+            } catch (\Throwable $th) {
+                //throw $th;
             }
         });
 
         collect(
             Trader::driver('dmcc')->fetchNotification('FYI')
         )->each(function ($notification) {
-            if (
-                $notification->notificationHeaderAndEntity->notification
-                ==
-                'Murabaha Sale Completed'
-            ) {
-                ProcessDmccMpoSaleCompleteNotification::dispatch($notification)->chain([
-                    new ProcessUnprocessedDmccNotification($notification),
-                ]);
+            try {
+                if (
+                    $notification->notificationHeaderAndEntity->notification
+                    ==
+                    'Murabaha Sale Completed'
+                ) {
+                    ProcessDmccMpoSaleCompleteNotification::dispatch($notification)->chain([
+                        new ProcessUnprocessedDmccNotification($notification),
+                    ]);
+                }
+            } catch (\Throwable $th) {
+                //throw $th;
             }
         });
     }

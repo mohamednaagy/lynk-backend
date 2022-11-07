@@ -58,7 +58,7 @@ class MakeOrderProceed extends Controller
                 )->delay(now()->addMinutes(2));
 
                 Trader::driver($traderOrder->provider)
-                    ->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ResponsePtp);
+                    ->createTraderOrderHistory($traderOrder, FinancingOrderHistory::RespondPtp);
 
                 return $this->successResponse();
             }
