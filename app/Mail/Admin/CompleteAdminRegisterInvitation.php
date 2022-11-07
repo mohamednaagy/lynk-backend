@@ -53,7 +53,7 @@ class CompleteAdminRegisterInvitation extends Mailable
     public function content()
     {
         return new Content(
-            view: 'emails.invitation-complete-register',
+            markdown: 'emails.invitation-complete-register',
         );
     }
 
