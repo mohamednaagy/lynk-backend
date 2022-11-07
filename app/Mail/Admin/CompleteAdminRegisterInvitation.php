@@ -31,6 +31,7 @@ class CompleteAdminRegisterInvitation extends Mailable
         );
 
         $this->url = $url;
+        $this->user = $user;
     }
 
     /**
