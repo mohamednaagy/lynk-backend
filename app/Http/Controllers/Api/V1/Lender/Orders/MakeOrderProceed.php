@@ -54,7 +54,7 @@ class MakeOrderProceed extends Controller
                 $traderOrder = $order->traderOrders->last();
                 UpdateFinancialOrderStatus::dispatch(
                     $traderOrder,
-                    FinancingOrderStatus::SellingCommodityToCustomer
+                    FinancingOrderStatus::CommoditySoldToCustomer
                 )->delay(now()->addMinutes(2));
 
                 Trader::driver($traderOrder->provider)

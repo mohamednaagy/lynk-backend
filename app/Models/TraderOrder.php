@@ -16,7 +16,7 @@ class TraderOrder extends Model
         'id',
         'financing_order_id',
         'provider',
-        'type',
+        'status',
         'reference',
         'data',
     ];
@@ -27,7 +27,7 @@ class TraderOrder extends Model
             'id',
             'financing_order_id',
             'provider',
-            'type',
+            'status',
             'reference',
         ];
     }

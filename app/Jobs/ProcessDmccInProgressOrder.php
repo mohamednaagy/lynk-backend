@@ -39,7 +39,7 @@ class ProcessDmccInProgressOrder implements ShouldQueue
         DB::transaction(function () {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             // TODO: check url value
-            app()->make(AskClientWakala::class)->handle($financingOrder, 'http://localhost');
+//            app()->make(AskClientWakala::class)->handle($financingOrder, 'http://localhost');
             Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingClientWakala);
         });
     }

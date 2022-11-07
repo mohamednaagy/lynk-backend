@@ -39,9 +39,14 @@ class ProcessDmccPtpNotification implements ShouldQueue
         DB::transaction(function () {
             $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
             $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
+
+            if (! $traderOrder) {
+                return;
+            }
+
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
-            if ($financingOrder->status !== FinancingOrderStatus::WaitingPurchasingCommodity) {
+            if ($financingOrder->status->value !== FinancingOrderStatus::WaitingPurchasingCommodity) {
                 return;
             }
 
