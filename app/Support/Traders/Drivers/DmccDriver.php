@@ -3,7 +3,6 @@
 namespace App\Support\Traders\Drivers;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\PdfGenerator\PdfGenerator;
@@ -11,7 +10,6 @@ use App\Support\Traders\Contracts\TraderInterface;
 use CodeDredd\Soap\Client\Response;
 use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -53,45 +51,6 @@ class DmccDriver implements TraderInterface
         return $ttiId;
     }
 
-    public function respondPtp(string $ttiId)
-    {
-        $this->respondPTPService($ttiId);
-
-        $traderOrder = $this->getTraderOrderByTtiId($ttiId);
-
-        $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Promise to Purchase');
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetPtpDocument);
-
-        $this->attachDocumentToOrder($traderOrder, $document, 'promise_to_purchase', 'base64');
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachPtpDocumentToOrder);
-
-        $this->createTransferOwnershipToLenderDocument($traderOrder, $ttiId);
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
-
-        $this->updateOrderStatus($traderOrder, FinancingOrderStatus::CommodityPurchased);
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CommodityPurchased);
-    }
-
-    public function issueMurabaha(string $ttiId)
-    {
-        $traderOrder = $this->getTraderOrderByTtiId($ttiId);
-        if ($traderOrder->order->status->value !== FinancingOrderStatus::ContractSigned) {
-            throw new UnprocessableEntityHttpException();
-        }
-        $versionNumber = $this->uploadTTIDocumentAndGetVersionNumber($ttiId);
-
-        $this->issueMurabahaPurchaseOffer($ttiId, $versionNumber);
-
-        $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Murabaha Purchase Offer Document');
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetMurabahaPurchaseOfferDocument);
-
-        $this->attachDocumentToOrder($traderOrder, $document, 'murabaha_purchase_order', 'base64');
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachMpoDocument);
-
-        $this->updateOrderStatus($traderOrder, FinancingOrderStatus::IssueMurabahaOffer);
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::IssueMurabahaOffer);
-    }
-
     public function fetchNotification(string $type): ?array
     {
         $response = $this->soap
@@ -120,28 +79,16 @@ class DmccDriver implements TraderInterface
         }
     }
 
-    /**
-     * @param $url
-     * @return string
-     */
     private function prefixUrl($url): string
     {
         return 'https://'.config('trader.providers.dmcc.username').':'.config('trader.providers.dmcc.password').'@na2.ai.dm-us.informaticacloud.com/active-bpel/soap/'.$url.'?wsdl';
     }
 
-    /**
-     * @param  Response  $response
-     * @return bool
-     */
     private function isSuccess(Response $response): bool
     {
         return $response->successful() && $response->json()['successCode'] === '0000';
     }
 
-    /**
-     * @param  FinancingOrder  $financingOrder
-     * @return mixed
-     */
     public function getTtiId(FinancingOrder $financingOrder): mixed
     {
         $response = $this->soap
@@ -164,11 +111,6 @@ class DmccDriver implements TraderInterface
         return $response->ttiId;
     }
 
-    /**
-     * @param  FinancingOrder  $financingOrder
-     * @param  string  $ttiId
-     * @return TraderOrder|Model
-     */
     private function createTraderOrder(FinancingOrder $financingOrder, string $ttiId): Model|TraderOrder
     {
         return $financingOrder->traderOrders()->create([
@@ -178,10 +120,6 @@ class DmccDriver implements TraderInterface
         ]);
     }
 
-    /**
-     * @param  string  $ttiId
-     * @return void
-     */
     public function respondPtpService(string $ttiId): void
     {
         $response = $this->soap
@@ -197,39 +135,16 @@ class DmccDriver implements TraderInterface
         }
     }
 
-    /**
-     * @param  string  $ttiId
-     * @return Model|Builder|null
-     */
-    private function getTraderOrderByTtiId(string $ttiId): Model|Builder|null
-    {
-        return TraderOrder::query()
-            ->where('type', 'TTIID')
-            ->where('reference', $ttiId)
-            ->first();
-    }
-
-    /**
-     * @param $traderOrder
-     * @param  string  $ttiId
-     * @return void
-     */
-    public function createSellingCommodityToCustomerDocument($traderOrder, string $ttiId): void
+    public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
         $html = view('selling-commodity-to-customer')->render();
-        $path = $traderOrder->financing_order_id.'/DMCC-SCTC/'.$ttiId.'.pdf';
+        $path = $traderOrder->financing_order_id.'/DMCC-SCTC/'.$traderOrder->reference.'.pdf';
         PdfGenerator::outputFromHtml($html, $path, [
             'gotoOptions' => ['waitUntil' => 'networkidle0'],
         ]);
-
         $this->attachDocumentToOrder($traderOrder, storage_path($path), 'selling_commodity_to_customer');
     }
 
-    /**
-     * @param  string  $ttiId
-     * @param  string  $documentType
-     * @return mixed
-     */
     public function getDocumentByTypeAndTransaction(string $ttiId, string $documentType): mixed
     {
         // request PTP document
@@ -247,18 +162,11 @@ class DmccDriver implements TraderInterface
         return $response->object()->getdocument[0]->getDocumentByTypeResponse[0]->document;
     }
 
-    /**
-     * @param $traderOrder
-     * @param $document
-     * @param $collectionName
-     * @param $type
-     * @return void
-     */
     public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
     {
         if (! is_null($type)) {
             $traderOrder->order->addMediaFromBase64(
-                base64_decode($document)
+                $document
             )->toMediaCollection($collectionName);
         } else {
             $traderOrder->order->addMedia(
@@ -267,38 +175,24 @@ class DmccDriver implements TraderInterface
         }
     }
 
-    /**
-     * @param $traderOrder
-     * @param  int  $status
-     * @return void
-     */
-    private function updateOrderStatus($traderOrder, int $status): void
+    public function updateOrderStatus($order, int $status): void
     {
-        $traderOrder->order->update([
+        $order->update([
             'status' => $status,
         ]);
     }
 
-    /**
-     * @param $traderOrder
-     * @param  string  $ttiId
-     * @return void
-     */
-    public function createTransferOwnershipToLenderDocument($traderOrder, string $ttiId): void
+    public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
         $html = view('transfer-ownership-to-lender')->render();
-        $path = $traderOrder->order_id.'/DMCC-TOTL/'.$ttiId.'.pdf';
+        $path = $traderOrder->financing_order_id.'/DMCC-TOTL/'.$traderOrder->reference.'.pdf';
         PdfGenerator::outputFromHtml($html, $path, [
             'gotoOptions' => ['waitUntil' => 'networkidle0'],
         ]);
         $this->attachDocumentToOrder($traderOrder, storage_path($path), 'transfer_ownership_to_lender');
     }
 
-    /**
-     * @param  TraderOrder  $traderOrder
-     * @param  int  $action
-     * @return void
-     */
+    // TODO: check with a.medhat
     public function createTraderOrderHistory(TraderOrder $traderOrder, int $action): void
     {
         $traderOrder->traderHistories()->create([
@@ -306,10 +200,6 @@ class DmccDriver implements TraderInterface
         ]);
     }
 
-    /**
-     * @param  string  $ttiId
-     * @return mixed
-     */
     private function uploadTTIDocumentAndGetVersionNumber(string $ttiId): mixed
     {
         // upload TTIDocument for now it sample PDF to get version
@@ -328,11 +218,6 @@ class DmccDriver implements TraderInterface
         return $response->versionNo;
     }
 
-    /**
-     * @param  string  $ttiId
-     * @param  string  $versionNo
-     * @return void
-     */
     public function issueMurabahaPurchaseOffer(string $ttiId, string $versionNo): void
     {
         $response = $this->soap
@@ -346,21 +231,5 @@ class DmccDriver implements TraderInterface
         if (! $this->isSuccess($response)) {
             throw new UnprocessableEntityHttpException();
         }
-    }
-
-    /**
-     * @param  string  $ttiId
-     * @return void
-     */
-    public function murabahaSaleCompleted(string $ttiId): void
-    {
-        $traderOrder = $this->getTraderOrderByTtiId($ttiId);
-
-        $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Warrant Amendment Except Warrant No');
-        $this->attachDocumentToOrder($traderOrder, $document, 'warrant_amendment_except_warrant_no', 'base64');
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
-
-        $this->updateOrderStatus($traderOrder, FinancingOrderStatus::MurabahaSaleCompleted);
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::MurabahaSaleCompleted);
     }
 }

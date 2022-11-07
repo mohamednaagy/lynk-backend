@@ -2,12 +2,16 @@
 
 namespace App\Jobs;
 
+use App\Enums\FinancingOrderStatus;
+use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 
 class ProcessDmccMpoNotification implements ShouldQueue
 {
@@ -32,7 +36,23 @@ class ProcessDmccMpoNotification implements ShouldQueue
      */
     public function handle(): void
     {
-        $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
-        Trader::driver('dmcc')->issueMurabaha($ttiId);
+        DB::transaction(function () {
+            $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
+            $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
+            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
+
+            if ($financingOrder->status !== FinancingOrderStatus::CommoditySoldToCustomer) {
+                return;
+            }
+
+            $versionNo = Trader::driver('dmcc')->uploadTTIDocumentAndGetVersionNumber($ttiId);
+
+            Trader::driver('dmcc')->issueMurabahaPurchaseOffer(
+                $ttiId,
+                $versionNo
+            );
+
+            Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);
+        });
     }
 }
