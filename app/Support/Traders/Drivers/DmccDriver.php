@@ -156,6 +156,17 @@ class DmccDriver implements TraderInterface
      */
     private function getTtiId(FinancingOrder $financingOrder): mixed
     {
+        Log::debug('getTTiId2', [
+            'currency' => 'SAR',
+            'costPrice' => $financingOrder->amount,
+            'profit' => $financingOrder->selling_price - $financingOrder->amount,
+            'paymentTerms' => config('trader.providers.dmcc.tti.payment_terms'),
+            'unitOfDuration' => config('trader.providers.dmcc.tti.unit_of_duration'),
+            'product' => null,
+            'registeredMember' => config('trader.providers.dmcc.tti.registered_member'),
+            'client' => null,
+        ]);
+
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('getTTIIDForIssuePTP'))
             ->call('getTTIIDForIssuePTP', [
