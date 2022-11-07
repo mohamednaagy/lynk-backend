@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Enums\Role;
 use App\Models\User;
+use App\Support\Authorizations\FinancingOrderMediaAuthorize;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -28,13 +28,11 @@ class MediaPolicy
      * @param  \App\Models\Media  $media
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(User $user, Media $media)
+    public function view(User $user, Media $media, $area = null)
     {
-        $order = $media->model;
+        $mediaAuthorize = new FinancingOrderMediaAuthorize($user, $media);
 
-        return $user->company_id == optional($order)->company_id
-            &&
-            ($user->hasAnyRole([Role::Admin, Role::LenderSupervisor]) || $user->id == optional($order)->creator_id);
+        return $mediaAuthorize->doesAreaHasAccessToCollection($area) && $mediaAuthorize->conditions();
     }
 
     /**
