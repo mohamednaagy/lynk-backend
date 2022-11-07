@@ -14,6 +14,8 @@ use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -58,6 +60,10 @@ class DmccDriver implements TraderInterface
     {
         $traderOrder = $this->getTraderOrderByTtiId($ttiId);
 
+        if (! $traderOrder) {
+            return;
+        }
+
         $this->respondPTPService($ttiId);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::RespondPtp);
 
@@ -77,6 +83,11 @@ class DmccDriver implements TraderInterface
     public function issueMurabaha(string $ttiId)
     {
         $traderOrder = $this->getTraderOrderByTtiId($ttiId);
+
+        if (! $traderOrder) {
+            return;
+        }
+
         if ($traderOrder->order->status->value !== FinancingOrderStatus::ContractSigned) {
             throw new UnprocessableEntityHttpException();
         }
@@ -146,6 +157,17 @@ class DmccDriver implements TraderInterface
      */
     private function getTtiId(FinancingOrder $financingOrder): mixed
     {
+        Log::debug('getTTiId2', [
+            'currency' => 'SAR',
+            'costPrice' => $financingOrder->amount,
+            'profit' => $financingOrder->selling_price - $financingOrder->amount,
+            'paymentTerms' => config('trader.providers.dmcc.tti.payment_terms'),
+            'unitOfDuration' => config('trader.providers.dmcc.tti.unit_of_duration'),
+            'product' => null,
+            'registeredMember' => config('trader.providers.dmcc.tti.registered_member'),
+            'client' => null,
+        ]);
+
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('getTTIIDForIssuePTP'))
             ->call('getTTIIDForIssuePTP', [
@@ -158,6 +180,8 @@ class DmccDriver implements TraderInterface
                 'registeredMember' => config('trader.providers.dmcc.tti.registered_member'),
                 'client' => null,
             ])->object();
+
+        Log::debug('getTTiId', [$response]);
 
         if (! isset($response->ttiId)) {
             throw new UnprocessableEntityHttpException();
@@ -224,7 +248,7 @@ class DmccDriver implements TraderInterface
             'gotoOptions' => ['waitUntil' => 'networkidle0'],
         ]);
 
-        $this->attachDocumentToOrder($traderOrder, storage_path($path), FinancingOrderMediaCollection::SellingCommodityToCustomer);
+        $this->attachDocumentToOrder($traderOrder, storage_path('app/'.$path), FinancingOrderMediaCollection::SellingCommodityToCustomer);
     }
 
     /**
@@ -260,8 +284,8 @@ class DmccDriver implements TraderInterface
     {
         if (! is_null($type)) {
             $traderOrder->order->addMediaFromBase64(
-                base64_decode($document)
-            )->toMediaCollection($collectionName);
+                $document
+            )->usingFileName('.pdf')->toMediaCollection($collectionName);
         } else {
             $traderOrder->order->addMedia(
                 $document
@@ -289,11 +313,14 @@ class DmccDriver implements TraderInterface
     private function createTransferOwnershipToLenderDocument($traderOrder, string $ttiId): void
     {
         $html = view('transfer-ownership-to-lender')->render();
-        $path = $traderOrder->order_id.'/DMCC-TOTL/'.$ttiId.'.pdf';
+
+        $path = $traderOrder->financing_order_id.'/DMCC-TOTL/'.$ttiId.'.pdf';
+
         PdfGenerator::outputFromHtml($html, $path, [
             'gotoOptions' => ['waitUntil' => 'networkidle0'],
         ]);
-        $this->attachDocumentToOrder($traderOrder, storage_path($path), FinancingOrderMediaCollection::TransferOwnershipToLender);
+
+        $this->attachDocumentToOrder($traderOrder, storage_path('app/'.$path), FinancingOrderMediaCollection::TransferOwnershipToLender);
     }
 
     /**
@@ -358,7 +385,12 @@ class DmccDriver implements TraderInterface
     {
         $traderOrder = $this->getTraderOrderByTtiId($ttiId);
 
+        if (! $traderOrder) {
+            return;
+        }
+
         $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Warrant Amendment Except Warrant No');
+        Storage::put('test.pdf', base64_decode($document));
         $this->attachDocumentToOrder($traderOrder, $document, FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo, 'base64');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
 
