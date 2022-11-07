@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Config;
 use Modules\Grantify\Facades\Grantify;
 
 if (! function_exists('validate_said')) {
@@ -42,5 +43,12 @@ if (! function_exists('perm')) {
         }
 
         return 'permission:'.implode('|', $permissionsArray);
+    }
+}
+
+if (! function_exists('whitelist_hosts')) {
+    function whitelist_hosts()
+    {
+        return explode(',', Config::get('app.host_whitelist'));
     }
 }
