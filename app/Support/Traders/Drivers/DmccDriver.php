@@ -13,6 +13,7 @@ use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -167,6 +168,8 @@ class DmccDriver implements TraderInterface
                 'registeredMember' => config('trader.providers.dmcc.tti.registered_member'),
                 'client' => null,
             ])->object();
+
+        Log::debug('getTTiId', [$response]);
 
         if (! isset($response->ttiId)) {
             throw new UnprocessableEntityHttpException();
