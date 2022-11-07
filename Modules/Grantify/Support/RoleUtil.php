@@ -29,8 +29,12 @@ class RoleUtil
      */
     public static function getPermissionsForRole(string $roleName): array|string
     {
-        $role = self::$roleMap[$roleName];
+        if (isset(self::$roleMap[$roleName])) {
+            $role = self::$roleMap[$roleName];
 
-        return $role::$basePermissions;
+            return $role::$basePermissions;
+        }
+
+        return [];
     }
 }
