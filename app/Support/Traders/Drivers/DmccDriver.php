@@ -14,6 +14,7 @@ use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -58,6 +59,10 @@ class DmccDriver implements TraderInterface
     {
         $traderOrder = $this->getTraderOrderByTtiId($ttiId);
 
+        if (! $traderOrder) {
+            return;
+        }
+
         $this->respondPTPService($ttiId);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::RespondPtp);
 
@@ -77,6 +82,11 @@ class DmccDriver implements TraderInterface
     public function issueMurabaha(string $ttiId)
     {
         $traderOrder = $this->getTraderOrderByTtiId($ttiId);
+
+        if (! $traderOrder) {
+            return;
+        }
+
         if ($traderOrder->order->status->value !== FinancingOrderStatus::ContractSigned) {
             throw new UnprocessableEntityHttpException();
         }
@@ -236,7 +246,7 @@ class DmccDriver implements TraderInterface
             'gotoOptions' => ['waitUntil' => 'networkidle0'],
         ]);
 
-        $this->attachDocumentToOrder($traderOrder, storage_path($path), 'selling_commodity_to_customer');
+        $this->attachDocumentToOrder($traderOrder, storage_path('app/'.$path), 'selling_commodity_to_customer');
     }
 
     /**
@@ -272,8 +282,8 @@ class DmccDriver implements TraderInterface
     {
         if (! is_null($type)) {
             $traderOrder->order->addMediaFromBase64(
-                base64_decode($document)
-            )->toMediaCollection($collectionName);
+                $document
+            )->usingFileName('.pdf')->toMediaCollection($collectionName);
         } else {
             $traderOrder->order->addMedia(
                 $document
@@ -301,11 +311,14 @@ class DmccDriver implements TraderInterface
     private function createTransferOwnershipToLenderDocument($traderOrder, string $ttiId): void
     {
         $html = view('transfer-ownership-to-lender')->render();
-        $path = $traderOrder->order_id.'/DMCC-TOTL/'.$ttiId.'.pdf';
+
+        $path = $traderOrder->financing_order_id.'/DMCC-TOTL/'.$ttiId.'.pdf';
+
         PdfGenerator::outputFromHtml($html, $path, [
             'gotoOptions' => ['waitUntil' => 'networkidle0'],
         ]);
-        $this->attachDocumentToOrder($traderOrder, storage_path($path), 'transfer_ownership_to_lender');
+
+        $this->attachDocumentToOrder($traderOrder, storage_path('app/'.$path), 'transfer_ownership_to_lender');
     }
 
     /**
@@ -370,7 +383,12 @@ class DmccDriver implements TraderInterface
     {
         $traderOrder = $this->getTraderOrderByTtiId($ttiId);
 
+        if (! $traderOrder) {
+            return;
+        }
+
         $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Warrant Amendment Except Warrant No');
+        Storage::put('test.pdf', base64_decode($document));
         $this->attachDocumentToOrder($traderOrder, $document, 'warrant_amendment_except_warrant_no', 'base64');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
 

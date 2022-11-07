@@ -21,13 +21,13 @@ class FinancingOrderTransformer extends TransformerAbstract
         'power_of_attorney',
         'is_approved',
         'status_reason',
-        'history',
     ];
 
     protected array $availableIncludes = [
         'creator',
         'approver',
         'created_at',
+        'history',
     ];
 
     public function transform(FinancingOrder $financingOrder)
