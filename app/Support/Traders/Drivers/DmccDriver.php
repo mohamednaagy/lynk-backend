@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\PdfGenerator\PdfGenerator;
@@ -174,8 +175,20 @@ class DmccDriver implements TraderInterface
     {
         return $financingOrder->traderOrders()->create([
             'provider' => 'dmcc',
-            'type' => 'TTIID',
             'reference' => $ttiId,
+            'status' => TraderOrderStatus::InProgress,
+        ]);
+    }
+
+    /**
+     * @param  TraderOrder  $traderOrder
+     * @param  int  $status
+     * @return bool
+     */
+    private function updateTraderOrderStatus(TraderOrder $traderOrder, int $status): bool
+    {
+        return $traderOrder->update([
+            'status' => $status,
         ]);
     }
 
@@ -205,8 +218,8 @@ class DmccDriver implements TraderInterface
     private function getTraderOrderByTtiId(string $ttiId): Model|Builder|null
     {
         return TraderOrder::query()
-            ->where('type', 'TTIID')
             ->where('reference', $ttiId)
+            ->where('status', TraderOrderStatus::InProgress)
             ->first();
     }
 

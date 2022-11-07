@@ -18,6 +18,7 @@ class TraderOrder extends Model
         'provider',
         'type',
         'reference',
+        'status',
         'data',
     ];
 
@@ -29,6 +30,7 @@ class TraderOrder extends Model
             'provider',
             'type',
             'reference',
+            'status',
         ];
     }
 
