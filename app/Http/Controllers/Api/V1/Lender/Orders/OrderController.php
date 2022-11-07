@@ -49,7 +49,7 @@ class OrderController extends Controller
         $order->load('creator', 'approver');
 
         return fractal($order, new FinancingOrderTransformer())
-            ->parseIncludes(['creator', 'approver', 'history'])
+            ->parseIncludes(['creator', 'approver'])
             ->respond();
     }
 
