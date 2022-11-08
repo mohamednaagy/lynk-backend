@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\SettingsController;
+use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
 use App\Http\Controllers\Api\V1\Admin\Transactions\TransactionController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
@@ -64,6 +65,10 @@ Route::prefix('v1/admin')->group(function () {
         Route::prefix('settings')->group(function () {
             Route::get('/', [SettingsController::class, 'index']);
             Route::put('/update', [SettingsController::class, 'update']);
+            Route::get('/wakala-templates/{type}', [WakalaTemplateController::class, 'show'])
+                ->where('type', 'client|company');
+            Route::put('/wakala-templates/{type}', [WakalaTemplateController::class, 'update'])
+                ->where('type', 'client|company');
         });
 
         Route::apiResource('companies', CompanyController::class);
