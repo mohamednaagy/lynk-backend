@@ -6,6 +6,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Support\QueryScoper\QueryScoper;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class OrderNeedActionScope extends QueryScoper
 {
@@ -32,7 +33,7 @@ class OrderNeedActionScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'need_action' => ['required', 'boolean'],
+                'need_action' => ['required', Rule::in('1', '0')],
             ]
         );
     }
@@ -46,11 +47,17 @@ class OrderNeedActionScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data)
     {
-        return $builder->whereIn(
-            'status',
-            [
-                FinancingOrderStatus::PendingApproval, FinancingOrderStatus::InProgress, FinancingOrderStatus::Rejected,
-            ]
-        );
+        if ($data['need_action'] === '1') {
+            return $builder->whereIn(
+                'status',
+                [
+                    FinancingOrderStatus::PendingApproval,
+                    FinancingOrderStatus::InProgress,
+                    FinancingOrderStatus::Rejected,
+                ]
+            );
+        }
+
+        return $builder;
     }
 }
