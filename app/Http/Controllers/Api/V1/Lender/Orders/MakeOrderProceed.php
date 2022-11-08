@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala;
-use App\Actions\Contracts\Orders\ApproveOrder as ApproveOrderInterface;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
@@ -21,15 +20,17 @@ class MakeOrderProceed extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  Request  $request
-     * @param  ApproveOrderInterface  $approveOrder
-     * @param  FinancingOrder  $order
+     * @param  MakeOrderProceedRequest  $request
+     * @param  AcceptClientWakala  $acceptClientWakala
+     * @param  int  $order
      * @return JsonResponse
+     *
+     * @throws \Throwable
      */
     public function __invoke(
         MakeOrderProceedRequest $request,
         AcceptClientWakala $acceptClientWakala,
-        $order
+        int $order
     ) {
         return DB::transaction(function () use ($request, $acceptClientWakala, $order) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
@@ -62,6 +63,8 @@ class MakeOrderProceed extends Controller
 
                 return $this->successResponse();
             }
+
+            return $this->successResponse();
         });
     }
 }
