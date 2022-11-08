@@ -54,14 +54,14 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     protected function phoneNumberCountryCode(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => "{$this->phone_number->getCountry()}",
+            get: fn () => $this->phone_number->getCountry(),
         );
     }
 
     protected function mobileDialingPhoneNumber(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => "{$this->phone_number->formatForMobileDialingInCountry($this->phone_number->getCountry())}",
+            get: fn () => $this->phone_number->formatForMobileDialingInCountry($this->phone_number->getCountry()),
         );
     }
 
@@ -74,66 +74,40 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function registerMediaCollections(): void
     {
         $this
-            ->addMediaCollection(
-                'client_wakala'
-            )
-            ->singleFile(
-            );
-        $this
-            ->addMediaCollection(
-                'bank_wakala'
-            )
-            ->singleFile(
-            );
+            ->addMediaCollection('client_wakala')
+            ->singleFile();
 
         $this
-            ->addMediaCollection(
-                'contract'
-            )
-            ->singleFile(
-            );
+            ->addMediaCollection('bank_wakala')
+            ->singleFile();
 
         $this
-            ->addMediaCollection(
-                'power_of_attorney'
-            )
-            ->singleFile(
-            );
+            ->addMediaCollection('contract')
+            ->singleFile();
 
         $this
-            ->addMediaCollection(
-                'promise_to_purchase'
-            )
-            ->singleFile(
-            );
+            ->addMediaCollection('power_of_attorney')
+            ->singleFile();
 
         $this
-            ->addMediaCollection(
-                'murabaha_purchase_order'
-            )
-            ->singleFile(
-            );
+            ->addMediaCollection('promise_to_purchase')
+            ->singleFile();
 
         $this
-            ->addMediaCollection(
-                'transfer_ownership_to_lender'
-            )
-            ->singleFile(
-            );
+            ->addMediaCollection('murabaha_purchase_order')
+            ->singleFile();
 
         $this
-            ->addMediaCollection(
-                'selling_commodity_to_customer'
-            )
-            ->singleFile(
-            );
+            ->addMediaCollection('transfer_ownership_to_lender')
+            ->singleFile();
 
         $this
-            ->addMediaCollection(
-                'warrant_amendment_except_warrant_no'
-            )
-            ->singleFile(
-            );
+            ->addMediaCollection('selling_commodity_to_customer')
+            ->singleFile();
+
+        $this
+            ->addMediaCollection('warrant_amendment_except_warrant_no')
+            ->singleFile();
     }
 
     public function company()
