@@ -14,7 +14,8 @@ return new class() extends Migration
     public function up()
     {
         Schema::table('financing_orders', function (Blueprint $table) {
-            $table->longText('reference_number')->nullable()->change();
+            $table->string('reference_number')->nullable()->change();
+            $table->dropUnique(['reference_number', 'company_id']);
         });
     }
 
