@@ -63,7 +63,9 @@ class UserTransformer extends TransformerAbstract
 
     public function includeCompany(User $user)
     {
-        $data = fractal($user->company, new CompanyTransformer())->toArray();
+        $data = fractal($user->company, new CompanyTransformer())
+            ->parseIncludes(['id', 'name', 'status'])
+            ->toArray();
 
         return $this->primitive($data['data']);
     }
