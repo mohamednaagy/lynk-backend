@@ -16,8 +16,10 @@ class UpdateAdminUserAction implements UpdateAdminUser
      */
     public function handle(User $user, array $data): bool
     {
-        if (array_key_exists('password', $data) && $data['password'] !== null) {
+        if (array_key_exists('password', $data) && ! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
+        } else {
+            $data['password'] = $user->password;
         }
 
         return $user->update(
