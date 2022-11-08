@@ -3,8 +3,8 @@
 namespace App\Support\Traders\Drivers;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderMediaCollection;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\PdfGenerator\PdfGenerator;

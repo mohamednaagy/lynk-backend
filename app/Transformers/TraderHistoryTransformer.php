@@ -3,7 +3,7 @@
 namespace App\Transformers;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use Illuminate\Support\Collection;
 use League\Fractal\TransformerAbstract;

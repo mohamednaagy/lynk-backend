@@ -3,7 +3,7 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
-use App\Enums\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use Illuminate\Support\Arr;
 use Propaganistas\LaravelPhone\PhoneNumber;

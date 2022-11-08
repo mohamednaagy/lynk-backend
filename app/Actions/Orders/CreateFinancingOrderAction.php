@@ -4,7 +4,7 @@ namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Wallets\CreateTransactions;
-use App\Enums\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Models\FinancingOrder;

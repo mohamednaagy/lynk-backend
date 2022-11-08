@@ -3,7 +3,7 @@
 namespace App\Actions\Clients;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala;
-use App\Enums\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;

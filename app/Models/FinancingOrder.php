@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Enums\FinancingOrderMediaCollection;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
