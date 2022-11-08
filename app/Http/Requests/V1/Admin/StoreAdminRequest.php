@@ -36,7 +36,7 @@ class StoreAdminRequest extends FormRequest
             'permissions.*.subject' => ['required', 'string', new EnumValue(Subject::class)],
             'permissions.*.actions' => ['required', 'array'],
             'permissions.*.actions.*' => ['required', 'string', new EnumValue(Action::class)],
-            'redirect_url' => ['required', 'url', new HostWhitelistRule()],
+            'redirect_url' => ['required', 'url', 'starts_with:http', new HostWhitelistRule()],
         ];
     }
 }

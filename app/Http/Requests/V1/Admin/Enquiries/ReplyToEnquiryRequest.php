@@ -29,7 +29,7 @@ class ReplyToEnquiryRequest extends FormRequest
         return [
             'body' => ['required', 'string', 'max:1000'],
             'status' => ['nullable', 'int', new EnumValue(EnquiryStatus::class)],
-            'redirect_url' => ['required', 'url', new HostWhitelistRule()],
+            'redirect_url' => ['required', 'url', 'starts_with:http', new HostWhitelistRule()],
         ];
     }
 }

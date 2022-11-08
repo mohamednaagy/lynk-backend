@@ -31,7 +31,7 @@ class StoreVisitorEnquiryRequest extends FormRequest
             'email' => ['required', 'email', 'max:255'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
-            'redirect_url' => ['required', 'url', new HostWhitelistRule()],
+            'redirect_url' => ['required', 'url', 'starts_with:http', new HostWhitelistRule()],
         ];
     }
 }

@@ -30,7 +30,7 @@ class SendLinkRequest extends FormRequest
         return [
             'email' => ['required', 'email', Rule::exists(User::class, 'email')],
             'company_unique_name' => ['nullable', 'string', Rule::exists(Company::class, 'unique_name')],
-            'redirect_url' => ['required', 'url', new HostWhitelistRule()],
+            'redirect_url' => ['required', 'url', 'starts_with:http', new HostWhitelistRule()],
         ];
     }
 }
