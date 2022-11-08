@@ -4,7 +4,7 @@ namespace App\Actions\Clients;
 
 use App\Actions\Contracts\Clients\AskClientWakala;
 use App\Models\FinancingOrder;
-use App\Support\Sms\Sms;
+use App\Support\SMS2\Sms;
 use Illuminate\Support\Facades\URL;
 use Shivella\Bitly\Facade\Bitly;
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Support\Sms\Drivers;
+namespace App\Support\SMS2\Drivers;
 
 use App\Exceptions\BalanceIsNotEnoughException;
 use App\Exceptions\InvalidLoginInfoException;
 use App\Exceptions\MobileNumbersIsNotCorrectException;
 use App\Exceptions\MSGDuplicatedException;
-use App\Support\Sms\SmsDriverInterface;
+use App\Support\SMS2\SmsDriverInterface;
 use Illuminate\Support\Facades\Http;
 
 class MsegatDriver implements SmsDriverInterface

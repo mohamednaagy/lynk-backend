@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Support\Sms;
+namespace App\Support\SMS2;
 
-use App\Support\Sms\Drivers\FakeDriver;
-use App\Support\Sms\Drivers\MsegatDriver;
+use App\Support\SMS2\Drivers\FakeDriver;
+use App\Support\SMS2\Drivers\MsegatDriver;
 use Illuminate\Support\Manager;
 
 class SmsManager extends Manager
