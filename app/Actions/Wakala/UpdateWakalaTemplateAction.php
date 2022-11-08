@@ -26,7 +26,7 @@ class UpdateWakalaTemplateAction implements UpdateWakalaTemplate
         $wakalaTemplateName = $data['template_type'].$this->templateNameSuffix;
         $settingInstance = $this->getSettingsClassInstance->handle(Area::SuperAdmin);
 
-        $settingInstance->$wakalaTemplateName = purifier::clean($data['wakala_template']);
+        $settingInstance->$wakalaTemplateName = Purifier::clean($data['wakala_template']);
 
         $settingInstance->save();
     }

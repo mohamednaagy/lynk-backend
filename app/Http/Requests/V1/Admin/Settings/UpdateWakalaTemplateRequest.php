@@ -27,7 +27,7 @@ class UpdateWakalaTemplateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'wakala_template' => ['required'],
+            'wakala_template' => ['required', 'string'],
         ];
     }
 }
