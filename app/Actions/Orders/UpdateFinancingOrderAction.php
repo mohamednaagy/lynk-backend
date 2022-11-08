@@ -19,25 +19,17 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
         $data['phone_number'] = PhoneNumber::make($data['phone_number'], $data['phone_country_code']);
 
         $financingOrder->update(
-            Arr::only($data, [
-                'reference_number',
-                'national_id',
-                'phone_number',
-                'amount',
-                'selling_price',
-            ]
+            Arr::only(
+                $data,
+                [
+                    'reference_number',
+                    'national_id',
+                    'phone_number',
+                    'amount',
+                    'selling_price',
+                ]
             )
         );
-
-        if (isset($data['contract'])) {
-            $financingOrder->addMedia($data['contract'])
-                ->toMediaCollection('contract');
-        }
-
-        if (isset($data['power_of_attorney'])) {
-            $financingOrder->addMedia($data['power_of_attorney'])
-                ->toMediaCollection('power_of_attorney');
-        }
 
         return $financingOrder;
     }

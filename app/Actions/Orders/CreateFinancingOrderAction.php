@@ -33,16 +33,6 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
             ])
         );
 
-        if (isset($data['contract'])) {
-            $financingOrder->addMedia($data['contract'])
-                ->toMediaCollection('contract');
-        }
-
-        if (isset($data['power_of_attorney'])) {
-            $financingOrder->addMedia($data['power_of_attorney'])
-                ->toMediaCollection('power_of_attorney');
-        }
-
         $company = tenant();
         $this->createTransactions->handle(
             $company->getWallet(WalletType::CompanyWallet),
