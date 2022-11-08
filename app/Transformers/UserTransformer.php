@@ -63,16 +63,9 @@ class UserTransformer extends TransformerAbstract
 
     public function includeCompany(User $user)
     {
-        return $this->primitive([
-            'id' => $user->company->id,
-            'name' => $user->company->name,
-            'status' => [
-                'value' => $user->company->status->value,
-                'description' => $user->company->status->description,
-            ],
-            'orders_count' => $user->company->orders_count,
-            'created_at' => optional($user->company->created_at)->format('Y-m-d'),
-        ]);
+        $data = fractal($user->company, new CompanyTransformer())->toArray();
+
+        return $this->primitive($data['data']);
     }
 
     public function includePermissions(User $user)
