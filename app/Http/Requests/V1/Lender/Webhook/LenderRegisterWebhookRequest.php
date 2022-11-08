@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\V1\Lender\Webhook;
 
+use App\Enums\WebhookType;
+use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LenderRegisterWebhookRequest extends FormRequest
@@ -25,7 +27,7 @@ class LenderRegisterWebhookRequest extends FormRequest
     {
         return [
             'webhook_url' => ['required', 'url', 'max:265'],
-            'webhook_type' => ['required', 'integer', 'in:1'],
+            'webhook_type' => ['required', new EnumValue(WebhookType::class)],
         ];
     }
 }

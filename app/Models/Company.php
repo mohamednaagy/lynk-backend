@@ -40,9 +40,6 @@ class Company extends BaseTenant implements Wallet
             'internal_status_comment',
             'does_order_require_approval',
             'order_cost',
-            'webhook_url',
-            'webhook_secret_key',
-            'webhook_type',
             'created_at',
             'updated_at',
         ];
