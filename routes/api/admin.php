@@ -49,15 +49,16 @@ Route::prefix('v1/admin')->group(function () {
 
         Route::get('/roles', GetAllRoles::class)->middleware(
             'permission:'.
-            Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Roles, [
-                Action::Index,
-            ])
+                Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Roles, [
+                    Action::Index,
+                ])
         );
+
         Route::get('/permissions', GetAllPermissions::class)->middleware(
             'permission:'.
-            Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Permissions, [
-                Action::Index,
-            ])
+                Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Permissions, [
+                    Action::Index,
+                ])
         );
 
         Route::prefix('settings')->group(function () {
@@ -67,6 +68,7 @@ Route::prefix('v1/admin')->group(function () {
 
         Route::apiResource('companies', CompanyController::class);
         Route::apiResource('companies.users', UserController::class)->shallow();
+
         Route::prefix('companies')->group(function () {
             Route::put('/{company}/status', UpdateCompanyStatus::class);
             Route::get('/{company}/balance ', GetBalance::class);

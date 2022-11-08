@@ -31,6 +31,7 @@ class CompleteAdminRegisterInvitation extends Mailable
         );
 
         $this->url = $url;
+        $this->user = $user;
     }
 
     /**
@@ -53,7 +54,7 @@ class CompleteAdminRegisterInvitation extends Mailable
     public function content()
     {
         return new Content(
-            view: 'emails.invitation-complete-register',
+            markdown: 'emails.invitation-complete-register',
         );
     }
 

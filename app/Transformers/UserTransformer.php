@@ -21,6 +21,7 @@ class UserTransformer extends TransformerAbstract
 
     protected array $availableIncludes = [
         'role',
+        'roles',
         'company',
         'is_email_verified',
         'permissions',
