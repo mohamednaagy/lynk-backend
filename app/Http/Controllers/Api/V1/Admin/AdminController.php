@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Actions\Contracts\CreateAdminWithRoleAndPermission;
-use App\Actions\Contracts\FindUserByIdAndRole;
 use App\Actions\Contracts\GetPaginatedUsersByRole;
 use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
 use App\Enums\Area;
@@ -13,12 +12,14 @@ use App\Http\Requests\V1\Admin\StoreAdminRequest;
 use App\Http\Requests\V1\Admin\UpdateAdminRequest;
 use App\Http\Resources\AuthResource;
 use App\Mail\Admin\CompleteAdminRegisterInvitation;
+use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Modules\Grantify\Facades\Grantify;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class AdminController extends Controller
 {
@@ -34,17 +35,13 @@ class AdminController extends Controller
     }
 
     /**
-     * @param $id
-     * @param  FindUserByIdAndRole  $findUserByIdAndRole
+     * @param  User  $admin
      * @return JsonResponse
      */
-    public function show(
-        $id,
-        FindUserByIdAndRole $findUserByIdAndRole
-    ): JsonResponse {
-        $admin = $findUserByIdAndRole->handle($id, Role::Admin);
-        if (! $admin) {
-            return $this->errorResponse();
+    public function show(User $admin): JsonResponse
+    {
+        if (! $admin->hasRole(Area::getRolesPerAreaMap()[Area::SuperAdmin])) {
+            throw new UnauthorizedException(403);
         }
 
         return fractal($admin, new UserTransformer(Area::SuperAdmin))
@@ -70,7 +67,7 @@ class AdminController extends Controller
         DB::transaction(function () use ($data, $createAdminWithRoleAndPermission) {
             $admin = $createAdminWithRoleAndPermission->handle($data);
 
-            Mail::to($admin->email)->send(new CompleteAdminRegisterInvitation($admin, $data['redirect_url']));
+//            Mail::to($admin->email)->send(new CompleteAdminRegisterInvitation($admin, $data['redirect_url']));
         });
 
         return $this->successResponse();
@@ -79,22 +76,19 @@ class AdminController extends Controller
     /**
      * Update the specified resource in storage.
      *
+     * @param  User  $admin
      * @param  UpdateAdminRequest  $updateAdminRequest
-     * @param  int  $id
      * @param  UpdateAdminWithRoleAndPermission  $updateAdminWithRoleAndPermission
-     * @param  FindUserByIdAndRole  $findUserByIdAndRole
      * @return JsonResponse
      */
     public function update(
+        User $admin,
         UpdateAdminRequest $updateAdminRequest,
-        int $id,
         UpdateAdminWithRoleAndPermission $updateAdminWithRoleAndPermission,
-        FindUserByIdAndRole $findUserByIdAndRole
     ): JsonResponse {
-        return DB::transaction(function () use ($updateAdminRequest, $id, $updateAdminWithRoleAndPermission, $findUserByIdAndRole) {
-            $admin = $findUserByIdAndRole->handle($id, Role::Admin);
-            if (! $admin) {
-                return $this->errorResponse();
+        return DB::transaction(function () use ($updateAdminRequest, $admin, $updateAdminWithRoleAndPermission) {
+            if (! $admin->hasRole(Area::getRolesPerAreaMap()[Area::SuperAdmin])) {
+                throw new UnauthorizedException(401);
             }
 
             $updateAdminWithRoleAndPermission->handle($updateAdminRequest->validated(), $admin);
@@ -104,15 +98,13 @@ class AdminController extends Controller
     }
 
     /**
-     * @param  int  $id
-     * @param  FindUserByIdAndRole  $findUserByIdAndRole
+     * @param  User  $admin
      * @return JsonResponse
      */
-    public function destroy(int $id, FindUserByIdAndRole $findUserByIdAndRole): JsonResponse
+    public function destroy(User $admin): JsonResponse
     {
-        $admin = $findUserByIdAndRole->handle($id, Role::Admin);
-        if (! $admin) {
-            return $this->errorResponse();
+        if (! $admin->hasRole(Area::getRolesPerAreaMap()[Area::SuperAdmin])) {
+            throw new UnauthorizedException(401);
         }
 
         $admin->delete();
