@@ -47,11 +47,13 @@ class OrderNeedActionScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data)
     {
-        if (isset($data['need_action']) && $data['need_action'] = true) {
+        if ($data['need_action'] === '1') {
             return $builder->whereIn(
                 'status',
                 [
-                    FinancingOrderStatus::PendingApproval, FinancingOrderStatus::InProgress, FinancingOrderStatus::Rejected,
+                    FinancingOrderStatus::PendingApproval,
+                    FinancingOrderStatus::InProgress,
+                    FinancingOrderStatus::Rejected,
                 ]
             );
         }
