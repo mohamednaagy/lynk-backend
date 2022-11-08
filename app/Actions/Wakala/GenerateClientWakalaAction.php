@@ -3,6 +3,7 @@
 namespace App\Actions\Wakala;
 
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 
@@ -12,7 +13,7 @@ class GenerateClientWakalaAction implements GenerateClientWakala
 
     protected string $template = 'templates.client-wakala';
 
-    protected string $collectionName = 'client_wakala';
+    protected string $collectionName = FinancingOrderMediaCollection::ClientWakala;
 
     protected string $filePath = '';
 

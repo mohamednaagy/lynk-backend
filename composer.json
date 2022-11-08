@@ -20,6 +20,7 @@
         "laravel/framework": "^9.2",
         "laravel/sanctum": "^2.14.1",
         "laravel/tinker": "^2.7",
+        "mews/purifier": "^3.3",
         "nwidart/laravel-modules": "^9.0",
         "predis/predis": "^2.0",
         "propaganistas/laravel-phone": "^4.3",

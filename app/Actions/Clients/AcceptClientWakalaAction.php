@@ -3,6 +3,7 @@
 namespace App\Actions\Clients;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -25,6 +26,6 @@ class AcceptClientWakalaAction implements AcceptClientWakala
             'client_wakala_accepted_at' => now(),
         ]);
 
-        return $order->addMedia(storage_path('app/'.$path))->toMediaCollection('client_wakala');
+        return $order->addMedia(storage_path('app/'.$path))->toMediaCollection(FinancingOrderMediaCollection::ClientWakala);
     }
 }

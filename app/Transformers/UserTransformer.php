@@ -63,7 +63,7 @@ class UserTransformer extends TransformerAbstract
 
     public function includeCompany(User $user)
     {
-        return $this->item($user->company, new CompanyTransformer());
+        return $this->item($user->company, new CompanyTransformer);
     }
 
     public function includePermissions(User $user)
