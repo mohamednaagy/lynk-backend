@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Enums\FinancingOrderHistory;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use Illuminate\Support\Collection;
 use League\Fractal\TransformerAbstract;
@@ -36,18 +37,18 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'step' => 'client_wakala',
                 'is_complete' => (bool) $this->financingOrder->client_wakala_accepted_at,
                 'completed_at' => optional($this->financingOrder->client_wakala_accepted_at)->format('Y-m-d h:m A'),
-                'document' => optional($this->financingOrder->getMedia('client_wakala')->first())->getUrl(),
+                'document' => optional($this->financingOrder->getMedia(FinancingOrderMediaCollection::ClientWakala)->first())->getUrl(),
             ],
             FinancingOrderHistory::CommodityPurchased => [
                 'step' => 'commodity_purchased',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:m A'),
                 'cert_document' => [
-                    'url' => optional($this->financingOrder->getMedia('client_wakala')->first())->getUrl(),
+                    'url' => optional($this->financingOrder->getMedia(FinancingOrderMediaCollection::ClientWakala)->first())->getUrl(),
                     'date' => optional($getPtpDocument)->created_at?->format('Y-m-d h:m A'),
                 ],
                 'ownership_document' => [
-                    'url' => optional($this->financingOrder->getMedia('transfer_ownership_to_lender')->first())->getUrl(),
+                    'url' => optional($this->financingOrder->getMedia(FinancingOrderMediaCollection::TransferOwnershipToLender)->first())->getUrl(),
                     'date' => optional($transferOwnershipToLender)->created_at?->format('Y-m-d h:m A'),
                 ],
             ],
@@ -60,18 +61,18 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'step' => 'selling_commodity_to_customer',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:m A'),
-                'document' => optional($this->financingOrder->getMedia('selling_commodity_to_customer')->first())->getUrl(),
+                'document' => optional($this->financingOrder->getMedia(FinancingOrderMediaCollection::SellingCommodityToCustomer)->first())->getUrl(),
             ],
             FinancingOrderHistory::IssueMurabahaOffer => [
                 'step' => 'selling_commodity_to_open_market',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:m A'),
                 'mpo_document' => [
-                    'url' => optional($this->financingOrder->getMedia('murabaha_purchase_order')->first())->getUrl(),
+                    'url' => optional($this->financingOrder->getMedia(FinancingOrderMediaCollection::MurabahaPurchaseOrder)->first())->getUrl(),
                     'date' => optional($getMurabahaPurchaseOfferDocument)->created_at?->format('Y-m-d h:m A'),
                 ],
                 'warranty_document' => [
-                    'url' => optional($this->financingOrder->getMedia('warrant_amendment_except_warrant_no')->first())->getUrl(),
+                    'url' => optional($this->financingOrder->getMedia(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo)->first())->getUrl(),
                     'date' => optional($getWarrantAmendmentExceptWarrantNoDocument)->created_at?->format('Y-m-d h:m A'),
                 ],
             ],
