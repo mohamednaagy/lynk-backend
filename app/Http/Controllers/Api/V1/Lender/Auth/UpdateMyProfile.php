@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Lender\Auth;
 use App\Actions\Contracts\UpdateUser;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\UpdateMyProfileRequest;
+use App\Transformers\UserTransformer;
 use Illuminate\Support\Arr;
 
 class UpdateMyProfile extends Controller
@@ -26,6 +27,6 @@ class UpdateMyProfile extends Controller
 
         $updateUser->handle($updateLenderRequest->user(), $validated);
 
-        return $this->successResponse();
+        return fractal($updateLenderRequest->user(), new UserTransformer())->respond();
     }
 }
