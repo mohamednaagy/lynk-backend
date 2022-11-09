@@ -33,6 +33,7 @@ class CreateOrderWithoutVerification extends Controller
                             'creator_id' => $request->user()->id,
                             'creator_type' => $request->user()->getMorphClass(),
                             'approved_at' => now(),
+                            'created_without_verification' => true,
                         ]
                     )
                 );
