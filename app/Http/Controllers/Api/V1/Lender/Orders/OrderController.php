@@ -5,17 +5,15 @@ namespace App\Http\Controllers\Api\V1\Lender\Orders;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
-use App\Enums\Action;
-use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\Subject;
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
-use Bavix\Wallet\Internal\Exceptions\ExceptionInterface;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
@@ -32,8 +30,12 @@ class OrderController extends Controller
      * @param  GetPaginatedFinancingOrder  $getPaginatedOrders
      * @return JsonResponse
      */
-    public function index(GetPaginatedFinancingOrder $getPaginatedOrders): JsonResponse
+    public function index(Request $request, GetPaginatedFinancingOrder $getPaginatedOrders): JsonResponse
     {
+        if ($request->user()->hasRole(Role::LenderOrderCreator)) {
+            $getPaginatedOrders->setCreator($request->user());
+        }
+
         $financingOrders = $getPaginatedOrders->handle();
 
         return fractal($financingOrders, new FinancingOrderTransformer())
@@ -47,6 +49,7 @@ class OrderController extends Controller
      */
     public function show(FinancingOrder $order): JsonResponse
     {
+        $this->authorize('view', $order);
         $order->load('creator', 'approver');
 
         return fractal($order, new FinancingOrderTransformer())
@@ -103,6 +106,7 @@ class OrderController extends Controller
         UpdateFinancingOrder $updateFinancingOrder,
         FinancingOrder $order
     ): JsonResponse {
+        $this->authorize('update', $order);
         $financingOrder = $updateFinancingOrder->update($order, $updateOrderRequest->validated());
 
         return fractal($financingOrder, new FinancingOrderTransformer())->respond();

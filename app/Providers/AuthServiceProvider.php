@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Enums\Role;
+use App\Models\FinancingOrder;
+use App\Policies\FinancingOrderPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -16,6 +18,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+        FinancingOrder::class => FinancingOrderPolicy::class,
     ];
 
     /**
