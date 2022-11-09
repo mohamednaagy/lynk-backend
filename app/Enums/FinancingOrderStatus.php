@@ -36,4 +36,6 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
     const RespondedToPtp = 14;
 
     const PtpDocumentRetrieved = 15;
+
+    const PendingCancel = 15;
 }

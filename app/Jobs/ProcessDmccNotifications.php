@@ -54,6 +54,12 @@ class ProcessDmccNotifications implements ShouldQueue
                 ProcessDmccMpoSaleCompleteNotification::dispatch($notification)->chain([
                     new ProcessUnprocessedDmccNotification($notification),
                 ]);
+            } elseif (
+                $notification->notificationHeaderAndEntity->notification
+                ==
+                'Tradeflow Transaction (Islamic) Cancelled'
+            ) {
+                ProcessDmccCancelNotification::dispatch($notification);
             }
         });
     }

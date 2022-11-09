@@ -128,6 +128,24 @@ class DmccDriver implements TraderInterface
         return $response->ttiId;
     }
 
+    public function cancelTtiId(FinancingOrder $financingOrder): mixed
+    {
+        $traderOrder = $financingOrder->traderOrders()->latest()->first();
+        $response = $this->soap
+            ->baseWsdl($this->prefixUrl('cancelTTI'))
+            ->call('cancelTTI', [
+                'ttiId' => $traderOrder->reference,
+                'comments' => 'Cancel Order',
+                'confirmAction' => 'true',
+            ]);
+
+        if (! $this->isSuccess($response)) {
+            throw new UnprocessableEntityHttpException();
+        }
+
+        return $response->object();
+    }
+
     private function createTraderOrder(FinancingOrder $financingOrder, string $ttiId): Model|TraderOrder
     {
         return $financingOrder->traderOrders()->create([
@@ -175,7 +193,6 @@ class DmccDriver implements TraderInterface
             ]);
 
         if (! isset($response->object()->getdocument[0]->getDocumentByTypeResponse[0]->document)) {
-            dd($response->object());
             throw new UnprocessableEntityHttpException();
         }
 

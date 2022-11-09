@@ -15,14 +15,29 @@ class CancelOrder extends Controller
      * Handle the incoming request.
      *
      * @param  CancelOrderRequest  $cancelOrderRequest
-     * @param  CancelOrderInterface  $cancelOrder,
+     * @param  CancelOrderInterface  $cancelOrder ,
      * @param  FinancingOrder  $order
      * @return JsonResponse
      */
     public function __invoke(CancelOrderRequest $cancelOrderRequest, CancelOrderInterface $cancelOrder, FinancingOrder $order): JsonResponse
     {
-        if ($order->status->is(FinancingOrderStatus::PendingApproval || FinancingOrderStatus::Rejected)) {
-            $order->update(['status' => FinancingOrderStatus::Canceled]);
+        if (
+            ! in_array($order->status->value,
+                [
+                    FinancingOrderStatus::Rejected,
+                    FinancingOrderStatus::InProgress,
+                    FinancingOrderStatus::RespondedToPtp,
+                    FinancingOrderStatus::PendingApproval,
+                    FinancingOrderStatus::CommodityPurchased,
+                    FinancingOrderStatus::WaitingClientWakala,
+                    FinancingOrderStatus::PtpDocumentRetrieved,
+                    FinancingOrderStatus::ClientWakalaCompleted,
+                    FinancingOrderStatus::CommoditySoldToCustomer,
+                    FinancingOrderStatus::WaitingPurchasingCommodity,
+                ]
+            )
+        ) {
+            return $this->errorResponse('This order can\'t be cancelled');
         }
 
         $cancelOrder->handle(
