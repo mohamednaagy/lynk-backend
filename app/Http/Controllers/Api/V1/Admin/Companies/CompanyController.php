@@ -27,7 +27,9 @@ class CompanyController extends Controller
         GetCompaniesRequest $getCompaniesRequest,
         GetCompanies $getCompanies
     ): JsonResponse {
-        return fractal($getCompanies->handle(), new CompanyTransformer())->respond();
+        return fractal($getCompanies->handle(), new CompanyTransformer())
+            ->parseIncludes(['id', 'name', 'status', 'orders_count', 'created_at'])
+            ->respond();
     }
 
     /**
@@ -56,7 +58,9 @@ class CompanyController extends Controller
      */
     public function show(Company $company): JsonResponse
     {
-        return fractal($company, new CompanyTransformer())->respond();
+        return fractal($company, new CompanyTransformer())
+            ->parseIncludes(['id', 'name', 'status', 'orders_count', 'created_at'])
+            ->respond();
     }
 
     /**

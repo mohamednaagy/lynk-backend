@@ -41,7 +41,7 @@ class CompanyTransformer extends TransformerAbstract
         ]);
     }
 
-    public function includeOrderCount(Company $company): Primitive
+    public function includeOrdersCount(Company $company): Primitive
     {
         return $this->primitive($company->orders_count);
     }
