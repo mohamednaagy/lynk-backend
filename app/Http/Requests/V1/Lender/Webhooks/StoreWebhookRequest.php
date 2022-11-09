@@ -3,7 +3,7 @@
 namespace App\Http\Requests\V1\Lender\Webhooks;
 
 use App\Enums\WebhookType;
-use App\Rules\WebhookRule;
+use App\Rules\WebhookTypeLimitRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -28,7 +28,7 @@ class StoreWebhookRequest extends FormRequest
     {
         return [
             'url' => ['required', 'url', 'max:265'],
-            'type' => ['required', new EnumValue(WebhookType::class), new WebhookRule(tenant())],
+            'type' => ['required', new EnumValue(WebhookType::class), new WebhookTypeLimitRule(tenant())],
         ];
     }
 }

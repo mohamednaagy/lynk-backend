@@ -7,7 +7,7 @@ use Exception;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Config;
 
-class WebhookRule implements Rule
+class WebhookTypeLimitRule implements Rule
 {
     protected $company;
 
