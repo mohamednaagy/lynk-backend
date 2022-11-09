@@ -29,6 +29,20 @@ final class Action extends Enum
 
     const Reject = 'reject';
 
+    const Cancel = 'cancel';
+
+    const Proceed = 'proceed';
+
+    const GetStats = 'getStats';
+
+    const ResendInvitation = 'resendInvitation';
+
+    const GetBalance = 'getBalance';
+
+    const CalculateOrderCost = 'calculateOrderCost';
+
+    const GetTransactions = 'getTransactions';
+
     const Charge = 'charge';
 
     const SyncStatusWithEdaat = 'syncStatusWithEdaat';

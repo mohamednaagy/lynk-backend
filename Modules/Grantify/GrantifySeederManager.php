@@ -49,9 +49,9 @@ class GrantifySeederManager extends Manager
         $defaultGuard = config('grantify.default_guard');
         foreach (Area::getRolesPerAreaMap() as $area => $roles) {
             // seed area class permissions (direct permissions)
-            $directPermissions = AreaUtil::getDirectPermissionsForArea($area);
-            $directPermissions = $this->storePermissions($directPermissions, $area, $defaultGuard);
-            $allPermissions = array_merge($allPermissions, $directPermissions);
+            $areaPermissions = AreaUtil::getAreaPermissions($area);
+            $storedPermissions = $this->storePermissions($areaPermissions, $area, $defaultGuard);
+            $allPermissions = array_merge($allPermissions, $storedPermissions);
 
             // seed permissions of each role
             foreach ($roles as $roleName) {

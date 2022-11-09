@@ -10,11 +10,13 @@ use Modules\Grantify\Support\Roles\LenderApiUser;
 use Modules\Grantify\Support\Roles\LenderBilling;
 use Modules\Grantify\Support\Roles\LenderOrderCreator;
 use Modules\Grantify\Support\Roles\LenderSupervisor;
+use Modules\Grantify\Support\Roles\Management;
 
 class RoleUtil
 {
     public static array $roleMap = [
         Role::Admin => Admin::class,
+        Role::Management => Management::class,
         Role::Customer => Customer::class,
         Role::LenderAdmin => LenderAdmin::class,
         Role::LenderBilling => LenderBilling::class,
