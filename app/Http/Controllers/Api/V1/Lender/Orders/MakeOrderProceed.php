@@ -3,17 +3,15 @@
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala;
-use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\MakeOrderProceedRequest;
-use App\Jobs\UpdateFinancialOrderStatus;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class MakeOrderProceed extends Controller
 {
@@ -25,13 +23,13 @@ class MakeOrderProceed extends Controller
      * @param  int  $order
      * @return JsonResponse
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function __invoke(
         MakeOrderProceedRequest $request,
         AcceptClientWakala $acceptClientWakala,
         int $order
-    ) {
+    ): JsonResponse {
         return DB::transaction(function () use ($request, $acceptClientWakala, $order) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
 
@@ -51,15 +49,6 @@ class MakeOrderProceed extends Controller
                 $order->update([
                     'status' => FinancingOrderStatus::ContractSigned,
                 ]);
-
-                $traderOrder = $order->traderOrders->last();
-                UpdateFinancialOrderStatus::dispatch(
-                    $traderOrder,
-                    FinancingOrderStatus::CommoditySoldToCustomer
-                )->delay(now()->addMinutes(2));
-
-                Trader::driver($traderOrder->provider)
-                    ->createTraderOrderHistory($traderOrder, FinancingOrderHistory::RespondPtp);
 
                 return $this->successResponse();
             }

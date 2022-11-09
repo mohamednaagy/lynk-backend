@@ -3,7 +3,6 @@
 namespace App\Support\Traders\Drivers;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
@@ -15,7 +14,6 @@ use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -55,55 +53,6 @@ class DmccDriver implements TraderInterface
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $ttiId;
-    }
-
-    public function respondPtp(string $ttiId)
-    {
-        $traderOrder = $this->getTraderOrderByTtiId($ttiId);
-
-        if (! $traderOrder) {
-            return;
-        }
-
-        $this->respondPTPService($ttiId);
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::RespondPtp);
-
-        $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Promise to Purchase');
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetPtpDocument);
-
-        $this->attachDocumentToOrder($traderOrder, $document, FinancingOrderMediaCollection::PromiseToPurchase, 'base64');
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachPtpDocumentToOrder);
-
-        $this->createTransferOwnershipToLenderDocument($traderOrder, $ttiId);
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
-
-        $this->updateOrderStatus($traderOrder, FinancingOrderStatus::CommodityPurchased);
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CommodityPurchased);
-    }
-
-    public function issueMurabaha(string $ttiId)
-    {
-        $traderOrder = $this->getTraderOrderByTtiId($ttiId);
-
-        if (! $traderOrder) {
-            return;
-        }
-
-        if ($traderOrder->order->status->value !== FinancingOrderStatus::ContractSigned) {
-            throw new UnprocessableEntityHttpException();
-        }
-        $versionNumber = $this->uploadTTIDocumentAndGetVersionNumber($ttiId);
-
-        $this->issueMurabahaPurchaseOffer($ttiId, $versionNumber);
-
-        $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Murabaha Purchase Offer Document');
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetMurabahaPurchaseOfferDocument);
-
-        $this->attachDocumentToOrder($traderOrder, $document, FinancingOrderMediaCollection::MurabahaPurchaseOrder, 'base64');
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachMpoDocument);
-
-        $this->updateOrderStatus($traderOrder, FinancingOrderStatus::IssueMurabahaOffer);
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::IssueMurabahaOffer);
     }
 
     public function fetchNotification(string $type): ?array
@@ -212,6 +161,7 @@ class DmccDriver implements TraderInterface
         ]);
 
         $this->attachDocumentToOrder($traderOrder, storage_path('app/'.$path), FinancingOrderMediaCollection::SellingCommodityToCustomer);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
     }
 
     public function getDocumentByTypeAndTransaction(string $ttiId, string $documentType): mixed
@@ -225,6 +175,7 @@ class DmccDriver implements TraderInterface
             ]);
 
         if (! isset($response->object()->getdocument[0]->getDocumentByTypeResponse[0]->document)) {
+            dd($response->object());
             throw new UnprocessableEntityHttpException();
         }
 
@@ -262,7 +213,6 @@ class DmccDriver implements TraderInterface
         $this->attachDocumentToOrder($traderOrder, storage_path('app/'.$path), FinancingOrderMediaCollection::TransferOwnershipToLender);
     }
 
-    // TODO: check with a.medhat
     public function createTraderOrderHistory(TraderOrder $traderOrder, int $action): void
     {
         $traderOrder->traderHistories()->create([
@@ -301,26 +251,5 @@ class DmccDriver implements TraderInterface
         if (! $this->isSuccess($response)) {
             throw new UnprocessableEntityHttpException();
         }
-    }
-
-    /**
-     * @param  string  $ttiId
-     * @return void
-     */
-    public function murabahaSaleCompleted(string $ttiId): void
-    {
-        $traderOrder = $this->getTraderOrderByTtiId($ttiId);
-
-        if (! $traderOrder) {
-            return;
-        }
-
-        $document = $this->getDocumentByTypeAndTransaction($ttiId, 'Warrant Amendment Except Warrant No');
-        Storage::put('test.pdf', base64_decode($document));
-        $this->attachDocumentToOrder($traderOrder, $document, FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo, 'base64');
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
-
-        $this->updateOrderStatus($traderOrder, FinancingOrderStatus::MurabahaSaleCompleted);
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::MurabahaSaleCompleted);
     }
 }

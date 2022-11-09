@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
@@ -40,6 +41,11 @@ class ProcessPtpDocumentRetrievedOrder implements ShouldQueue
             $lastTraderOrder = $financingOrder->traderOrders()->latest()->first();
 
             Trader::driver('dmcc')->createTransferOwnershipToLenderDocument($lastTraderOrder);
+
+            Trader::driver('dmcc')->createTraderOrderHistory(
+                $lastTraderOrder,
+                FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
+            );
 
             Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::CommodityPurchased);
         });

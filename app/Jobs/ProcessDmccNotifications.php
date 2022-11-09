@@ -45,18 +45,15 @@ class ProcessDmccNotifications implements ShouldQueue
         collect(
             Trader::driver('dmcc')->fetchNotification('FYI')
         )->each(function ($notification) {
-            try {
-                if (
-                    $notification->notificationHeaderAndEntity->notification
-                    ==
-                    'Murabaha Sale Completed'
-                ) {
-                    ProcessDmccMpoSaleCompleteNotification::dispatch($notification)->chain([
-                        new ProcessUnprocessedDmccNotification($notification),
-                    ]);
-                }
-            } catch (\Throwable $th) {
-                //throw $th;
+            if (
+                in_array($notification->notificationHeaderAndEntity->notification, [
+                    'Murabaha Sale Completed',
+                    'Tradeflow Transaction (Islamic) - Payment Settlement Required',
+                ])
+            ) {
+                ProcessDmccMpoSaleCompleteNotification::dispatch($notification)->chain([
+                    new ProcessUnprocessedDmccNotification($notification),
+                ]);
             }
         });
     }

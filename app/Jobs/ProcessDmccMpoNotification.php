@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -53,6 +54,11 @@ class ProcessDmccMpoNotification implements ShouldQueue
             Trader::driver('dmcc')->issueMurabahaPurchaseOffer(
                 $ttiId,
                 $versionNo
+            );
+
+            Trader::driver('dmcc')->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::IssueMurabahaOffer
             );
 
             Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);

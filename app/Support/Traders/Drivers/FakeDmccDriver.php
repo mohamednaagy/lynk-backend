@@ -33,7 +33,6 @@ class FakeDmccDriver implements TraderInterface
 
     public function processFetchNotification($notificationId): void
     {
-
     }
 
     public function getTtiId(FinancingOrder $financingOrder): mixed
@@ -52,7 +51,6 @@ class FakeDmccDriver implements TraderInterface
 
     public function respondPtpService(string $ttiId): void
     {
-
     }
 
     public function createSellingCommodityToCustomerDocument($traderOrder): void
@@ -102,7 +100,6 @@ class FakeDmccDriver implements TraderInterface
         $this->attachDocumentToOrder($traderOrder, storage_path('app/'.$path), 'transfer_ownership_to_lender');
     }
 
-    // TODO: check with a.medhat
     public function createTraderOrderHistory(TraderOrder $traderOrder, int $action): void
     {
         $traderOrder->traderHistories()->create([
@@ -117,6 +114,5 @@ class FakeDmccDriver implements TraderInterface
 
     public function issueMurabahaPurchaseOffer(string $ttiId, string $versionNo): void
     {
-
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -51,6 +52,12 @@ class ProcessDmccPtpNotification implements ShouldQueue
             }
 
             Trader::driver('dmcc')->respondPtpService($ttiId);
+
+            Trader::driver('dmcc')->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::RespondPtp
+            );
+
             Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::RespondedToPtp);
         });
     }

@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
@@ -48,6 +49,11 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
                 'Promise to Purchase'
             );
 
+            Trader::driver('dmcc')->createTraderOrderHistory(
+                $lastTraderOrder,
+                FinancingOrderHistory::GetPtpDocument
+            );
+
             Trader::driver('dmcc')->attachDocumentToOrder(
                 $lastTraderOrder,
                 $ptpDocument,
@@ -55,9 +61,19 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
                 'base64'
             );
 
+            Trader::driver('dmcc')->createTraderOrderHistory(
+                $lastTraderOrder,
+                FinancingOrderHistory::AttachPtpDocumentToOrder
+            );
+
             $ttiDocument = Trader::driver('dmcc')->getDocumentByTypeAndTransaction(
                 $lastTraderOrder->reference,
                 'TTI - Holding certificate'
+            );
+
+            Trader::driver('dmcc')->createTraderOrderHistory(
+                $lastTraderOrder,
+                FinancingOrderHistory::GetTtiDocument
             );
 
             Trader::driver('dmcc')->attachDocumentToOrder(
@@ -65,6 +81,11 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
                 $ttiDocument,
                 'tti_holding_certificate',
                 'base64'
+            );
+
+            Trader::driver('dmcc')->createTraderOrderHistory(
+                $lastTraderOrder,
+                FinancingOrderHistory::AttachTtiDocument
             );
 
             Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::PtpDocumentRetrieved);

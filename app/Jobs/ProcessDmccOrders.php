@@ -14,8 +14,6 @@ class ProcessDmccOrders implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-//    public $queue = 'default';
-
     /**
      * Execute the job.
      *

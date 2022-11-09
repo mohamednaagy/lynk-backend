@@ -12,6 +12,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 
 class ProcessDmccInProgressOrder implements ShouldQueue
@@ -44,8 +45,7 @@ class ProcessDmccInProgressOrder implements ShouldQueue
             if (Trader::driver() instanceof FakeDmccDriver) {
                 Trader::driver()->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabahaSaleCompleted);
             }
-            // TODO: check url value
-//            app()->make(AskClientWakala::class)->handle($financingOrder, 'http://localhost');
+            app()->make(AskClientWakala::class)->handle($financingOrder, Config::get('frontent.wakala_url').$financingOrder->id);
             Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingClientWakala);
         });
     }

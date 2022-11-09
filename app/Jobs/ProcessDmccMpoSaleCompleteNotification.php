@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -53,6 +54,11 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
                 'Murabaha Purchase Offer Document'
             );
 
+            Trader::driver('dmcc')->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::GetMurabahaPurchaseOfferDocument
+            );
+
             Trader::driver('dmcc')->attachDocumentToOrder(
                 $traderOrder,
                 $mpoDocument,
@@ -60,9 +66,19 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
                 'base64'
             );
 
+            Trader::driver('dmcc')->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::AttachMpoDocument
+            );
+
             $warrantDocument = Trader::driver('dmcc')->getDocumentByTypeAndTransaction(
                 $ttiId,
                 'Warrant Amendment Except Warrant No'
+            );
+
+            Trader::driver('dmcc')->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument
             );
 
             Trader::driver('dmcc')->attachDocumentToOrder(
@@ -70,6 +86,11 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
                 $warrantDocument,
                 'warrant_amendment_except_warrant_no',
                 'base64'
+            );
+
+            Trader::driver('dmcc')->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument
             );
 
             Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabahaSaleCompleted);
