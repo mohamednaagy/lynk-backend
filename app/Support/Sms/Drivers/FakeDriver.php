@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Support\SMS2\Drivers;
+namespace App\Support\Sms\Drivers;
 
-use App\Support\SMS2\SmsDriverInterface;
+use App\Support\Sms\SmsDriverInterface;
 
 class FakeDriver implements SmsDriverInterface
 {

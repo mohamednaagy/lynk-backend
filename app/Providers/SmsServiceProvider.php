@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Support\SMS2\SmsManager;
+use App\Support\Sms\SmsManager;
 use Illuminate\Support\ServiceProvider;
 
 class SmsServiceProvider extends ServiceProvider

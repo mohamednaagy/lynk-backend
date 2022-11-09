@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\SMS2;
+namespace App\Support\Sms;
 
 use Illuminate\Support\Facades\Facade;
 
