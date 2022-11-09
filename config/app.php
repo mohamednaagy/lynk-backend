@@ -163,6 +163,7 @@ return [
         LaravelLang\JsonFallbackHotfix\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
+        Mews\Purifier\PurifierServiceProvider::class,
 
         /*
          * Package Service Providers...
@@ -208,6 +209,7 @@ return [
         'Trader' => App\Support\Traders\Facades\Trader::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
         'Sms' => App\Support\Sms\Sms::class,
+        'Purifier' => Mews\Purifier\Facades\Purifier::class,
     ])->toArray(),
 
     /*

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use function trans;
 
@@ -28,8 +29,8 @@ class UpdateAdminRequest extends FormRequest
         $rules = [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
-            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($this->id)],
-            'password' => ['required', 'string', 'confirmed'],
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($this->admin->id)],
+            'password' => ['nullable', 'string', 'confirmed'],
         ];
 
         if (! empty($this->role)) {
