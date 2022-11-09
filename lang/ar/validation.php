@@ -137,6 +137,7 @@ return [
         'person_id_not_found' => 'National ID not found',
         'invalid_mobile_number' => 'Invalid mobile number',
     ],
+    'setting_locale' => 'حقل :attribute يجب أن يحتوى على :locale ترجمة',
     'attributes' => [
         'address' => 'العنوان',
         'age' => 'العمر',
