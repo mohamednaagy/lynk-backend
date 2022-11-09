@@ -13,12 +13,11 @@ class Webhook extends Model
     use BelongsToTenant;
 
     protected $casts = [
-        'webhook_type' => WebhookType::class,
+        'type' => WebhookType::class,
     ];
 
     protected $fillable = [
-        'webhook_url',
-        'webhook_secret_key',
-        'webhook_type',
+        'url',
+        'type',
     ];
 }

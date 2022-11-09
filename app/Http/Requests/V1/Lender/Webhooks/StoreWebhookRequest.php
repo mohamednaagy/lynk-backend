@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Requests\V1\Lender\Webhook;
+namespace App\Http\Requests\V1\Lender\Webhooks;
 
 use App\Enums\WebhookType;
+use App\Rules\WebhookRule;
+use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class LenderRegisterWebhookRequest extends FormRequest
+class StoreWebhookRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,8 +27,8 @@ class LenderRegisterWebhookRequest extends FormRequest
     public function rules()
     {
         return [
-            'webhook_url' => ['required', 'url', 'max:265'],
-            'webhook_type' => ['required', Rule::in(WebhookType::getValues())],
+            'url' => ['required', 'url', 'max:265'],
+            'type' => ['required', new EnumValue(WebhookType::class), new WebhookRule(tenant())],
         ];
     }
 }

@@ -6,5 +6,5 @@ use BenSampo\Enum\Enum;
 
 final class WebhookType extends Enum
 {
-    public const OrderUpdates = 1;
+    public const OrderUpdates = 'ORDER_UPDATES';
 }

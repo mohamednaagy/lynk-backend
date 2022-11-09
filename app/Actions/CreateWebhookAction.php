@@ -4,7 +4,7 @@ namespace App\Actions;
 
 use App\Actions\Contracts\CreateWebhook;
 use App\Models\Webhook;
-use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 
 class CreateWebhookAction implements CreateWebhook
 {
@@ -13,8 +13,12 @@ class CreateWebhookAction implements CreateWebhook
      */
     public function handle($data): Webhook
     {
-        $data['webhook_secret_key'] = base64_encode(Str::random(10));
-
-        return Webhook::create($data);
+        return Webhook::create(Arr::only(
+            $data,
+            [
+                'url',
+                'type',
+            ]
+        ));
     }
 }

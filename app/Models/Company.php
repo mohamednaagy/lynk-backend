@@ -40,6 +40,7 @@ class Company extends BaseTenant implements Wallet
             'internal_status_comment',
             'does_order_require_approval',
             'order_cost',
+            'webhook_secret_key',
             'created_at',
             'updated_at',
         ];
@@ -53,5 +54,10 @@ class Company extends BaseTenant implements Wallet
     public function orders(): HasMany
     {
         return $this->hasMany(FinancingOrder::class);
+    }
+
+    public function webhooks(): HasMany
+    {
+        return $this->hasMany(Webhook::class);
     }
 }

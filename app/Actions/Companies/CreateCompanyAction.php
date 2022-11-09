@@ -5,6 +5,8 @@ namespace App\Actions\Companies;
 use App\Actions\Contracts\Companies\CreateCompany;
 use App\Models\Company;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 
 class CreateCompanyAction implements CreateCompany
 {
@@ -14,6 +16,8 @@ class CreateCompanyAction implements CreateCompany
      */
     public function handle(array $data): Company
     {
+        $data['webhook_secret_key'] = Crypt::encryptString(Str::random(40));
+
         return Company::create(
             Arr::only(
                 $data,
@@ -24,6 +28,7 @@ class CreateCompanyAction implements CreateCompany
                     'status',
                     'order_cost',
                     'does_order_require_approval',
+                    'webhook_secret_key',
                 ]
             )
         );

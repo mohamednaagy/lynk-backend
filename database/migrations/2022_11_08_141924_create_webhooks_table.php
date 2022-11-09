@@ -21,9 +21,8 @@ return new class() extends Migration
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->mediumText('webhook_url');
-            $table->string('webhook_secret_key');
-            $table->tinyInteger('webhook_type');
+            $table->text('url');
+            $table->string('type');
             $table->timestamps();
         });
     }
