@@ -9,10 +9,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 class GetPaginatedUsersByRoleAction implements GetPaginatedUsersByRole
 {
     /**
-     * @param  string  $role
+     * @param  string|array  $role
      * @return LengthAwarePaginator
      */
-    public function handle(string $role): LengthAwarePaginator
+    public function handle(string|array $role): LengthAwarePaginator
     {
         return User::role($role)->paginate();
     }

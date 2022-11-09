@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1\Admin;
 
 use App\Enums\Action;
+use App\Enums\Role;
 use App\Enums\Subject;
 use App\Rules\HostWhitelistRule;
 use BenSampo\Enum\Rules\EnumValue;
@@ -31,6 +32,7 @@ class StoreAdminRequest extends FormRequest
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'email' => ['required', 'email', 'unique:users,email'],
+            'role' => ['required', 'string', new EnumValue(Role::class)],
             'permissions' => ['required', 'array', 'min:1'],
             'permissions.*' => ['required', 'array'],
             'permissions.*.subject' => ['required', 'string', new EnumValue(Subject::class)],
