@@ -159,7 +159,6 @@ class FakeDmccDriver implements TraderInterface
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
     }
 
-    // TODO
     public function getDocumentByTypeAndTransaction(string $ttiId, string $documentType): mixed
     {
         // request PTP document
@@ -172,7 +171,7 @@ class FakeDmccDriver implements TraderInterface
             throw new UnprocessableEntityHttpException();
         }
 
-        return $response->object()->getdocument[0]->getDocumentByTypeResponse[0]->document;
+        return $response->json('data.fileContent');
     }
 
     public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
