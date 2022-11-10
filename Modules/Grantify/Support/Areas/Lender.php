@@ -17,13 +17,9 @@ class Lender
             Action::Approve,
             Action::Reject,
             Action::Cancel,
-            Action::GetStats,
         ],
         Subject::LenderWallet => [
             Action::Manage,
-            Action::GetBalance,
-            Action::CalculateOrderCost,
-            Action::GetTransactions,
         ],
         Subject::Dashboard => [
             Action::Show,
@@ -33,9 +29,6 @@ class Lender
             Action::Index,
             Action::Create,
         ],
-        Subject::LenderUsers => [
-            Action::ResendInvitation,
-        ],
         Subject::Enquiries => [
             Action::Index,
             Action::Show,
@@ -44,6 +37,21 @@ class Lender
         Subject::EnquiryReplies => [
             Action::Index,
             Action::Create,
+        ],
+        Subject::Stats => [
+            Action::Show,
+        ],
+        Subject::Invitation => [
+            Action::Resend,
+        ],
+        Subject::Balance => [
+            Action::Show,
+        ],
+        Subject::Transactions => [
+            Action::Show,
+        ],
+        Subject::OrderCost => [
+            Action::Calculate,
         ],
     ];
 }

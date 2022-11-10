@@ -33,15 +33,9 @@ final class Action extends Enum
 
     const Proceed = 'proceed';
 
-    const GetStats = 'getStats';
+    const Resend = 'resend';
 
-    const ResendInvitation = 'resendInvitation';
-
-    const GetBalance = 'getBalance';
-
-    const CalculateOrderCost = 'calculateOrderCost';
-
-    const GetTransactions = 'getTransactions';
+    const Calculate = 'calculate';
 
     const Charge = 'charge';
 
