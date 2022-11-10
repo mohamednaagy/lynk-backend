@@ -13,7 +13,7 @@ class CompanyInfoTransformer extends TransformerAbstract
             'company_name' => $company->getCompanyName(),
             'company_cr' => $company->getCompanyCr(),
             'vat_id' => $company->getVatId(),
-            'vat' => round($company->getVatToShow(), 1),
+            'vat' => round($company->getVatPercentage(), 1),
             'address_line_one' => $company->getCompanyAddress()->getAddressLineOne(),
             'address_line_two' => $company->getCompanyAddress()->getAddressLineTwo(),
         ];

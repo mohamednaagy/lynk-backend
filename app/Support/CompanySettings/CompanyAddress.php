@@ -3,7 +3,6 @@
 namespace App\Support\CompanySettings;
 
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\App;
 
 class CompanyAddress
 {
@@ -11,6 +10,10 @@ class CompanyAddress
 
     private array $addressLineTwo;
 
+    /**
+     * @param  array  $addressLineOne
+     * @param  array  $addressLineTwo
+     */
     public function __construct(
         array $addressLineOne,
         array $addressLineTwo,
@@ -19,6 +22,11 @@ class CompanyAddress
         $this->addressLineTwo = $addressLineTwo;
     }
 
+    /**
+     * @param  array  $addressLineOneData
+     * @param  array  $addressLineTwoData
+     * @return CompanyAddress
+     */
     public static function fromArray(array $addressLineOneData, array $addressLineTwoData): CompanyAddress
     {
         return new static(
@@ -27,29 +35,27 @@ class CompanyAddress
         );
     }
 
-    public function getAddressLineOneToStore(): array
-    {
-        return $this->addressLineOne;
-    }
-
-    public function getAddressLineOne(string $locale = null): string
+    /**
+     * @param  string|null  $locale
+     * @return array|string
+     */
+    public function getAddressLineOne(string $locale = null): array|string
     {
         if (is_null($locale)) {
-            $locale = App::getLocale();
+            return $this->addressLineOne;
         }
 
         return Arr::get($this->addressLineOne, $locale);
     }
 
-    public function getAddressLineTwoToStore(): array
-    {
-        return $this->addressLineTwo;
-    }
-
-    public function getAddressLineTwo(string $locale = null): string
+    /**
+     * @param  string|null  $locale
+     * @return array|string
+     */
+    public function getAddressLineTwo(string $locale = null): array|string
     {
         if (is_null($locale)) {
-            $locale = App::getLocale();
+            return $this->addressLineTwo;
         }
 
         return Arr::get($this->addressLineTwo, $locale);

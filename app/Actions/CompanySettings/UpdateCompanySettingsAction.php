@@ -13,12 +13,12 @@ class UpdateCompanySettingsAction implements UpdateCompanySettings
         $companyInstance = app(CompanySettings::class);
         $company = Company::fromArray($data);
 
-        $companyInstance->company_name = $company->getCompanyNameToStore();
+        $companyInstance->company_name = $company->getCompanyName();
         $companyInstance->company_cr = $company->getCompanyCr();
         $companyInstance->vat_id = $company->getVatId();
-        $companyInstance->vat = $company->getVatToStore();
-        $companyInstance->address_line_one = $company->getCompanyAddress()->getAddressLineOneToStore();
-        $companyInstance->address_line_two = $company->getCompanyAddress()->getAddressLineTwoToStore();
+        $companyInstance->vat = $company->getVat();
+        $companyInstance->address_line_one = $company->getCompanyAddress()->getAddressLineOne();
+        $companyInstance->address_line_two = $company->getCompanyAddress()->getAddressLineTwo();
 
         $companyInstance->save();
 

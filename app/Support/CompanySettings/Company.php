@@ -3,7 +3,6 @@
 namespace App\Support\CompanySettings;
 
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\App;
 
 class Company
 {
@@ -17,6 +16,13 @@ class Company
 
     private CompanyAddress $companyAddress;
 
+    /**
+     * @param  array  $companyName
+     * @param  string  $companyCr
+     * @param  string  $vatId
+     * @param  float  $vat
+     * @param  CompanyAddress  $companyAddress
+     */
     public function __construct(
         array $companyName,
         string $companyCr,
@@ -31,6 +37,10 @@ class Company
         $this->companyAddress = $companyAddress;
     }
 
+    /**
+     * @param  array  $data
+     * @return Company
+     */
     public static function fromArray(array $data): Company
     {
         return new static(
@@ -42,40 +52,55 @@ class Company
         );
     }
 
-    public function getCompanyNameToStore(): array
-    {
-        return $this->companyName;
-    }
-
-    public function getCompanyName(string $locale = null): string
+    /**
+     * @param  string|null  $locale
+     * @return array|string
+     */
+    public function getCompanyName(string $locale = null): array|string
     {
         if (is_null($locale)) {
-            $locale = App::getLocale();
+            return $this->companyName;
         }
 
         return Arr::get($this->companyName, $locale);
     }
 
+    /**
+     * @return string
+     */
     public function getCompanyCr(): string
     {
         return $this->companyCr;
     }
 
+    /**
+     * @return string
+     */
     public function getVatId(): string
     {
         return $this->vatId;
     }
 
-    public function getVatToStore(): float
+    /**
+     * @return float
+     */
+    public function getVat(): float
     {
         return $this->vat / 100;
     }
 
-    public function getVatToShow(): float
+    /**
+     * @return float
+     */
+    public function getVatPercentage(): float
     {
         return $this->vat * 100;
     }
 
+    /**
+     * @param  string|null  $locale
+     * @return CompanyAddress
+     */
     public function getCompanyAddress(string $locale = null): CompanyAddress
     {
         return $this->companyAddress;
