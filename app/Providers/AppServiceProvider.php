@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Support\Traders\TraderManager;
-use App\Support\Webhooks\WebhookEventManager;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -28,11 +27,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('trader.store', function ($app) {
             return $app->make('dmcc')->driver();
         });
-
-        $this->app->bind('webhook', function () {
-            return new WebhookEventManager;
-        }
-        );
     }
 
     /**

@@ -186,6 +186,7 @@ return [
         App\Providers\EdaatServiceProvider::class,
         App\Providers\PdfGeneratorServiceProvider::class,
         App\Providers\MobileVerifyServiceProvider::class,
+        App\Providers\WebhookServiceProvider::class,
         // \Shivella\Bitly\BitlyServiceProvider::class,
     ],
 
@@ -208,7 +209,7 @@ return [
         'Trader' => App\Support\Traders\Facades\Trader::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
         'Sms' => App\Support\Sms\Sms::class,
-        'Webhhok' => \App\Support\Webhooks\Facades\Webhook::class,
+        'WebhookEvent' => \App\Support\Webhooks\Facades\WebhookEvent::class,
     ])->toArray(),
 
     /*

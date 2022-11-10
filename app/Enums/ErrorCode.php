@@ -24,5 +24,5 @@ class ErrorCode
 
     public const FILE_NOT_FOUND = 1009;
 
-    public const WEBHOOK_LIMIT_TYPE_NOT_FOUND = 10011;
+    public const WEBHOOK_LIMIT_TYPE_NOT_FOUND = 10010;
 }

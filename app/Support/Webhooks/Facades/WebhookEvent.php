@@ -4,7 +4,7 @@ namespace App\Support\Webhooks\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
-class Webhook extends Facade
+class WebhookEvent extends Facade
 {
     /**
      * Get the registered name of the component.
@@ -15,6 +15,6 @@ class Webhook extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return 'webhook';
+        return 'webhookEvent';
     }
 }
