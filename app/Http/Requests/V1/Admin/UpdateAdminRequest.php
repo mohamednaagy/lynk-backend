@@ -5,6 +5,7 @@ namespace App\Http\Requests\V1\Admin;
 use App\Enums\Action;
 use App\Enums\Role;
 use App\Enums\Subject;
+use App\Models\User;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -32,7 +33,13 @@ class UpdateAdminRequest extends FormRequest
         return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
-            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($this->admin->id)],
+            'email' => [
+                'required',
+                'email',
+                Rule::unique(User::class, 'email')
+                    ->whereNull('company_id')
+                    ->ignore($this->admin->id),
+            ],
             'password' => ['nullable', 'string', 'confirmed'],
             'role' => ['required', 'string', new EnumValue(Role::class)],
             'permissions' => ['required', 'array', 'min:1'],
