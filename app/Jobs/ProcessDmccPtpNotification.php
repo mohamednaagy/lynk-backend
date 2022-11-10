@@ -51,14 +51,14 @@ class ProcessDmccPtpNotification implements ShouldQueue
                 return;
             }
 
-            Trader::driver('dmcc')->respondPtpService($ttiId);
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->respondPtpService($ttiId);
 
-            Trader::driver('dmcc')->createTraderOrderHistory(
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::RespondPtp
             );
 
-            Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::RespondedToPtp);
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::RespondedToPtp);
         });
     }
 }

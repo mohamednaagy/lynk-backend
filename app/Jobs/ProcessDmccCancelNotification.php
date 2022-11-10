@@ -44,7 +44,7 @@ class ProcessDmccCancelNotification implements ShouldQueue
             }
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
-            Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::Canceled);
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::Canceled);
         });
     }
 }

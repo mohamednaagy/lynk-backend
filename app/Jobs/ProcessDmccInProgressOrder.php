@@ -5,7 +5,6 @@ namespace App\Jobs;
 use App\Actions\Contracts\Clients\AskClientWakala;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
-use App\Support\Traders\Drivers\FakeDmccDriver;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -42,11 +41,8 @@ class ProcessDmccInProgressOrder implements ShouldQueue
     {
         DB::transaction(function () {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-            if (Trader::driver() instanceof FakeDmccDriver) {
-                Trader::driver()->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabahaSaleCompleted);
-            }
             app()->make(AskClientWakala::class)->handle($financingOrder, Config::get('frontent.wakala_url').$financingOrder->id);
-            Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingClientWakala);
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingClientWakala);
         });
     }
 }

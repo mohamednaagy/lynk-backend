@@ -40,7 +40,7 @@ class MakeOrderProceed extends Controller
                     'status' => FinancingOrderStatus::WaitingPurchasingCommodity,
                 ]);
 
-                Trader::driver('dmcc')->getTti($order);
+                Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->getTti($order);
 
                 return $this->successResponse([
                     'wakala_file_url' => $media->getUrl(),

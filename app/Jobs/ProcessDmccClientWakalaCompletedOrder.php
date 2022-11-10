@@ -45,9 +45,9 @@ class ProcessDmccClientWakalaCompletedOrder implements ShouldQueue
                 return;
             }
 
-            Trader::driver('dmcc')->getTtiId($financingOrder);
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->getTtiId($financingOrder);
 
-            Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingPurchasingCommodity);
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingPurchasingCommodity);
         });
     }
 }

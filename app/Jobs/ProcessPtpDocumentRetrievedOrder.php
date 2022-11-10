@@ -40,14 +40,14 @@ class ProcessPtpDocumentRetrievedOrder implements ShouldQueue
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             $lastTraderOrder = $financingOrder->traderOrders()->latest()->first();
 
-            Trader::driver('dmcc')->createTransferOwnershipToLenderDocument($lastTraderOrder);
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTransferOwnershipToLenderDocument($lastTraderOrder);
 
-            Trader::driver('dmcc')->createTraderOrderHistory(
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTraderOrderHistory(
                 $lastTraderOrder,
                 FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
             );
 
-            Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::CommodityPurchased);
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::CommodityPurchased);
         });
     }
 }

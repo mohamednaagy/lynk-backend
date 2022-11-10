@@ -49,19 +49,19 @@ class ProcessDmccMpoNotification implements ShouldQueue
                 return;
             }
 
-            $versionNo = Trader::driver('dmcc')->uploadTTIDocumentAndGetVersionNumber($ttiId);
+            $versionNo = Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->uploadTTIDocumentAndGetVersionNumber($ttiId);
 
-            Trader::driver('dmcc')->issueMurabahaPurchaseOffer(
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->issueMurabahaPurchaseOffer(
                 $ttiId,
                 $versionNo
             );
 
-            Trader::driver('dmcc')->createTraderOrderHistory(
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::IssueMurabahaOffer
             );
 
-            Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);
         });
     }
 }

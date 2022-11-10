@@ -44,51 +44,51 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
                 return;
             }
 
-            $ptpDocument = Trader::driver('dmcc')->getDocumentByTypeAndTransaction(
+            $ptpDocument = Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->getDocumentByTypeAndTransaction(
                 $lastTraderOrder->reference,
                 'Promise to Purchase'
             );
 
-            Trader::driver('dmcc')->createTraderOrderHistory(
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTraderOrderHistory(
                 $lastTraderOrder,
                 FinancingOrderHistory::GetPtpDocument
             );
 
-            Trader::driver('dmcc')->attachDocumentToOrder(
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->attachDocumentToOrder(
                 $lastTraderOrder,
                 $ptpDocument,
                 'promise_to_purchase',
                 'base64'
             );
 
-            Trader::driver('dmcc')->createTraderOrderHistory(
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTraderOrderHistory(
                 $lastTraderOrder,
                 FinancingOrderHistory::AttachPtpDocumentToOrder
             );
 
-            $ttiDocument = Trader::driver('dmcc')->getDocumentByTypeAndTransaction(
+            $ttiDocument = Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->getDocumentByTypeAndTransaction(
                 $lastTraderOrder->reference,
                 'TTI - Holding certificate'
             );
 
-            Trader::driver('dmcc')->createTraderOrderHistory(
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTraderOrderHistory(
                 $lastTraderOrder,
                 FinancingOrderHistory::GetTtiDocument
             );
 
-            Trader::driver('dmcc')->attachDocumentToOrder(
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->attachDocumentToOrder(
                 $lastTraderOrder,
                 $ttiDocument,
                 'tti_holding_certificate',
                 'base64'
             );
 
-            Trader::driver('dmcc')->createTraderOrderHistory(
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTraderOrderHistory(
                 $lastTraderOrder,
                 FinancingOrderHistory::AttachTtiDocument
             );
 
-            Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::PtpDocumentRetrieved);
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::PtpDocumentRetrieved);
         });
     }
 }

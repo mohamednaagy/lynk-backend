@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'default' => env('DEFAULT_TRADER', 'dmcc'),
+    'default' => env('DEFAULT_TRADER', 'fake_dmcc'),
     'providers' => [
         'dmcc' => [
             'username' => env('DMCC_USERNAME', 'bim.interface.uat'),

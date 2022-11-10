@@ -39,9 +39,9 @@ class ProcessDmccContractSignedOrder implements ShouldQueue
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             $lastTraderOrder = $financingOrder->traderOrders()->latest()->first();
 
-            Trader::driver('dmcc')->createSellingCommodityToCustomerDocument($lastTraderOrder);
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createSellingCommodityToCustomerDocument($lastTraderOrder);
 
-            Trader::driver('dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::CommoditySoldToCustomer);
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::CommoditySoldToCustomer);
         });
     }
 }
