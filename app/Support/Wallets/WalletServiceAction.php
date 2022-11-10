@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Actions\Wallets;
+namespace App\Support\Wallets;
 
-use App\Actions\Contracts\Wallets\WalletService;
 use App\Models\Wallet;
+use App\Support\Wallets\Contracts\WalletService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 

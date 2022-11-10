@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Contracts\Wallets;
+namespace App\Support\Wallets\Contracts;
 
 use App\Models\Wallet;
 use Illuminate\Database\Eloquent\Model;
