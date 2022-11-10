@@ -135,7 +135,7 @@ return [
         'invalid_person_id' => 'Invalid national ID/Iqama',
         'person_id_not_found' => 'Invalid national ID/Iqama',
         'invalid_mobile_number' => 'Invalid phone number',
-        'webhook_type_limit' => 'Could not use this webhook type more than :limit times',
+        'webhook_type_limit' => 'This webhook couldn\'t be used more than :limit time(s)',
 
     ],
     /*

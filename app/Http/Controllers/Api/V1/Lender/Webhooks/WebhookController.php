@@ -17,7 +17,9 @@ class WebhookController extends Controller
      */
     public function store(StoreWebhookRequest $request, CreateWebhook $createWebhook)
     {
-        return fractal($createWebhook->handle($request->validated()), new WebhookTransformer())
+        $webhook = $createWebhook->handle($request->validated());
+
+        return fractal($webhook, new WebhookTransformer())
             ->parseIncludes(['id', 'url', 'type'])
             ->respond();
     }

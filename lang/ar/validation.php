@@ -136,6 +136,7 @@ return [
         'invalid_person_id' => 'Invalid National ID',
         'person_id_not_found' => 'National ID not found',
         'invalid_mobile_number' => 'Invalid mobile number',
+        'webhook_type_limit' => 'لا يمكن استخدام هذا النوع أكثر من :limit مرات',
     ],
     'attributes' => [
         'address' => 'العنوان',

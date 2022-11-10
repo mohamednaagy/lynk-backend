@@ -2,8 +2,9 @@
 
 namespace App\Rules;
 
+use App\Enums\ErrorCode;
+use App\Exceptions\Webhook\WebhookTypeNotFoundException;
 use App\Models\Company;
-use Exception;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Config;
 
@@ -51,10 +52,10 @@ class WebhookTypeLimitRule implements Rule
 
     private function getLimit($type)
     {
-        $limit = Config::get('webhooks.limits');
+        $limit = Config::get('webhook-server.limits');
 
         if (! isset($limit[$type])) {
-            throw new Exception('Unsupported type');
+            throw new WebhookTypeNotFoundException('Unsupported type', ErrorCode::WEBHOOK_LIMIT_TYPE_NOT_FOUND);
         }
 
         return $limit[$type];

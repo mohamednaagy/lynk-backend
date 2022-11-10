@@ -7,25 +7,31 @@ use Spatie\WebhookServer\WebhookCall;
 
 class WebhookEventManager
 {
-    public function __construct(protected Company $company, protected string $webhookType, protected array $payload)
+    /**
+     * fire company webhook by webhook type
+     *
+     * @param  Company  $company
+     * @param  string  $webhookType
+     * @param  array  $payload
+     * @return void
+     */
+    public function fire(Company $company, string $webhookType, array $payload)
     {
-    }
-
-    public function fireEvents()
-    {
-        $this->company
-            ->webhooks()
-            ->whereType($this->webhookType)->chunk(
-            50,
-            function ($webhooks) {
-                $webhooks->map(function ($webhook) {
-                    WebhookCall::create()
-                        ->url($webhook->url)
-                        ->payload($this->payload)
-                        ->useSecret($webhook->company->webhook_secret_key)
-                        ->dispatch();
-                });
-            }
-        );
+        $company->webhooks()
+            ->whereType($webhookType)
+            ->chunk(
+                50,
+                function ($webhooks) use ($company, $payload) {
+                    $webhooks->map(
+                        function ($webhook) use ($company, $payload) {
+                            WebhookCall::create()
+                                ->url($webhook->url)
+                                ->payload($payload)
+                                ->useSecret($company->webhook_secret_key)
+                                ->dispatch();
+                        }
+                    );
+                }
+            );
     }
 }

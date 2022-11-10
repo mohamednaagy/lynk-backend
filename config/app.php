@@ -208,6 +208,7 @@ return [
         'Trader' => App\Support\Traders\Facades\Trader::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
         'Sms' => App\Support\Sms\Sms::class,
+        'Webhhok' => \App\Support\Webhooks\Facades\Webhook::class,
     ])->toArray(),
 
     /*

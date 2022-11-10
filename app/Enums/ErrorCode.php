@@ -23,4 +23,6 @@ class ErrorCode
     public const EMAIL_NOT_VERIFIED = 1008;
 
     public const FILE_NOT_FOUND = 1009;
+
+    public const WEBHOOK_LIMIT_TYPE_NOT_FOUND = 10011;
 }

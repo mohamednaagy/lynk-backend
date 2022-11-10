@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\WebhookType;
+
 return [
 
     /*
@@ -68,4 +70,8 @@ return [
      * underlying job that performs the webhook request.
      */
     'tags' => [],
+
+    'limits' => [
+        WebhookType::OrderUpdates => env('WEBHOOK_LIMIT_ORDER_UPDATES', 10),
+    ],
 ];
