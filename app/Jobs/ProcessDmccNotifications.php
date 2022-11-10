@@ -45,7 +45,6 @@ class ProcessDmccNotifications implements ShouldQueue
         collect(
             Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->fetchNotification('FYI')
         )->each(function ($notification) {
-            dd($notification);
             if (
                 in_array($notification->notificationHeaderAndEntity->notification, [
                     'Murabaha Sale Completed',

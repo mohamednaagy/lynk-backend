@@ -14,6 +14,7 @@ use CodeDredd\Soap\SoapClient;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use stdClass;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class FakeDmccDriver implements TraderInterface
@@ -47,13 +48,14 @@ class FakeDmccDriver implements TraderInterface
             throw new UnprocessableEntityHttpException();
         }
 
-        $data = collect($response->json())->map(function ($notification) use (&$data) {
+        $data = collect($response->json())->map(function ($notification) {
             return (object) [
-                'notificationHeaderAndEntity' => [
+                'notificationHeaderAndEntity' => (object) [
+                    'notificationId' => $notification['id'],
                     'notification' => $notification['notification'],
-                    'notificationEntityDetails' => [
+                    'notificationEntityDetails' => (object) [
                         'notificationEntity' => [
-                            [
+                            (object) [
                                 'entityValue' => $notification['ttiId'],
                             ],
                         ],
@@ -69,7 +71,7 @@ class FakeDmccDriver implements TraderInterface
     {
         $response = Http::get($this->prefixUrl('processNotification/'.$notificationId));
 
-        if (! $response->successful()) {
+        if (! $this->isSuccess($response)) {
             throw new UnprocessableEntityHttpException();
         }
     }
@@ -227,5 +229,31 @@ class FakeDmccDriver implements TraderInterface
         if (! $this->isSuccess($response)) {
             throw new UnprocessableEntityHttpException();
         }
+    }
+
+    private function arrayToObject($array)
+    {
+        $obj = new stdClass();
+
+        foreach ($array as $k => $v) {
+            if (strlen($k)) {
+                if (is_array($v) && ! $this->isAssoc($v)) {
+                    $obj->{$k} = $this->arrayToObject($v); //RECURSION
+                } else {
+                    $obj->{$k} = $v;
+                }
+            }
+        }
+
+        return $obj;
+    }
+
+    public function isAssoc(array $arr)
+    {
+        if ([] === $arr) {
+            return false;
+        }
+
+        return array_keys($arr) !== range(0, count($arr) - 1);
     }
 }
