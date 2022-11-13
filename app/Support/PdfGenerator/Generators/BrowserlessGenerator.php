@@ -66,9 +66,11 @@ class BrowserlessGenerator implements GeneratorInterface
                 ]);
             }
 
-            $storageCallback($tmpFileResource);
+            $storedFile = $storageCallback($tmpFileResource);
 
             fclose($tmpFileResource);
+
+            return $storedFile;
         } catch (\Throwable $th) {
             fclose($tmpFileResource);
             throw $th;
