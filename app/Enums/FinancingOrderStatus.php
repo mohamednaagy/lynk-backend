@@ -111,4 +111,13 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
 
         return in_array($status, self::$state[$this->value]);
     }
+
+    /**
+     * @param  FinancingOrderStatus|int  $status
+     * @return bool
+     */
+    public function cantMoveTo(Status|int $status): bool
+    {
+        return ! $this->cantMoveTo($status);
+    }
 }
