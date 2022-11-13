@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -37,7 +38,8 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
     public function handle(): void
     {
         $driver = config('trader.default');
-        DB::transaction(function () use ($driver) {
+        $trader = Trader::driver($driver);
+        DB::transaction(function () use ($trader) {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             $lastTraderOrder = $financingOrder->traderOrders()->latest()->first();
 
@@ -45,51 +47,51 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
                 return;
             }
 
-            $ptpDocument = Trader::driver($driver)->getDocumentByTypeAndTransaction(
+            $ptpDocument = $trader->getDocumentByTypeAndTransaction(
                 $lastTraderOrder->reference,
                 'Promise to Purchase'
             );
 
-            Trader::driver($driver)->createTraderOrderHistory(
+            $trader->createTraderOrderHistory(
                 $lastTraderOrder,
                 FinancingOrderHistory::GetPtpDocument
             );
 
-            Trader::driver($driver)->attachDocumentToOrder(
+            $trader->attachDocumentToOrder(
                 $lastTraderOrder,
                 $ptpDocument,
-                'promise_to_purchase',
+                FinancingOrderMediaCollection::PromiseToPurchase,
                 'base64'
             );
 
-            Trader::driver($driver)->createTraderOrderHistory(
+            $trader->createTraderOrderHistory(
                 $lastTraderOrder,
                 FinancingOrderHistory::AttachPtpDocumentToOrder
             );
 
-            $ttiDocument = Trader::driver($driver)->getDocumentByTypeAndTransaction(
+            $ttiDocument = $trader->getDocumentByTypeAndTransaction(
                 $lastTraderOrder->reference,
                 'TTI - Holding certificate'
             );
 
-            Trader::driver($driver)->createTraderOrderHistory(
+            $trader->createTraderOrderHistory(
                 $lastTraderOrder,
                 FinancingOrderHistory::GetTtiHoldingCertificateDocument
             );
 
-            Trader::driver($driver)->attachDocumentToOrder(
+            $trader->attachDocumentToOrder(
                 $lastTraderOrder,
                 $ttiDocument,
-                'tti_holding_certificate',
+                FinancingOrderMediaCollection::TtiHoldingCertificate,
                 'base64'
             );
 
-            Trader::driver($driver)->createTraderOrderHistory(
+            $trader->createTraderOrderHistory(
                 $lastTraderOrder,
                 FinancingOrderHistory::AttachTtiHoldingCertificateDocument
             );
 
-            Trader::driver($driver)->updateOrderStatus($financingOrder, FinancingOrderStatus::PtpDocumentRetrieved);
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::PtpDocumentRetrieved);
         });
     }
 }

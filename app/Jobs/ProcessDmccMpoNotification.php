@@ -38,7 +38,8 @@ class ProcessDmccMpoNotification implements ShouldQueue
     public function handle(): void
     {
         $driver = config('trader.default');
-        DB::transaction(function () use ($driver) {
+        $trader = Trader::driver($driver);
+        DB::transaction(function () use ($trader) {
             $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
             $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
             if (! $traderOrder) {
@@ -50,19 +51,19 @@ class ProcessDmccMpoNotification implements ShouldQueue
                 return;
             }
 
-            $versionNo = Trader::driver($driver)->uploadTTIDocumentAndGetVersionNumber($ttiId);
+            $versionNo = $trader->uploadTTIDocumentAndGetVersionNumber($ttiId);
 
-            Trader::driver($driver)->issueMurabahaPurchaseOffer(
+            $trader->issueMurabahaPurchaseOffer(
                 $ttiId,
                 $versionNo
             );
 
-            Trader::driver($driver)->createTraderOrderHistory(
+            $trader->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::IssueMurabahaOffer
             );
 
-            Trader::driver($driver)->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);
         });
     }
 }

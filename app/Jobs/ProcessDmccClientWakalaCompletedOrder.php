@@ -37,7 +37,8 @@ class ProcessDmccClientWakalaCompletedOrder implements ShouldQueue
     public function handle(): void
     {
         $driver = config('trader.default');
-        DB::transaction(function () use ($driver) {
+        $trader = Trader::driver($driver);
+        DB::transaction(function () use ($trader) {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             if ($financingOrder->traderOrders()->whereIn('status', [
                 TraderOrderStatus::InProgress,
@@ -46,9 +47,9 @@ class ProcessDmccClientWakalaCompletedOrder implements ShouldQueue
                 return;
             }
 
-            Trader::driver($driver)->getTtiId($financingOrder);
+            $trader->getTtiId($financingOrder);
 
-            Trader::driver($driver)->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingPurchasingCommodity);
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingPurchasingCommodity);
         });
     }
 }

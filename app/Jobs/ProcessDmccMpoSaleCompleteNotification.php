@@ -39,7 +39,8 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
     public function handle(): void
     {
         $driver = config('trader.default');
-        DB::transaction(function () use ($driver) {
+        $trader = Trader::driver($driver);
+        DB::transaction(function () use ($trader) {
             $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
             $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
             if (! $traderOrder) {
@@ -51,51 +52,51 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
                 return;
             }
 
-            $mpoDocument = Trader::driver($driver)->getDocumentByTypeAndTransaction(
+            $mpoDocument = $trader->getDocumentByTypeAndTransaction(
                 $ttiId,
                 'Murabaha Purchase Offer Document'
             );
 
-            Trader::driver($driver)->createTraderOrderHistory(
+            $trader->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::GetMurabahaPurchaseOfferDocument
             );
 
-            Trader::driver($driver)->attachDocumentToOrder(
+            $trader->attachDocumentToOrder(
                 $traderOrder,
                 $mpoDocument,
                 FinancingOrderMediaCollection::MurabahaPurchaseOrder,
                 'base64'
             );
 
-            Trader::driver($driver)->createTraderOrderHistory(
+            $trader->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::AttachMpoDocument
             );
 
-            $warrantDocument = Trader::driver($driver)->getDocumentByTypeAndTransaction(
+            $warrantDocument = $trader->getDocumentByTypeAndTransaction(
                 $ttiId,
                 'Warrant Amendment Except Warrant No'
             );
 
-            Trader::driver($driver)->createTraderOrderHistory(
+            $trader->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument
             );
 
-            Trader::driver($driver)->attachDocumentToOrder(
+            $trader->attachDocumentToOrder(
                 $traderOrder,
                 $warrantDocument,
                 FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
                 'base64'
             );
 
-            Trader::driver($driver)->createTraderOrderHistory(
+            $trader->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument
             );
 
-            Trader::driver($driver)->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabahaSaleCompleted);
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabahaSaleCompleted);
         });
     }
 }

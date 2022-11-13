@@ -38,7 +38,8 @@ class ProcessDmccPtpNotification implements ShouldQueue
     public function handle(): void
     {
         $driver = config('trader.default');
-        DB::transaction(function () use ($driver) {
+        $trader = Trader::driver($driver);
+        DB::transaction(function () use ($trader) {
             $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
             $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
 
@@ -52,14 +53,14 @@ class ProcessDmccPtpNotification implements ShouldQueue
                 return;
             }
 
-            Trader::driver($driver)->respondPtpService($ttiId);
+            $trader->respondPtpService($ttiId);
 
-            Trader::driver($driver)->createTraderOrderHistory(
+            $trader->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::RespondPtp
             );
 
-            Trader::driver($driver)->updateOrderStatus($financingOrder, FinancingOrderStatus::RespondedToPtp);
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::RespondedToPtp);
         });
     }
 }

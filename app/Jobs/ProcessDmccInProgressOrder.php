@@ -41,10 +41,11 @@ class ProcessDmccInProgressOrder implements ShouldQueue
     public function handle(): void
     {
         $driver = config('trader.default');
-        DB::transaction(function () use ($driver) {
+        $trader = Trader::driver($driver);
+        DB::transaction(function () use ($trader) {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             app()->make(AskClientWakala::class)->handle($financingOrder, Str::replace('{order_id}', $financingOrder->id, Config::get('frontent.client_wakala_url')));
-            Trader::driver($driver)->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingClientWakala);
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingClientWakala);
         });
     }
 }
