@@ -107,7 +107,7 @@ class FakeDriver implements TraderInterface
 
     public function cancelOrder(FinancingOrder $financingOrder): mixed
     {
-        $traderOrder = $financingOrder->traderOrders()->latest()->first();
+        $traderOrder = $financingOrder->activeTraderOrder()->first();
         $response = $this->soap
             ->baseWsdl($this->buildUrl('cancelTTI'))
             ->call('cancelTTI', [

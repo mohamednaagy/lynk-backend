@@ -186,4 +186,9 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             }
         );
     }
+
+    public function scopeActiveTraderOrder($query)
+    {
+        $query->traderOrders()->latest();
+    }
 }

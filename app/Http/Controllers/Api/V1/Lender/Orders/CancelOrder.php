@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Orders\CancelOrder as CancelOrderInterface;
+use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\CancelOrderRequest;
@@ -37,7 +38,10 @@ class CancelOrder extends Controller
                 ]
             )
         ) {
-            return $this->errorResponse('This order can\'t be cancelled');
+            return $this->errorResponse(
+                trans('unable_to_cancelled'),
+                ErrorCode::UNABLE_TO_CANCEL_ORDER
+            );
         }
 
         $cancelOrder->handle(

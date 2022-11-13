@@ -41,7 +41,7 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
         $trader = Trader::driver($driver);
         DB::transaction(function () use ($trader) {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-            $lastTraderOrder = $financingOrder->traderOrders()->latest()->first();
+            $lastTraderOrder = $financingOrder->activeTraderOrder()->first();
 
             if (! $lastTraderOrder) {
                 return;

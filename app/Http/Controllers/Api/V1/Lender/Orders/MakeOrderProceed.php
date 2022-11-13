@@ -53,7 +53,7 @@ class MakeOrderProceed extends Controller
                     'status' => FinancingOrderStatus::ContractSigned,
                 ]);
 
-                $traderOrder = $order->traderOrders()->latest()->first();
+                $traderOrder = $order->activeTraderOrder()->first();
 
                 $traderOrder->traderHistories()->create([
                     'action' => FinancingOrderHistory::ContractSigned,

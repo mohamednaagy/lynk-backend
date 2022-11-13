@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -41,7 +42,11 @@ class ProcessDmccPtpNotification implements ShouldQueue
         $trader = Trader::driver($driver);
         DB::transaction(function () use ($trader) {
             $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
-            $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
+            $traderOrder = TraderOrder::query()
+                ->where('reference', $ttiId)
+                ->where('status', TraderOrderStatus::InProgress)
+                ->lockForUpdate()
+                ->first();
 
             if (! $traderOrder) {
                 return;
