@@ -3,9 +3,10 @@
 namespace App\Support\PdfGenerator\Generators;
 
 use App\Support\PdfGenerator\Contracts\GeneratorInterface;
+use App\Support\PdfGenerator\Exceptions\ClosureNotFoundException;
 use App\Support\PdfGenerator\Exceptions\GeneratingPdfException;
+use Closure;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 
 class BrowserlessGenerator implements GeneratorInterface
 {
@@ -40,6 +41,17 @@ class BrowserlessGenerator implements GeneratorInterface
         $tmpFileResource = tmpfile();
 
         try {
+            if ($options instanceof Closure) {
+                $storageClosure = $options;
+                $options = [];
+            } else {
+                if (empty($options['storageClosure'])) {
+                    throw new ClosureNotFoundException();
+                }
+                $storageClosure = $options['storageClosure'];
+                unset($options['storageClosure']);
+            }
+
             $response = Http::baseUrl($this->baseUrl)
                 ->withOptions([
                     'sink' => $tmpFileResource,
@@ -53,11 +65,7 @@ class BrowserlessGenerator implements GeneratorInterface
                 ]);
             }
 
-            Storage::disk($this->getStorageDisk())
-                ->put(
-                    $path,
-                    $tmpFileResource
-                );
+            $storageClosure($tmpFileResource);
 
             fclose($tmpFileResource);
         } catch (\Throwable $th) {
@@ -78,18 +86,10 @@ class BrowserlessGenerator implements GeneratorInterface
 
     public function prepareRequestData($html, $options)
     {
-        $goToOptions = $options['gotoOptions'] ?? [];
-        unset($options['gotoOptions']);
-
-        $requestData = [
+        return [
             'html' => $html,
+            'gotoOptions' => ['waitUntil' => 'networkidle0'],
             'options' => array_merge($this->getDefaultOptions(), $options),
         ];
-
-        if (! empty($goToOptions)) {
-            $requestData['gotoOptions'] = $goToOptions;
-        }
-
-        return $requestData;
     }
 }
