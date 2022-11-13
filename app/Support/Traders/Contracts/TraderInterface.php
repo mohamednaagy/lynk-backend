@@ -10,5 +10,7 @@ interface TraderInterface
 
     public function getTti(FinancingOrder $financingOrder);
 
-    public function fetchNotification(string $type);
+    public function fetchNotifications(string $type);
+
+    public function cancelOrder(FinancingOrder $financingOrder): mixed;
 }

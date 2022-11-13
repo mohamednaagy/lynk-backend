@@ -32,6 +32,7 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
      */
     public function handle(): void
     {
-        Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->processFetchNotification($this->notification->notificationHeaderAndEntity->notificationId);
+        $driver = config('trader.default');
+        Trader::driver($driver)->processNotification($this->notification->notificationHeaderAndEntity->notificationId);
     }
 }

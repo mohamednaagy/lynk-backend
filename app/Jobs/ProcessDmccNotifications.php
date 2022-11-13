@@ -20,8 +20,9 @@ class ProcessDmccNotifications implements ShouldQueue
      */
     public function handle(): void
     {
+        $driver = config('trader.default');
         collect(
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->fetchNotification('ACTIONABLE')
+            Trader::driver($driver)->fetchNotifications('ACTIONABLE')
         )->each(function ($notification) {
             try {
                 if (
@@ -43,7 +44,7 @@ class ProcessDmccNotifications implements ShouldQueue
         });
 
         collect(
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->fetchNotification('FYI')
+            Trader::driver($driver)->fetchNotifications('FYI')
         )->each(function ($notification) {
             if (
                 in_array($notification->notificationHeaderAndEntity->notification, [

@@ -36,7 +36,8 @@ class ProcessDmccCancelNotification implements ShouldQueue
      */
     public function handle(): void
     {
-        DB::transaction(function () {
+        $driver = config('trader.default');
+        DB::transaction(function () use ($driver) {
             $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
             $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
             if (! $traderOrder) {
@@ -44,7 +45,7 @@ class ProcessDmccCancelNotification implements ShouldQueue
             }
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::Canceled);
+            Trader::driver($driver)->updateOrderStatus($financingOrder, FinancingOrderStatus::Canceled);
         });
     }
 }

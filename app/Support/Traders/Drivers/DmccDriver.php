@@ -55,7 +55,7 @@ class DmccDriver implements TraderInterface
         return $ttiId;
     }
 
-    public function fetchNotification(string $type): ?array
+    public function fetchNotifications(string $type): ?array
     {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('notificationDetailsRequest'))
@@ -70,7 +70,7 @@ class DmccDriver implements TraderInterface
         return $response->object()->NotificationAllDetailsResponse[0]->notificationAllDetailsResponse->notificationDetails ?? [];
     }
 
-    public function processFetchNotification($notificationId): void
+    public function processNotification($notificationId): void
     {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('processNotification'))
@@ -128,7 +128,7 @@ class DmccDriver implements TraderInterface
         return $response->ttiId;
     }
 
-    public function cancelTtiId(FinancingOrder $financingOrder): mixed
+    public function cancelOrder(FinancingOrder $financingOrder): mixed
     {
         $traderOrder = $financingOrder->traderOrders()->latest()->first();
         $response = $this->soap

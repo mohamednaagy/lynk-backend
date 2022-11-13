@@ -32,6 +32,7 @@ class MakeOrderProceed extends Controller
         int $order
     ): JsonResponse {
         return DB::transaction(function () use ($request, $acceptClientWakala, $order) {
+            $driver = config('trader.default');
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
 
             if ($request->validated('case') === FinancingOrderProceedCase::ClientWakalaAccepted) {
@@ -41,7 +42,7 @@ class MakeOrderProceed extends Controller
                     'status' => FinancingOrderStatus::WaitingPurchasingCommodity,
                 ]);
 
-                Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->getTti($order);
+                Trader::driver($driver)->getTti($order);
 
                 return $this->successResponse([
                     'wakala_file_url' => $media->getUrl(),

@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -37,7 +38,8 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
      */
     public function handle(): void
     {
-        DB::transaction(function () {
+        $driver = config('trader.default');
+        DB::transaction(function () use ($driver) {
             $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
             $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
             if (! $traderOrder) {
@@ -49,51 +51,51 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
                 return;
             }
 
-            $mpoDocument = Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->getDocumentByTypeAndTransaction(
+            $mpoDocument = Trader::driver($driver)->getDocumentByTypeAndTransaction(
                 $ttiId,
                 'Murabaha Purchase Offer Document'
             );
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTraderOrderHistory(
+            Trader::driver($driver)->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::GetMurabahaPurchaseOfferDocument
             );
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->attachDocumentToOrder(
+            Trader::driver($driver)->attachDocumentToOrder(
                 $traderOrder,
                 $mpoDocument,
-                'murabha_purchase_order',
+                FinancingOrderMediaCollection::MurabahaPurchaseOrder,
                 'base64'
             );
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTraderOrderHistory(
+            Trader::driver($driver)->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::AttachMpoDocument
             );
 
-            $warrantDocument = Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->getDocumentByTypeAndTransaction(
+            $warrantDocument = Trader::driver($driver)->getDocumentByTypeAndTransaction(
                 $ttiId,
                 'Warrant Amendment Except Warrant No'
             );
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTraderOrderHistory(
+            Trader::driver($driver)->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument
             );
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->attachDocumentToOrder(
+            Trader::driver($driver)->attachDocumentToOrder(
                 $traderOrder,
                 $warrantDocument,
-                'warrant_amendment_except_warrant_no',
+                FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
                 'base64'
             );
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTraderOrderHistory(
+            Trader::driver($driver)->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument
             );
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabahaSaleCompleted);
+            Trader::driver($driver)->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabahaSaleCompleted);
         });
     }
 }

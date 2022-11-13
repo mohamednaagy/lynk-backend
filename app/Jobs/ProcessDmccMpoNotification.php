@@ -37,7 +37,8 @@ class ProcessDmccMpoNotification implements ShouldQueue
      */
     public function handle(): void
     {
-        DB::transaction(function () {
+        $driver = config('trader.default');
+        DB::transaction(function () use ($driver) {
             $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
             $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
             if (! $traderOrder) {
@@ -49,19 +50,19 @@ class ProcessDmccMpoNotification implements ShouldQueue
                 return;
             }
 
-            $versionNo = Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->uploadTTIDocumentAndGetVersionNumber($ttiId);
+            $versionNo = Trader::driver($driver)->uploadTTIDocumentAndGetVersionNumber($ttiId);
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->issueMurabahaPurchaseOffer(
+            Trader::driver($driver)->issueMurabahaPurchaseOffer(
                 $ttiId,
                 $versionNo
             );
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTraderOrderHistory(
+            Trader::driver($driver)->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::IssueMurabahaOffer
             );
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);
+            Trader::driver($driver)->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);
         });
     }
 }

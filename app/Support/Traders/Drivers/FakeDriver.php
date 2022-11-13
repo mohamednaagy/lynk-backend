@@ -14,10 +14,9 @@ use CodeDredd\Soap\SoapClient;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
-use stdClass;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
-class FakeDmccDriver implements TraderInterface
+class FakeDriver implements TraderInterface
 {
     private SoapClient $soap;
 
@@ -40,9 +39,9 @@ class FakeDmccDriver implements TraderInterface
         return $ttiId;
     }
 
-    public function fetchNotification(string $type): ?array
+    public function fetchNotifications(string $type): ?array
     {
-        $response = Http::get($this->prefixUrl('notifications?type='.$type));
+        $response = Http::get($this->buildUrl('notifications?type='.$type));
 
         if (! $response->successful()) {
             throw new UnprocessableEntityHttpException();
@@ -67,18 +66,18 @@ class FakeDmccDriver implements TraderInterface
         return $data->toArray();
     }
 
-    public function processFetchNotification($notificationId): void
+    public function processNotification($notificationId): void
     {
-        $response = Http::get($this->prefixUrl('processNotification/'.$notificationId));
+        $response = Http::get($this->buildUrl('processNotification/'.$notificationId));
 
         if (! $this->isSuccess($response)) {
             throw new UnprocessableEntityHttpException();
         }
     }
 
-    private function prefixUrl($url): string
+    private function buildUrl($path): string
     {
-        return 'http://'.config('trader.providers.fake_dmcc.username').':'.config('trader.providers.fake_dmcc.password').'@'.config('trader.providers.fake_dmcc.url').$url;
+        return 'http://'.config('trader.providers.fake.username').':'.config('trader.providers.fake.password').'@'.config('trader.providers.fake.url').$path;
     }
 
     private function isSuccess(Response $response): bool
@@ -88,14 +87,14 @@ class FakeDmccDriver implements TraderInterface
 
     public function getTtiId(FinancingOrder $financingOrder): mixed
     {
-        $response = Http::post($this->prefixUrl('getTTIIdForIssuePTP'), [
+        $response = Http::post($this->buildUrl('getTTIIdForIssuePTP'), [
             'currency' => 'SAR',
-            'costPrice' => 100,
-            'profit' => 50,
-            'paymentTerms' => config('trader.providers.dmcc.tti.payment_terms'),
-            'unitOfDuration' => config('trader.providers.dmcc.tti.unit_of_duration'),
+            'costPrice' => $financingOrder->amount,
+            'profit' => $financingOrder->selling_price - $financingOrder->amount,
+            'paymentTerms' => config('trader.providers.fake.tti.payment_terms'),
+            'unitOfDuration' => config('trader.providers.fake.tti.unit_of_duration'),
             'product' => null,
-            'registeredMember' => config('trader.providers.dmcc.tti.registered_member'),
+            'registeredMember' => config('trader.providers.fake.tti.registered_member'),
             'client' => null,
         ]);
 
@@ -106,12 +105,11 @@ class FakeDmccDriver implements TraderInterface
         return $response->json('data.ttiId');
     }
 
-    // TODO
-    public function cancelTtiId(FinancingOrder $financingOrder): mixed
+    public function cancelOrder(FinancingOrder $financingOrder): mixed
     {
         $traderOrder = $financingOrder->traderOrders()->latest()->first();
         $response = $this->soap
-            ->baseWsdl($this->prefixUrl('cancelTTI'))
+            ->baseWsdl($this->buildUrl('cancelTTI'))
             ->call('cancelTTI', [
                 'ttiId' => $traderOrder->reference,
                 'comments' => 'Cancel Order',
@@ -128,7 +126,7 @@ class FakeDmccDriver implements TraderInterface
     private function createTraderOrder(FinancingOrder $financingOrder, string $ttiId): Model|TraderOrder
     {
         return $financingOrder->traderOrders()->create([
-            'provider' => 'dmcc',
+            'provider' => 'fake',
             'reference' => $ttiId,
             'status' => TraderOrderStatus::InProgress,
         ]);
@@ -136,7 +134,7 @@ class FakeDmccDriver implements TraderInterface
 
     public function respondPtpService(string $ttiId): void
     {
-        $response = Http::post($this->prefixUrl('respondPTPService'), [
+        $response = Http::post($this->buildUrl('respondPTPService'), [
             'ttiId' => $ttiId,
             'comments' => 'create PTP',
             'submitAction' => 'true',
@@ -162,7 +160,7 @@ class FakeDmccDriver implements TraderInterface
     public function getDocumentByTypeAndTransaction(string $ttiId, string $documentType): mixed
     {
         // request PTP document
-        $response = Http::post($this->prefixUrl('getDoumentByType'), [
+        $response = Http::post($this->buildUrl('getDoumentByType'), [
             'ttiId' => $ttiId,
             'type' => $documentType,
         ]);
@@ -219,7 +217,7 @@ class FakeDmccDriver implements TraderInterface
 
     public function issueMurabahaPurchaseOffer(string $ttiId, string $versionNo): void
     {
-        $response = Http::post($this->prefixUrl('issueMurabahaPurchaseOffer'), [
+        $response = Http::post($this->buildUrl('issueMurabahaPurchaseOffer'), [
             'ttiId' => $ttiId,
             'comments' => 'create MPO',
             'ttiDocumentVersionNo' => $versionNo,
@@ -228,31 +226,5 @@ class FakeDmccDriver implements TraderInterface
         if (! $this->isSuccess($response)) {
             throw new UnprocessableEntityHttpException();
         }
-    }
-
-    private function arrayToObject($array)
-    {
-        $obj = new stdClass();
-
-        foreach ($array as $k => $v) {
-            if (strlen($k)) {
-                if (is_array($v) && ! $this->isAssoc($v)) {
-                    $obj->{$k} = $this->arrayToObject($v); //RECURSION
-                } else {
-                    $obj->{$k} = $v;
-                }
-            }
-        }
-
-        return $obj;
-    }
-
-    public function isAssoc(array $arr)
-    {
-        if ([] === $arr) {
-            return false;
-        }
-
-        return array_keys($arr) !== range(0, count($arr) - 1);
     }
 }

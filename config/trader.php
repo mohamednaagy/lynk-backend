@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'default' => env('DEFAULT_TRADER', 'fake_dmcc'),
+    'default' => env('DEFAULT_TRADER', 'fake'),
     'providers' => [
         'dmcc' => [
             'username' => env('DMCC_USERNAME', 'bim.interface.uat'),
@@ -13,15 +13,15 @@ return [
                 'registered_member' => env('DMCC_TTI_REGISTERED_MEMBER', 'BOLFT'),
             ],
         ],
-        'fake_dmcc' => [
-            'url' => 'faker-dd.uselynk.com/api/',
-            'username' => env('FAKE_DMCC_USERNAME', 'lynk'),
-            'password' => env('FAKE_DMCC_PASSWORD', '12345678'),
+        'fake' => [
+            'url' => env('FAKE_TRADER_URL', 'faker-dd.uselynk.com/api/'),
+            'username' => env('FAKE_TRADER_USERNAME', 'lynk'),
+            'password' => env('FAKE_TRADER_PASSWORD', '12345678'),
             'tti' => [
-                'payment_terms' => env('DMCC_TTI_PAYMENT_TERMS', '21'),
-                'unit_of_duration' => env('DMCC_TTI_UNIT_OF_DURATION', 'Days'),
-                'product' => env('DMCC_TTI_PRODUCT', 'rice'),
-                'registered_member' => env('DMCC_TTI_REGISTERED_MEMBER', 'BOLFT'),
+                'payment_terms' => env('FAKE_TRADER_TTI_PAYMENT_TERMS', '21'),
+                'unit_of_duration' => env('FAKE_TRADER_TTI_UNIT_OF_DURATION', 'Days'),
+                'product' => env('FAKE_TRADER_TTI_PRODUCT', 'rice'),
+                'registered_member' => env('FAKE_TRADER_TTI_REGISTERED_MEMBER', 'BOLFT'),
             ],
         ],
     ],

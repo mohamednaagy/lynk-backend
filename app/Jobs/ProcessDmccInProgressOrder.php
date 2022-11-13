@@ -13,6 +13,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ProcessDmccInProgressOrder implements ShouldQueue
 {
@@ -39,10 +40,11 @@ class ProcessDmccInProgressOrder implements ShouldQueue
      */
     public function handle(): void
     {
-        DB::transaction(function () {
+        $driver = config('trader.default');
+        DB::transaction(function () use ($driver) {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-            app()->make(AskClientWakala::class)->handle($financingOrder, Config::get('frontent.wakala_url').$financingOrder->id);
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingClientWakala);
+            app()->make(AskClientWakala::class)->handle($financingOrder, Str::replace('{order_id}', $financingOrder->id, Config::get('frontent.client_wakala_url')));
+            Trader::driver($driver)->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingClientWakala);
         });
     }
 }
