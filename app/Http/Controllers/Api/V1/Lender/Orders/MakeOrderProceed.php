@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
@@ -48,6 +49,12 @@ class MakeOrderProceed extends Controller
             } elseif ($request->validated('case') === FinancingOrderProceedCase::ContractSigned) {
                 $order->update([
                     'status' => FinancingOrderStatus::ContractSigned,
+                ]);
+
+                $traderOrder = $order->traderOrders()->latest()->first();
+
+                $traderOrder->traderHistories()->create([
+                    'action' => FinancingOrderHistory::ContractSigned,
                 ]);
 
                 return $this->successResponse();
