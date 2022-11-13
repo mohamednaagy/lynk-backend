@@ -9,7 +9,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
 {
     const PendingApproval = 1;
 
-    const InProgress = 2;
+    const Approved = 2;
 
     const Canceled = 3;
 

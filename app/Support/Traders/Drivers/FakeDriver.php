@@ -4,20 +4,20 @@ namespace App\Support\Traders\Drivers;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
-use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
-use App\Models\TraderOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
+use App\Support\Traders\TraderHelper;
 use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class FakeDriver implements TraderInterface
 {
+    use TraderHelper;
+
     private SoapClient $soap;
 
     public function __construct()
@@ -33,7 +33,7 @@ class FakeDriver implements TraderInterface
     public function getTti(FinancingOrder $financingOrder): string
     {
         $ttiId = $this->getTtiId($financingOrder);
-        $traderOrder = $this->createTraderOrder($financingOrder, $ttiId);
+        $traderOrder = $this->createTraderOrder($financingOrder, $ttiId, 'fake');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $ttiId;
@@ -123,15 +123,6 @@ class FakeDriver implements TraderInterface
         return $response->object();
     }
 
-    private function createTraderOrder(FinancingOrder $financingOrder, string $ttiId): Model|TraderOrder
-    {
-        return $financingOrder->traderOrders()->create([
-            'provider' => 'fake',
-            'reference' => $ttiId,
-            'status' => TraderOrderStatus::InProgress,
-        ]);
-    }
-
     public function respondPtpService(string $ttiId): void
     {
         $response = Http::post($this->buildUrl('respondPTPService'), [
@@ -185,13 +176,6 @@ class FakeDriver implements TraderInterface
         }
     }
 
-    public function updateOrderStatus($order, int $status): void
-    {
-        $order->update([
-            'status' => $status,
-        ]);
-    }
-
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
         $html = view('transfer-ownership-to-lender')->render();
@@ -201,13 +185,6 @@ class FakeDriver implements TraderInterface
         ]);
 
         $this->attachDocumentToOrder($traderOrder, storage_path('app/'.$path), FinancingOrderMediaCollection::TransferOwnershipToLender);
-    }
-
-    public function createTraderOrderHistory(TraderOrder $traderOrder, int $action): void
-    {
-        $traderOrder->traderHistories()->create([
-            'action' => $action,
-        ]);
     }
 
     public function uploadTTIDocumentAndGetVersionNumber(string $ttiId): mixed

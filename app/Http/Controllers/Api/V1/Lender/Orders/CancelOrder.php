@@ -26,7 +26,7 @@ class CancelOrder extends Controller
             ! in_array($order->status->value,
                 [
                     FinancingOrderStatus::Rejected,
-                    FinancingOrderStatus::InProgress,
+                    FinancingOrderStatus::Approved,
                     FinancingOrderStatus::RespondedToPtp,
                     FinancingOrderStatus::PendingApproval,
                     FinancingOrderStatus::CommodityPurchased,

@@ -168,7 +168,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function scopeActive($query)
     {
-        return $query->whereIn('status', [FinancingOrderStatus::PendingApproval, FinancingOrderStatus::InProgress]);
+        return $query->whereIn('status', [FinancingOrderStatus::PendingApproval, FinancingOrderStatus::Approved]);
     }
 
     public function scopeCompleted($query)
