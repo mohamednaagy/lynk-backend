@@ -1,18 +1,13 @@
 <?php
 
-namespace App\Actions;
+namespace App\Support\Authorizations\Utility;
 
-use App\Actions\Contracts\getMediaCollectionByArea;
 use App\Enums\Area;
 use App\Enums\FinancingOrderMediaCollection;
 
-class getMediaCollectionByAreaAction implements getMediaCollectionByArea
+class MediaCollection
 {
-    /**
-     * @param  mixed  $area
-     * @return mixed
-     */
-    public function handle($area)
+    public function getCollectionsByArea($area)
     {
         return match ($area) {
             Area::Lender => [

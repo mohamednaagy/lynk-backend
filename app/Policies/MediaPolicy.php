@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Support\Authorizations\FinancingOrderMediaAuthorize;
+use App\Support\Authorizations\FinancingOrderAuthorizer;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -25,14 +25,14 @@ class MediaPolicy
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Media  $media
+     * @param  \Spatie\MediaLibrary\MediaCollections\Models\Media  $media
      * @return \Illuminate\Auth\Access\Response|bool
      */
     public function view(User $user, Media $media, $area = null)
     {
-        $mediaAuthorize = new FinancingOrderMediaAuthorize($user, $media);
+        $mediaAuthorize = new FinancingOrderAuthorizer($user, $media, $area);
 
-        return $mediaAuthorize->doesAreaHasAccessToCollection($area) && $mediaAuthorize->conditions();
+        return $mediaAuthorize->canAccess();
     }
 
     /**
