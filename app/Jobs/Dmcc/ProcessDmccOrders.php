@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;

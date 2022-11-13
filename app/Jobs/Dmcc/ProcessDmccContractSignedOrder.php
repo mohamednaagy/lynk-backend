@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderStatus;
-use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -13,7 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccClientWakalaCompletedOrder implements ShouldQueue
+class ProcessDmccContractSignedOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -40,16 +39,11 @@ class ProcessDmccClientWakalaCompletedOrder implements ShouldQueue
         $trader = Trader::driver($driver);
         DB::transaction(function () use ($trader) {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-            if ($financingOrder->traderOrders()->whereIn('status', [
-                TraderOrderStatus::InProgress,
-                TraderOrderStatus::Completed,
-            ])->count() > 0) {
-                return;
-            }
+            $lastTraderOrder = $financingOrder->activeTraderOrder()->first();
 
-            $trader->getTtiId($financingOrder);
+            $trader->createSellingCommodityToCustomerDocument($lastTraderOrder);
 
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingPurchasingCommodity);
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommoditySoldToCustomer);
         });
     }
 }
