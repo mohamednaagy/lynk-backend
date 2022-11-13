@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -14,7 +13,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccMpoNotification implements ShouldQueue
+class ProcessDmccCancelNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -45,23 +44,7 @@ class ProcessDmccMpoNotification implements ShouldQueue
             }
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
-            if ($financingOrder->status->value !== FinancingOrderStatus::CommoditySoldToCustomer) {
-                return;
-            }
-
-            $versionNo = Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->uploadTTIDocumentAndGetVersionNumber($ttiId);
-
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->issueMurabahaPurchaseOffer(
-                $ttiId,
-                $versionNo
-            );
-
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::IssueMurabahaOffer
-            );
-
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::Canceled);
         });
     }
 }

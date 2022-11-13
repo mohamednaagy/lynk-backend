@@ -28,7 +28,7 @@ class AcceptDmccAgreement extends Command
      */
     public function handle(): int
     {
-        if (Trader::driver('dmcc')->acceptAgreement()) {
+        if (Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->acceptAgreement()) {
             $this->line('Agreement Successfully Accepted');
 
             return Command::SUCCESS;

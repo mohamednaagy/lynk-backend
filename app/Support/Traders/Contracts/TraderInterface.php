@@ -10,9 +10,5 @@ interface TraderInterface
 
     public function getTti(FinancingOrder $financingOrder);
 
-    public function respondPtp(string $ttiId);
-
-    public function issueMurabaha(string $ttiId);
-
     public function fetchNotification(string $type);
 }
