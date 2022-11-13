@@ -6,18 +6,21 @@ use App\Actions\Contracts\Orders\ApproveOrder as ApproveOrderInterface;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\FinancingOrder;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class ApproveOrder extends Controller
 {
     /**
      * Handle the incoming request.
      *
+     * @param  Request  $request
      * @param  ApproveOrderInterface  $approveOrder
      * @param  FinancingOrder  $order
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function __invoke(ApproveOrderInterface $approveOrder, FinancingOrder $order)
+    public function __invoke(Request $request, ApproveOrderInterface $approveOrder, FinancingOrder $order)
     {
         if (! $order->status->is(FinancingOrderStatus::PendingApproval)) {
             return $this->errorResponse(
@@ -26,7 +29,7 @@ class ApproveOrder extends Controller
             );
         }
 
-        $approveOrder->handle($order, auth()->user());
+        $approveOrder->handle($order, $request->user());
 
         return $this->successResponse();
     }

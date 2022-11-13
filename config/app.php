@@ -163,6 +163,7 @@ return [
         LaravelLang\JsonFallbackHotfix\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
+        Mews\Purifier\PurifierServiceProvider::class,
 
         /*
          * Package Service Providers...
@@ -205,8 +206,10 @@ return [
         'Grantify' => Modules\Grantify\Facades\Grantify::class,
         'GrantifySeeder' => Modules\Grantify\Facades\GrantifySeeder::class,
         'MobileVerify' => App\Support\MobileVerification\Facades\MobileVerify::class,
+        'Trader' => App\Support\Traders\Facades\Trader::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
         'Sms' => App\Support\Sms\Sms::class,
+        'Purifier' => Mews\Purifier\Facades\Purifier::class,
     ])->toArray(),
 
     /*

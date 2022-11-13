@@ -12,5 +12,5 @@ interface AcceptClientWakala
      * @param  string  $token
      * @return Media
      */
-    public function handle(FinancingOrder $order, string $token): Media;
+    public function handle(FinancingOrder $order): Media;
 }

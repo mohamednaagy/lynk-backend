@@ -18,7 +18,7 @@ class SendEmailVerification extends Controller
      */
     public function __invoke(SendEmailVerificationRequest $request)
     {
-        $user = auth()->user();
+        $user = $request->user();
 
         if ($request->has('email')) {
             $user->update($request->safe(['email']));

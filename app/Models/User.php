@@ -72,14 +72,14 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
     protected function mobileDialingPhoneNumber(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => "{$this->phone_number->formatForMobileDialingInCountry($this->phone_number->getCountry())}",
+            get: fn ($value) => optional($this->phone_number)->formatForMobileDialingInCountry(optional($this->phone_number)->getCountry()),
         );
     }
 
     protected function phoneNumberCountryCode(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => "{$this->phone_number->getCountry()}",
+            get: fn ($value) => optional($this->phone_number)->getCountry(),
         );
     }
 

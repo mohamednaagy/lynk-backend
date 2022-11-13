@@ -4,6 +4,7 @@ namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Wallets\CreateTransactions;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Models\FinancingOrder;
@@ -29,17 +30,18 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
                 'status',
                 'creator_id',
                 'creator_type',
+                'approved_at',
             ])
         );
 
         if (isset($data['contract'])) {
             $financingOrder->addMedia($data['contract'])
-                ->toMediaCollection('contract');
+                ->toMediaCollection(FinancingOrderMediaCollection::Contract);
         }
 
         if (isset($data['power_of_attorney'])) {
             $financingOrder->addMedia($data['power_of_attorney'])
-                ->toMediaCollection('power_of_attorney');
+                ->toMediaCollection(FinancingOrderMediaCollection::PowerOfAttorney);
         }
 
         $company = tenant();

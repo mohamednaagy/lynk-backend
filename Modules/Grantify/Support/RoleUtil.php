@@ -6,6 +6,7 @@ use App\Enums\Role;
 use Modules\Grantify\Support\Roles\Admin;
 use Modules\Grantify\Support\Roles\Customer;
 use Modules\Grantify\Support\Roles\LenderAdmin;
+use Modules\Grantify\Support\Roles\LenderApiUser;
 use Modules\Grantify\Support\Roles\LenderBilling;
 use Modules\Grantify\Support\Roles\LenderOrderCreator;
 use Modules\Grantify\Support\Roles\LenderSupervisor;
@@ -19,6 +20,7 @@ class RoleUtil
         Role::LenderBilling => LenderBilling::class,
         Role::LenderOrderCreator => LenderOrderCreator::class,
         Role::LenderSupervisor => LenderSupervisor::class,
+        Role::LenderApiUser => LenderApiUser::class,
     ];
 
     /**

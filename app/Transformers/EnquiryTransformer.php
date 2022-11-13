@@ -13,7 +13,7 @@ class EnquiryTransformer extends TransformerAbstract
     protected array $availableIncludes = [
         'body',
         'creator',
-        'comments',
+        'replies',
     ];
 
     public function transform(Enquiry $enquiry): array
@@ -46,6 +46,7 @@ class EnquiryTransformer extends TransformerAbstract
         return $this->primitive([
             'email' => $enquiry->email,
             'name' => $enquiry->name,
+            'phone_number' => $enquiry->phone_number,
         ]);
     }
 }

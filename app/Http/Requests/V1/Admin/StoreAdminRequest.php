@@ -3,10 +3,13 @@
 namespace App\Http\Requests\V1\Admin;
 
 use App\Enums\Action;
+use App\Enums\Role;
 use App\Enums\Subject;
+use App\Models\User;
 use App\Rules\HostWhitelistRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreAdminRequest extends FormRequest
 {
@@ -30,7 +33,13 @@ class StoreAdminRequest extends FormRequest
         return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
-            'email' => ['required', 'email', 'unique:users,email'],
+            'email' => [
+                'required',
+                'email',
+                Rule::unique(User::class, 'email')
+                    ->whereNull('company_id'),
+            ],
+            'role' => ['required', 'string', new EnumValue(Role::class)],
             'permissions' => ['required', 'array', 'min:1'],
             'permissions.*' => ['required', 'array'],
             'permissions.*.subject' => ['required', 'string', new EnumValue(Subject::class)],

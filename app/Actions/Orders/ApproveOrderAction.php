@@ -11,7 +11,7 @@ class ApproveOrderAction implements ApproveOrder
 {
     public function handle(FinancingOrder $financingOrder, User $user)
     {
-        $financingOrder->status = FinancingOrderStatus::InProgress;
+        $financingOrder->status = FinancingOrderStatus::WaitingClientWakala;
         $financingOrder->approver_id = $user->id;
         $financingOrder->approved_at = now();
         $financingOrder->save();

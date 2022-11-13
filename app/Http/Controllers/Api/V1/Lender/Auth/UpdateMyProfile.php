@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Lender\Auth;
 use App\Actions\Contracts\UpdateUser;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\UpdateMyProfileRequest;
+use App\Transformers\UserTransformer;
 use Illuminate\Support\Arr;
 
 class UpdateMyProfile extends Controller
@@ -13,7 +14,7 @@ class UpdateMyProfile extends Controller
      * Handle the incoming request.
      *
      * @param  UpdateUser  $updateUser
-     * @param  UpdateLenderRequest  $updateLenderRequest
+     * @param  UpdateMyProfileRequest  $updateLenderRequest
      * @return \Illuminate\Http\JsonResponse
      */
     public function __invoke(UpdateUser $updateUser, UpdateMyProfileRequest $updateLenderRequest)
@@ -24,8 +25,8 @@ class UpdateMyProfile extends Controller
             $validated = Arr::except($validated, 'password');
         }
 
-        $updateUser->handle(auth()->user(), $validated);
+        $updateUser->handle($updateLenderRequest->user(), $validated);
 
-        return $this->successResponse();
+        return fractal($updateLenderRequest->user(), new UserTransformer())->respond();
     }
 }

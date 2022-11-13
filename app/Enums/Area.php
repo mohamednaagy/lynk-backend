@@ -27,6 +27,7 @@ final class Area extends Enum
                 Role::LenderBilling,
                 Role::LenderSupervisor,
                 Role::LenderOrderCreator,
+                Role::LenderApiUser,
             ],
         ];
     }

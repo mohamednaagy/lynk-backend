@@ -26,7 +26,7 @@ class AccessVisitorEnquiry extends Mailable
     public function __construct(Enquiry $enquiry, string $externalUrl)
     {
         $this->enquiry = $enquiry;
-        $this->url = URL::signedExternalRoute($externalUrl, 'api.v1.visitor.enquiry', ['enquiry_id' => $enquiry->id]);
+        $this->url = URL::signedExternalRoute($externalUrl, 'api.v1.visitor.enquiry', ['enquiry' => $enquiry->id]);
     }
 
     /**
