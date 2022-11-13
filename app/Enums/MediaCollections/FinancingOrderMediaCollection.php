@@ -10,6 +10,8 @@ final class FinancingOrderMediaCollection extends Enum
 
     const ClientWakala = 'client_wakala';
 
+    const LenderWakala = 'lender_wakala';
+
     const BankWakala = 'bank_wakala';
 
     const PowerOfAttorney = 'power_of_attorney';

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Lender\Orders;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
+use App\Actions\Contracts\Wakala\GenerateLenderWakala;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
@@ -63,10 +64,13 @@ class OrderController extends Controller
      *
      * @throws ExceptionInterface
      */
-    public function store(StoreOrderRequest $request, CreateFinancingOrder $createFinancingOrder): JsonResponse
-    {
+    public function store(
+        StoreOrderRequest $request,
+        CreateFinancingOrder $createFinancingOrder,
+        GenerateLenderWakala $generateLenderWakala
+    ): JsonResponse {
         return DB::transaction(
-            static function () use ($createFinancingOrder, $request) {
+            static function () use ($createFinancingOrder, $request, $generateLenderWakala) {
                 $status = tenant()->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval
                     : FinancingOrderStatus::WaitingClientWakala;
@@ -84,6 +88,8 @@ class OrderController extends Controller
                         ]
                     )
                 );
+
+                $generateLenderWakala->handle($financingOrder);
 
                 return fractal($financingOrder, new FinancingOrderTransformer())->respond();
             }
