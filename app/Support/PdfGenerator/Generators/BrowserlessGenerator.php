@@ -3,8 +3,8 @@
 namespace App\Support\PdfGenerator\Generators;
 
 use App\Support\PdfGenerator\Contracts\GeneratorInterface;
-use App\Support\PdfGenerator\Exceptions\ClosureNotFoundException;
 use App\Support\PdfGenerator\Exceptions\GeneratingPdfException;
+use App\Support\PdfGenerator\Exceptions\MissingStorageCallbackException;
 use Closure;
 use Illuminate\Support\Facades\Http;
 
@@ -41,15 +41,16 @@ class BrowserlessGenerator implements GeneratorInterface
         $tmpFileResource = tmpfile();
 
         try {
+            $storageCallback = null;
+
             if ($options instanceof Closure) {
-                $storageClosure = $options;
+                $storageCallback = $options;
                 $options = [];
+            } elseif (isset($options['storageCallback']) && $options['storageCallback'] instanceof Closure) {
+                $storageCallback = $options['storageCallback'];
+                unset($options['storageCallback']);
             } else {
-                if (empty($options['storageClosure'])) {
-                    throw new ClosureNotFoundException();
-                }
-                $storageClosure = $options['storageClosure'];
-                unset($options['storageClosure']);
+                throw new MissingStorageCallbackException();
             }
 
             $response = Http::baseUrl($this->baseUrl)
@@ -65,7 +66,7 @@ class BrowserlessGenerator implements GeneratorInterface
                 ]);
             }
 
-            $storageClosure($tmpFileResource);
+            $storageCallback($tmpFileResource);
 
             fclose($tmpFileResource);
         } catch (\Throwable $th) {
