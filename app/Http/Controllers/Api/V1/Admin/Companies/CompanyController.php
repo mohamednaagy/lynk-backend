@@ -59,7 +59,16 @@ class CompanyController extends Controller
     public function show(Company $company): JsonResponse
     {
         return fractal($company, new CompanyTransformer())
-            ->parseIncludes(['id', 'name', 'status', 'orders_count', 'created_at'])
+            ->parseIncludes([
+                'id',
+                'name',
+                'status',
+                'orders_count',
+                'created_at',
+                'unique_name',
+                'company_cr',
+                'does_order_require_approval',
+            ])
             ->respond();
     }
 

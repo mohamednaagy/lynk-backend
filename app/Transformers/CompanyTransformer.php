@@ -11,6 +11,9 @@ class CompanyTransformer extends TransformerAbstract
     protected array $availableIncludes = [
         'id',
         'name',
+        'unique_name',
+        'company_cr',
+        'does_order_require_approval',
         'status',
         'orders_count',
         'created_at',
@@ -33,6 +36,16 @@ class CompanyTransformer extends TransformerAbstract
         return $this->primitive($company->name);
     }
 
+    public function includeUniqueName(Company $company): Primitive
+    {
+        return $this->primitive($company->unique_name);
+    }
+
+    public function includeCompanyCr(Company $company): Primitive
+    {
+        return $this->primitive($company->company_cr);
+    }
+
     public function includeStatus(Company $company): Primitive
     {
         return $this->primitive([
@@ -44,6 +57,11 @@ class CompanyTransformer extends TransformerAbstract
     public function includeOrdersCount(Company $company): Primitive
     {
         return $this->primitive($company->orders_count);
+    }
+
+    public function includeDoesOrderRequireApproval(Company $company): Primitive
+    {
+        return $this->primitive($company->does_order_require_approval);
     }
 
     public function includeCreatedAt(Company $company): Primitive
