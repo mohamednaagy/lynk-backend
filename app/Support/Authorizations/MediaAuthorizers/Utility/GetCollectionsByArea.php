@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Authorizations\Utility;
+namespace App\Support\Authorizations\MediaAuthorizers\Utility;
 
 use App\Enums\Area;
 use App\Enums\FinancingOrderMediaCollection;

@@ -4,7 +4,7 @@ namespace App\Support\Authorizations\MediaAuthorizers\Authorizers;
 
 use App\Models\User;
 use App\Support\Authorizations\MediaAuthorizers\MediaAuthorizerManager;
-use App\Support\Authorizations\Utility\GetCollectionsByArea;
+use App\Support\Authorizations\MediaAuthorizers\Utility\GetCollectionsByArea;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MediaAuthorizer
