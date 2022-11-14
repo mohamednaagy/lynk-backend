@@ -3,7 +3,7 @@
 namespace App\Console;
 
 use App\Jobs\Dmcc\ProcessDmccNotifications;
-use App\Jobs\Dmcc\ProcessDmccOrders;
+use App\Jobs\Dmcc\ProcessFinancingOrders;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -17,7 +17,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->job(new ProcessDmccOrders())->everyTwoMinutes()->withoutOverlapping();
+        $schedule->job(new ProcessFinancingOrders())->everyTwoMinutes()->withoutOverlapping();
         $schedule->job(new ProcessDmccNotifications())->everyMinute()->withoutOverlapping();
     }
 
