@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Dmcc;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -13,7 +15,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccCancelNotification implements ShouldQueue
+class ProcessDmccMpoNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -36,15 +38,38 @@ class ProcessDmccCancelNotification implements ShouldQueue
      */
     public function handle(): void
     {
-        DB::transaction(function () {
+        $driver = config('trader.default');
+        $trader = Trader::driver($driver);
+        DB::transaction(function () use ($trader) {
             $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
-            $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
+            $traderOrder = TraderOrder::query()
+                ->where('reference', $ttiId)
+                ->where('status', TraderOrderStatus::InProgress)
+                ->lockForUpdate()
+                ->first();
+
             if (! $traderOrder) {
                 return;
             }
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::Canceled);
+            if ($financingOrder->status->value !== FinancingOrderStatus::CommoditySoldToCustomer) {
+                return;
+            }
+
+            $versionNo = $trader->uploadTTIDocumentAndGetVersionNumber($ttiId);
+
+            $trader->issueMurabahaPurchaseOffer(
+                $ttiId,
+                $versionNo
+            );
+
+            $trader->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::IssueMurabahaOffer
+            );
+
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);
         });
     }
 }

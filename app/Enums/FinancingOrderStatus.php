@@ -11,7 +11,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
 {
     const PendingApproval = 1;
 
-    const InProgress = 2;
+    const Approved = 2;
 
     const Canceled = 3;
 
@@ -39,10 +39,10 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
 
     const PtpDocumentRetrieved = 15;
 
-    const PendingCancel = 15;
+    const PendingCancel = 16;
 
     private static array $state = [
-        self::InProgress => [
+        self::Approved => [
             self::PendingApproval,
         ],
         self::Rejected => [
@@ -53,7 +53,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         ],
         self::Canceled => [
             self::Rejected,
-            self::InProgress,
+            self::Approved,
             self::RespondedToPtp,
             self::PendingApproval,
             self::CommodityPurchased,
@@ -64,7 +64,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
             self::WaitingPurchasingCommodity,
         ],
         self::WaitingClientWakala => [
-            self::InProgress,
+            self::Approved,
         ],
         self::ClientWakalaCompleted => [
             self::WaitingClientWakala,

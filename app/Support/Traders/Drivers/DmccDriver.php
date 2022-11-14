@@ -4,15 +4,13 @@ namespace App\Support\Traders\Drivers;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
-use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
-use App\Models\TraderOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
+use App\Support\Traders\TraderHelper;
 use CodeDredd\Soap\Client\Response;
 use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -20,6 +18,8 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class DmccDriver implements TraderInterface
 {
+    use TraderHelper;
+
     private SoapClient $soap;
 
     public function __construct()
@@ -49,13 +49,13 @@ class DmccDriver implements TraderInterface
     public function getTti(FinancingOrder $financingOrder): string
     {
         $ttiId = $this->getTtiId($financingOrder);
-        $traderOrder = $this->createTraderOrder($financingOrder, $ttiId);
+        $traderOrder = $this->createTraderOrder($financingOrder, $ttiId, 'dmcc');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $ttiId;
     }
 
-    public function fetchNotification(string $type): ?array
+    public function fetchNotifications(string $type): ?array
     {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('notificationDetailsRequest'))
@@ -70,7 +70,7 @@ class DmccDriver implements TraderInterface
         return $response->object()->NotificationAllDetailsResponse[0]->notificationAllDetailsResponse->notificationDetails ?? [];
     }
 
-    public function processFetchNotification($notificationId): void
+    public function processNotification($notificationId): void
     {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('processNotification'))
@@ -128,9 +128,9 @@ class DmccDriver implements TraderInterface
         return $response->ttiId;
     }
 
-    public function cancelTtiId(FinancingOrder $financingOrder): mixed
+    public function cancelOrder(FinancingOrder $financingOrder): mixed
     {
-        $traderOrder = $financingOrder->traderOrders()->latest()->first();
+        $traderOrder = $financingOrder->activeTraderOrder()->first();
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('cancelTTI'))
             ->call('cancelTTI', [
@@ -144,15 +144,6 @@ class DmccDriver implements TraderInterface
         }
 
         return $response->object();
-    }
-
-    private function createTraderOrder(FinancingOrder $financingOrder, string $ttiId): Model|TraderOrder
-    {
-        return $financingOrder->traderOrders()->create([
-            'provider' => 'dmcc',
-            'reference' => $ttiId,
-            'status' => TraderOrderStatus::InProgress,
-        ]);
     }
 
     public function respondPtpService(string $ttiId): void
@@ -212,13 +203,6 @@ class DmccDriver implements TraderInterface
         }
     }
 
-    public function updateOrderStatus($order, int $status): void
-    {
-        $order->update([
-            'status' => $status,
-        ]);
-    }
-
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
         $html = view('transfer-ownership-to-lender')->render();
@@ -228,13 +212,6 @@ class DmccDriver implements TraderInterface
         ]);
 
         $this->attachDocumentToOrder($traderOrder, storage_path('app/'.$path), FinancingOrderMediaCollection::TransferOwnershipToLender);
-    }
-
-    public function createTraderOrderHistory(TraderOrder $traderOrder, int $action): void
-    {
-        $traderOrder->traderHistories()->create([
-            'action' => $action,
-        ]);
     }
 
     public function uploadTTIDocumentAndGetVersionNumber(string $ttiId): mixed

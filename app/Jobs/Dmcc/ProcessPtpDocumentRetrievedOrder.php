@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Dmcc;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
@@ -12,7 +13,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccContractSignedOrder implements ShouldQueue
+class ProcessPtpDocumentRetrievedOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -35,13 +36,20 @@ class ProcessDmccContractSignedOrder implements ShouldQueue
      */
     public function handle(): void
     {
-        DB::transaction(function () {
+        $driver = config('trader.default');
+        $trader = Trader::driver($driver);
+        DB::transaction(function () use ($trader) {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-            $lastTraderOrder = $financingOrder->traderOrders()->latest()->first();
+            $lastTraderOrder = $financingOrder->activeTraderOrder()->first();
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createSellingCommodityToCustomerDocument($lastTraderOrder);
+            $trader->createTransferOwnershipToLenderDocument($lastTraderOrder);
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::CommoditySoldToCustomer);
+            $trader->createTraderOrderHistory(
+                $lastTraderOrder,
+                FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
+            );
+
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommodityPurchased);
         });
     }
 }

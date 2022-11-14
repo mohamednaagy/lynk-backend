@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Dmcc;
 
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -20,8 +20,10 @@ class ProcessDmccNotifications implements ShouldQueue
      */
     public function handle(): void
     {
+        $driver = config('trader.default');
+        $trader = Trader::driver($driver);
         collect(
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->fetchNotification('ACTIONABLE')
+            $trader->fetchNotifications('ACTIONABLE')
         )->each(function ($notification) {
             try {
                 if (
@@ -43,7 +45,7 @@ class ProcessDmccNotifications implements ShouldQueue
         });
 
         collect(
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->fetchNotification('FYI')
+            $trader->fetchNotifications('FYI')
         )->each(function ($notification) {
             if (
                 in_array($notification->notificationHeaderAndEntity->notification, [

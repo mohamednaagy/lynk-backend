@@ -2,8 +2,8 @@
 
 namespace App\Console;
 
-use App\Jobs\ProcessDmccNotifications;
-use App\Jobs\ProcessDmccOrders;
+use App\Jobs\Dmcc\ProcessDmccNotifications;
+use App\Jobs\Dmcc\ProcessDmccOrders;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 

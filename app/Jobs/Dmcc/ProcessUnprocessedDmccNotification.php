@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Dmcc;
 
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -32,6 +32,8 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
      */
     public function handle(): void
     {
-        Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->processFetchNotification($this->notification->notificationHeaderAndEntity->notificationId);
+        $driver = config('trader.default');
+        $trader = Trader::driver($driver);
+        $trader->processNotification($this->notification->notificationHeaderAndEntity->notificationId);
     }
 }
