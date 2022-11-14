@@ -13,7 +13,6 @@ class Lender
             Action::Create,
             Action::Index,
             Action::Show,
-            Action::Proceed,
             Action::Approve,
             Action::Reject,
             Action::Cancel,
@@ -38,20 +37,8 @@ class Lender
             Action::Index,
             Action::Create,
         ],
-        Subject::Stats => [
-            Action::Show,
-        ],
-        Subject::Invitation => [
-            Action::Resend,
-        ],
-        Subject::Balance => [
-            Action::Show,
-        ],
-        Subject::Transactions => [
-            Action::Show,
-        ],
-        Subject::OrderCost => [
-            Action::Calculate,
+        Subject::LenderTransactions => [
+            Action::Index,
         ],
     ];
 }

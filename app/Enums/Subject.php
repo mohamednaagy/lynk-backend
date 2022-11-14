@@ -4,10 +4,6 @@ namespace App\Enums;
 
 use BenSampo\Enum\Enum;
 
-/**
- * @method static static Admins()
- * @method static static Customer()
- */
 final class Subject extends Enum
 {
     const All = 'all';
@@ -39,14 +35,4 @@ final class Subject extends Enum
     const Enquiries = 'enquiries';
 
     const EnquiryReplies = 'enquiryReplies';
-
-    const Stats = 'stats';
-
-    const Invitation = 'invitation';
-
-    const Balance = 'balance';
-
-    const OrderCost = 'orderCost';
-
-    const Transactions = 'transactions';
 }

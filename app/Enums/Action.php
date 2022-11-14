@@ -31,12 +31,6 @@ final class Action extends Enum
 
     const Cancel = 'cancel';
 
-    const Proceed = 'proceed';
-
-    const Resend = 'resend';
-
-    const Calculate = 'calculate';
-
     const Charge = 'charge';
 
     const SyncStatusWithEdaat = 'syncStatusWithEdaat';
