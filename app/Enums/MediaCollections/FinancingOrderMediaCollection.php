@@ -23,4 +23,6 @@ final class FinancingOrderMediaCollection extends Enum
     const SellingCommodityToCustomer = 'selling_commodity_to_customer';
 
     const WarrantAmendmentExceptWarrantNo = 'warrant_amendment_except_warrant_no';
+
+    const TtiHoldingCertificate = 'tti_holding_certificate';
 }

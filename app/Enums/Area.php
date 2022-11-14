@@ -21,6 +21,7 @@ final class Area extends Enum
         return [
             self::SuperAdmin => [
                 Role::Admin,
+                Role::Management,
             ],
             self::Lender => [
                 Role::LenderAdmin,

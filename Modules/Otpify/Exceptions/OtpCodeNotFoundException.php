@@ -16,10 +16,17 @@ class OtpCodeNotFoundException extends Exception
      */
     public function render($request)
     {
-        return response()->errorResponse(
-            trans('otpify::response.otp_code_invalid'),
-            Response::HTTP_UNAUTHORIZED,
-            ErrorCode::OTPIFY_INVALID
-        );
+        $message = trans('otpify::response.otp_code_invalid');
+        $code = Response::HTTP_UNAUTHORIZED;
+
+        if ($request->expectsJson()) {
+            return response()->errorResponse(
+                $message,
+                $code,
+                ErrorCode::OTPIFY_INVALID
+            );
+        }
+
+        abort($code, $message);
     }
 }

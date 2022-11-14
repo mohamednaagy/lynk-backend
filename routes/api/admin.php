@@ -45,7 +45,7 @@ Route::prefix('v1/admin')->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::put('auth/profile', UpdateMyProfile::class);
 
-        Route::apiResource('admins', AdminController::class)->parameters(['admins' => 'id']);
+        Route::apiResource('admins', AdminController::class);
         Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
 
         Route::get('/roles', GetAllRoles::class)->middleware(

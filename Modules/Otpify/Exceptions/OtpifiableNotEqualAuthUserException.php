@@ -16,10 +16,17 @@ class OtpifiableNotEqualAuthUserException extends Exception
      */
     public function render($request)
     {
-        return response()->errorResponse(
-            trans('otpify::response.otpifiable_not_equal_auth_user'),
-            Response::HTTP_UNAUTHORIZED,
-            ErrorCode::OTPIFY_WRONG_USER
-        );
+        $message = trans('otpify::response.otpifiable_not_equal_auth_user');
+        $code = Response::HTTP_UNAUTHORIZED;
+
+        if ($request->expectsJson()) {
+            return response()->errorResponse(
+                $message,
+                $code,
+                ErrorCode::OTPIFY_WRONG_USER
+            );
+        }
+
+        abort($code, $message);
     }
 }
