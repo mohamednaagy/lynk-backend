@@ -14,7 +14,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccClientWakalaCompletedOrder implements ShouldQueue
+class ProcessClientWakalaCompletedOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -45,6 +45,10 @@ class ProcessDmccClientWakalaCompletedOrder implements ShouldQueue
                 TraderOrderStatus::InProgress,
                 TraderOrderStatus::Completed,
             ])->count() > 0) {
+                return;
+            }
+
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::WaitingPurchasingCommodity)) {
                 return;
             }
 

@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Jobs\Dmcc;
+namespace App\Jobs\General;
 
 use App\Actions\Contracts\Clients\AskClientWakala;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
-use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -15,8 +14,9 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Throwable;
 
-class ProcessDmccInProgressOrder implements ShouldQueue
+class ProcessInProgressOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -37,16 +37,16 @@ class ProcessDmccInProgressOrder implements ShouldQueue
      *
      * @return void
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function handle(): void
     {
-        $driver = config('trader.default');
-        $trader = Trader::driver($driver);
-        DB::transaction(function () use ($trader) {
+        DB::transaction(function () {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             app()->make(AskClientWakala::class)->handle($financingOrder, Str::replace('{order_id}', $financingOrder->id, Config::get('frontent.client_wakala_url')));
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingClientWakala);
+            $financingOrder->update([
+                'status' => FinancingOrderStatus::WaitingClientWakala,
+            ]);
         });
     }
 

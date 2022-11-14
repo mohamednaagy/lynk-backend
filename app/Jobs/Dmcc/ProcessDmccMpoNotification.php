@@ -54,13 +54,13 @@ class ProcessDmccMpoNotification implements ShouldQueue
                 return;
             }
 
-            $trader = Trader::driver($traderOrder->provider);
-
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::CommoditySoldToCustomer)) {
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::MurabhaOfferIssued)) {
                 return;
             }
+
+            $trader = Trader::driver($traderOrder->provider);
 
             $versionNo = $trader->uploadTTIDocumentAndGetVersionNumber($this->ttiId);
 

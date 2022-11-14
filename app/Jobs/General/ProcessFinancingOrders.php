@@ -1,8 +1,12 @@
 <?php
 
-namespace App\Jobs\Dmcc;
+namespace App\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
+use App\Jobs\Dmcc\ProcessClientWakalaCompletedOrder;
+use App\Jobs\Dmcc\ProcessDmccContractSignedOrder;
+use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
+use App\Jobs\Dmcc\ProcessPtpDocumentRetrievedOrder;
 use App\Models\FinancingOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -31,8 +35,8 @@ class ProcessFinancingOrders implements ShouldQueue
             ])->chunk(10, function ($ordersCollection) {
                 $ordersCollection->each(function ($order) {
                     match ($order->status->value) {
-                        FinancingOrderStatus::Approved => ProcessDmccInProgressOrder::dispatch($order->id),
-                        FinancingOrderStatus::ClientWakalaCompleted => ProcessDmccClientWakalaCompletedOrder::dispatch($order->id),
+                        FinancingOrderStatus::Approved => ProcessInProgressOrder::dispatch($order->id),
+                        FinancingOrderStatus::ClientWakalaCompleted => ProcessClientWakalaCompletedOrder::dispatch($order->id),
                         FinancingOrderStatus::RespondedToPtp => ProcessDmccRespondedToPtpOrder::dispatch($order->id),
                         FinancingOrderStatus::PtpDocumentRetrieved => ProcessPtpDocumentRetrievedOrder::dispatch($order->id),
                         FinancingOrderStatus::ContractSigned => ProcessDmccContractSignedOrder::dispatch($order->id),

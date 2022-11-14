@@ -55,13 +55,13 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
                 return;
             }
 
-            $trader = Trader::driver($traderOrder->provider);
-
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::MurabhaOfferIssued)) {
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::MurabahaSaleCompleted)) {
                 return;
             }
+
+            $trader = Trader::driver($traderOrder->provider);
 
             $mpoDocument = $trader->getDocumentByTypeAndTransaction(
                 $this->ttiId,

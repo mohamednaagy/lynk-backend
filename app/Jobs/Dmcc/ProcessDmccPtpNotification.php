@@ -54,13 +54,13 @@ class ProcessDmccPtpNotification implements ShouldQueue
                 return;
             }
 
-            $trader = Trader::driver($traderOrder->provider);
-
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::WaitingPurchasingCommodity)) {
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::RespondedToPtp)) {
                 return;
             }
+
+            $trader = Trader::driver($traderOrder->provider);
 
             $trader->respondPtpService($this->ttiId);
 

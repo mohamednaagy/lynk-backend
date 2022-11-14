@@ -38,7 +38,12 @@ class ProcessDmccContractSignedOrder implements ShouldQueue
     {
         DB::transaction(function () {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-            $lastTraderOrder = $financingOrder->activeTraderOrder()->first();
+            $lastTraderOrder = $financingOrder->activeTraderOrder()
+                ->whereIn('provider', ['dmcc', 'fake'])->first();
+
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::CommoditySoldToCustomer)) {
+                return;
+            }
 
             $trader = Trader::driver($lastTraderOrder->provider);
 

@@ -46,6 +46,10 @@ class ProcessPtpDocumentRetrievedOrder implements ShouldQueue
                 return;
             }
 
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::CommodityPurchased)) {
+                return;
+            }
+
             $trader = Trader::driver($lastTraderOrder->provider);
 
             $trader->createTransferOwnershipToLenderDocument($lastTraderOrder);

@@ -38,12 +38,17 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
      */
     public function handle(): void
     {
+        // to unify
         DB::transaction(function () {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             $lastTraderOrder = $financingOrder->activeTraderOrder()
                 ->whereIn('provider', ['dmcc', 'fake'])->first();
 
             if (! $lastTraderOrder) {
+                return;
+            }
+
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::PtpDocumentRetrieved)) {
                 return;
             }
 

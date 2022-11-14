@@ -68,6 +68,10 @@ class ProcessDmccCancelNotification implements ShouldQueue
                 $traderOrder,
                 FinancingOrderHistory::OrderCancelled
             );
+
+            $traderOrder->update([
+                'status' => TraderOrderStatus::Cancelled,
+            ]);
         });
     }
 

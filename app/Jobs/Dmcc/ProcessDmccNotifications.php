@@ -21,6 +21,11 @@ class ProcessDmccNotifications implements ShouldQueue
     public function handle(): void
     {
         $driver = config('trader.default');
+
+        if (! in_array($driver, ['dmcc', 'fake'])) {
+            return;
+        }
+
         $trader = Trader::driver($driver);
         collect(
             $trader->fetchNotifications('ACTIONABLE')
