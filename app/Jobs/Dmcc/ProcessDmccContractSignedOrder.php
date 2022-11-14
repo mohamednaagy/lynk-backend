@@ -9,6 +9,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
@@ -35,15 +36,25 @@ class ProcessDmccContractSignedOrder implements ShouldQueue
      */
     public function handle(): void
     {
-        $driver = config('trader.default');
-        $trader = Trader::driver($driver);
-        DB::transaction(function () use ($trader) {
+        DB::transaction(function () {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             $lastTraderOrder = $financingOrder->activeTraderOrder()->first();
+
+            $trader = Trader::driver($lastTraderOrder->provider);
 
             $trader->createSellingCommodityToCustomerDocument($lastTraderOrder);
 
             $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommoditySoldToCustomer);
         });
+    }
+
+    /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array
+     */
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping('financingOrder'.$this->financingOrder->id)];
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\TraderOrderStatus;
 use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -189,6 +190,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function scopeActiveTraderOrder($query)
     {
-        $query->traderOrders()->latest();
+        $query->traderOrders()->where('status', TraderOrderStatus::InProgress)->latest();
     }
 }

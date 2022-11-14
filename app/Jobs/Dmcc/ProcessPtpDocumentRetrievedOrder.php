@@ -10,6 +10,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
@@ -36,11 +37,16 @@ class ProcessPtpDocumentRetrievedOrder implements ShouldQueue
      */
     public function handle(): void
     {
-        $driver = config('trader.default');
-        $trader = Trader::driver($driver);
-        DB::transaction(function () use ($trader) {
+        DB::transaction(function () {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-            $lastTraderOrder = $financingOrder->activeTraderOrder()->first();
+            $lastTraderOrder = $financingOrder->activeTraderOrder()
+                ->whereIn('provider', ['dmcc', 'fake'])->first();
+
+            if (! $lastTraderOrder) {
+                return;
+            }
+
+            $trader = Trader::driver($lastTraderOrder->provider);
 
             $trader->createTransferOwnershipToLenderDocument($lastTraderOrder);
 
@@ -51,5 +57,15 @@ class ProcessPtpDocumentRetrievedOrder implements ShouldQueue
 
             $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommodityPurchased);
         });
+    }
+
+    /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array
+     */
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping('financingOrder'.$this->financingOrder->id)];
     }
 }

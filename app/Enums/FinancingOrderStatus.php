@@ -52,6 +52,9 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
             self::MurabahaSaleCompleted,
         ],
         self::Canceled => [
+            self::PendingCancel,
+        ],
+        self::PendingCancel => [
             self::Rejected,
             self::Approved,
             self::RespondedToPtp,
@@ -118,6 +121,6 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
      */
     public function cantMoveTo(Status|int $status): bool
     {
-        return ! $this->cantMoveTo($status);
+        return ! $this->canMoveTo($status);
     }
 }

@@ -7,11 +7,14 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 
 class ProcessUnprocessedDmccNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected string $notificationId;
 
     protected mixed $notification;
 
@@ -34,6 +37,17 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
     {
         $driver = config('trader.default');
         $trader = Trader::driver($driver);
-        $trader->processNotification($this->notification->notificationHeaderAndEntity->notificationId);
+        $this->notificationId = $this->notification->notificationHeaderAndEntity->notificationId;
+        $trader->processNotification($this->notificationId);
+    }
+
+    /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array
+     */
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping('notificationId'.$this->notificationId)];
     }
 }

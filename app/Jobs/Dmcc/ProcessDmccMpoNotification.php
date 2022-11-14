@@ -12,12 +12,15 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
 class ProcessDmccMpoNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected string $ttiId;
 
     protected mixed $notification;
 
@@ -38,29 +41,31 @@ class ProcessDmccMpoNotification implements ShouldQueue
      */
     public function handle(): void
     {
-        $driver = config('trader.default');
-        $trader = Trader::driver($driver);
-        DB::transaction(function () use ($trader) {
-            $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
+        DB::transaction(function () {
+            $this->ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
             $traderOrder = TraderOrder::query()
-                ->where('reference', $ttiId)
+                ->where('reference', $this->ttiId)
                 ->where('status', TraderOrderStatus::InProgress)
+                ->whereIn('provider', ['dmcc', 'fake'])
                 ->lockForUpdate()
                 ->first();
 
             if (! $traderOrder) {
                 return;
             }
+
+            $trader = Trader::driver($traderOrder->provider);
+
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
-            if ($financingOrder->status->value !== FinancingOrderStatus::CommoditySoldToCustomer) {
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::CommoditySoldToCustomer)) {
                 return;
             }
 
-            $versionNo = $trader->uploadTTIDocumentAndGetVersionNumber($ttiId);
+            $versionNo = $trader->uploadTTIDocumentAndGetVersionNumber($this->ttiId);
 
             $trader->issueMurabahaPurchaseOffer(
-                $ttiId,
+                $this->ttiId,
                 $versionNo
             );
 
@@ -71,5 +76,15 @@ class ProcessDmccMpoNotification implements ShouldQueue
 
             $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);
         });
+    }
+
+    /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array
+     */
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping('dmccTtiId'.$this->ttiId)];
     }
 }
