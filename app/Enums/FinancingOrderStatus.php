@@ -112,7 +112,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
             $status = $status->value;
         }
 
-        return in_array($status, self::$state[$this->value]);
+        return in_array($this->value, self::$state[$status]);
     }
 
     /**
