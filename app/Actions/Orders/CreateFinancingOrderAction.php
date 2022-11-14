@@ -31,7 +31,7 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
                 'creator_id',
                 'creator_type',
                 'approved_at',
-                'created_without_verification',
+                'is_verification_required',
             ])
         );
 

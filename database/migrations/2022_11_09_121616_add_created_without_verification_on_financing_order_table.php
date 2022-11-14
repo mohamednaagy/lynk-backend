@@ -14,7 +14,7 @@ return new class() extends Migration
     public function up()
     {
         Schema::table('financing_orders', function (Blueprint $table) {
-            $table->boolean('created_without_verification')->default(false)->after('customer_details');
+            $table->boolean('is_verification_required')->default(true)->after('customer_details');
         });
     }
 
@@ -26,7 +26,7 @@ return new class() extends Migration
     public function down()
     {
         Schema::table('financing_orders', function (Blueprint $table) {
-            $table->dropColumn('created_without_verification');
+            $table->dropColumn('is_verification_required');
         });
     }
 };
