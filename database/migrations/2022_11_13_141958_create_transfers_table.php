@@ -14,14 +14,13 @@ return new class extends Migration
     public function up()
     {
         Schema::create('transfers', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('id');
-            $table->uuid('uuid')->unique();
-            $table->unsignedBigInteger('from_id');
-            $table->unsignedBigInteger('to_id');
-            $table->unsignedBigInteger('deposit_id');
-            $table->unsignedBigInteger('withdraw_id');
-            $table->decimal('amount', 64, 2);
+            $table->id()->unsigned();
+            $table->uuid()->unique();
+            $table->foreignId('from_id')->constrained('wallets');
+            $table->foreignId('to_id')->constrained('wallets');
+            $table->foreignId('deposit_id')->constrained('transactions');
+            $table->foreignId('withdraw_id')->constrained('transactions');
+            $table->decimal('amount', 64);
             $table->json('data');
 
             $table->timestamps();

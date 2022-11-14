@@ -13,12 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('transfers');
+        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('wallets');
+
         Schema::create('transactions', function (Blueprint $table) {
-            $table->unsignedBigInteger('id');
-            $table->uuid('uuid')->unique();
+            $table->id()->unsigned();
+            $table->uuid()->unique();
             $table->unsignedBigInteger('wallet_id');
             $table->string('reference_number');
-            $table->decimal('amount', 64, 2);
+            $table->decimal('amount', 64);
             $table->json('data');
 
             $table->timestamps();

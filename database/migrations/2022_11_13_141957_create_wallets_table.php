@@ -14,12 +14,11 @@ return new class extends Migration
     public function up()
     {
         Schema::create('wallets', function (Blueprint $table) {
-            $table->unsignedBigInteger('id');
+            $table->id()->unsigned();
             $table->string('name');
             $table->morphs('holder');
-            $table->uuid('uuid')->unique();
-
-            $table->unique(['holder', 'name'], 'holder_name');
+            $table->uuid()->unique();
+            $table->unique(['holder_id', 'holder_type', 'name'], 'holder_name');
 
             $table->timestamps();
         });
