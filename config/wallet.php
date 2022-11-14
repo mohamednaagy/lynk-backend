@@ -183,7 +183,7 @@ return [
         'creating' => [],
         'default' => [
             'name' => 'Default Wallet',
-            'slug' => \App\Enums\WalletType::CompanyWallet,
+            'slug' => 'default',
             'meta' => [],
         ],
     ],
