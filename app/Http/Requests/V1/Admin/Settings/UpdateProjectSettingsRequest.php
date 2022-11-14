@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 /**
  * @property string $area
  */
-class UpdateCompanySettingsRequest extends FormRequest
+class UpdateProjectSettingsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -20,7 +20,7 @@ use App\Http\Controllers\Api\V1\Admin\Orders\GetBalance;
 use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
-use App\Http\Controllers\Api\V1\Admin\Settings\CompanySettingsController;
+use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\SettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
 use App\Http\Controllers\Api\V1\Admin\Transactions\TransactionController;
@@ -70,8 +70,8 @@ Route::prefix('v1/admin')->group(function () {
                 ->where('type', 'client|company');
             Route::put('/wakala-templates/{type}', [WakalaTemplateController::class, 'update'])
                 ->where('type', 'client|company');
-            Route::get('/company', [CompanySettingsController::class, 'show']);
-            Route::put('/company', [CompanySettingsController::class, 'update']);
+            Route::get('/project', [ProjectSettingsController::class, 'show']);
+            Route::put('/project', [ProjectSettingsController::class, 'update']);
         });
 
         Route::apiResource('companies', CompanyController::class);

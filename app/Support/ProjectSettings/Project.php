@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Support\CompanySettings;
+namespace App\Support\ProjectSettings;
 
 use Illuminate\Support\Arr;
 
-class Company
+class Project
 {
     private array $companyName;
 
@@ -14,41 +14,41 @@ class Company
 
     private float $vat;
 
-    private CompanyAddress $companyAddress;
+    private ProjectAddress $projectAddress;
 
     /**
      * @param  array  $companyName
      * @param  string  $companyCr
      * @param  string  $vatId
      * @param  float  $vat
-     * @param  CompanyAddress  $companyAddress
+     * @param  ProjectAddress  $projectAddress
      */
     public function __construct(
         array $companyName,
         string $companyCr,
         string $vatId,
         float $vat,
-        CompanyAddress $companyAddress
+        ProjectAddress $projectAddress
     ) {
         $this->companyName = $companyName;
         $this->companyCr = $companyCr;
         $this->vatId = $vatId;
         $this->vat = $vat;
-        $this->companyAddress = $companyAddress;
+        $this->projectAddress = $projectAddress;
     }
 
     /**
      * @param  array  $data
-     * @return Company
+     * @return Project
      */
-    public static function fromArray(array $data): Company
+    public static function fromArray(array $data): Project
     {
         return new static(
             $data['company_name'],
             $data['company_cr'],
             $data['vat_id'],
             $data['vat'],
-            CompanyAddress::fromArray($data['address_line_one'], $data['address_line_two']),
+            ProjectAddress::fromArray($data['address_line_one'], $data['address_line_two']),
         );
     }
 
@@ -99,10 +99,10 @@ class Company
 
     /**
      * @param  string|null  $locale
-     * @return CompanyAddress
+     * @return ProjectAddress
      */
-    public function getCompanyAddress(string $locale = null): CompanyAddress
+    public function getCompanyAddress(string $locale = null): ProjectAddress
     {
-        return $this->companyAddress;
+        return $this->projectAddress;
     }
 }

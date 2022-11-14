@@ -4,7 +4,7 @@ namespace App\Settings\Classes;
 
 use Spatie\LaravelSettings\Settings;
 
-class CompanySettings extends Settings
+class ProjectSettings extends Settings
 {
     public array $company_name;
 
@@ -20,6 +20,6 @@ class CompanySettings extends Settings
 
     public static function group(): string
     {
-        return 'company';
+        return 'project';
     }
 }

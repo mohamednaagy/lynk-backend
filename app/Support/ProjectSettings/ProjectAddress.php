@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Support\CompanySettings;
+namespace App\Support\ProjectSettings;
 
 use Illuminate\Support\Arr;
 
-class CompanyAddress
+class ProjectAddress
 {
     private array $addressLineOne;
 
@@ -25,9 +25,9 @@ class CompanyAddress
     /**
      * @param  array  $addressLineOneData
      * @param  array  $addressLineTwoData
-     * @return CompanyAddress
+     * @return ProjectAddress
      */
-    public static function fromArray(array $addressLineOneData, array $addressLineTwoData): CompanyAddress
+    public static function fromArray(array $addressLineOneData, array $addressLineTwoData): ProjectAddress
     {
         return new static(
             $addressLineOneData,
