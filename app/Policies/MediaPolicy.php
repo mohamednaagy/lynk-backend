@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Support\Authorizations\MediaAuthorizers\Authorizers\FinancingOrderMediaAuthorizer;
+use App\Support\Authorizations\MediaAuthorizers\Authorizers\MediaAuthorizer;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -30,7 +30,7 @@ class MediaPolicy
      */
     public function view(User $user, Media $media, $area = null)
     {
-        $mediaAuthorize = new FinancingOrderMediaAuthorizer($user, $media, $area);
+        $mediaAuthorize = new MediaAuthorizer($user, $media, $area);
 
         return $mediaAuthorize->canAccess();
     }
