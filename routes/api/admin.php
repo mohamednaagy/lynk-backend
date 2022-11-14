@@ -80,6 +80,7 @@ Route::prefix('v1/admin')->group(function () {
             Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
             Route::get('{company}/orders', [OrderController::class, 'index']);
             Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
+            Route::post('/{company}/transactions ', [TransactionController::class, 'store']);
             Route::get('/{company}/settings ', GetCompanySetting::class);
         });
 
