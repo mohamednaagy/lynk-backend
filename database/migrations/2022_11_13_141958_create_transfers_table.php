@@ -6,6 +6,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    protected $connection;
+
+    public function __construct()
+    {
+        $this->connection = config('wallet.database.connection', 'mysql');
+    }
+
     /**
      * Run the migrations.
      *
