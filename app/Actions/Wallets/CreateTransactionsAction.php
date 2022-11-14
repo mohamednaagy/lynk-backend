@@ -3,8 +3,10 @@
 namespace App\Actions\Wallets;
 
 use App\Actions\Contracts\Wallets\CreateTransactions;
+use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Support\Transactions\Descriptions\DescriptionManager;
 use Bavix\Wallet\Models\Wallet;
+use Illuminate\Http\UploadedFile;
 
 class CreateTransactionsAction implements CreateTransactions
 {
@@ -19,8 +21,17 @@ class CreateTransactionsAction implements CreateTransactions
         Wallet $wallet,
         int $transactionReason,
         string $amount,
-        array $meta
-    ): string {
-        return DescriptionManager::handleTransaction($transactionReason, $wallet, $amount, $meta);
+        array $meta,
+        array $attachments
+    ) {
+        $transaction = DescriptionManager::handleTransaction($transactionReason, $wallet, $amount, $meta);
+
+        foreach ($attachments as $media) {
+            if ($media instanceof UploadedFile) {
+                $transaction->addMedia($media)->toMediaCollection(TransactionMediaCollection::Attachments);
+            }
+        }
+
+        return $transaction;
     }
 }

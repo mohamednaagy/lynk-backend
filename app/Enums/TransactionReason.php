@@ -10,5 +10,5 @@ final class TransactionReason extends Enum
 
     const DepositByEdaat = 2;
 
-    const DepositByAdmin = 3;
+    const ManualDeposit = 3;
 }

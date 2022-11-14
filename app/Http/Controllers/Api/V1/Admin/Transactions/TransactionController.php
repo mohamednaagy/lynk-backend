@@ -21,9 +21,10 @@ class TransactionController extends Controller
     {
         $createTransactions->handle(
             $company->getWallet(WalletType::CompanyWallet),
-            TransactionReason::DepositByAdmin,
+            TransactionReason::ManualDeposit,
             $storeTransactionRequest->validated('amount'),
-            []
+            $storeTransactionRequest->safe(['description_en', 'description_ar']),
+            [$storeTransactionRequest->validated('attachment')]
         );
 
         return $this->successResponse();

@@ -29,6 +29,9 @@ class StoreTransactionRequest extends FormRequest
 
         return [
             'amount' => ['required', 'gt:0', 'regex:/^\d+(\.\d{1,2})?$/'],
+            'description_en' => ['required', 'string', 'max:255'],
+            'description_ar' => ['required', 'string', 'max:255'],
+            'attachment' => ['required', 'file', 'mimes:png,jpg,jpeg,pdf'],
         ];
     }
 }
