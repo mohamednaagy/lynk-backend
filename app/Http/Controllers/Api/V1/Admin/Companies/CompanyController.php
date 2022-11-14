@@ -24,11 +24,17 @@ class CompanyController extends Controller
      * @return JsonResponse
      */
     public function index(
-        GetCompaniesRequest $getCompaniesRequest,
         GetCompanies $getCompanies
     ): JsonResponse {
         return fractal($getCompanies->handle(), new CompanyTransformer())
-            ->parseIncludes(['id', 'name', 'status', 'orders_count', 'created_at'])
+            ->parseIncludes([
+                'id',
+                'name',
+                'status',
+                'orders_count',
+                'created_at',
+                'order_cost',
+            ])
             ->respond();
     }
 
@@ -63,11 +69,11 @@ class CompanyController extends Controller
                 'id',
                 'name',
                 'status',
-                'orders_count',
                 'created_at',
                 'unique_name',
                 'company_cr',
                 'does_order_require_approval',
+                'order_cost',
             ])
             ->respond();
     }

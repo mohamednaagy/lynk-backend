@@ -17,6 +17,7 @@ class CompanyTransformer extends TransformerAbstract
         'status',
         'orders_count',
         'created_at',
+        'order_cost',
     ];
 
     public function transform(Company $company): array
@@ -39,6 +40,11 @@ class CompanyTransformer extends TransformerAbstract
     public function includeUniqueName(Company $company): Primitive
     {
         return $this->primitive($company->unique_name);
+    }
+
+    public function includeOrderCost(Company $company): Primitive
+    {
+        return $this->primitive($company->order_cost);
     }
 
     public function includeCompanyCr(Company $company): Primitive
