@@ -5,9 +5,9 @@ namespace App\Support\Authorizations\Utility;
 use App\Enums\Area;
 use App\Enums\FinancingOrderMediaCollection;
 
-class MediaCollection
+class GetCollectionsByArea
 {
-    public function getCollectionsByArea($area)
+    public function __invoke($area)
     {
         return match ($area) {
             Area::Lender => [

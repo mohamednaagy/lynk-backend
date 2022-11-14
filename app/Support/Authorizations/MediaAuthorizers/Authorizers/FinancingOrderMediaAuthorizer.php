@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Support\Authorizations;
+namespace App\Support\Authorizations\MediaAuthorizers\Authorizers;
 
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\User;
-use App\Support\Authorizations\Contracts\AuthorizeContract;
-use App\Support\Authorizations\Utility\MediaCollection;
+use App\Support\Authorizations\MediaAuthorizers\Contracts\MediaAuthorizerContract;
+use App\Support\Authorizations\Utility\GetCollectionsByArea;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class FinancingOrderAuthorizer implements AuthorizeContract
+class FinancingOrderMediaAuthorizer implements MediaAuthorizerContract
 {
     public const AllowedRoles = [Role::Admin, Role::LenderSupervisor, Role::LenderAdmin];
 
@@ -38,7 +38,9 @@ class FinancingOrderAuthorizer implements AuthorizeContract
      */
     public function doesAreaHaveAccessToCollection($area)
     {
-        return in_array($this->media->collection_name, (new MediaCollection())->getCollectionsByArea($area));
+        $getCollectionsByArea = new GetCollectionsByArea();
+
+        return in_array($this->media->collection_name, $getCollectionsByArea($area));
     }
 
     /**
@@ -56,7 +58,7 @@ class FinancingOrderAuthorizer implements AuthorizeContract
         &&
         (
             $this->user->hasRole(self::AllowedRoles)
-            || perm_to([Area::SuperAdmin, Area::Lender], [Subject::FinancingOrders, Action::Show])
+            || $this->user->hasAnyPermission(perm_to([Area::SuperAdmin, Area::Lender], [Subject::FinancingOrders, Action::Show]))
             || $this->user->id == optional($order)->creator_id
         );
     }
