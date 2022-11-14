@@ -35,8 +35,7 @@ class WebhookTypeLimitRule implements Rule
         $this->limit = $this->getLimit($type);
 
         return $this->limit === -1
-         ||
-         $this->company->webhooks()->where('type', $type)->count() < $this->limit;
+            || $this->company->webhooks()->where('type', $type)->count() < $this->limit;
     }
 
     /**

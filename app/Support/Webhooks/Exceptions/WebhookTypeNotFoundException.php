@@ -10,8 +10,8 @@ class WebhookTypeNotFoundException extends Exception
 {
     public function render($request)
     {
-        $message = __('Unsupported webhook type');
-        $code = Response::HTTP_NOT_FOUND;
+        $message = __('error.webhook_type_not_supported');
+        $code = Response::HTTP_BAD_REQUEST;
 
         if ($request->expectsJson()) {
             return response()->errorResponse(

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Contracts;
+namespace App\Actions\Contracts\Webhooks;
 
 use App\Models\Webhook;
 
