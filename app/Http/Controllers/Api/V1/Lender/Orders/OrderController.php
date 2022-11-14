@@ -8,15 +8,19 @@ use App\Actions\Contracts\Orders\UpdateFinancingOrder;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
+use App\Mail\OrderCreated;
 use App\Models\FinancingOrder;
+use App\Models\User;
 use App\Transformers\FinancingOrderTransformer;
 use Bavix\Wallet\Internal\Exceptions\ExceptionInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -84,6 +88,11 @@ class OrderController extends Controller
                         ]
                     )
                 );
+
+                $notification = 'notification model';
+                $admins = User::role([Role::LenderAdmin, Role::LenderSupervisor])->get();
+
+                Mail::cc($admins)->queue(new OrderCreated($notification));
 
                 return fractal($financingOrder, new FinancingOrderTransformer())->respond();
             }
