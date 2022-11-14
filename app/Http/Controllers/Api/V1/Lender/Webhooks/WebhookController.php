@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Webhooks;
 
-use App\Actions\Contracts\CreateWebhook;
+use App\Actions\Contracts\Webhooks\CreateWebhook;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Webhooks\StoreWebhookRequest;
 use App\Transformers\WebhookTransformer;

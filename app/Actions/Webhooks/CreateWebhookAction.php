@@ -2,7 +2,7 @@
 
 namespace App\Actions\Webhooks;
 
-use App\Actions\Contracts\CreateWebhook;
+use App\Actions\Contracts\Webhooks\CreateWebhook;
 use App\Models\Webhook;
 use Illuminate\Support\Arr;
 
