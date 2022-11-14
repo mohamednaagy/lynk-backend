@@ -32,13 +32,13 @@ class UpdateProjectSettingsRequest extends FormRequest
             'company_name.ar' => ['required', 'string', 'max:255'],
             'company_cr' => ['required', 'string', 'max:255'],
             'vat_id' => ['required', 'string', 'max:255'],
-            'vat' => ['required', 'numeric', 'between:0,100'],
+            'vat_rate' => ['required', 'numeric', 'between:0,100'],
             'address_line_one' => ['required', 'array', 'size:2'],
-            'address_line_one.en' => ['required', 'string', 'max:1000'],
-            'address_line_one.ar' => ['required', 'string', 'max:1000'],
+            'address_line_one.en' => ['required', 'string', 'max:100'],
+            'address_line_one.ar' => ['required', 'string', 'max:100'],
             'address_line_two' => ['required', 'array', 'size:2'],
-            'address_line_two.en' => ['required', 'string', 'max:1000'],
-            'address_line_two.ar' => ['required', 'string', 'max:1000'],
+            'address_line_two.en' => ['required', 'string', 'max:100'],
+            'address_line_two.ar' => ['required', 'string', 'max:100'],
         ];
     }
 }

@@ -10,17 +10,17 @@ class UpdateProjectSettingsAction implements UpdateProjectSettings
 {
     public function handle(array $data): Project
     {
-        $projectInstance = app(ProjectSettings::class);
+        $projectSettings = app(ProjectSettings::class);
         $project = Project::fromArray($data);
 
-        $projectInstance->company_name = $project->getCompanyName();
-        $projectInstance->company_cr = $project->getCompanyCr();
-        $projectInstance->vat_id = $project->getVatId();
-        $projectInstance->vat = $project->getVat();
-        $projectInstance->address_line_one = $project->getCompanyAddress()->getAddressLineOne();
-        $projectInstance->address_line_two = $project->getCompanyAddress()->getAddressLineTwo();
+        $projectSettings->company_name = $project->getCompanyName();
+        $projectSettings->company_cr = $project->getCompanyCr();
+        $projectSettings->vat_id = $project->getVatId();
+        $projectSettings->vat_rate = $project->getVatRate() / 100;
+        $projectSettings->address_line_one = $project->getCompanyAddress()->getAddressLineOne();
+        $projectSettings->address_line_two = $project->getCompanyAddress()->getAddressLineTwo();
 
-        $projectInstance->save();
+        $projectSettings->save();
 
         return $project;
     }

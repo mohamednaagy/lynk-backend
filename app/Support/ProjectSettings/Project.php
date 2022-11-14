@@ -6,35 +6,20 @@ use Illuminate\Support\Arr;
 
 class Project
 {
-    private array $companyName;
-
-    private string $companyCr;
-
-    private string $vatId;
-
-    private float $vat;
-
-    private ProjectAddress $projectAddress;
-
     /**
      * @param  array  $companyName
      * @param  string  $companyCr
      * @param  string  $vatId
-     * @param  float  $vat
+     * @param  float  $vatRate
      * @param  ProjectAddress  $projectAddress
      */
     public function __construct(
-        array $companyName,
-        string $companyCr,
-        string $vatId,
-        float $vat,
-        ProjectAddress $projectAddress
+        private array $companyName,
+        private string $companyCr,
+        private string $vatId,
+        private float $vatRate,
+        private ProjectAddress $projectAddress
     ) {
-        $this->companyName = $companyName;
-        $this->companyCr = $companyCr;
-        $this->vatId = $vatId;
-        $this->vat = $vat;
-        $this->projectAddress = $projectAddress;
     }
 
     /**
@@ -47,7 +32,7 @@ class Project
             $data['company_name'],
             $data['company_cr'],
             $data['vat_id'],
-            $data['vat'],
+            $data['vat_rate'],
             ProjectAddress::fromArray($data['address_line_one'], $data['address_line_two']),
         );
     }
@@ -84,24 +69,23 @@ class Project
     /**
      * @return float
      */
-    public function getVat(): float
+    public function getVatRate(): float
     {
-        return $this->vat / 100;
+        return $this->vatRate;
     }
 
     /**
      * @return float
      */
-    public function getVatPercentage(): float
+    public function getVatRateInPercentage(): float
     {
-        return $this->vat * 100;
+        return $this->vatRate * 100;
     }
 
     /**
-     * @param  string|null  $locale
      * @return ProjectAddress
      */
-    public function getCompanyAddress(string $locale = null): ProjectAddress
+    public function getCompanyAddress(): ProjectAddress
     {
         return $this->projectAddress;
     }

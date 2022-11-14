@@ -7,19 +7,19 @@ return new class extends SettingsMigration
     public function up(): void
     {
         $this->migrator->add('project.company_name', [
-            'ar' => fake()->name(),
-            'en' => fake()->name(),
+            'ar' => 'LYNK',
+            'en' => 'لينك',
         ]);
         $this->migrator->add('project.address_line_one', [
-            'ar' => fake()->address(),
-            'en' => fake()->address(),
+            'ar' => 'شارع الأمير فيصل',
+            'en' => 'Prince Faisal Street',
         ]);
         $this->migrator->add('project.address_line_two', [
-            'ar' => fake()->address(),
-            'en' => fake()->address(),
+            'ar' => 'الرياض، السعودية',
+            'en' => 'Riyadh, Saudi Arabia',
         ]);
-        $this->migrator->add('project.company_cr', fake()->randomNumber());
-        $this->migrator->add('project.vat_id', fake()->randomNumber());
-        $this->migrator->add('project.vat', fake()->randomFloat(1, 0, 100));
+        $this->migrator->add('project.company_cr', '70065554874');
+        $this->migrator->add('project.vat_id', '2665656565');
+        $this->migrator->add('project.vat_rate', 0.15);
     }
 };

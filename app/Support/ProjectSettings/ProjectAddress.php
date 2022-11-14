@@ -6,20 +6,14 @@ use Illuminate\Support\Arr;
 
 class ProjectAddress
 {
-    private array $addressLineOne;
-
-    private array $addressLineTwo;
-
     /**
      * @param  array  $addressLineOne
      * @param  array  $addressLineTwo
      */
     public function __construct(
-        array $addressLineOne,
-        array $addressLineTwo,
+        private array $addressLineOne,
+        private array $addressLineTwo,
     ) {
-        $this->addressLineOne = $addressLineOne;
-        $this->addressLineTwo = $addressLineTwo;
     }
 
     /**

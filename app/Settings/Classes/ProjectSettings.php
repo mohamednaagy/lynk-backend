@@ -12,7 +12,7 @@ class ProjectSettings extends Settings
 
     public string $vat_id;
 
-    public float $vat;
+    public float $vat_rate;
 
     public array $address_line_one;
 

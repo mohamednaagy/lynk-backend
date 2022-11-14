@@ -137,7 +137,6 @@ return [
         'invalid_mobile_number' => 'Invalid phone number',
 
     ],
-    'setting_locale' => 'The :attribute must include :locale translation',
     /*
      |--------------------------------------------------------------------------
      | Custom Validation Language Lines
