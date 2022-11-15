@@ -4,6 +4,7 @@ namespace Modules\Otpify\Exceptions;
 
 use App\Enums\ErrorCode;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class OtpCodeIncorrectException extends Exception
@@ -14,12 +15,19 @@ class OtpCodeIncorrectException extends Exception
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function render($request)
+    public function render(Request $request)
     {
-        return response()->errorResponse(
-            trans('otpify::response.otp_code_invalid'),
-            Response::HTTP_UNAUTHORIZED,
-            ErrorCode::OTPIFY_CODE_INVALID
-        );
+        $message = trans('otpify::response.otp_code_invalid');
+        $code = Response::HTTP_UNAUTHORIZED;
+
+        if ($request->expectsJson()) {
+            return response()->errorResponse(
+                $message,
+                $code,
+                ErrorCode::OTPIFY_CODE_INVALID
+            );
+        }
+
+        abort($code, $message);
     }
 }

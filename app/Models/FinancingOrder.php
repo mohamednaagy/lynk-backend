@@ -18,6 +18,10 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
+/**
+ * @property mixed $status
+ * @property mixed $traderOrders
+ */
 class FinancingOrder extends Model implements HasMedia, Otpifiable
 {
     use HasFactory, InteractsWithMedia, BelongsToTenant, LogsActivity, HasScopes;
@@ -100,6 +104,9 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->singleFile();
         $this
             ->addMediaCollection(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
+            ->singleFile();
+        $this
+            ->addMediaCollection(FinancingOrderMediaCollection::TtiHoldingCertificate)
             ->singleFile();
     }
 

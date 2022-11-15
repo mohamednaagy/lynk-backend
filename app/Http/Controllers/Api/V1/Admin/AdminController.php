@@ -6,6 +6,7 @@ use App\Actions\Contracts\CreateAdminWithRoleAndPermission;
 use App\Actions\Contracts\GetPaginatedUsersByRole;
 use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\StoreAdminRequest;
 use App\Http\Requests\V1\Admin\UpdateAdminRequest;
@@ -29,7 +30,7 @@ class AdminController extends Controller
         $admins = $getPaginatedUsersByRole->handle(Area::getRolesPerAreaMap()[Area::SuperAdmin]);
 
         return fractal($admins, new UserTransformer(Area::SuperAdmin))
-            ->parseIncludes(['roles', 'permissions'])
+            ->parseIncludes(['role'])
             ->respond();
     }
 
@@ -44,7 +45,7 @@ class AdminController extends Controller
         }
 
         return fractal($admin, new UserTransformer(Area::SuperAdmin))
-            ->parseIncludes(['permissions'])
+            ->parseIncludes(['role', 'permissions'])
             ->respond();
     }
 
@@ -60,7 +61,12 @@ class AdminController extends Controller
         CreateAdminWithRoleAndPermission $createAdminWithRoleAndPermission
     ): JsonResponse {
         $data = $createAdminRequest->validated();
-        $data['permissions'] = Grantify::transformToAreaSubject(Area::SuperAdmin, $data['permissions']);
+
+        if ($data['role'] == Role::Admin) {
+            unset($data['permissions']);
+        } else {
+            $data['permissions'] = Grantify::transformToAreaSubject(Area::SuperAdmin, $data['permissions']);
+        }
 
         DB::transaction(function () use ($data, $createAdminWithRoleAndPermission) {
             $admin = $createAdminWithRoleAndPermission->handle($data);

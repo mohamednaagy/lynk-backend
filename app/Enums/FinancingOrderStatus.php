@@ -19,9 +19,9 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
 
     const CommodityPurchased = 6;
 
-    const SellingCommodityToCustomer = 7;
+    const CommoditySoldToCustomer = 7;
 
-    const IssueMurabahaOffer = 8;
+    const MurabhaOfferIssued = 8;
 
     const MurabahaSaleCompleted = 9;
 
@@ -30,4 +30,12 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
     const WaitingClientWakala = 11;
 
     const WaitingPurchasingCommodity = 12;
+
+    const ClientWakalaCompleted = 13;
+
+    const RespondedToPtp = 14;
+
+    const PtpDocumentRetrieved = 15;
+
+    const PendingCancel = 15;
 }

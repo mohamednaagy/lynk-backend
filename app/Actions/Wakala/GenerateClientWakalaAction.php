@@ -6,6 +6,7 @@ use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class GenerateClientWakalaAction implements GenerateClientWakala
 {
@@ -17,18 +18,22 @@ class GenerateClientWakalaAction implements GenerateClientWakala
 
     protected string $filePath = '';
 
-    public function handle(FinancingOrder $financingOrder)
+    /**
+     * @param  FinancingOrder  $financingOrder
+     * @return Media
+     */
+    public function handle(FinancingOrder $financingOrder): Media
     {
         $html = view($this->getTemplate(), [
             'clientName' => $financingOrder->company->name,
         ])->render();
 
         $path = $this->getFilePath($financingOrder).'.pdf';
-        PdfGenerator::outputFromHtml($html, $path);
 
-        return $financingOrder
-            ->addMediaFromDisk($path)
-            ->toMediaCollection($this->getCollectionName());
+        return PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($financingOrder) {
+            return $financingOrder->addMedia($fileResource)
+                ->toMediaCollection($this->getCollectionName());
+        });
     }
 
     public function setTemplate(string $template)

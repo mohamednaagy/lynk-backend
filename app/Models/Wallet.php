@@ -2,15 +2,10 @@
 
 namespace App\Models;
 
-use Bavix\Wallet\Models\Wallet as BaseWallet;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-class Wallet extends BaseWallet
+class Wallet extends Model
 {
     use HasFactory;
-
-    public function getBalanceAttribute(): string
-    {
-        return $this->getRawOriginal('balance');
-    }
 }

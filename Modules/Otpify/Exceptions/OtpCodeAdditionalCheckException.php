@@ -4,6 +4,7 @@ namespace Modules\Otpify\Exceptions;
 
 use App\Enums\ErrorCode;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class OtpCodeAdditionalCheckException extends Exception
@@ -14,12 +15,19 @@ class OtpCodeAdditionalCheckException extends Exception
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function render($request)
+    public function render(Request $request)
     {
-        return response()->errorResponse(
-            trans('otpify::response.otp_code_additional_check_error'),
-            Response::HTTP_UNAUTHORIZED,
-            ErrorCode::OTPIFY_ADDITIONAL_CHECK
-        );
+        $message = trans('otpify::response.otp_code_additional_check_error');
+        $code = Response::HTTP_UNAUTHORIZED;
+
+        if ($request->expectsJson()) {
+            return response()->errorResponse(
+                $message,
+                $code,
+                ErrorCode::OTPIFY_ADDITIONAL_CHECK
+            );
+        }
+
+        abort($code, $message);
     }
 }

@@ -129,7 +129,7 @@ class FinancingOrderTransformer extends TransformerAbstract
     {
         return $this->collection(collect([
             'client_wakala',
-            FinancingOrderHistory::CommodityPurchased,
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
             FinancingOrderHistory::ContractSigned,
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
             FinancingOrderHistory::IssueMurabahaOffer,

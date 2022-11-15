@@ -39,7 +39,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'completed_at' => optional($this->financingOrder->client_wakala_accepted_at)->format('Y-m-d h:m A'),
                 'document' => optional($this->financingOrder->getMedia(FinancingOrderMediaCollection::ClientWakala)->first())->getUrl(),
             ],
-            FinancingOrderHistory::CommodityPurchased => [
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => [
                 'step' => 'commodity_purchased',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:m A'),

@@ -2,8 +2,12 @@
 
 namespace App\Http\Requests\V1\Admin;
 
+use App\Enums\Action;
+use App\Enums\Role;
+use App\Enums\Subject;
+use App\Models\User;
+use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use function trans;
 
@@ -26,22 +30,24 @@ class UpdateAdminRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
+        return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
-            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($this->admin->id)],
+            'email' => [
+                'required',
+                'email',
+                Rule::unique(User::class, 'email')
+                    ->whereNull('company_id')
+                    ->ignore($this->admin->id),
+            ],
             'password' => ['nullable', 'string', 'confirmed'],
+            'role' => ['required', 'string', new EnumValue(Role::class)],
+            'permissions' => ['required', 'array', 'min:1'],
+            'permissions.*' => ['required', 'array'],
+            'permissions.*.subject' => ['required', 'string', new EnumValue(Subject::class)],
+            'permissions.*.actions' => ['required', 'array'],
+            'permissions.*.actions.*' => ['required', 'string', new EnumValue(Action::class)],
         ];
-
-        if (! empty($this->role)) {
-            $rules['role'] = ['required', 'string', 'exists:roles,name'];
-        }
-
-        if (! empty($this->permissions)) {
-            $rules['permissions.*'] = ['required', 'array', 'distinct'];
-        }
-
-        return $rules;
     }
 
     /**
