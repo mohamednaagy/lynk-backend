@@ -15,7 +15,7 @@ class WalletServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(
+        $this->app->singleton(
             WalletService::class,
             function () {
                 return new WalletServiceAction();
@@ -30,6 +30,5 @@ class WalletServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
     }
 }
