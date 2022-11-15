@@ -81,6 +81,7 @@ class OrderController extends Controller
                             'creator_id' => $user->id,
                             'creator_type' => $user->getMorphClass(),
                             'approved_at' => $status === FinancingOrderStatus::WaitingClientWakala ? now() : null,
+                            'is_verification_required' => true,
                         ]
                     )
                 );
