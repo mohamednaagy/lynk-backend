@@ -2,6 +2,8 @@
 
 namespace App\Jobs\Dmcc;
 
+use App\Enums\FinancingOrderStatus;
+use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,6 +15,8 @@ use Illuminate\Queue\SerializesModels;
 class ProcessUnprocessedDmccNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected string $ttiId;
 
     protected string $notificationId;
 
@@ -27,6 +31,7 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
     {
         $this->notification = $notification;
         $this->notificationId = $this->notification->notificationHeaderAndEntity->notificationId;
+        $this->ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
     }
 
     /**
@@ -42,8 +47,17 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
             return;
         }
 
+        $traderOrder = TraderOrder::query()->where('reference', $this->ttiId)->first();
+        $financingOrder = $traderOrder->order;
+
+        if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::Completed)) {
+            return;
+        }
+
         $trader = Trader::driver($driver);
         $trader->processNotification($this->notificationId);
+
+        $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::Completed);
     }
 
     /**
