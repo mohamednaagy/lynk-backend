@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
@@ -12,7 +13,6 @@ use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class FakeDriver implements TraderInterface
 {
@@ -44,7 +44,14 @@ class FakeDriver implements TraderInterface
         $response = Http::get($this->buildUrl('notifications?type='.$type));
 
         if (! $response->successful()) {
-            throw new UnprocessableEntityHttpException();
+            throw new TraderException(collect([
+                'driver' => 'fake',
+                'step' => 'fetchNotifications',
+                'requestBody' => [
+                    'type' => $type,
+                ],
+                'responseBody' => $response->body(),
+            ]));
         }
 
         $data = collect($response->json())->map(function ($notification) {
@@ -66,12 +73,22 @@ class FakeDriver implements TraderInterface
         return $data->toArray();
     }
 
+    /**
+     * @throws TraderException
+     */
     public function processNotification($notificationId): void
     {
         $response = Http::get($this->buildUrl('processNotification/'.$notificationId));
 
         if (! $this->isSuccess($response)) {
-            throw new UnprocessableEntityHttpException();
+            throw new TraderException(collect([
+                'driver' => 'fake',
+                'step' => 'processNotification',
+                'requestBody' => [
+                    'notificationId' => $notificationId,
+                ],
+                'responseBody' => $response->body(),
+            ]));
         }
     }
 
@@ -85,6 +102,9 @@ class FakeDriver implements TraderInterface
         return $response->successful();
     }
 
+    /**
+     * @throws TraderException
+     */
     public function getTtiId(FinancingOrder $financingOrder): mixed
     {
         $response = Http::post($this->buildUrl('getTTIIdForIssuePTP'), [
@@ -99,12 +119,30 @@ class FakeDriver implements TraderInterface
         ]);
 
         if (! $this->isSuccess($response)) {
-            throw new UnprocessableEntityHttpException();
+            throw new TraderException(collect([
+                'driver' => 'fake',
+                'step' => 'getTtiId',
+                'requestBody' => [
+                    'currency' => 'SAR',
+                    'costPrice' => $financingOrder->amount,
+                    'profit' => $financingOrder->selling_price - $financingOrder->amount,
+                    'paymentTerms' => config('trader.providers.fake.tti.payment_terms'),
+                    'unitOfDuration' => config('trader.providers.fake.tti.unit_of_duration'),
+                    'product' => null,
+                    'registeredMember' => config('trader.providers.fake.tti.registered_member'),
+                    'client' => null,
+                ],
+                'responseBody' => $response->body(),
+                'financingOrderId' => $financingOrder->id,
+            ]));
         }
 
         return $response->json('data.ttiId');
     }
 
+    /**
+     * @throws TraderException
+     */
     public function cancelOrder(FinancingOrder $financingOrder): mixed
     {
         $traderOrder = $financingOrder->activeTraderOrder()->first();
@@ -117,12 +155,26 @@ class FakeDriver implements TraderInterface
             ]);
 
         if (! $this->isSuccess($response)) {
-            throw new UnprocessableEntityHttpException();
+            throw new TraderException(collect([
+                'driver' => 'fake',
+                'step' => 'cancelOrder',
+                'requestBody' => [
+                    'ttiId' => $traderOrder->reference,
+                    'comments' => 'Cancel Order',
+                    'confirmAction' => 'true',
+                ],
+                'responseBody' => $response->body(),
+                'financingOrderId' => $financingOrder->id,
+                'traderOrderId' => $traderOrder->id,
+            ]));
         }
 
         return $response->object();
     }
 
+    /**
+     * @throws TraderException
+     */
     public function respondPtpService(string $ttiId): void
     {
         $response = Http::post($this->buildUrl('respondPTPService'), [
@@ -132,7 +184,16 @@ class FakeDriver implements TraderInterface
         ]);
 
         if (! $this->isSuccess($response)) {
-            throw new UnprocessableEntityHttpException();
+            throw new TraderException(collect([
+                'driver' => 'fake',
+                'step' => 'respondPtpService',
+                'requestBody' => [
+                    'ttiId' => $ttiId,
+                    'comments' => 'create PTP',
+                    'submitAction' => 'true',
+                ],
+                'responseBody' => $response->body(),
+            ]));
         }
     }
 
@@ -148,6 +209,9 @@ class FakeDriver implements TraderInterface
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
     }
 
+    /**
+     * @throws TraderException
+     */
     public function getDocumentByTypeAndTransaction(string $ttiId, string $documentType): mixed
     {
         // request PTP document
@@ -157,7 +221,15 @@ class FakeDriver implements TraderInterface
         ]);
 
         if (! $this->isSuccess($response)) {
-            throw new UnprocessableEntityHttpException();
+            throw new TraderException(collect([
+                'driver' => 'fake',
+                'step' => 'getDocumentByTypeAndTransaction',
+                'requestBody' => [
+                    'ttiId' => $ttiId,
+                    'type' => $documentType,
+                ],
+                'responseBody' => $response->body(),
+            ]));
         }
 
         return $response->json('data.fileContent');
@@ -192,6 +264,9 @@ class FakeDriver implements TraderInterface
         return '001';
     }
 
+    /**
+     * @throws TraderException
+     */
     public function issueMurabahaPurchaseOffer(string $ttiId, string $versionNo): void
     {
         $response = Http::post($this->buildUrl('issueMurabahaPurchaseOffer'), [
@@ -201,7 +276,16 @@ class FakeDriver implements TraderInterface
         ]);
 
         if (! $this->isSuccess($response)) {
-            throw new UnprocessableEntityHttpException();
+            throw new TraderException(collect([
+                'driver' => 'fake',
+                'step' => 'issueMurabahaPurchaseOffer',
+                'requestBody' => [
+                    'ttiId' => $ttiId,
+                    'comments' => 'create MPO',
+                    'ttiDocumentVersionNo' => $versionNo,
+                ],
+                'responseBody' => $response->body(),
+            ]));
         }
     }
 }
