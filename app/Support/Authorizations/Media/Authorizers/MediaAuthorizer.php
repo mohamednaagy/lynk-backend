@@ -41,12 +41,10 @@ class MediaAuthorizer implements MediaAuthorizerContract
 
     public function resolveAuthorizerByModel()
     {
-        $authorizer = match (get_class($this->media->model)) {
+        return match (get_class($this->media->model)) {
             FinancingOrder::class => new FinancingOrderMediaAuthorizer($this->user, $this->media->model),
             default => throw new Exception(__('error.media_class_not_supported'))
         };
-
-        return $authorizer->canAccess();
     }
 
     /**
@@ -57,6 +55,6 @@ class MediaAuthorizer implements MediaAuthorizerContract
     public function canAccess(): bool
     {
         return $this->doesAreaHaveAccessToCollection($this->area)
-        && $this->resolveAuthorizerByModel();
+        && $this->resolveAuthorizerByModel()->canAccess();
     }
 }

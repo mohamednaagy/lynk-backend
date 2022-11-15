@@ -32,7 +32,7 @@ class FinancingOrderMediaAuthorizer implements MediaAuthorizerContract
         return $this->user->company_id == $this->financingOrder->company_id
                && (
                    $this->user->hasRole(self::AllowedRoles)
-                   || $this->user->hasAnyPermission(perm_as_array([Area::SuperAdmin, Area::Lender], [Subject::FinancingOrders, Action::Show]))
+                   || $this->user->hasAnyPermission(perm_arr([Area::SuperAdmin, Area::Lender], [Subject::FinancingOrders, Action::Show]))
                    || $this->user->id == $this->financingOrder->creator_id
                );
     }

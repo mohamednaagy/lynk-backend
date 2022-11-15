@@ -57,8 +57,8 @@ if (! function_exists('perm')) {
     }
 }
 
-if (! function_exists('perm_as_array')) {
-    function perm_as_array($area, ...$permissions)
+if (! function_exists('perm_arr')) {
+    function perm_arr($area, ...$permissions)
     {
         return explode('|', perm($area, ...$permissions));
     }
