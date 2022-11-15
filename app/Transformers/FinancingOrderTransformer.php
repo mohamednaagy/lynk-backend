@@ -21,13 +21,13 @@ class FinancingOrderTransformer extends TransformerAbstract
         'power_of_attorney',
         'is_approved',
         'status_reason',
-        'history',
     ];
 
     protected array $availableIncludes = [
         'creator',
         'approver',
         'created_at',
+        'history',
     ];
 
     public function transform(FinancingOrder $financingOrder)
@@ -129,11 +129,11 @@ class FinancingOrderTransformer extends TransformerAbstract
     {
         return $this->collection(collect([
             'client_wakala',
-            FinancingOrderHistory::CommodityPurchased,
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
             FinancingOrderHistory::ContractSigned,
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
             FinancingOrderHistory::IssueMurabahaOffer,
             FinancingOrderHistory::MurabahaSaleCompleted,
-        ]), new TraderHistoryTransformer($financingOrder, $financingOrder->traderOrders->last()->traderHistories));
+        ]), new TraderHistoryTransformer($financingOrder, $financingOrder->traderOrders->last()->traderHistories ?? collect()));
     }
 }

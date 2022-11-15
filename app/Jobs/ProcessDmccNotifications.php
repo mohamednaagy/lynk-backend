@@ -21,34 +21,45 @@ class ProcessDmccNotifications implements ShouldQueue
     public function handle(): void
     {
         collect(
-            Trader::driver('dmcc')->fetchNotification('ACTIONABLE')
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->fetchNotification('ACTIONABLE')
         )->each(function ($notification) {
-            if (
-                $notification->notificationHeaderAndEntity->notification
-                ==
-                'Action Required for Promise to Purchase'
-            ) {
-                ProcessDmccPtpNotification::dispatch($notification);
-            } elseif (
-                $notification->notificationHeaderAndEntity->notification
-                ==
-                'Action Required for Issue Murabaha Purchase Offer'
-            ) {
-                ProcessDmccMpoNotification::dispatch($notification);
+            try {
+                if (
+                    $notification->notificationHeaderAndEntity->notification
+                    ==
+                    'Action Required for Promise to Purchase'
+                ) {
+                    ProcessDmccPtpNotification::dispatch($notification);
+                } elseif (
+                    $notification->notificationHeaderAndEntity->notification
+                    ==
+                    'Action Required for Issue Murabaha Purchase Offer'
+                ) {
+                    ProcessDmccMpoNotification::dispatch($notification);
+                }
+            } catch (\Throwable $th) {
+                //throw $th;
             }
         });
 
         collect(
-            Trader::driver('dmcc')->fetchNotification('FYI')
+            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->fetchNotification('FYI')
         )->each(function ($notification) {
             if (
-                $notification->notificationHeaderAndEntity->notification
-                ==
-                'Murabaha Sale Completed'
+                in_array($notification->notificationHeaderAndEntity->notification, [
+                    'Murabaha Sale Completed',
+                    'Tradeflow Transaction (Islamic) - Payment Settlement Required',
+                ])
             ) {
                 ProcessDmccMpoSaleCompleteNotification::dispatch($notification)->chain([
                     new ProcessUnprocessedDmccNotification($notification),
                 ]);
+            } elseif (
+                $notification->notificationHeaderAndEntity->notification
+                ==
+                'Tradeflow Transaction (Islamic) Cancelled'
+            ) {
+                ProcessDmccCancelNotification::dispatch($notification);
             }
         });
     }

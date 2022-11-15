@@ -3,6 +3,7 @@
 namespace App\Actions\Clients;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -17,14 +18,15 @@ class AcceptClientWakalaAction implements AcceptClientWakala
 
         $path = $order->id.'/client-wakala/'.$order->getNationalId().'.pdf';
 
-        PdfGenerator::outputFromHtml($wakalaTemplate, $path, [
-            'gotoOptions' => ['waitUntil' => 'networkidle0'],
-        ]);
+        $media = PdfGenerator::outputFromHtml($wakalaTemplate, $path, function ($fileResource) use ($order) {
+            return $order->addMedia($fileResource)
+                ->toMediaCollection(FinancingOrderMediaCollection::ClientWakala);
+        });
 
         $order->update([
             'client_wakala_accepted_at' => now(),
         ]);
 
-        return $order->addMedia(storage_path('app/'.$path))->toMediaCollection('client_wakala');
+        return $media;
     }
 }

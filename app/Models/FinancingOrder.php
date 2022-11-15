@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +18,10 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
+/**
+ * @property mixed $status
+ * @property mixed $traderOrders
+ */
 class FinancingOrder extends Model implements HasMedia, Otpifiable
 {
     use HasFactory, InteractsWithMedia, BelongsToTenant, LogsActivity, HasScopes;
@@ -40,6 +45,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'customer_details',
         'status_reason',
         'client_wakala_accepted_at',
+        'is_verification_required',
     ];
 
     protected $casts = [
@@ -54,14 +60,14 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     protected function phoneNumberCountryCode(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => "{$this->phone_number->getCountry()}",
+            get: fn () => $this->phone_number->getCountry(),
         );
     }
 
     protected function mobileDialingPhoneNumber(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => "{$this->phone_number->formatForMobileDialingInCountry($this->phone_number->getCountry())}",
+            get: fn () => $this->phone_number->formatForMobileDialingInCountry($this->phone_number->getCountry()),
         );
     }
 
@@ -74,66 +80,35 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function registerMediaCollections(): void
     {
         $this
-            ->addMediaCollection(
-                'client_wakala'
-            )
-            ->singleFile(
-            );
+            ->addMediaCollection(FinancingOrderMediaCollection::ClientWakala)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'bank_wakala'
-            )
-            ->singleFile(
-            );
-
+            ->addMediaCollection(FinancingOrderMediaCollection::BankWakala)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'contract'
-            )
-            ->singleFile(
-            );
-
+            ->addMediaCollection(FinancingOrderMediaCollection::Contract)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'power_of_attorney'
-            )
-            ->singleFile(
-            );
-
+            ->addMediaCollection(FinancingOrderMediaCollection::PowerOfAttorney)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'promise_to_purchase'
-            )
-            ->singleFile(
-            );
-
+            ->addMediaCollection(FinancingOrderMediaCollection::PromiseToPurchase)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'murabaha_purchase_order'
-            )
-            ->singleFile(
-            );
-
+            ->addMediaCollection(FinancingOrderMediaCollection::MurabahaPurchaseOrder)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'transfer_ownership_to_lender'
-            )
-            ->singleFile(
-            );
-
+            ->addMediaCollection(FinancingOrderMediaCollection::TransferOwnershipToLender)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'selling_commodity_to_customer'
-            )
-            ->singleFile(
-            );
-
+            ->addMediaCollection(FinancingOrderMediaCollection::SellingCommodityToCustomer)
+            ->singleFile();
         $this
-            ->addMediaCollection(
-                'warrant_amendment_except_warrant_no'
-            )
-            ->singleFile(
-            );
+            ->addMediaCollection(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
+            ->singleFile();
+        $this
+            ->addMediaCollection(FinancingOrderMediaCollection::TtiHoldingCertificate)
+            ->singleFile();
     }
 
     public function company()
@@ -153,12 +128,12 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function getPowerOfAttorneyAttribute()
     {
-        return $this->getFirstMediaUrl('power_of_attorney');
+        return $this->getFirstMediaUrl(FinancingOrderMediaCollection::PowerOfAttorney);
     }
 
     public function getContractAttribute()
     {
-        return $this->getFirstMediaUrl('contract');
+        return $this->getFirstMediaUrl(FinancingOrderMediaCollection::Contract);
     }
 
     public function traderOrders()

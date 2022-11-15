@@ -3,34 +3,34 @@
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala;
-use App\Actions\Contracts\Orders\ApproveOrder as ApproveOrderInterface;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\MakeOrderProceedRequest;
-use App\Jobs\UpdateFinancialOrderStatus;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class MakeOrderProceed extends Controller
 {
     /**
      * Handle the incoming request.
      *
-     * @param  Request  $request
-     * @param  ApproveOrderInterface  $approveOrder
-     * @param  FinancingOrder  $order
+     * @param  MakeOrderProceedRequest  $request
+     * @param  AcceptClientWakala  $acceptClientWakala
+     * @param  int  $order
      * @return JsonResponse
+     *
+     * @throws Throwable
      */
     public function __invoke(
         MakeOrderProceedRequest $request,
         AcceptClientWakala $acceptClientWakala,
-        $order
-    ) {
+        int $order
+    ): JsonResponse {
         return DB::transaction(function () use ($request, $acceptClientWakala, $order) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
 
@@ -41,7 +41,7 @@ class MakeOrderProceed extends Controller
                     'status' => FinancingOrderStatus::WaitingPurchasingCommodity,
                 ]);
 
-                Trader::driver('dmcc')->getTti($order);
+                Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->getTti($order);
 
                 return $this->successResponse([
                     'wakala_file_url' => $media->getUrl(),
@@ -51,17 +51,16 @@ class MakeOrderProceed extends Controller
                     'status' => FinancingOrderStatus::ContractSigned,
                 ]);
 
-                $traderOrder = $order->traderOrders->last();
-                UpdateFinancialOrderStatus::dispatch(
-                    $traderOrder,
-                    FinancingOrderStatus::SellingCommodityToCustomer
-                )->delay(now()->addMinutes(2));
+                $traderOrder = $order->traderOrders()->latest()->first();
 
-                Trader::driver($traderOrder->provider)
-                    ->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ResponsePtp);
+                $traderOrder->traderHistories()->create([
+                    'action' => FinancingOrderHistory::ContractSigned,
+                ]);
 
                 return $this->successResponse();
             }
+
+            return $this->successResponse();
         });
     }
 }

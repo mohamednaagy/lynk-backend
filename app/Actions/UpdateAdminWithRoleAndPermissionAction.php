@@ -2,10 +2,10 @@
 
 namespace App\Actions;
 
-use App\Actions\Contracts\Admins\UpdateAdminUser;
 use App\Actions\Contracts\SyncPermissionToUser;
 use App\Actions\Contracts\SyncRoleToUser;
 use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
+use App\Actions\Contracts\UpdateUser;
 use App\Models\User;
 
 class UpdateAdminWithRoleAndPermissionAction implements UpdateAdminWithRoleAndPermission
@@ -15,7 +15,7 @@ class UpdateAdminWithRoleAndPermissionAction implements UpdateAdminWithRoleAndPe
      * @param  SyncPermissionToUser  $syncPermissionToUser
      */
     public function __construct(
-        protected UpdateAdminUser $updateAdminUser,
+        protected UpdateUser $updateUser,
         protected SyncRoleToUser $syncRoleToUser,
         protected SyncPermissionToUser $syncPermissionToUser
     ) {
@@ -31,7 +31,7 @@ class UpdateAdminWithRoleAndPermissionAction implements UpdateAdminWithRoleAndPe
     public function handle(array $data, User $user): void
     {
         // update user
-        $this->updateAdminUser->handle($user, $data);
+        $this->updateUser->handle($user, $data);
 
         // sync role
         if (! empty($data['role'])) {

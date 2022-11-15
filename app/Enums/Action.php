@@ -29,6 +29,8 @@ final class Action extends Enum
 
     const Reject = 'reject';
 
+    const Cancel = 'cancel';
+
     const Charge = 'charge';
 
     const SyncStatusWithEdaat = 'syncStatusWithEdaat';

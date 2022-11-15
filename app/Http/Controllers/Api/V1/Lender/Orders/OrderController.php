@@ -14,17 +14,18 @@ use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
-use Bavix\Wallet\Internal\Service\DatabaseServiceInterface;
+use Bavix\Wallet\Internal\Exceptions\ExceptionInterface;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Index]))->only('index');
-        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Show]))->only('show');
-        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Create]))->only('store');
-        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Edit]))->only('update');
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Index]))->only('index');
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Show]))->only('show');
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Create]))->only('store');
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Edit]))->only('update');
     }
 
     /**
@@ -49,7 +50,7 @@ class OrderController extends Controller
         $order->load('creator', 'approver');
 
         return fractal($order, new FinancingOrderTransformer())
-            ->parseIncludes(['creator', 'approver'])
+            ->parseIncludes(['creator', 'approver', 'history'])
             ->respond();
     }
 
@@ -62,11 +63,9 @@ class OrderController extends Controller
      *
      * @throws ExceptionInterface
      */
-    public function store(
-        StoreOrderRequest $request,
-        CreateFinancingOrder $createFinancingOrder
-    ): JsonResponse {
-        return app(DatabaseServiceInterface::class)->transaction(
+    public function store(StoreOrderRequest $request, CreateFinancingOrder $createFinancingOrder): JsonResponse
+    {
+        return DB::transaction(
             static function () use ($createFinancingOrder, $request) {
                 $status = tenant()->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval
@@ -82,6 +81,7 @@ class OrderController extends Controller
                             'creator_id' => $user->id,
                             'creator_type' => $user->getMorphClass(),
                             'approved_at' => $status === FinancingOrderStatus::WaitingClientWakala ? now() : null,
+                            'is_verification_required' => true,
                         ]
                     )
                 );

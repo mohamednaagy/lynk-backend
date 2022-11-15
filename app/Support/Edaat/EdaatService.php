@@ -51,21 +51,36 @@ class EdaatService
         return false;
     }
 
-    public function registerWebhook(string $paymentUrl, string $billUrl, string $reconcileUrl)
+    public function registerWebhook(?string $paymentUrl, ?string $billUrl, ?string $reconcileUrl)
     {
-        $responsePayment = Http::edaat()
-            ->withBody("\"$paymentUrl\"", 'application/json')
-            ->post($this->prefixedPath('endpoints/PaymentNotification'));
+        $isPaymentSuccess = true;
+        if ($paymentUrl) {
+            $responsePayment = Http::edaat()
+                ->withBody("\"$paymentUrl\"", 'application/json')
+                ->post($this->prefixedPath('endpoints/PaymentNotification'));
 
-        $responseBill = Http::edaat()
-            ->withBody("\"$billUrl\"", 'application/json')
-            ->post($this->prefixedPath('endpoints/BillConfirmation'));
+            $isPaymentSuccess = $this->isSuccess($responsePayment);
+        }
 
-        $responseReconcile = Http::edaat()
-            ->withBody("\"$reconcileUrl\"", 'application/json')
-            ->post($this->prefixedPath('endpoints/Reconciliation'));
+        $isBillSuccess = true;
+        if ($billUrl) {
+            $responseBill = Http::edaat()
+                ->withBody("\"$billUrl\"", 'application/json')
+                ->post($this->prefixedPath('endpoints/BillConfirmation'));
 
-        return $this->isSuccess($responseBill) && $this->isSuccess($responsePayment) && $this->isSuccess($responseReconcile);
+            $isBillSuccess = $this->isSuccess($responseBill);
+        }
+
+        $isReconcileSuccess = true;
+        if ($reconcileUrl) {
+            $responseReconcile = Http::edaat()
+                ->withBody("\"$reconcileUrl\"", 'application/json')
+                ->post($this->prefixedPath('endpoints/Reconciliation'));
+
+            $isReconcileSuccess = $this->isSuccess($responseReconcile);
+        }
+
+        return $isPaymentSuccess && $isReconcileSuccess && $isBillSuccess;
     }
 
     private function isSuccess(Response $response)
