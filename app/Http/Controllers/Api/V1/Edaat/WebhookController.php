@@ -17,7 +17,6 @@ class WebhookController extends Controller
         Request $request,
         EdaatService $edaatService,
         CreateTransactions $createTransactions,
-        string $status
     ) {
         foreach ($request->all() as $invoice) {
             if ($edaatService->isPaidInvoice($invoice['InvoiceNo'])) {
