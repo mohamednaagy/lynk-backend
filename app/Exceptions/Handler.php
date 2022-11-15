@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
+use App\Enums\ErrorCode;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedByRequestDataException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -45,6 +47,10 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        $this->renderable(function (TenantCouldNotBeIdentifiedByRequestDataException $e, $request) {
+            return response()->errorResponse(__('Invalid Company id'), code: ErrorCode::X_COMPANY_INVALID);
         });
     }
 }
