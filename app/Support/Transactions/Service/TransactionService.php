@@ -4,10 +4,10 @@ namespace App\Support\Transactions\Service;
 
 use App\Models\Transfer;
 use App\Models\Wallet;
+use App\Support\Generator\ReferenceNumber\Contracts\ReferenceNumberGeneratorInterFace;
 use App\Support\Transactions\Service\Contracts\TransactionServiceInterface;
 use Bavix\Wallet\Models\Transaction;
 use Brick\Math\BigDecimal;
-use Illuminate\Support\Str;
 
 class TransactionService implements TransactionServiceInterface
 {
@@ -19,7 +19,7 @@ class TransactionService implements TransactionServiceInterface
             'wallet_id' => $wallet->getKey(),
             'amount' => $amount,
             'type' => $type,
-            'reference_number' => $referenceNumber ?? Str::random(20),
+            'reference_number' => $referenceNumber ?? app(ReferenceNumberGeneratorInterFace::class)->generate(),
             'meta' => $meta,
         ]);
     }
@@ -32,7 +32,7 @@ class TransactionService implements TransactionServiceInterface
             'wallet_id' => $wallet->getKey(),
             'amount' => $amount,
             'type' => $type,
-            'reference_number' => $referenceNumber ?? Str::random(20),
+            'reference_number' => $referenceNumber ?? app(ReferenceNumberGeneratorInterFace::class)->generate(),
             'meta' => $meta,
         ]);
     }
