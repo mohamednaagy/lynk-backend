@@ -229,11 +229,14 @@ class DmccDriver implements TraderInterface
     {
         $html = view('selling-commodity-to-customer')->render();
         $path = $traderOrder->financing_order_id.'/DMCC-SCTC/'.$traderOrder->reference.'.pdf';
-        PdfGenerator::outputFromHtml($html, $path, [
-            'gotoOptions' => ['waitUntil' => 'networkidle0'],
-        ]);
+        PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($traderOrder) {
+            $this->attachDocumentToOrder(
+                $traderOrder,
+                $fileResource,
+                FinancingOrderMediaCollection::SellingCommodityToCustomer
+            );
+        });
 
-        $this->attachDocumentToOrder($traderOrder, storage_path('app/'.$path), FinancingOrderMediaCollection::SellingCommodityToCustomer);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
     }
 
@@ -282,11 +285,13 @@ class DmccDriver implements TraderInterface
     {
         $html = view('transfer-ownership-to-lender')->render();
         $path = $traderOrder->financing_order_id.'/DMCC-TOTL/'.$traderOrder->reference.'.pdf';
-        PdfGenerator::outputFromHtml($html, $path, [
-            'gotoOptions' => ['waitUntil' => 'networkidle0'],
-        ]);
-
-        $this->attachDocumentToOrder($traderOrder, storage_path('app/'.$path), FinancingOrderMediaCollection::TransferOwnershipToLender);
+        PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($traderOrder) {
+            $this->attachDocumentToOrder(
+                $traderOrder,
+                $fileResource,
+                FinancingOrderMediaCollection::TransferOwnershipToLender
+            );
+        });
     }
 
     /**
