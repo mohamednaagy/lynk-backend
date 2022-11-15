@@ -52,6 +52,10 @@ use Bavix\Wallet\Services\TransferService;
 use Bavix\Wallet\Services\WalletService;
 
 return [
+    'database' => [
+        'connection' => 'mysql',
+    ],
+
     /**
      * Arbitrary Precision Calculator.
      *

@@ -10,7 +10,7 @@ interface GeneratorInterface
      * @param  string  $html
      * @param  string  $path
      * @param  array  $options
-     * @return string
+     * @return mixed
      */
     public function outputFromHtml($html, $path, $options);
 }
