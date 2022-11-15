@@ -2,25 +2,20 @@
 
 namespace App\Support\Transactions\Service;
 
-use App\Models\User;
+use App\Models\Transfer;
 use App\Models\Wallet;
 use App\Support\Transactions\Service\Contracts\TransactionServiceInterface;
 use Bavix\Wallet\Models\Transaction;
-use Bavix\Wallet\Models\Transfer;
 use Brick\Math\BigDecimal;
 
 class TransactionService implements TransactionServiceInterface
 {
-    public function __construct(protected ?User $user, protected ?Wallet $wallet)
-    {
-    }
-
-    public function withdraw(float|int $amount, int $type, ?string $referenceNumber, ?array $meta)
+    public function withdraw(Wallet $wallet, float|int $amount, int $type, ?string $referenceNumber, ?array $meta)
     {
         return Transaction::create([
-            'payable_type' => $this->user->getMorphClass(),
-            'payable_id' => $this->user->getKey(),
-            'wallet_id' => $this->wallet->getKey(),
+            'payable_type' => $wallet->holder->getMorphClass(),
+            'payable_id' => $wallet->holder->getKey(),
+            'wallet_id' => $wallet->getKey(),
             'amount' => $amount,
             'type' => $type,
             'reference_number' => $referenceNumber,
@@ -28,12 +23,12 @@ class TransactionService implements TransactionServiceInterface
         ]);
     }
 
-    public function deposit(float|int $amount, int $type, ?string $referenceNumber, ?array $meta)
+    public function deposit(Wallet $wallet, float|int $amount, int $type, ?string $referenceNumber, ?array $meta)
     {
         return Transaction::create([
-            'payable_type' => $this->user->getMorphClass(),
-            'payable_id' => $this->user->getKey(),
-            'wallet_id' => $this->wallet->getKey(),
+            'payable_type' => $wallet->holder->getMorphClass(),
+            'payable_id' => $wallet->holder->getKey(),
+            'wallet_id' => $wallet->getKey(),
             'amount' => $amount,
             'type' => $type,
             'reference_number' => $referenceNumber,
@@ -41,29 +36,30 @@ class TransactionService implements TransactionServiceInterface
         ]);
     }
 
-    public function transfer(Wallet $toWallet, float|int $amount, int $type, ?string $referenceNumber, ?array $meta)
+    public function transfer(Wallet $fromWallet, Wallet $toWallet, float|int $amount, int $type, ?string $referenceNumber, ?array $meta)
     {
-        $withdraw = $this->withdraw($amount, $type, $referenceNumber, $meta);
-        $deposit = $this->deposit($amount, $type, $referenceNumber, $meta);
+        $withdraw = $this->withdraw($fromWallet, $amount, $type, $referenceNumber, $meta);
+        $deposit = $this->deposit($toWallet, $amount, $type, $referenceNumber, $meta);
 
         return Transfer::create([
-            'from_type' => $this->user->getMorphClass(),
-            'from_id' => $this->user->getKey(),
+            'from_type' => $fromWallet->getMorphClass(),
+            'from_id' => $fromWallet->getKey(),
             'to_type' => $toWallet->getMorphClass(),
             'to_id' => $toWallet->getKey(),
             'deposit_id' => $deposit->getKey(),
             'withdraw_id' => $withdraw->getKey(),
+            'data' => $meta,
         ]);
     }
 
-    public function getBalance()
+    public function getBalance(Wallet $wallet)
     {
-        return $this->wallet->getBalanceAttribute();
+        return $wallet->balance;
     }
 
-    public function checkIfCanDraw(float| int $amount)
+    public function checkIfCanDraw(Wallet $wallet, float| int $amount)
     {
-        $balance = $this->getBalance();
+        $balance = $this->getBalance($wallet);
 
         return BigDecimal::of($balance)->compareTo(BigDecimal::of($amount)) >= 0;
     }

@@ -6,13 +6,13 @@ use App\Models\Wallet;
 
 interface TransactionServiceInterface
 {
-    public function withdraw(float|int $amount, int $type, ?string $referenceNumber, ?array $meta);
+    public function withdraw(Wallet $wallet, float|int $amount, int $type, ?string $referenceNumber, ?array $meta);
 
-    public function deposit(float|int $amount, int $type, ?string $referenceNumber, ?array $meta);
+    public function deposit(Wallet $wallet, float|int $amount, int $type, ?string $referenceNumber, ?array $meta);
 
-    public function transfer(Wallet $toWallet, float|int $amount, int $type, ?string $referenceNumber, ?array $meta);
+    public function transfer(Wallet $fromWallet, Wallet $toWallet, float|int $amount, int $type, ?string $referenceNumber, ?array $meta);
 
-    public function getBalance();
+    public function getBalance(Wallet $wallet);
 
-    public function checkIfCanDraw(float|int $amount);
+    public function checkIfCanDraw(Wallet $wallet, float| int $amount);
 }
