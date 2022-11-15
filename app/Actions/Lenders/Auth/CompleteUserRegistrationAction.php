@@ -16,6 +16,8 @@ class CompleteUserRegistrationAction implements CompleteUserRegistration
             'password' => Hash::make($data['password']),
         ]);
 
+        $user->markEmailAsVerified();
+
         return $user;
     }
 }
