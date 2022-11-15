@@ -44,8 +44,10 @@ class EdaatRegisterWebhook extends Command
 
     private function getUrl($route)
     {
-        return filter_var($route, FILTER_VALIDATE_URL)
-            ? $route
-            : route($route);
+        if (! $route || filter_var($route, FILTER_VALIDATE_URL)) {
+            return $route;
+        }
+
+        return route($route);
     }
 }
