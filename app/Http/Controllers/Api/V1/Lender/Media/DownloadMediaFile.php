@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Media;
 
+use App\Enums\Area;
 use App\Enums\ErrorCode;
 use App\Http\Controllers\Controller;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -15,8 +16,12 @@ class DownloadMediaFile extends Controller
      * @param  Media  $media
      * @return mixed
      */
-    public function __invoke(Media $media)
+    public function __invoke($media)
     {
+        $media = Media::where('uuid', $media)->firstOrFail();
+
+        $this->authorize('view', [$media, Area::Lender]);
+
         try {
             return response()->download($media->getPath());
         } catch (\Throwable $th) {

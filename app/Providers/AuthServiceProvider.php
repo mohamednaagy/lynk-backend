@@ -3,9 +3,11 @@
 namespace App\Providers;
 
 use App\Enums\Role;
+use App\Policies\MediaPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -15,7 +17,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+        Media::class => MediaPolicy::class,
     ];
 
     /**
@@ -36,13 +38,13 @@ class AuthServiceProvider extends ServiceProvider
             return rtrim($this->app['request']->input('redirect_url'), '/').'/'.$token.'?'.$query;
         });
 
-        Gate::before(function ($user, $ability) {
-            // TODO: need to map the role to the request path.
-            // For example: /api/v1/admin => Role::Admin
-            // For example: /api/v1/lender => Role::LenderAdmin
+        // Gate::before(function ($user, $ability) {
+        //     // TODO: need to map the role to the request path.
+        //     // For example: /api/v1/admin => Role::Admin
+        //     // For example: /api/v1/lender => Role::LenderAdmin
 
-            /** @var \App\Models\User $user */
-            return $user->hasRole([Role::Admin, Role::LenderAdmin]) ? true : null;
-        });
+        //     /** @var \App\Models\User $user */
+        //     return $user->hasRole([Role::Admin, Role::LenderAdmin]) ? true : null;
+        // });
     }
 }
