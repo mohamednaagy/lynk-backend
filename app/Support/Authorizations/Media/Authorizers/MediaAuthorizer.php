@@ -41,6 +41,18 @@ class MediaAuthorizer implements MediaAuthorizerContract
 
     public function resolveAuthorizerByModel()
     {
+        $model = $this->media->model;
+
+        if ($model === null) {
+            return new class
+            {
+                public function canAccess()
+                {
+                    return false;
+                }
+            };
+        }
+
         return match (get_class($this->media->model)) {
             FinancingOrder::class => new FinancingOrderMediaAuthorizer($this->user, $this->media->model),
             default => throw new Exception(__('error.media_class_not_supported'))
@@ -55,6 +67,6 @@ class MediaAuthorizer implements MediaAuthorizerContract
     public function canAccess(): bool
     {
         return $this->doesAreaHaveAccessToCollection($this->area)
-        && $this->resolveAuthorizerByModel()->canAccess();
+            && $this->resolveAuthorizerByModel()->canAccess();
     }
 }

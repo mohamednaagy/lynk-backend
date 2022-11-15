@@ -16,8 +16,10 @@ class DownloadMediaFile extends Controller
      * @param  Media  $media
      * @return mixed
      */
-    public function __invoke(Media $media)
+    public function __invoke($media)
     {
+        $media = Media::where('uuid', $media)->firstOrFail();
+
         $this->authorize('view', [$media, Area::Lender]);
 
         try {

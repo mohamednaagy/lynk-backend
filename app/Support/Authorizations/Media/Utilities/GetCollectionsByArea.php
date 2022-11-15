@@ -10,14 +10,12 @@ class GetCollectionsByArea
     public function __invoke($area)
     {
         return match ($area) {
-            Area::Lender => [
-                FinancingOrderMediaCollection::BankWakala,
-                FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-                FinancingOrderMediaCollection::Contract,
-            ],
-            Area::SuperAdmin => [
-                FinancingOrderMediaCollection::Contract,
-            ],
+            Area::Lender => array_merge(
+                FinancingOrderMediaCollection::getValues()
+            ),
+            Area::SuperAdmin => array_merge(
+                FinancingOrderMediaCollection::getValues()
+            ),
             default => []
         };
     }
