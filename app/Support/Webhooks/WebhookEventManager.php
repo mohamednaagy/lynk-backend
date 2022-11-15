@@ -22,7 +22,7 @@ class WebhookEventManager
             ->chunk(
                 50,
                 function ($webhooks) use ($company, $payload) {
-                    $webhooks->map(
+                    $webhooks->each(
                         function ($webhook) use ($company, $payload) {
                             WebhookCall::create()
                                 ->url($webhook->url)
