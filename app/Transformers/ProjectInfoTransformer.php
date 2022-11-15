@@ -13,7 +13,8 @@ class ProjectInfoTransformer extends TransformerAbstract
             'company_name' => $project->getCompanyName(),
             'company_cr' => $project->getCompanyCr(),
             'vat_id' => $project->getVatId(),
-            'vat_rate' => round($project->getVatRateInPercentage(), 1),
+            'vat_rate' => $project->getVatRate(),
+            'vat_rate_in_percentage' => $project->getVatRateInPercentage(),
             'address_line_one' => $project->getCompanyAddress()->getAddressLineOne(),
             'address_line_two' => $project->getCompanyAddress()->getAddressLineTwo(),
         ];

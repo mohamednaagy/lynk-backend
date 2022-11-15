@@ -32,7 +32,7 @@ class Project
             $data['company_name'],
             $data['company_cr'],
             $data['vat_id'],
-            $data['vat_rate'],
+            $data['vat_rate'] / 100,
             ProjectAddress::fromArray($data['address_line_one'], $data['address_line_two']),
         );
     }
