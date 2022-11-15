@@ -7,6 +7,7 @@ use App\Models\Wallet;
 use App\Support\Transactions\Service\Contracts\TransactionServiceInterface;
 use Bavix\Wallet\Models\Transaction;
 use Brick\Math\BigDecimal;
+use Illuminate\Support\Str;
 
 class TransactionService implements TransactionServiceInterface
 {
@@ -18,7 +19,7 @@ class TransactionService implements TransactionServiceInterface
             'wallet_id' => $wallet->getKey(),
             'amount' => $amount,
             'type' => $type,
-            'reference_number' => $referenceNumber,
+            'reference_number' => $referenceNumber ?? Str::random(20),
             'meta' => $meta,
         ]);
     }
@@ -31,7 +32,7 @@ class TransactionService implements TransactionServiceInterface
             'wallet_id' => $wallet->getKey(),
             'amount' => $amount,
             'type' => $type,
-            'reference_number' => $referenceNumber,
+            'reference_number' => $referenceNumber ?? Str::random(20),
             'meta' => $meta,
         ]);
     }

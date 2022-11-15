@@ -14,7 +14,9 @@ class TransactionServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->singleton(TransactionServiceInterface::class, function () {
+            return new TransactionService();
+        });
     }
 
     /**
@@ -24,8 +26,5 @@ class TransactionServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->app->singleton(TransactionServiceInterface::class, function () {
-            return new TransactionService;
-        });
     }
 }
