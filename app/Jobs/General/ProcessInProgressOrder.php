@@ -42,6 +42,7 @@ class ProcessInProgressOrder implements ShouldQueue
     public function handle(): void
     {
         DB::transaction(function () {
+            /** @var FinancingOrder $financingOrder */
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             app()->make(AskClientWakala::class)->handle($financingOrder, Str::replace('{order_id}', $financingOrder->id, Config::get('frontent.client_wakala_url')));
             $financingOrder->update([
@@ -57,6 +58,6 @@ class ProcessInProgressOrder implements ShouldQueue
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('financingOrder'.$this->financingOrder->id)];
+        return [new WithoutOverlapping('financingOrder'.$this->financingOrder)];
     }
 }

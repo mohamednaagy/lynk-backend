@@ -32,6 +32,7 @@ class ProcessDmccMpoNotification implements ShouldQueue
     public function __construct($notification)
     {
         $this->notification = $notification;
+        $this->ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
     }
 
     /**
@@ -42,7 +43,6 @@ class ProcessDmccMpoNotification implements ShouldQueue
     public function handle(): void
     {
         DB::transaction(function () {
-            $this->ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
             $traderOrder = TraderOrder::query()
                 ->where('reference', $this->ttiId)
                 ->where('status', TraderOrderStatus::InProgress)

@@ -26,6 +26,7 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
     public function __construct($notification)
     {
         $this->notification = $notification;
+        $this->notificationId = $this->notification->notificationHeaderAndEntity->notificationId;
     }
 
     /**
@@ -42,7 +43,6 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
         }
 
         $trader = Trader::driver($driver);
-        $this->notificationId = $this->notification->notificationHeaderAndEntity->notificationId;
         $trader->processNotification($this->notificationId);
     }
 

@@ -65,6 +65,6 @@ class ProcessClientWakalaCompletedOrder implements ShouldQueue
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('financingOrder'.$this->financingOrder->id)];
+        return [new WithoutOverlapping('financingOrder'.$this->financingOrder)];
     }
 }

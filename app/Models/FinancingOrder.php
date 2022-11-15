@@ -188,8 +188,8 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         );
     }
 
-    public function scopeActiveTraderOrder($query)
+    public function activeTraderOrder()
     {
-        $query->traderOrders()->where('status', TraderOrderStatus::InProgress)->latest();
+        return $this->traderOrders()->where('status', TraderOrderStatus::InProgress)->latest();
     }
 }
