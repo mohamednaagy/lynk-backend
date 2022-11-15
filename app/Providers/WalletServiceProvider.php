@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Support\Wallets\Contracts\WalletService;
-use App\Support\Wallets\WalletServiceAction;
+use App\Support\Wallets\Contracts\WalletServiceInterface;
+use App\Support\Wallets\WalletService;
 use Illuminate\Support\ServiceProvider;
 
 class WalletServiceProvider extends ServiceProvider
@@ -16,9 +16,9 @@ class WalletServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(
-            WalletService::class,
+            WalletServiceInterface::class,
             function () {
-                return new WalletServiceAction();
+                return new WalletService();
             }
         );
     }

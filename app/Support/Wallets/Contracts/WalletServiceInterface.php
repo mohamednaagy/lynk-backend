@@ -5,7 +5,7 @@ namespace App\Support\Wallets\Contracts;
 use App\Models\Wallet;
 use Illuminate\Database\Eloquent\Model;
 
-interface WalletService
+interface WalletServiceInterface
 {
     public function create(Model $model, array $data): Wallet;
 

@@ -3,11 +3,10 @@
 namespace App\Support\Wallets;
 
 use App\Models\Wallet;
-use App\Support\Wallets\Contracts\WalletService;
+use App\Support\Wallets\Contracts\WalletServiceInterface;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 
-class WalletServiceAction implements WalletService
+class WalletService implements WalletServiceInterface
 {
     /**
      * @param  \Illuminate\Database\Eloquent\Model  $model
@@ -21,7 +20,6 @@ class WalletServiceAction implements WalletService
             [
                 'holder_type' => $model->getMorphClass(),
                 'holder_id' => $model->getKey(),
-                'uuid' => Str::uuid(),
             ]
         ));
     }
