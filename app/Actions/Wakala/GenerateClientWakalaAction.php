@@ -31,7 +31,7 @@ class GenerateClientWakalaAction implements GenerateClientWakala
         $path = $this->getFilePath($financingOrder).'.pdf';
 
         return PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($financingOrder) {
-            return $financingOrder->addMedia($fileResource)
+            return $financingOrder->addMediaFromStream($fileResource)
                 ->toMediaCollection($this->getCollectionName());
         });
     }

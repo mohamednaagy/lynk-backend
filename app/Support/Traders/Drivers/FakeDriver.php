@@ -245,7 +245,7 @@ class FakeDriver implements TraderInterface
                 $document
             )->usingFileName('.pdf')->toMediaCollection($collectionName);
         } else {
-            $traderOrder->order->addMedia(
+            $traderOrder->order->addMediaFromStream(
                 $document
             )->toMediaCollection($collectionName);
         }
