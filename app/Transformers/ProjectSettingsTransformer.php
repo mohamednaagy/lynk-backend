@@ -5,7 +5,7 @@ namespace App\Transformers;
 use App\Support\ProjectSettings\Project;
 use League\Fractal\TransformerAbstract;
 
-class ProjectInfoTransformer extends TransformerAbstract
+class ProjectSettingsTransformer extends TransformerAbstract
 {
     public function transform(Project $project): array
     {

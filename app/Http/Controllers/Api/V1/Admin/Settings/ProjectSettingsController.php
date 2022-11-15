@@ -6,14 +6,14 @@ use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\ProjectSettings\UpdateProjectSettings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Settings\UpdateProjectSettingsRequest;
-use App\Transformers\ProjectInfoTransformer;
+use App\Transformers\ProjectSettingsTransformer;
 use Illuminate\Http\JsonResponse;
 
 class ProjectSettingsController extends Controller
 {
     public function show(GetProjectSettings $getProjectSettings): JsonResponse
     {
-        return fractal($getProjectSettings->handle(), new ProjectInfoTransformer())->respond();
+        return fractal($getProjectSettings->handle(), new ProjectSettingsTransformer())->respond();
     }
 
     /**
@@ -30,6 +30,6 @@ class ProjectSettingsController extends Controller
         $data = $updateProjectSettingsRequest->validated();
         $data['vat_rate'] /= 100;
 
-        return fractal($updateProjectSettings->handle($data), new ProjectInfoTransformer())->respond();
+        return fractal($updateProjectSettings->handle($data), new ProjectSettingsTransformer())->respond();
     }
 }
