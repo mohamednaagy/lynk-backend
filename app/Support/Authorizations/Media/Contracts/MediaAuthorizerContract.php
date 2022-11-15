@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Authorizations\MediaAuthorizers\Contracts;
+namespace App\Support\Authorizations\Media\Contracts;
 
 interface MediaAuthorizerContract
 {

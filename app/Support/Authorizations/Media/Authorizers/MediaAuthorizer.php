@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Support\Authorizations\MediaAuthorizers\Authorizers;
+namespace App\Support\Authorizations\Media\Authorizers;
 
+use App\Models\FinancingOrder;
 use App\Models\User;
-use App\Support\Authorizations\MediaAuthorizers\MediaAuthorizerManager;
-use App\Support\Authorizations\MediaAuthorizers\Utility\GetCollectionsByArea;
+use App\Support\Authorizations\Media\Contracts\MediaAuthorizerContract;
+use App\Support\Authorizations\Media\Utilities\GetCollectionsByArea;
+use Exception;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class MediaAuthorizer
+class MediaAuthorizer implements MediaAuthorizerContract
 {
     protected $media;
 
@@ -37,12 +39,14 @@ class MediaAuthorizer
         return in_array($this->media->collection_name, $getCollectionsByArea($area));
     }
 
-    public function doesUserHaveAccessToModel()
+    public function resolveAuthorizerByModel()
     {
-        $manager = (new MediaAuthorizerManager($this->user, $this->media->model))
-            ->getMediaAuthorizerManager();
+        $authorizer = match (get_class($this->media->model)) {
+            FinancingOrder::class => new FinancingOrderMediaAuthorizer($this->user, $this->media->model),
+            default => throw new Exception(__('error.media_class_not_supported'))
+        };
 
-        return $manager->canAccess();
+        return $authorizer->canAccess();
     }
 
     /**
@@ -53,6 +57,6 @@ class MediaAuthorizer
     public function canAccess(): bool
     {
         return $this->doesAreaHaveAccessToCollection($this->area)
-        && $this->doesUserHaveAccessToModel();
+        && $this->resolveAuthorizerByModel();
     }
 }

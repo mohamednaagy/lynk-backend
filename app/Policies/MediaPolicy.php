@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Support\Authorizations\MediaAuthorizers\Authorizers\MediaAuthorizer;
+use App\Support\Authorizations\Media\Authorizers\MediaAuthorizer;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
