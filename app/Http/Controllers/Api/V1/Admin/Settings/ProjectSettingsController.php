@@ -28,6 +28,7 @@ class ProjectSettingsController extends Controller
         UpdateProjectSettings $updateProjectSettings
     ): JsonResponse {
         $data = $updateProjectSettingsRequest->validated();
+        $data['vat_rate'] /= 100;
 
         return fractal($updateProjectSettings->handle($data), new ProjectInfoTransformer())->respond();
     }

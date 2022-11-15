@@ -2,20 +2,21 @@
 
 namespace App\Settings\Classes;
 
-use App\Settings\Casters\ProjectCaster;
-use App\Support\ProjectSettings\Project;
 use Spatie\LaravelSettings\Settings;
 
 class ProjectSettings extends Settings
 {
-    public Project $project;
+    public array $company_name;
 
-    public static function casts(): array
-    {
-        return [
-            'project' => ProjectCaster::class,
-        ];
-    }
+    public string $company_cr;
+
+    public string $vat_id;
+
+    public float $vat_rate;
+
+    public array $address_line_one;
+
+    public array $address_line_two;
 
     public static function group(): string
     {

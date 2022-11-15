@@ -10,6 +10,8 @@ class GetProjectSettingsAction implements GetProjectSettings
 {
     public function handle(): Project
     {
-        return app(ProjectSettings::class)->project;
+        $projectSettings = app(ProjectSettings::class);
+
+        return Project::fromArray($projectSettings->toArray());
     }
 }
