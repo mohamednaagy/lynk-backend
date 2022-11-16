@@ -18,7 +18,7 @@ class CreateVisitorEnquiry extends Controller
         return DB::transaction(function () use ($storeEnquiryRequest, $createEnquiry) {
             $enquiry = $createEnquiry->handle($storeEnquiryRequest->validated());
 
-            $invitationUrl = $storeEnquiryRequest->safeInput('redirect_url');
+            $invitationUrl = $storeEnquiryRequest->validated('redirect_url');
             Mail::to($enquiry->email)->send(new AccessVisitorEnquiry($enquiry, $invitationUrl));
 
             return fractal($enquiry, new EnquiryTransformer())->respond();

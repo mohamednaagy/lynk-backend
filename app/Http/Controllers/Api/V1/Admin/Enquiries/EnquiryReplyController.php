@@ -71,7 +71,7 @@ class EnquiryReplyController extends Controller
 
             // send email to notify the visitor with the reply
             if ($enquiry->email) {
-                $invitationUrl = $replyToEnquiryRequest->safeInput('redirect_url');
+                $invitationUrl = $replyToEnquiryRequest->validated('redirect_url');
                 Mail::to($enquiry->email)->send(new ReplyToVisitorEnquiry($enquiry, $invitationUrl));
             }
 

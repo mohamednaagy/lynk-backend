@@ -30,14 +30,14 @@ class LoginController extends Controller
      */
     public function authenticate(LoginRequest $request, LoginUser $loginUser)
     {
-        if (($companyUniqueName = $request->safeInput('unique_name')) != null) {
+        if (($companyUniqueName = $request->validated('unique_name')) != null) {
             $company = Company::where('unique_name', $companyUniqueName)->firstOrFail();
             tenancy()->initialize($company);
         }
 
-        $user = User::where('email', $request->safeInput('email'))->first();
+        $user = User::where('email', $request->validated('email'))->first();
 
-        if ($user === null || ! Hash::check($request->safeInput('password'), $user->password)) {
+        if ($user === null || ! Hash::check($request->validated('password'), $user->password)) {
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);
