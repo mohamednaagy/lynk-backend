@@ -209,9 +209,11 @@ class DmccDriver implements TraderInterface
                 $document
             )->usingFileName('.pdf')->toMediaCollection($collectionName);
         } else {
-            $traderOrder->order->addMedia(
+            $traderOrder->order->addMediaFromStream(
                 $document
-            )->toMediaCollection($collectionName);
+            )
+                ->usingFilename($traderOrder->id.'.pdf')
+                ->toMediaCollection($collectionName);
         }
     }
 
