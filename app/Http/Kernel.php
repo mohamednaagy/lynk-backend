@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
         'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
         'checkAreaOtp' => \App\Http\Middleware\CheckAreaOtp::class,
         'IsEmailVerified' => \App\Http\Middleware\IsEmailVerified::class,
+        'setLocale' => SetLocalization::class,
     ];
 }

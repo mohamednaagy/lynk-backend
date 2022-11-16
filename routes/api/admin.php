@@ -42,7 +42,7 @@ use Modules\Grantify\Facades\Grantify;
 Route::prefix('v1/admin')->group(function () {
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.complete-register');
 
-    Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->group(function () {
+    Route::middleware(['auth:sanctum', 'role:'.Role::Admin, 'setLocale'])->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::put('auth/profile', UpdateMyProfile::class);
 
