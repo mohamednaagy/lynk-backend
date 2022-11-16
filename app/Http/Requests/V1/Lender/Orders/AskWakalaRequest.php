@@ -25,7 +25,7 @@ class AskWakalaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'wakala_url' => ['required', 'url', 'starts_with:http', new HostWhitelistRule()],
+            'wakala_url' => ['required', 'url', new HostWhitelistRule()],
         ];
     }
 }

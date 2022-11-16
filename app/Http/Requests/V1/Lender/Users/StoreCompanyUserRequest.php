@@ -35,7 +35,7 @@ class StoreCompanyUserRequest extends FormRequest
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'email' => ['required', 'email', Rule::unique(User::class, 'email')],
-            'redirect_url' => ['required', 'url', 'starts_with:http', new HostWhitelistRule()],
+            'redirect_url' => ['required', 'url', new HostWhitelistRule()],
             'role' => [
                 'required',
                 Arr::except(Rule::in(Area::getRolesPerAreaMap()[Area::Lender]), [Role::LenderApiUser]),
