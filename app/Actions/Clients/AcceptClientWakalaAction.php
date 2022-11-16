@@ -20,6 +20,7 @@ class AcceptClientWakalaAction implements AcceptClientWakala
 
         $media = PdfGenerator::outputFromHtml($wakalaTemplate, $path, function ($fileResource) use ($order) {
             return $order->addMediaFromStream($fileResource)
+                ->usingFileName($order->getNationalId().'.pdf')
                 ->toMediaCollection(FinancingOrderMediaCollection::ClientWakala);
         });
 
