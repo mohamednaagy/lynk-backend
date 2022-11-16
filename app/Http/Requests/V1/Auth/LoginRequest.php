@@ -28,31 +28,9 @@ class LoginRequest extends FormRequest
     {
         return [
             'unique_name' => ['nullable', 'string', Rule::exists(Company::class, 'unique_name')],
-            'email' => ['required', 'string', 'email', 'exists:users,email'],
+            'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
             'source' => ['required', 'string'],
         ];
-    }
-
-    /**
-     * Configure the validator instance.
-     *
-     * @param  \Illuminate\Validation\Validator  $validator
-     * @return void
-     */
-    public function withValidator($validator)
-    {
-        $validator->after(
-            function ($validator) {
-                $this->makeUniqueNameRequiredWhenEmailDuplicated($validator);
-            }
-        );
-    }
-
-    public function makeUniqueNameRequiredWhenEmailDuplicated($validator)
-    {
-        if (User::whereEmail($this->validated('email'))->count() > 1 && is_null($this->validated('unique_name'))) {
-            $validator->errors()->add('unique_name', __('validation.required', ['attribute' => 'unique_name']));
-        }
     }
 }

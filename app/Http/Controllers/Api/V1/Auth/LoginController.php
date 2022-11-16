@@ -37,13 +37,13 @@ class LoginController extends Controller
         }
 
         $user = User::where('email', $request->validated('email'))
-            ->when(! is_null($company), function ($query) use ($company) {
-                $query->where('company_id', $company->id);
-            })->firstOrFail();
+            ->when(is_null($company), function ($query) {
+                $query->whereNull('company_id');
+            })->first();
 
-        if (! Hash::check($request->validated('password'), $user->password)) {
+        if (! $user || ! Hash::check($request->validated('password'), $user->password)) {
             throw ValidationException::withMessages([
-                'password' => __('auth.password'),
+                'email' => __('auth.failed'),
             ]);
         }
 
