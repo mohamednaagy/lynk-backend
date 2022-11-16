@@ -56,6 +56,8 @@ return [
             'throw' => false,
         ],
 
+        'public_disk' => env('PUBLIC_DISK_NAME'),
+
     ],
 
     /*
