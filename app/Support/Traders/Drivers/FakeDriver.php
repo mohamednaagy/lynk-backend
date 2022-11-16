@@ -240,14 +240,15 @@ class FakeDriver implements TraderInterface
 
     public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
     {
+        $fileName = $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
         if (! is_null($type)) {
             $traderOrder->order->addMediaFromBase64(
                 $document
-            )->usingFileName($traderOrder->reference.'.pdf')->toMediaCollection($collectionName);
+            )->usingFileName($fileName)->toMediaCollection($collectionName);
         } else {
             $traderOrder->order->addMediaFromStream(
                 $document
-            )->usingFileName($traderOrder->reference.'.pdf')->toMediaCollection($collectionName);
+            )->usingFileName($fileName)->toMediaCollection($collectionName);
         }
     }
 
