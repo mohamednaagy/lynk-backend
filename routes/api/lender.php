@@ -64,7 +64,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
             Route::put('orders/{order}/reject', RejectOrder::class);
             Route::put('orders/{order}/cancel', CancelOrder::class);
             Route::post('orders/no-verification', CreateOrderWithoutVerification::class)
-                ->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Create]));
+                ->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Create]));
             Route::apiResource('users', UserController::class);
             Route::post('{user}/resend-invitation', ResendInvitation::class);
             Route::get('edaat-invoices', GetEdaatInvoices::class);
