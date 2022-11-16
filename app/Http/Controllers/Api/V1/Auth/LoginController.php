@@ -35,6 +35,8 @@ class LoginController extends Controller
             tenancy()->initialize($company);
         }
 
+        // __REVIEW__: If company is null (not initialized), this should be reflected in the query to scope it company_id is null
+        // accounts
         $user = User::where('email', $request->safeInput('email'))->first();
 
         if ($user === null || ! Hash::check($request->safeInput('password'), $user->password)) {
