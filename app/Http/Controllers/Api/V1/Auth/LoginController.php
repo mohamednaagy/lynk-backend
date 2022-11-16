@@ -32,12 +32,12 @@ class LoginController extends Controller
     {
         $companyUniqueName = $request->validated('unique_name');
         $company = null;
-        if ($companyUniqueName != null && $company = Company::where('unique_name', $companyUniqueName)->firstOrFail()) {
+        if (! is_null($companyUniqueName) && $company = Company::where('unique_name', $companyUniqueName)->firstOrFail()) {
             tenancy()->initialize($company);
         }
 
         $user = User::where('email', $request->validated('email'))
-            ->when($companyUniqueName && $company, function ($query) use ($company) {
+            ->when(! is_null($company), function ($query) use ($company) {
                 $query->where('company_id', $company->id);
             })->firstOrFail();
 
