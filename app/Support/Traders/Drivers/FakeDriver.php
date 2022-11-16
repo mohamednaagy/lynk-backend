@@ -243,11 +243,11 @@ class FakeDriver implements TraderInterface
         if (! is_null($type)) {
             $traderOrder->order->addMediaFromBase64(
                 $document
-            )->usingFileName('.pdf')->toMediaCollection($collectionName);
+            )->usingFileName($traderOrder->reference.'.pdf')->toMediaCollection($collectionName);
         } else {
             $traderOrder->order->addMediaFromStream(
                 $document
-            )->toMediaCollection($collectionName);
+            )->usingFileName($traderOrder->reference.'.pdf')->toMediaCollection($collectionName);
         }
     }
 

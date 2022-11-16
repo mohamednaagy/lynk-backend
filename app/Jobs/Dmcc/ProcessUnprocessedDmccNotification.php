@@ -48,6 +48,11 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
         }
 
         $traderOrder = TraderOrder::query()->where('reference', $this->ttiId)->first();
+
+        if (! $traderOrder) {
+            return;
+        }
+
         $financingOrder = $traderOrder->order;
 
         if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::Completed)) {
