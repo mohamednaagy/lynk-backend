@@ -2,14 +2,16 @@
 
 namespace App\Enums;
 
+use App\Enums\FinancingOrderStatus as Status;
 use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
+use UnexpectedValueException;
 
 final class FinancingOrderStatus extends Enum implements LocalizedEnum
 {
     const PendingApproval = 1;
 
-    const InProgress = 2;
+    const Approved = 2;
 
     const Canceled = 3;
 
@@ -37,5 +39,88 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
 
     const PtpDocumentRetrieved = 15;
 
-    const PendingCancel = 15;
+    const PendingCancel = 16;
+
+    private static array $state = [
+        self::Approved => [
+            self::PendingApproval,
+        ],
+        self::Rejected => [
+            self::PendingApproval,
+        ],
+        self::Completed => [
+            self::MurabahaSaleCompleted,
+        ],
+        self::Canceled => [
+            self::PendingCancel,
+        ],
+        self::PendingCancel => [
+            self::Rejected,
+            self::Approved,
+            self::RespondedToPtp,
+            self::PendingApproval,
+            self::CommodityPurchased,
+            self::WaitingClientWakala,
+            self::PtpDocumentRetrieved,
+            self::ClientWakalaCompleted,
+            self::CommoditySoldToCustomer,
+            self::WaitingPurchasingCommodity,
+        ],
+        self::WaitingClientWakala => [
+            self::Approved,
+        ],
+        self::ClientWakalaCompleted => [
+            self::WaitingClientWakala,
+        ],
+        self::WaitingPurchasingCommodity => [
+            self::ClientWakalaCompleted,
+        ],
+        self::RespondedToPtp => [
+            self::WaitingPurchasingCommodity,
+        ],
+        self::PtpDocumentRetrieved => [
+            self::RespondedToPtp,
+        ],
+        self::CommodityPurchased => [
+            self::PtpDocumentRetrieved,
+        ],
+        self::ContractSigned => [
+            self::CommodityPurchased,
+        ],
+        self::CommoditySoldToCustomer => [
+            self::ContractSigned,
+        ],
+        self::MurabhaOfferIssued => [
+            self::CommoditySoldToCustomer,
+        ],
+        self::MurabahaSaleCompleted => [
+            self::MurabhaOfferIssued,
+        ],
+    ];
+
+    /**
+     * @param  Status|int  $status
+     * @return bool
+     */
+    public function canMoveTo(Status|int $status): bool
+    {
+        if (! isset(self::$state[$status])) {
+            throw new UnexpectedValueException('no mapping for this status');
+        }
+
+        if ($status instanceof Status) {
+            $status = $status->value;
+        }
+
+        return in_array($this->value, self::$state[$status]);
+    }
+
+    /**
+     * @param  FinancingOrderStatus|int  $status
+     * @return bool
+     */
+    public function cantMoveTo(Status|int $status): bool
+    {
+        return ! $this->canMoveTo($status);
+    }
 }

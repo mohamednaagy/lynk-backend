@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
@@ -10,10 +10,11 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccClientWakalaCompletedOrder implements ShouldQueue
+class ProcessClientWakalaCompletedOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -36,7 +37,9 @@ class ProcessDmccClientWakalaCompletedOrder implements ShouldQueue
      */
     public function handle(): void
     {
-        DB::transaction(function () {
+        $driver = config('trader.default');
+        $trader = Trader::driver($driver);
+        DB::transaction(function () use ($trader) {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             if ($financingOrder->traderOrders()->whereIn('status', [
                 TraderOrderStatus::InProgress,
@@ -45,9 +48,23 @@ class ProcessDmccClientWakalaCompletedOrder implements ShouldQueue
                 return;
             }
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->getTtiId($financingOrder);
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::WaitingPurchasingCommodity)) {
+                return;
+            }
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingPurchasingCommodity);
+            $trader->getTtiId($financingOrder);
+
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingPurchasingCommodity);
         });
+    }
+
+    /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array
+     */
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping('financingOrder'.$this->financingOrder)];
     }
 }

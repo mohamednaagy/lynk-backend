@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -11,12 +12,15 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
 class ProcessDmccPtpNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected string $ttiId;
 
     protected mixed $notification;
 
@@ -28,6 +32,7 @@ class ProcessDmccPtpNotification implements ShouldQueue
     public function __construct($notification)
     {
         $this->notification = $notification;
+        $this->ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
     }
 
     /**
@@ -38,8 +43,12 @@ class ProcessDmccPtpNotification implements ShouldQueue
     public function handle(): void
     {
         DB::transaction(function () {
-            $ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
-            $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
+            $traderOrder = TraderOrder::query()
+                ->where('reference', $this->ttiId)
+                ->where('status', TraderOrderStatus::InProgress)
+                ->whereIn('provider', ['dmcc', 'fake'])
+                ->lockForUpdate()
+                ->first();
 
             if (! $traderOrder) {
                 return;
@@ -47,18 +56,30 @@ class ProcessDmccPtpNotification implements ShouldQueue
 
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
-            if ($financingOrder->status->value !== FinancingOrderStatus::WaitingPurchasingCommodity) {
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::RespondedToPtp)) {
                 return;
             }
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->respondPtpService($ttiId);
+            $trader = Trader::driver($traderOrder->provider);
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTraderOrderHistory(
+            $trader->respondPtpService($this->ttiId);
+
+            $trader->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::RespondPtp
             );
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::RespondedToPtp);
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::RespondedToPtp);
         });
+    }
+
+    /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array
+     */
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping('dmccTtiId'.$this->ttiId)];
     }
 }

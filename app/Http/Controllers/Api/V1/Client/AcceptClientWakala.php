@@ -28,7 +28,10 @@ class AcceptClientWakala extends Controller
         AcceptClientWakalaRequest $request,
         AcceptWakalaInterface $acceptClientWakala
     ) {
-        return DB::transaction(function () use ($request, $acceptClientWakala) {
+        $driver = config('trader.default');
+        $trader = Trader::driver($driver);
+
+        return DB::transaction(function () use ($trader, $request, $acceptClientWakala) {
             $order = FinancingOrder::lockForUpdate()
                 ->findOrFail($request->validated('order_id'));
 
@@ -48,7 +51,7 @@ class AcceptClientWakala extends Controller
                 'status' => FinancingOrderStatus::WaitingPurchasingCommodity,
             ]);
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->getTti($order);
+            $trader->getTti($order);
 
             Cache::forget($tokenCacheKey);
 

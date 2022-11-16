@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
@@ -10,6 +10,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
@@ -38,16 +39,37 @@ class ProcessPtpDocumentRetrievedOrder implements ShouldQueue
     {
         DB::transaction(function () {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-            $lastTraderOrder = $financingOrder->traderOrders()->latest()->first();
+            $lastTraderOrder = $financingOrder->activeTraderOrder()
+                ->whereIn('provider', ['dmcc', 'fake'])->first();
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTransferOwnershipToLenderDocument($lastTraderOrder);
+            if (! $lastTraderOrder) {
+                return;
+            }
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createTraderOrderHistory(
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::CommodityPurchased)) {
+                return;
+            }
+
+            $trader = Trader::driver($lastTraderOrder->provider);
+
+            $trader->createTransferOwnershipToLenderDocument($lastTraderOrder);
+
+            $trader->createTraderOrderHistory(
                 $lastTraderOrder,
                 FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
             );
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::CommodityPurchased);
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommodityPurchased);
         });
+    }
+
+    /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array
+     */
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping('financingOrder'.$this->financingOrder)];
     }
 }
