@@ -3,6 +3,7 @@
 namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderStatus;
+use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -63,6 +64,10 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
         $trader->processNotification($this->notificationId);
 
         $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::Completed);
+
+        $traderOrder->update([
+            'status' => TraderOrderStatus::Completed,
+        ]);
     }
 
     /**
