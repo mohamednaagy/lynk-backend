@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
+use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
 use App\Actions\Contracts\Wallets\CreateTransactions;
+use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
-use App\Enums\TransactionReason;
-use App\Enums\WalletType;
 use App\Exceptions\BalanceIsNotEnoughException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
@@ -64,8 +64,6 @@ class OrderController extends Controller
                 'national_id',
                 'amount',
                 'selling_price',
-                'contract',
-                'power_of_attorney',
                 'is_approved',
                 'status_reason',
             ])->respond();
@@ -88,8 +86,6 @@ class OrderController extends Controller
                 'national_id',
                 'amount',
                 'selling_price',
-                'contract',
-                'power_of_attorney',
                 'is_approved',
                 'status_reason',
                 'creator',
@@ -107,14 +103,16 @@ class OrderController extends Controller
      *
      * @throws ExceptionInterface
      */
-    public function store(StoreOrderRequest $request, CreateFinancingOrder $createFinancingOrder, CreateTransactions $createTransactions): JsonResponse
-    {
+    public function store(
+        StoreOrderRequest $request,
+        CreateFinancingOrder $createFinancingOrder,
+        CreateTransactions $createTransactions
+    ): JsonResponse {
         return DB::transaction(
-            static function () use ($createFinancingOrder, $createTransactions, $request) {
+            function () use ($createFinancingOrder, $createTransactions, $request) {
                 $company = tenant();
-                $wallet = $company->getWallet(WalletType::CompanyWallet);
                 // throw exception is balance not enough
-                if ($wallet->balance < tenant()->order_cost) {
+                if (! app(CanCreateOrder::class)->handle($company)) {
                     throw new BalanceIsNotEnoughException();
                 }
 
@@ -138,30 +136,16 @@ class OrderController extends Controller
                 );
 
                 // deduct the cost from the wallet
-
-                $createTransactions->handle(
-                    $wallet,
-                    TransactionReason::OrderCreationFee,
-                    $company->order_cost,
-                    [
-                        'financing_order_id' => $financingOrder->id,
-                        'reference_number ' => $financingOrder->reference_number,
-                        'amount' => $financingOrder->amount,
-                        'order_cost' => $financingOrder->order_cost,
-                    ]
-                );
+                app(DeductOrderCreationFee::class)->handle($createTransactions, $financingOrder);
 
                 return fractal($financingOrder, new FinancingOrderTransformer())
                     ->parseIncludes([
                         'id',
                         'status',
-                        'company_id',
                         'reference_number',
                         'national_id',
                         'amount',
                         'selling_price',
-                        'contract',
-                        'power_of_attorney',
                         'is_approved',
                         'status_reason',
                         'phone_country_code',
@@ -191,13 +175,10 @@ class OrderController extends Controller
             ->parseIncludes([
                 'id',
                 'status',
-                'company_id',
                 'reference_number',
                 'national_id',
                 'amount',
                 'selling_price',
-                'contract',
-                'power_of_attorney',
                 'is_approved',
                 'status_reason',
             ])->respond();

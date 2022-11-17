@@ -160,7 +160,7 @@ return [
      */
 
     'attributes' => [
-        'national_id' => 'national id',
+        'national_id' => 'national ID',
     ],
 
 ];

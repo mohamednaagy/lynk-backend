@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
+use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Actions\Contracts\Wallets\CreateTransactions;
+use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\TransactionReason;
-use App\Enums\WalletType;
 use App\Exceptions\BalanceIsNotEnoughException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\CreateOrderWithoutVerificationRequest;
@@ -31,9 +31,9 @@ class CreateOrderWithoutVerification extends Controller
         return DB::transaction(
             function () use ($createFinancingOrder, $request, $generateWakala, $createTransactions) {
                 $company = tenant();
-                $wallet = $company->getWallet(WalletType::CompanyWallet);
                 // throw exception is balance not enough
-                if ($wallet->balance < tenant()->order_cost) {
+
+                if (! app(CanCreateOrder::class)->handle($company)) {
                     throw new BalanceIsNotEnoughException();
                 }
 
@@ -51,17 +51,7 @@ class CreateOrderWithoutVerification extends Controller
                 );
 
                 // deduct the cost from the wallet
-                $createTransactions->handle(
-                    $wallet,
-                    TransactionReason::OrderCreationFee,
-                    $company->order_cost,
-                    [
-                        'financing_order_id' => $financingOrder->id,
-                        'reference_number ' => $financingOrder->reference_number,
-                        'amount' => $financingOrder->amount,
-                        'order_cost' => $financingOrder->order_cost,
-                    ]
-                );
+                app(DeductOrderCreationFee::class)->handle($createTransactions, $financingOrder);
 
                 $generateWakala->handle($financingOrder);
 
@@ -74,8 +64,6 @@ class CreateOrderWithoutVerification extends Controller
                         'national_id',
                         'amount',
                         'selling_price',
-                        'contract',
-                        'power_of_attorney',
                         'is_approved',
                         'status_reason',
                         'phone_country_code',

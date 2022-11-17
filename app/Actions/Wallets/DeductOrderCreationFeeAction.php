@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Actions\Wallets;
+
+use App\Actions\Contracts\Wallets\CreateTransactions;
+use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
+use App\Enums\TransactionReason;
+use App\Enums\WalletType;
+use App\Models\FinancingOrder;
+
+class DeductOrderCreationFeeAction implements DeductOrderCreationFee
+{
+    public function handle(CreateTransactions $createTransactions, FinancingOrder $financingOrder)
+    {
+        $company = $financingOrder->company;
+        $wallet = $company->getWallet(WalletType::CompanyWallet);
+
+        return $createTransactions->handle(
+            $wallet,
+            TransactionReason::OrderCreationFee,
+            $company->order_cost,
+            [
+                'financing_order_id' => $financingOrder->id,
+                'reference_number ' => $financingOrder->reference_number,
+                'amount' => $financingOrder->amount,
+                'order_cost' => $financingOrder->order_cost,
+            ]
+        );
+    }
+}
