@@ -718,7 +718,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             الوحيد من
             تاريخ و توقيت هذه الشهادة ، وقد تم شراؤها من {{$owner}} بناءاً على طلب الشركة رقم {{$orderNumber}} مقابل
             مبلغ وقدره
-            {{$amount}} ، وسيتم تحصيل مبلغ السلعة في تاريخ {{ now()->toDateTimeString() }}</p>
+            {{$amount}} ، وسيتم تحصيل مبلغ السلعة في تاريخ {{ $date }}</p>
         <p class="text-center text-lg font-semibold text-black">بيانات السلعة</p>
 
         <table class="min-w-full">
