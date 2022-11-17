@@ -710,40 +710,43 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 </div>
 <div class="divide-y divide-gray-300/50">
     <div class="space-y-6 py-8 text-base leading-7">
-        <p class="text-black">التاريخ: {{ now()->toDateTimeString() }}</p>
-        <p class="text-black">الوقت: {{ now()->toDateTimeString() }}</p>
-        <p class="text-center text-black">رقم المرجع: 11264</p>
+        <p class="text-black">التاريخ: {{ $date }}</p>
+        <p class="text-black">الوقت: {{ $time }}</p>
+        <p class="text-center text-black">رقم المرجع: {{$ttiId}}</p>
         <p class="text-center text-xl font-bold text-black">شهادة ملكية</p>
-        <p class="text-center text-black">نؤكد نحن لنك أن السلعة المذكورة أدناه هي ملك لـ \ xyz وهي المالك الوحيد من
-            تاريخ و توقيت هذه الشهادة ، وقد تم شراؤها من المالك الأول بناءاً على طلب الشركة رقم 20 مقابل مبلغ وقدره
-            1000 ، وسيتم تحصيل مبلغ السلعة في تاريخ {{ now()->toDateTimeString() }}</p>
+        <p class="text-center text-black">نؤكد نحن لنك أن السلعة المذكورة أدناه هي ملك لـ \ {{$companyName}} وهي المالك
+            الوحيد من
+            تاريخ و توقيت هذه الشهادة ، وقد تم شراؤها من {{$owner}} بناءاً على طلب الشركة رقم {{$orderNumber}} مقابل
+            مبلغ وقدره
+            {{$amount}} ، وسيتم تحصيل مبلغ السلعة في تاريخ {{ now()->toDateTimeString() }}</p>
         <p class="text-center text-lg font-semibold text-black">بيانات السلعة</p>
 
         <table class="min-w-full">
             <tbody>
             <tr>
                 <td class="w-1/2 border border-black px-4 text-right">نوع السلعة</td>
-                <td class="w-1/2 border border-black">أرز</td>
+                <td class="w-1/2 border border-black">{{$hsCodeDescription}}</td>
             </tr>
             <tr>
                 <td class="w-1/2 border border-black px-4 text-right">الكمية</td>
-                <td class="w-1/2 border border-black">1000</td>
+                <td class="w-1/2 border border-black">{{$quantity}}</td>
             </tr>
             <tr>
                 <td class="w-1/2 border border-black px-4 text-right">قيمة السلعة</td>
-                <td class="w-1/2 border border-black">100000</td>
+                <td class="w-1/2 border border-black">{{$amount}}</td>
             </tr>
             <tr>
                 <td class="w-1/2 border border-black px-4 text-right">موقع السلعة</td>
-                <td class="w-1/2 border border-black">الرياض</td>
+                <td class="w-1/2 border border-black">{{$warehouse}}</td>
             </tr>
             </tbody>
         </table>
 
-        <p class="text-center text-lg text-black">سيتم حفظ السلعة لدينا بالنيابة عن xyz إلى أن يتم إشعارنا بالتصرف.
+        <p class="text-center text-lg text-black">سيتم حفظ السلعة لدينا بالنيابة عن {{$companyName}} إلى أن يتم إشعارنا
+            بالتصرف.
         </p>
-        <p class="text-center text-lg text-black">الجهة التمويلية سيكون مسؤولاً عن رسوم التخزين والحفظ إذا تم
-            الاحتفاظ بـ \ الأرز لأكثر من يوم عمل</p>
+        <p class="text-center text-lg text-black">{{$companyName}} سيكون مسؤولاً عن رسوم التخزين والحفظ إذا تم
+            الاحتفاظ بـ \ {{$hsCodeDescription}} لأكثر من يوم عمل</p>
         <p class="pt-2 text-center text-black">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
     </div>
     <div class="flex flex-row justify-between pt-8 font-semibold">
