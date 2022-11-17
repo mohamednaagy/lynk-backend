@@ -32,7 +32,9 @@ class LoginController extends Controller
     {
         $companyUniqueName = $request->validated('unique_name');
         $company = null;
-        if (! is_null($companyUniqueName) && $company = Company::where('unique_name', $companyUniqueName)->firstOrFail()) {
+
+        if (! is_null($companyUniqueName)) {
+            $company = Company::where('unique_name', $companyUniqueName)->firstOrFail();
             tenancy()->initialize($company);
         }
 
@@ -48,7 +50,7 @@ class LoginController extends Controller
         }
 
         return $this->successResponse(
-            $loginUser->handle($user, $request->input('source'), $request)
+            $loginUser->handle($user, $request->validated('source'), $request)
         );
     }
 
