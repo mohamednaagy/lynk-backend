@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Lender\Settings;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Area;
 use App\Http\Controllers\Controller;
+use App\Transformers\LenderSettingsTransformer;
 
 class GetLenderAreaSettings extends Controller
 {
@@ -16,7 +17,8 @@ class GetLenderAreaSettings extends Controller
      */
     public function __invoke(GetSettingsClassInstance $getSettingsClassInstance)
     {
-        // __REVIEW__ create transformer for settings and return only: email_verification_enabled by includes
-        return $this->successResponse($getSettingsClassInstance->handle(Area::Lender)->toArray());
+        return fractal($getSettingsClassInstance->handle(Area::Lender), new LenderSettingsTransformer())
+            ->parseIncludes(['email_verification_enabled'])
+            ->respond();
     }
 }

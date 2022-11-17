@@ -25,6 +25,7 @@ class UserTransformer extends TransformerAbstract
         'company',
         'is_email_verified',
         'permissions',
+        'locale',
     ];
 
     public function __construct(string $area = null)
@@ -108,5 +109,8 @@ class UserTransformer extends TransformerAbstract
         return $query;
     }
 
-    //__REVIEW__ add user locale include
+    public function includeLocale(User $user): Primitive
+    {
+        return $this->primitive($user->locale);
+    }
 }
