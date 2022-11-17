@@ -13,6 +13,7 @@ class UserTransformer extends TransformerAbstract
 {
     protected string|null $area = null;
 
+    // __REVIEW__ move to available includes
     protected array $defaultIncludes = [
         'phone_number',
         'phone_country_code',
@@ -35,6 +36,8 @@ class UserTransformer extends TransformerAbstract
 
     public function transform(User $user)
     {
+        // __REVIEW__ move to available includes
+        // Need to revise the whole app to aviod any breaking changes
         return [
             'id' => $user->id,
             'first_name' => $user->first_name,
@@ -68,6 +71,7 @@ class UserTransformer extends TransformerAbstract
             ->parseIncludes(['id', 'name', 'status'])
             ->toArray();
 
+        // __REVIEW__ use item with CompanyTransformer
         return $this->primitive($data['data']);
     }
 
