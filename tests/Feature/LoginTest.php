@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -17,6 +18,7 @@ class LoginTest extends TestCase
     public function test_login_throw_exception_for_empty_body(): void
     {
         $response = $this->postJson('api/v1/auth/login');
+
         $response->assertStatus(422)->assertExactJson(
             [
                 'message' => 'The email field is required. (and 2 more errors)',
@@ -210,8 +212,82 @@ class LoginTest extends TestCase
             'source' => $source,
         ]);
 
-        $response->assertStatus(200)->assertExactJson([
-            'token' => $response->getOriginalContent()['token'],
+        $response->assertStatus(200)->assertExactJson(
+            [
+                'data' => [
+                    'token' => $response->getOriginalContent()['data']['token'],
+                    'type' => $response->getOriginalContent()['data']['type'],
+                    'company_id' => $response->getOriginalContent()['data']['company_id'],
+                ],
+            ]
+        );
+    }
+
+    public function testTwoUsersWithSameEmailAndDifferentCompanyNotPassed()
+    {
+        $email = 'a@a.aa';
+        $passwordPlainText = '12345678';
+        $passwordEncrypted = bcrypt('12345678');
+        $source = 'admin';
+
+        $campanies = Company::factory(2)->create();
+
+        $campanies->each(function ($company) use ($email, $passwordEncrypted) {
+            User::factory()->create([
+                'email' => $email,
+                'password' => $passwordEncrypted,
+                'company_id' => $company->id,
+            ]);
+        });
+
+        $response = $this->postJson('api/v1/auth/login', [
+            'email' => $email,
+            'password' => $passwordPlainText,
+            'source' => $source,
         ]);
+
+        $response->assertStatus(422)->assertExactJson([
+            'message' => 'These credentials do not match our records.',
+            'errors' => [
+                'email' => [
+                    'These credentials do not match our records.',
+                ],
+            ],
+        ]);
+    }
+
+    public function testTwoUsersWithSameEmailAndDifferentCompanyPassedByUniqueName()
+    {
+        $email = 'a@a.aa';
+        $passwordPlainText = '12345678';
+        $passwordEncrypted = bcrypt('12345678');
+        $source = 'admin';
+
+        $campanies = Company::factory(2)->create();
+
+        $campanies->each(function ($company) use ($email, $passwordEncrypted) {
+            User::factory()->create([
+                'email' => $email,
+                'password' => $passwordEncrypted,
+                'company_id' => $company->id,
+            ]);
+        });
+
+        $response = $this->postJson('api/v1/auth/login', [
+            'email' => $email,
+            'password' => $passwordPlainText,
+            'source' => $source,
+            'unique_name' => $campanies->first()->unique_name,
+        ]);
+
+        $response->assertStatus(200)->assertExactJson(
+            [
+                'data' => [
+                    'token' => $response->getOriginalContent()['data']['token'],
+                    'type' => $response->getOriginalContent()['data']['type'],
+                    'company_id' => $response->getOriginalContent()['data']['company_id'],
+                ],
+            ]
+        );
     }
 }
