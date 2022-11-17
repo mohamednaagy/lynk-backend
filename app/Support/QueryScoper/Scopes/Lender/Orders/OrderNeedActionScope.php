@@ -52,7 +52,7 @@ class OrderNeedActionScope extends QueryScoper
                 'status',
                 [
                     FinancingOrderStatus::PendingApproval,
-                    FinancingOrderStatus::InProgress,
+                    FinancingOrderStatus::Approved,
                     FinancingOrderStatus::Rejected,
                 ]
             );

@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Facade;
 use RuntimeException;
 
 /**
- * @method static driver()
+ * @method static driver(string $driver)
  */
 class Trader extends Facade
 {
