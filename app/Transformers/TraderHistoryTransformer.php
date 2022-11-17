@@ -65,7 +65,7 @@ class TraderHistoryTransformer extends TransformerAbstract
             ],
             FinancingOrderHistory::IssueMurabahaOffer => [
                 'step' => 'selling_commodity_to_open_market',
-                'is_complete' => (bool) $traderOrderHistoryExist,
+                'is_complete' => (bool) $this->traderHistories->where('action', FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)->first(),
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:m A'),
                 'mpo_document' => [
                     'url' => optional($this->financingOrder->getMedia(FinancingOrderMediaCollection::MurabahaPurchaseOrder)->first())->getUrl(),
