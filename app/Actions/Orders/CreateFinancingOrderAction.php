@@ -35,16 +35,19 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
             ])
         );
 
+        // __REVIEW__ remove please
         if (isset($data['contract'])) {
             $financingOrder->addMedia($data['contract'])
                 ->toMediaCollection(FinancingOrderMediaCollection::Contract);
         }
 
+        // __REVIEW__ remove please
         if (isset($data['power_of_attorney'])) {
             $financingOrder->addMedia($data['power_of_attorney'])
                 ->toMediaCollection(FinancingOrderMediaCollection::PowerOfAttorney);
         }
 
+        // __REVIEW__ We need to move this to separate action
         $company = tenant();
         $this->createTransactions->handle(
             $company->getWallet(WalletType::CompanyWallet),
@@ -54,6 +57,7 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
                 'financing_order_id' => $financingOrder->id,
                 'reference_number ' => $financingOrder->reference_number,
                 'amount' => $financingOrder->amount,
+                // __REVIEW__: add order_cost here for refrence later
             ]
         );
 
