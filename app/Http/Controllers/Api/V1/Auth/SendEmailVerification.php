@@ -24,7 +24,7 @@ class SendEmailVerification extends Controller
             $user->update($request->safe(['email']));
         }
 
-        Mail::to($user->email)->send(new VerifyEmail($user, $request->safeInput('redirect_url')));
+        Mail::to($user->email)->send(new VerifyEmail($user, $request->validated('redirect_url')));
 
         return $this->successResponse();
     }
