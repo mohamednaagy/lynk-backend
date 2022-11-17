@@ -130,14 +130,31 @@ return [
     'uuid' => 'حقل :attribute يجب أن يكون بصيغة UUID سليمة.',
     'national_id_wrong_format' => 'رقم الهوية غير صحيح',
     'host_whitelist' => 'حقل :attribute غير موثوق فيه.',
-    // __REVIEW__: الحقل :attribute يحتوي على رقم هاتف غير صحيح
-    'phone' => 'حقل :attribute رقم هاتف غير صحيح.',
+    'phone' => 'الحقل :attribute يحتوي على رقم هاتف غير صحيح',
     'custom_validation' => [
         'phone_number_does_not_belong_to_national_id' => 'Phone number doesn’t belong to National ID/Iqama',
         'invalid_person_id' => 'Invalid National ID',
         'person_id_not_found' => 'National ID not found',
         'invalid_mobile_number' => 'Invalid mobile number',
     ],
+
+    /*
+     |--------------------------------------------------------------------------
+     | Custom Validation Language Lines
+     |--------------------------------------------------------------------------
+     |
+     | Here you may specify custom validation messages for attributes using the
+     | convention "attribute.rule" to name the lines. This makes it quick to
+     | specify a specific custom language line for a given attribute rule.
+     |
+     */
+
+    'custom' => [
+        'company_unique_name' => [
+            'regex' => 'يجب أن يحتوي المعرف على أحرف إنجليزية وأرقام و _ فقط. بالإضافة يجب أن يبدأ بحرف إنجليزي',
+        ],
+    ],
+
     'attributes' => [
         'address' => 'العنوان',
         'age' => 'العمر',

@@ -36,13 +36,13 @@ class RegisterLenderAction implements RegisterLender
      */
     public function handle(array $data): User
     {
-        // __REVIEW__ add "does_order_require_approval"
         $company = $this->createCompany->handle([
             'name' => $data['company_name'],
             'unique_name' => $data['company_unique_name'],
             'company_cr' => $data['company_cr'],
             'status' => $data['company_status'],
             'order_cost' => $data['order_cost'],
+            'does_order_require_approval' => $data['does_order_require_approval'],
         ]);
 
         tenancy()->initialize($company);

@@ -21,13 +21,12 @@ class Register extends Controller
         GetSettingsClassInstance $getSettingsClassInstance
     ): JsonResponse {
         return DB::transaction(function () use ($loginUser, $request, $registerLender, $getSettingsClassInstance) {
-            // __REVIEW__ add default_does_order_require_approval with value = true in
-            // the Lender setting and pass it in the array_merge as "does_order_require_approval"
             $data = array_merge(
                 $request->validated(),
                 [
-                    'company_status' => $getSettingsClassInstance->handle(Area::Lender)->company_registration_status,
-                    'order_cost' => $getSettingsClassInstance->handle(Area::Lender)->order_cost,
+                    'does_order_require_approval' => $getSettingsClassInstance->handle(Area::Lender)->default_does_order_require_approval,
+                    'company_status' => $getSettingsClassInstance->handle(Area::Lender)->default_company_registration_status,
+                    'order_cost' => $getSettingsClassInstance->handle(Area::Lender)->default_order_cost,
                 ]
             );
 

@@ -8,7 +8,6 @@ use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Area;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Admin\Companies\GetCompaniesRequest;
 use App\Http\Requests\V1\Admin\Companies\StoreCompanyRequest;
 use App\Http\Requests\V1\Admin\Companies\UpdateCompanyRequest;
 use App\Models\Company;
@@ -19,7 +18,6 @@ use Illuminate\Support\Facades\DB;
 class CompanyController extends Controller
 {
     /**
-     * @param  GetCompaniesRequest  $getCompaniesRequest
      * @param  GetCompanies  $getCompanies
      * @return JsonResponse
      */
@@ -50,7 +48,7 @@ class CompanyController extends Controller
         GetSettingsClassInstance $getSettingsClassInstance
     ): JsonResponse {
         $data = $createCompanyRequest->validated();
-        $data['status'] = $getSettingsClassInstance->handle(Area::Lender)->company_created_by_operation_status;
+        $data['status'] = $getSettingsClassInstance->handle(Area::Lender)->default_company_created_by_operation_status;
         $data['does_order_require_approval'] = true;
 
         $createCompany->handle($data);
