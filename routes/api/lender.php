@@ -76,7 +76,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
                 Route::post('/invoice', CreateEdaatInvoice::class);
             });
 
-            Route::get('media/{media}/download', DownloadMediaFile::class);
+            Route::get('media/{media}/download', DownloadMediaFile::class)->name('media.download');
             Route::apiResource('enquiries', EnquiryController::class);
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)
                 ->only('index', 'store');
