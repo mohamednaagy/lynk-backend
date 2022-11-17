@@ -2,7 +2,6 @@
 
 namespace App\Http;
 
-use App\Http\Middleware\SetLocalization;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -22,7 +21,6 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        SetLocalization::class,
     ];
 
     /**
@@ -44,6 +42,7 @@ class Kernel extends HttpKernel
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\SetLocalization::class,
         ],
     ];
 
@@ -69,5 +68,6 @@ class Kernel extends HttpKernel
         'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
         'checkAreaOtp' => \App\Http\Middleware\CheckAreaOtp::class,
         'IsEmailVerified' => \App\Http\Middleware\IsEmailVerified::class,
+        'setAppLocale' => \App\Http\Middleware\SetLocalization::class,
     ];
 }
