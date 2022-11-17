@@ -25,8 +25,6 @@ class CreateOrderWithoutVerification extends Controller
     ) {
         return DB::transaction(
             function () use ($createFinancingOrder, $request, $generateWakala) {
-                // __REVIEW__: we need to check if balance is enough
-
                 $financingOrder = $createFinancingOrder->handle(
                     array_merge(
                         $request->validated(),
@@ -39,8 +37,6 @@ class CreateOrderWithoutVerification extends Controller
                         ]
                     )
                 );
-
-                // __REVIEW__: we need to deduct order cost from the wallet
 
                 $generateWakala->handle($financingOrder);
 
