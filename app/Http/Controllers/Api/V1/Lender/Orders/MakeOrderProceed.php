@@ -47,7 +47,10 @@ class MakeOrderProceed extends Controller
 
     public function handleClientWakalaAccepted(FinancingOrder $order)
     {
-        if ($order->status->cantMoveTo(FinancingOrderStatus::WaitingClientWakala)) {
+        if (
+            $order->is_verification_required
+            || $order->status->cantMoveTo(FinancingOrderStatus::ClientWakalaCompleted)
+        ) {
             return $this->errorResponse(
                 __('error.order_status_doesnt_follow_sequence'),
                 Response::HTTP_BAD_REQUEST,
