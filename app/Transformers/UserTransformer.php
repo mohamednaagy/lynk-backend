@@ -71,7 +71,7 @@ class UserTransformer extends TransformerAbstract
             ->parseIncludes(['id', 'name', 'status'])
             ->toArray();
 
-        // __REVIEW__ use item with CompanyTransformer
+        // __REVIEW__ use $this->item(...) with CompanyTransformer
         return $this->primitive($data['data']);
     }
 

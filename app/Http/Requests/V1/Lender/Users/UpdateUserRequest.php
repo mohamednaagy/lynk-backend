@@ -33,6 +33,7 @@ class UpdateUserRequest extends FormRequest
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'email' => [
                 'required', 'email',
+                // __REVIEW__ replace with tenant()->unique(User::class, 'email')
                 Rule::unique(User::class, 'email')
                     ->ignore($this->route('user')->id)
                     ->where('company_id', tenant('id')),

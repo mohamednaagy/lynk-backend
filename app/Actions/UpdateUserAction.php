@@ -24,6 +24,8 @@ class UpdateUserAction implements UpdateUser
             $data['phone_number'] = phone($data['phone_number'], $data['phone_country_code']);
         }
 
+        // __REVIEW__ source should be removed
+        // __REVIEW__ locale should be added with a default value if it doesn't exist
         return $user->update(
             Arr::only(
                 $data,

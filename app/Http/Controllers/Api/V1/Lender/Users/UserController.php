@@ -57,12 +57,11 @@ class UserController extends Controller
      * @param  User  $user
      * @return JsonResponse
      */
-    public function show(
-        User $user
-    ): JsonResponse {
-        return fractal($user, new UserTransformer(Area::Lender))->parseIncludes([
-            'role',
-        ])->respond();
+    public function show(User $user): JsonResponse
+    {
+        return fractal($user, new UserTransformer(Area::Lender))
+            ->parseIncludes(['role'])
+            ->respond();
     }
 
     /**

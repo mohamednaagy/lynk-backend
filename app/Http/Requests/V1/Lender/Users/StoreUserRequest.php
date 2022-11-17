@@ -29,13 +29,15 @@ class StoreUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        // __REVIEW__ add attributes translations
+        // See: https://laravel.com/docs/9.x/validation#specifying-attribute-in-language-files
         return  [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             // __REVIEW__ add "mobile" type to phone validation rule
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
-            // __REVIEW__ add "email" to ->unique(User::class)
+            // __REVIEW__ add "email" column to ->unique(User::class)
             'email' => ['required', 'email', tenant()->unique(User::class)],
             'redirect_url' => ['required', 'url', new HostWhitelistRule()],
             'role' => [

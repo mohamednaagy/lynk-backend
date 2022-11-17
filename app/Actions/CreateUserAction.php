@@ -27,6 +27,8 @@ class CreateUserAction implements CreateUser
             $data['phone_number'] = null;
         }
 
+        // __REVIEW__ source should be removed
+        // __REVIEW__ locale should be added with a default value if it doesn't exist
         return User::create(
             Arr::only(
                 $data,
