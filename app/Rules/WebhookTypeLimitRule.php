@@ -45,7 +45,7 @@ class WebhookTypeLimitRule implements Rule
      */
     public function message()
     {
-        return __('validation.custom_validation.webhook_type_limit', ['limit' => $this->limit]);
+        return __('validation.webhook_type_limit', ['limit' => $this->limit]);
     }
 
     private function getLimit($type)
