@@ -4,6 +4,7 @@ namespace App\Http\Requests\V1\Lender\Orders;
 
 use App\Rules\ValidateSAID;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CreateOrderWithoutVerificationRequest extends FormRequest
 {
@@ -24,17 +25,13 @@ class CreateOrderWithoutVerificationRequest extends FormRequest
      */
     public function rules()
     {
-        $tenant = tenant();
-
         return [
             'reference_number' => ['nullable', 'string', 'max:100'],
-            'national_id' => ['required', 'digits:10', new ValidateSAID],
+            'national_id' => ['required', 'digits:10', new ValidateSAID()],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
-            'phone_number' => ['required', 'phone:phone_country_code', 'string'],
-            'amount' => ['required', 'numeric'],
-            'selling_price' => ['required', 'numeric'],
-            'contract' => ['sometimes', 'file'],
-            'power_of_attorney' => ['sometimes', 'file'],
+            'phone_number' => ['required', 'phone:phone_country_code', 'string', Rule::phone()->country(['SA'])],
+            'amount' => ['required', 'numeric', 'gt:0'],
+            'selling_price' => ['required', 'numeric', 'gte:amount'],
         ];
     }
 }
