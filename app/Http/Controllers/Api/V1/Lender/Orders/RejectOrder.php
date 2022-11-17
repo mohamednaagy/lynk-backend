@@ -25,7 +25,6 @@ class RejectOrder extends Controller
         // __REVIEW__ use $order->status->cantMoveTo(...)
         // See app/Http/Controllers/Api/V1/Lender/Orders/MakeOrderProceed.php for reference
         if (! $order->status->is(FinancingOrderStatus::PendingApproval)) {
-            // __REVIEW__ change error message and add error code as in MakeOrderProceed
             return $this->errorResponse(
                 __('error.order_cannot_be_approved_because_it_is_approved')
             );
