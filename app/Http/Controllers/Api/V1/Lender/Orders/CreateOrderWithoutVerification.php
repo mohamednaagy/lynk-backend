@@ -50,8 +50,6 @@ class CreateOrderWithoutVerification extends Controller
                     )
                 );
 
-                $generateWakala->handle($financingOrder);
-
                 // deduct the cost from the wallet
                 $createTransactions->handle(
                     $wallet,
@@ -64,6 +62,8 @@ class CreateOrderWithoutVerification extends Controller
                         'order_cost' => $financingOrder->order_cost,
                     ]
                 );
+
+                $generateWakala->handle($financingOrder);
 
                 return fractal($financingOrder, new FinancingOrderTransformer())
                     ->parseIncludes([
