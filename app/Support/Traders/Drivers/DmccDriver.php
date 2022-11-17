@@ -341,7 +341,7 @@ class DmccDriver implements TraderInterface
                 'ttiId' => $ttiId,
             ]);
 
-        if (! $this->isSuccess($response)) {
+        if ($response->object()->errorCode != '') {
             throw new TraderException(collect([
                 'driver' => 'dmcc',
                 'step' => 'getInventoryBasket',
