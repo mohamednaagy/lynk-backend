@@ -128,14 +128,10 @@ return [
     'uploaded' => 'فشل في تحميل الـ :attribute.',
     'url' => 'صيغة رابط حقل :attribute غير صحيحة.',
     'uuid' => 'حقل :attribute يجب أن يكون بصيغة UUID سليمة.',
-    'national_id_wrong_format' => 'رقم الهوية غير صحيح',
+    'national_id_wrong_format' => ':attribute غير صحيح',
     'host_whitelist' => 'حقل :attribute غير موثوق فيه.',
     'phone' => 'حقل :attribute رقم هاتف غير صحيح.',
     'custom_validation' => [
-        'phone_number_does_not_belong_to_national_id' => 'Phone number doesn’t belong to National ID/Iqama',
-        'invalid_person_id' => 'Invalid National ID',
-        'person_id_not_found' => 'National ID not found',
-        'invalid_mobile_number' => 'Invalid mobile number',
     ],
     'attributes' => [
         'address' => 'العنوان',
@@ -209,5 +205,6 @@ return [
         'updated_at' => 'تاريخ التحديث',
         'username' => 'اسم المُستخدم',
         'year' => 'السنة',
+        'national_id' => 'رقم الهوية',
     ],
 ];
