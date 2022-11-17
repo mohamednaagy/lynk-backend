@@ -17,6 +17,7 @@ class GetAuthUser extends Controller
      */
     public function __invoke(Request $request)
     {
+        // __REVIEW__ add user locale in the includes
         return fractal($request->user()->load(['roles']), new UserTransformer(Area::Lender))
             ->parseIncludes(['is_email_verified', 'role', 'company', 'permissions'])
             ->respond();

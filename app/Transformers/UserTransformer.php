@@ -107,4 +107,6 @@ class UserTransformer extends TransformerAbstract
 
         return $query;
     }
+
+    //__REVIEW__ add user locale include
 }

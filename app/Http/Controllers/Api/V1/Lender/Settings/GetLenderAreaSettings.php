@@ -16,6 +16,7 @@ class GetLenderAreaSettings extends Controller
      */
     public function __invoke(GetSettingsClassInstance $getSettingsClassInstance)
     {
+        // __REVIEW__ create transformer for settings and return only: email_verification_enabled by includes
         return $this->successResponse($getSettingsClassInstance->handle(Area::Lender)->toArray());
     }
 }
