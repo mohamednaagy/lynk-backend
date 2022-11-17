@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1\Auth;
 
 use App\Models\Company;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -26,7 +27,7 @@ class LoginRequest extends FormRequest
     public function rules()
     {
         return [
-            'unique_name' => ['nullable', 'string',  Rule::exists(Company::class, 'unique_name')],
+            'unique_name' => ['nullable', 'string', Rule::exists(Company::class, 'unique_name')],
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
             'source' => ['required', 'string'],

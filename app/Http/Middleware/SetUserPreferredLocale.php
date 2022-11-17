@@ -7,7 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class SetLocalization
+class SetUserPreferredLocale
 {
     /**
      * Handle an incoming request.
@@ -18,11 +18,8 @@ class SetLocalization
      */
     public function handle(Request $request, Closure $next)
     {
-        if ($request->hasHeader('X-Locale')) {
-            app()->setLocale($request->header('X-Locale'));
-        } elseif ($request->user() && ! is_null($request->user()->locale)) {
-            $locale = $request->user()->locale;
-            app()->setLocale($locale);
+        if ($request->user()) {
+            $request->user()->update(['locale' => app()->getLocale()]);
         }
 
         return $next($request);

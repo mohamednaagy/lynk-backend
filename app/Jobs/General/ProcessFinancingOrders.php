@@ -1,8 +1,12 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
+use App\Jobs\Dmcc\ProcessClientWakalaCompletedOrder;
+use App\Jobs\Dmcc\ProcessDmccContractSignedOrder;
+use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
+use App\Jobs\Dmcc\ProcessPtpDocumentRetrievedOrder;
 use App\Models\FinancingOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -10,7 +14,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ProcessDmccOrders implements ShouldQueue
+class ProcessFinancingOrders implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -22,12 +26,17 @@ class ProcessDmccOrders implements ShouldQueue
     public function handle(): void
     {
         FinancingOrder::query()
-            ->where('status', '!=', FinancingOrderStatus::Completed)
-            ->chunk(10, function ($ordersCollection) {
+            ->whereIn('status', [
+                FinancingOrderStatus::Approved,
+                FinancingOrderStatus::ClientWakalaCompleted,
+                FinancingOrderStatus::RespondedToPtp,
+                FinancingOrderStatus::PtpDocumentRetrieved,
+                FinancingOrderStatus::ContractSigned,
+            ])->chunk(10, function ($ordersCollection) {
                 $ordersCollection->each(function ($order) {
                     match ($order->status->value) {
-                        FinancingOrderStatus::InProgress => ProcessDmccInProgressOrder::dispatch($order->id),
-                        FinancingOrderStatus::ClientWakalaCompleted => ProcessDmccClientWakalaCompletedOrder::dispatch($order->id),
+                        FinancingOrderStatus::Approved => ProcessInProgressOrder::dispatch($order->id),
+                        FinancingOrderStatus::ClientWakalaCompleted => ProcessClientWakalaCompletedOrder::dispatch($order->id),
                         FinancingOrderStatus::RespondedToPtp => ProcessDmccRespondedToPtpOrder::dispatch($order->id),
                         FinancingOrderStatus::PtpDocumentRetrieved => ProcessPtpDocumentRetrievedOrder::dispatch($order->id),
                         FinancingOrderStatus::ContractSigned => ProcessDmccContractSignedOrder::dispatch($order->id),

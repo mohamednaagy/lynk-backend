@@ -13,10 +13,12 @@ class CancelOrderAction implements CancelOrder
 {
     public function handle(FinancingOrder $financingOrder, User $user, array $data): void
     {
-        DB::transaction(function () use ($financingOrder, $data) {
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->cancelTtiId($financingOrder);
+        $driver = config('trader.default');
+        $trader = Trader::driver($driver);
+        DB::transaction(function () use ($trader, $financingOrder, $data) {
+            $trader->cancelOrder($financingOrder);
 
-            $financingOrder->status = FinancingOrderStatus::PendingCancel;
+            $financingOrder->status = FinancingOrderStatus::PendingCancellation;
             $financingOrder->status_reason = $data['status_reason'] ?? null;
             $financingOrder->save();
         });

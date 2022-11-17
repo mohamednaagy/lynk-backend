@@ -1,20 +1,22 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\General;
 
 use App\Actions\Contracts\Clients\AskClientWakala;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
-use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Throwable;
 
-class ProcessDmccInProgressOrder implements ShouldQueue
+class ProcessInProgressOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -35,14 +37,27 @@ class ProcessDmccInProgressOrder implements ShouldQueue
      *
      * @return void
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function handle(): void
     {
         DB::transaction(function () {
+            /** @var FinancingOrder $financingOrder */
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-            app()->make(AskClientWakala::class)->handle($financingOrder, Config::get('frontent.wakala_url').$financingOrder->id);
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingClientWakala);
+            app()->make(AskClientWakala::class)->handle($financingOrder, Str::replace('{order_id}', $financingOrder->id, Config::get('frontent.client_wakala_url')));
+            $financingOrder->update([
+                'status' => FinancingOrderStatus::WaitingClientWakala,
+            ]);
         });
+    }
+
+    /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array
+     */
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping('financingOrder'.$this->financingOrder)];
     }
 }

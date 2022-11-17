@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
@@ -9,6 +9,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
@@ -37,11 +38,28 @@ class ProcessDmccContractSignedOrder implements ShouldQueue
     {
         DB::transaction(function () {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-            $lastTraderOrder = $financingOrder->traderOrders()->latest()->first();
+            $lastTraderOrder = $financingOrder->activeTraderOrder()
+                ->whereIn('provider', ['dmcc', 'fake'])->first();
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->createSellingCommodityToCustomerDocument($lastTraderOrder);
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::CommoditySoldToCustomer)) {
+                return;
+            }
 
-            Trader::driver(config('trader.default') == 'fake_dmcc' ? 'fake_dmcc' : 'dmcc')->updateOrderStatus($financingOrder, FinancingOrderStatus::CommoditySoldToCustomer);
+            $trader = Trader::driver($lastTraderOrder->provider);
+
+            $trader->createSellingCommodityToCustomerDocument($lastTraderOrder);
+
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommoditySoldToCustomer);
         });
+    }
+
+    /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array
+     */
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping('financingOrder'.$this->financingOrder)];
     }
 }

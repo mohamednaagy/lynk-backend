@@ -22,10 +22,10 @@ class OrderController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Index]))->only('index');
-        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Show]))->only('show');
-        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Create]))->only('store');
-        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Edit]))->only('update');
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Index, Action::Manage]))->only('index');
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Show, Action::Manage]))->only('show');
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Create, Action::Manage]))->only('store');
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Edit, Action::Manage]))->only('update');
     }
 
     /**
