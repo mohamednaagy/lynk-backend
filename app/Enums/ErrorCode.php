@@ -26,5 +26,7 @@ class ErrorCode
 
     public const UNABLE_TO_CANCEL_ORDER = 1010;
 
-    public const BALANCE_NOT_ENOUGH = 1011;
+    public const ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE = 1011;
+
+    public const BALANCE_NOT_ENOUGH = 1012;
 }

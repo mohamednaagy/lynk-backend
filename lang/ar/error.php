@@ -10,4 +10,5 @@ return [
     'person_id_not_found' => 'رقم الهوية غير موجود',
     'invalid_mobile_number' => 'رقم الهاتف غير صحيح',
     'no_enough_balance' => 'لا يوجد رصيد كافي',
+    'order_status_doesnt_follow_sequence' => 'حالة الطلب التمويلي لا يمكن تغييرها لأنها لا تتبع التسلسل الصحيح',
 ];
