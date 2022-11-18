@@ -164,6 +164,8 @@ return [
      |
      */
 
-    'attributes' => [],
+    'attributes' => [
+        'status_reason' => 'status reason',
+    ],
 
 ];
