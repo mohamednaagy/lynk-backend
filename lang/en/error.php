@@ -9,5 +9,5 @@ return [
     'invalid_person_id' => 'Invalid National ID',
     'person_id_not_found' => 'National ID not found',
     'invalid_mobile_number' => 'Invalid mobile number',
-
+    'no_enough_balance' => 'No enough balance',
 ];

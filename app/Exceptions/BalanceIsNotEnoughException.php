@@ -17,7 +17,7 @@ class BalanceIsNotEnoughException extends Exception
      */
     public function render(Request $request)
     {
-        $message = trans('wallet.no_enough_balance');
+        $message = trans('error.no_enough_balance');
         $code = Response::HTTP_BAD_REQUEST;
 
         if ($request->expectsJson()) {

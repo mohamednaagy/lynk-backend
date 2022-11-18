@@ -9,5 +9,5 @@ return [
     'invalid_person_id' => 'رقم الهوية غير صحيح',
     'person_id_not_found' => 'رقم الهوية غير موجود',
     'invalid_mobile_number' => 'رقم الهاتف غير صحيح',
-
+    'no_enough_balance' => 'لا يوجد رصيد كافي',
 ];
