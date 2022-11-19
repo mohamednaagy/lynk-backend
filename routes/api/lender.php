@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\Lender\Auth\ResendInvitation;
 use App\Http\Controllers\Api\V1\Lender\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryReplyController;
+use App\Http\Controllers\Api\V1\Lender\Media\DownloadMediaFile;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CancelOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CreateOrderWithoutVerification;
