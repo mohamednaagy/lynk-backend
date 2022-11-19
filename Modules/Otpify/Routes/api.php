@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Api\V1\Lender\Media\DownloadMediaFile;
 use Illuminate\Support\Facades\Route;
-use Modules\Otpify\Http\Controllers\OtpifyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,9 +14,9 @@ use Modules\Otpify\Http\Controllers\OtpifyController;
 |
 */
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/generate-otp', [OtpifyController::class, 'generateOtp']);
-    Route::post('/verify-otp', [OtpifyController::class, 'verifyOtpCode']);
-});
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::post('/generate-otp', [OtpifyController::class, 'generateOtp']);
+//     Route::post('/verify-otp', [OtpifyController::class, 'verifyOtpCode']);
+// });
 
 Route::get('v1/lender/media/{media}/download', DownloadMediaFile::class)->name('api.v1.media.download');
