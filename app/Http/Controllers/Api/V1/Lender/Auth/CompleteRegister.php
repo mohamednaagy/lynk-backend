@@ -29,8 +29,6 @@ class CompleteRegister extends Controller
         User $user,
         CompleteUserRegistration $completeUserRegistration
     ): JsonResponse {
-        dd($user);
-
         return DB::transaction(function () use ($request, $user, $completeUserRegistration) {
             $user = $completeUserRegistration->handle($user, $request->validated());
 
