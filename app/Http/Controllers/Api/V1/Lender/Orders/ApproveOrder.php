@@ -24,7 +24,7 @@ class ApproveOrder extends Controller
     public function __invoke(Request $request, ApproveOrderInterface $approveOrder, FinancingOrder $order)
     {
         // __REVIEW__ add DB::transaction
-        // __REVIEW__ query FinancingOrder and lockForUpdate
+        // __REVIEW__ query FinancingOrder and lockForUpdate (example app/Http/Controllers/Api/V1/Lender/Orders/MakeOrderProceed.php)
         if ($order->status->cantMoveTo(FinancingOrderStatus::Approved)) {
             return $this->errorResponse(
                 __('error.order_cannot_be_approved_because_it_is_approved'),
