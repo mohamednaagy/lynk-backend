@@ -26,6 +26,7 @@ class UpdateUserAction implements UpdateUser
 
         // __REVIEW__ source should be removed
         // __REVIEW__ locale should be added with a default value if it doesn't exist
+        // __REVIEW__ company_id should be added
         return $user->update(
             Arr::only(
                 $data,

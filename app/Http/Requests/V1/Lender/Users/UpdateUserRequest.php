@@ -39,6 +39,8 @@ class UpdateUserRequest extends FormRequest
                     ->where('company_id', tenant('id')),
             ],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
+            // __REVIEW__ add "mobile" type to phone validation rule so that it accepts mobile numbers (not landline numbers)
+            // See Laravel Phone docs
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'role' => [
                 'required',

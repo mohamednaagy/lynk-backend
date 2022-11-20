@@ -32,7 +32,6 @@ class CreateLenderUserWithRoleAndPermissionAction implements CreateLenderUserWit
     public function handle(array $data): User
     {
         // __REVIEW__ create user doesn't accept company_id so you should update CreateUserAction
-        // create user
         $user = $this->createUser->handle(Arr::only(
             $data,
             [

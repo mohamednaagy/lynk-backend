@@ -78,6 +78,10 @@ class UserController extends Controller
         UpdateLenderUserWithRoleAndPermission $updateLenderUserWithRoleAndPermission,
     ): JsonResponse {
         return DB::transaction((function () use ($updateUserRequest, $user, $updateLenderUserWithRoleAndPermission) {
+            // __REVIEW__ we should prevent the current form updating his account
+            // Example, if there is only one admin in Company X, he can edit his role to
+            // be Supervisor. In that case, the company will not have an admin!!
+
             if ($user->hasRole(Role::LenderApiUser)) {
                 throw new AuthorizationException();
             }
@@ -96,6 +100,5 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
     }
 }
