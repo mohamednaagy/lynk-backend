@@ -25,12 +25,16 @@ class CompleteRegister extends Controller
      * @return JsonResponse
      */
     public function __invoke(
+        // __REVIEW__ Move request to be first before $user
         User $user,
         CompleteRegisterRequest $request,
+        // __REIVEW__ $CompleteUserRegistration -> $completeUserRegistration
         CompleteUserRegistration $CompleteUserRegistration
     ): JsonResponse {
+        // __REVIEW__ use DB::transaction();
         $user = $CompleteUserRegistration->handle($user, $request->validated());
 
+        // __REVIEW__ return $this->successResponse();
         return fractal($user, new UserTransformer)->respond();
     }
 }

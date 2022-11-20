@@ -15,8 +15,11 @@ class ResendInvitation extends Controller
     {
         if (is_null($user->password)) {
             $invitationUrl = $request->validated('redirect_url');
+
+            // __REVIEW__ pass $user object instead of $user->email so that Mail can utilize $user->locale
             Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
+            // __REVIEW__ no need to return here. The return on line 26 is enough
             return fractal($user, new UserTransformer())->respond();
         }
 
