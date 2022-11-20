@@ -54,6 +54,8 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
+        // __REVIEW__ move this to be after Line 60.
+        // __REVIEW__ we need to create api resource [EdaatInvoiceController] (index, store, show)
         Route::get('edaat-invoices', GetEdaatInvoices::class);
 
         Route::middleware('IsEmailVerified:'.Area::Lender)->group(function () {
@@ -69,12 +71,14 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
             Route::apiResource('orders', OrderController::class);
             Route::apiResource('users', UserController::class);
             Route::post('{user}/resend-invitation', ResendInvitation::class);
+            // __REVIEW__ remove this from here as it should be added in api resource as mentioned in line 58
             Route::get('edaat-invoices', GetEdaatInvoices::class);
 
             Route::prefix('wallet')->group(function () {
                 Route::get('/balance', GetBalance::class);
                 Route::post('/calculate', CalculateOrderCost::class);
                 Route::get('/transactions', GetWalletTransactions::class);
+                // __REVIEW__ remove this from here as it should be added in api resource as mentioned in line 58
                 Route::post('/invoice', CreateEdaatInvoice::class);
             });
 

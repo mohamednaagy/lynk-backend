@@ -6,6 +6,7 @@ use App\Actions\Contracts\Lenders\GetEdaatInvoices;
 use App\Models\EdaatInvoice;
 use Illuminate\Database\Eloquent\Builder;
 
+// __REVIEW__ remove this action
 class GetEdaatInvoicesAction implements GetEdaatInvoices
 {
     /**

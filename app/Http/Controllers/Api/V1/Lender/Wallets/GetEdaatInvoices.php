@@ -1,5 +1,7 @@
 <?php
 
+// __REVIEW__ Edaat controllers should under App\Http\Controllers\Api\V1\Lender\Edaat
+
 namespace App\Http\Controllers\Api\V1\Lender\Wallets;
 
 use App\Actions\Contracts\Wallets\GetEdaatInvoices as GetEdaatInvoicesInterface;
