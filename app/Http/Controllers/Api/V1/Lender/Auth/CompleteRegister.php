@@ -31,6 +31,15 @@ class CompleteRegister extends Controller
     ): JsonResponse {
         $user = $CompleteUserRegistration->handle($user, $request->validated());
 
-        return fractal($user, new UserTransformer)->respond();
+        return fractal($user, new UserTransformer)
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 }

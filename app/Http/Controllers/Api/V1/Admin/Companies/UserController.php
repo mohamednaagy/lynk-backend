@@ -26,7 +26,16 @@ class UserController extends Controller
         Company $company,
         GetCompanyUsers $getCompanyUsers
     ): JsonResponse {
-        return fractal($getCompanyUsers->handle($company), new UserTransformer)->respond();
+        return fractal($getCompanyUsers->handle($company), new UserTransformer)
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 
     /**
@@ -39,8 +48,16 @@ class UserController extends Controller
     public function show(Request $request, User $user): JsonResponse
     {
         return fractal($user, new UserTransformer(Area::Lender))
-            ->parseIncludes(['role'])
-            ->respond();
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'role',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 
     /**
@@ -68,7 +85,16 @@ class UserController extends Controller
             $invitationUrl = $storeCompanyUserRequest->validated('redirect_url');
             Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
-            return fractal($user, new UserTransformer())->respond();
+            return fractal($user, new UserTransformer())
+                ->parseIncludes([
+                    'id',
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'phone_number',
+                    'phone_country_code',
+                    'formatted_phone_number',
+                ])->respond();
         });
     }
 

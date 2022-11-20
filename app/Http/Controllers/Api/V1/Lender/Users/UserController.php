@@ -28,7 +28,16 @@ class UserController extends Controller
      */
     public function index(GetPaginatedLenderUsers $getPaginatedLenders): JsonResponse
     {
-        return fractal($getPaginatedLenders->handle(), new UserTransformer)->respond();
+        return fractal($getPaginatedLenders->handle(), new UserTransformer)
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 
     /**
@@ -44,14 +53,20 @@ class UserController extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($storeUserRequest, $createLenderWithRoleAndPermission) {
             $user = $createLenderWithRoleAndPermission->handle($storeUserRequest->validated());
-            // __REVIEW__ leave new line between unrelated functions.
-            // Example, creating user is different from sending an email (get invitation link + send email)
-            $invitationUrl = $storeUserRequest->validated('redirect_url');
-            // __REVIEW__ Pass $user to ::to(...) method so it can utilizes $user default locale
-            // Otherwise, it will utilize the authenticated locale
-            Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
-            return fractal($user, new UserTransformer())->respond();
+            $invitationUrl = $storeUserRequest->validated('redirect_url');
+            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl));
+
+            return fractal($user, new UserTransformer())
+                ->parseIncludes([
+                    'id',
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'phone_number',
+                    'phone_country_code',
+                    'formatted_phone_number',
+                ])->respond();
         });
     }
 
@@ -64,8 +79,16 @@ class UserController extends Controller
     public function show(User $user): JsonResponse
     {
         return fractal($user, new UserTransformer(Area::Lender))
-            ->parseIncludes(['role'])
-            ->respond();
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'role',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 
     /**
@@ -82,11 +105,7 @@ class UserController extends Controller
         UpdateLenderUserWithRoleAndPermission $updateLenderUserWithRoleAndPermission,
     ): JsonResponse {
         return DB::transaction((function () use ($updateUserRequest, $user, $updateLenderUserWithRoleAndPermission) {
-            // __REVIEW__ we should prevent the current form updating his account
-            // Example, if there is only one admin in Company X, he can edit his role to
-            // be Supervisor. In that case, the company will not have an admin!!
-
-            if ($user->hasRole(Role::LenderApiUser)) {
+            if ($user->hasRole(Role::LenderApiUser) || $user->id == auth()->user()->getAuthIdentifier()) {
                 throw new AuthorizationException();
             }
 

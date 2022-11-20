@@ -27,8 +27,10 @@ class CreateUserAction implements CreateUser
             $data['phone_number'] = null;
         }
 
-        // __REVIEW__ source should be removed
-        // __REVIEW__ locale should be added with a default value if it doesn't exist
+        if (array_key_exists('locale', $data) && $data['locale'] == null) {
+            $data['locale'] = app()->getLocale();
+        }
+
         return User::create(
             Arr::only(
                 $data,
@@ -38,7 +40,8 @@ class CreateUserAction implements CreateUser
                     'email',
                     'phone_number',
                     'password',
-                    'source',
+                    'company_id',
+                    'locale',
                 ]
             )
         );

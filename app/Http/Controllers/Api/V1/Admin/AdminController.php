@@ -30,8 +30,16 @@ class AdminController extends Controller
         $admins = $getPaginatedUsersByRole->handle(Area::getRolesPerAreaMap()[Area::SuperAdmin]);
 
         return fractal($admins, new UserTransformer(Area::SuperAdmin))
-            ->parseIncludes(['role'])
-            ->respond();
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'role',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 
     /**
@@ -45,8 +53,17 @@ class AdminController extends Controller
         }
 
         return fractal($admin, new UserTransformer(Area::SuperAdmin))
-            ->parseIncludes(['role', 'permissions'])
-            ->respond();
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'role',
+                'permissions',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 
     /**

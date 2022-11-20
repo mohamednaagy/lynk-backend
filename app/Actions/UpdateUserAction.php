@@ -24,9 +24,10 @@ class UpdateUserAction implements UpdateUser
             $data['phone_number'] = phone($data['phone_number'], $data['phone_country_code']);
         }
 
-        // __REVIEW__ source should be removed
-        // __REVIEW__ locale should be added with a default value if it doesn't exist
-        // __REVIEW__ company_id should be added
+        if (array_key_exists('locale', $data) && $data['locale'] == null) {
+            $data['locale'] = app()->getLocale();
+        }
+
         return $user->update(
             Arr::only(
                 $data,
@@ -36,7 +37,7 @@ class UpdateUserAction implements UpdateUser
                     'email',
                     'phone_number',
                     'password',
-                    'source',
+                    'company_id',
                 ]
             )
         );

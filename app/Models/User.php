@@ -40,6 +40,7 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
         'email',
         'password',
         'locale',
+        'company_id',
     ];
 
     /**
