@@ -102,8 +102,7 @@ class UserTransformer extends TransformerAbstract
         $query = $user->roles();
 
         $query = match ($this->area) {
-            Area::Lender => $query->whereIn('name', Area::getRolesPerAreaMap()[$this->area]),
-            Area::SuperAdmin => $query->whereIn('name', Area::getRolesPerAreaMap()[$this->area]),
+            Area::Lender, Area::SuperAdmin => $query->whereIn('name', Area::roles($this->area)),
         };
 
         return $query;

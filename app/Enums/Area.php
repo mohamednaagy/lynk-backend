@@ -3,6 +3,7 @@
 namespace App\Enums;
 
 use BenSampo\Enum\Enum;
+use Modules\Grantify\Support\Areas\SuperAdmin;
 
 /**
  * @method static static SuperAdmin()
@@ -16,24 +17,28 @@ final class Area extends Enum
 
     const Lender = 'Lender';
 
-    // __REVIEW__ we need to be able to call "getRolesPerAreaMap" with Area::name  to return roles for certain area
-    // Otherwise it will return all.
-    // We need to adjust all places where this function is used
-    // Hint: we can move each area roles to the files in Modules/Grantify/Support/Areas
-    public static function getRolesPerAreaMap(): array
+    public static array $superAdminRoles = [
+        Role::Admin,
+        Role::Management,
+    ];
+
+    public static array $lenderRoles = [
+        Role::LenderAdmin,
+        Role::LenderBilling,
+        Role::LenderSupervisor,
+        Role::LenderOrderCreator,
+        Role::LenderApiUser,
+    ];
+
+    public static function roles(string $area = null): array
     {
-        return [
-            self::SuperAdmin => [
-                Role::Admin,
-                Role::Management,
-            ],
-            self::Lender => [
-                Role::LenderAdmin,
-                Role::LenderBilling,
-                Role::LenderSupervisor,
-                Role::LenderOrderCreator,
-                Role::LenderApiUser,
-            ],
-        ];
+        return match ($area) {
+            self::SuperAdmin => self::$superAdminRoles,
+            self::Lender => self::$lenderRoles,
+            default => [
+                self::SuperAdmin => self::$superAdminRoles,
+                self::Lender => self::$lenderRoles,
+            ]
+        };
     }
 }
