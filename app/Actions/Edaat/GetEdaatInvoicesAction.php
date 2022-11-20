@@ -1,22 +1,20 @@
 <?php
 
-namespace App\Actions\Lenders;
+namespace App\Actions\Edaat;
 
-use App\Actions\Contracts\Lenders\GetEdaatInvoices;
+use App\Actions\Contracts\Wallets\GetEdaatInvoices;
 use App\Models\EdaatInvoice;
 use Illuminate\Database\Eloquent\Builder;
 
-// __REVIEW__ remove this action
 class GetEdaatInvoicesAction implements GetEdaatInvoices
 {
     /**
      * Get edaat invoices for tenant (company) or admin
      *
      * @param  array  $scopes
-     * @param  int  $paginate
      * @return  Builder
      */
-    public function handle(array $scopes = [], int $paginate = 10): Builder
+    public function handle(array $scopes = []): Builder
     {
         return EdaatInvoice::query()->toScopes($scopes);
     }
