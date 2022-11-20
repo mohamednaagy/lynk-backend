@@ -27,6 +27,7 @@ class IsEmailVerified
     {
         $user = $request->user();
 
+        // __REVIEW__ Check if $user implements the interface of MustVerifyEmail
         if (! $user || ($this->isEmailVerifiedRequired($area) && ! $user->hasVerifiedEmail())) {
             return $this->notAuthorizedResponse($request);
         }
@@ -44,6 +45,9 @@ class IsEmailVerified
     private function notAuthorizedResponse(Request $request)
     {
         if ($request->expectsJson()) {
+            // __REVIEW__ user lang/{ar|en}/error.php file for translation
+            // __REVIEW__ Arabic: يجب عليك التحقق من البريد الإلكتروني
+            // __REVIEW__ English: You must verify your email address
             return response()->errorResponse(__('Must Verify Email'), 403, ErrorCode::EMAIL_NOT_VERIFIED);
         }
 
