@@ -16,6 +16,10 @@ final class Area extends Enum
 
     const Lender = 'Lender';
 
+    // __REVIEW__ we need to be able to call "getRolesPerAreaMap" with Area::name  to return roles for certain area
+    // Otherwise it will return all.
+    // We need to adjust all places where this function is used
+    // Hint: we can move each area roles to the files in Modules/Grantify/Support/Areas
     public static function getRolesPerAreaMap(): array
     {
         return [
