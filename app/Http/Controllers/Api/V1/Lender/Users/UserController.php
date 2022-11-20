@@ -44,7 +44,11 @@ class UserController extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($storeUserRequest, $createLenderWithRoleAndPermission) {
             $user = $createLenderWithRoleAndPermission->handle($storeUserRequest->validated());
+            // __REVIEW__ leave new line between unrelated functions.
+            // Example, creating user is different from sending an email (get invitation link + send email)
             $invitationUrl = $storeUserRequest->validated('redirect_url');
+            // __REVIEW__ Pass $user to ::to(...) method so it can utilizes $user default locale
+            // Otherwise, it will utilize the authenticated locale
             Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
             return fractal($user, new UserTransformer())->respond();
