@@ -6,6 +6,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\TraderHelper;
@@ -352,7 +353,15 @@ class DmccDriver implements TraderInterface
             ]));
         }
 
-        return $response->object();
+        $response = $response->object();
+
+        $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
+        $traderOrder->update([
+            'product' => $response->inventoryDetails[0]->hsCodeDescription,
+            'quantity' => $response->inventoryDetails[0]->quantity,
+        ]);
+
+        return $response;
     }
 
     /**
