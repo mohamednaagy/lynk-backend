@@ -56,7 +56,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::get('edaat-invoices', GetEdaatInvoices::class);
 
-        Route::middleware('IsEmailVerified:'.Area::Lender)->group(function () {
+        Route::middleware('verified.email:'.Area::Lender)->group(function () {
             Route::put('auth/profile', UpdateMyProfile::class);
             Route::get('orders/volume', GetOrdersVolume::class);
             Route::get('orders/stats', GetOrdersStats::class);

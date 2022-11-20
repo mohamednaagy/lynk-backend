@@ -6,4 +6,5 @@ return [
     'unable_to_cancelled' => 'هذا الطلب لا يمكن إلغاؤه',
     'media_class_not_supported' => 'هذا العنصر غير مدعوم',
     'order_status_doesnt_follow_sequence' => 'حالة الطلب التمويلي لا يمكن تغييرها لأنها لا تتبع التسلسل الصحيح',
+    'must_verify_email' => 'يجب عليك التحقق من البريد الإلكتروني',
 ];

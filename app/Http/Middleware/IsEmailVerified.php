@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\ErrorCode;
 use Closure;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\Request;
 
 class IsEmailVerified
@@ -27,8 +28,7 @@ class IsEmailVerified
     {
         $user = $request->user();
 
-        // __REVIEW__ Check if $user implements the interface of MustVerifyEmail
-        if (! $user || ($this->isEmailVerifiedRequired($area) && ! $user->hasVerifiedEmail())) {
+        if (! $user || ($user instanceof MustVerifyEmail && $this->isEmailVerifiedRequired($area) && ! $user->hasVerifiedEmail())) {
             return $this->notAuthorizedResponse($request);
         }
 
@@ -44,13 +44,11 @@ class IsEmailVerified
 
     private function notAuthorizedResponse(Request $request)
     {
+        $message = __('error.must_verify_email');
         if ($request->expectsJson()) {
-            // __REVIEW__ user lang/{ar|en}/error.php file for translation
-            // __REVIEW__ Arabic: يجب عليك التحقق من البريد الإلكتروني
-            // __REVIEW__ English: You must verify your email address
-            return response()->errorResponse(__('Must Verify Email'), 403, ErrorCode::EMAIL_NOT_VERIFIED);
+            return response()->errorResponse($message, 403, ErrorCode::EMAIL_NOT_VERIFIED);
         }
 
-        abort(403);
+        abort(403, $message);
     }
 }
