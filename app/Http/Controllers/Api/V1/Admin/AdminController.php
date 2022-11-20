@@ -71,6 +71,7 @@ class AdminController extends Controller
         DB::transaction(function () use ($data, $createAdminWithRoleAndPermission) {
             $admin = $createAdminWithRoleAndPermission->handle($data);
 
+            // __REVIEW__ pass $admin to "to(..)" to utilize the admin locale
             Mail::to($admin->email)->send(new CompleteAdminRegisterInvitation($admin, $data['redirect_url']));
         });
 
@@ -95,6 +96,7 @@ class AdminController extends Controller
                 throw UnauthorizedException::forRoles(Area::getRolesPerAreaMap()[Area::SuperAdmin]);
             }
 
+            // __REVIEW__ use DB::transaction(...)
             $updateAdminWithRoleAndPermission->handle($updateAdminRequest->validated(), $admin);
 
             return $this->successResponse();

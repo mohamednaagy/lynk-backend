@@ -41,8 +41,9 @@ class UpdateAdminRequest extends FormRequest
                     ->ignore($this->admin->id),
             ],
             'password' => ['nullable', 'string', 'confirmed'],
+            // __REVIEW__ instead of new EnumValue(Role::class), we should define the allowed roles using Rule::in(...)
             'role' => ['required', 'string', new EnumValue(Role::class)],
-            'permissions' => ['required', 'array', 'min:1'],
+            'permissions' => ['required', 'array'],
             'permissions.*' => ['required', 'array'],
             'permissions.*.subject' => ['required', 'string', new EnumValue(Subject::class)],
             'permissions.*.actions' => ['required', 'array'],
@@ -57,6 +58,7 @@ class UpdateAdminRequest extends FormRequest
      */
     public function messages(): array
     {
+        // __REVIEW__ no need to add here if "/lang/{ar|en}/validation.php"  has "phone" message
         return [
             'phone_number.phone' => trans('validation.phone'),
         ];

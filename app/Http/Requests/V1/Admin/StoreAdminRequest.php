@@ -30,6 +30,8 @@ class StoreAdminRequest extends FormRequest
      */
     public function rules()
     {
+        // __REVIEW__ Check if attributes are translated
+        // https://laravel.com/docs/9.x/validation#specifying-attribute-in-language-files
         return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
@@ -39,6 +41,7 @@ class StoreAdminRequest extends FormRequest
                 Rule::unique(User::class, 'email')
                     ->whereNull('company_id'),
             ],
+            // __REVIEW__ instead of new EnumValue(Role::class), we should define the allowed roles using Rule::in(...)
             'role' => ['required', 'string', new EnumValue(Role::class)],
             'permissions' => ['required', 'array', 'min:1'],
             'permissions.*' => ['required', 'array'],

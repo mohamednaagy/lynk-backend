@@ -17,10 +17,14 @@ class CompleteAdminRegister extends Controller
     }
 
     public function __invoke(
+        // __REVIEW__ move FormRequest to be first argument
+        // __REVIEW__ $user is wrong!!
         User $user,
         CompleteAdminRegisterRequest $completeAdminRegisterRequest,
         CompleteAdminRegistration $completeAdminRegistration
     ): JsonResponse {
+        // __REVIEW__ use DB::transaction(...)
+        // __REVIEW__ adding check on password. If password is not null, this means the user has completed the registration
         $user = $completeAdminRegistration->handle($user, $completeAdminRegisterRequest->validated());
 
         return fractal($user, new UserTransformer)->respond();
