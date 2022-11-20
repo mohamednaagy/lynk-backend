@@ -17,8 +17,7 @@ class UpdateMyProfile extends Controller
      * @param  UpdateMyProfileRequest  $updateLenderRequest
      * @return \Illuminate\Http\JsonResponse
      */
-    // __REVIEW__ : Always Request/FormRquest comes first in the arguments
-    public function __invoke(UpdateUser $updateUser, UpdateMyProfileRequest $updateLenderRequest)
+    public function __invoke(UpdateMyProfileRequest $updateLenderRequest, UpdateUser $updateUser)
     {
         $validated = $updateLenderRequest->validated();
 

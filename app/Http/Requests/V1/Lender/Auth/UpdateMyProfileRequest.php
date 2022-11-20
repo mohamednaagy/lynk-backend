@@ -25,13 +25,10 @@ class UpdateMyProfileRequest extends FormRequest
      */
     public function rules()
     {
-        // __REVIEW__ add translation for attributes
         return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
-            // __REVIEW__ we need to "mobile" type to phone number rule
-            // See: https://github.com/Propaganistas/Laravel-Phone#validation
-            'phone_number' => ['required', 'phone:phone_country_code', 'string'],
+            'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],
             'phone_country_code' => ['required', 'string', 'size:2'],
             'password' => ['nullable', 'string', 'min:8', 'max:100'],
             'email' => [

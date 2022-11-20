@@ -209,5 +209,10 @@ return [
         'updated_at' => 'تاريخ التحديث',
         'username' => 'اسم المُستخدم',
         'year' => 'السنة',
+        'phone_number' => 'رقم الهاتف',
+        'phone_country_code' => 'رمز بلد الهاتف',
+        'reference_number' => 'الرقم المرجعي',
+        'national_id' => 'الرقم القومي',
+        'selling_price' => 'سعر البيع',
     ],
 ];
