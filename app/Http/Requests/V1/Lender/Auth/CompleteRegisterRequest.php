@@ -25,8 +25,6 @@ class CompleteRegisterRequest extends FormRequest
      */
     public function rules()
     {
-        // __REVIEW__ make sure to translate attributes
-        // https://laravel.com/docs/9.x/validation#customizing-the-validation-attributes
         return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],

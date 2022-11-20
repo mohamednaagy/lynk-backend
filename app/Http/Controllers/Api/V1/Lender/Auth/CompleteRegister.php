@@ -6,8 +6,8 @@ use App\Actions\Contracts\Lenders\Auth\CompleteUserRegistration;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\CompleteRegisterRequest;
 use App\Models\User;
-use App\Transformers\UserTransformer;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class CompleteRegister extends Controller
 {
@@ -25,16 +25,16 @@ class CompleteRegister extends Controller
      * @return JsonResponse
      */
     public function __invoke(
-        // __REVIEW__ Move request to be first before $user
-        User $user,
         CompleteRegisterRequest $request,
-        // __REIVEW__ $CompleteUserRegistration -> $completeUserRegistration
-        CompleteUserRegistration $CompleteUserRegistration
+        User $user,
+        CompleteUserRegistration $completeUserRegistration
     ): JsonResponse {
-        // __REVIEW__ use DB::transaction();
-        $user = $CompleteUserRegistration->handle($user, $request->validated());
+        dd($user);
 
-        // __REVIEW__ return $this->successResponse();
-        return fractal($user, new UserTransformer)->respond();
+        return DB::transaction(function () use ($request, $user, $completeUserRegistration) {
+            $user = $completeUserRegistration->handle($user, $request->validated());
+
+            return  $this->successResponse();
+        });
     }
 }

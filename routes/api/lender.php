@@ -46,9 +46,6 @@ Route::get('v1/lender/media/{media}/download', DownloadMediaFile::class)->name('
 Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     Route::get('/area-settings', GetLenderAreaSettings::class);
     Route::post('/register', Register::class);
-    // __REVIEW__ this route should be the last route since it start with path variable {user}
-    Route::post('{user}/complete-register', CompleteRegister::class)->name('lender.complete-register');
-
     Route::middleware([
         'auth:sanctum',
         'role:'.implode('|', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator, Role::LenderApiUser]),
@@ -68,12 +65,8 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
             Route::put('orders/{order}/cancel', CancelOrder::class);
             Route::post('orders/no-verification', CreateOrderWithoutVerification::class)
                 ->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Create]));
+            Route::post('users/{user}/resend-invitation', ResendInvitation::class);
             Route::apiResource('users', UserController::class);
-
-            //__REIVEW__ change route path to be 'users/{user}/resend-invitation
-            // __REVIEW__ move route to be before apiResource('users') so that no overwritting can happen
-            // See: https://laravel.com/docs/9.x/controllers#restful-supplementing-resource-controllers
-            Route::post('{user}/resend-invitation', ResendInvitation::class);
             Route::get('edaat-invoices', GetEdaatInvoices::class);
 
             Route::prefix('wallet')->group(function () {
@@ -89,4 +82,6 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
             Route::apiResource('enquiries.replies', EnquiryReplyController::class);
         });
     });
+
+    Route::post('{user}/complete-register', CompleteRegister::class)->name('lender.complete-register');
 });
