@@ -41,6 +41,8 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 |
 */
 
+Route::get('v1/lender/media/{media}/download', DownloadMediaFile::class)->name('api.v1.media.download');
+
 Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     Route::get('/area-settings', GetLenderAreaSettings::class);
     Route::post('/register', Register::class);
@@ -58,13 +60,13 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
             Route::put('auth/profile', UpdateMyProfile::class);
             Route::get('orders/volume', GetOrdersVolume::class);
             Route::get('orders/stats', GetOrdersStats::class);
-            Route::apiResource('orders', OrderController::class);
             Route::post('orders/{order}/proceed', MakeOrderProceed::class);
             Route::put('orders/{order}/approve', ApproveOrder::class);
             Route::put('orders/{order}/reject', RejectOrder::class);
             Route::put('orders/{order}/cancel', CancelOrder::class);
             Route::post('orders/no-verification', CreateOrderWithoutVerification::class)
                 ->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Create]));
+            Route::apiResource('orders', OrderController::class);
             Route::apiResource('users', UserController::class);
             Route::post('{user}/resend-invitation', ResendInvitation::class);
             Route::get('edaat-invoices', GetEdaatInvoices::class);
@@ -76,7 +78,6 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
                 Route::post('/invoice', CreateEdaatInvoice::class);
             });
 
-            Route::get('media/{media}/download', DownloadMediaFile::class)->name('media.download');
             Route::apiResource('enquiries', EnquiryController::class);
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)
                 ->only('index', 'store');
