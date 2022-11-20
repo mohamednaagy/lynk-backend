@@ -20,8 +20,11 @@ class ApproveOrder extends Controller
      * @param  FinancingOrder  $order
      * @return JsonResponse
      */
+    // __REVIEW__ Change FinancingOrder $order to $order (we will query it by lockForUpdate)
     public function __invoke(Request $request, ApproveOrderInterface $approveOrder, FinancingOrder $order)
     {
+        // __REVIEW__ add DB::transaction
+        // __REVIEW__ query FinancingOrder and lockForUpdate
         if ($order->status->cantMoveTo(FinancingOrderStatus::Approved)) {
             return $this->errorResponse(
                 __('error.order_cannot_be_approved_because_it_is_approved'),
