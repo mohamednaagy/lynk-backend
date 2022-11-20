@@ -18,20 +18,27 @@ class FinancingOrderObserver
      */
     public function updated(FinancingOrder $financingOrder): void
     {
+        $product = $financingOrder->activeTraderOrder()->first()->product ?? '';
+        $quantity = $financingOrder->activeTraderOrder()->first()->quantity ?? '';
+        $sellingPrice = $financingOrder->getOriginal('selling_price') ?? '';
+        $url = $financingOrder->getMedia(FinancingOrderMediaCollection::SellingCommodityToCustomer)->first() ?? '';
+        $phoneNumber = ltrim($financingOrder->getPhoneNumber()->formatE164(), '+');
+        $locale = app()->getLocale();
+
         match ($financingOrder->status->value) {
             FinancingOrderStatus::CommoditySoldToCustomer => Sms::driver('msegat')->send(
                 __(ClientMessage::CommoditySoldToCustomer, [
-                    'product' => $financingOrder->activeTraderOrder()->first()->data->product,
-                    'quantity' => $financingOrder->activeTraderOrder()->first()->data->quantity,
-                    'sellingPrice' => $financingOrder->getOriginal('selling_price'),
-                    'url' => $financingOrder->getMedia(FinancingOrderMediaCollection::SellingCommodityToCustomer)->first(),
-                ], app()->getLocale()), ltrim($financingOrder->getPhoneNumber()->formatE164(), '+')),
+                    'product' => $product,
+                    'quantity' => $quantity,
+                    'sellingPrice' => $sellingPrice,
+                    'url' => $url,
+                ], $locale), $phoneNumber),
             FinancingOrderStatus::MurabahaSaleCompleted => Sms::driver('msegat')->send(
                 __(ClientMessage::MurabahaSaleCompleted, [
-                    'product' => $financingOrder->activeTraderOrder()->first()->data->product,
-                    'quantity' => $financingOrder->activeTraderOrder()->first()->data->quantity,
-                    'amount' => $financingOrder->getOriginal('selling_price'),
-                ], app()->getLocale()), ltrim($financingOrder->getPhoneNumber()->formatE164(), '+')),
+                    'product' => $product,
+                    'quantity' => $quantity,
+                    'amount' => $sellingPrice,
+                ], $locale), $phoneNumber),
             default => new \ErrorException('Error found'),
         };
     }
