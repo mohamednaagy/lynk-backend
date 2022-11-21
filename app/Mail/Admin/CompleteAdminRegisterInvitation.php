@@ -25,11 +25,11 @@ class CompleteAdminRegisterInvitation extends Mailable
      */
     public function __construct(User $user, string $externalUrl)
     {
-        // __REVIEW__ move $externalUrl to be on a new line
-        // __REVIEW__ put expiry time 48 hours on the signed url
-        $url = URL::signedExternalRoute($externalUrl,
+        $url = URL::signedExternalRoute(
+            $externalUrl,
             'admin.complete-register',
-            ['admin' => $user->id]
+            ['admin' => $user->id],
+            172800
         );
 
         $this->url = $url;
@@ -43,10 +43,13 @@ class CompleteAdminRegisterInvitation extends Mailable
      */
     public function envelope()
     {
-        // __REVIEW__ subject translation is not working
-        // __REVIEW__ use different file for admin invitation
         return new Envelope(
-            subject: __('emails.invitation-complete-register.complete_registration', ['app_name' => config('app.name')]),
+            subject: __(
+                'emails/invitation-admin-complete-register.complete_registration',
+                [
+                    'app_name' => config('app.name'),
+                ]
+            ),
         );
     }
 
@@ -57,9 +60,8 @@ class CompleteAdminRegisterInvitation extends Mailable
      */
     public function content()
     {
-        // __REVIEW__ use different template for admin invitation
         return new Content(
-            markdown: 'emails.invitation-complete-register',
+            markdown: 'emails.invitation-admin-complete-register',
         );
     }
 

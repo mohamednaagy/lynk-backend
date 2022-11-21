@@ -3,21 +3,23 @@
 namespace App\Actions\Admins\Auth;
 
 use App\Actions\Contracts\Admins\Auth\CompleteAdminRegistration;
+use App\Actions\Contracts\UpdateUser;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 
 class CompleteAdminRegistrationAction implements CompleteAdminRegistration
 {
+    public function __construct(protected UpdateUser $updateUser)
+    {
+    }
+
     public function handle(User $user, $data): User
     {
-        // __REVIEW__ use UpdateUserAction
-        $user->update([
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-            'password' => Hash::make($data['password']),
-        ]);
+        $data['password'] = Hash::make($data['password']);
+        $data['email_verified_at'] = Carbon::now()->toDateTimeString();
 
-        // __REVIEW__ after completing registration, mark user email as verified
+        $this->updateUser->handle($user, $data);
 
         return $user;
     }

@@ -9,7 +9,6 @@ use App\Models\User;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use function trans;
 
 class UpdateAdminRequest extends FormRequest
 {
@@ -48,19 +47,6 @@ class UpdateAdminRequest extends FormRequest
             'permissions.*.subject' => ['required', 'string', new EnumValue(Subject::class)],
             'permissions.*.actions' => ['required', 'array'],
             'permissions.*.actions.*' => ['required', 'string', new EnumValue(Action::class)],
-        ];
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function messages(): array
-    {
-        // __REVIEW__ no need to add here if "/lang/{ar|en}/validation.php"  has "phone" message
-        return [
-            'phone_number.phone' => trans('validation.phone'),
         ];
     }
 }

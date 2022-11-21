@@ -190,6 +190,7 @@ return [
         'restored_at' => 'تاريخ الاستعادة',
         'result_text_under_image' => 'نص النتيجة أسفل الصورة',
         'role' => 'الصلاحية',
+        'permissions' => 'الأذونات',
         'second' => 'ثانية',
         'sex' => 'الجنس',
         'short_text' => 'نص مختصر',
@@ -209,5 +210,6 @@ return [
         'updated_at' => 'تاريخ التحديث',
         'username' => 'اسم المُستخدم',
         'year' => 'السنة',
+        'phone_number' => 'رقم الهاتف',
     ],
 ];

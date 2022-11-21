@@ -30,8 +30,6 @@ class StoreAdminRequest extends FormRequest
      */
     public function rules()
     {
-        // __REVIEW__ Check if attributes are translated
-        // https://laravel.com/docs/9.x/validation#specifying-attribute-in-language-files
         return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],

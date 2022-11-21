@@ -8,6 +8,7 @@ use App\Http\Requests\V1\Admin\Auth\CompleteAdminRegisterRequest;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class CompleteAdminRegister extends Controller
 {
@@ -17,16 +18,18 @@ class CompleteAdminRegister extends Controller
     }
 
     public function __invoke(
-        // __REVIEW__ move FormRequest to be first argument
-        // __REVIEW__ $user is wrong!!
-        User $user,
         CompleteAdminRegisterRequest $completeAdminRegisterRequest,
+        User $admin,
         CompleteAdminRegistration $completeAdminRegistration
     ): JsonResponse {
-        // __REVIEW__ use DB::transaction(...)
-        // __REVIEW__ adding check on password. If password is not null, this means the user has completed the registration
-        $user = $completeAdminRegistration->handle($user, $completeAdminRegisterRequest->validated());
+        if (! is_null($admin->passowrd)) {
+            return fractal($admin, new UserTransformer)->respond();
+        }
 
-        return fractal($user, new UserTransformer)->respond();
+        DB::transaction(function () use ($completeAdminRegistration, $admin, $completeAdminRegisterRequest) {
+            $completeAdminRegistration->handle($admin, $completeAdminRegisterRequest->validated());
+        });
+
+        return fractal($admin, new UserTransformer)->respond();
     }
 }

@@ -40,9 +40,6 @@ use Modules\Grantify\Facades\Grantify;
 */
 
 Route::prefix('v1/admin')->group(function () {
-    // __REVIEW__ move this route to be the last one since it starts with path variable {admin}
-    Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.complete-register');
-
     Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::put('auth/profile', UpdateMyProfile::class);
@@ -95,4 +92,6 @@ Route::prefix('v1/admin')->group(function () {
         Route::apiResource('enquiries', EnquiryController::class);
         Route::apiResource('enquiries.replies', EnquiryReplyController::class);
     });
+
+    Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.complete-register');
 });

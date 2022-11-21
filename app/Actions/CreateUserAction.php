@@ -37,6 +37,7 @@ class CreateUserAction implements CreateUser
                     'phone_number',
                     'password',
                     'source',
+                    'locale',
                 ]
             )
         );

@@ -61,6 +61,7 @@ class AdminController extends Controller
         CreateAdminWithRoleAndPermission $createAdminWithRoleAndPermission
     ): JsonResponse {
         $data = $createAdminRequest->validated();
+        $data['locale'] = app()->getLocale();
 
         if ($data['role'] == Role::Admin) {
             unset($data['permissions']);
@@ -71,8 +72,7 @@ class AdminController extends Controller
         DB::transaction(function () use ($data, $createAdminWithRoleAndPermission) {
             $admin = $createAdminWithRoleAndPermission->handle($data);
 
-            // __REVIEW__ pass $admin to "to(..)" to utilize the admin locale
-            Mail::to($admin->email)->send(new CompleteAdminRegisterInvitation($admin, $data['redirect_url']));
+            Mail::to($admin)->send(new CompleteAdminRegisterInvitation($admin, $data['redirect_url']));
         });
 
         return $this->successResponse();
@@ -96,8 +96,9 @@ class AdminController extends Controller
                 throw UnauthorizedException::forRoles(Area::getRolesPerAreaMap()[Area::SuperAdmin]);
             }
 
-            // __REVIEW__ use DB::transaction(...)
-            $updateAdminWithRoleAndPermission->handle($updateAdminRequest->validated(), $admin);
+            DB::transaction(function () use ($updateAdminWithRoleAndPermission, $updateAdminRequest, $admin) {
+                $updateAdminWithRoleAndPermission->handle($updateAdminRequest->validated(), $admin);
+            });
 
             return $this->successResponse();
         });
