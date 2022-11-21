@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\CompanyStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,7 +21,7 @@ class CompanyFactory extends Factory
             'name' => $this->faker->company,
             'unique_name' => $this->faker->unique()->domainName,
             'company_cr' => $this->faker->unique()->text(100),
-            'status' => 3,
+            'status' => CompanyStatus::Approved,
             'public_status_comment' => $this->faker->randomLetter,
             'internal_status_comment' => $this->faker->randomLetter,
             'does_order_require_approval' => $this->faker->boolean,
