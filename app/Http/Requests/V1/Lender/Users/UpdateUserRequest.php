@@ -4,6 +4,7 @@ namespace App\Http\Requests\V1\Lender\Users;
 
 use App\Enums\Area;
 use App\Enums\Role;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;

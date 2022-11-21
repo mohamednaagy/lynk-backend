@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\TraderOrderStatus;
 use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -45,6 +46,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'customer_details',
         'status_reason',
         'client_wakala_accepted_at',
+        'is_verification_required',
     ];
 
     protected $casts = [
@@ -168,7 +170,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function scopeActive($query)
     {
-        return $query->whereIn('status', [FinancingOrderStatus::PendingApproval, FinancingOrderStatus::InProgress]);
+        return $query->whereIn('status', [FinancingOrderStatus::PendingApproval, FinancingOrderStatus::Approved]);
     }
 
     public function scopeCompleted($query)
@@ -185,5 +187,10 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
                 $query->where('creator_id', $model->getKey());
             }
         );
+    }
+
+    public function activeTraderOrder()
+    {
+        return $this->traderOrders()->where('status', TraderOrderStatus::InProgress)->latest();
     }
 }

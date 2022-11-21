@@ -1,7 +1,7 @@
 <?php
 
+// use App\Http\Controllers\Api\V1\Lender\Media\DownloadMediaFile;
 use Illuminate\Support\Facades\Route;
-use Modules\Otpify\Http\Controllers\OtpifyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,7 +14,7 @@ use Modules\Otpify\Http\Controllers\OtpifyController;
 |
 */
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/generate-otp', [OtpifyController::class, 'generateOtp']);
-    Route::post('/verify-otp', [OtpifyController::class, 'verifyOtpCode']);
-});
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::post('/generate-otp', [OtpifyController::class, 'generateOtp']);
+//     Route::post('/verify-otp', [OtpifyController::class, 'verifyOtpCode']);
+// });

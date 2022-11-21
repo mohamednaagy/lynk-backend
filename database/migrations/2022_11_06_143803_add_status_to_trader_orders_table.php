@@ -14,7 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('trader_orders', function (Blueprint $table) {
-            $table->integer('status')->after('data');
+            $table->unsignedTinyInteger('status')->after('data');
             $table->dropColumn('type');
         });
     }

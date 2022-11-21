@@ -26,10 +26,11 @@ class OrderController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Index]))->only('index');
-        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Show]))->only('show');
-        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Create]))->only('store');
-        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Edit]))->only('update');
+        // __REVIEW__ break down long line to be easy to read
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Index, Action::Manage]))->only('index');
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Show, Action::Manage]))->only('show');
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Create, Action::Manage]))->only('store');
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Edit, Action::Manage]))->only('update');
     }
 
     /**
@@ -40,6 +41,7 @@ class OrderController extends Controller
     {
         $financingOrders = $getPaginatedOrders->handle();
 
+        // __REVIEW__ remove excludes
         return fractal($financingOrders, new FinancingOrderTransformer())
             ->parseExcludes(['contract', 'power_of_attorney'])
             ->respond();
@@ -71,6 +73,14 @@ class OrderController extends Controller
     {
         return DB::transaction(
             static function () use ($createFinancingOrder, $request) {
+                // __REVIEW__ before creating order, check if enough balance exists or not
+                // If balance is not enough, return custom exception called BalanceIsNotEnough that will render
+                // the following
+                // "message": "No engouh balance", //english
+                // "message": "لا يوجد رصيد كافي" , //arabic
+                // "code": "Suitable error code"
+                // See example Modules/Otpify/Exceptions/OtpCodeExpiredException.php
+
                 $status = tenant()->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval
                     : FinancingOrderStatus::WaitingClientWakala;
@@ -85,9 +95,12 @@ class OrderController extends Controller
                             'creator_id' => $user->id,
                             'creator_type' => $user->getMorphClass(),
                             'approved_at' => $status === FinancingOrderStatus::WaitingClientWakala ? now() : null,
+                            'is_verification_required' => true,
                         ]
                     )
                 );
+
+                //__REVIEW__ we should deduct from the company wallet here
 
                 $notification = 'notification model';
                 $admins = User::role([Role::LenderAdmin, Role::LenderSupervisor])->get();

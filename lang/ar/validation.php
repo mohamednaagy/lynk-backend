@@ -131,6 +131,7 @@ return [
     'national_id_wrong_format' => 'رقم الهوية غير صحيح',
     'host_whitelist' => 'حقل :attribute غير موثوق فيه.',
     'phone' => 'حقل :attribute رقم هاتف غير صحيح.',
+    'webhook_type_limit' => 'لا يمكن استخدام هذا النوع أكثر من :limit مرات',
     'custom_validation' => [
         'phone_number_does_not_belong_to_national_id' => 'Phone number doesn’t belong to National ID/Iqama',
         'invalid_person_id' => 'Invalid National ID',

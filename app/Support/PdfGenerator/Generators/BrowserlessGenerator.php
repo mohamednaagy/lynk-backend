@@ -58,14 +58,12 @@ class BrowserlessGenerator implements GeneratorInterface
                     'sink' => $tmpFileResource,
                 ])
                 ->post('pdf', $this->prepareRequestData($html, $options));
-
             if (! $response->ok()) {
                 throw new GeneratingPdfException([
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
             }
-
             $storedFile = $storageCallback($tmpFileResource);
 
             fclose($tmpFileResource);
