@@ -7,4 +7,5 @@ return [
     'media_class_not_supported' => 'This class not supported',
     'order_status_doesnt_follow_sequence' => 'Order status cannot be updated because it doesn\'t follow the right sequence',
     'webhook_type_not_supported' => 'Unsupported webhook type',
+    'must_verify_email' => 'You must verify your email address',
 ];
