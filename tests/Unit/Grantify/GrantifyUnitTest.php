@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Endpoints\V1\Grantify;
+namespace Tests\Unit\Grantify;
 
 use App\Actions\AssignPermissionToUserAction;
 use App\Actions\AssignRoleToUserAction;

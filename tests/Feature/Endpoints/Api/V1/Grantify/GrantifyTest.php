@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\V1\Grantify;
+namespace Tests\Feature\Endpoints\Api\V1\Grantify;
 
 use App\Enums\Action;
 use App\Enums\Area;
