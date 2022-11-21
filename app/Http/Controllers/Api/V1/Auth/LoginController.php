@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Actions\Contracts\LoginUser;
-use App\Enums\NotificationType;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Auth\LoginRequest;
@@ -17,7 +16,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Jenssegers\Agent\Agent;
+use Jenssegers\Agent\Facades\Agent;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
 
@@ -53,17 +52,10 @@ class LoginController extends Controller
                 'email' => __('auth.failed'),
             ]);
         }
-        $agent = new Agent();
-        $platform = $agent->platform();
-        $device = $agent->device();
-        $browser = $agent->browser();
-        $ipAddress = request()->ip();
-        $timeLogin = Carbon::now()->toDateTimeString();
 
         if (! $user->hasRole(Role::LenderApiUser)) {
-            $user->notify(new LoginNotification($ipAddress, $timeLogin, $device, $platform, $browser));
+            $user->notify(new LoginNotification(request()->ip(), Carbon::now()->toDateTimeString(), Agent::device(), Agent::platform(), Agent::browser()));
         }
-        $user->unreadNotifications()->update(['notifiable_type' => NotificationType::NewSignIn]);
 
         return $this->successResponse(
             $loginUser->handle($user, $request->validated('source'), $request)

@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Enums\NotificationType;
 use DragonCode\Contracts\Queue\ShouldQueue;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -56,6 +57,7 @@ class LoginNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject(__('emails/login-notification.subject'))
+            ->metadata('notifiable_type', NotificationType::NewSignIn)
             ->markdown('emails.login-notification', [
                 'timeLogin' => $this->timeLogin,
                 'ipAddress' => $this->ipAddress,
@@ -79,5 +81,10 @@ class LoginNotification extends Notification implements ShouldQueue
             'platform' => $this->platform,
             'browser' => $this->browser,
         ];
+    }
+
+    public function databaseType()
+    {
+        return NotificationType::NewSignIn;
     }
 }

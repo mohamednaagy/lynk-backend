@@ -1,9 +1,9 @@
 <x-mail::message>
- {{__('emails/login-notification.greet')}}
+ {{__('Hello')}}
  <br>
  {{__('emails/login-notification.body')}}
  <br>
- {{__('emails/login-notification.ip-address')}}
+ {{__('emails/login-notification.ip_address')}}
  {{$ipAddress}}
  <br>
  {{__('emails/login-notification.at')}}{{$timeLogin}}
@@ -14,6 +14,6 @@
  <br>
  {{__('emails/login-notification.browser')}}{{$browser}}
 
-Thanks,<br>
+{{__('Thanks,')}} <br>
 {{ config('app.name') }}
 </x-mail::message>
