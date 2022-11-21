@@ -7,11 +7,9 @@ use Bavix\Wallet\Interfaces\Wallet;
 use Bavix\Wallet\Traits\HasWallet;
 use Bavix\Wallet\Traits\HasWalletFloat;
 use Bavix\Wallet\Traits\HasWallets;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Crypt;
 use Stancl\Tenancy\Database\Concerns\HasScopedValidationRules;
 use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
@@ -67,12 +65,5 @@ class Company extends BaseTenant implements Wallet
     public function webhooks(): HasMany
     {
         return $this->hasMany(Webhook::class);
-    }
-
-    public function webhookSecretKey(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => Crypt::decryptString($value),
-        );
     }
 }
