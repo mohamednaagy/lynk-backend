@@ -168,6 +168,6 @@ return [
     'attributes' => [
         'company_unique_name' => 'company identifier',
         'company_cr' => 'company CR',
+        'national_id' => 'national ID',
     ],
-
 ];
