@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Api\V1\Lender\Orders;
 use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
-use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Enums\FinancingOrderStatus;
-use App\Exceptions\BalanceIsNotEnoughException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\CreateOrderWithoutVerificationRequest;
 use App\Transformers\FinancingOrderTransformer;
@@ -26,16 +24,14 @@ class CreateOrderWithoutVerification extends Controller
         CreateOrderWithoutVerificationRequest $request,
         CreateFinancingOrder $createFinancingOrder,
         GenerateClientWakala $generateWakala,
-        CreateTransactions $createTransactions
+        DeductOrderCreationFee $deductOrderCreationFee,
+        CanCreateOrder $canCreateOrder
     ) {
         return DB::transaction(
-            function () use ($createFinancingOrder, $request, $generateWakala, $createTransactions) {
+            function () use ($request, $createFinancingOrder, $generateWakala, $deductOrderCreationFee, $canCreateOrder) {
                 $company = tenant();
                 // throw exception is balance not enough
-
-                if (! app(CanCreateOrder::class)->handle($company)) {
-                    throw new BalanceIsNotEnoughException();
-                }
+                $canCreateOrder->handle($company);
 
                 $financingOrder = $createFinancingOrder->handle(
                     array_merge(
@@ -51,7 +47,7 @@ class CreateOrderWithoutVerification extends Controller
                 );
 
                 // deduct the cost from the wallet
-                app(DeductOrderCreationFee::class)->handle($createTransactions, $financingOrder);
+                $deductOrderCreationFee->handle($financingOrder);
 
                 $generateWakala->handle($financingOrder);
 

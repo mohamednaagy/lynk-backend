@@ -10,12 +10,19 @@ use App\Models\FinancingOrder;
 
 class DeductOrderCreationFeeAction implements DeductOrderCreationFee
 {
-    public function handle(CreateTransactions $createTransactions, FinancingOrder $financingOrder)
+    protected $createTransactions;
+
+    public function __construct(CreateTransactions $createTransactions)
+    {
+        $this->createTransactions = $createTransactions;
+    }
+
+    public function handle(FinancingOrder $financingOrder)
     {
         $company = $financingOrder->company;
         $wallet = $company->getWallet(WalletType::CompanyWallet);
 
-        return $createTransactions->handle(
+        return $this->createTransactions->handle(
             $wallet,
             TransactionReason::OrderCreationFee,
             $company->order_cost,

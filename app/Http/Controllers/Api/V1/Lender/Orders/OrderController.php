@@ -6,14 +6,12 @@ use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
-use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
-use App\Exceptions\BalanceIsNotEnoughException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
@@ -29,12 +27,12 @@ class OrderController extends Controller
     {
         $this->middleware(
             'permission:'.
-        perm(Area::Lender, [Subject::FinancingOrders, Action::Index, Action::Manage])
+            perm(Area::Lender, [Subject::FinancingOrders, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-             perm(Area::Lender, [Subject::FinancingOrders, Action::Show, Action::Manage])
+            perm(Area::Lender, [Subject::FinancingOrders, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
@@ -112,15 +110,14 @@ class OrderController extends Controller
     public function store(
         StoreOrderRequest $request,
         CreateFinancingOrder $createFinancingOrder,
-        CreateTransactions $createTransactions
+        DeductOrderCreationFee $deductOrderCreationFee,
+        CanCreateOrder $canCreateOrder
     ): JsonResponse {
         return DB::transaction(
-            function () use ($createFinancingOrder, $createTransactions, $request) {
+            function () use ($request, $createFinancingOrder, $deductOrderCreationFee, $canCreateOrder) {
                 $company = tenant();
                 // throw exception is balance not enough
-                if (! app(CanCreateOrder::class)->handle($company)) {
-                    throw new BalanceIsNotEnoughException();
-                }
+                $canCreateOrder->handle($company);
 
                 $status = tenant()->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval
@@ -142,7 +139,7 @@ class OrderController extends Controller
                 );
 
                 // deduct the cost from the wallet
-                app(DeductOrderCreationFee::class)->handle($createTransactions, $financingOrder);
+                $deductOrderCreationFee->handle($financingOrder);
 
                 return fractal($financingOrder, new FinancingOrderTransformer())
                     ->parseIncludes([

@@ -6,5 +6,5 @@ use App\Models\FinancingOrder;
 
 interface DeductOrderCreationFee
 {
-    public function handle(CreateTransactions $createTransactions, FinancingOrder $financingOrder);
+    public function handle(FinancingOrder $financingOrder);
 }

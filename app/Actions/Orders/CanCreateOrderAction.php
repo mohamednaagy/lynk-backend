@@ -4,6 +4,7 @@ namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Enums\WalletType;
+use App\Exceptions\BalanceIsNotEnoughException;
 use App\Models\Company;
 
 class CanCreateOrderAction implements CanCreateOrder
@@ -12,6 +13,10 @@ class CanCreateOrderAction implements CanCreateOrder
     {
         $wallet = $company->getWallet(WalletType::CompanyWallet);
 
-        return $wallet->balance > tenant()->order_cost;
+        if ($wallet->balance >= $company->order_cost) {
+            return true;
+        }
+
+        throw new BalanceIsNotEnoughException();
     }
 }
