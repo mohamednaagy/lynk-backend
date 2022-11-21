@@ -50,7 +50,7 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (TenantCouldNotBeIdentifiedByRequestDataException $e, $request) {
-            return response()->errorResponse(__('Invalid Company id'), code: ErrorCode::X_COMPANY_INVALID);
+            return response()->errorResponse(trans('error.x_company_invalid'), code: ErrorCode::X_COMPANY_INVALID);
         });
     }
 }
