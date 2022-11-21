@@ -166,10 +166,8 @@ return [
      */
 
     'attributes' => [
-        'phone_number' => 'Phone Number',
-        'company_name' => 'Company Name',
-        'company_unique_name' => 'Company unique name',
-        'company_cr' => 'Company CR',
+        'company_unique_name' => 'company identifier',
+        'company_cr' => 'company CR',
     ],
 
 ];

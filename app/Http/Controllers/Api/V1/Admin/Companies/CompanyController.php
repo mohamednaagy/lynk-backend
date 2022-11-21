@@ -49,7 +49,6 @@ class CompanyController extends Controller
     ): JsonResponse {
         $data = $createCompanyRequest->validated();
         $data['status'] = $getSettingsClassInstance->handle(Area::Lender)->default_company_status_created_by_operation;
-        $data['does_order_require_approval'] = $getSettingsClassInstance->handle(Area::Lender)->default_does_order_require_approval;
 
         $createCompany->handle($data);
 
