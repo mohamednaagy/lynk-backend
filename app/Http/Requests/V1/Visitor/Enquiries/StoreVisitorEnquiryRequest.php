@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1\Visitor\Enquiries;
 
 use App\Rules\HostWhitelistRule;
+use App\Rules\UrlProtocolRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreVisitorEnquiryRequest extends FormRequest
@@ -31,7 +32,7 @@ class StoreVisitorEnquiryRequest extends FormRequest
             'email' => ['required', 'email', 'max:255'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
-            'redirect_url' => ['required', 'url', new HostWhitelistRule()],
+            'redirect_url' => ['required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
         ];
     }
 }

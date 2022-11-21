@@ -5,6 +5,7 @@ namespace App\Http\Requests\V1\Admin;
 use App\Enums\Action;
 use App\Enums\Subject;
 use App\Rules\HostWhitelistRule;
+use App\Rules\UrlProtocolRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -36,7 +37,7 @@ class StoreAdminRequest extends FormRequest
             'permissions.*.subject' => ['required', 'string', new EnumValue(Subject::class)],
             'permissions.*.actions' => ['required', 'array'],
             'permissions.*.actions.*' => ['required', 'string', new EnumValue(Action::class)],
-            'redirect_url' => ['required', 'url', new HostWhitelistRule()],
+            'redirect_url' => ['required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
         ];
     }
 }

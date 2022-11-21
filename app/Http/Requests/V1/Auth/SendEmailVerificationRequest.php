@@ -4,6 +4,7 @@ namespace App\Http\Requests\V1\Auth;
 
 use App\Models\User;
 use App\Rules\HostWhitelistRule;
+use App\Rules\UrlProtocolRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -23,7 +24,7 @@ class SendEmailVerificationRequest extends FormRequest
     {
         return [
             'email' => ['sometimes', 'email', Rule::unique(User::class, 'email')->ignore($this->user()->id)],
-            'redirect_url' => ['required', 'url', new HostWhitelistRule],
+            'redirect_url' => ['required', 'url', new UrlProtocolRule(), new HostWhitelistRule],
         ];
     }
 }

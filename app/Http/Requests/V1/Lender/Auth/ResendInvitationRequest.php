@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1\Lender\Auth;
 
 use App\Rules\HostWhitelistRule;
+use App\Rules\UrlProtocolRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ResendInvitationRequest extends FormRequest
@@ -25,7 +26,7 @@ class ResendInvitationRequest extends FormRequest
     public function rules()
     {
         return [
-            'redirect_url' => ['required', 'url', new HostWhitelistRule()],
+            'redirect_url' => ['required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
         ];
     }
 }

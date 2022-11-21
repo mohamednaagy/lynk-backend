@@ -130,6 +130,8 @@ return [
     'national_id_wrong_format' => 'National ID format is not valid',
     'host_whitelist' => 'The :attribute is not whitelisted.',
     'phone' => 'The :attribute is not valid phone number.',
+    'url_protocol' => 'The :attribute must start with one of the following URL protocols: :values.',
+
     'custom_validation' => [
         'phone_number_not_matched' => 'Phone number does\'t belong to national ID/Iqama',
         'invalid_person_id' => 'Invalid national ID/Iqama',
