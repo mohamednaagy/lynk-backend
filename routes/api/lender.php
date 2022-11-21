@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\V1\Lender\Wallets\CreateEdaatInvoice;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetBalance;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetWalletTransactions;
+use App\Http\Controllers\Api\V1\Lender\Webhooks\WebhookController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
@@ -78,6 +79,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
                 Route::post('/invoice', CreateEdaatInvoice::class);
             });
 
+            Route::post('webhooks', [WebhookController::class, 'store']);
             Route::apiResource('enquiries', EnquiryController::class);
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)
                 ->only('index', 'store');
