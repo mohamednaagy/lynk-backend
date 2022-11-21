@@ -228,6 +228,7 @@ return [
         'username' => 'اسم المُستخدم',
         'year' => 'السنة',
         'phone_number' => 'رقم الهاتف',
+        'phone_country_code ' => 'رمز بلد الهاتف',
         'company_name' => 'اسم الشركة',
         'company_unique_name' => 'معرف الشركة',
         'company_cr' => 'رقم السجل التجاري للشركة',

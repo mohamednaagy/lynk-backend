@@ -164,6 +164,11 @@ return [
      |
      */
 
-    'attributes' => [],
+    'attributes' => [
+        'phone_number' => 'Phone Number',
+        'company_name' => 'Company Name',
+        'company_unique_name' => 'Company unique name',
+        'company_cr' => 'Company CR',
+    ],
 
 ];
