@@ -164,6 +164,13 @@ return [
      |
      */
 
-    'attributes' => [],
+    'attributes' => [
+        'phone_number' => 'Phone number',
+        'phone_country_code' => 'Phone Country Code',
+        'reference_number' => 'Reference Number',
+        'national_id' => 'National ID',
+        'selling_price' => 'Selling Price',
+
+    ],
 
 ];

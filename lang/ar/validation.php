@@ -212,7 +212,7 @@ return [
         'phone_number' => 'رقم الهاتف',
         'phone_country_code' => 'رمز بلد الهاتف',
         'reference_number' => 'الرقم المرجعي',
-        'national_id' => 'الرقم القومي',
+        'national_id' => 'رقم الهوية/الإقامة',
         'selling_price' => 'سعر البيع',
     ],
 ];
