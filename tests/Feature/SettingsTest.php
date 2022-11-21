@@ -60,6 +60,7 @@ class SettingsTest extends TestCase
         $data = [
             'area' => Area::SuperAdmin,
             'otp_driver' => 'twilio',
+            'otp_enabled' => true,
         ];
 
         $response = $this->withToken($token)->putJson('api/v1/admin/settings/update', $data);

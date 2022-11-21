@@ -48,6 +48,7 @@ class SettingsUnitTest extends TestCase
         $data = [
             'area' => Area::SuperAdmin,
             'otp_driver' => 'email',
+            'otp_enabled' => true,
         ];
         $updateSettingsAction->handle($data);
 

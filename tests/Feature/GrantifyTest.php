@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,7 +17,7 @@ class GrantifyTest extends TestCase
 
     public function test_get_roles_throw_exception_for_unauthorized_user(): void
     {
-        $token = $this->login();
+        $token = $this->login(Role::LenderAdmin);
         $authorizationToken = $this->createUserAuthorizationToken();
         // get auth user data
         $getOtpCodeResponse = $this->withToken($token)->getJson('api/v1/admin/roles', [
@@ -48,7 +49,7 @@ class GrantifyTest extends TestCase
 
     public function test_get_permissions_for_unauthorized_user(): void
     {
-        $token = $this->login();
+        $token = $this->login(Role::LenderAdmin);
         $authorizationToken = $this->createUserAuthorizationToken();
         // get auth user data
         $getOtpCodeResponse = $this->withToken($token)->getJson('api/v1/admin/roles', [
