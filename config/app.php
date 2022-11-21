@@ -187,6 +187,7 @@ return [
         App\Providers\EdaatServiceProvider::class,
         App\Providers\PdfGeneratorServiceProvider::class,
         App\Providers\MobileVerifyServiceProvider::class,
+        App\Providers\WalletServiceProvider::class,
         // \Shivella\Bitly\BitlyServiceProvider::class,
     ],
 
