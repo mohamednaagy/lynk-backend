@@ -130,6 +130,7 @@ return [
     'uuid' => 'حقل :attribute يجب أن يكون بصيغة UUID سليمة.',
     'national_id_wrong_format' => 'رقم الهوية غير صحيح',
     'host_whitelist' => 'حقل :attribute غير موثوق فيه.',
+    'webhook_type_limit' => 'لا يمكن استخدام هذا النوع أكثر من :limit مرات',
     'phone' => 'الحقل :attribute يحتوي على رقم هاتف غير صحيح',
     'custom_validation' => [
         'phone_number_does_not_belong_to_national_id' => 'Phone number doesn’t belong to National ID/Iqama',

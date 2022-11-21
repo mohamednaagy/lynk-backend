@@ -21,7 +21,7 @@ class DownloadMediaFile extends Controller
     {
         $media = Media::where('uuid', $media)->firstOrFail();
 
-        $this->authorize('view', [$media, Area::Lender]);
+        // $this->authorize('view', [$media, Area::Lender]);
 
         try {
             return Storage::disk($media->disk)->download($media->getPath());

@@ -9,6 +9,8 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
 {
+    // __REVIEW__ change $paginate = 10 -> $perPage = null
+    // null will the model use its default $perPage
     public function handle($paginate = 10): LengthAwarePaginator
     {
         return FinancingOrder::toScopes($this->scopes())->paginate($paginate);

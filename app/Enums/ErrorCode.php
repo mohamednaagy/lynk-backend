@@ -25,4 +25,8 @@ class ErrorCode
     public const FILE_NOT_FOUND = 1009;
 
     public const UNABLE_TO_CANCEL_ORDER = 1010;
+
+    public const ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE = 1011;
+
+    public const WEBHOOK_LIMIT_TYPE_NOT_FOUND = 1012;
 }

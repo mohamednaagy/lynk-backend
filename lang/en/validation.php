@@ -130,6 +130,7 @@ return [
     'national_id_wrong_format' => 'National ID format is not valid',
     'host_whitelist' => 'The :attribute is not whitelisted.',
     'phone' => 'The :attribute is not a valid phone number.',
+    'webhook_type_limit' => 'This webhook couldn\'t be used more than :limit time(s)',
     'custom_validation' => [
         'phone_number_not_matched' => 'Phone number does\'t belong to national ID/Iqama',
         'invalid_person_id' => 'Invalid national ID/Iqama',

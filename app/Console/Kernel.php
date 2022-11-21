@@ -17,7 +17,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->job(new ProcessFinancingOrders())->everyTwoMinutes()->withoutOverlapping();
+        $schedule->job(new ProcessFinancingOrders())->everyMinute()->withoutOverlapping();
         $schedule->job(new ProcessDmccNotifications())->everyMinute()->withoutOverlapping();
     }
 

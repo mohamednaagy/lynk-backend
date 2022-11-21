@@ -44,7 +44,7 @@ class UserController extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($storeUserRequest, $createLenderWithRoleAndPermission) {
             $user = $createLenderWithRoleAndPermission->handle($storeUserRequest->validated());
-            $invitationUrl = $storeUserRequest->safeInput('redirect_url');
+            $invitationUrl = $storeUserRequest->validated('redirect_url');
             Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
             return fractal($user, new UserTransformer())->respond();

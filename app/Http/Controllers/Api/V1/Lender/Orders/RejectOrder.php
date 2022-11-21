@@ -19,8 +19,11 @@ class RejectOrder extends Controller
      * @param  FinancingOrder  $order
      * @return JsonResponse
      */
+    // __REVIEW__ break down the arguments on lines to be easier to read
     public function __invoke(RejectOrderRequest $rejectOrderRequest, RejectOrderInterface $rejectOrder, FinancingOrder $order): JsonResponse
     {
+        // __REVIEW__ use $order->status->cantMoveTo(...)
+        // See app/Http/Controllers/Api/V1/Lender/Orders/MakeOrderProceed.php for reference
         if (! $order->status->is(FinancingOrderStatus::PendingApproval)) {
             return $this->errorResponse(
                 __('error.order_cannot_be_approved_because_it_is_approved')
