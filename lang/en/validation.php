@@ -129,7 +129,8 @@ return [
     'uuid' => 'The :attribute must be a valid UUID.',
     'national_id_wrong_format' => ':attribute format is not valid',
     'host_whitelist' => 'The :attribute is not whitelisted.',
-    'phone' => 'The :attribute is not valid phone number.',
+    'phone' => 'The :attribute is not a valid phone number.',
+    'webhook_type_limit' => 'This webhook couldn\'t be used more than :limit time(s)',
     'custom_validation' => [
     ],
     /*
@@ -144,8 +145,8 @@ return [
      */
 
     'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
+        'company_unique_name' => [
+            'regex' => 'Identifier should contain only English letters, numbers and _. It should start with English letter',
         ],
     ],
     /*
@@ -160,7 +161,8 @@ return [
      */
 
     'attributes' => [
+        'company_unique_name' => 'company identifier',
+        'company_cr' => 'company CR',
         'national_id' => 'national ID',
     ],
-
 ];

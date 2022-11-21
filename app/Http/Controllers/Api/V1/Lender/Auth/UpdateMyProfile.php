@@ -17,7 +17,7 @@ class UpdateMyProfile extends Controller
      * @param  UpdateMyProfileRequest  $updateLenderRequest
      * @return \Illuminate\Http\JsonResponse
      */
-    public function __invoke(UpdateUser $updateUser, UpdateMyProfileRequest $updateLenderRequest)
+    public function __invoke(UpdateMyProfileRequest $updateLenderRequest, UpdateUser $updateUser)
     {
         $validated = $updateLenderRequest->validated();
 

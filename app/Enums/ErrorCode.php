@@ -29,4 +29,6 @@ class ErrorCode
     public const ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE = 1011;
 
     public const BALANCE_NOT_ENOUGH = 1012;
+
+    public const WEBHOOK_LIMIT_TYPE_NOT_FOUND = 1013;
 }

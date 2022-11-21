@@ -130,9 +130,28 @@ return [
     'uuid' => 'حقل :attribute يجب أن يكون بصيغة UUID سليمة.',
     'national_id_wrong_format' => ':attribute غير صحيح',
     'host_whitelist' => 'حقل :attribute غير موثوق فيه.',
-    'phone' => 'حقل :attribute رقم هاتف غير صحيح.',
+    'webhook_type_limit' => 'لا يمكن استخدام هذا النوع أكثر من :limit مرات',
+    'phone' => 'الحقل :attribute يحتوي على رقم هاتف غير صحيح',
     'custom_validation' => [
     ],
+
+    /*
+     |--------------------------------------------------------------------------
+     | Custom Validation Language Lines
+     |--------------------------------------------------------------------------
+     |
+     | Here you may specify custom validation messages for attributes using the
+     | convention "attribute.rule" to name the lines. This makes it quick to
+     | specify a specific custom language line for a given attribute rule.
+     |
+     */
+
+    'custom' => [
+        'company_unique_name' => [
+            'regex' => 'يجب أن يحتوي المعرف على أحرف إنجليزية وأرقام و _ فقط. بالإضافة يجب أن يبدأ بحرف إنجليزي',
+        ],
+    ],
+
     'attributes' => [
         'address' => 'العنوان',
         'age' => 'العمر',
@@ -154,7 +173,7 @@ return [
         'description' => 'الوصف',
         'district' => 'الحي',
         'duration' => 'المدة',
-        'email' => 'البريد الالكتروني',
+        'email' => 'البريد الإلكتروني',
         'excerpt' => 'المُلخص',
         'filter' => 'تصفية',
         'first_name' => 'الاسم الأول',
@@ -205,6 +224,14 @@ return [
         'updated_at' => 'تاريخ التحديث',
         'username' => 'اسم المُستخدم',
         'year' => 'السنة',
-        'national_id' => 'رقم الهوية',
+        'phone_number' => 'رقم الهاتف',
+        'company_name' => 'اسم الشركة',
+        'company_unique_name' => 'معرف الشركة',
+        'company_cr' => 'رقم السجل التجاري للشركة',
+        'source' => 'المصدر',
+        'phone_country_code' => 'رمز بلد الهاتف',
+        'reference_number' => 'الرقم المرجعي',
+        'national_id' => 'رقم الهوية/الإقامة',
+        'selling_price' => 'سعر البيع',
     ],
 ];

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Endpoints\Api\V1\Auth;
 
 use App\Models\Company;
 use App\Models\User;

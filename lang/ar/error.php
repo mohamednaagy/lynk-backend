@@ -11,4 +11,6 @@ return [
     'invalid_mobile_number' => 'رقم الهاتف غير صحيح',
     'no_enough_balance' => 'لا يوجد رصيد كافي',
     'order_status_doesnt_follow_sequence' => 'حالة الطلب التمويلي لا يمكن تغييرها لأنها لا تتبع التسلسل الصحيح',
+    'webhook_type_not_supported' => 'هذا النوع غير مدعوم',
+    'must_verify_email' => 'يجب عليك التحقق من البريد الإلكتروني',
 ];
