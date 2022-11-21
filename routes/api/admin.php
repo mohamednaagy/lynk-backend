@@ -95,6 +95,6 @@ Route::prefix('v1/admin')->group(function () {
         Route::apiResource('enquiries', EnquiryController::class);
         Route::apiResource('enquiries.replies', EnquiryReplyController::class);
 
-        Route::get('media/download-file', DownloadMedia::class);
+        Route::get('media/{media}/download', DownloadMedia::class);
     });
 });
