@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Settings;
+namespace Tests\Unit\Endpoints\V1\Settings;
 
 use App\Actions\GetSettingsAreaAction;
 use App\Actions\GetSettingsClassInstanceAction;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Settings;
+namespace Tests\Feature\Endpoints\V1\Settings;
 
 use App\Enums\Area;
 use Illuminate\Foundation\Testing\RefreshDatabase;
