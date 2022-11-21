@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Grantify;
 
 use App\Actions\AssignPermissionToUserAction;
 use App\Actions\AssignRoleToUserAction;
@@ -49,9 +49,12 @@ class GrantifyUnitTest extends TestCase
     {
         // expected permission format from the font-end
         $permission = [
-            Area::SuperAdmin.'-'.Subject::Customers => [
-                Action::Index,
-                Action::Create,
+            [
+                'subject' => Area::SuperAdmin.'-'.Subject::Admins,
+                'actions' => [
+                    Action::Index,
+                    Action::Create,
+                ],
             ],
         ];
         // assign the permissions to the user
@@ -67,7 +70,9 @@ class GrantifyUnitTest extends TestCase
 
         // invalid permission format
         $permission = [
-            Area::SuperAdmin.'-'.Action::Create.'.'.Subject::Customers,
+            0 => [
+                'subject' => Area::SuperAdmin.'-'.Action::Create.'.'.Subject::Admins,
+            ],
         ];
         $assignPermissionToUser = new AssignPermissionToUserAction();
         $assignPermissionToUser->handle($this->user, $permission);
@@ -102,20 +107,28 @@ class GrantifyUnitTest extends TestCase
     {
         // expected permission format from the font-end
         $permissionAssign = [
-            Area::SuperAdmin.'-'.Subject::Customers => [
-                Action::Index,
-                Action::Delete,
+            0 => [
+                'subject' => Area::SuperAdmin.'-'.Subject::Admins,
+                'actions' => [
+                    Action::Index,
+                    Action::Delete,
+                ],
             ],
         ];
 
         $permissionSync = [
-            Area::SuperAdmin.'-'.Subject::Customers => [
-                Action::Index,
-                Action::Delete,
+            0 => [
+                'subject' => Area::SuperAdmin.'-'.Subject::Dashboard,
+                'actions' => [
+                    Action::Show,
+                ],
             ],
-            Area::SuperAdmin.'-'.Subject::Admins => [
-                Action::Index,
-                Action::Edit,
+            1 => [
+                'subject' => Area::SuperAdmin.'-'.Subject::Admins,
+                'actions' => [
+                    Action::Index,
+                    Action::Delete,
+                ],
             ],
         ];
 
@@ -135,7 +148,7 @@ class GrantifyUnitTest extends TestCase
 
         // expected permission format from the font-end
         $permissionAssign = [
-            Area::SuperAdmin.'-'.Subject::Customers => [
+            Area::SuperAdmin.'-'.Subject::Admins => [
                 Action::Index,
                 Action::Delete,
             ],
@@ -144,7 +157,7 @@ class GrantifyUnitTest extends TestCase
         // invalid permission
         $permissionSync = [
             Area::SuperAdmin.'-'.Action::Create => [
-                Subject::Customers,
+                Subject::Admins,
             ],
             Area::SuperAdmin.'-'.Action::Delete => [
                 Subject::Admins,
