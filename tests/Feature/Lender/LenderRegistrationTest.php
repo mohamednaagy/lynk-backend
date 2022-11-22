@@ -2,10 +2,11 @@
 
 namespace Tests\Feature\Lender;
 
+use App\Models\Company;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class LenderRegisterationTest extends TestCase
+class LenderRegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -304,5 +305,133 @@ class LenderRegisterationTest extends TestCase
                 ],
             ]
         );
+    }
+
+    public function test_register_lender_throw_exception_on_exist_company_unique_name(): void
+    {
+        $companyTest = $this->createCompany();
+
+        $response = $this->postJson('/api/v1/lender/register', [
+            'first_name' => 'youssof',
+            'last_name' => 'okiel',
+            'phone_country_code' => 'SA',
+            'phone_number' => '503811000',
+            'email' => 'y.okiel@g.c',
+            'password' => 'Qwer@1234',
+            'password_confirmation' => 'Qwer@1234',
+            'source' => 'Postman',
+            'company_name' => 'test',
+            'company_unique_name' => 'CompanyTest1',
+            'company_cr' => '123456789101',
+        ]);
+
+        $response->assertStatus(422)->assertExactJson(
+            [
+                'message' => 'The company unique name has already been taken.',
+                'errors' => [
+                    'company_unique_name' => [
+                        'The company unique name has already been taken.',
+                    ],
+                ],
+            ]
+        );
+    }
+
+    public function test_register_lender_throw_exception_on_empty_company_cr(): void
+    {
+        $response = $this->postJson('/api/v1/lender/register', [
+            'first_name' => 'youssof',
+            'last_name' => 'okiel',
+            'phone_country_code' => 'SA',
+            'phone_number' => '503811000',
+            'email' => 'y.okiel@g.c',
+            'password' => 'Qwer@1234',
+            'password_confirmation' => 'Qwer@1234',
+            'source' => 'Postman',
+            'company_name' => 'test',
+            'company_unique_name' => 'CompanyTest0',
+            'company_cr' => '',
+        ]);
+
+        $response->assertStatus(422)->assertExactJson(
+            [
+                'message' => 'The company cr field is required.',
+                'errors' => [
+                    'company_cr' => [
+                        'The company cr field is required.',
+                    ],
+                ],
+            ]
+        );
+    }
+
+    public function test_register_lender_throw_exception_on_exist_company_cr(): void
+    {
+        $companyTest = $this->createCompany();
+
+        $response = $this->postJson('/api/v1/lender/register', [
+            'first_name' => 'youssof',
+            'last_name' => 'okiel',
+            'phone_country_code' => 'SA',
+            'phone_number' => '503811000',
+            'email' => 'y.okiel@g.c',
+            'password' => 'Qwer@1234',
+            'password_confirmation' => 'Qwer@1234',
+            'source' => 'Postman',
+            'company_name' => 'test',
+            'company_unique_name' => 'CompanyTest2',
+            'company_cr' => '123',
+        ]);
+
+        $response->assertStatus(422)->assertExactJson(
+            [
+                'message' => 'The company cr has already been taken.',
+                'errors' => [
+                    'company_cr' => [
+                        'The company cr has already been taken.',
+                    ],
+                ],
+            ]
+        );
+    }
+
+    public function test_register_lender_throw_exception_on_empty_source(): void
+    {
+        $response = $this->postJson('/api/v1/lender/register', [
+            'first_name' => 'youssof',
+            'last_name' => 'okiel',
+            'phone_country_code' => 'SA',
+            'phone_number' => '503811000',
+            'email' => 'y.okiel@g.c',
+            'password' => 'Qwer@1234',
+            'password_confirmation' => 'Qwer@1234',
+            'source' => '',
+            'company_name' => 'test',
+            'company_unique_name' => 'CompanyTest0',
+            'company_cr' => '123456789101',
+        ]);
+
+        $response->assertStatus(422)->assertExactJson(
+            [
+                'message' => 'The source field is required.',
+                'errors' => [
+                    'source' => [
+                        'The source field is required.',
+                    ],
+                ],
+            ]
+        );
+    }
+
+    public function createCompany(): Company
+    {
+        return Company::factory()->create([
+            'name' => 'Company Test',
+            'unique_name' => 'CompanyTest1',
+            'company_cr' => '123',
+            'status' => 3,
+            'order_cost' => 150,
+            'does_order_require_approval' => 0,
+        ]);
     }
 }
