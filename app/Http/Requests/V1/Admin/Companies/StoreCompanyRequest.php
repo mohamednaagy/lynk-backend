@@ -53,7 +53,6 @@ class StoreCompanyRequest extends FormRequest
                 'required',
                 'numeric',
             ],
-
         ];
     }
 }

@@ -36,54 +36,63 @@ class TraderHistoryTransformer extends TransformerAbstract
             'client_wakala' => [
                 'step' => 'client_wakala',
                 'is_complete' => (bool) $this->financingOrder->client_wakala_accepted_at,
-                'completed_at' => optional($this->financingOrder->client_wakala_accepted_at)->format('Y-m-d h:m A'),
-                'document' => optional($this->financingOrder->getMedia(FinancingOrderMediaCollection::ClientWakala)->first())->getUrl(),
+                'completed_at' => optional($this->financingOrder->client_wakala_accepted_at)->format('Y-m-d h:i:s A'),
+                'document' => $this->fileUrl($this->financingOrder->getMedia(FinancingOrderMediaCollection::ClientWakala)->first()),
             ],
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => [
                 'step' => 'commodity_purchased',
                 'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:m A'),
+                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
                 'cert_document' => [
-                    'url' => optional($this->financingOrder->getMedia(FinancingOrderMediaCollection::ClientWakala)->first())->getUrl(),
-                    'date' => optional($getPtpDocument)->created_at?->format('Y-m-d h:m A'),
+                    'url' => $this->fileUrl($this->financingOrder->getMedia(FinancingOrderMediaCollection::TtiHoldingCertificate)->first()),
+                    'date' => optional($getPtpDocument)->created_at?->format('Y-m-d h:i:s A'),
                 ],
                 'ownership_document' => [
-                    'url' => optional($this->financingOrder->getMedia(FinancingOrderMediaCollection::TransferOwnershipToLender)->first())->getUrl(),
-                    'date' => optional($transferOwnershipToLender)->created_at?->format('Y-m-d h:m A'),
+                    'url' => $this->fileUrl($this->financingOrder->getMedia(FinancingOrderMediaCollection::TransferOwnershipToLender)->first()),
+                    'date' => optional($transferOwnershipToLender)->created_at?->format('Y-m-d h:i:s A'),
                 ],
             ],
             FinancingOrderHistory::ContractSigned => [
                 'step' => 'contract_singed',
                 'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:m A'),
+                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
             ],
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => [
                 'step' => 'selling_commodity_to_customer',
                 'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:m A'),
-                'document' => optional($this->financingOrder->getMedia(FinancingOrderMediaCollection::SellingCommodityToCustomer)->first())->getUrl(),
+                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
+                'document' => $this->fileUrl($this->financingOrder->getMedia(FinancingOrderMediaCollection::SellingCommodityToCustomer)->first()),
             ],
             FinancingOrderHistory::IssueMurabahaOffer => [
                 'step' => 'selling_commodity_to_open_market',
-                'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:m A'),
+                'is_complete' => (bool) $this->traderHistories->where('action', FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)->first(),
+                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
                 'mpo_document' => [
-                    'url' => optional($this->financingOrder->getMedia(FinancingOrderMediaCollection::MurabahaPurchaseOrder)->first())->getUrl(),
-                    'date' => optional($getMurabahaPurchaseOfferDocument)->created_at?->format('Y-m-d h:m A'),
+                    'url' => $this->fileUrl($this->financingOrder->getMedia(FinancingOrderMediaCollection::MurabahaPurchaseOrder)->first()),
+                    'date' => optional($getMurabahaPurchaseOfferDocument)->created_at?->format('Y-m-d h:i:s A'),
                 ],
                 'warranty_document' => [
-                    'url' => optional($this->financingOrder->getMedia(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo)->first())->getUrl(),
-                    'date' => optional($getWarrantAmendmentExceptWarrantNoDocument)->created_at?->format('Y-m-d h:m A'),
+                    'url' => $this->fileUrl($this->financingOrder->getMedia(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo)->first()),
+                    'date' => optional($getWarrantAmendmentExceptWarrantNoDocument)->created_at?->format('Y-m-d h:i:s A'),
                 ],
             ],
             FinancingOrderHistory::MurabahaSaleCompleted => [
                 'step' => 'murabha_sale_completed',
                 'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:m A'),
+                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
             ],
             default => null,
         };
 
         return $data;
+    }
+
+    public function fileUrl($media)
+    {
+        if ($media) {
+            return route('api.v1.media.download', ['media' => $media->uuid]);
+        }
+
+        return null;
     }
 }

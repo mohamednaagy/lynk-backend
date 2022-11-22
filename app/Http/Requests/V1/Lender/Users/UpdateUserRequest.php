@@ -4,6 +4,7 @@ namespace App\Http\Requests\V1\Lender\Users;
 
 use App\Enums\Area;
 use App\Enums\Role;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
@@ -41,7 +42,7 @@ class UpdateUserRequest extends FormRequest
             'role' => [
                 'required',
                 Rule::in(
-                    Arr::except(Area::getRolesPerAreaMap()[Area::Lender], [Role::LenderApiUser])
+                    Arr::except(Area::roles(Area::Lender), [Role::LenderApiUser])
                 ),
             ],
         ];

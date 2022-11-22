@@ -8,34 +8,41 @@ use App\Actions\Contracts\Orders\UpdateFinancingOrder;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
-use Bavix\Wallet\Internal\Exceptions\ExceptionInterface;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Index]))->only('index');
-        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Show]))->only('show');
-        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Create]))->only('store');
-        $this->middleware(perm(Area::Lender, [Subject::FinancingOrders, Action::Edit]))->only('update');
+        // __REVIEW__ break down long line to be easy to read
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Index, Action::Manage]))->only('index');
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Show, Action::Manage]))->only('show');
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Create, Action::Manage]))->only('store');
+        $this->middleware('permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Edit, Action::Manage]))->only('update');
     }
 
     /**
      * @param  GetPaginatedFinancingOrder  $getPaginatedOrders
      * @return JsonResponse
      */
-    public function index(GetPaginatedFinancingOrder $getPaginatedOrders): JsonResponse
+    public function index(Request $request, GetPaginatedFinancingOrder $getPaginatedOrders): JsonResponse
     {
+        if ($request->user()->hasRole(Role::LenderOrderCreator)) {
+            $getPaginatedOrders->setCreator($request->user());
+        }
+
         $financingOrders = $getPaginatedOrders->handle();
 
+        // __REVIEW__ remove excludes
         return fractal($financingOrders, new FinancingOrderTransformer())
             ->parseExcludes(['contract', 'power_of_attorney'])
             ->respond();
@@ -47,6 +54,7 @@ class OrderController extends Controller
      */
     public function show(FinancingOrder $order): JsonResponse
     {
+        $this->authorize('view', $order);
         $order->load('creator', 'approver');
 
         return fractal($order, new FinancingOrderTransformer())
@@ -67,6 +75,14 @@ class OrderController extends Controller
     {
         return DB::transaction(
             static function () use ($createFinancingOrder, $request) {
+                // __REVIEW__ before creating order, check if enough balance exists or not
+                // If balance is not enough, return custom exception called BalanceIsNotEnough that will render
+                // the following
+                // "message": "No engouh balance", //english
+                // "message": "لا يوجد رصيد كافي" , //arabic
+                // "code": "Suitable error code"
+                // See example Modules/Otpify/Exceptions/OtpCodeExpiredException.php
+
                 $status = tenant()->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval
                     : FinancingOrderStatus::WaitingClientWakala;
@@ -81,9 +97,12 @@ class OrderController extends Controller
                             'creator_id' => $user->id,
                             'creator_type' => $user->getMorphClass(),
                             'approved_at' => $status === FinancingOrderStatus::WaitingClientWakala ? now() : null,
+                            'is_verification_required' => true,
                         ]
                     )
                 );
+
+                //__REVIEW__ we should deduct from the company wallet here
 
                 return fractal($financingOrder, new FinancingOrderTransformer())->respond();
             }
@@ -103,6 +122,7 @@ class OrderController extends Controller
         UpdateFinancingOrder $updateFinancingOrder,
         FinancingOrder $order
     ): JsonResponse {
+        $this->authorize('update', $order);
         $financingOrder = $updateFinancingOrder->update($order, $updateOrderRequest->validated());
 
         return fractal($financingOrder, new FinancingOrderTransformer())->respond();

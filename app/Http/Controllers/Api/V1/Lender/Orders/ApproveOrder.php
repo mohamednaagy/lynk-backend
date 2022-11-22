@@ -22,7 +22,7 @@ class ApproveOrder extends Controller
      */
     public function __invoke(Request $request, ApproveOrderInterface $approveOrder, FinancingOrder $order)
     {
-        if (! $order->status->is(FinancingOrderStatus::PendingApproval)) {
+        if ($order->status->cantMoveTo(FinancingOrderStatus::Approved)) {
             return $this->errorResponse(
                 __('error.order_cannot_be_approved_because_it_is_approved'),
                 Response::HTTP_BAD_REQUEST

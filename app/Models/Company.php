@@ -15,7 +15,12 @@ use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
 class Company extends BaseTenant implements Wallet
 {
-    use HasFactory, HasScopedValidationRules, HasWallet, HasWallets, HasWalletFloat, SoftDeletes;
+    use HasFactory;
+    use HasScopedValidationRules;
+    use HasWallet;
+    use HasWallets;
+    use HasWalletFloat;
+    use SoftDeletes;
 
     protected $table = 'companies';
 
@@ -26,6 +31,7 @@ class Company extends BaseTenant implements Wallet
     protected $casts = [
         'status' => CompanyStatus::class,
         'does_order_require_approval' => 'boolean',
+        'webhook_secret_key' => 'encrypted',
     ];
 
     public static function getCustomColumns(): array
@@ -40,6 +46,7 @@ class Company extends BaseTenant implements Wallet
             'internal_status_comment',
             'does_order_require_approval',
             'order_cost',
+            'webhook_secret_key',
             'created_at',
             'updated_at',
         ];
@@ -53,5 +60,10 @@ class Company extends BaseTenant implements Wallet
     public function orders(): HasMany
     {
         return $this->hasMany(FinancingOrder::class);
+    }
+
+    public function webhooks(): HasMany
+    {
+        return $this->hasMany(Webhook::class);
     }
 }

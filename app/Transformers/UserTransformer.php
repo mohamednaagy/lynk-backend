@@ -25,6 +25,7 @@ class UserTransformer extends TransformerAbstract
         'company',
         'is_email_verified',
         'permissions',
+        'locale',
     ];
 
     public function __construct(string $area = null)
@@ -101,10 +102,14 @@ class UserTransformer extends TransformerAbstract
         $query = $user->roles();
 
         $query = match ($this->area) {
-            Area::Lender => $query->whereIn('name', Area::getRolesPerAreaMap()[$this->area]),
-            Area::SuperAdmin => $query->whereIn('name', Area::getRolesPerAreaMap()[$this->area]),
+            Area::Lender, Area::SuperAdmin => $query->whereIn('name', Area::roles($this->area)),
         };
 
         return $query;
+    }
+
+    public function includeLocale(User $user): Primitive
+    {
+        return $this->primitive($user->locale);
     }
 }

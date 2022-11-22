@@ -9,6 +9,8 @@ use League\Fractal\TransformerAbstract;
 
 class FinancingOrderTransformer extends TransformerAbstract
 {
+    //__REVIEW__ move defaultIncludes to availableIncludes
+    // and change all the requests that use this transformer to not break the frontend
     protected array $defaultIncludes = [
         'id',
         'status',
@@ -32,6 +34,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function transform(FinancingOrder $financingOrder)
     {
+        // __REVIEW__ remove from here and add to includeXXX functions
         return [
             'phone_country_code' => $financingOrder->phone_number_country_code,
             'phone_number' => $financingOrder->mobile_dialing_phone_number,
@@ -82,11 +85,13 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive($financingOrder->selling_price);
     }
 
+    // __REVIEW__ remove this pls
     public function includeContract(FinancingOrder $financingOrder)
     {
         return $this->primitive($financingOrder->contract);
     }
 
+    // __REVIEW__ remove this pls
     public function includePowerOfAttorney(FinancingOrder $financingOrder)
     {
         return $this->primitive($financingOrder->power_of_attorney);

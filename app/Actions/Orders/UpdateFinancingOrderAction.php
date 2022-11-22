@@ -32,11 +32,13 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
             )
         );
 
+        // __REVIEW__ remove pls
         if (isset($data['contract'])) {
             $financingOrder->addMedia($data['contract'])
                 ->toMediaCollection(FinancingOrderMediaCollection::Contract);
         }
 
+        // __REVIEW__ remove pls
         if (isset($data['power_of_attorney'])) {
             $financingOrder->addMedia($data['power_of_attorney'])
                 ->toMediaCollection(FinancingOrderMediaCollection::PowerOfAttorney);

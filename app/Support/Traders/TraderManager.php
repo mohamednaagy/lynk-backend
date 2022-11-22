@@ -4,7 +4,7 @@ namespace App\Support\Traders;
 
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\DmccDriver;
-use App\Support\Traders\Drivers\FakeDmccDriver;
+use App\Support\Traders\Drivers\FakeDriver;
 use Illuminate\Support\Manager;
 
 class TraderManager extends Manager
@@ -19,8 +19,8 @@ class TraderManager extends Manager
         return new DmccDriver();
     }
 
-    public function createFakeDmccDriver(): TraderInterface
+    public function createFakeDriver(): TraderInterface
     {
-        return new FakeDmccDriver();
+        return new FakeDriver();
     }
 }
