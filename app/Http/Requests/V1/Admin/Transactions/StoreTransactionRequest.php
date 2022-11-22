@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Transactions;
 
+use App\Rules\MoneyValuesRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTransactionRequest extends FormRequest
@@ -23,12 +24,8 @@ class StoreTransactionRequest extends FormRequest
      */
     public function rules()
     {
-        // The regex will hold for quantities like '12' or '12.5' or '12.05'.
-        //  If you want more decimal points than two,
-        //  replace the "2" with the allowed decimals you need.
-
         return [
-            'amount' => ['required', 'gt:0', 'regex:/^\d+(\.\d{1,2})?$/'],
+            'amount' => ['required', 'gt:0', new MoneyValuesRule],
             'description_en' => ['required', 'string', 'max:255'],
             'description_ar' => ['required', 'string', 'max:255'],
             'attachment' => ['required', 'file', 'mimes:png,jpg,jpeg,pdf'],

@@ -13,8 +13,8 @@ class DefaultGenerator extends GeneratorBase
         return '';
     }
 
-    public function handleTransaction(Wallet $wallet, string $amount, array $meta)
+    public function handleTransaction(Wallet $wallet, string $amount, array $meta): Transaction
     {
-        return $wallet->deposit($amount, $meta);
+        return $wallet->depositFloat($amount, $meta);
     }
 }

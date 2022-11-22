@@ -6,5 +6,5 @@ use BenSampo\Enum\Enum;
 
 final class TransactionMediaCollection extends Enum
 {
-    public const Attachments = 'attachments';
+    public const Attachments = 'transaction_attachments';
 }

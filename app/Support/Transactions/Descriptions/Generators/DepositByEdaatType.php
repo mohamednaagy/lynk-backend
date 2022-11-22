@@ -20,6 +20,6 @@ class DepositByEdaatType extends GeneratorBase
 
     public function handleTransaction(Wallet $wallet, string $amount, array $meta): Transaction
     {
-        return $wallet->deposit($amount, $meta);
+        return $wallet->depositFloat($amount, $meta);
     }
 }

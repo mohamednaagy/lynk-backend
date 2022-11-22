@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\SettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
+use App\Http\Controllers\Api\V1\Admin\Transactions\ChargeBalanceManually;
 use App\Http\Controllers\Api\V1\Admin\Transactions\TransactionController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
@@ -84,7 +85,7 @@ Route::prefix('v1/admin')->group(function () {
             Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
             Route::get('{company}/orders', [OrderController::class, 'index']);
             Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
-            Route::post('/{company}/transactions ', [TransactionController::class, 'store']);
+            Route::post('/{company}/wallet/manual-deposit', ChargeBalanceManually::class);
             Route::get('/{company}/settings ', GetCompanySetting::class);
         });
 
