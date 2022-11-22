@@ -23,7 +23,10 @@ class EdaatInvoiceController extends Controller
             ->with('creator')
             ->paginate();
 
-        return fractal($edaatInvoices, new EdaatInvoiceTransformer())->respond();
+        return fractal($edaatInvoices, new EdaatInvoiceTransformer())
+            ->parseIncludes(['id', 'invoice_number', 'amount', 'amount_formatted',
+                'creator', 'company_name', 'company_number', 'status', ])
+            ->respond();
     }
 
     public function store(
@@ -42,12 +45,9 @@ class EdaatInvoiceController extends Controller
 
             $invoice = $createEdaatInvoice->handle($amount);
 
-            return $this->successResponse([
-                'amount' => $invoice->amount,
-                'invoice_number' => $invoice->invoice_number,
-                'company_number' => 903,
-                'company_name' => trans('common.edaat'),
-            ]);
+            return fractal($invoice, new EdaatInvoiceTransformer())
+                ->parseIncludes(['amount', 'invoice_number', 'company_number', 'company_name'])
+                ->respond();
         });
     }
 }

@@ -26,7 +26,8 @@ class GetEdaatInvoices extends Controller
             ->paginate();
 
         return fractal($edaatInvoices, new EdaatInvoiceTransformer())
-            ->parseIncludes(['company'])
+            ->parseIncludes(['id', 'invoice_number', 'amount', 'amount_formatted',
+                'creator', 'company_name', 'company_number', 'status', 'company', ])
             ->respond();
     }
 
