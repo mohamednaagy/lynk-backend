@@ -31,7 +31,6 @@ class CreateLenderUserWithRoleAndPermissionAction implements CreateLenderUserWit
      */
     public function handle(array $data): User
     {
-        // create user
         $user = $this->createUser->handle(Arr::only(
             $data,
             [

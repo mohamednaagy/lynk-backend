@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Actions\Contracts\CreateUser;
 use App\Models\User;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 
 class CreateUserAction implements CreateUser
@@ -27,6 +28,10 @@ class CreateUserAction implements CreateUser
             $data['phone_number'] = null;
         }
 
+        if (! isset($data['locale']) || ! in_array($data['locale'], Config::get('app.locales'))) {
+            $data['locale'] = app()->getLocale();
+        }
+
         return User::create(
             Arr::only(
                 $data,
@@ -36,7 +41,8 @@ class CreateUserAction implements CreateUser
                     'email',
                     'phone_number',
                     'password',
-                    'source',
+                    'company_id',
+                    'locale',
                 ]
             )
         );
