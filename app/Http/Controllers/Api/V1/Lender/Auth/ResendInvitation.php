@@ -14,9 +14,8 @@ class ResendInvitation extends Controller
     {
         if (is_null($user->password)) {
             $invitationUrl = $request->validated('redirect_url');
-            Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
-            return $this->successResponse();
+            Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
         }
 
         return $this->successResponse();
