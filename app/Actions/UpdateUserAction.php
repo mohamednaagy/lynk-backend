@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Actions\Contracts\UpdateUser;
 use App\Models\User;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 
 class UpdateUserAction implements UpdateUser
@@ -24,7 +25,7 @@ class UpdateUserAction implements UpdateUser
             $data['phone_number'] = phone($data['phone_number'], $data['phone_country_code']);
         }
 
-        if (array_key_exists('locale', $data) && $data['locale'] == null) {
+        if (! isset($data['locale']) || ! in_array($data['locale'], Config::get('app.locales'))) {
             $data['locale'] = app()->getLocale();
         }
 

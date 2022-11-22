@@ -37,6 +37,7 @@ class UserController extends Controller
                 'phone_number',
                 'phone_country_code',
                 'formatted_phone_number',
+                'role',
             ])->respond();
     }
 
