@@ -2,7 +2,7 @@
 
 namespace App\Support\Generator\ReferenceNumber\Contracts;
 
-interface ReferenceNumberGeneratorInterFace
+interface ReferenceNumberGeneratorInterface
 {
     public function generate(): string;
 }

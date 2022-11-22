@@ -2,10 +2,10 @@
 
 namespace App\Support\Generator\ReferenceNumber;
 
-use App\Support\Generator\ReferenceNumber\Contracts\ReferenceNumberGeneratorInterFace;
+use App\Support\Generator\ReferenceNumber\Contracts\ReferenceNumberGeneratorInterface;
 use Illuminate\Support\Str;
 
-class ReferenceNumberGenerator implements ReferenceNumberGeneratorInterFace
+class ReferenceNumberGenerator implements ReferenceNumberGeneratorInterface
 {
     /**
      * @return string
