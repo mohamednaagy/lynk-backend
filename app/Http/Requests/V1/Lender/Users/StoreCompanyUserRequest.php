@@ -38,7 +38,7 @@ class StoreCompanyUserRequest extends FormRequest
             'redirect_url' => ['required', 'url', new HostWhitelistRule()],
             'role' => [
                 'required',
-                Arr::except(Rule::in(Area::getRolesPerAreaMap()[Area::Lender]), [Role::LenderApiUser]),
+                Arr::except((array) Rule::in(Area::roles(Area::Lender)), [Role::LenderApiUser]),
             ],
         ];
     }
