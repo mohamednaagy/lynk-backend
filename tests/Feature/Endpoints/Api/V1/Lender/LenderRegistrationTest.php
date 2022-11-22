@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Lender;
+namespace Tests\Feature\Endpoints\Api\V1\Lender;
 
 use App\Models\Company;
 use Illuminate\Foundation\Testing\RefreshDatabase;
