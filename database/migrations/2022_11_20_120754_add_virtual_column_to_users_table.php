@@ -12,15 +12,17 @@ return new class() extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('virtual_company_id_email')
-                ->virtualAs('concat_ws(":",company_id,email)')
-                ->unique()
-                ->after('company_id');
+            if (! app()->runningUnitTests()) {
+                $table->string('virtual_company_id_email')
+                    ->virtualAs('concat_ws(":",company_id,email)')
+                    ->unique()
+                    ->after('company_id');
 
-            $table->dropUnique(['email', (new Company())->getForeignKey()]);
+                $table->dropUnique(['email', (new Company())->getForeignKey()]);
+            }
         });
     }
 
@@ -29,7 +31,7 @@ return new class() extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropUnique(['virtual_company_id_email']);
