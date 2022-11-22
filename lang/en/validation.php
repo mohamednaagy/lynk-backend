@@ -170,4 +170,5 @@ return [
         'company_cr' => 'company CR',
         'national_id' => 'national ID',
     ],
+
 ];
