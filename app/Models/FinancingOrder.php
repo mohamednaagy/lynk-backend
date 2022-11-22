@@ -47,6 +47,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'status_reason',
         'client_wakala_accepted_at',
         'is_verification_required',
+        'company_id',
     ];
 
     protected $casts = [

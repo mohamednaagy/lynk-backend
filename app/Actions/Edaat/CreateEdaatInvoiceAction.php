@@ -2,7 +2,7 @@
 
 namespace App\Actions\Edaat;
 
-use App\Actions\Contracts\Wallets\CreateEdaatInvoice;
+use App\Actions\Contracts\Edaat\CreateEdaatInvoice;
 use App\Enums\EdaatInvoiceStatus;
 use App\Models\EdaatInvoice;
 use App\Support\Edaat\EdaatService;
@@ -19,6 +19,7 @@ class CreateEdaatInvoiceAction implements CreateEdaatInvoice
         $invoice = EdaatInvoice::create([
             'amount' => $amount,
             'status' => EdaatInvoiceStatus::Pending,
+            'creator_id' => auth()->user()->getAuthIdentifier(),
         ]);
         $invoice->creator()->associate(auth()->user());
 

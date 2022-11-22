@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Contracts\Wallets;
+namespace App\Actions\Contracts\Edaat;
 
 use App\Models\EdaatInvoice;
 use App\Support\Edaat\EdaatService;
