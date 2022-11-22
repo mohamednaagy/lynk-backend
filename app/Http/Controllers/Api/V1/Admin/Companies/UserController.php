@@ -24,10 +24,12 @@ class UserController extends Controller
     public function index(
         GetCompanyUsersRequest $getCompanyUsersRequest,
         Company $company,
+        // __REVIEW__ change to GetPaginatedCompanyUsers $getPaginatedCompanyUsers
         GetCompanyUsers $getCompanyUsers
     ): JsonResponse {
         return fractal($getCompanyUsers->handle($company), new UserTransformer)
             ->parseIncludes([
+                // __REVIEW__ add number of orders created by each
                 'id',
                 'first_name',
                 'last_name',
@@ -47,6 +49,11 @@ class UserController extends Controller
      */
     public function show(Request $request, User $user): JsonResponse
     {
+        // __REVIEW__ check if the user has one of the following roles:
+        // Role::LenderAdmin,
+        // Role::LenderOrderCreator,
+        // Role::LenderBilling,
+        // Role::LenderSupervisor,
         return fractal($user, new UserTransformer(Area::Lender))
             ->parseIncludes([
                 'id',
@@ -76,13 +83,16 @@ class UserController extends Controller
         CreateLenderUserWithRoleAndPermission $createUserWithRoleAndPermission
     ): JsonResponse {
         return DB::transaction(function () use ($company, $storeCompanyUserRequest, $createUserWithRoleAndPermission) {
+            // __REVIEW__ leave some spaces between lines of unrelated functions
+            // Example, between $invitationUrl... and create user, add new line
             $user = $createUserWithRoleAndPermission->handle(
                 $storeCompanyUserRequest->validated() +
-                [
-                    'company_id' => $company->id,
-                ]
+                    [
+                        'company_id' => $company->id,
+                    ]
             );
             $invitationUrl = $storeCompanyUserRequest->validated('redirect_url');
+            // __REVIEW__ pass $user not email to the "->to(...)"
             Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
             return fractal($user, new UserTransformer())

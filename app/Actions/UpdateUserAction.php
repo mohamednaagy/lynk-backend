@@ -29,6 +29,7 @@ class UpdateUserAction implements UpdateUser
             $data['locale'] = app()->getLocale();
         }
 
+        // __REVIEW__ add locale to the array
         return $user->update(
             Arr::only(
                 $data,
