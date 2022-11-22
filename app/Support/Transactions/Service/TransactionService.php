@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 
 class TransactionService implements TransactionServiceInterface
 {
-    public function __construct(protected ReferenceNumberGeneratorInterface $referenceNumberGeneratorInterFace)
+    public function __construct(protected ReferenceNumberGeneratorInterface $referenceNumberGeneratorInterface)
     {
     }
 
@@ -23,8 +23,8 @@ class TransactionService implements TransactionServiceInterface
             'amount' => $amount,
             'type' => $type,
             'uuid' => Str::uuid(),
-            'reference_number' => $referenceNumber ?? $this->referenceNumberGeneratorInterFace->generate(),
-            'data' => $meta,
+            'reference_number' => $referenceNumber ?? $this->referenceNumberGeneratorInterface->generate(),
+            'meta' => $meta,
         ]);
     }
 
@@ -35,8 +35,8 @@ class TransactionService implements TransactionServiceInterface
             'amount' => $amount,
             'type' => $type,
             'uuid' => Str::uuid(),
-            'reference_number' => $referenceNumber ?? $this->referenceNumberGeneratorInterFace->generate(),
-            'data' => $meta,
+            'reference_number' => $referenceNumber ?? $this->referenceNumberGeneratorInterface->generate(),
+            'meta' => $meta,
         ]);
     }
 
@@ -52,7 +52,7 @@ class TransactionService implements TransactionServiceInterface
             'to_id' => $toWallet->getKey(),
             'deposit_id' => $deposit->getKey(),
             'withdraw_id' => $withdraw->getKey(),
-            'data' => $meta,
+            'meta' => $meta,
         ]);
     }
 

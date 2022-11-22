@@ -19,9 +19,20 @@ class WalletServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(WalletServiceInterface::class, WalletService::class);
-        $this->app->singleton(TransactionServiceInterface::class, TransactionService::class);
-        $this->app->singleton(ReferenceNumberGeneratorInterface::class, config('wallet.reference_number.generator') ?? ReferenceNumberGenerator::class);
+        $this->app->singleton(
+            WalletServiceInterface::class,
+            WalletService::class
+        );
+
+        $this->app->singleton(
+            TransactionServiceInterface::class,
+            TransactionService::class
+        );
+
+        $this->app->singleton(
+            ReferenceNumberGeneratorInterface::class,
+            config('wallet.reference_number.generator') ?? ReferenceNumberGenerator::class
+        );
     }
 
     /**

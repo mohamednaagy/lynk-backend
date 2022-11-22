@@ -15,10 +15,10 @@ class Transaction extends Model
         'wallet_id',
         'reference_number',
         'amount',
-        'data',
+        'meta',
     ];
 
     protected $casts = [
-        'data' => 'array',
+        'meta' => 'array',
     ];
 }
