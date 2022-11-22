@@ -11,6 +11,12 @@ use Propaganistas\LaravelPhone\PhoneNumber;
 
 trait RequestHasMobileVerification
 {
+    protected $phone_number = 'phone_number';
+
+    protected $phone_country_code = 'phone_country_code';
+
+    protected $national_id = 'national_id';
+
     /**
      * Configure the validator instance.
      *
@@ -30,8 +36,8 @@ trait RequestHasMobileVerification
     {
         $errors = [];
         try {
-            $phone = PhoneNumber::make($this->phone_number, $this->phone_country_code);
-            MobileVerify::verify($phone, $this->national_id);
+            $phone = PhoneNumber::make($this->validated($this->phone_number), $this->validated($this->phone_country_code));
+            MobileVerify::verify($phone, $this->validated($this->national_id));
         } catch (MobileNumberNotMatchedException $e) {
             $errors['national_id'] = __('error.phone_number_not_matched');
         } catch (InvalidPersonIdException $e) {
