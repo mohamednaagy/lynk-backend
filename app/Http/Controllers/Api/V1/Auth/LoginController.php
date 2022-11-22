@@ -54,7 +54,12 @@ class LoginController extends Controller
         }
 
         if (! $user->hasRole(Role::LenderApiUser)) {
-            $user->notify(new LoginNotification(request()->ip(), Carbon::now()->toDateTimeString(), Agent::device(), Agent::platform(), Agent::browser()));
+            $user->notify(new LoginNotification(
+                request()->ip(),
+                Carbon::now()->toDateTimeString(),
+                Agent::device(),
+                Agent::platform(),
+                Agent::browser()));
         }
 
         return $this->successResponse(
