@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Lender\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Lender\Auth\Register;
 use App\Http\Controllers\Api\V1\Lender\Auth\ResendInvitation;
 use App\Http\Controllers\Api\V1\Lender\Auth\UpdateMyProfile;
+use App\Http\Controllers\Api\V1\Lender\Edaat\EdaatInvoiceController;
 use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryReplyController;
 use App\Http\Controllers\Api\V1\Lender\Media\DownloadMediaFile;
@@ -23,9 +24,7 @@ use App\Http\Controllers\Api\V1\Lender\Orders\RejectOrder;
 use App\Http\Controllers\Api\V1\Lender\Settings\GetLenderAreaSettings;
 use App\Http\Controllers\Api\V1\Lender\Users\UserController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CalculateOrderCost;
-use App\Http\Controllers\Api\V1\Lender\Wallets\CreateEdaatInvoice;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetBalance;
-use App\Http\Controllers\Api\V1\Lender\Wallets\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetWalletTransactions;
 use App\Http\Controllers\Api\V1\Lender\Webhooks\WebhookController;
 use Illuminate\Support\Facades\Route;
@@ -55,9 +54,10 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
-        Route::get('edaat-invoices', GetEdaatInvoices::class);
 
         Route::middleware('verified.email:'.Area::Lender)->group(function () {
+            Route::apiResource('edaat-invoices', EdaatInvoiceController::class)
+                ->only('index', 'store');
             Route::put('auth/profile', UpdateMyProfile::class);
             Route::get('orders/volume', GetOrdersVolume::class);
             Route::get('orders/stats', GetOrdersStats::class);
@@ -70,13 +70,11 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
             Route::apiResource('orders', OrderController::class);
             Route::apiResource('users', UserController::class);
             Route::post('{user}/resend-invitation', ResendInvitation::class);
-            Route::get('edaat-invoices', GetEdaatInvoices::class);
 
             Route::prefix('wallet')->group(function () {
                 Route::get('/balance', GetBalance::class);
                 Route::post('/calculate', CalculateOrderCost::class);
                 Route::get('/transactions', GetWalletTransactions::class);
-                Route::post('/invoice', CreateEdaatInvoice::class);
             });
 
             Route::post('webhooks', [WebhookController::class, 'store']);
