@@ -2,7 +2,7 @@
 
 namespace App\Actions\Edaat;
 
-use App\Actions\Contracts\Wallets\GetEdaatInvoices;
+use App\Actions\Contracts\Edaat\GetEdaatInvoices;
 use App\Models\EdaatInvoice;
 use Illuminate\Database\Eloquent\Builder;
 
