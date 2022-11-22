@@ -41,7 +41,7 @@ class UpdateUserRequest extends FormRequest
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'role' => [
                 'required',
-                Arr::except(Rule::in(Area::getRolesPerAreaMap()[Area::Lender]), [Role::LenderApiUser]),
+                Arr::except(Rule::in(Area::roles(Area::Lender)), [Role::LenderApiUser]),
             ],
         ];
     }
