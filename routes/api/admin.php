@@ -16,7 +16,7 @@ use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
-use App\Http\Controllers\Api\V1\Admin\Image\UploadImage;
+use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
 use App\Http\Controllers\Api\V1\Admin\Orders\GetBalance;
 use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
