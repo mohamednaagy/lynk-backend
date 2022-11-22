@@ -24,8 +24,15 @@ class EdaatInvoiceController extends Controller
             ->paginate();
 
         return fractal($edaatInvoices, new EdaatInvoiceTransformer())
-            ->parseIncludes(['id', 'invoice_number', 'amount', 'amount_formatted',
-                'creator', 'company_name', 'company_number', 'status', ])
+            ->parseIncludes([
+                'id',
+                'invoice_number',
+                'amount',
+                'amount_formatted',
+                'company_name',
+                'company_number',
+                'status',
+            ])
             ->respond();
     }
 
@@ -46,7 +53,12 @@ class EdaatInvoiceController extends Controller
             $invoice = $createEdaatInvoice->handle($amount);
 
             return fractal($invoice, new EdaatInvoiceTransformer())
-                ->parseIncludes(['amount', 'invoice_number', 'company_number', 'company_name'])
+                ->parseIncludes([
+                    'amount',
+                    'invoice_number',
+                    'company_number',
+                    'company_name',
+                ])
                 ->respond();
         });
     }
