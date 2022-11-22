@@ -10,6 +10,12 @@ class Wallet extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'holder_type',
+        'holder_id',
+        'name',
+    ];
+
     public function holder(): MorphTo
     {
         return $this->morphTo();
