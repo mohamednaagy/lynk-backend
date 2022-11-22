@@ -2,38 +2,41 @@
 
 namespace App\Support\Transactions\Service;
 
+use App\Models\Transaction;
 use App\Models\Transfer;
 use App\Models\Wallet;
-use App\Support\Generator\ReferenceNumber\Contracts\ReferenceNumberGeneratorInterFace;
+use App\Support\Generator\ReferenceNumber\Contracts\ReferenceNumberGeneratorInterface;
 use App\Support\Transactions\Service\Contracts\TransactionServiceInterface;
-use Bavix\Wallet\Models\Transaction;
 use Brick\Math\BigDecimal;
+use Illuminate\Support\Str;
 
 class TransactionService implements TransactionServiceInterface
 {
+    public function __construct(protected ReferenceNumberGeneratorInterface $referenceNumberGeneratorInterFace)
+    {
+    }
+
     public function withdraw(Wallet $wallet, float|int $amount, int $type, ?string $referenceNumber, ?array $meta)
     {
         return Transaction::create([
-            'payable_type' => $wallet->holder->getMorphClass(),
-            'payable_id' => $wallet->holder->getKey(),
             'wallet_id' => $wallet->getKey(),
             'amount' => $amount,
             'type' => $type,
-            'reference_number' => $referenceNumber ?? app(ReferenceNumberGeneratorInterFace::class)->generate(),
-            'meta' => $meta,
+            'uuid' => Str::uuid(),
+            'reference_number' => $referenceNumber ?? $this->referenceNumberGeneratorInterFace->generate(),
+            'data' => $meta,
         ]);
     }
 
     public function deposit(Wallet $wallet, float|int $amount, int $type, ?string $referenceNumber, ?array $meta)
     {
         return Transaction::create([
-            'payable_type' => $wallet->holder->getMorphClass(),
-            'payable_id' => $wallet->holder->getKey(),
             'wallet_id' => $wallet->getKey(),
             'amount' => $amount,
             'type' => $type,
-            'reference_number' => $referenceNumber ?? app(ReferenceNumberGeneratorInterFace::class)->generate(),
-            'meta' => $meta,
+            'uuid' => Str::uuid(),
+            'reference_number' => $referenceNumber ?? $this->referenceNumberGeneratorInterFace->generate(),
+            'data' => $meta,
         ]);
     }
 
