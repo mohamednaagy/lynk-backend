@@ -4,6 +4,7 @@ namespace Tests;
 
 use App\Enums\Area;
 use App\Enums\Role;
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -61,6 +62,43 @@ abstract class TestCase extends BaseTestCase
 
         return $loginResponse->getOriginalContent()['data']['token'];
     }
+
+      protected function lenderLogin(string $role, string $test = null, ?Company $company)
+      {
+          $email = 'a@a.aa';
+          $passwordPlainText = '12345678';
+          $passwordEncrypted = bcrypt('12345678');
+          $source = 'admin';
+
+          $campany = $company ?? Company::factory()->create();
+
+          // create user
+          $user = User::factory()->create([
+              'email' => $email,
+              'password' => $passwordEncrypted,
+              'company_id' => $campany->id,
+          ]);
+
+          Grantify::assignRoleToModel($user, $role);
+
+          if ($test == null) {
+              $this->actingAs($user);
+          }
+
+          // login user
+          $loginResponse = $this->postJson('api/v1/auth/login', [
+              'email' => $email,
+              'password' => $passwordPlainText,
+              'source' => $source,
+              'unique_name' => $campany->unique_name,
+          ]);
+
+          $loginResponse->assertStatus(200)->assertJsonStructure([
+              'data' => ['token'],
+          ]);
+
+          return $loginResponse->getOriginalContent()['data']['token'];
+      }
 
     protected function createOtpifyCode(int $code, int $otpifiableId, array $data = []): Builder|Model
     {
