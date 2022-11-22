@@ -30,7 +30,7 @@ return new class extends Migration
             $table->unsignedBigInteger('wallet_id');
             $table->string('reference_number');
             $table->decimal('amount', 64);
-            $table->json('data');
+            $table->json('meta');
 
             $table->timestamps();
         });

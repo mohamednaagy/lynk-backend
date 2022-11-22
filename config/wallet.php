@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Support\Generator\ReferenceNumber\ReferenceNumberGenerator;
 use Bavix\Wallet\Internal\Assembler\AvailabilityDtoAssembler;
 use Bavix\Wallet\Internal\Assembler\BalanceUpdatedEventAssembler;
 use Bavix\Wallet\Internal\Assembler\ExtraDtoAssembler;
@@ -190,5 +191,9 @@ return [
             'slug' => 'default',
             'meta' => [],
         ],
+    ],
+
+    'reference_number' => [
+        'generator' => ReferenceNumberGenerator::class,
     ],
 ];
