@@ -233,5 +233,6 @@ return [
         'reference_number' => 'الرقم المرجعي',
         'national_id' => 'رقم الهوية/الإقامة',
         'selling_price' => 'سعر البيع',
+        'status_reason' => 'سبب الحالة',
     ],
 ];

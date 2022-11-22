@@ -27,7 +27,7 @@ class AdminController extends Controller
      */
     public function index(GetPaginatedUsersByRole $getPaginatedUsersByRole): JsonResponse
     {
-        $admins = $getPaginatedUsersByRole->handle(Area::getRolesPerAreaMap()[Area::SuperAdmin]);
+        $admins = $getPaginatedUsersByRole->handle(Area::roles(Area::SuperAdmin));
 
         return fractal($admins, new UserTransformer(Area::SuperAdmin))
             ->parseIncludes(['role'])
@@ -40,8 +40,8 @@ class AdminController extends Controller
      */
     public function show(User $admin): JsonResponse
     {
-        if (! $admin->hasRole(Area::getRolesPerAreaMap()[Area::SuperAdmin])) {
-            throw UnauthorizedException::forRoles(Area::getRolesPerAreaMap()[Area::SuperAdmin]);
+        if (! $admin->hasRole(Area::roles(Area::SuperAdmin))) {
+            throw UnauthorizedException::forRoles(Area::roles(Area::SuperAdmin));
         }
 
         return fractal($admin, new UserTransformer(Area::SuperAdmin))
@@ -91,8 +91,8 @@ class AdminController extends Controller
         UpdateAdminWithRoleAndPermission $updateAdminWithRoleAndPermission,
     ): JsonResponse {
         return DB::transaction(function () use ($updateAdminRequest, $admin, $updateAdminWithRoleAndPermission) {
-            if (! $admin->hasRole(Area::getRolesPerAreaMap()[Area::SuperAdmin])) {
-                throw UnauthorizedException::forRoles(Area::getRolesPerAreaMap()[Area::SuperAdmin]);
+            if (! $admin->hasRole(Area::roles(Area::SuperAdmin))) {
+                throw UnauthorizedException::forRoles(Area::roles(Area::SuperAdmin));
             }
 
             $updateAdminWithRoleAndPermission->handle($updateAdminRequest->validated(), $admin);
@@ -107,8 +107,8 @@ class AdminController extends Controller
      */
     public function destroy(User $admin): JsonResponse
     {
-        if (! $admin->hasRole(Area::getRolesPerAreaMap()[Area::SuperAdmin])) {
-            throw UnauthorizedException::forRoles(Area::getRolesPerAreaMap()[Area::SuperAdmin]);
+        if (! $admin->hasRole(Area::roles(Area::SuperAdmin))) {
+            throw UnauthorizedException::forRoles(Area::roles(Area::SuperAdmin));
         }
 
         $admin->delete();

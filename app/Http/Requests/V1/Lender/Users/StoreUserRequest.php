@@ -39,7 +39,7 @@ class StoreUserRequest extends FormRequest
             'role' => [
                 'required',
                 Rule::in(
-                    Arr::except(Area::getRolesPerAreaMap()[Area::Lender], [Role::LenderApiUser])
+                    Arr::except(Area::roles(Area::Lender), [Role::LenderApiUser])
                 ),
             ],
         ];
