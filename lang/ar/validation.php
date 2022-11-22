@@ -238,5 +238,6 @@ return [
         'national_id' => 'رقم الهوية/الإقامة',
         'selling_price' => 'سعر البيع',
         'status_reason' => 'سبب الحالة',
+        'redirect_url' => 'رابط إعادة التوجيه',
     ],
 ];

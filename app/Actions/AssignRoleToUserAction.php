@@ -16,7 +16,6 @@ class AssignRoleToUserAction implements AssignRoleToUser
      */
     public function handle(User $user, string|array|Role $role): void
     {
-        //2test 3
         Grantify::assignRoleToModel($user, $role);
     }
 }

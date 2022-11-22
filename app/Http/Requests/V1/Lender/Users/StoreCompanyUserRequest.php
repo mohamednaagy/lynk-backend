@@ -29,11 +29,14 @@ class StoreCompanyUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        // __REVIEW__ translate attributes if needed
         return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
+            // __REVIEW__ phone:phone_country_code => phone:phone_country_code,mobile
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
+            // __REVIEW__ email should be unique within company
             'email' => ['required', 'email', Rule::unique(User::class, 'email')],
             'redirect_url' => ['required', 'url', new HostWhitelistRule()],
             'role' => [

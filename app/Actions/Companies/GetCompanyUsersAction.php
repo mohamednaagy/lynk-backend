@@ -16,6 +16,7 @@ class GetCompanyUsersAction implements GetCompanyUsers
      */
     public function handle(Company $company): LengthAwarePaginator
     {
+        // __REVIEW__ add number of orders created by each
         return User::query()
             ->whereHas('roles', function ($query) {
                 return $query->whereIn('name', [

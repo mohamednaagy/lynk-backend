@@ -28,7 +28,17 @@ class UserController extends Controller
      */
     public function index(GetPaginatedLenderUsers $getPaginatedLenders): JsonResponse
     {
-        return fractal($getPaginatedLenders->handle(), new UserTransformer)->respond();
+        return fractal($getPaginatedLenders->handle(), new UserTransformer)
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+                'role',
+            ])->respond();
     }
 
     /**
@@ -44,10 +54,21 @@ class UserController extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($storeUserRequest, $createLenderWithRoleAndPermission) {
             $user = $createLenderWithRoleAndPermission->handle($storeUserRequest->validated());
-            $invitationUrl = $storeUserRequest->validated('redirect_url');
-            Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
-            return fractal($user, new UserTransformer())->respond();
+            $invitationUrl = $storeUserRequest->validated('redirect_url');
+            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl));
+
+            return fractal($user, new UserTransformer())
+                ->parseIncludes([
+                    'id',
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'phone_number',
+                    'phone_country_code',
+                    'formatted_phone_number',
+                    'role',
+                ])->respond();
         });
     }
 
@@ -57,12 +78,19 @@ class UserController extends Controller
      * @param  User  $user
      * @return JsonResponse
      */
-    public function show(
-        User $user
-    ): JsonResponse {
-        return fractal($user, new UserTransformer(Area::Lender))->parseIncludes([
-            'role',
-        ])->respond();
+    public function show(User $user): JsonResponse
+    {
+        return fractal($user, new UserTransformer(Area::Lender))
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'role',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 
     /**
@@ -79,7 +107,7 @@ class UserController extends Controller
         UpdateLenderUserWithRoleAndPermission $updateLenderUserWithRoleAndPermission,
     ): JsonResponse {
         return DB::transaction((function () use ($updateUserRequest, $user, $updateLenderUserWithRoleAndPermission) {
-            if ($user->hasRole(Role::LenderApiUser)) {
+            if ($user->hasRole(Role::LenderApiUser) || $user->id == auth()->user()->getAuthIdentifier()) {
                 throw new AuthorizationException();
             }
 
@@ -97,6 +125,5 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
     }
 }
