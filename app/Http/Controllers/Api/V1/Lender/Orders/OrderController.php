@@ -62,12 +62,10 @@ class OrderController extends Controller
             ->parseIncludes([
                 'id',
                 'status',
-                'company_id',
                 'reference_number',
                 'national_id',
                 'amount',
                 'selling_price',
-                'is_approved',
                 'status_reason',
             ])->respond();
     }
