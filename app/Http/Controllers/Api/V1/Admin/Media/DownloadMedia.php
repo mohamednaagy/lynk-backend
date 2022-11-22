@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1\Admin\Media;
+
+use App\Enums\Area;
+use App\Enums\ErrorCode;
+use App\Http\Controllers\Controller;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+class DownloadMedia extends Controller
+{
+    /**
+     * @param  Request  $request
+     * @param $media
+     * @return JsonResponse|StreamedResponse
+     *
+     * @throws AuthorizationException
+     */
+    public function __invoke(Request $request, $media)
+    {
+        $media = Media::where('uuid', $media)->firstOrFail();
+
+        $this->authorize('view', [$media, Area::SuperAdmin]);
+
+        try {
+            return Storage::disk($media->disk)->download($media->getPath());
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage(), Response::HTTP_NOT_FOUND, ErrorCode::FILE_NOT_FOUND);
+        }
+    }
+}

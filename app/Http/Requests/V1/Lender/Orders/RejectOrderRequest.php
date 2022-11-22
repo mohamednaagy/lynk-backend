@@ -23,7 +23,6 @@ class RejectOrderRequest extends FormRequest
      */
     public function rules(): array
     {
-        // __REVIEW__ add localization for validation attribute
         return [
             'status_reason' => ['nullable', 'string', 'max:255'],
         ];

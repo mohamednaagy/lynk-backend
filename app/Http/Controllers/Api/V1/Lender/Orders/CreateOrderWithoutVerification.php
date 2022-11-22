@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
+use App\Enums\Action;
+use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\CreateOrderWithoutVerificationRequest;
 use App\Transformers\FinancingOrderTransformer;
@@ -12,6 +15,13 @@ use Illuminate\Support\Facades\DB;
 
 class CreateOrderWithoutVerification extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.perm(Area::Lender, [Subject::FinancingOrders, Action::Create, Action::Manage])
+        );
+    }
+
     /**
      * Handle the incoming request.
      *

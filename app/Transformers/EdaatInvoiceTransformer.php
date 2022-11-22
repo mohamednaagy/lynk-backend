@@ -8,7 +8,9 @@ use League\Fractal\TransformerAbstract;
 
 class EdaatInvoiceTransformer extends TransformerAbstract
 {
-    protected array $defaultIncludes = [
+    protected array $defaultIncludes = [];
+
+    protected array $availableIncludes = [
         'id',
         'invoice_number',
         'amount',
@@ -18,11 +20,7 @@ class EdaatInvoiceTransformer extends TransformerAbstract
         'company_number',
         'status',
         'created_at',
-    ];
-
-    protected array $availableIncludes = [
         'company',
-        'creator',
     ];
 
     public function transform(EdaatInvoice $edaatInvoice): array
