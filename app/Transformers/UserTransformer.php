@@ -29,6 +29,7 @@ class UserTransformer extends TransformerAbstract
         'phone_number',
         'phone_country_code',
         'formatted_phone_number',
+        'orders_count',
     ];
 
     public function __construct(string $area = null)
@@ -127,5 +128,10 @@ class UserTransformer extends TransformerAbstract
     public function includeLocale(User $user): Primitive
     {
         return $this->primitive($user->locale);
+    }
+
+    public function includeOrdersCount(User $user): Primitive
+    {
+        return $this->primitive((int) $user->orders_count);
     }
 }
