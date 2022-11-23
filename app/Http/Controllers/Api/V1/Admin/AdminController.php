@@ -108,6 +108,10 @@ class AdminController extends Controller
         UpdateAdminWithRoleAndPermission $updateAdminWithRoleAndPermission,
     ): JsonResponse {
         return DB::transaction(function () use ($updateAdminRequest, $admin, $updateAdminWithRoleAndPermission) {
+            if (! $admin->hasRole(Area::roles(Area::SuperAdmin))) {
+                throw UnauthorizedException::forRoles(Area::roles(Area::SuperAdmin));
+            }
+
             $data = $updateAdminRequest->validated();
 
             if ($data['role'] == Role::Admin) {
@@ -116,11 +120,7 @@ class AdminController extends Controller
                 $data['permissions'] = Grantify::transformToAreaSubject(Area::SuperAdmin, $data['permissions']);
             }
 
-            if (! $admin->hasRole(Area::roles(Area::SuperAdmin))) {
-                throw UnauthorizedException::forRoles(Area::roles(Area::SuperAdmin));
-            }
-
-            $updateAdminWithRoleAndPermission->handle($updateAdminRequest->validated(), $admin);
+            $updateAdminWithRoleAndPermission->handle($data, $admin);
 
             return $this->successResponse();
         });
