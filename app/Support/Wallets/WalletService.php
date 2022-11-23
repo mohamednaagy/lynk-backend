@@ -4,12 +4,14 @@ namespace App\Support\Wallets;
 
 use App\Models\Wallet;
 use App\Support\Wallets\Contracts\WalletServiceInterface;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class WalletService implements WalletServiceInterface
 {
     /**
-     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  Model  $model
      * @param  array  $data
      * @return mixed
      */
@@ -20,6 +22,7 @@ class WalletService implements WalletServiceInterface
             [
                 'holder_type' => $model->getMorphClass(),
                 'holder_id' => $model->getKey(),
+                'uuid' => Str::uuid()->toString(),
             ]
         ));
     }
@@ -76,5 +79,13 @@ class WalletService implements WalletServiceInterface
     public function findByNameOrFail(string $name)
     {
         return Wallet::where('name', $name)->firstOrFail();
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getAll(): Collection
+    {
+        return Wallet::all();
     }
 }
