@@ -6,6 +6,7 @@ use App\Actions\Contracts\Orders\ApproveOrder as ApproveOrderInterface;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\FinancingOrder;
+use App\Notifications\OrderApproved;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -33,6 +34,10 @@ class ApproveOrder extends Controller
             }
 
             $approveOrder->handle($order, $request->user());
+
+            if ($order->creator->id !== $request->user()->id) {
+                $order->creator->notify(new OrderApproved($order, $request->user()));
+            }
 
             return $this->successResponse();
         });
