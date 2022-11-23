@@ -2,11 +2,11 @@
 
 namespace App\Actions\Companies;
 
-use App\Actions\Contracts\Companies\GetCompanies;
+use App\Actions\Contracts\Companies\GetPaginatedCompanies;
 use App\Models\Company;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-class GetCompaniesAction implements GetCompanies
+class GetPaginatedCompaniesAction implements GetPaginatedCompanies
 {
     public function handle(): LengthAwarePaginator
     {
