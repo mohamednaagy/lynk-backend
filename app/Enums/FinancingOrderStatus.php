@@ -13,8 +13,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
 
     const Approved = 2;
 
-    // __REVIEW__ change from "Canceled" to "Cancelled"
-    const Canceled = 3;
+    const Cancelled = 3;
 
     const Completed = 4;
 
@@ -40,9 +39,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
 
     const PtpDocumentRetrieved = 15;
 
-    // __REVIEW__ change from "PendingCancel" to "PendingCancellation"
-    // __REVIEW__ change any place that uses this
-    const PendingCancel = 16;
+    const PendingCancellation = 16;
 
     private static array $state = [
         self::Approved => [
@@ -54,10 +51,10 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         self::Completed => [
             self::MurabahaSaleCompleted,
         ],
-        self::Canceled => [
-            self::PendingCancel,
+        self::Cancelled => [
+            self::PendingCancellation,
         ],
-        self::PendingCancel => [
+        self::PendingCancellation => [
             self::Rejected,
             self::Approved,
             self::RespondedToPtp,
