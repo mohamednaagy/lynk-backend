@@ -27,22 +27,22 @@ class OrderController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::FinancingOrders, Action::Index, Action::Manage])
+                perm(Area::Lender, [Subject::FinancingOrders, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::FinancingOrders, Action::Show, Action::Manage])
+                perm(Area::Lender, [Subject::FinancingOrders, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::FinancingOrders, Action::Create, Action::Manage])
+                perm(Area::Lender, [Subject::FinancingOrders, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::FinancingOrders, Action::Edit, Action::Manage])
+                perm(Area::Lender, [Subject::FinancingOrders, Action::Edit, Action::Manage])
         )->only('update');
     }
 
@@ -77,17 +77,20 @@ class OrderController extends Controller
     public function show(FinancingOrder $order): JsonResponse
     {
         $this->authorize('view', $order);
+
         $order->load('creator', 'approver');
 
         return fractal($order, new FinancingOrderTransformer())
             ->parseIncludes([
                 'id',
                 'status',
-                'company_id',
                 'reference_number',
                 'national_id',
                 'amount',
                 'selling_price',
+                'phone_country_code',
+                'phone_number',
+                'phone_number_formatted',
                 'is_approved',
                 'status_reason',
                 'creator',
@@ -183,6 +186,9 @@ class OrderController extends Controller
                 'selling_price',
                 'is_approved',
                 'status_reason',
+                'phone_country_code',
+                'phone_number',
+                'phone_number_formatted',
             ])->respond();
     }
 }
