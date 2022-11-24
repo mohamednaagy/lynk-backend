@@ -56,7 +56,6 @@ class LoginNotification extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->subject(__('emails/login-notification.subject'))
             ->metadata('notifiable_type', NotificationType::NewSignIn)
             ->markdown('emails.login-notification', [
                 'timeLogin' => $this->timeLogin,
