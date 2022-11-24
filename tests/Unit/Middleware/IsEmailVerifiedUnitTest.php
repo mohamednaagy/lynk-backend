@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
-class IsEmailVerifiedTest extends TestCase
+class IsEmailVerifiedUnitTest extends TestCase
 {
     use RefreshDatabase;
 
