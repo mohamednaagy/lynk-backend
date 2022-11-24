@@ -61,5 +61,12 @@ class SuperAdmin
             Action::Index,
             Action::Create,
         ],
+        Subject::Companies => [
+            Action::Index,
+            Action::Create,
+            Action::Edit,
+            Action::Show,
+            Action::Delete,
+        ],
     ];
 }
