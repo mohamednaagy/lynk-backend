@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1\Admin;
 
 use App\Enums\Action;
+use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\User;
@@ -40,8 +41,7 @@ class UpdateAdminRequest extends FormRequest
                     ->ignore($this->admin->id),
             ],
             'password' => ['nullable', 'string', 'confirmed'],
-            // __REVIEW__ instead of new EnumValue(Role::class), we should define the allowed roles using Rule::in(...)
-            'role' => ['required', 'string', new EnumValue(Role::class)],
+            'role' => ['required', 'string', Rule::in(Area::roles(Area::SuperAdmin))],
             'permissions' => [
                 'exclude_if:role,'.Role::Admin,
                 'required',

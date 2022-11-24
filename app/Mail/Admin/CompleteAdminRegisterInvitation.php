@@ -29,7 +29,7 @@ class CompleteAdminRegisterInvitation extends Mailable
             $externalUrl,
             'admin.complete-register',
             ['admin' => $user->id],
-            172800
+            now()->addHour(48)
         );
 
         $this->url = $url;
@@ -45,7 +45,7 @@ class CompleteAdminRegisterInvitation extends Mailable
     {
         return new Envelope(
             subject: __(
-                'emails/invitation-admin-complete-register.complete_registration',
+                'emails/admin-invitation.complete_registration',
                 [
                     'app_name' => config('app.name'),
                 ]
@@ -61,7 +61,7 @@ class CompleteAdminRegisterInvitation extends Mailable
     public function content()
     {
         return new Content(
-            markdown: 'emails.invitation-admin-complete-register',
+            markdown: 'emails.admin-invitation',
         );
     }
 
