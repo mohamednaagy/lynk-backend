@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Requests\V1\Admin\Transactions;
+namespace App\Http\Requests\V1\Admin\Companies;
 
-use App\Rules\MoneyValuesRule;
+use App\Rules\MoneyValueRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTransactionRequest extends FormRequest
@@ -25,10 +25,10 @@ class StoreTransactionRequest extends FormRequest
     public function rules()
     {
         return [
-            'amount' => ['required', 'gt:0', new MoneyValuesRule],
+            'amount' => ['required', 'gt:0', new MoneyValueRule],
             'description_en' => ['required', 'string', 'max:255'],
             'description_ar' => ['required', 'string', 'max:255'],
-            'attachment' => ['required', 'file', 'mimes:png,jpg,jpeg,pdf'],
+            'attachment' => ['required', 'file', 'mimes:png,jpg,jpeg,pdf', 'max:2000'],
         ];
     }
 }

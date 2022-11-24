@@ -132,6 +132,7 @@ return [
     'host_whitelist' => 'حقل :attribute غير موثوق فيه.',
     'webhook_type_limit' => 'لا يمكن استخدام هذا النوع أكثر من :limit مرات',
     'phone' => 'الحقل :attribute يحتوي على رقم هاتف غير صحيح',
+    'money_value' => 'صيغة حقل :attribute .غير صحيحة.',
     'custom_validation' => [
         'phone_number_does_not_belong_to_national_id' => 'Phone number doesn’t belong to National ID/Iqama',
         'invalid_person_id' => 'Invalid National ID',

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Actions\Admins\Transactions;
+namespace App\Actions\Companies;
 
-use App\Actions\Contracts\Admins\Transactions\ChargeBalanceManually;
+use App\Actions\Contracts\Companies\ChargeBalanceManually;
 use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;

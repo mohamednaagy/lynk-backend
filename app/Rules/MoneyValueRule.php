@@ -4,7 +4,7 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
-class MoneyValuesRule implements Rule
+class MoneyValueRule implements Rule
 {
     /**
      * @param  int  $decimal
@@ -35,6 +35,6 @@ class MoneyValuesRule implements Rule
      */
     public function message()
     {
-        return __('validation.regex');
+        return __('validation.money_value');
     }
 }

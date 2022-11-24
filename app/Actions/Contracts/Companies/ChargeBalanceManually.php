@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Contracts\Admins\Transactions;
+namespace App\Actions\Contracts\Companies;
 
 use App\Models\Company;
 
