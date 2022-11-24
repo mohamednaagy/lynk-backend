@@ -27,7 +27,7 @@ class CompleteAdminRegisterInvitation extends Mailable
     {
         $url = URL::signedExternalRoute(
             $externalUrl,
-            'admin.complete-register',
+            'api.v1.admins.admin.sign-up',
             ['admin' => $user->id],
             now()->addHour(48)
         );

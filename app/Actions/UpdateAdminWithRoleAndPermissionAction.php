@@ -6,9 +6,7 @@ use App\Actions\Contracts\SyncPermissionToUser;
 use App\Actions\Contracts\SyncRoleToUser;
 use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
 use App\Actions\Contracts\UpdateUser;
-use App\Enums\Area;
 use App\Models\User;
-use Modules\Grantify\Facades\Grantify;
 
 class UpdateAdminWithRoleAndPermissionAction implements UpdateAdminWithRoleAndPermission
 {
@@ -42,7 +40,6 @@ class UpdateAdminWithRoleAndPermissionAction implements UpdateAdminWithRoleAndPe
 
         // sync permission
         if (! empty($data['permissions'])) {
-            $data['permissions'] = Grantify::transformToAreaSubject(Area::SuperAdmin, $data['permissions']);
             $this->syncPermissionToUser->handle($user, $data['permissions']);
         }
     }

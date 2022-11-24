@@ -78,12 +78,7 @@ class AdminController extends Controller
         CreateAdminWithRoleAndPermission $createAdminWithRoleAndPermission
     ): JsonResponse {
         $data = $createAdminRequest->validated();
-
-        if ($data['role'] == Role::Admin) {
-            unset($data['permissions']);
-        } else {
-            $data['permissions'] = Grantify::transformToAreaSubject(Area::SuperAdmin, $data['permissions']);
-        }
+        $data = $this->adminRolePermissionsCheck($data);
 
         DB::transaction(function () use ($data, $createAdminWithRoleAndPermission) {
             $admin = $createAdminWithRoleAndPermission->handle($data);
@@ -113,18 +108,24 @@ class AdminController extends Controller
             }
 
             $data = $updateAdminRequest->validated();
-
-            if ($data['role'] == Role::Admin) {
-                unset($data['permissions']);
-            } else {
-                $data['permissions'] = Grantify::transformToAreaSubject(Area::SuperAdmin, $data['permissions']);
-            }
+            $data = $this->adminRolePermissionsCheck($data);
 
             DB::transaction(function () use ($updateAdminWithRoleAndPermission, $data, $admin) {
                 $updateAdminWithRoleAndPermission->handle($data, $admin);
             });
 
-            return $this->successResponse();
+            return fractal($admin, new UserTransformer(Area::SuperAdmin))
+                ->parseIncludes([
+                    'id',
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'role',
+                    'permissions',
+                    'phone_number',
+                    'phone_country_code',
+                    'formatted_phone_number',
+                ])->respond();
         });
     }
 
@@ -141,5 +142,16 @@ class AdminController extends Controller
         $admin->delete();
 
         return $this->successResponse();
+    }
+
+    private function adminRolePermissionsCheck(array $data): array
+    {
+        if ($data['role'] == Role::Admin) {
+            unset($data['permissions']);
+        } else {
+            $data['permissions'] = Grantify::transformToAreaSubject(Area::SuperAdmin, $data['permissions']);
+        }
+
+        return $data;
     }
 }
