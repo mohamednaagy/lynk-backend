@@ -4,7 +4,6 @@ namespace App\Support\Wallets;
 
 use App\Models\Wallet;
 use App\Support\Wallets\Contracts\WalletServiceInterface;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -79,13 +78,5 @@ class WalletService implements WalletServiceInterface
     public function findByNameOrFail(string $name)
     {
         return Wallet::where('name', $name)->firstOrFail();
-    }
-
-    /**
-     * @return Collection
-     */
-    public function getAll(): Collection
-    {
-        return Wallet::all();
     }
 }
