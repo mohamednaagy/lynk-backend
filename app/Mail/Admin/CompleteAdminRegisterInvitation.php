@@ -45,7 +45,7 @@ class CompleteAdminRegisterInvitation extends Mailable
     {
         return new Envelope(
             subject: __(
-                'emails/admin-invitation.complete_registration',
+                'emails/admin-invitation.subject',
                 [
                     'app_name' => config('app.name'),
                 ]
