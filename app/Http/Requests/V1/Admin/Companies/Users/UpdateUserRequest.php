@@ -38,10 +38,11 @@ class UpdateUserRequest extends FormRequest
                     ->where('company_id', $this->route('user')->company_id),
             ],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
+            // __REVIEW__ 'phone:phone_country_code' => 'phone:phone_country_code,mobile'
             'phone_number' => ['required', 'phone:phone_country_code', 'string'],
             'role' => [
                 'required',
-                Arr::except(Rule::in(Area::getRolesPerAreaMap()[Area::Lender]), [Role::LenderApiUser]),
+                Arr::except(Rule::in(Area::roles(Area::Lender)), [Role::LenderApiUser]),
             ],
         ];
     }

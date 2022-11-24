@@ -27,11 +27,19 @@ class AdminController extends Controller
      */
     public function index(GetPaginatedUsersByRole $getPaginatedUsersByRole): JsonResponse
     {
-        $admins = $getPaginatedUsersByRole->handle(Area::getRolesPerAreaMap()[Area::SuperAdmin]);
+        $admins = $getPaginatedUsersByRole->handle(Area::roles(Area::SuperAdmin));
 
         return fractal($admins, new UserTransformer(Area::SuperAdmin))
-            ->parseIncludes(['role'])
-            ->respond();
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'role',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 
     /**
@@ -40,13 +48,22 @@ class AdminController extends Controller
      */
     public function show(User $admin): JsonResponse
     {
-        if (! $admin->hasRole(Area::getRolesPerAreaMap()[Area::SuperAdmin])) {
-            throw UnauthorizedException::forRoles(Area::getRolesPerAreaMap()[Area::SuperAdmin]);
+        if (! $admin->hasRole(Area::roles(Area::SuperAdmin))) {
+            throw UnauthorizedException::forRoles(Area::roles(Area::SuperAdmin));
         }
 
         return fractal($admin, new UserTransformer(Area::SuperAdmin))
-            ->parseIncludes(['role', 'permissions'])
-            ->respond();
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'role',
+                'permissions',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 
     /**
@@ -61,7 +78,6 @@ class AdminController extends Controller
         CreateAdminWithRoleAndPermission $createAdminWithRoleAndPermission
     ): JsonResponse {
         $data = $createAdminRequest->validated();
-        $data['locale'] = app()->getLocale();
 
         if ($data['role'] == Role::Admin) {
             unset($data['permissions']);
@@ -92,12 +108,20 @@ class AdminController extends Controller
         UpdateAdminWithRoleAndPermission $updateAdminWithRoleAndPermission,
     ): JsonResponse {
         return DB::transaction(function () use ($updateAdminRequest, $admin, $updateAdminWithRoleAndPermission) {
-            if (! $admin->hasRole(Area::getRolesPerAreaMap()[Area::SuperAdmin])) {
-                throw UnauthorizedException::forRoles(Area::getRolesPerAreaMap()[Area::SuperAdmin]);
+            if (! $admin->hasRole(Area::roles(Area::SuperAdmin))) {
+                throw UnauthorizedException::forRoles(Area::roles(Area::SuperAdmin));
             }
 
-            DB::transaction(function () use ($updateAdminWithRoleAndPermission, $updateAdminRequest, $admin) {
-                $updateAdminWithRoleAndPermission->handle($updateAdminRequest->validated(), $admin);
+            $data = $updateAdminRequest->validated();
+
+            if ($data['role'] == Role::Admin) {
+                unset($data['permissions']);
+            } else {
+                $data['permissions'] = Grantify::transformToAreaSubject(Area::SuperAdmin, $data['permissions']);
+            }
+
+            DB::transaction(function () use ($updateAdminWithRoleAndPermission, $data, $admin) {
+                $updateAdminWithRoleAndPermission->handle($data, $admin);
             });
 
             return $this->successResponse();
@@ -110,8 +134,8 @@ class AdminController extends Controller
      */
     public function destroy(User $admin): JsonResponse
     {
-        if (! $admin->hasRole(Area::getRolesPerAreaMap()[Area::SuperAdmin])) {
-            throw UnauthorizedException::forRoles(Area::getRolesPerAreaMap()[Area::SuperAdmin]);
+        if (! $admin->hasRole(Area::roles(Area::SuperAdmin))) {
+            throw UnauthorizedException::forRoles(Area::roles(Area::SuperAdmin));
         }
 
         $admin->delete();

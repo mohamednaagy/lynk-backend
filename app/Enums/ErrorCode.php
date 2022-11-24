@@ -27,4 +27,10 @@ class ErrorCode
     public const UNABLE_TO_CANCEL_ORDER = 1010;
 
     public const ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE = 1011;
+
+    public const WEBHOOK_LIMIT_TYPE_NOT_FOUND = 1012;
+
+    public const X_COMPANY_INVALID = 1013;
+
+    public const BALANCE_NOT_ENOUGH = 1014;
 }

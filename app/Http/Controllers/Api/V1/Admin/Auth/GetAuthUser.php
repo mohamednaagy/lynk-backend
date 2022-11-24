@@ -17,6 +17,15 @@ class GetAuthUser extends Controller
      */
     public function __invoke(Request $request)
     {
-        return fractal($request->user(), new UserTransformer)->parseIncludes(['email'])->respond();
+        return fractal($request->user(), new UserTransformer)
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 }

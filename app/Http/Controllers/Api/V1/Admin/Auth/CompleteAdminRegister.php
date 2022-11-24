@@ -30,6 +30,15 @@ class CompleteAdminRegister extends Controller
             $completeAdminRegistration->handle($admin, $completeAdminRegisterRequest->validated());
         });
 
-        return fractal($admin, new UserTransformer)->respond();
+        return fractal($admin, new UserTransformer)
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 }

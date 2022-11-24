@@ -17,6 +17,8 @@ class EdaatInvoice extends Model
         'amount',
         'invoice_number',
         'status',
+        'creator_id',
+        'company_id',
     ];
 
     protected $casts = [

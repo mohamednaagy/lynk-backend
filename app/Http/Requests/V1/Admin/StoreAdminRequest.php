@@ -41,11 +41,34 @@ class StoreAdminRequest extends FormRequest
             ],
             // __REVIEW__ instead of new EnumValue(Role::class), we should define the allowed roles using Rule::in(...)
             'role' => ['required', 'string', new EnumValue(Role::class)],
-            'permissions' => ['required', 'array', 'min:1'],
-            'permissions.*' => ['required', 'array'],
-            'permissions.*.subject' => ['required', 'string', new EnumValue(Subject::class)],
-            'permissions.*.actions' => ['required', 'array'],
-            'permissions.*.actions.*' => ['required', 'string', new EnumValue(Action::class)],
+            'permissions' => [
+                'exclude_if:role,'.Role::Admin,
+                'required',
+                'array',
+                'min:1',
+            ],
+            'permissions.*' => [
+                'exclude_if:role,'.Role::Admin,
+                'required',
+                'array',
+            ],
+            'permissions.*.subject' => [
+                'exclude_if:role,'.Role::Admin,
+                'required',
+                'string',
+                new EnumValue(Subject::class),
+            ],
+            'permissions.*.actions' => [
+                'exclude_if:role,'.Role::Admin,
+                'required',
+                'array',
+            ],
+            'permissions.*.actions.*' => [
+                'exclude_if:role,'.Role::Admin,
+                'required',
+                'string',
+                new EnumValue(Action::class),
+            ],
             'redirect_url' => ['required', 'url', new HostWhitelistRule()],
         ];
     }
