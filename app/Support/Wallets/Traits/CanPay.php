@@ -28,11 +28,11 @@ trait CanPay
 
     public function transfer(Wallet $toWallet, float|int $amount, int $type, ...$parameters)
     {
-        $wallet = $this->wallet; // to change getting wallet from interface or another trait
+        $fromWallet = $this->wallet; // to change getting wallet from interface or another trait
         $referenceNumber = $this->getDynamicParameters(false, $parameters);
         $meta = $this->getDynamicParameters(true, $parameters);
 
-        return app(TransactionServiceInterface::class)->transfer($wallet, $toWallet, $amount, $type, $referenceNumber, $meta);
+        return app(TransactionServiceInterface::class)->transfer($fromWallet, $toWallet, $amount, $type, $referenceNumber, $meta);
     }
 
     private function getDynamicParameters(bool $isMeta, $parameters)
