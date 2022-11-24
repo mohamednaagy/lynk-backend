@@ -3,19 +3,17 @@
 namespace Tests\Feature\Lender\Order;
 
 use App\Enums\Role;
-use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\User;
-use Bavix\Wallet\Internal\Exceptions\ExceptionInterface;
+use App\Traits\Test\OrderTrait;
 use Bavix\Wallet\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Grantify\Facades\Grantify;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class OrderStoreTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, OrderTrait;
 
     private static Company $company;
 
@@ -25,46 +23,19 @@ class OrderStoreTest extends TestCase
 
     /**
      * @return void
-     *
-     * @throws ExceptionInterface
      */
     public function setUp(): void
     {
         parent::setUp();
 
-        self::$company = Company::factory()->create([
-            'first_name' => 'firstName',
-            'last_name' => 'lastName',
-            'phone_country_code' => 'SA',
-            'phone_number' => '503811000',
-            'email' => 'test@uselynk.test',
-            'password' => 'Qwer@1234',
-            'source' => 'Postman',
-            'company_name' => 'companyName',
-            'company_unique_name' => 'lynk05',
-            'company_cr' => '12345678910',
-        ]);
-
-        self::$wallet = self::$company->createWallet([
-            'name' => WalletType::CompanyWallet,
-            'slug' => WalletType::CompanyWallet,
-        ]);
-
-        self::$wallet->deposit(2000);
-
-        self::$userLender = User::factory()->create([
-            'email' => 'lender@bim.com',
-            'password' => bcrypt('12345678'),
-            'company_id' => self::$company->getOriginal('id'),
-        ]);
-
-        Grantify::assignRoleToModel(self::$userLender, Role::LenderAdmin);
+        [self::$company, self::$wallet] = $this->createCompanyDetails();
+        self::$userLender = $this->createLenderUser(self::$company->getOriginal('id'), Role::LenderAdmin);
     }
 
     /**
      * @return void
      */
-    public function testThatUnAuthUserCantCreateOrder(): void
+    public function test_that_un_auth_user_cant_create_order(): void
     {
         $this->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson('api/v1/lender/orders', [
@@ -82,7 +53,7 @@ class OrderStoreTest extends TestCase
     /**
      * @return void
      */
-    public function testThatAuthUserWithoutNationalIdCantCreateOrder(): void
+    public function test_that_auth_user_without_national_id_cant_create_order(): void
     {
         $this->actingAs(self::$userLender)->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson('api/v1/lender/orders', [
@@ -96,7 +67,7 @@ class OrderStoreTest extends TestCase
     /**
      * @return void
      */
-    public function testThatAuthUserWithoutAmountCantCreateOrder(): void
+    public function test_that_auth_user_without_amount_cant_create_order(): void
     {
         $this->actingAs(self::$userLender)->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson('api/v1/lender/orders', [
@@ -118,7 +89,7 @@ class OrderStoreTest extends TestCase
     /**
      * @return void
      */
-    public function testThatAuthUserWithoutSellingPriceCantCreateOrder(): void
+    public function test_that_auth_user_without_selling_price_cant_create_order(): void
     {
         $this->actingAs(self::$userLender)->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson('api/v1/lender/orders', [
@@ -140,7 +111,7 @@ class OrderStoreTest extends TestCase
     /**
      * @return void
      */
-    public function testThatAuthUserWithoutPhoneCountryCodeCantCreateOrder(): void
+    public function test_that_auth_user_without_phone_country_code_cant_create_order(): void
     {
         $this->actingAs(self::$userLender)->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson('api/v1/lender/orders', [
@@ -156,7 +127,7 @@ class OrderStoreTest extends TestCase
                         'The phone country code field is required when phone number is present.',
                     ],
                     'phone_number' => [
-                        'The phone number is not valid phone number.',
+                        'The phone number is not a valid phone number.',
                     ],
                 ],
             ]);
@@ -165,7 +136,7 @@ class OrderStoreTest extends TestCase
     /**
      * @return void
      */
-    public function testThatAuthUserWithoutPhoneNumberCantCreateOrder(): void
+    public function test_that_auth_user_without_phone_number_cant_create_order(): void
     {
         $this->actingAs(self::$userLender)->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson('api/v1/lender/orders', [
@@ -190,7 +161,7 @@ class OrderStoreTest extends TestCase
     /**
      * @return void
      */
-    public function testThatAuthUserCanCreateOrderWithValidData(): void
+    public function test_that_auth_user_can_create_order_with_valid_data(): void
     {
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
