@@ -134,7 +134,7 @@ class UserTransformer extends TransformerAbstract
     public function includeOrdersCount(User $user): Primitive
     {
         if (is_null($user->orders_count)) {
-            throw new LazyLoadingViolationException((object) User::class, 'orders');
+            throw new LazyLoadingViolationException($user, 'orders_count');
         }
 
         return $this->primitive((int) $user->orders_count);
