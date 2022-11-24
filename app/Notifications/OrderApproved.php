@@ -46,7 +46,7 @@ class OrderApproved extends Notification
                 'orderId' => $this->financingOrder->getOriginal('id'),
             ]))
             ->greeting(trans('emails/order-approved.greeting'))
-            ->line(trans('emails/order-approved.order_approved', [
+            ->line(trans('emails/order-approved.approved_message', [
                 'orderId' => $this->financingOrder->getOriginal('id'),
                 'approvedAt' => now()->format('Y-m-d H:i:s'),
             ]))
