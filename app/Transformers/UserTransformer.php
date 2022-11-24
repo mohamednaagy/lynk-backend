@@ -4,6 +4,7 @@ namespace App\Transformers;
 
 use App\Enums\Area;
 use App\Models\User;
+use Illuminate\Database\LazyLoadingViolationException;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 use Modules\Grantify\Facades\Grantify;
@@ -132,6 +133,10 @@ class UserTransformer extends TransformerAbstract
 
     public function includeOrdersCount(User $user): Primitive
     {
+        if (is_null($user->orders_count)) {
+            throw new LazyLoadingViolationException((object) User::class, 'orders');
+        }
+
         return $this->primitive((int) $user->orders_count);
     }
 }

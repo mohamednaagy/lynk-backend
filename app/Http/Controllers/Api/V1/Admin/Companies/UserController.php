@@ -19,7 +19,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Validation\UnauthorizedException;
 
 class UserController extends Controller
 {
@@ -57,7 +56,7 @@ class UserController extends Controller
             Role::LenderSupervisor,
         ])
         ) {
-            throw new UnauthorizedException();
+            throw new AuthorizationException();
         }
 
         return fractal($user, new UserTransformer(Area::Lender))
