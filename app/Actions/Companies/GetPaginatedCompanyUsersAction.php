@@ -2,13 +2,13 @@
 
 namespace App\Actions\Companies;
 
-use App\Actions\Contracts\Companies\GetCompanyUsers;
+use App\Actions\Contracts\Companies\GetPaginatedCompanyUsers;
 use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-class GetCompanyUsersAction implements GetCompanyUsers
+class GetPaginatedCompanyUsersAction implements GetPaginatedCompanyUsers
 {
     /**
      * @param  Company  $company
@@ -16,7 +16,6 @@ class GetCompanyUsersAction implements GetCompanyUsers
      */
     public function handle(Company $company): LengthAwarePaginator
     {
-        // __REVIEW__ add number of orders created by each
         return User::query()
             ->whereHas('roles', function ($query) {
                 return $query->whereIn('name', [
@@ -27,6 +26,7 @@ class GetCompanyUsersAction implements GetCompanyUsers
                 ]);
             })
             ->where('company_id', $company->id)
+            ->withCount('orders')
             ->paginate();
     }
 }
