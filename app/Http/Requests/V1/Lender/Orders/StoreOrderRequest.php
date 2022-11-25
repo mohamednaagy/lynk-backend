@@ -9,6 +9,7 @@ use App\Exceptions\MobileVerification\PersonNotFoundException;
 use App\Rules\ValidateSAID;
 use App\Support\MobileVerification\Facades\MobileVerify;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
 class StoreOrderRequest extends FormRequest
@@ -50,14 +51,16 @@ class StoreOrderRequest extends FormRequest
     /**
      * Configure the validator instance.
      *
-     * @param  \Illuminate\Validation\Validator  $validator
+     * @param  Validator  $validator
      * @return void
      */
-    public function withValidator($validator)
+    public function withValidator(Validator $validator): void
     {
         $validator->after(
             function ($validator) {
-                $this->checkMobileVerification($validator);
+                if ($this->validated('national_id')) {
+                    $this->checkMobileVerification($validator);
+                }
             }
         );
     }

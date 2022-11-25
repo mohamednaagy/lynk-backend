@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Traits\Test;
+namespace Tests\Traits;
 
-use App\Enums\Role;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -13,14 +13,18 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Grantify\Facades\Grantify;
 
-trait OrderTrait
+trait InteractsWithLender
 {
     /**
+     * @param  int  $walletInitialAmount
+     * @param  array  $data
      * @return array
      */
-    public function createCompanyDetails(): array
-    {
-        $company = Company::factory()->create([
+    public function createCompany(
+        int $walletInitialAmount = 2000,
+        array $data = []
+    ): array {
+        $company = Company::factory()->create(array_merge([
             'first_name' => 'firstName',
             'last_name' => 'lastName',
             'phone_country_code' => 'SA',
@@ -31,14 +35,14 @@ trait OrderTrait
             'company_name' => 'companyName',
             'company_unique_name' => 'lynk05',
             'company_cr' => '12345678910',
-        ]);
+        ], $data));
 
         $wallet = $company->createWallet([
             'name' => WalletType::CompanyWallet,
             'slug' => WalletType::CompanyWallet,
         ]);
 
-        $wallet->deposit(2000);
+        $wallet->depositFloat($walletInitialAmount);
 
         return [
             $company,
@@ -48,16 +52,22 @@ trait OrderTrait
 
     /**
      * @param  int  $companyId
-     * @param  Role  $role
+     * @param  string  $role
+     * @param  string  $email
+     * @param  array  $data
      * @return Collection|Model|mixed
      */
-    public function createLenderUser(int $companyId, string $role): mixed
-    {
-        $userLender = User::factory()->create([
-            'email' => 'lender@bim.com',
+    public function createLenderUser(
+        int $companyId,
+        string $role,
+        string $email = 'lender@bim.com',
+        array $data = []
+    ): mixed {
+        $userLender = User::factory()->create(array_merge([
+            'email' => $email,
             'password' => bcrypt('12345678'),
             'company_id' => $companyId,
-        ]);
+        ], $data));
 
         Grantify::assignRoleToModel($userLender, $role);
 
@@ -67,11 +77,12 @@ trait OrderTrait
     /**
      * @param  int  $companyId
      * @param  int  $userId
+     * @param  array  $data
      * @return Model|Builder
      */
-    public function createOrder(int $companyId, int $userId): Model|Builder
+    public function createOrder(int $companyId, int $userId, $data = []): Model|Builder
     {
-        return FinancingOrder::query()->create([
+        return FinancingOrder::query()->create(array_merge([
             'company_id' => $companyId,
             'approved_at' => Carbon::now(),
             'creator_id' => $userId,
@@ -80,8 +91,8 @@ trait OrderTrait
             'phone_number' => '+966500112233',
             'amount' => 200,
             'selling_price' => 220,
-            'status' => 11,
-            'is_verification_required' => 1,
-        ]);
+            'status' => FinancingOrderStatus::WaitingClientWakala,
+            'is_verification_required' => true,
+        ], $data));
     }
 }
