@@ -1,5 +1,7 @@
 <?php
 
+// __REVIEW__ change file path to be "app/Support/QueryScoper/Scopes/Edaat/InvoiceNumberScope.php"
+
 namespace App\Support\QueryScoper\Scopes\Lender\Edaat;
 
 use App\Support\QueryScoper\QueryScoper;
@@ -46,6 +48,7 @@ class InvoiceNumberScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data): Builder
     {
+        // __REVIEW__ change "Where" to "where"
         return $builder->Where('invoice_number', $data['invoice_number']);
     }
 }

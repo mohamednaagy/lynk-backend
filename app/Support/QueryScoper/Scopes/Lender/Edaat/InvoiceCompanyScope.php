@@ -1,5 +1,7 @@
 <?php
 
+// __REVIEW__ change file path to be "app/Support/QueryScoper/Scopes/Edaat/InvoiceCompanyScope.php"
+
 namespace App\Support\QueryScoper\Scopes\Lender\Edaat;
 
 use App\Models\Company;
@@ -34,6 +36,7 @@ class InvoiceCompanyScope extends QueryScoper
         return Validator::make(
             $data,
             [
+                // __REVIEW__ change 'int' to 'integer'
                 'company_id' => ['required', 'int', Rule::exists(Company::class, 'id')],
             ]
         );
