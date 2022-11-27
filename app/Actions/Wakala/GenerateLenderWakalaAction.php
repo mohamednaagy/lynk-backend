@@ -24,12 +24,24 @@ class GenerateLenderWakalaAction implements GenerateLenderWakala
 
     public function handle(FinancingOrder $financingOrder)
     {
-        $lenderTemplate = $this->getWakalaTemplate->handle('company')['wakala_template'];
+        $lenderTemplate = $this->getWakalaTemplate->handle('client')['wakala_template'];
 
-        $companyName = $financingOrder->company->name;
-        $crNumber = $financingOrder->company->company_cr;
+        $date = now()->toDateString();
+        $time = now()->toTimeString();
+        $commodityNumber = $financingOrder->reference_number;
+        $amount = $financingOrder->amount;
 
-        $template = str_replace(['companyName', 'crNumber'], [$companyName, $crNumber], $lenderTemplate);
+        $template = str_replace([
+            '{{signingContractDate}}',
+            '{{signingContractTime}}',
+            '{{commodityNumber}}',
+            '{{amount}}',
+        ], [
+            $date,
+            $time,
+            $commodityNumber,
+            $amount,
+        ], $lenderTemplate);
 
         $html = view($this->getTemplate(), [
             'template' => $template,
