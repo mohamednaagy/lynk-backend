@@ -12,6 +12,6 @@ class GenerateWebhookSecretKeyAction implements GenerateWebhookSecretKey
      */
     public function handle(): string
     {
-        return Str::random(40);
+        return Str::random(\config('webhook-server.secret_key_length'));
     }
 }
