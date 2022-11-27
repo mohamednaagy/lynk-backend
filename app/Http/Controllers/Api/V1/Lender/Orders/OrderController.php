@@ -17,6 +17,7 @@ use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -47,6 +48,7 @@ class OrderController extends Controller
     }
 
     /**
+     * @param  Request  $request
      * @param  GetPaginatedFinancingOrder  $getPaginatedOrders
      * @return JsonResponse
      */
@@ -73,6 +75,8 @@ class OrderController extends Controller
     /**
      * @param  FinancingOrder  $order
      * @return JsonResponse
+     *
+     * @throws AuthorizationException
      */
     public function show(FinancingOrder $order): JsonResponse
     {
@@ -104,9 +108,11 @@ class OrderController extends Controller
      *
      * @param  StoreOrderRequest  $request
      * @param  CreateFinancingOrder  $createFinancingOrder
+     * @param  DeductOrderCreationFee  $deductOrderCreationFee
+     * @param  CanCreateOrder  $canCreateOrder
      * @return JsonResponse
      *
-     * @throws ExceptionInterface
+     * @throws \Throwable
      */
     public function store(
         StoreOrderRequest $request,
@@ -167,6 +173,8 @@ class OrderController extends Controller
      * @param  UpdateFinancingOrder  $updateFinancingOrder
      * @param  FinancingOrder  $order
      * @return JsonResponse
+     *
+     * @throws AuthorizationException
      */
     public function update(
         UpdateOrderRequest $updateOrderRequest,
@@ -174,6 +182,13 @@ class OrderController extends Controller
         FinancingOrder $order
     ): JsonResponse {
         $this->authorize('update', $order);
+
+        if ($order->status->cantBeUpdated()) {
+            return $this->errorResponse(
+                __('error.order_cannot_be_updated')
+            );
+        }
+
         $financingOrder = $updateFinancingOrder->update($order, $updateOrderRequest->validated());
 
         return fractal($financingOrder, new FinancingOrderTransformer())

@@ -123,4 +123,27 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
     {
         return ! $this->canMoveTo($status);
     }
+
+    /**
+     * @return bool
+     */
+    public function canBeUpdated(): bool
+    {
+        if (in_array($this->value, [
+            self::PendingApproval,
+            self::WaitingClientWakala,
+        ])) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**.
+     * @return bool
+     */
+    public function cantBeUpdated(): bool
+    {
+        return ! $this->canBeUpdated();
+    }
 }

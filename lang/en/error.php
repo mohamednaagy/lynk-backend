@@ -11,6 +11,7 @@ return [
     'invalid_mobile_number' => 'Invalid mobile number',
     'no_enough_balance' => 'No enough balance',
     'order_status_doesnt_follow_sequence' => 'Order status cannot be updated because it doesn\'t follow the right sequence',
+    'order_cannot_be_updated' => 'Order cannot be updated currently',
     'webhook_type_not_supported' => 'Unsupported webhook type',
     'must_verify_email' => 'You must verify your email address',
     'x_company_invalid' => 'Invalid company',
