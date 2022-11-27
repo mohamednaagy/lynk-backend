@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\DB;
 
 class EnquiryReplyController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('checkCompanyStatus');
+    }
+
     /**
      * Display a listing of the resource.
      *

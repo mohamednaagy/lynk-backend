@@ -10,6 +10,11 @@ use Illuminate\Support\Arr;
 
 class UpdateMyProfile extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('checkCompanyStatus');
+    }
+
     /**
      * Handle the incoming request.
      *

@@ -33,4 +33,6 @@ class ErrorCode
     public const X_COMPANY_INVALID = 1013;
 
     public const BALANCE_NOT_ENOUGH = 1014;
+
+    public const COMPANY_NOT_ACTIVE = 1015;
 }

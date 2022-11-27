@@ -14,6 +14,11 @@ use Illuminate\Http\Request;
 
 class EnquiryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('checkCompanyStatus');
+    }
+
     /**
      * Display a listing of the resource.
      *
