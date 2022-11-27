@@ -31,6 +31,7 @@ class UpdateMyProfile extends Controller
 
         $updateUser->handle($user, $data);
 
+        // __REVIEW__ return $this->successResponse();
         return fractal($user, new UserTransformer)
             ->parseIncludes([
                 'id',

@@ -17,6 +17,8 @@ class GetAuthUser extends Controller
      */
     public function __invoke(Request $request)
     {
+        // __REVIEW__ Add role and permissions to parseIncludes
+        // __REVIEW__ add Area to UserTransformer
         return fractal($request->user(), new UserTransformer)
             ->parseIncludes([
                 'id',

@@ -49,10 +49,13 @@ Route::prefix('v1/admin')->group(function () {
         Route::put('auth/profile', UpdateMyProfile::class);
 
         Route::apiResource('admins', AdminController::class);
+
+        // __REVIEW__ remove this route
         Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
 
         Route::get('/roles', GetAllRoles::class)->middleware(
             'permission:'.
+            // __REVIEW__ use "perm" function
                 Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Roles, [
                     Action::Index,
                 ])
@@ -60,6 +63,7 @@ Route::prefix('v1/admin')->group(function () {
 
         Route::get('/permissions', GetAllPermissions::class)->middleware(
             'permission:'.
+            // __REVIEW__ use "perm" function
                 Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Permissions, [
                     Action::Index,
                 ])
