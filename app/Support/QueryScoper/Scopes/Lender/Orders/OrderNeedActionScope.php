@@ -1,5 +1,7 @@
 <?php
 
+// __REVIEW__ need to change file path "app/Support/QueryScoper/Scopes/FinancingOrders/OrderNeedActionScope.php"
+
 namespace App\Support\QueryScoper\Scopes\Lender\Orders;
 
 use App\Enums\FinancingOrderStatus;
