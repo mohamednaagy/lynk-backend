@@ -45,15 +45,15 @@ Route::get('v1/lender/media/{media}/download', DownloadMediaFile::class)->name('
 Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     Route::get('/area-settings', GetLenderAreaSettings::class);
     Route::post('/register', Register::class);
+
     Route::middleware([
         'auth:sanctum',
-        'role:'.implode('|', [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator, Role::LenderApiUser]),
+        'role:'.implode('|', [
+            Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator, Role::LenderApiUser,
+        ]),
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
-
-        Route::get('/settings', [SettingsController::class, 'index']);
-        Route::put('/settings', [SettingsController::class, 'update']);
 
         Route::middleware('verified.email:'.Area::Lender)->group(function () {
             Route::put('auth/profile', UpdateMyProfile::class);
@@ -70,18 +70,22 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
                 Route::apiResource('orders', OrderController::class);
                 Route::post('users/{user}/resend-invitation', ResendInvitation::class);
                 Route::apiResource('users', UserController::class);
+
                 Route::prefix('wallet')->group(function () {
                     Route::get('/balance', GetBalance::class);
                     Route::post('/calculate', CalculateOrderCost::class);
                     Route::get('/transactions', GetWalletTransactions::class);
                 });
+
                 Route::post('webhooks', [WebhookController::class, 'store']);
                 Route::put('webhooks/refresh-secret', [WebhookController::class, 'refreshSecret']);
+
+                Route::get('/settings', [SettingsController::class, 'index']);
+                Route::put('/settings', [SettingsController::class, 'update']);
             });
 
             Route::apiResource('enquiries', EnquiryController::class);
-            Route::apiResource('enquiries.replies', EnquiryReplyController::class)
-                ->only('index', 'store');
+            Route::apiResource('enquiries.replies', EnquiryReplyController::class)->only('index', 'store');
             Route::apiResource('enquiries.replies', EnquiryReplyController::class);
         });
     });
