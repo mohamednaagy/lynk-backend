@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\QueryScoper\Scopes\Lender\Orders;
+namespace App\Support\QueryScoper\Scopes\FinancingOrders;
 
 use App\Enums\FinancingOrderStatus;
 use App\Support\QueryScoper\QueryScoper;
@@ -52,7 +52,9 @@ class OrderNeedActionScope extends QueryScoper
                 'status',
                 [
                     FinancingOrderStatus::PendingApproval,
-                    FinancingOrderStatus::Approved,
+                    FinancingOrderStatus::ContractSigned,
+                    FinancingOrderStatus::WaitingClientWakala,
+                    FinancingOrderStatus::MurabahaSaleCompleted,
                     FinancingOrderStatus::Rejected,
                 ]
             );
