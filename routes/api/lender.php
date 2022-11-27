@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\V1\Lender\Orders\MakeOrderProceed;
 use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Orders\RejectOrder;
 use App\Http\Controllers\Api\V1\Lender\Settings\GetLenderAreaSettings;
+use App\Http\Controllers\Api\V1\Lender\Settings\SettingsController;
 use App\Http\Controllers\Api\V1\Lender\Users\UserController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CalculateOrderCost;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetBalance;
@@ -51,6 +52,9 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
 
+        Route::get('/settings', [SettingsController::class, 'index']);
+        Route::put('/settings', [SettingsController::class, 'update']);
+
         Route::middleware('verified.email:'.Area::Lender)->group(function () {
             Route::put('auth/profile', UpdateMyProfile::class);
 
@@ -75,6 +79,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
             });
 
             Route::post('webhooks', [WebhookController::class, 'store']);
+            Route::put('webhooks/refresh-secret', [WebhookController::class, 'refreshSecret']);
 
             Route::apiResource('enquiries', EnquiryController::class);
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)
