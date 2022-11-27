@@ -27,7 +27,7 @@ class UpdateSettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'default_does_order_require_approval' => ['required', 'boolean'],
+            'does_order_require_approval' => ['required', 'boolean'],
         ];
     }
 }

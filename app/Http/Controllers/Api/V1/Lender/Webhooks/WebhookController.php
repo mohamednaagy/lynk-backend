@@ -39,6 +39,7 @@ class WebhookController extends Controller
         $company = $updateWebhookSecretKey->handle($company);
 
         return fractal($company, new CompanyTransformer())
-            ->parseIncludes(['webhook_secret_key'])->respond();
+            ->parseIncludes(['webhook_secret_key'])
+            ->respond();
     }
 }

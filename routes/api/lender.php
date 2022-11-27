@@ -53,7 +53,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         Route::get('auth', GetAuthUser::class);
 
         Route::get('/settings', [SettingsController::class, 'index']);
-        Route::put('/update-settings', [SettingsController::class, 'update']);
+        Route::put('/settings', [SettingsController::class, 'update']);
 
         Route::middleware('verified.email:'.Area::Lender)->group(function () {
             Route::put('auth/profile', UpdateMyProfile::class);

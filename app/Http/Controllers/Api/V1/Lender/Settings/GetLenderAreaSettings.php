@@ -19,9 +19,7 @@ class GetLenderAreaSettings extends Controller
     public function __invoke(GetSettingsClassInstance $getSettingsClassInstance)
     {
         return fractal($getSettingsClassInstance->handle(Area::Lender), new LenderSettingsTransformer())
-            ->parseIncludes([
-                'default_order_cost',
-                'default_does_order_require_approval',
-            ])->respond();
+            ->parseIncludes(['email_verification_enabled'])
+            ->respond();
     }
 }
