@@ -15,6 +15,7 @@ use App\Mail\CompleteRegisterInvitation;
 use App\Models\Company;
 use App\Models\User;
 use App\Transformers\UserTransformer;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -46,6 +47,8 @@ class UserController extends Controller
      * @param  Request  $request
      * @param  User  $user
      * @return JsonResponse
+     *
+     * @throws AuthorizationException
      */
     public function show(Request $request, User $user): JsonResponse
     {

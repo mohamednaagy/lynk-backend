@@ -12,16 +12,15 @@ class CheckEdaatInvoiceStatus extends Controller
 {
     public function __invoke(
         CheckEdaatInvoiceStatusInterface $checkEdaatInvoiceStatus,
-        // __REVIEW__ don't load $invoice as model (see comment on line 23)
-        EdaatInvoice $invoice
+        int $invoice
     ): JsonResponse {
-        // __REVIEW__ use DB::transaction(...) instead of app(DatabaseServiceInterface::class)
+        // According to https://bavix.github.io/laravel-wallet/#/transaction,
+        // DB::transaction() not working with Wallet version below 9.6, and we are using 9.5
         app(DatabaseServiceInterface::class)->transaction(static function () use (
             $checkEdaatInvoiceStatus,
             $invoice
         ) {
-            // __REVIEW__ retreive $invoice from the database and lockForUpdate
-            // __REVIEW__ for reference, see: app/Http/Controllers/Api/V1/Lender/Orders/RejectOrder.php
+            $invoice = EdaatInvoice::lockForUpdate()->findOrFail($invoice);
             $checkEdaatInvoiceStatus->handle($invoice);
         });
 

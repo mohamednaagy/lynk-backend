@@ -88,11 +88,8 @@ Route::prefix('v1/admin')->group(function () {
             Route::get('/{company}/settings ', GetCompanySetting::class);
         });
 
-        // __REVIEW__ remove "wallet" prefix
-        Route::prefix('wallet')->group(function () {
-            Route::get('/edaat-invoices', GetEdaatInvoices::class);
-            Route::post('/edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
-        });
+        Route::get('edaat-invoices', GetEdaatInvoices::class);
+        Route::post('edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
 
         Route::apiResource('enquiries', EnquiryController::class);
         Route::apiResource('enquiries.replies', EnquiryReplyController::class);
