@@ -18,8 +18,7 @@ class TransactionTransformer extends TransformerAbstract
             'description' => (! is_null($transaction->meta) && isset($transaction->meta['type']))
                 ? DescriptionManager::getDescription($transaction)
                 : null,
-            // __REVIEW__ this should be amount_float
-            'amount' => $transaction->amount,
+            'amount' => $transaction->amount_float,
         ];
     }
 }
