@@ -54,27 +54,25 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         Route::middleware('verified.email:'.Area::Lender)->group(function () {
             Route::put('auth/profile', UpdateMyProfile::class);
 
-            Route::apiResource('edaat-invoices', EdaatInvoiceController::class)->only('index', 'store');
-
-            Route::get('orders/volume', GetOrdersVolume::class);
-            Route::get('orders/stats', GetOrdersStats::class);
-            Route::post('orders/{order}/proceed', MakeOrderProceed::class);
-            Route::put('orders/{order}/approve', ApproveOrder::class);
-            Route::put('orders/{order}/reject', RejectOrder::class);
-            Route::put('orders/{order}/cancel', CancelOrder::class);
-            Route::post('orders/no-verification', CreateOrderWithoutVerification::class);
-            Route::apiResource('orders', OrderController::class);
-
-            Route::post('users/{user}/resend-invitation', ResendInvitation::class);
-            Route::apiResource('users', UserController::class);
-
-            Route::prefix('wallet')->group(function () {
-                Route::get('/balance', GetBalance::class);
-                Route::post('/calculate', CalculateOrderCost::class);
-                Route::get('/transactions', GetWalletTransactions::class);
+            Route::middleware('checkCompanyStatus')->group(function () {
+                Route::apiResource('edaat-invoices', EdaatInvoiceController::class)->only('index', 'store');
+                Route::get('orders/volume', GetOrdersVolume::class);
+                Route::get('orders/stats', GetOrdersStats::class);
+                Route::post('orders/{order}/proceed', MakeOrderProceed::class);
+                Route::put('orders/{order}/approve', ApproveOrder::class);
+                Route::put('orders/{order}/reject', RejectOrder::class);
+                Route::put('orders/{order}/cancel', CancelOrder::class);
+                Route::post('orders/no-verification', CreateOrderWithoutVerification::class);
+                Route::apiResource('orders', OrderController::class);
+                Route::post('users/{user}/resend-invitation', ResendInvitation::class);
+                Route::apiResource('users', UserController::class);
+                Route::prefix('wallet')->group(function () {
+                    Route::get('/balance', GetBalance::class);
+                    Route::post('/calculate', CalculateOrderCost::class);
+                    Route::get('/transactions', GetWalletTransactions::class);
+                });
+                Route::post('webhooks', [WebhookController::class, 'store']);
             });
-
-            Route::post('webhooks', [WebhookController::class, 'store']);
 
             Route::apiResource('enquiries', EnquiryController::class);
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)

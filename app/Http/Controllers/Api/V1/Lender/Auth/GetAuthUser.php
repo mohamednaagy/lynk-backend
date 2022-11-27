@@ -9,11 +9,6 @@ use Illuminate\Http\Request;
 
 class GetAuthUser extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('checkCompanyStatus');
-    }
-
     /**
      * Handle an authentication attempt.
      *
