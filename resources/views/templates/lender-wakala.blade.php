@@ -7,8 +7,8 @@
     <title>Company Wakala</title>
 </head>
 <body>
-<header>{{$header}}</header>
-<h1>Company Wakala - {{ $companyName }} - {{ $crNumber }} - {{ now()->toDateTimeString() }}</h1>
-<footer>{{$footer}}</footer>
+
+{!! $template !!}
+
 </body>
 </html>

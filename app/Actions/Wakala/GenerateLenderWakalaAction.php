@@ -3,6 +3,7 @@
 namespace App\Actions\Wakala;
 
 use App\Actions\Contracts\Wakala\GenerateLenderWakala;
+use App\Actions\Contracts\Wakala\GetWakalaTemplate;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
@@ -17,13 +18,21 @@ class GenerateLenderWakalaAction implements GenerateLenderWakala
 
     protected string $filePath = '';
 
+    public function __construct(protected GetWakalaTemplate $getWakalaTemplate)
+    {
+    }
+
     public function handle(FinancingOrder $financingOrder)
     {
+        $lenderTemplate = $this->getWakalaTemplate->handle('company')['wakala_template'];
+
+        $companyName = $financingOrder->company->name;
+        $crNumber = $financingOrder->company->company_cr;
+
+        $template = str_replace(['companyName', 'crNumber'], [$companyName, $crNumber], $lenderTemplate);
+
         $html = view($this->getTemplate(), [
-            'companyName' => $financingOrder->company->name,
-            'crNumber' => $financingOrder->company->company_cr,
-            'header' => 'Header',
-            'footer' => 'Footer',
+            'template' => $template,
         ])->render();
 
         $path = $this->getFilePath($financingOrder).'.pdf';
