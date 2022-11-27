@@ -66,8 +66,12 @@ Route::prefix('v1/admin')->group(function () {
         );
 
         Route::prefix('settings')->group(function () {
+            // __REVIEW__ change route path to "lender"
             Route::get('/', [SettingsController::class, 'index']);
+            // __REVIEW__ change route path to "lender"
             Route::put('/update', [SettingsController::class, 'update']);
+
+            // __REVIEW__ move "wakala-templates/{type}" routes to be outside settings
             Route::get('/wakala-templates/{type}', [WakalaTemplateController::class, 'show'])
                 ->where('type', 'client|company');
             Route::put('/wakala-templates/{type}', [WakalaTemplateController::class, 'update'])
@@ -98,6 +102,6 @@ Route::prefix('v1/admin')->group(function () {
 
         Route::get('media/{media}/download', DownloadMedia::class);
 
-        Route::post('/upload-Image', [UploadImage::class, 'store']);
+        Route::post('/upload-image', [UploadImage::class, 'store']);
     });
 });
