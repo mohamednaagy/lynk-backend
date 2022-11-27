@@ -30,17 +30,23 @@ class GenerateLenderWakalaAction implements GenerateLenderWakala
         $time = now()->toTimeString();
         $commodityNumber = $financingOrder->reference_number;
         $amount = $financingOrder->amount;
+        $orderNumber = $financingOrder->id;
+        $orderDate = $financingOrder->approved_at->format('Y-m-d');
 
         $template = str_replace([
             '{{signingContractDate}}',
             '{{signingContractTime}}',
             '{{commodityNumber}}',
             '{{amount}}',
+            '{{orderNumber}}',
+            '{{orderDate}}',
         ], [
             $date,
             $time,
             $commodityNumber,
             $amount,
+            $orderNumber,
+            $orderDate,
         ], $lenderTemplate);
 
         $html = view($this->getTemplate(), [
