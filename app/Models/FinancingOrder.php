@@ -185,6 +185,14 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         );
     }
 
+    public function scopeRequireAction($query)
+    {
+        return $query->whereIn(
+            'status',
+            FinancingOrderStatus::$requireAction
+        );
+    }
+
     public function scopeCompleted($query)
     {
         return $query->whereStatus(FinancingOrderStatus::Completed);
