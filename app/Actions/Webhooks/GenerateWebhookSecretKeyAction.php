@@ -12,6 +12,6 @@ class GenerateWebhookSecretKeyAction implements GenerateWebhookSecretKey
      */
     public function handle(): string
     {
-        return 'secret-key:'.Str::random(40).':'.now()->toString();
+        return Str::random(40);
     }
 }
