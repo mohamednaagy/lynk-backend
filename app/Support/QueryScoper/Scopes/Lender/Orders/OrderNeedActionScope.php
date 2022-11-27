@@ -54,6 +54,7 @@ class OrderNeedActionScope extends QueryScoper
         // ContractSigned
         // WaitingClientWakala
         // MurabahaSaleCompleted
+        // Rejected
         if ($data['need_action'] === '1') {
             return $builder->whereIn(
                 'status',
