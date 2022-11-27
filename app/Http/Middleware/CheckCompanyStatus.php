@@ -18,7 +18,9 @@ class CheckCompanyStatus
      */
     public function handle(Request $request, Closure $next)
     {
-        if (! tenant()->status->is(CompanyStatus::Approved)) {
+        $company = tenant();
+
+        if ($company && ! $company->status->is(CompanyStatus::Approved)) {
             return $this->notAuthorizedResponse($request);
         }
 
