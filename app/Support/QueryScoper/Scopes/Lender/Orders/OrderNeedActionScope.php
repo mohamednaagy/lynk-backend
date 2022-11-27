@@ -47,6 +47,11 @@ class OrderNeedActionScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data)
     {
+        // __REVIEW__ we need to update statuses list to be:
+        // PendingApproval
+        // ContractSigned
+        // WaitingClientWakala
+        // MurabahaSaleCompleted
         if ($data['need_action'] === '1') {
             return $builder->whereIn(
                 'status',
