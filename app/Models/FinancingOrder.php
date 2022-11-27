@@ -189,7 +189,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     {
         return $query->whereIn(
             'status',
-            FinancingOrderStatus::$requireAction
+            FinancingOrderStatus::RequireActionStatuses
         );
     }
 
