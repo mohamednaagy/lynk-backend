@@ -3,7 +3,6 @@
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
-use App\Enums\Subject;
 use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
@@ -12,7 +11,6 @@ use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
 use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
-use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
@@ -28,7 +26,6 @@ use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
 use App\Http\Controllers\Api\V1\Admin\Transactions\TransactionController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
-use Modules\Grantify\Facades\Grantify;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,23 +47,12 @@ Route::prefix('v1/admin')->group(function () {
 
         Route::apiResource('admins', AdminController::class);
 
-        // __REVIEW__ remove this route
-        Route::apiResource('customers', CustomerController::class)->parameters(['customers' => 'id']);
-
         Route::get('/roles', GetAllRoles::class)->middleware(
-            'permission:'.
-            // __REVIEW__ use "perm" function
-                Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Roles, [
-                    Action::Index,
-                ])
+            'permission:'.perm(Area::SuperAdmin, [Action::Index])
         );
 
         Route::get('/permissions', GetAllPermissions::class)->middleware(
-            'permission:'.
-            // __REVIEW__ use "perm" function
-                Grantify::transformToPermissionsFormat(Area::SuperAdmin, Subject::Permissions, [
-                    Action::Index,
-                ])
+            'permission:'.perm(Area::SuperAdmin, [Action::Index])
         );
 
         Route::prefix('settings')->group(function () {

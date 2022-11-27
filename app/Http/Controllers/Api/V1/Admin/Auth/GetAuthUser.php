@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Auth;
 
+use App\Enums\Area;
 use App\Http\Controllers\Controller;
 use App\Transformers\UserTransformer;
 use Illuminate\Http\JsonResponse;
@@ -17,9 +18,7 @@ class GetAuthUser extends Controller
      */
     public function __invoke(Request $request)
     {
-        // __REVIEW__ Add role and permissions to parseIncludes
-        // __REVIEW__ add Area to UserTransformer
-        return fractal($request->user(), new UserTransformer)
+        return fractal($request->user(), new UserTransformer(Area::SuperAdmin))
             ->parseIncludes([
                 'id',
                 'first_name',
@@ -28,6 +27,8 @@ class GetAuthUser extends Controller
                 'phone_number',
                 'phone_country_code',
                 'formatted_phone_number',
+                'role',
+                'permissions',
             ])->respond();
     }
 }
