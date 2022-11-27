@@ -29,7 +29,7 @@ class CancelOrder extends Controller
         return DB::transaction(function () use ($cancelOrderRequest, $cancelOrder, $order) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
 
-            if ($order->status->cantMoveTo(FinancingOrderStatus::Cancelled)) {
+            if ($order->status->cantMoveTo(FinancingOrderStatus::PendingCancellation)) {
                 return $this->errorResponse(
                     __('error.unable_to_cancelled'),
                     ErrorCode::UNABLE_TO_CANCEL_ORDER

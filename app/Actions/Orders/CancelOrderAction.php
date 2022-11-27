@@ -18,9 +18,9 @@ class CancelOrderAction implements CancelOrder
 
         $trader->cancelOrder($financingOrder);
 
-        // use "update" method to be consistent through the application
-        $financingOrder->status = FinancingOrderStatus::PendingCancellation;
-        $financingOrder->status_reason = $data['status_reason'] ?? null;
-        $financingOrder->save();
+        $financingOrder->update([
+            'status' => FinancingOrderStatus::PendingCancellation,
+            'status_reason' => $data['status_reason'] ?? null,
+        ]);
     }
 }
