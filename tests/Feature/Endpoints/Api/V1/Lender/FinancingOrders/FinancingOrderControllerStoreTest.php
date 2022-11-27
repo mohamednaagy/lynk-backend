@@ -38,10 +38,10 @@ class FinancingOrderControllerStoreTest extends TestCase
         parent::setUp();
 
         [self::$company, self::$wallet] = $this->createCompany('2000');
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->getOriginal('id'), Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$userLenderSupervisor = $this->createLenderUser(self::$company->getOriginal('id'), Role::LenderSupervisor, 'lenderSupervisor@bim.com');
-        self::$userLenderBilling = $this->createLenderUser(self::$company->getOriginal('id'), Role::LenderBilling, 'lenderBilling@bim.com');
-        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->getOriginal('id'), Role::LenderOrderCreator, 'lenderOrderCreator@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'lenderSupervisor@bim.com');
+        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'lenderBilling@bim.com');
+        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'lenderOrderCreator@bim.com');
         self::$orderDetails = [
             'national_id' => '2553451234',
             'amount' => '200',
@@ -56,7 +56,7 @@ class FinancingOrderControllerStoreTest extends TestCase
      */
     public function test_that_un_auth_user_cant_create_order(): void
     {
-        $this->withHeader('X-Company', self::$company->getOriginal('id'))
+        $this->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/orders', self::$orderDetails)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
@@ -69,7 +69,7 @@ class FinancingOrderControllerStoreTest extends TestCase
      */
     public function test_that_auth_user_without_national_id_cant_create_order(): void
     {
-        $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->getOriginal('id'))
+        $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/orders', Arr::except(self::$orderDetails, ['national_id']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertExactJson([
@@ -87,7 +87,7 @@ class FinancingOrderControllerStoreTest extends TestCase
      */
     public function test_that_auth_user_without_amount_cant_create_order(): void
     {
-        $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->getOriginal('id'))
+        $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/orders', Arr::except(self::$orderDetails, ['amount']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertExactJson([
@@ -105,7 +105,7 @@ class FinancingOrderControllerStoreTest extends TestCase
      */
     public function test_that_auth_user_without_selling_price_cant_create_order(): void
     {
-        $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->getOriginal('id'))
+        $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/orders', Arr::except(self::$orderDetails, ['selling_price']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertExactJson([
@@ -123,7 +123,7 @@ class FinancingOrderControllerStoreTest extends TestCase
      */
     public function test_that_auth_user_without_phone_country_code_cant_create_order(): void
     {
-        $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->getOriginal('id'))
+        $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/orders', Arr::except(self::$orderDetails, ['phone_country_code']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertExactJson([
@@ -144,7 +144,7 @@ class FinancingOrderControllerStoreTest extends TestCase
      */
     public function test_that_auth_user_without_phone_number_cant_create_order(): void
     {
-        $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->getOriginal('id'))
+        $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/orders', Arr::except(self::$orderDetails, ['phone_number']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertExactJson([
@@ -166,7 +166,7 @@ class FinancingOrderControllerStoreTest extends TestCase
     public function test_that_admin_user_can_create_order_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderAdmin)
-            ->withHeader('X-Company', self::$company->getOriginal('id'))
+            ->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/orders', self::$orderDetails)
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
@@ -198,7 +198,7 @@ class FinancingOrderControllerStoreTest extends TestCase
     public function test_that_supervisor_user_can_create_order_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderSupervisor)
-            ->withHeader('X-Company', self::$company->getOriginal('id'))
+            ->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/orders', self::$orderDetails)
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
@@ -230,7 +230,7 @@ class FinancingOrderControllerStoreTest extends TestCase
     public function test_that_billing_user_cant_create_order_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderBilling)
-            ->withHeader('X-Company', self::$company->getOriginal('id'))
+            ->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/orders', self::$orderDetails)
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
@@ -241,7 +241,7 @@ class FinancingOrderControllerStoreTest extends TestCase
     public function test_that_order_creator_user_can_create_order_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
-            ->withHeader('X-Company', self::$company->getOriginal('id'))
+            ->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/orders', self::$orderDetails)
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
