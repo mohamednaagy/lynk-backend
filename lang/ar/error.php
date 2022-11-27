@@ -14,4 +14,5 @@ return [
     'webhook_type_not_supported' => 'هذا النوع غير مدعوم',
     'must_verify_email' => 'يجب عليك التحقق من البريد الإلكتروني',
     'x_company_invalid' => 'الشركة غير صحيحة',
+    'company_not_active' => 'الشركة غير مفعلة',
 ];
