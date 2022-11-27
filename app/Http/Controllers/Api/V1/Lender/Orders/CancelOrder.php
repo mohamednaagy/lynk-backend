@@ -20,8 +20,12 @@ class CancelOrder extends Controller
      * @param  FinancingOrder  $order
      * @return JsonResponse
      */
+    // __REVIEW__ break arguments on multiple lines to make it easy to read
     public function __invoke(CancelOrderRequest $cancelOrderRequest, CancelOrderInterface $cancelOrder, FinancingOrder $order): JsonResponse
     {
+        // __REVIEW__ use DB::transaction(...) and lock FinancingOrder. For reference, check app/Http/Controllers/Api/V1/Lender/Orders/RejectOrder.php
+
+        // __REVIEW__ use canMove/cantMove methods
         if (
             ! in_array($order->status->value,
                 [
@@ -39,6 +43,11 @@ class CancelOrder extends Controller
             )
         ) {
             return $this->errorResponse(
+                // __REVIEW__ use function "__(...)" to be consisten through application
+                // __REVIEW__ move error message to "lang/{ar|en}/error.php" file
+                // Error message:
+                // English -> Order cannot be cancelled
+                // Arabic -> لا يمكن إلغاء الطلب في الوقت الحالي
                 trans('unable_to_cancelled'),
                 ErrorCode::UNABLE_TO_CANCEL_ORDER
             );
