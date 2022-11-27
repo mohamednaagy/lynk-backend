@@ -78,15 +78,26 @@ class AdminController extends Controller
         CreateAdminWithRoleAndPermission $createAdminWithRoleAndPermission
     ): JsonResponse {
         $data = $createAdminRequest->validated();
-        $data = $this->adminRolePermissionsCheck($data);
+        $data = $this->transformPermissions($data);
 
-        DB::transaction(function () use ($data, $createAdminWithRoleAndPermission) {
+        return DB::transaction(function () use ($data, $createAdminWithRoleAndPermission) {
             $admin = $createAdminWithRoleAndPermission->handle($data);
 
             Mail::to($admin)->send(new CompleteAdminRegisterInvitation($admin, $data['redirect_url']));
-        });
 
-        return $this->successResponse();
+            return fractal($admin, new UserTransformer(Area::SuperAdmin))
+                ->parseIncludes([
+                    'id',
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'role',
+                    'permissions',
+                    'phone_number',
+                    'phone_country_code',
+                    'formatted_phone_number',
+                ])->respond();
+        });
     }
 
     /**
@@ -108,7 +119,7 @@ class AdminController extends Controller
             }
 
             $data = $updateAdminRequest->validated();
-            $data = $this->adminRolePermissionsCheck($data);
+            $data = $this->transformPermissions($data);
 
             DB::transaction(function () use ($updateAdminWithRoleAndPermission, $data, $admin) {
                 $updateAdminWithRoleAndPermission->handle($data, $admin);
@@ -144,7 +155,7 @@ class AdminController extends Controller
         return $this->successResponse();
     }
 
-    private function adminRolePermissionsCheck(array $data): array
+    protected function transformPermissions(array $data): array
     {
         if ($data['role'] == Role::Admin) {
             unset($data['permissions']);

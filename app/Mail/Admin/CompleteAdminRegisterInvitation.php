@@ -29,7 +29,7 @@ class CompleteAdminRegisterInvitation extends Mailable
             $externalUrl,
             'api.v1.admins.admin.sign-up',
             ['admin' => $user->id],
-            now()->addHour(48)
+            now()->addHours(48)
         );
 
         $this->url = $url;

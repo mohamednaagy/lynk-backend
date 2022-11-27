@@ -2,7 +2,7 @@
 
 namespace Modules\Grantify\Support\Roles;
 
-class Management
+class Manager
 {
     public static array $basePermissions = [
 
