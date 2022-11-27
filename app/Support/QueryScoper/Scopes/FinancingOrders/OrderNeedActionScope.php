@@ -1,8 +1,6 @@
 <?php
 
-// __REVIEW__ need to change file path "app/Support/QueryScoper/Scopes/FinancingOrders/OrderNeedActionScope.php"
-
-namespace App\Support\QueryScoper\Scopes\Lender\Orders;
+namespace App\Support\QueryScoper\Scopes\FinancingOrders;
 
 use App\Enums\FinancingOrderStatus;
 use App\Support\QueryScoper\QueryScoper;
@@ -49,18 +47,14 @@ class OrderNeedActionScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data)
     {
-        // __REVIEW__ we need to update statuses list to be:
-        // PendingApproval
-        // ContractSigned
-        // WaitingClientWakala
-        // MurabahaSaleCompleted
-        // Rejected
         if ($data['need_action'] === '1') {
             return $builder->whereIn(
                 'status',
                 [
                     FinancingOrderStatus::PendingApproval,
-                    FinancingOrderStatus::Approved,
+                    FinancingOrderStatus::ContractSigned,
+                    FinancingOrderStatus::WaitingClientWakala,
+                    FinancingOrderStatus::MurabahaSaleCompleted,
                     FinancingOrderStatus::Rejected,
                 ]
             );
