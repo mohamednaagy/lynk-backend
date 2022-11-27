@@ -14,6 +14,7 @@ class CalculateOrderCost extends Controller
         CalculateOrdersCost $calculateOrdersCost
     ): JsonResponse {
         $response = $calculateOrdersCost->handle(
+            // __REVIEW__ use validated(...) instead of input(...)
             ordersCount: $calculateOrdersRequest->input('orders_count'),
             orderCost: tenant()->order_cost
         );
