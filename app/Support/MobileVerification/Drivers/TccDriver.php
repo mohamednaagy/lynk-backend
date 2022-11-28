@@ -28,8 +28,12 @@ class TccDriver implements MobileVerifyDriverInterface
      */
     public function verify(PhoneNumber $mobileNumber, string $personId): bool
     {
+        $urlProtocol = config('app.env') == 'local' ? 'http://' : 'https://';
+        $hostIP = '158.101.230.247';
+        $url = $urlProtocol.$hostIP.'/TCC-Web/api/mobile/verify';
+
         $response = Http::post(
-            'https://158.101.230.247/TCC-Web/api/mobile/verify',
+            $url,
             $this->prepareRequestData(ltrim($mobileNumber->formatE164(), '+'), $personId)
         );
 
