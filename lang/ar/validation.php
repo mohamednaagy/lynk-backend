@@ -132,6 +132,8 @@ return [
     'host_whitelist' => 'حقل :attribute غير موثوق فيه.',
     'webhook_type_limit' => 'لا يمكن استخدام هذا النوع أكثر من :limit مرات',
     'phone' => 'الحقل :attribute يحتوي على رقم هاتف غير صحيح',
+    'phone' => 'حقل :attribute رقم هاتف غير صحيح.',
+    'url_protocol' => ':attribute يجب ان  يبدأ بأحد القيم التالية: :values',
     'custom_validation' => [
     ],
 
