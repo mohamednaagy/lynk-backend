@@ -70,5 +70,6 @@ class Kernel extends HttpKernel
         'checkAreaOtp' => \App\Http\Middleware\CheckAreaOtp::class,
         'verified.email' => \App\Http\Middleware\IsEmailVerified::class,
         'setAppLocale' => \App\Http\Middleware\SetLocalization::class,
+        'checkCompanyStatus' => \App\Http\Middleware\CheckCompanyStatus::class,
     ];
 }

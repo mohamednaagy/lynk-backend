@@ -4,6 +4,7 @@ namespace App\Transformers;
 
 use App\Enums\Area;
 use App\Models\User;
+use Illuminate\Database\LazyLoadingViolationException;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 use Modules\Grantify\Facades\Grantify;
@@ -29,6 +30,7 @@ class UserTransformer extends TransformerAbstract
         'phone_number',
         'phone_country_code',
         'formatted_phone_number',
+        'orders_count',
     ];
 
     public function __construct(string $area = null)
@@ -127,5 +129,14 @@ class UserTransformer extends TransformerAbstract
     public function includeLocale(User $user): Primitive
     {
         return $this->primitive($user->locale);
+    }
+
+    public function includeOrdersCount(User $user): Primitive
+    {
+        if (is_null($user->orders_count)) {
+            throw new LazyLoadingViolationException($user, 'orders_count');
+        }
+
+        return $this->primitive((int) $user->orders_count);
     }
 }

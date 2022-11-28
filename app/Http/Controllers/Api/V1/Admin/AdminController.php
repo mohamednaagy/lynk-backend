@@ -112,7 +112,15 @@ class AdminController extends Controller
                 throw UnauthorizedException::forRoles(Area::roles(Area::SuperAdmin));
             }
 
-            $updateAdminWithRoleAndPermission->handle($updateAdminRequest->validated(), $admin);
+            $data = $updateAdminRequest->validated();
+
+            if ($data['role'] == Role::Admin) {
+                unset($data['permissions']);
+            } else {
+                $data['permissions'] = Grantify::transformToAreaSubject(Area::SuperAdmin, $data['permissions']);
+            }
+
+            $updateAdminWithRoleAndPermission->handle($data, $admin);
 
             return $this->successResponse();
         });

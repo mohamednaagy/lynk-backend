@@ -135,4 +135,12 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
     {
         return $this->hasMany(Enquiry::class);
     }
+
+    /**
+     * @return HasMany
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(FinancingOrder::class, 'creator_id', 'id');
+    }
 }
