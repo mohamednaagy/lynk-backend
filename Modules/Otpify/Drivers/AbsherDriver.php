@@ -12,6 +12,7 @@ use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
 use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
 use Modules\Otpify\Exceptions\OtpCodeExpiredException;
 use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
+use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
 use Modules\Otpify\Models\OtpifyCode;
 use Modules\Otpify\Traits\CanOtpifyCode;
 
@@ -46,7 +47,7 @@ class AbsherDriver implements OtpifyDriverInterface
             'personId' => $otpifiable->getNationalId(),
         ];
 
-        $response = Http::post($sendUrl, $body)->toPsrResponse();
+        $response = Http::post($sendUrl, $body)->collect()->toArray();
 
         $tcn = $response['tcn'];
 
@@ -78,6 +79,10 @@ class AbsherDriver implements OtpifyDriverInterface
     {
         $otpifyCode = $this->getOtpifyCode($vid);
 
+        if (! isset($otpifyCode->data['tcn'])) {
+            throw new OtpCodeNotFoundException;
+        }
+
         if ($otpifyCode->expired_at != null) {
             throw new OtpCodeAlreadyUsedException();
         }
@@ -90,15 +95,15 @@ class AbsherDriver implements OtpifyDriverInterface
             throw new OtpCodeAdditionalCheckException();
         }
 
-        $checkUrl = $this->url('check');
+        $checkUrl = $this->url('confirm');
 
         $data = [
             'apiKey' => $this->apiKey,
-            'tcn' => $vid,
+            'tcn' => $otpifyCode->data['tcn'],
             'otp' => $code,
         ];
 
-        $response = Http::post($checkUrl, $data)->toPsrResponse();
+        $response = Http::post($checkUrl, $data)->collect()->toArray();
 
         if (
             Arr::get($response, 'code') === 600 &&
