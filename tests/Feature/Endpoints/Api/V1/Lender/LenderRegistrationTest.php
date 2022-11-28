@@ -2,20 +2,20 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Lender;
 
-use App\Models\Company;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Traits\InteractsWithLender;
 
 class LenderRegistrationTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, InteractsWithLender;
 
     /**
      * A basic feature test example.
      *
      * @return void
      */
-    public function test_valid_all_inputs_register()
+    public function test_valid_all_inputs_register(): void
     {
         $response = $this->postJson('/api/v1/lender/register', [
             'first_name' => 'Joe',
@@ -28,7 +28,7 @@ class LenderRegistrationTest extends TestCase
             'source' => 'Postman',
             'company_name' => 'test company1',
             'company_unique_name' => 'lynk06',
-            'company_cr' => '123456789101',
+            'company_cr' => '1234567891',
         ]);
 
         $response->assertStatus(201)->assertJsonStructure(
@@ -55,7 +55,7 @@ class LenderRegistrationTest extends TestCase
             'source' => 'Postman',
             'company_name' => 'test company1',
             'company_unique_name' => 'lynk06',
-            'company_cr' => '123456789101',
+            'company_cr' => '1234567891',
         ]);
 
         $response->assertStatus(422)->assertExactJson(
@@ -87,7 +87,7 @@ class LenderRegistrationTest extends TestCase
             'source' => 'Postman',
             'company_name' => 'test company1',
             'company_unique_name' => 'lynk06',
-            'company_cr' => '123456789101',
+            'company_cr' => '1234567891',
         ]);
 
         $response->assertStatus(422)->assertExactJson(
@@ -119,7 +119,7 @@ class LenderRegistrationTest extends TestCase
             'source' => 'Postman',
             'company_name' => 'test company1',
             'company_unique_name' => 'lynk06',
-            'company_cr' => '123456789101',
+            'company_cr' => '1234567891',
         ]);
 
         $response->assertStatus(422)->assertExactJson(
@@ -147,7 +147,7 @@ class LenderRegistrationTest extends TestCase
             'source' => 'Postman',
             'company_name' => 'test company1',
             'company_unique_name' => 'lynk06',
-            'company_cr' => '123456789101',
+            'company_cr' => '1234567891',
         ]);
 
         $response->assertStatus(422)->assertExactJson(
@@ -175,7 +175,7 @@ class LenderRegistrationTest extends TestCase
             'source' => 'Postman',
             'company_name' => 'test company1',
             'company_unique_name' => 'lynk06',
-            'company_cr' => '123456789101',
+            'company_cr' => '1234567891',
         ]);
 
         $response->assertStatus(422)->assertExactJson(
@@ -203,7 +203,7 @@ class LenderRegistrationTest extends TestCase
             'source' => 'Postman',
             'company_name' => 'test company1',
             'company_unique_name' => 'lynk06',
-            'company_cr' => '123456789101',
+            'company_cr' => '1234567891',
         ]);
 
         $response->assertStatus(422)->assertExactJson(
@@ -231,7 +231,7 @@ class LenderRegistrationTest extends TestCase
             'source' => 'Postman',
             'company_name' => 'test company1',
             'company_unique_name' => 'lynk06',
-            'company_cr' => '123456789101',
+            'company_cr' => '1234567891',
         ]);
 
         $response->assertStatus(422)->assertExactJson(
@@ -264,7 +264,7 @@ class LenderRegistrationTest extends TestCase
             'source' => 'Postman',
             'company_name' => '',
             'company_unique_name' => 'lynk06',
-            'company_cr' => '123456789101',
+            'company_cr' => '1234567891',
         ]);
 
         $response->assertStatus(422)->assertExactJson(
@@ -292,15 +292,15 @@ class LenderRegistrationTest extends TestCase
             'source' => 'Postman',
             'company_name' => 'test',
             'company_unique_name' => '',
-            'company_cr' => '123456789101',
+            'company_cr' => '1234567891',
         ]);
 
         $response->assertStatus(422)->assertExactJson(
             [
-                'message' => 'The company unique name field is required.',
+                'message' => 'The company identifier field is required.',
                 'errors' => [
                     'company_unique_name' => [
-                        'The company unique name field is required.',
+                        'The company identifier field is required.',
                     ],
                 ],
             ]
@@ -309,7 +309,7 @@ class LenderRegistrationTest extends TestCase
 
     public function test_register_lender_throw_exception_on_exist_company_unique_name(): void
     {
-        $companyTest = $this->createCompany();
+        $this->createCompany();
 
         $response = $this->postJson('/api/v1/lender/register', [
             'first_name' => 'youssof',
@@ -321,16 +321,16 @@ class LenderRegistrationTest extends TestCase
             'password_confirmation' => 'Qwer@1234',
             'source' => 'Postman',
             'company_name' => 'test',
-            'company_unique_name' => 'CompanyTest1',
-            'company_cr' => '123456789101',
+            'company_unique_name' => 'lynk05',
+            'company_cr' => '1234567892',
         ]);
 
         $response->assertStatus(422)->assertExactJson(
             [
-                'message' => 'The company unique name has already been taken.',
+                'message' => 'The company identifier has already been taken.',
                 'errors' => [
                     'company_unique_name' => [
-                        'The company unique name has already been taken.',
+                        'The company identifier has already been taken.',
                     ],
                 ],
             ]
@@ -355,10 +355,10 @@ class LenderRegistrationTest extends TestCase
 
         $response->assertStatus(422)->assertExactJson(
             [
-                'message' => 'The company cr field is required.',
+                'message' => 'The company CR field is required.',
                 'errors' => [
                     'company_cr' => [
-                        'The company cr field is required.',
+                        'The company CR field is required.',
                     ],
                 ],
             ]
@@ -367,7 +367,7 @@ class LenderRegistrationTest extends TestCase
 
     public function test_register_lender_throw_exception_on_exist_company_cr(): void
     {
-        $companyTest = $this->createCompany();
+        $this->createCompany();
 
         $response = $this->postJson('/api/v1/lender/register', [
             'first_name' => 'youssof',
@@ -380,15 +380,15 @@ class LenderRegistrationTest extends TestCase
             'source' => 'Postman',
             'company_name' => 'test',
             'company_unique_name' => 'CompanyTest2',
-            'company_cr' => '123',
+            'company_cr' => '1234567891',
         ]);
 
         $response->assertStatus(422)->assertExactJson(
             [
-                'message' => 'The company cr has already been taken.',
+                'message' => 'The company CR has already been taken.',
                 'errors' => [
                     'company_cr' => [
-                        'The company cr has already been taken.',
+                        'The company CR has already been taken.',
                     ],
                 ],
             ]
@@ -408,7 +408,7 @@ class LenderRegistrationTest extends TestCase
             'source' => '',
             'company_name' => 'test',
             'company_unique_name' => 'CompanyTest0',
-            'company_cr' => '123456789101',
+            'company_cr' => '1234567891',
         ]);
 
         $response->assertStatus(422)->assertExactJson(
@@ -421,17 +421,5 @@ class LenderRegistrationTest extends TestCase
                 ],
             ]
         );
-    }
-
-    public function createCompany(): Company
-    {
-        return Company::factory()->create([
-            'name' => 'Company Test',
-            'unique_name' => 'CompanyTest1',
-            'company_cr' => '123',
-            'status' => 3,
-            'order_cost' => 150,
-            'does_order_require_approval' => 0,
-        ]);
     }
 }
