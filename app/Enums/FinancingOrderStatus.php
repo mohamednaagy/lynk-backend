@@ -98,6 +98,13 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         ],
     ];
 
+    public const RequireActionStatuses = [
+        self::PendingApproval,
+        self::CommodityPurchased,
+        self::MurabahaSaleCompleted,
+        self::Rejected,
+    ];
+
     /**
      * @param  Status|int  $status
      * @return bool

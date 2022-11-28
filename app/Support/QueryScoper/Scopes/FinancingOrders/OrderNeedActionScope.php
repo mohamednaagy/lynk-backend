@@ -2,7 +2,6 @@
 
 namespace App\Support\QueryScoper\Scopes\FinancingOrders;
 
-use App\Enums\FinancingOrderStatus;
 use App\Support\QueryScoper\QueryScoper;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
@@ -48,16 +47,7 @@ class OrderNeedActionScope extends QueryScoper
     public function prepareBuilder($builder, $data)
     {
         if ($data['need_action'] === '1') {
-            return $builder->whereIn(
-                'status',
-                [
-                    FinancingOrderStatus::PendingApproval,
-                    FinancingOrderStatus::ContractSigned,
-                    FinancingOrderStatus::WaitingClientWakala,
-                    FinancingOrderStatus::MurabahaSaleCompleted,
-                    FinancingOrderStatus::Rejected,
-                ]
-            );
+            return $builder->requireAction();
         }
 
         return $builder;
