@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Companies;
 
-use App\Actions\Contracts\Companies\GetCompanyUsers;
+use App\Actions\Contracts\Companies\GetPaginatedCompanyUsers;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\GetCompanyUsersRequest;
 use App\Http\Requests\V1\Admin\Companies\Users\UpdateUserRequest;
@@ -24,9 +25,19 @@ class UserController extends Controller
     public function index(
         GetCompanyUsersRequest $getCompanyUsersRequest,
         Company $company,
-        GetCompanyUsers $getCompanyUsers
+        GetPaginatedCompanyUsers $getPaginatedCompanyUsers
     ): JsonResponse {
-        return fractal($getCompanyUsers->handle($company), new UserTransformer)->respond();
+        return fractal($getPaginatedCompanyUsers->handle($company), new UserTransformer)
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+                'orders_count',
+            ])->respond();
     }
 
     /**
@@ -38,9 +49,27 @@ class UserController extends Controller
      */
     public function show(Request $request, User $user): JsonResponse
     {
+        if (! $user->hasAnyRole([
+            Role::LenderAdmin,
+            Role::LenderOrderCreator,
+            Role::LenderBilling,
+            Role::LenderSupervisor,
+        ])
+        ) {
+            throw new AuthorizationException();
+        }
+
         return fractal($user, new UserTransformer(Area::Lender))
-            ->parseIncludes(['role'])
-            ->respond();
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'role',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 
     /**
@@ -65,10 +94,21 @@ class UserController extends Controller
                     'company_id' => $company->id,
                 ]
             );
-            $invitationUrl = $storeCompanyUserRequest->validated('redirect_url');
-            Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
-            return fractal($user, new UserTransformer())->respond();
+            $invitationUrl = $storeCompanyUserRequest->validated('redirect_url');
+
+            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl));
+
+            return fractal($user, new UserTransformer())
+                ->parseIncludes([
+                    'id',
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'phone_number',
+                    'phone_country_code',
+                    'formatted_phone_number',
+                ])->respond();
         });
     }
 

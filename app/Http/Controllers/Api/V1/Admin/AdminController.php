@@ -30,8 +30,16 @@ class AdminController extends Controller
         $admins = $getPaginatedUsersByRole->handle(Area::roles(Area::SuperAdmin));
 
         return fractal($admins, new UserTransformer(Area::SuperAdmin))
-            ->parseIncludes(['role'])
-            ->respond();
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'role',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 
     /**
@@ -45,8 +53,17 @@ class AdminController extends Controller
         }
 
         return fractal($admin, new UserTransformer(Area::SuperAdmin))
-            ->parseIncludes(['role', 'permissions'])
-            ->respond();
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'role',
+                'permissions',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 
     /**
@@ -95,7 +112,15 @@ class AdminController extends Controller
                 throw UnauthorizedException::forRoles(Area::roles(Area::SuperAdmin));
             }
 
-            $updateAdminWithRoleAndPermission->handle($updateAdminRequest->validated(), $admin);
+            $data = $updateAdminRequest->validated();
+
+            if ($data['role'] == Role::Admin) {
+                unset($data['permissions']);
+            } else {
+                $data['permissions'] = Grantify::transformToAreaSubject(Area::SuperAdmin, $data['permissions']);
+            }
+
+            $updateAdminWithRoleAndPermission->handle($data, $admin);
 
             return $this->successResponse();
         });

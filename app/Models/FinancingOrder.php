@@ -25,7 +25,11 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  */
 class FinancingOrder extends Model implements HasMedia, Otpifiable
 {
-    use HasFactory, InteractsWithMedia, BelongsToTenant, LogsActivity, HasScopes;
+    use HasFactory;
+    use InteractsWithMedia;
+    use BelongsToTenant;
+    use LogsActivity;
+    use HasScopes;
 
     /**
      * The attributes that are mass assignable.
@@ -164,14 +168,29 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return true;
     }
 
-    public function scopeCanceled($query)
+    public function scopeCancelled($query)
     {
-        return $query->whereStatus(FinancingOrderStatus::Canceled);
+        return $query->whereStatus(FinancingOrderStatus::Cancelled);
     }
 
     public function scopeActive($query)
     {
-        return $query->whereIn('status', [FinancingOrderStatus::PendingApproval, FinancingOrderStatus::Approved]);
+        return $query->whereNotIn(
+            'status',
+            [
+                FinancingOrderStatus::Cancelled,
+                FinancingOrderStatus::Completed,
+                FinancingOrderStatus::Rejected,
+            ]
+        );
+    }
+
+    public function scopeRequireAction($query)
+    {
+        return $query->whereIn(
+            'status',
+            FinancingOrderStatus::RequireActionStatuses
+        );
     }
 
     public function scopeCompleted($query)

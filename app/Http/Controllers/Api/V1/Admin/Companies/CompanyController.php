@@ -22,6 +22,7 @@ class CompanyController extends Controller
      * @return JsonResponse
      */
     public function index(
+        // __REVIEW__ Change name to GetPaginatedCompanies $getPaginatedCompanies
         GetCompanies $getCompanies
     ): JsonResponse {
         return fractal($getCompanies->handle(), new CompanyTransformer())
@@ -47,11 +48,13 @@ class CompanyController extends Controller
         CreateCompany $createCompany,
         GetSettingsClassInstance $getSettingsClassInstance
     ): JsonResponse {
+        // __REVIEW__ use DB::transaction(...)
         $data = $createCompanyRequest->validated();
         $data['status'] = $getSettingsClassInstance->handle(Area::Lender)->default_company_status_created_by_operation;
 
         $createCompany->handle($data);
 
+        // __REVIEW__ return company with transformer
         return $this->successResponse();
     }
 
@@ -86,6 +89,7 @@ class CompanyController extends Controller
         UpdateCompany $updateCompany,
         Company $company
     ): JsonResponse {
+        // __REVIEW__ use DB::transaction(...)
         $updateCompany->handle($company, $updateCompanyRequest->validated());
 
         return $this->successResponse();

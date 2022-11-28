@@ -16,7 +16,7 @@ class UpdateUserRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -26,7 +26,7 @@ class UpdateUserRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
         return  [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
@@ -38,7 +38,7 @@ class UpdateUserRequest extends FormRequest
                     ->where('company_id', $this->route('user')->company_id),
             ],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
-            'phone_number' => ['required', 'phone:phone_country_code', 'string'],
+            'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],
             'role' => [
                 'required',
                 Arr::except(Rule::in(Area::roles(Area::Lender)), [Role::LenderApiUser]),

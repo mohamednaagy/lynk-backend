@@ -33,7 +33,7 @@ class Register extends Controller
             $lender = $registerLender->handle($data);
 
             return $this->successResponse(
-                $loginUser->handle($lender, $request->source, $request),
+                $loginUser->handle($lender, $request->validated('source'), $request),
                 Response::HTTP_CREATED
             );
         });
