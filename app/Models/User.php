@@ -40,6 +40,7 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
         'email',
         'password',
         'locale',
+        'company_id',
     ];
 
     /**
@@ -133,5 +134,13 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
     public function enquiries(): HasMany
     {
         return $this->hasMany(Enquiry::class);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(FinancingOrder::class, 'creator_id', 'id');
     }
 }

@@ -29,6 +29,7 @@ class CompleteRegisterRequest extends FormRequest
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'password' => ['required', 'confirmed', Password::defaults()],
+            'source' => ['required', 'string', 'max:100'],
         ];
     }
 }

@@ -16,10 +16,13 @@ use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
+use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
+use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Orders\GetBalance;
 use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
+use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\SettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
 use App\Http\Controllers\Api\V1\Admin\Transactions\TransactionController;
@@ -69,6 +72,8 @@ Route::prefix('v1/admin')->group(function () {
                 ->where('type', 'client|company');
             Route::put('/wakala-templates/{type}', [WakalaTemplateController::class, 'update'])
                 ->where('type', 'client|company');
+            Route::get('/project', [ProjectSettingsController::class, 'show']);
+            Route::put('/project', [ProjectSettingsController::class, 'update']);
         });
 
         Route::apiResource('companies', CompanyController::class);
@@ -90,5 +95,9 @@ Route::prefix('v1/admin')->group(function () {
 
         Route::apiResource('enquiries', EnquiryController::class);
         Route::apiResource('enquiries.replies', EnquiryReplyController::class);
+
+        Route::get('media/{media}/download', DownloadMedia::class);
+
+        Route::post('/upload-Image', [UploadImage::class, 'store']);
     });
 });

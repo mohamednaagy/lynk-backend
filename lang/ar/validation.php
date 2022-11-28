@@ -128,15 +128,32 @@ return [
     'uploaded' => 'فشل في تحميل الـ :attribute.',
     'url' => 'صيغة رابط حقل :attribute غير صحيحة.',
     'uuid' => 'حقل :attribute يجب أن يكون بصيغة UUID سليمة.',
-    'national_id_wrong_format' => 'رقم الهوية غير صحيح',
+    'national_id_wrong_format' => ':attribute غير صحيح',
     'host_whitelist' => 'حقل :attribute غير موثوق فيه.',
+    'webhook_type_limit' => 'لا يمكن استخدام هذا النوع أكثر من :limit مرات',
+    'phone' => 'الحقل :attribute يحتوي على رقم هاتف غير صحيح',
     'phone' => 'حقل :attribute رقم هاتف غير صحيح.',
+    'url_protocol' => ':attribute يجب ان  يبدأ بأحد القيم التالية: :values',
     'custom_validation' => [
-        'phone_number_does_not_belong_to_national_id' => 'Phone number doesn’t belong to National ID/Iqama',
-        'invalid_person_id' => 'Invalid National ID',
-        'person_id_not_found' => 'National ID not found',
-        'invalid_mobile_number' => 'Invalid mobile number',
     ],
+
+    /*
+     |--------------------------------------------------------------------------
+     | Custom Validation Language Lines
+     |--------------------------------------------------------------------------
+     |
+     | Here you may specify custom validation messages for attributes using the
+     | convention "attribute.rule" to name the lines. This makes it quick to
+     | specify a specific custom language line for a given attribute rule.
+     |
+     */
+
+    'custom' => [
+        'company_unique_name' => [
+            'regex' => 'يجب أن يحتوي المعرف على أحرف إنجليزية وأرقام و _ فقط. بالإضافة يجب أن يبدأ بحرف إنجليزي',
+        ],
+    ],
+
     'attributes' => [
         'address' => 'العنوان',
         'age' => 'العمر',
@@ -158,7 +175,7 @@ return [
         'description' => 'الوصف',
         'district' => 'الحي',
         'duration' => 'المدة',
-        'email' => 'البريد الالكتروني',
+        'email' => 'البريد الإلكتروني',
         'excerpt' => 'المُلخص',
         'filter' => 'تصفية',
         'first_name' => 'الاسم الأول',
@@ -209,5 +226,16 @@ return [
         'updated_at' => 'تاريخ التحديث',
         'username' => 'اسم المُستخدم',
         'year' => 'السنة',
+        'phone_number' => 'رقم الهاتف',
+        'company_name' => 'اسم الشركة',
+        'company_unique_name' => 'معرف الشركة',
+        'company_cr' => 'رقم السجل التجاري للشركة',
+        'source' => 'المصدر',
+        'phone_country_code' => 'رمز بلد الهاتف',
+        'reference_number' => 'الرقم المرجعي',
+        'national_id' => 'رقم الهوية/الإقامة',
+        'selling_price' => 'سعر البيع',
+        'status_reason' => 'سبب الحالة',
+        'redirect_url' => 'رابط إعادة التوجيه',
     ],
 ];

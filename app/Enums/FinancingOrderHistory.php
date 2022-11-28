@@ -35,7 +35,9 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
 
     const AttachWarrantAmendmentExceptWarrantNoDocument = 14;
 
-    const GetTtiDocument = 15;
+    const GetTtiHoldingCertificateDocument = 15;
 
-    const AttachTtiDocument = 16;
+    const AttachTtiHoldingCertificateDocument = 16;
+
+    const OrderCancelled = 17;
 }

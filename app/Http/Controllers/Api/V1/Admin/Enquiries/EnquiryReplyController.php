@@ -57,7 +57,7 @@ class EnquiryReplyController extends Controller
             $data['enquiry_id'] = $enquiry->id;
             $data['user_id'] = ($user = $replyToEnquiryRequest->user())->id;
             $data['role_id'] = $user->roles()
-                ->whereIn('name', Area::getRolesPerAreaMap()[Area::SuperAdmin])
+                ->whereIn('name', Area::roles(Area::SuperAdmin))
                 ->firstOrFail()
                 ->id;
             $enquiryReply = $replyToEnquiry->handle($data);
@@ -71,7 +71,7 @@ class EnquiryReplyController extends Controller
 
             // send email to notify the visitor with the reply
             if ($enquiry->email) {
-                $invitationUrl = $replyToEnquiryRequest->safeInput('redirect_url');
+                $invitationUrl = $replyToEnquiryRequest->validated('redirect_url');
                 Mail::to($enquiry->email)->send(new ReplyToVisitorEnquiry($enquiry, $invitationUrl));
             }
 

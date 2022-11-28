@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\V1\Lender\Settings;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Area;
 use App\Http\Controllers\Controller;
+use App\Transformers\LenderSettingsTransformer;
+use Illuminate\Http\JsonResponse;
 
 class GetLenderAreaSettings extends Controller
 {
@@ -12,10 +14,12 @@ class GetLenderAreaSettings extends Controller
      * Handle the incoming request.
      *
      * @param  GetSettingsClassInstance  $getSettingsClassInstance
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function __invoke(GetSettingsClassInstance $getSettingsClassInstance)
     {
-        return $this->successResponse($getSettingsClassInstance->handle(Area::Lender)->toArray());
+        return fractal($getSettingsClassInstance->handle(Area::Lender), new LenderSettingsTransformer())
+            ->parseIncludes(['email_verification_enabled'])
+            ->respond();
     }
 }

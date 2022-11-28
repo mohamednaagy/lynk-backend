@@ -13,5 +13,7 @@ final class TraderOrderStatus extends Enum implements LocalizedEnum
 
     const Expired = 3;
 
-    const Canceled = 4;
+    const Cancelled = 4;
+
+    const PendingCancellation = 5;
 }

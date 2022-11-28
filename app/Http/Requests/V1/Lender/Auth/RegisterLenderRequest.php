@@ -26,24 +26,23 @@ class RegisterLenderRequest extends FormRequest
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'email' => ['required', 'email'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
-            'phone_number' => ['required', 'phone:phone_country_code', 'string'],
+            'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],
             'password' => ['required', 'confirmed', Password::defaults()],
             'company_name' => ['required', 'string', 'min:3'],
-            'company_unique_name' => ['required', 'string', Rule::unique(Company::class, 'unique_name'), 'min:3', 'regex:/(^[a-zA-Z]+[a-zA-Z0-9\\-\\_]*$)/u'],
-            'company_cr' => ['required', 'string', Rule::unique(Company::class, 'company_cr'), 'min:1'],
+            'company_unique_name' => [
+                'required',
+                'string',
+                Rule::unique(Company::class, 'unique_name'),
+                'min:3',
+                'regex:/(^[a-zA-Z]+[a-zA-Z0-9_]*$)/u',
+            ],
+            'company_cr' => [
+                'required',
+                'string',
+                Rule::unique(Company::class, 'company_cr'),
+                'size:10',
+            ],
             'source' => ['required', 'string'],
-        ];
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function messages(): array
-    {
-        return [
-            'phone_number.phone' => trans('validation.phone'),
         ];
     }
 }

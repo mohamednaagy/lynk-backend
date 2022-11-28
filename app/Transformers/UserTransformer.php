@@ -4,6 +4,7 @@ namespace App\Transformers;
 
 use App\Enums\Area;
 use App\Models\User;
+use Illuminate\Database\LazyLoadingViolationException;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 use Modules\Grantify\Facades\Grantify;
@@ -13,18 +14,23 @@ class UserTransformer extends TransformerAbstract
 {
     protected string|null $area = null;
 
-    protected array $defaultIncludes = [
-        'phone_number',
-        'phone_country_code',
-        'formatted_phone_number',
-    ];
+    protected array $defaultIncludes = [];
 
     protected array $availableIncludes = [
+        'id',
+        'first_name',
+        'last_name',
+        'email',
         'role',
         'roles',
         'company',
         'is_email_verified',
         'permissions',
+        'locale',
+        'phone_number',
+        'phone_country_code',
+        'formatted_phone_number',
+        'orders_count',
     ];
 
     public function __construct(string $area = null)
@@ -35,11 +41,28 @@ class UserTransformer extends TransformerAbstract
     public function transform(User $user)
     {
         return [
-            'id' => $user->id,
-            'first_name' => $user->first_name,
-            'last_name' => $user->last_name,
-            'email' => $user->email,
+
         ];
+    }
+
+    public function includeId(User $user): Primitive
+    {
+        return $this->primitive($user->id);
+    }
+
+    public function includeFirstName(User $user): Primitive
+    {
+        return $this->primitive($user->first_name);
+    }
+
+    public function includeLastName(User $user): Primitive
+    {
+        return $this->primitive($user->last_name);
+    }
+
+    public function includeEmail(User $user): Primitive
+    {
+        return $this->primitive($user->email);
     }
 
     public function includeIsEmailVerified(User $user)
@@ -63,11 +86,7 @@ class UserTransformer extends TransformerAbstract
 
     public function includeCompany(User $user)
     {
-        $data = fractal($user->company, new CompanyTransformer())
-            ->parseIncludes(['id', 'name', 'status'])
-            ->toArray();
-
-        return $this->primitive($data['data']);
+        return $this->item($user->company, new CompanyTransformer());
     }
 
     public function includePermissions(User $user)
@@ -101,10 +120,23 @@ class UserTransformer extends TransformerAbstract
         $query = $user->roles();
 
         $query = match ($this->area) {
-            Area::Lender => $query->whereIn('name', Area::getRolesPerAreaMap()[$this->area]),
-            Area::SuperAdmin => $query->whereIn('name', Area::getRolesPerAreaMap()[$this->area]),
+            Area::Lender, Area::SuperAdmin => $query->whereIn('name', Area::roles($this->area)),
         };
 
         return $query;
+    }
+
+    public function includeLocale(User $user): Primitive
+    {
+        return $this->primitive($user->locale);
+    }
+
+    public function includeOrdersCount(User $user): Primitive
+    {
+        if (is_null($user->orders_count)) {
+            throw new LazyLoadingViolationException($user, 'orders_count');
+        }
+
+        return $this->primitive((int) $user->orders_count);
     }
 }
