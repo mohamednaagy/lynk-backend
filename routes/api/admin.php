@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
+use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyBalance;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
 use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
@@ -16,16 +17,15 @@ use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
+use App\Http\Controllers\Api\V1\Admin\FinancingOrders\FinancingOrderController;
+use App\Http\Controllers\Api\V1\Admin\FinancingOrders\FinancingOrderTransactionController;
 use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
-use App\Http\Controllers\Api\V1\Admin\Orders\GetBalance;
-use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\SettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
-use App\Http\Controllers\Api\V1\Admin\Transactions\TransactionController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
 use Modules\Grantify\Facades\Grantify;
@@ -76,21 +76,17 @@ Route::prefix('v1/admin')->group(function () {
             Route::put('/project', [ProjectSettingsController::class, 'update']);
         });
 
-        Route::apiResource('companies', CompanyController::class);
-        Route::apiResource('companies.users', UserController::class)->shallow();
-
-        // __REVIEW__ move this group to be before "companies" apiResource
-        // __REVIEW__ For more info https://laravel.com/docs/9.x/controllers#restful-supplementing-resource-controllers
         Route::prefix('companies')->group(function () {
             Route::put('/{company}/status', UpdateCompanyStatus::class);
-            Route::get('/{company}/balance ', GetBalance::class);
-            // __REVIEW__ remove this as already the apiResouce exists
-            Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
-            // __REVIEW__ remove this as already the apiResouce exists
-            Route::get('{company}/orders', [OrderController::class, 'index']);
-            Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
+            Route::get('/{company}/balance ', GetCompanyBalance::class);
+            Route::get('/{company}/orders/{order}', [FinancingOrderController::class, 'show']);
+            Route::get('{company}/orders', [FinancingOrderController::class, 'index']);
+            Route::get('/{company}/transactions ', [FinancingOrderTransactionController::class, 'index']);
             Route::get('/{company}/settings ', GetCompanySetting::class);
         });
+
+        Route::apiResource('companies', CompanyController::class);
+        Route::apiResource('companies.users', UserController::class)->shallow();
 
         Route::prefix('wallet')->group(function () {
             Route::get('/edaat-invoices', GetEdaatInvoices::class);
