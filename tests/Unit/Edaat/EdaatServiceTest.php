@@ -31,7 +31,7 @@ class EdaatServiceTest extends TestCase
     /**
      * @return void
      */
-    public function testThatCreateInvoiceSuccessIfIdIsUnique(): void
+    public function test_that_create_invoice_success_if_id_is_unique(): void
     {
         $response = self::$edaatService->createInvoice(self::$randomString, self::$amount);
         $this->assertNotNull($response);
@@ -41,7 +41,7 @@ class EdaatServiceTest extends TestCase
     /**
      * @return void
      */
-    public function testThatCreateInvoiceFailIfIdIsNotUnique(): void
+    public function test_that_create_invoice_fail_if_id_is_not_unique(): void
     {
         $response = self::$edaatService->createInvoice(self::$randomString, self::$amount);
         $this->assertNotNull($response);
@@ -55,7 +55,7 @@ class EdaatServiceTest extends TestCase
     /**
      * @return void
      */
-    public function testThatInvoiceIsNotPaid(): void
+    public function test_that_invoice_is_not_paid(): void
     {
         $response = self::$edaatService->createInvoice(self::$randomString, self::$amount);
         $this->assertNotNull($response);
@@ -69,7 +69,7 @@ class EdaatServiceTest extends TestCase
     /**
      * @return void
      */
-    public function testThatRegisterWebhookReturnSuccess(): void
+    public function test_that_register_webhook_return_success(): void
     {
         $response = self::$edaatService->registerWebhook(null, null, null);
         $this->assertNotNull($response);
