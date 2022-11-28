@@ -7,6 +7,7 @@ use App\Exceptions\MobileVerification\InvalidPersonIdException;
 use App\Exceptions\MobileVerification\MobileNumberNotMatchedException;
 use App\Exceptions\MobileVerification\PersonNotFoundException;
 use App\Support\MobileVerification\Facades\MobileVerify;
+use Illuminate\Validation\Validator;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
 trait RequestHasMobileVerification
@@ -23,11 +24,13 @@ trait RequestHasMobileVerification
      * @param  \Illuminate\Validation\Validator  $validator
      * @return void
      */
-    public function withValidator($validator)
+    public function withValidator(Validator $validator)
     {
         $validator->after(
             function ($validator) {
-                $this->checkMobileVerification($validator);
+                if ($this->validated('national_id')) {
+                    $this->checkMobileVerification($validator);
+                }
             }
         );
     }

@@ -6,6 +6,7 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Models\User;
 use App\Rules\HostWhitelistRule;
+use App\Rules\UrlProtocolRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
@@ -39,7 +40,7 @@ class StoreUserRequest extends FormRequest
                 'email',
                 tenant()->unique(User::class, 'email'),
             ],
-            'redirect_url' => ['required', 'url', new HostWhitelistRule()],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
             'role' => [
                 'required',
                 Rule::in(

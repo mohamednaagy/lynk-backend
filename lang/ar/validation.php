@@ -133,6 +133,7 @@ return [
     'webhook_type_limit' => 'لا يمكن استخدام هذا النوع أكثر من :limit مرات',
     'phone' => 'الحقل :attribute يحتوي على رقم هاتف غير صحيح',
     'company_unique_name' => 'يجب أن يحتوي المعرف على أحرف إنجليزية وأرقام و _ فقط. بالإضافة يجب أن يبدأ بحرف إنجليزي',
+    'url_protocol' => ':attribute يجب ان  يبدأ بأحد القيم التالية: :values',
     'custom_validation' => [
     ],
 

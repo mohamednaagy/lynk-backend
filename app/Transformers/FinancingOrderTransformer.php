@@ -71,7 +71,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeNationalId(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->national_id);
+        return $this->primitive((string) $financingOrder->national_id);
     }
 
     public function includePhoneNumber(FinancingOrder $financingOrder)
@@ -81,12 +81,12 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeAmount(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->amount);
+        return $this->primitive((string) $financingOrder->amount);
     }
 
     public function includeSellingPrice(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->selling_price);
+        return $this->primitive((string) $financingOrder->selling_price);
     }
 
     public function includeCreatorName(FinancingOrder $financingOrder)
