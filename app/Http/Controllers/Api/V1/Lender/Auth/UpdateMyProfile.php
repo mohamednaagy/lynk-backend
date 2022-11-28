@@ -17,7 +17,7 @@ class UpdateMyProfile extends Controller
      * @param  UpdateMyProfileRequest  $updateLenderRequest
      * @return \Illuminate\Http\JsonResponse
      */
-    public function __invoke(UpdateUser $updateUser, UpdateMyProfileRequest $updateLenderRequest)
+    public function __invoke(UpdateMyProfileRequest $updateLenderRequest, UpdateUser $updateUser)
     {
         $validated = $updateLenderRequest->validated();
 
@@ -27,6 +27,15 @@ class UpdateMyProfile extends Controller
 
         $updateUser->handle($updateLenderRequest->user(), $validated);
 
-        return fractal($updateLenderRequest->user(), new UserTransformer())->respond();
+        return fractal($updateLenderRequest->user(), new UserTransformer())
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 }

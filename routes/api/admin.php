@@ -16,6 +16,8 @@ use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
+use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
+use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Orders\GetBalance;
 use App\Http\Controllers\Api\V1\Admin\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
@@ -93,5 +95,9 @@ Route::prefix('v1/admin')->group(function () {
 
         Route::apiResource('enquiries', EnquiryController::class);
         Route::apiResource('enquiries.replies', EnquiryReplyController::class);
+
+        Route::get('media/{media}/download', DownloadMedia::class);
+
+        Route::post('/upload-Image', [UploadImage::class, 'store']);
     });
 });

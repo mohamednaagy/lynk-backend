@@ -9,6 +9,7 @@ use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\TraderHelper;
+use Carbon\Carbon;
 use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
 use Illuminate\Http\Client\Response;
@@ -199,7 +200,18 @@ class FakeDriver implements TraderInterface
 
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
-        $html = view('selling-commodity-to-customer')->render();
+        $html = view('selling-commodity-to-customer', [
+            'ttiId' => $traderOrder->reference,
+            'companyName' => $traderOrder->order->company->name,
+            'orderNumber' => $traderOrder->financing_order_id,
+            'amount' => $traderOrder->order->amount,
+            'hsCodeDescription' => 'product description',
+            'quantity' => 100,
+            'warehouse' => 'warehouse',
+            'owner' => 'owner',
+            'date' => Carbon::now()->toDateString(),
+            'time' => Carbon::now()->toTimeString(),
+        ])->render();
         $path = $traderOrder->financing_order_id.'/DMCC-SCTC/'.$traderOrder->reference.'.pdf';
         PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($traderOrder) {
             $this->attachDocumentToOrder(
@@ -254,7 +266,18 @@ class FakeDriver implements TraderInterface
 
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
-        $html = view('transfer-ownership-to-lender')->render();
+        $html = view('transfer-ownership-to-lender', [
+            'ttiId' => $traderOrder->reference,
+            'companyName' => $traderOrder->order->company->name,
+            'orderNumber' => $traderOrder->financing_order_id,
+            'amount' => $traderOrder->order->amount,
+            'hsCodeDescription' => 'product description',
+            'quantity' => 100,
+            'warehouse' => 'warehouse',
+            'owner' => 'owner',
+            'date' => Carbon::now()->toDateString(),
+            'time' => Carbon::now()->toTimeString(),
+        ])->render();
         $path = $traderOrder->financing_order_id.'/DMCC-TOTL/'.$traderOrder->reference.'.pdf';
         PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($traderOrder) {
             $this->attachDocumentToOrder(

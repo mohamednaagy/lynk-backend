@@ -25,7 +25,7 @@ class FinancingOrderFactory extends Factory
             'selling_price' => $this->faker->randomNumber(5),
             'status' => $this->faker->numberBetween(1, 4),
             'approved_at' => $this->faker->dateTimeBetween(30),
-            'reason' => $this->faker->randomLetter(),
+            'status_reason' => $this->faker->randomLetter(),
             'created_at' => $created_at,
             'updated_at' => $created_at,
         ];
