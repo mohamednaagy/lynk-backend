@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Companies;
 
-use App\Rules\UniqueNameRule;
+use App\Rules\CompanyUniqueNameRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -35,7 +35,7 @@ class UpdateCompanyRequest extends FormRequest
                 'required',
                 'string',
                 'min:3',
-                new UniqueNameRule,
+                new CompanyUniqueNameRule,
                 Rule::unique('companies', 'unique_name')
                     ->ignore($this->route('company')),
             ],

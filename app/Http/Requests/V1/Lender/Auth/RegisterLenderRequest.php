@@ -3,7 +3,7 @@
 namespace App\Http\Requests\V1\Lender\Auth;
 
 use App\Models\Company;
-use App\Rules\UniqueNameRule;
+use App\Rules\CompanyUniqueNameRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -35,7 +35,7 @@ class RegisterLenderRequest extends FormRequest
                 'string',
                 Rule::unique(Company::class, 'unique_name'),
                 'min:3',
-                new UniqueNameRule,
+                new CompanyUniqueNameRule,
             ],
             'company_cr' => [
                 'required',

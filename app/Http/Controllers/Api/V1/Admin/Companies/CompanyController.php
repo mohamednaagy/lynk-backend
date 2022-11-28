@@ -58,8 +58,10 @@ class CompanyController extends Controller
                     'id',
                     'name',
                     'status',
-                    'orders_count',
                     'created_at',
+                    'unique_name',
+                    'company_cr',
+                    'does_order_require_approval',
                     'order_cost',
                 ])
                 ->respond();

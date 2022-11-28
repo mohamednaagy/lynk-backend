@@ -3,7 +3,7 @@
 namespace App\Http\Requests\V1\Admin\Companies;
 
 use App\Models\Company;
-use App\Rules\UniqueNameRule;
+use App\Rules\CompanyUniqueNameRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -36,7 +36,7 @@ class StoreCompanyRequest extends FormRequest
                 'required',
                 'string',
                 'min:3',
-                new UniqueNameRule,
+                new CompanyUniqueNameRule,
                 Rule::unique(Company::class, 'unique_name'),
 
             ],

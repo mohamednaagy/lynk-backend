@@ -131,7 +131,7 @@ return [
     'host_whitelist' => 'The :attribute is not whitelisted.',
     'phone' => 'The :attribute is not a valid phone number.',
     'webhook_type_limit' => 'This webhook couldn\'t be used more than :limit time(s)',
-    'unique_name' => 'Identifier should contain only English letters, numbers and _. It should start with English letter',
+    'company_unique_name' => 'Identifier should contain only English letters, numbers and _. It should start with English letter',
     'custom_validation' => [
     ],
     /*
@@ -165,11 +165,6 @@ return [
         'company_unique_name' => 'company identifier',
         'company_cr' => 'company CR',
         'national_id' => 'national ID',
-        'unique_name' => 'Unique Name',
-        'does_order_require_approval' => 'Does Order Require Approval',
-        'order_cost' => 'Order Cost',
-        'public_status_comment' => 'Public Status Comment',
-        'internal_status_comment' => 'Internal Status Comment',
     ],
 
 ];
