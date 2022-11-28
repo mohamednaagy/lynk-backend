@@ -4,7 +4,7 @@ namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Models\FinancingOrder;
-use App\Support\QueryScoper\Scopes\Lender\Orders\OrderNeedActionScope;
+use App\Support\QueryScoper\Scopes\FinancingOrders\OrderNeedActionScope;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 

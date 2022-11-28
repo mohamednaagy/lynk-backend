@@ -3,7 +3,6 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use Illuminate\Support\Arr;
 use Propaganistas\LaravelPhone\PhoneNumber;
@@ -31,18 +30,6 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
                 ]
             )
         );
-
-        // __REVIEW__ remove pls
-        if (isset($data['contract'])) {
-            $financingOrder->addMedia($data['contract'])
-                ->toMediaCollection(FinancingOrderMediaCollection::Contract);
-        }
-
-        // __REVIEW__ remove pls
-        if (isset($data['power_of_attorney'])) {
-            $financingOrder->addMedia($data['power_of_attorney'])
-                ->toMediaCollection(FinancingOrderMediaCollection::PowerOfAttorney);
-        }
 
         return $financingOrder;
     }

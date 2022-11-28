@@ -24,6 +24,7 @@ class UpdateCompanyRequest extends FormRequest
      */
     public function rules()
     {
+        // __REVIEW__ see comments on app/Http/Requests/V1/Admin/Companies/StoreCompanyRequest.php
         return [
             'name' => [
                 'required',

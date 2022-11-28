@@ -23,6 +23,15 @@ class CompleteAdminRegister extends Controller
     ): JsonResponse {
         $user = $completeAdminRegistration->handle($user, $completeAdminRegisterRequest->validated());
 
-        return fractal($user, new UserTransformer)->respond();
+        return fractal($user, new UserTransformer)
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 }
