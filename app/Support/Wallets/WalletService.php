@@ -28,55 +28,113 @@ class WalletService implements WalletServiceInterface
 
     /**
      * @param  int  $id
+     * @param  bool  $lock
      * @return mixed
      */
-    public function findById(int $id)
+    public function findById(int $id, bool $lock = true)
     {
-        return Wallet::find($id);
+        return $this->buildWalletQueryBase($lock)->find($id);
     }
 
     /**
      * @param  string  $uuid
+     * @param  bool  $lock
      * @return mixed
      */
-    public function findByUuid(string $uuid)
+    public function findByUuid(string $uuid, bool $lock = true)
     {
-        return Wallet::where('uuid', $uuid)->first();
+        return $this->buildWalletQueryBase($lock)
+            ->where('uuid', $uuid)
+            ->first();
     }
 
     /**
+     * @param  Model  $model
      * @param  string  $name
+     * @param  bool  $lock
      * @return mixed
      */
-    public function findByName(string $name)
+    public function findByName(Model $model, string $name, bool $lock = true)
     {
-        return Wallet::where('name', $name)->first();
+        return $this->buildWalletQueryBase($lock)
+            ->where('name', $name)
+            ->where('holder_id', $model->getKey())
+            ->where('holder_type', $model->getMorphClass())
+            ->first();
     }
 
     /**
      * @param  int  $id
+     * @param  bool  $lock
      * @return mixed
      */
-    public function findByIdOrFail(int $id)
+    public function findByIdOrFail(int $id, bool $lock = true)
     {
-        return Wallet::findOrFail($id);
+        return $this->buildWalletQueryBase($lock)->findOrFail($id);
     }
 
     /**
      * @param  string  $uuid
+     * @param  bool  $lock
      * @return mixed
      */
-    public function findByUuidOrFail(string $uuid)
+    public function findByUuidOrFail(string $uuid, bool $lock = true)
     {
-        return Wallet::where('uuid', $uuid)->firstOrFail();
+        return $this->buildWalletQueryBase($lock)
+            ->where('uuid', $uuid)
+            ->firstOrFail();
     }
 
     /**
+     * @param  Model  $model
+     * @param  string  $name
+     * @param  bool  $lock
+     * @return mixed
+     */
+    public function findByNameOrFail(Model $model, string $name, bool $lock = true)
+    {
+        return $this->buildWalletQueryBase($lock)
+            ->where('name', $name)
+            ->where('holder_id', $model->getKey())
+            ->where('holder_type', $model->getMorphClass())
+            ->firstOrFail();
+    }
+
+    /**
+     * @param  string|null  $name
+     * @param  bool  $lock
+     * @return mixed
+     */
+    public function getWallets(Model $model, ?string $name, bool $lock = true)
+    {
+        return $this->buildWalletQueryBase($lock)
+            ->when($name, fn ($query) => $query->where('name', $name))
+            ->where('holder_id', $model->getKey())
+            ->where('holder_type', $model->getMorphClass())
+            ->firstOrFail();
+    }
+
+    /**
+     * @param  Model  $model
      * @param  string  $name
      * @return mixed
      */
-    public function findByNameOrFail(string $name)
+    public function hasWallet(Model $model, string $name)
     {
-        return Wallet::where('name', $name)->firstOrFail();
+        return Wallet::where('holder_id', $model->getKey())
+            ->where('holder_type', $model->getMorphClass())
+            ->where('name', $name)
+            ->exists();
+    }
+
+    /**
+     * Build base of wallet query
+     *
+     * @param  bool  $lock
+     * @return \Illuminate\Database\Query\Builder
+     */
+    protected function buildWalletQueryBase(bool $lock)
+    {
+        return Wallet::when($lock, fn ($query) => $query->lockForUpdate());
     }
 }
