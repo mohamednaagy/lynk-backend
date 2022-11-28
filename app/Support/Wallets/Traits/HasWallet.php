@@ -31,11 +31,12 @@ trait HasWallet
         return (bool) app(WalletServiceInterface::class)->hasWallet($this, $name);
     }
 
-    public function createWallet(string $name)
+    public function createWallet(string $name, string $currency = null)
     {
         /** @var Model $this */
         return app(WalletServiceInterface::class)->create($this, [
             'name' => $name,
+            'currency' => $currency,
         ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Cknow\Money\Casts\MoneyStringCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,5 +21,6 @@ class Transaction extends Model
 
     protected $casts = [
         'meta' => 'array',
+        'amount' => MoneyStringCast::class.':currency',
     ];
 }

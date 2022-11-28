@@ -4,57 +4,56 @@ namespace App\Support\Wallets\Traits;
 
 use App\Models\Wallet;
 use App\Support\Transactions\Service\Contracts\TransactionServiceInterface;
-use App\Support\Wallets\InvalidArgument;
 
 trait CanPay
 {
     public function withdraw(float|int $amount, int $type, ...$parameters)
     {
-        $wallet = $this->wallet; // to change getting wallet from interface or another trait
-        $referenceNumber = $this->getDynamicParameters(false, $parameters);
-        $meta = $this->getDynamicParameters(true, $parameters);
+        [$referenceNumber, $meta] = $this->resolveReferenceNumberAndMeta($parameters);
 
-        return app(TransactionServiceInterface::class)->withdraw($wallet, $amount, $type, $referenceNumber, $meta);
+        return app(TransactionServiceInterface::class)
+            ->withdraw($this, $amount, $type, $referenceNumber, $meta);
     }
 
     public function deposit(float|int $amount, int $type, ...$parameters)
     {
-        $wallet = $this->wallet; // to change getting wallet from interface or another trait
-        $referenceNumber = $this->getDynamicParameters(false, $parameters);
-        $meta = $this->getDynamicParameters(true, $parameters);
+        [$referenceNumber, $meta] = $this->resolveReferenceNumberAndMeta($parameters);
 
-        return app(TransactionServiceInterface::class)->deposit($wallet, $amount, $type, $referenceNumber, $meta);
+        return app(TransactionServiceInterface::class)
+            ->deposit($this, $amount, $type, $referenceNumber, $meta);
     }
 
     public function transfer(Wallet $toWallet, float|int $amount, int $type, ...$parameters)
     {
-        $fromWallet = $this->wallet; // to change getting wallet from interface or another trait
-        $referenceNumber = $this->getDynamicParameters(false, $parameters);
-        $meta = $this->getDynamicParameters(true, $parameters);
+        [$referenceNumber, $meta] = $this->resolveReferenceNumberAndMeta($parameters);
 
-        return app(TransactionServiceInterface::class)->transfer($fromWallet, $toWallet, $amount, $type, $referenceNumber, $meta);
+        return app(TransactionServiceInterface::class)
+            ->transfer($this, $toWallet, $amount, $type, $referenceNumber, $meta);
     }
 
-    private function getDynamicParameters(bool $isMeta, $parameters)
+    protected function resolveReferenceNumberAndMeta($parameters)
     {
         if (count($parameters) > 2) {
-            throw new InvalidArgument();
+            throw new \ArgumentCountError('Passing a lot of arguments. Expecting two arguments or less');
         }
 
-        if ($isMeta) {
-            foreach ($parameters as $parameter) {
-                if (is_array($parameter)) {
-                    return $parameter;
-                }
-            }
-
-            return [];
+        if (count($parameters) === 2) {
+            return $parameters;
         }
 
-        foreach ($parameters  as $parameter) {
-            if (! is_array($parameter)) {
-                return $parameter;
-            }
+        // $parameters count is 1 and it is string,
+        // that means that it is $refrenceNumber
+        if (is_string($parameters[0])) {
+            return [$parameters[0], []];
         }
+
+        // Otherwise it is array which represents $meta
+        if (is_array($parameters[0])) {
+            return [null, $parameters[0]];
+        }
+
+        throw new \InvalidArgumentException(
+            'Provided meta/reference number don\'t match their respective types [string|null,array]'
+        );
     }
 }

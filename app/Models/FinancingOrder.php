@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Support\QueryScoper\HasScopes;
+use Cknow\Money\Casts\MoneyStringCast;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -54,6 +55,8 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'data' => 'array',
         'customer_details' => 'array',
         'phone_number' => E164PhoneNumberCast::class,
+        'amount' => MoneyStringCast::class.':currency',
+        'selling_price' => MoneyStringCast::class.':currency',
     ];
 
     protected function phoneNumberCountryCode(): Attribute

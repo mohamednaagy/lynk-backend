@@ -2,23 +2,31 @@
 
 namespace App\Models;
 
+use App\Support\Wallets\Traits\CanPay;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Facades\Config;
 
 class Wallet extends Model
 {
-    use HasFactory;
+    use HasFactory, CanPay;
 
     protected $fillable = [
         'holder_type',
         'holder_id',
         'name',
         'uuid',
+        'currency',
     ];
 
     public function holder(): MorphTo
     {
-        return $this->morphTo();
+        return $this->morphTo('holder');
+    }
+
+    public function getConnectionName()
+    {
+        return Config::get('wallet.database.connection', parent::getConnectionName());
     }
 }

@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Support\Transactions\Service;
+namespace App\Support\Wallets;
 
 use App\Models\Transaction;
 use App\Models\Transfer;
 use App\Models\Wallet;
 use App\Support\Generator\ReferenceNumber\Contracts\ReferenceNumberGeneratorInterface;
-use App\Support\Transactions\Service\Contracts\TransactionServiceInterface;
+use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use Brick\Math\BigDecimal;
+use Cknow\Money\Money;
 use Illuminate\Support\Str;
 
 class TransactionService implements TransactionServiceInterface
@@ -16,8 +17,13 @@ class TransactionService implements TransactionServiceInterface
     {
     }
 
-    public function withdraw(Wallet $wallet, float|int $amount, int $type, ?string $referenceNumber, ?array $meta)
-    {
+    public function withdraw(
+        Wallet $wallet,
+        Money $amount,
+        int $type,
+        string $referenceNumber = null,
+        array $meta = []
+    ) {
         return Transaction::create([
             'wallet_id' => $wallet->getKey(),
             'amount' => $amount,
@@ -28,8 +34,13 @@ class TransactionService implements TransactionServiceInterface
         ]);
     }
 
-    public function deposit(Wallet $wallet, float|int $amount, int $type, ?string $referenceNumber, ?array $meta)
-    {
+    public function deposit(
+        Wallet $wallet,
+        Money $amount,
+        int $type,
+        string $referenceNumber = null,
+        array $meta = []
+    ) {
         return Transaction::create([
             'wallet_id' => $wallet->getKey(),
             'amount' => $amount,
@@ -40,8 +51,14 @@ class TransactionService implements TransactionServiceInterface
         ]);
     }
 
-    public function transfer(Wallet $fromWallet, Wallet $toWallet, float|int $amount, int $type, ?string $referenceNumber, ?array $meta)
-    {
+    public function transfer(
+        Wallet $fromWallet,
+        Wallet $toWallet,
+        Money $amount,
+        int $type,
+        string $referenceNumber = null,
+        array $meta = []
+    ) {
         $withdraw = $this->withdraw($fromWallet, $amount, $type, $referenceNumber, $meta);
         $deposit = $this->deposit($toWallet, $amount, $type, $referenceNumber, $meta);
 
@@ -61,7 +78,7 @@ class TransactionService implements TransactionServiceInterface
         return $wallet->balance;
     }
 
-    public function checkIfCanDraw(Wallet $wallet, float| int $amount)
+    public function checkIfCanDraw(Wallet $wallet, Money $amount)
     {
         $balance = $this->getBalance($wallet);
 

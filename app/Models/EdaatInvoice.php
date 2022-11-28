@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\EdaatInvoiceStatus;
 use App\Support\QueryScoper\HasScopes;
+use Cknow\Money\Casts\MoneyStringCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,6 +22,7 @@ class EdaatInvoice extends Model
 
     protected $casts = [
         'status' => EdaatInvoiceStatus::class,
+        'amount' => MoneyStringCast::class.':currency',
     ];
 
     public function creator(): BelongsTo
