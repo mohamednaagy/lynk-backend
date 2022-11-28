@@ -79,10 +79,14 @@ Route::prefix('v1/admin')->group(function () {
         Route::apiResource('companies', CompanyController::class);
         Route::apiResource('companies.users', UserController::class)->shallow();
 
+        // __REVIEW__ move this group to be before "companies" apiResource
+        // __REVIEW__ For more info https://laravel.com/docs/9.x/controllers#restful-supplementing-resource-controllers
         Route::prefix('companies')->group(function () {
             Route::put('/{company}/status', UpdateCompanyStatus::class);
             Route::get('/{company}/balance ', GetBalance::class);
+            // __REVIEW__ remove this as already the apiResouce exists
             Route::get('/{company}/orders/{order}', [OrderController::class, 'show']);
+            // __REVIEW__ remove this as already the apiResouce exists
             Route::get('{company}/orders', [OrderController::class, 'index']);
             Route::get('/{company}/transactions ', [TransactionController::class, 'index']);
             Route::get('/{company}/settings ', GetCompanySetting::class);
