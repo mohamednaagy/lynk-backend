@@ -28,7 +28,7 @@ class UserController extends Controller
      */
     public function index(GetPaginatedLenderUsers $getPaginatedLenders): JsonResponse
     {
-        return fractal($getPaginatedLenders->handle(), new UserTransformer)
+        return fractal($getPaginatedLenders->handle(), new UserTransformer(Area::Lender))
             ->parseIncludes([
                 'id',
                 'first_name',
@@ -58,7 +58,7 @@ class UserController extends Controller
             $invitationUrl = $storeUserRequest->validated('redirect_url');
             Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
-            return fractal($user, new UserTransformer())
+            return fractal($user, new UserTransformer(Area::Lender))
                 ->parseIncludes([
                     'id',
                     'first_name',
