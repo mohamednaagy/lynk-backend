@@ -217,4 +217,19 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ->putJson('api/v1/lender/orders/'.self::$order->id, self::$updatedOrderDetails)
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
+
+    /**
+     * @return void
+     */
+    public function test_that_order_creator_user_can_update_owned_order_with_valid_data(): void
+    {
+        $this->actingAs(self::$userLenderOrderCreator)
+            ->withHeader('X-Company', self::$company->id)
+            ->putJson('api/v1/lender/orders/'.self::$orderOwnedByOrderCreator->id, self::$updatedOrderDetails)
+            ->assertStatus(Response::HTTP_OK)
+            ->assertExactJson(
+                json_decode(fractal(self::$orderOwnedByOrderCreator->refresh(), new FinancingOrderTransformer())
+                    ->toJson(), true)
+            );
+    }
 }
