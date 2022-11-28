@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static bool send(string $message, string $phoneNumber)
+ * @method static driver(string $string)
  */
 class Sms extends Facade
 {

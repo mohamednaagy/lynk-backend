@@ -11,8 +11,20 @@ class OrderController extends Controller
 {
     public function index(Company $company)
     {
-        return fractal($company->orders()->with('creator')->paginate(), new FinancingOrderTransformer())
-            ->parseIncludes(['creator', 'created_at'])
+        $orders = $company->orders()->with('creator')->paginate();
+
+        return fractal($orders, new FinancingOrderTransformer())
+            ->parseIncludes([
+                'id',
+                'status',
+                'reference_number',
+                'national_id',
+                'amount',
+                'selling_price',
+                'status_reason',
+                'creator',
+                'created_at',
+            ])
             ->respond();
     }
 
@@ -25,7 +37,24 @@ class OrderController extends Controller
         $order->load('creator');
 
         return fractal($order, new FinancingOrderTransformer())
-            ->parseIncludes(['creator', 'created_at'])
+            ->parseIncludes([
+                'id',
+                'status',
+                'reference_number',
+                'national_id',
+                'amount',
+                'selling_price',
+                'phone_country_code',
+                'phone_number',
+                'phone_number_formatted',
+                'is_approved',
+                'status_reason',
+                'creator',
+                'approver',
+                'history',
+                'creator',
+                'created_at',
+            ])
             ->respond();
     }
 }

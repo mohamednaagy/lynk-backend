@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Lender\Auth;
 
 use App\Actions\Contracts\Lenders\Auth\CompleteUserRegistration;
+use App\Actions\Contracts\LoginUser;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\CompleteRegisterRequest;
 use App\Models\User;
@@ -27,12 +28,15 @@ class CompleteRegister extends Controller
     public function __invoke(
         CompleteRegisterRequest $request,
         User $user,
-        CompleteUserRegistration $completeUserRegistration
+        CompleteUserRegistration $completeUserRegistration,
+        LoginUser $loginUser
     ): JsonResponse {
-        return DB::transaction(function () use ($request, $user, $completeUserRegistration) {
+        return DB::transaction(function () use ($request, $user, $completeUserRegistration, $loginUser) {
             $user = $completeUserRegistration->handle($user, $request->validated());
 
-            return  $this->successResponse();
+            return $this->successResponse(
+                $loginUser->handle($user, $request->validated('source'), $request)
+            );
         });
     }
 }

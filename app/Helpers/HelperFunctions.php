@@ -63,3 +63,14 @@ if (! function_exists('perm_arr')) {
         return explode('|', perm($area, ...$permissions));
     }
 }
+
+if (! function_exists('get_host_from_url')) {
+    function get_host_from_url($url)
+    {
+        $url = parse_url($url, PHP_URL_HOST) ?: explode('/', parse_url($url, PHP_URL_PATH), 2);
+
+        return is_array($url) ?
+         array_shift($url)
+         : $url;
+    }
+}
