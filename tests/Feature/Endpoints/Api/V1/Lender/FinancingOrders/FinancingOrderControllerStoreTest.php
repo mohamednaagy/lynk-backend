@@ -91,10 +91,13 @@ class FinancingOrderControllerStoreTest extends TestCase
             ->postJson('api/v1/lender/orders', Arr::except(self::$orderDetails, ['amount']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertExactJson([
-                'message' => 'The amount field is required.',
+                'message' => 'The amount field is required. (and 1 more error)',
                 'errors' => [
                     'amount' => [
                         0 => 'The amount field is required.',
+                    ],
+                    'selling_price' => [
+                        0 => 'The selling price must be greater than or equal to amount.',
                     ],
                 ],
             ]);
@@ -133,7 +136,7 @@ class FinancingOrderControllerStoreTest extends TestCase
                         'The phone country code field is required when phone number is present.',
                     ],
                     'phone_number' => [
-                        'The phone number is not a valid phone number.',
+                        'The phone number is not valid phone number.',
                     ],
                 ],
             ]);
@@ -154,7 +157,7 @@ class FinancingOrderControllerStoreTest extends TestCase
                         'The phone number field is required.',
                     ],
                     'national_id' => [
-                        "Phone number does't belong to national ID/Iqama",
+                        'error.phone_number_not_matched',
                     ],
                 ],
             ]);
@@ -179,13 +182,10 @@ class FinancingOrderControllerStoreTest extends TestCase
                         'description',
                         'value',
                     ],
-                    'company_id',
                     'reference_number',
                     'national_id',
                     'amount',
                     'selling_price',
-                    'contract',
-                    'power_of_attorney',
                     'is_approved',
                     'status_reason',
                 ],
@@ -211,13 +211,10 @@ class FinancingOrderControllerStoreTest extends TestCase
                         'description',
                         'value',
                     ],
-                    'company_id',
                     'reference_number',
                     'national_id',
                     'amount',
                     'selling_price',
-                    'contract',
-                    'power_of_attorney',
                     'is_approved',
                     'status_reason',
                 ],
@@ -254,13 +251,10 @@ class FinancingOrderControllerStoreTest extends TestCase
                         'description',
                         'value',
                     ],
-                    'company_id',
                     'reference_number',
                     'national_id',
                     'amount',
                     'selling_price',
-                    'contract',
-                    'power_of_attorney',
                     'is_approved',
                     'status_reason',
                 ],
