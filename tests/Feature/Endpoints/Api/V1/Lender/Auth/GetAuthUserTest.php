@@ -1,16 +1,18 @@
 <?php
 
-namespace Tests\Feature\Lender;
+namespace Tests\Feature\Endpoints\Api\V1\Lender\Auth;
 
+use App\Enums\Area;
 use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
+use App\Transformers\UserTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Grantify\Facades\Grantify;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
-class GetLenderDetailsTest extends TestCase
+class GetAuthUserTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -50,7 +52,7 @@ class GetLenderDetailsTest extends TestCase
     /**
      * @return void
      */
-    public function testThatUnAuthUserCantFetchHisData(): void
+    public function test_that_un_auth_user_cant_fetch_his_details(): void
     {
         $this->withHeader('X-Company', self::$company->getOriginal('id'))
             ->getJson('api/v1/lender/auth')
@@ -63,36 +65,31 @@ class GetLenderDetailsTest extends TestCase
     /**
      * @return void
      */
-    public function testThatLenderCanFetchHisData(): void
+    public function test_that_lender_can_fetch_his_details(): void
     {
-        $this->actingAs(self::$userLender)
+        $data = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->getJson('api/v1/lender/auth')
             ->assertStatus(Response::HTTP_OK)
-            ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'first_name',
-                    'last_name',
-                    'email',
-                    'phone_number',
-                    'phone_country_code',
-                    'formatted_phone_number',
-                    'role',
-                    'company' => [
+            ->assertExactJson(
+                fractal(self::$userLender->load(['roles']), new UserTransformer(Area::Lender))
+                    ->parseIncludes([
                         'id',
-                        'name',
-                        'status' => [
-                            'value',
-                            'description',
-                        ],
-                    ],
-                    'is_email_verified',
-                    'permissions' => [
-                        ['subject', 'action'],
-                    ],
-                    'locale',
-                ],
-            ]);
+                        'first_name',
+                        'last_name',
+                        'email',
+                        'is_email_verified',
+                        'role',
+                        'company.id',
+                        'company.name',
+                        'company.status',
+                        'company.id',
+                        'permissions',
+                        'locale',
+                        'phone_number',
+                        'phone_country_code',
+                        'formatted_phone_number',
+                    ])->respond()->getData(true)
+            );
     }
 }
