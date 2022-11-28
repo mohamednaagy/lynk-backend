@@ -9,15 +9,19 @@ interface WalletServiceInterface
 {
     public function create(Model $model, array $data): Wallet;
 
-    public function findById(int $id);
+    public function findById(int $id, bool $lock);
 
-    public function findByUuid(string $uuid);
+    public function findByUuid(string $uuid, bool $lock);
 
-    public function findByName(string $name);
+    public function findByName(Model $model, string $name, bool $lock);
 
-    public function findByIdOrFail(int $id);
+    public function findByIdOrFail(int $id, bool $lock);
 
-    public function findByUuidOrFail(string $uuid);
+    public function findByUuidOrFail(string $uuid, bool $lock);
 
-    public function findByNameOrFail(string $name);
+    public function findByNameOrFail(Model $model, string $name, bool $lock);
+
+    public function getWallets(Model $model, ?string $name, bool $lock);
+
+    public function hasWallet(Model $model, string $name);
 }
