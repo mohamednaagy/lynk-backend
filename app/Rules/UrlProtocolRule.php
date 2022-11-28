@@ -55,7 +55,7 @@ class UrlProtocolRule implements Rule
      */
     private function getProtocolList()
     {
-        if ($this->isProtocolsEmpty()) {
+        if ($this->areProtocolsEmpty()) {
             return $this->defaultProtocols;
         }
 
@@ -76,12 +76,12 @@ class UrlProtocolRule implements Rule
 
     protected function getProtocols()
     {
-        return ! $this->isProtocolsEmpty() ?
+        return ! $this->areProtocolsEmpty() ?
             $this->protocols
             : $this->defaultProtocols;
     }
 
-    private function isProtocolsEmpty()
+    private function areProtocolsEmpty()
     {
         return empty($this->protocols);
     }
