@@ -3,26 +3,26 @@
 namespace Tests\Feature\Endpoints\Api\V1\Lender\Order;
 
 use App\Enums\FinancingOrderProceedCase;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Models\Company;
-use App\Models\FinancingOrder;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
-use Modules\Grantify\Facades\Grantify;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
+use Tests\Traits\InteractsWithLender;
 
 class MakeOrderProceedTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, InteractsWithLender;
 
     private static Company $company;
 
     private static User $userLender;
 
-    private static FinancingOrder $financingOrder;
+    private static Builder|Model $financingOrder;
 
     /**
      * @return void
@@ -33,29 +33,9 @@ class MakeOrderProceedTest extends TestCase
 
         Artisan::call('module:seed');
 
-        self::$company = Company::factory()->create([
-            'first_name' => 'firstName',
-            'last_name' => 'lastName',
-            'phone_country_code' => 'SA',
-            'phone_number' => '503811000',
-            'email' => 'test@uselynk.test',
-            'password' => 'Qwer@1234',
-            'source' => 'Postman',
-            'company_name' => 'companyName',
-            'company_unique_name' => 'lynk05',
-            'company_cr' => '12345678910',
-        ]);
-
-        self::$userLender = User::factory()->create([
-            'email' => 'lender@bim.com',
-            'password' => bcrypt('12345678'),
-            'company_id' => self::$company->getOriginal('id'),
-            'email_verified_at' => now(),
-        ]);
-
-        Grantify::assignRoleToModel(self::$userLender, Role::LenderAdmin);
-
-        self::$financingOrder = $this->createFinancingOrder();
+        [self::$company] = $this->createCompany('2000', ['company_cr' => '1234567891']);
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$financingOrder = $this->createOrder(self::$company->id, self::$userLender->id);
     }
 
     /**
@@ -131,21 +111,6 @@ class MakeOrderProceedTest extends TestCase
         $response->assertStatus(400)->assertJsonStructure([
             'message',
             'code',
-        ]);
-    }
-
-    private function createFinancingOrder(): FinancingOrder
-    {
-        return FinancingOrder::factory()->create([
-            'company_id' => self::$company->getOriginal('id'),
-            'national_id' => '2553451234',
-            'phone_number' => '+966503811000',
-            'amount' => 1000,
-            'selling_price' => 1000.5,
-            'status' => FinancingOrderStatus::PendingApproval,
-            'creator_id' => '2',
-            'creator_type' => 'App\Models\User',
-            'is_verification_required' => 0,
         ]);
     }
 }
