@@ -14,6 +14,7 @@ class Wallet extends Model
         'holder_type',
         'holder_id',
         'name',
+        'uuid',
     ];
 
     public function holder(): MorphTo
