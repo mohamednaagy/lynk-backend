@@ -87,9 +87,9 @@ class FinancingOrderControllerIndexTest extends TestCase
             ->getJson('api/v1/lender/orders')
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                json_decode(fractal($orders, new FinancingOrderTransformer())
+                fractal($orders, new FinancingOrderTransformer())
                     ->parseExcludes(['contract', 'power_of_attorney'])
-                    ->toJson(), true)
+                    ->respond()->getData(true)
             );
     }
 
@@ -105,9 +105,9 @@ class FinancingOrderControllerIndexTest extends TestCase
             ->getJson('api/v1/lender/orders')
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                json_decode(fractal($orders, new FinancingOrderTransformer())
+                fractal($orders, new FinancingOrderTransformer())
                     ->parseExcludes(['contract', 'power_of_attorney'])
-                    ->toJson(), true)
+                    ->respond()->getData(true)
             );
     }
 
@@ -136,9 +136,9 @@ class FinancingOrderControllerIndexTest extends TestCase
             ->getJson('api/v1/lender/orders')
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                json_decode(fractal($orders, new FinancingOrderTransformer())
+                fractal($orders, new FinancingOrderTransformer())
                     ->parseExcludes(['contract', 'power_of_attorney'])
-                    ->toJson(), true)
+                    ->respond()->getData(true)
             );
     }
 }

@@ -84,9 +84,9 @@ class FinancingOrderControllerShowTest extends TestCase
             ->getJson('api/v1/lender/orders/'.self::$firstOrderInSameCompany->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                json_decode(fractal(self::$firstOrderInSameCompany, new FinancingOrderTransformer())
+                fractal(self::$firstOrderInSameCompany, new FinancingOrderTransformer())
                     ->parseIncludes(['creator', 'approver', 'history'])
-                    ->toJson(), true)
+                    ->respond()->getData(true)
             );
     }
 
@@ -100,9 +100,9 @@ class FinancingOrderControllerShowTest extends TestCase
             ->getJson('api/v1/lender/orders/'.self::$firstOrderInSameCompany->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                json_decode(fractal(self::$firstOrderInSameCompany, new FinancingOrderTransformer())
+                fractal(self::$firstOrderInSameCompany, new FinancingOrderTransformer())
                     ->parseIncludes(['creator', 'approver', 'history'])
-                    ->toJson(), true)
+                    ->respond()->getData(true)
             );
     }
 
@@ -138,9 +138,9 @@ class FinancingOrderControllerShowTest extends TestCase
             ->getJson('api/v1/lender/orders/'.self::$thirdOrderInSameCompany->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                json_decode(fractal(self::$thirdOrderInSameCompany, new FinancingOrderTransformer())
+                fractal(self::$thirdOrderInSameCompany, new FinancingOrderTransformer())
                     ->parseIncludes(['creator', 'approver', 'history'])
-                    ->toJson(), true)
+                    ->respond()->getData(true)
             );
     }
 }
