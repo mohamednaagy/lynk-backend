@@ -92,10 +92,9 @@ class UserTransformer extends TransformerAbstract
     public function includePermissions(User $user)
     {
         $rolesQuery = $this->getRolesQueryBasedOnArea($user);
+        $permissions = Permission::role($rolesQuery->get())->get()->merge($user->permissions);
 
-        $subjectPermissions = Grantify::transformPermissionsToSubjectAction(
-            Permission::role($rolesQuery->get())->get()
-        );
+        $subjectPermissions = Grantify::transformPermissionsToSubjectAction($permissions);
 
         return $this->primitive($subjectPermissions);
     }
