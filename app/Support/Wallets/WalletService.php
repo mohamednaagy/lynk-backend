@@ -105,13 +105,13 @@ class WalletService implements WalletServiceInterface
      * @param  bool  $lock
      * @return mixed
      */
-    public function getWallets(Model $model, ?string $name, bool $lock = true)
+    public function getWallets(Model $model, string $name = null, bool $lock = true)
     {
         return $this->buildWalletQueryBase($lock)
             ->when($name, fn ($query) => $query->where('name', $name))
             ->where('holder_id', $model->getKey())
             ->where('holder_type', $model->getMorphClass())
-            ->firstOrFail();
+            ->get();
     }
 
     /**
