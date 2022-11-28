@@ -17,6 +17,7 @@ class UpdateCompanyStatus extends Controller
      * @return JsonResponse
      */
     public function __invoke(
+        // __REVIEW__ make Request/FormRequest the first argument
         Company $company,
         UpdateCompanyStatusRequest $updateCompanyStatusRequest,
         UpdateCompanyStatusInterface $updateCompanyStatus

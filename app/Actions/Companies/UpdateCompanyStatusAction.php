@@ -15,6 +15,7 @@ class UpdateCompanyStatusAction implements UpdateCompanyStatus
      */
     public function handle(Company $company, array $data): Company
     {
+        // __REVIEW__ use UpdateCompanyAction instead
         $company->update(
             Arr::only(
                 $data,
