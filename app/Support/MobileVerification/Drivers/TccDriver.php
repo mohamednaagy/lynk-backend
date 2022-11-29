@@ -10,6 +10,7 @@ use App\Exceptions\MobileVerification\MobileNumberNotMatchedException;
 use App\Exceptions\MobileVerification\PersonNotFoundException;
 use App\Support\MobileVerification\Contracts\MobileVerifyDriverInterface;
 use Exception;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Propaganistas\LaravelPhone\PhoneNumber;
@@ -28,9 +29,7 @@ class TccDriver implements MobileVerifyDriverInterface
      */
     public function verify(PhoneNumber $mobileNumber, string $personId): bool
     {
-        $urlProtocol = config('app.env') == 'local' ? 'http://' : 'https://';
-        $hostIP = '158.101.230.247';
-        $url = $urlProtocol.$hostIP.'/TCC-Web/api/mobile/verify';
+        $url = $this->url('TCC-Web/api/mobile/verify');
 
         $response = Http::post(
             $url,
@@ -40,12 +39,8 @@ class TccDriver implements MobileVerifyDriverInterface
         $response = $response->json();
 
         activity()
-            ->withProperties(
-                ['response' => $response]
-            )
-            ->log(
-                'Mobile Number Verification'
-            );
+            ->withProperties(['response' => $response])
+            ->log('Mobile Number Verification');
 
         return $this->verifyResponse($response);
     }
@@ -111,5 +106,10 @@ class TccDriver implements MobileVerifyDriverInterface
             default:
                 throw new Exception();
         }
+    }
+
+    public function url($path)
+    {
+        return rtrim(Config::get('mobile-verify.drivers.tcc.base_url'), '/').'/'.ltrim($path, '/');
     }
 }
