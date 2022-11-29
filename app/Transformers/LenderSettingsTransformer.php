@@ -18,6 +18,12 @@ class LenderSettingsTransformer extends TransformerAbstract
         'default_company_status_created_by_operation',
     ];
 
+    public function transform(Settings $settings): array
+    {
+        return [
+        ];
+    }
+
     public function includeEmailVerificationEnabled(Settings $settings): Primitive
     {
         return $this->primitive($settings->email_verification_enabled);
