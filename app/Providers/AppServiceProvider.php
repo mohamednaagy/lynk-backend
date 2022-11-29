@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Support\Traders\TraderManager;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -67,6 +69,15 @@ class AppServiceProvider extends ServiceProvider
                 ->letters()
                 ->numbers()
                 ->symbols();
+        });
+
+        DB::macro('multipleTransaction', function (\Closure $transaction) {
+            return DB::transaction(function () use ($transaction) {
+                return DB::connection(Config::get('wallet.database.connection'))->transaction(
+                    function () use ($transaction) {
+                        return $transaction();
+                    });
+            });
         });
     }
 }

@@ -114,7 +114,7 @@ class OrderController extends Controller
         DeductOrderCreationFee $deductOrderCreationFee,
         CanCreateOrder $canCreateOrder
     ): JsonResponse {
-        return DB::transaction(
+        return DB::multipleTransaction(
             function () use ($request, $createFinancingOrder, $deductOrderCreationFee, $canCreateOrder) {
                 $company = tenant();
                 // throw exception is balance not enough

@@ -30,7 +30,7 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
                 'financing_order_id' => $financingOrder->id,
                 'reference_number ' => $financingOrder->reference_number,
                 'amount' => $financingOrder->amount,
-                'order_cost' => $financingOrder->order_cost,
+                'order_cost' => $company->order_cost,
             ]
         );
     }
