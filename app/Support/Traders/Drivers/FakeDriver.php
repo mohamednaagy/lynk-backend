@@ -109,9 +109,9 @@ class FakeDriver implements TraderInterface
     public function getTtiId(FinancingOrder $financingOrder): mixed
     {
         $response = Http::post($this->buildUrl('getTTIIdForIssuePTP'), [
-            'currency' => currency(),
-            'costPrice' => $financingOrder->amount,
-            'profit' => $financingOrder->selling_price - $financingOrder->amount,
+            'currency' => $financingOrder->currency(),
+            'costPrice' => $financingOrder->amount->formatByDecimal(),
+            'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
             'paymentTerms' => config('trader.providers.fake.tti.payment_terms'),
             'unitOfDuration' => config('trader.providers.fake.tti.unit_of_duration'),
             'product' => null,
@@ -124,9 +124,9 @@ class FakeDriver implements TraderInterface
                 'driver' => 'fake',
                 'step' => 'getTtiId',
                 'requestBody' => [
-                    'currency' => currency(),
-                    'costPrice' => $financingOrder->amount,
-                    'profit' => $financingOrder->selling_price - $financingOrder->amount,
+                    'currency' => $financingOrder->currency(),
+                    'costPrice' => $financingOrder->amount->formatByDecimal(),
+                    'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
                     'paymentTerms' => config('trader.providers.fake.tti.payment_terms'),
                     'unitOfDuration' => config('trader.providers.fake.tti.unit_of_duration'),
                     'product' => null,
@@ -204,7 +204,7 @@ class FakeDriver implements TraderInterface
             'ttiId' => $traderOrder->reference,
             'companyName' => $traderOrder->order->company->name,
             'orderNumber' => $traderOrder->financing_order_id,
-            'amount' => $traderOrder->order->amount,
+            'amount' => $traderOrder->order->amount->formatByDecimal(),
             'hsCodeDescription' => 'product description',
             'quantity' => 100,
             'warehouse' => 'warehouse',
@@ -270,7 +270,7 @@ class FakeDriver implements TraderInterface
             'ttiId' => $traderOrder->reference,
             'companyName' => $traderOrder->order->company->name,
             'orderNumber' => $traderOrder->financing_order_id,
-            'amount' => $traderOrder->order->amount,
+            'amount' => $traderOrder->order->amount->formatByDecimal(),
             'hsCodeDescription' => 'product description',
             'quantity' => 100,
             'warehouse' => 'warehouse',
