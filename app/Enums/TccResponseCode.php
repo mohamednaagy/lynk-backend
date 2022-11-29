@@ -12,6 +12,18 @@ final class TccResponseCode extends Enum
 
     const InvalidMobileNumber = 1202;
 
+    const InvalidRequestFormat = 709;
+
+    const InvalidApiKey = 711;
+
+    const ServiceNotAvailable = 715;
+
+    const InvalidNationality = 718;
+
+    const InvalidPersonIdType = 719;
+
+    const InvalidOperatorTcn = 732;
+
     const PersonNotFound = 747;
 
     const InvalidPersonId = 702;

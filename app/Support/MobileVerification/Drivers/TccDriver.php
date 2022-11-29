@@ -4,10 +4,16 @@ namespace App\Support\MobileVerification\Drivers;
 
 use App\Enums\TccPersonIdType;
 use App\Enums\TccResponseCode;
+use App\Exceptions\MobileVerification\InvalidApiKeyException;
 use App\Exceptions\MobileVerification\InvalidMobileNumberException;
+use App\Exceptions\MobileVerification\InvalidNationalityException;
+use App\Exceptions\MobileVerification\InvalidOperatorTcnException;
 use App\Exceptions\MobileVerification\InvalidPersonIdException;
+use App\Exceptions\MobileVerification\InvalidPersonIdTypeException;
+use App\Exceptions\MobileVerification\InvalidRequestFormatException;
 use App\Exceptions\MobileVerification\MobileNumberNotMatchedException;
 use App\Exceptions\MobileVerification\PersonNotFoundException;
+use App\Exceptions\MobileVerification\ServiceNotAvailableException;
 use App\Support\MobileVerification\Contracts\MobileVerifyDriverInterface;
 use Exception;
 use Illuminate\Support\Facades\Config;
@@ -103,6 +109,18 @@ class TccDriver implements MobileVerifyDriverInterface
                 throw new PersonNotFoundException();
             case TccResponseCode::InvalidPersonId:
                 throw new InvalidPersonIdException();
+            case TccResponseCode::InvalidRequestFormat:
+                throw new InvalidRequestFormatException();
+            case TccResponseCode::InvalidApiKey:
+                throw new InvalidApiKeyException();
+            case TccResponseCode::ServiceNotAvailable:
+                throw new ServiceNotAvailableException();
+            case TccResponseCode::InvalidNationality:
+                throw new InvalidNationalityException();
+            case TccResponseCode::InvalidPersonIdType:
+                throw new InvalidPersonIdTypeException();
+            case TccResponseCode::InvalidOperatorTcn:
+                throw new InvalidOperatorTcnException();
             default:
                 throw new Exception();
         }
