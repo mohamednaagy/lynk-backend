@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
+use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyStatus;
 use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
 use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
@@ -81,6 +82,7 @@ Route::prefix('v1/admin')->group(function () {
         Route::apiResource('companies', CompanyController::class);
         Route::apiResource('companies.users', UserController::class)->shallow();
 
+        Route::get('companies-status', [GetCompanyStatus::class, 'index']);
         Route::prefix('companies')->group(function () {
             Route::put('/{company}/status', UpdateCompanyStatus::class);
             Route::get('/{company}/balance ', GetBalance::class);
