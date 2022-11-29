@@ -21,7 +21,7 @@ class Register extends Controller
         LoginUser $loginUser,
         GetSettingsClassInstance $getSettingsClassInstance
     ): JsonResponse {
-        return DB::transaction(function () use ($loginUser, $request, $registerLender, $getSettingsClassInstance) {
+        return DB::multipleTransaction(function () use ($loginUser, $request, $registerLender, $getSettingsClassInstance) {
             $data = array_merge(
                 $request->validated(),
                 [

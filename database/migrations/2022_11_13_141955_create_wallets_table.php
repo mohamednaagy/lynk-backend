@@ -24,6 +24,7 @@ return new class extends Migration
         Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('wallets');
         Schema::enableForeignKeyConstraints();
+
         Schema::create('wallets', function (Blueprint $table) {
             $table->id();
             $table->string('name');
