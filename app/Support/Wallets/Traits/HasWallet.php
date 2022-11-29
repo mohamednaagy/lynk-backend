@@ -41,9 +41,15 @@ trait HasWallet
         ]);
     }
 
-    public function transactions(string $name)
+    public function transactions(string $walletName)
     {
         /** @var Model $this */
-        return app(WalletServiceInterface::class)->transactions($this, $name);
+        return app(WalletServiceInterface::class)->transactions($this, $walletName);
+    }
+
+    public function balance(string $walletName)
+    {
+        /** @var Model $this */
+        return app(WalletServiceInterface::class)->balance($this, $walletName);
     }
 }

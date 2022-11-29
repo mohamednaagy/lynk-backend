@@ -134,11 +134,23 @@ class WalletService implements WalletServiceInterface
      * @param  string  $name
      * @return mixed
      */
-    public function transactions(Model $model, string $name): Builder
+    public function transactions(Model $model, string $walletName): Builder
     {
-        $wallet = $this->findByNameOrFail($model, $name);
+        $wallet = $this->findByNameOrFail($model, $walletName);
 
         return Transaction::where('wallet_id', $wallet->getKey());
+    }
+
+    /**
+     * @param  Model  $model
+     * @param  string  $walletName
+     * @return mixed
+     */
+    public function balance(Model $model, string $walletName)
+    {
+        $wallet = $this->findByNameOrFail($model, $walletName);
+
+        return $wallet->balance;
     }
 
     /**

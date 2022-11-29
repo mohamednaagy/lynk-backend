@@ -26,5 +26,7 @@ interface WalletServiceInterface
 
     public function hasWallet(Model $model, string $name);
 
-    public function transactions(Model $model, string $name): Builder;
+    public function getBalance(Model $model, string $walletName);
+
+    public function transactions(Model $model, string $walletName): Builder;
 }
