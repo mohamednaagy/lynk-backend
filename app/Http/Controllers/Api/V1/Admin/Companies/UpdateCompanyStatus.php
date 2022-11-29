@@ -19,11 +19,11 @@ class UpdateCompanyStatus extends Controller
      * @return JsonResponse
      */
     public function __invoke(
-        UpdateCompanyStatusRequest $updateCompanyStatusRequest,
+        UpdateCompanyStatusRequest $request,
         Company $company,
         UpdateCompany $updateCompany
     ): JsonResponse {
-        $updateCompany->handle($company, $updateCompanyStatusRequest->validated());
+        $updateCompany->handle($company, $request->validated());
 
         return $this->successResponse([]);
     }
