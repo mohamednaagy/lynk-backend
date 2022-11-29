@@ -121,7 +121,7 @@ class DmccDriver implements TraderInterface
     public function getTtiId(FinancingOrder $financingOrder): mixed
     {
         Log::debug('getTTiId2', [
-            'currency' => $financingOrder->currency(),
+            'currency' => $financingOrder->currency,
             'costPrice' => $financingOrder->amount->formatByDecimal(),
             'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
             'paymentTerms' => config('trader.providers.dmcc.tti.payment_terms'),
@@ -134,7 +134,7 @@ class DmccDriver implements TraderInterface
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('getTTIIDForIssuePTP'))
             ->call('getTTIIDForIssuePTP', [
-                'currency' => $financingOrder->currency(),
+                'currency' => $financingOrder->currency,
                 'costPrice' => $financingOrder->amount->formatByDecimal(),
                 'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
                 'paymentTerms' => config('trader.providers.dmcc.tti.payment_terms'),
@@ -151,7 +151,7 @@ class DmccDriver implements TraderInterface
                 'driver' => 'dmcc',
                 'step' => 'getTtiId',
                 'requestBody' => [
-                    'currency' => $financingOrder->currency(),
+                    'currency' => $financingOrder->currency,
                     'costPrice' => $financingOrder->amount->formatByDecimal(),
                     'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
                     'paymentTerms' => config('trader.providers.dmcc.tti.payment_terms'),
