@@ -5,9 +5,7 @@ namespace App\Actions\Companies;
 use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\Webhooks\GenerateWebhookSecretKey;
 use App\Models\Company;
-use Cknow\Money\Money;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Config;
 
 class CreateCompanyAction implements CreateCompany
 {
@@ -22,8 +20,6 @@ class CreateCompanyAction implements CreateCompany
     public function handle(array $data): Company
     {
         $data['webhook_secret_key'] = $this->generateWebhookSecretKey->handle();
-
-        $data['order_cost'] = Money::parseByDecimal($data['order_cost'], Config::get('money.defaultCurrency'));
 
         // __REVIEW__ public_status_comment & internal_status_comment should be included here
         return Company::create(
