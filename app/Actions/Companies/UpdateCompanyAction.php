@@ -15,7 +15,6 @@ class UpdateCompanyAction implements UpdateCompany
      */
     public function handle(Company $company, array $data): Company
     {
-        // __REVIEW__ public_status_comment & internal_status_comment & webhook_secret_key should be included here
         $company->update(
             Arr::only(
                 $data,
@@ -26,6 +25,9 @@ class UpdateCompanyAction implements UpdateCompany
                     'status',
                     'order_cost',
                     'does_order_require_approval',
+                    'public_status_comment',
+                    'internal_status_comment',
+                    'webhook_secret_key',
                 ]
             )
         );
