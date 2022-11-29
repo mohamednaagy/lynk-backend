@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Enums\EdaatInvoiceStatus;
+use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\QueryScoper\HasScopes;
-use Cknow\Money\Casts\MoneyStringCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

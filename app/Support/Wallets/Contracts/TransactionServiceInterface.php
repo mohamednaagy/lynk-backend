@@ -32,7 +32,7 @@ interface TransactionServiceInterface
         array $meta
     );
 
-    public function getBalance(Wallet $wallet);
+    public function getBalance(Wallet $wallet): Money;
 
     public function checkIfCanDraw(Wallet $wallet, Money $amount);
 }

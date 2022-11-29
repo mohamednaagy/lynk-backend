@@ -3,6 +3,7 @@
 namespace App\Support\Wallets\Contracts;
 
 use App\Models\Wallet;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 interface WalletServiceInterface
@@ -24,4 +25,6 @@ interface WalletServiceInterface
     public function getWallets(Model $model, ?string $name, bool $lock);
 
     public function hasWallet(Model $model, string $name);
+
+    public function transactions(Model $model, string $name): Builder;
 }

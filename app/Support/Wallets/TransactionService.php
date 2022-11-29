@@ -26,7 +26,7 @@ class TransactionService implements TransactionServiceInterface
     ) {
         return Transaction::create([
             'wallet_id' => $wallet->getKey(),
-            'amount' => $amount,
+            'amount' => $amount->isNegative() ? $amount : $amount->negative(),
             'type' => $type,
             'uuid' => Str::uuid(),
             'reference_number' => $referenceNumber ?? $this->referenceNumberGeneratorInterface->generate(),
@@ -73,7 +73,7 @@ class TransactionService implements TransactionServiceInterface
         ]);
     }
 
-    public function getBalance(Wallet $wallet)
+    public function getBalance(Wallet $wallet): Money
     {
         return $wallet->balance;
     }

@@ -14,9 +14,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('edaat_invoices', function (Blueprint $table) {
-            $table->decimal('amount', 64, 0)->change();
-            $table->string('currency', 4)->after('amount')->default(Money::getDefaultCurrency());
+        Schema::table('companies', function (Blueprint $table) {
+            $table->decimal('order_cost', 64, 0)->change();
+            $table->string('order_cost_currency', 4)->after('order_cost')->default(Money::getDefaultCurrency());
         });
     }
 
@@ -27,9 +27,9 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('edaat_invoices', function (Blueprint $table) {
-            $table->decimal('amount', 64, 2)->change();
-            $table->dropColumn('currency', 4);
+        Schema::table('companies', function (Blueprint $table) {
+            $table->decimal('order_cost', 64, 2)->change();
+            $table->dropColumn('order_cost_currency');
         });
     }
 };

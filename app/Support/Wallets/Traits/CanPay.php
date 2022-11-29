@@ -3,11 +3,12 @@
 namespace App\Support\Wallets\Traits;
 
 use App\Models\Wallet;
-use App\Support\Transactions\Service\Contracts\TransactionServiceInterface;
+use App\Support\Wallets\Contracts\TransactionServiceInterface;
+use Cknow\Money\Money;
 
 trait CanPay
 {
-    public function withdraw(float|int $amount, int $type, ...$parameters)
+    public function withdraw(Money $amount, int $type, ...$parameters)
     {
         [$referenceNumber, $meta] = $this->resolveReferenceNumberAndMeta($parameters);
 
@@ -15,7 +16,7 @@ trait CanPay
             ->withdraw($this, $amount, $type, $referenceNumber, $meta);
     }
 
-    public function deposit(float|int $amount, int $type, ...$parameters)
+    public function deposit(Money $amount, int $type, ...$parameters)
     {
         [$referenceNumber, $meta] = $this->resolveReferenceNumberAndMeta($parameters);
 
@@ -23,7 +24,7 @@ trait CanPay
             ->deposit($this, $amount, $type, $referenceNumber, $meta);
     }
 
-    public function transfer(Wallet $toWallet, float|int $amount, int $type, ...$parameters)
+    public function transfer(Wallet $toWallet, Money $amount, int $type, ...$parameters)
     {
         [$referenceNumber, $meta] = $this->resolveReferenceNumberAndMeta($parameters);
 

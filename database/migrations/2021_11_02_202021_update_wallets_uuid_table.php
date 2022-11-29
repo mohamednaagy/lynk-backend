@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Models\Wallet;
 use Bavix\Wallet\Internal\Service\UuidFactoryServiceInterface;
-use Bavix\Wallet\Models\Wallet;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;

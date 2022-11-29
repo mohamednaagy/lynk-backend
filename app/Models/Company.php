@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\CompanyStatus;
+use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\Wallets\Traits\HasWallet;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,6 +25,7 @@ class Company extends BaseTenant
         'status' => CompanyStatus::class,
         'does_order_require_approval' => 'boolean',
         'webhook_secret_key' => 'encrypted',
+        'order_cost' => MoneyStringCast::class.':order_cost_currency',
     ];
 
     public static function getCustomColumns(): array
@@ -41,6 +43,7 @@ class Company extends BaseTenant
             'webhook_secret_key',
             'created_at',
             'updated_at',
+            'order_cost_currency',
         ];
     }
 

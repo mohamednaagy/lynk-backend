@@ -8,6 +8,7 @@ use App\Actions\Contracts\LoginUser;
 use App\Enums\Area;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\RegisterLenderRequest;
+use Cknow\Money\Money;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -24,9 +25,15 @@ class Register extends Controller
             $data = array_merge(
                 $request->validated(),
                 [
-                    'does_order_require_approval' => $getSettingsClassInstance->handle(Area::Lender)->default_does_order_require_approval,
-                    'company_status' => $getSettingsClassInstance->handle(Area::Lender)->default_company_registration_status,
-                    'order_cost' => $getSettingsClassInstance->handle(Area::Lender)->default_order_cost,
+                    'does_order_require_approval' => $getSettingsClassInstance->handle(Area::Lender)
+                        ->default_does_order_require_approval,
+                    'company_status' => $getSettingsClassInstance->handle(Area::Lender)
+                        ->default_company_registration_status,
+                    'order_cost' => Money::parseByDecimal(
+                        $getSettingsClassInstance
+                            ->handle(Area::Lender)->default_order_cost,
+                        Money::getDefaultCurrency()
+                    ),
                 ]
             );
 

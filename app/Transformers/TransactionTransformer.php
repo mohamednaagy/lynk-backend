@@ -2,8 +2,8 @@
 
 namespace App\Transformers;
 
+use App\Models\Transaction;
 use App\Support\Transactions\Descriptions\DescriptionManager;
-use Bavix\Wallet\Models\Transaction;
 use Carbon\Carbon;
 use League\Fractal\TransformerAbstract;
 

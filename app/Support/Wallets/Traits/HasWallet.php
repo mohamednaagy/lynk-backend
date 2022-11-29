@@ -2,12 +2,13 @@
 
 namespace App\Support\Wallets\Traits;
 
+use App\Models\Wallet;
 use App\Support\Wallets\Contracts\WalletServiceInterface;
 use Illuminate\Database\Eloquent\Model;
 
 trait HasWallet
 {
-    public function getWallet(string $name, bool $lock = true)
+    public function getWallet(string $name, bool $lock = true): Wallet
     {
         /** @var Model $this */
         return app(WalletServiceInterface::class)->findByName($this, $name, $lock);
@@ -38,5 +39,11 @@ trait HasWallet
             'name' => $name,
             'currency' => $currency,
         ]);
+    }
+
+    public function transactions(string $name)
+    {
+        /** @var Model $this */
+        return app(WalletServiceInterface::class)->transactions($this, $name);
     }
 }

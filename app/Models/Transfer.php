@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Cknow\Money\Casts\MoneyStringCast;
+use App\Support\Money\Casts\MoneyStringCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

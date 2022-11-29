@@ -2,8 +2,10 @@
 
 namespace App\Support\Wallets;
 
+use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Support\Wallets\Contracts\WalletServiceInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -125,6 +127,18 @@ class WalletService implements WalletServiceInterface
             ->where('holder_type', $model->getMorphClass())
             ->where('name', $name)
             ->exists();
+    }
+
+    /**
+     * @param  Model  $model
+     * @param  string  $name
+     * @return mixed
+     */
+    public function transactions(Model $model, string $name): Builder
+    {
+        $wallet = $this->findByNameOrFail($model, $name);
+
+        return Transaction::where('wallet_id', $wallet->getKey());
     }
 
     /**
