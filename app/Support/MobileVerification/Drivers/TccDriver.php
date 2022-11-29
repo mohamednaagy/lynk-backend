@@ -39,13 +39,16 @@ class TccDriver implements MobileVerifyDriverInterface
 
         $response = Http::post(
             $url,
-            $this->prepareRequestData(ltrim($mobileNumber->formatE164(), '+'), $personId)
+            $data = $this->prepareRequestData(ltrim($mobileNumber->formatE164(), '+'), $personId)
         );
 
         $response = $response->json();
 
         activity()
-            ->withProperties(['response' => $response])
+            ->withProperties([
+                'request' => $data,
+                'response' => $response,
+            ])
             ->log('Mobile Number Verification');
 
         return $this->verifyResponse($response);
@@ -101,7 +104,7 @@ class TccDriver implements MobileVerifyDriverInterface
         switch ($response['code']) {
             case TccResponseCode::MobileNumberMatched:
                 return true;
-            case TccResponseCode::MobileNumberUnMatched:
+            case TccResponseCode::MobileNumberUnmatched:
                 throw new MobileNumberNotMatchedException();
             case TccResponseCode::InvalidMobileNumber:
                 throw new InvalidMobileNumberException();

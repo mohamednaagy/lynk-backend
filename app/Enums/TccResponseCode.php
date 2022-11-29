@@ -8,7 +8,7 @@ final class TccResponseCode extends Enum
 {
     const MobileNumberMatched = 1200;
 
-    const MobileNumberUnMatched = 1201;
+    const MobileNumberUnmatched = 1201;
 
     const InvalidMobileNumber = 1202;
 

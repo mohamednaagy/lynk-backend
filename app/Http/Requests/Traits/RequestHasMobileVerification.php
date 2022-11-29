@@ -4,14 +4,10 @@ namespace App\Http\Requests\Traits;
 
 use App\Exceptions\MobileVerification\InvalidApiKeyException;
 use App\Exceptions\MobileVerification\InvalidMobileNumberException;
-use App\Exceptions\MobileVerification\InvalidNationalityException;
-use App\Exceptions\MobileVerification\InvalidOperatorTcnException;
 use App\Exceptions\MobileVerification\InvalidPersonIdException;
-use App\Exceptions\MobileVerification\InvalidPersonIdTypeException;
 use App\Exceptions\MobileVerification\InvalidRequestFormatException;
 use App\Exceptions\MobileVerification\MobileNumberNotMatchedException;
 use App\Exceptions\MobileVerification\PersonNotFoundException;
-use App\Exceptions\MobileVerification\ServiceNotAvailableException;
 use App\Support\MobileVerification\Facades\MobileVerify;
 use Illuminate\Validation\Validator;
 use Propaganistas\LaravelPhone\PhoneNumber;
@@ -59,14 +55,8 @@ trait RequestHasMobileVerification
             $errors['phone_number'] = __('error.invalid_request_format');
         } catch (InvalidApiKeyException $e) {
             $errors['phone_number'] = __('error.invalid_api_key');
-        } catch (ServiceNotAvailableException $e) {
+        } catch (\Throwable $e) {
             $errors['phone_number'] = __('error.service_not_available');
-        } catch (InvalidNationalityException $e) {
-            $errors['phone_number'] = __('error.invalid_nationality');
-        } catch (InvalidPersonIdTypeException $e) {
-            $errors['phone_number'] = __('error.invalid_person_id_type');
-        } catch (InvalidOperatorTcnException $e) {
-            $errors['phone_number'] = __('error.invalid_operator_tcn');
         }
 
         foreach ($errors as $key => $message) {

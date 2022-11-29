@@ -11,7 +11,7 @@ return [
     'invalid_mobile_number' => 'Invalid mobile number',
     'invalid_request_format' => 'Invalid request JSON format',
     'invalid_api_key' => 'Invalid API key',
-    'service_not_available' => 'TCC service not available',
+    'service_not_available' => 'Service is not available',
     'invalid_nationality' => 'Invalid nationality',
     'invalid_person_id_type' => 'Invalid national ID type',
     'invalid_operator_tcn' => 'Invalid operator TCN',
