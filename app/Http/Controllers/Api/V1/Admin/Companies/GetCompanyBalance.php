@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Orders;
+namespace App\Http\Controllers\Api\V1\Admin\Companies;
 
 use App\Actions\Contracts\Lenders\GetLenderBalance;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use Illuminate\Http\JsonResponse;
 
-class GetBalance extends Controller
+class GetCompanyBalance extends Controller
 {
     /**
      * @param  Company  $company

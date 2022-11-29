@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Orders;
+namespace App\Http\Controllers\Api\V1\Admin\FinancingOrders;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
 
-class OrderController extends Controller
+class FinancingOrderController extends Controller
 {
     public function index(Company $company)
     {
