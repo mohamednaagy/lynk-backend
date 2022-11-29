@@ -21,6 +21,10 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        Schema::dropIfExists('transfers');
+        Schema::enableForeignKeyConstraints();
+
         Schema::create('transfers', function (Blueprint $table) {
             $table->id();
             $table->uuid()->unique();

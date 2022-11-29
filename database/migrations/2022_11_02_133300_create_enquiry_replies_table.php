@@ -21,7 +21,8 @@ return new class extends Migration
                 ->nullable()
                 ->constrained()
                 ->cascadeOnDelete();
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('role_id')->nullable();
 
             $table->timestamps();
         });
