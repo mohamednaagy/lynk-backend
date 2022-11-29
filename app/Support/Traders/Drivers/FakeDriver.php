@@ -109,7 +109,7 @@ class FakeDriver implements TraderInterface
     public function getTtiId(FinancingOrder $financingOrder): mixed
     {
         $response = Http::post($this->buildUrl('getTTIIdForIssuePTP'), [
-            'currency' => 'SAR',
+            'currency' => currency(),
             'costPrice' => $financingOrder->amount,
             'profit' => $financingOrder->selling_price - $financingOrder->amount,
             'paymentTerms' => config('trader.providers.fake.tti.payment_terms'),
@@ -124,7 +124,7 @@ class FakeDriver implements TraderInterface
                 'driver' => 'fake',
                 'step' => 'getTtiId',
                 'requestBody' => [
-                    'currency' => 'SAR',
+                    'currency' => currency(),
                     'costPrice' => $financingOrder->amount,
                     'profit' => $financingOrder->selling_price - $financingOrder->amount,
                     'paymentTerms' => config('trader.providers.fake.tti.payment_terms'),
