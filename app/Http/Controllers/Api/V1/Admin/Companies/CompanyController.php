@@ -54,15 +54,22 @@ class CompanyController extends Controller
         $data['status'] = $getSettingsClassInstance->handle(Area::Lender)->default_company_status_created_by_operation;
 
         $company = $createCompany->handle($data);
-        tenancy()->initialize($company);
 
         $company->createWallet([
             'name' => WalletType::CompanyWallet,
             'slug' => WalletType::CompanyWallet,
         ]);
 
-        // __REVIEW__ return company with transformer
-        return $this->successResponse();
+        return fractal($company, new CompanyTransformer())
+            ->parseIncludes([
+                'id',
+                'name',
+                'status',
+                'orders_count',
+                'created_at',
+                'order_cost',
+            ])
+            ->respond();
     }
 
     /**
