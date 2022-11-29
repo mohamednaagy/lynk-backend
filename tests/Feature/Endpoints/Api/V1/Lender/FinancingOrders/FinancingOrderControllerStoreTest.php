@@ -157,7 +157,7 @@ class FinancingOrderControllerStoreTest extends TestCase
                         'The phone number field is required.',
                     ],
                     'national_id' => [
-                        'error.phone_number_not_matched',
+                        'Phone number doesn’t belong to National ID/Iqama',
                     ],
                 ],
             ]);

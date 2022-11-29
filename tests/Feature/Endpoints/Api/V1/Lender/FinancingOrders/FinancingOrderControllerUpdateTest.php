@@ -163,7 +163,7 @@ class FinancingOrderControllerUpdateTest extends TestCase
                 'message' => 'The phone number field is required. (and 1 more error)',
                 'errors' => [
                     'national_id' => [
-                        'error.phone_number_not_matched',
+                        'Phone number doesn’t belong to National ID/Iqama',
                     ],
                     'phone_number' => [
                         'The phone number field is required.',
@@ -195,7 +195,9 @@ class FinancingOrderControllerUpdateTest extends TestCase
                         'phone_country_code',
                         'phone_number',
                         'phone_number_formatted',
-                    ])->respond()->getData(true)
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 
@@ -222,7 +224,9 @@ class FinancingOrderControllerUpdateTest extends TestCase
                         'phone_country_code',
                         'phone_number',
                         'phone_number_formatted',
-                    ])->respond()->getData(true)
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 
@@ -271,7 +275,9 @@ class FinancingOrderControllerUpdateTest extends TestCase
                         'phone_country_code',
                         'phone_number',
                         'phone_number_formatted',
-                    ])->respond()->getData(true)
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 }

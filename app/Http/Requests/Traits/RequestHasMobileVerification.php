@@ -42,7 +42,7 @@ trait RequestHasMobileVerification
             $phone = PhoneNumber::make($this->validated($this->phoneNumber), $this->validated($this->phoneCountryCode));
             MobileVerify::verify($phone, $this->validated($this->nationalId));
         } catch (MobileNumberNotMatchedException $e) {
-            $errors['national_id'] = __('error.phone_number_not_matched');
+            $errors['national_id'] = __('error.phone_number_does_not_belong_to_national_id');
         } catch (InvalidPersonIdException $e) {
             $errors['national_id'] = __('error.invalid_person_id');
         } catch (PersonNotFoundException $e) {

@@ -100,7 +100,9 @@ class FinancingOrderControllerShowTest extends TestCase
                         'creator',
                         'approver',
                         'history',
-                    ])->respond()->getData(true)
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 
@@ -130,7 +132,9 @@ class FinancingOrderControllerShowTest extends TestCase
                         'creator',
                         'approver',
                         'history',
-                    ])->respond()->getData(true)
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 
@@ -182,7 +186,9 @@ class FinancingOrderControllerShowTest extends TestCase
                         'creator',
                         'approver',
                         'history',
-                    ])->respond()->getData(true)
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 }

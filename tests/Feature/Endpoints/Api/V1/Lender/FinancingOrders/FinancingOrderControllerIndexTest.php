@@ -96,7 +96,9 @@ class FinancingOrderControllerIndexTest extends TestCase
                         'amount',
                         'selling_price',
                         'status_reason',
-                    ])->respond()->getData(true)
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 
@@ -121,7 +123,9 @@ class FinancingOrderControllerIndexTest extends TestCase
                         'amount',
                         'selling_price',
                         'status_reason',
-                    ])->respond()->getData(true)
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 
@@ -159,7 +163,9 @@ class FinancingOrderControllerIndexTest extends TestCase
                         'amount',
                         'selling_price',
                         'status_reason',
-                    ])->respond()->getData(true)
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 }
