@@ -4,7 +4,6 @@ namespace Modules\Otpify\Drivers;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
@@ -47,9 +46,9 @@ class AbsherDriver implements OtpifyDriverInterface
             'personId' => $otpifiable->getNationalId(),
         ];
 
-        $response = Http::post($sendUrl, $body)->collect()->toArray();
+        $response = Http::post($sendUrl, $body);
 
-        $tcn = $response['tcn'];
+        $tcn = $response->json('tcn');
 
         return $this->createOtpifyCode(null, $otpifiable, $otpifiable, ['tcn' => $tcn]);
     }
@@ -91,7 +90,7 @@ class AbsherDriver implements OtpifyDriverInterface
             throw new OtpCodeExpiredException();
         }
 
-        if ($additionalCheckCallback instanceof Closure && ! $additionalCheckCallback($request, $code)) {
+        if ($additionalCheckCallback instanceof Closure && ! $additionalCheckCallback($request, $otpifyCode)) {
             throw new OtpCodeAdditionalCheckException();
         }
 
@@ -103,19 +102,17 @@ class AbsherDriver implements OtpifyDriverInterface
             'otp' => $code,
         ];
 
-        $response = Http::post($checkUrl, $data)->collect()->toArray();
+        $response = Http::post($checkUrl, $data);
 
         if (
-            Arr::get($response, 'code') === 600 &&
-            isset($response['userDetails']) &&
-            $userDetails = $response['userDetails']
+            $response->json('code') === 600 &&
+            $userDetails = $response->json('userDetails')
         ) {
             $otpifyCode->otpifiable->update(['customer_details' => $userDetails]);
 
             $this->setOtpExpiredAt($otpifyCode);
 
             return true;
-        // return $this->createAuthorizationToken($request->all());
         } else {
             throw new OtpCodeIncorrectException();
         }
