@@ -21,8 +21,6 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::dropIfExists('wallets');
-
         Schema::create('wallets', function (Blueprint $table) {
             $table->id();
             $table->string('name');

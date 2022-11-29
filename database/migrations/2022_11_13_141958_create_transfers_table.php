@@ -21,8 +21,6 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::dropIfExists('transfers');
-
         Schema::create('transfers', function (Blueprint $table) {
             $table->id();
             $table->uuid()->unique();
