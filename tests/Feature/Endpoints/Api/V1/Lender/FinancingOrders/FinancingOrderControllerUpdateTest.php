@@ -100,10 +100,13 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ->putJson('api/v1/lender/orders/'.self::$order->id, Arr::except(self::$updatedOrderDetails, ['amount']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertExactJson([
-                'message' => 'The amount field is required.',
+                'message' => 'The amount field is required. (and 1 more error)',
                 'errors' => [
                     'amount' => [
                         0 => 'The amount field is required.',
+                    ],
+                    'selling_price' => [
+                        0 => 'The selling price must be greater than or equal to amount.',
                     ],
                 ],
             ]);
@@ -142,7 +145,7 @@ class FinancingOrderControllerUpdateTest extends TestCase
                         'The phone country code field is required when phone number is present.',
                     ],
                     'phone_number' => [
-                        'The phone number is not a valid phone number.',
+                        'The phone number is not valid phone number.',
                     ],
                 ],
             ]);
@@ -157,8 +160,11 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ->putJson('api/v1/lender/orders/'.self::$order->id, Arr::except(self::$updatedOrderDetails, ['phone_number']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertExactJson([
-                'message' => 'The phone number field is required.',
+                'message' => 'The phone number field is required. (and 1 more error)',
                 'errors' => [
+                    'national_id' => [
+                        'Phone number doesn’t belong to National ID/Iqama',
+                    ],
                     'phone_number' => [
                         'The phone number field is required.',
                     ],
@@ -177,7 +183,21 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
                 fractal(self::$order->refresh(), new FinancingOrderTransformer())
-                    ->respond()->getData(true)
+                    ->parseIncludes([
+                        'id',
+                        'status',
+                        'reference_number',
+                        'national_id',
+                        'amount',
+                        'selling_price',
+                        'is_approved',
+                        'status_reason',
+                        'phone_country_code',
+                        'phone_number',
+                        'phone_number_formatted',
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 
@@ -192,7 +212,21 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
                 fractal(self::$order->refresh(), new FinancingOrderTransformer())
-                    ->respond()->getData(true)
+                    ->parseIncludes([
+                        'id',
+                        'status',
+                        'reference_number',
+                        'national_id',
+                        'amount',
+                        'selling_price',
+                        'is_approved',
+                        'status_reason',
+                        'phone_country_code',
+                        'phone_number',
+                        'phone_number_formatted',
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 
@@ -229,7 +263,21 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
                 fractal(self::$orderOwnedByOrderCreator->refresh(), new FinancingOrderTransformer())
-                    ->respond()->getData(true)
+                    ->parseIncludes([
+                        'id',
+                        'status',
+                        'reference_number',
+                        'national_id',
+                        'amount',
+                        'selling_price',
+                        'is_approved',
+                        'status_reason',
+                        'phone_country_code',
+                        'phone_number',
+                        'phone_number_formatted',
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 }

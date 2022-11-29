@@ -88,8 +88,17 @@ class FinancingOrderControllerIndexTest extends TestCase
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
                 fractal($orders, new FinancingOrderTransformer())
-                    ->parseExcludes(['contract', 'power_of_attorney'])
-                    ->respond()->getData(true)
+                    ->parseIncludes([
+                        'id',
+                        'status',
+                        'reference_number',
+                        'national_id',
+                        'amount',
+                        'selling_price',
+                        'status_reason',
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 
@@ -106,8 +115,17 @@ class FinancingOrderControllerIndexTest extends TestCase
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
                 fractal($orders, new FinancingOrderTransformer())
-                    ->parseExcludes(['contract', 'power_of_attorney'])
-                    ->respond()->getData(true)
+                    ->parseIncludes([
+                        'id',
+                        'status',
+                        'reference_number',
+                        'national_id',
+                        'amount',
+                        'selling_price',
+                        'status_reason',
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 
@@ -137,8 +155,17 @@ class FinancingOrderControllerIndexTest extends TestCase
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
                 fractal($orders, new FinancingOrderTransformer())
-                    ->parseExcludes(['contract', 'power_of_attorney'])
-                    ->respond()->getData(true)
+                    ->parseIncludes([
+                        'id',
+                        'status',
+                        'reference_number',
+                        'national_id',
+                        'amount',
+                        'selling_price',
+                        'status_reason',
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 }

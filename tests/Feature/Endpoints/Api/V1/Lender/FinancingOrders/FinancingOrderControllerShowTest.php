@@ -85,8 +85,24 @@ class FinancingOrderControllerShowTest extends TestCase
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
                 fractal(self::$firstOrderInSameCompany, new FinancingOrderTransformer())
-                    ->parseIncludes(['creator', 'approver', 'history'])
-                    ->respond()->getData(true)
+                    ->parseIncludes([
+                        'id',
+                        'status',
+                        'reference_number',
+                        'national_id',
+                        'amount',
+                        'selling_price',
+                        'phone_country_code',
+                        'phone_number',
+                        'phone_number_formatted',
+                        'is_approved',
+                        'status_reason',
+                        'creator',
+                        'approver',
+                        'history',
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 
@@ -101,8 +117,24 @@ class FinancingOrderControllerShowTest extends TestCase
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
                 fractal(self::$firstOrderInSameCompany, new FinancingOrderTransformer())
-                    ->parseIncludes(['creator', 'approver', 'history'])
-                    ->respond()->getData(true)
+                    ->parseIncludes([
+                        'id',
+                        'status',
+                        'reference_number',
+                        'national_id',
+                        'amount',
+                        'selling_price',
+                        'phone_country_code',
+                        'phone_number',
+                        'phone_number_formatted',
+                        'is_approved',
+                        'status_reason',
+                        'creator',
+                        'approver',
+                        'history',
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 
@@ -139,8 +171,24 @@ class FinancingOrderControllerShowTest extends TestCase
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
                 fractal(self::$thirdOrderInSameCompany, new FinancingOrderTransformer())
-                    ->parseIncludes(['creator', 'approver', 'history'])
-                    ->respond()->getData(true)
+                    ->parseIncludes([
+                        'id',
+                        'status',
+                        'reference_number',
+                        'national_id',
+                        'amount',
+                        'selling_price',
+                        'phone_country_code',
+                        'phone_number',
+                        'phone_number_formatted',
+                        'is_approved',
+                        'status_reason',
+                        'creator',
+                        'approver',
+                        'history',
+                    ])
+                    ->respond()
+                    ->getData(true)
             );
     }
 }
