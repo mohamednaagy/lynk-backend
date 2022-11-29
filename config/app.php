@@ -189,6 +189,7 @@ return [
         App\Providers\TenancyServiceProvider::class,
         App\Providers\MacroServiceProvider::class,
         App\Providers\PasswordResetServiceProvider::class,
+        App\Providers\DatabaseServiceProvider::class,
         // sms provider
         App\Providers\SmsServiceProvider::class,
         App\Providers\EdaatServiceProvider::class,
