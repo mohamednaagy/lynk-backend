@@ -3,6 +3,7 @@
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
+use App\Enums\Subject;
 use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
@@ -48,11 +49,11 @@ Route::prefix('v1/admin')->group(function () {
         Route::apiResource('admins', AdminController::class);
 
         Route::get('/roles', GetAllRoles::class)->middleware(
-            'permission:'.perm(Area::SuperAdmin, [Action::Index])
+            'permission:'.perm(Area::SuperAdmin, [Subject::Roles, Action::Index])
         );
 
         Route::get('/permissions', GetAllPermissions::class)->middleware(
-            'permission:'.perm(Area::SuperAdmin, [Action::Index])
+            'permission:'.perm(Area::SuperAdmin, [Subject::Permissions, Action::Index])
         );
 
         Route::prefix('settings')->group(function () {
