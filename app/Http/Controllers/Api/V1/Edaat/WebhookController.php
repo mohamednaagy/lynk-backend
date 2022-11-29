@@ -21,21 +21,21 @@ class WebhookController extends Controller
     ) {
         Log::debug('test', [$request->all()]);
         foreach ($request->all() as $invoice) {
-            // if ($edaatService->isPaidInvoice($invoice['InvoiceNo'])) {
-            $invoice = EdaatInvoice::where('id', $invoice['InternalCode'])->lockForUpdate()->first();
+            if ($edaatService->isPaidInvoice($invoice['InvoiceNo'])) {
+                $invoice = EdaatInvoice::where('id', $invoice['InternalCode'])->lockForUpdate()->first();
 
-            $wallet = $invoice->company->getWallet(WalletType::CompanyWallet);
-            $invoice->update(['status' => EdaatInvoiceStatus::Paid]);
+                $wallet = $invoice->company->getWallet(WalletType::CompanyWallet);
+                $invoice->update(['status' => EdaatInvoiceStatus::Paid]);
 
-            $createTransactions->handle(
-                $wallet,
-                $invoice->amount,
-                TransactionReason::DepositByEdaat,
-                [
-                    'invoice_number' => $invoice->invoice_number,
-                ]
-            );
-            // }
+                $createTransactions->handle(
+                    $wallet,
+                    $invoice->amount,
+                    TransactionReason::DepositByEdaat,
+                    [
+                        'invoice_number' => $invoice->invoice_number,
+                    ]
+                );
+            }
         }
     }
 }
