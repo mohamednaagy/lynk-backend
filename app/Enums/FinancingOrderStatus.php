@@ -105,6 +105,11 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         self::Rejected,
     ];
 
+    public const AllowedToUpdateStatuses = [
+        self::PendingApproval,
+        self::Rejected,
+    ];
+
     /**
      * @param  Status|int  $status
      * @return bool
@@ -136,14 +141,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
      */
     public function canBeUpdated(): bool
     {
-        if (in_array($this->value, [
-            self::PendingApproval,
-            self::WaitingClientWakala,
-        ])) {
-            return true;
-        }
-
-        return false;
+        return in_array($this->value, self::AllowedToUpdateStatuses);
     }
 
     /**.

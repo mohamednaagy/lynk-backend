@@ -9,6 +9,7 @@ use App\Actions\Contracts\Orders\UpdateFinancingOrder;
 use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
@@ -20,6 +21,7 @@ use App\Transformers\FinancingOrderTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
@@ -95,6 +97,7 @@ class OrderController extends Controller
                 'phone_country_code',
                 'phone_number',
                 'phone_number_formatted',
+                'is_updatable',
                 'is_approved',
                 'status_reason',
                 'creator',
@@ -170,7 +173,7 @@ class OrderController extends Controller
     /**
      * Summary of update
      *
-     * @param  UpdateOrderRequest  $updateOrderRequest
+     * @param  UpdateOrderRequest  $request
      * @param  UpdateFinancingOrder  $updateFinancingOrder
      * @param  FinancingOrder  $order
      * @return JsonResponse
@@ -185,7 +188,9 @@ class OrderController extends Controller
         $this->authorize('update', $order);
         if ($order->status->cantBeUpdated()) {
             return $this->errorResponse(
-                __('error.order_cannot_be_updated')
+                __('error.order_cannot_be_updated'),
+                Response::HTTP_BAD_REQUEST,
+                ErrorCode::ORDER_NOT_UPDATABLE
             );
         }
         $financingOrder = $updateFinancingOrder->update($order, $request->validated());

@@ -74,3 +74,15 @@ if (! function_exists('get_host_from_url')) {
          : $url;
     }
 }
+
+if (! function_exists('format_enum')) {
+    function format_enum(string $enum, $key)
+    {
+        $states = constant($enum.'::'.$key);
+        if (is_array($states)) {
+            return implode(',', array_map(fn ($state) => (new $enum($state))->description, $states));
+        }
+
+        return (new $enum($states))->description;
+    }
+}
