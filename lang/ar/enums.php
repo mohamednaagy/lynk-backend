@@ -6,13 +6,9 @@ use App\Enums\CompanyStatus;
 
 return [
     CompanyStatus::class => [
-
         CompanyStatus::Pending => 'قيد الانتظار',
-
         CompanyStatus::UnderReview => 'قيد المراجعة',
-
-        CompanyStatus::Approved => 'وافق',
-
-        CompanyStatus::Approved => 'مرفوض',
+        CompanyStatus::Approved => 'تمت الموافقة',
+        CompanyStatus::Approved => 'تم الرفض',
     ],
 ];
