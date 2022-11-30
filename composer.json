@@ -17,7 +17,6 @@
         "codedredd/laravel-soap": "^3.0",
         "guzzlehttp/guzzle": "^7.2",
         "jenssegers/agent": "^2.6",
-        "laravel-lang/json-fallback-hotfix": "^1.0",
         "laravel/framework": "^9.2",
         "laravel/sanctum": "^2.14.1",
         "laravel/tinker": "^2.7",
