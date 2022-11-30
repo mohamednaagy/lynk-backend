@@ -19,7 +19,7 @@ return [
     'invalid_operator_tcn' => 'Invalid operator TCN',
     'no_enough_balance' => 'No enough balance',
     'order_status_doesnt_follow_sequence' => 'Order status cannot be updated because it doesn\'t follow the right sequence',
-    'order_cannot_be_updated' => 'Order can be updated only if the status is '.format_enum(FinancingOrderStatus::class, 'AllowedToUpdateStatuses'),
+    'order_cannot_be_updated' => 'Order can be updated only if the status is '.FinancingOrderStatus::joinDescription(FinancingOrderStatus::AllowedToUpdateStatuses),
     'webhook_type_not_supported' => 'Unsupported webhook type',
     'must_verify_email' => 'You must verify your email address',
     'x_company_invalid' => 'Invalid company',
