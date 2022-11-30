@@ -8,7 +8,7 @@ use App\Enums\Role;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
-use Bavix\Wallet\Models\Wallet;
+use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -63,81 +63,66 @@ class RejectOrderControllerTest extends TestCase
 
     public function test_order_rejected_successfully()
     {
-        $this->actingAs(self::$userLenderAdmin);
-
-        $response = $this->putJson(
-            '/api/v1/lender/orders/'.self::$pendingApprovalOrder->id.'/reject',
-            ['status_reason' => self::$statusReason],
-            ['X-Company' => self::$company->id]
-        );
-
-        $response->assertStatus(200);
+        $this->actingAs(self::$userLenderAdmin)
+            ->putJson(
+                '/api/v1/lender/orders/'.self::$pendingApprovalOrder->id.'/reject',
+                ['status_reason' => self::$statusReason],
+                ['X-Company' => self::$company->id]
+            )->assertStatus(200);
     }
 
     public function test_order_can_not_moved_to_reject_status()
     {
-        $this->actingAs(self::$userLenderAdmin);
-
-        $response = $this->putJson(
-            '/api/v1/lender/orders/'.self::$financingOrder->id.'/reject',
-            ['status_reason' => self::$statusReason],
-            ['X-Company' => self::$company->id]
-        );
-
-        $response->assertStatus(400)->assertJsonFragment([
+        $this->actingAs(self::$userLenderAdmin)
+            ->putJson(
+                '/api/v1/lender/orders/'.self::$financingOrder->id.'/reject',
+                ['status_reason' => self::$statusReason],
+                ['X-Company' => self::$company->id]
+            )
+            ->assertStatus(400)->assertJsonFragment([
             'message' => __('error.order_cannot_be_approved_because_it_is_approved'),
         ]);
     }
 
     public function test_other_company_can_not_reject_order()
     {
-        $this->actingAs(self::$userLenderAdmin);
-
-        $response = $this->putJson(
-            '/api/v1/lender/orders/'.self::$financingOrder->id.'/reject',
-            ['status_reason' => self::$statusReason],
-            ['X-Company' => self::$secondCompany->id]
-        );
-
-        $response->assertStatus(404);
+        $this->actingAs(self::$userLenderAdmin)
+            ->putJson(
+                '/api/v1/lender/orders/'.self::$financingOrder->id.'/reject',
+                ['status_reason' => self::$statusReason],
+                ['X-Company' => self::$secondCompany->id]
+            )->assertStatus(404);
     }
 
     public function test_order_not_exists()
     {
-        $this->actingAs(self::$userLenderAdmin);
-
-        $response = $this->putJson(
-            '/api/v1/lender/orders/'. 400 .'/reject',
-            ['status_reason' => self::$statusReason],
-            ['X-Company' => self::$company->id]
-        );
-
-        $response->assertStatus(404);
+        $this->actingAs(self::$userLenderAdmin)
+            ->putJson(
+                '/api/v1/lender/orders/'. 400 .'/reject',
+                ['status_reason' => self::$statusReason],
+                ['X-Company' => self::$company->id]
+            )
+            ->assertStatus(404);
     }
 
     public function test_customer_can_not_reject_order()
     {
-        $this->actingAs(self::$customer);
-
-        $response = $this->putJson(
-            '/api/v1/lender/orders/'.self::$financingOrder->id.'/reject',
-            ['status_reason' => self::$statusReason],
-            ['X-Company' => self::$company->id]
-        );
-
-        $response->assertStatus(403);
+        $this->actingAs(self::$customer)
+            ->putJson(
+                '/api/v1/lender/orders/'.self::$financingOrder->id.'/reject',
+                ['status_reason' => self::$statusReason],
+                ['X-Company' => self::$company->id]
+            )->assertStatus(403);
     }
 
     public function test_can_not_reject_order_without_email_verification()
     {
-        $this->actingAs(self::$userLenderAdminWithoutEmailVerification);
-
-        $response = $this->putJson(
-            '/api/v1/lender/orders/'.self::$financingOrder->id.'/reject',
-            [],
-            ['X-Company' => self::$company->id]
-        );
-        $response->assertStatus(403)->assertJsonFragment([
+        $this->actingAs(self::$userLenderAdminWithoutEmailVerification)
+            ->putJson(
+                '/api/v1/lender/orders/'.self::$financingOrder->id.'/reject',
+                [],
+                ['X-Company' => self::$company->id]
+            )->assertStatus(403)->assertJsonFragment([
             'message' => __('error.must_verify_email'),
             'code' => ErrorCode::EMAIL_NOT_VERIFIED,
         ]);
