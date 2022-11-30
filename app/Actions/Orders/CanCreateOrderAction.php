@@ -13,7 +13,7 @@ class CanCreateOrderAction implements CanCreateOrder
     {
         $wallet = $company->getWallet(WalletType::CompanyWallet);
 
-        if ($wallet->balance >= $company->order_cost) {
+        if ($wallet->balance->greaterThanOrEqual($company->order_cost)) {
             return true;
         }
 
