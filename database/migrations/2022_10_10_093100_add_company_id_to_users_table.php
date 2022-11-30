@@ -21,10 +21,12 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->string('virtual_company_id_email')
-                ->virtualAs('concat_ws(":",company_id,email)')
-                ->unique()
-                ->after('company_id');
+            if (! app()->runningUnitTests()) {
+                $table->string('virtual_company_id_email')
+                    ->virtualAs('concat_ws(":",company_id,email)')
+                    ->unique()
+                    ->after('company_id');
+            }
 
             $table->dropUnique(['email']);
         });
