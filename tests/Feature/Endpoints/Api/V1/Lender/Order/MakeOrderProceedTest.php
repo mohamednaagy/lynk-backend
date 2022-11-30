@@ -1,5 +1,7 @@
 <?php
 
+// __REVIEW__ change file to be under "tests/Feature/Endpoints/Api/V1/Lender/FinancingOrders"
+
 namespace Tests\Feature\Endpoints\Api\V1\Lender\Order;
 
 use App\Enums\FinancingOrderProceedCase;
@@ -10,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+// __REVIEW__ use Illuminate\Http\Response
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
@@ -41,9 +44,11 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
+    // __REVIEW__ change unAuth to unauth or not_auth
     public function test_that_unAuth_user_cant_make_order_proceed(): void
     {
         $this->withHeader('X-Company', self::$company->getOriginal('id'))
+            // __REVIEW__ extract "api/v1/lender/orders/" to constant since it is repeated
             ->postJson('api/v1/lender/orders/'.self::$financingOrder->getOriginal('id').'/proceed')
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
@@ -108,9 +113,19 @@ class MakeOrderProceedTest extends TestCase
                 'case' => FinancingOrderProceedCase::ContractSigned,
             ]);
 
+        // __REVIEW__ we to assert code value
         $response->assertStatus(400)->assertJsonStructure([
             'message',
             'code',
         ]);
     }
+
+    // __REVIEW__ we need to test FinancingOrderProceedCase::ContractSigned is only with the correct statuses.
+    // Look for $state in the app/Enums/FinancingOrderStatus.php
+
+    // __REVIEW__ We need to make sure FinancingOrderProceedCase::ClientWakalaAccepted is only working
+    // when order column (is_verification_required) = false and with correct order status
+    // Look for $state in the app/Enums/FinancingOrderStatus.php
+
+    // __REVIEW__ We need to check if order status is changed after success response to the correct status
 }
