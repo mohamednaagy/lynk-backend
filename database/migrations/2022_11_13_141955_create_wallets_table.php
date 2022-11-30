@@ -21,9 +21,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::disableForeignKeyConstraints();
+        // this to avoid errors when running "php artisan migrate:fresh". This command will drop all tables
+        // in the default connection but not in the "wallet.database.connection"
+        Schema::dropIfExists('transfers');
+        Schema::dropIfExists('transactions');
         Schema::dropIfExists('wallets');
-        Schema::enableForeignKeyConstraints();
 
         Schema::create('wallets', function (Blueprint $table) {
             $table->id();
