@@ -9,8 +9,7 @@ use League\Fractal\TransformerAbstract;
 
 class FinancingOrderTransformer extends TransformerAbstract
 {
-    protected array $defaultIncludes = [
-    ];
+    protected array $defaultIncludes = [];
 
     protected array $availableIncludes = [
         'id',
@@ -71,7 +70,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeNationalId(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->national_id);
+        return $this->primitive((string) $financingOrder->national_id);
     }
 
     public function includePhoneNumber(FinancingOrder $financingOrder)
@@ -81,12 +80,12 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeAmount(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->amount);
+        return $this->primitive($financingOrder->amount->formatByDecimal());
     }
 
     public function includeSellingPrice(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->selling_price);
+        return $this->primitive($financingOrder->selling_price->formatByDecimal());
     }
 
     public function includeCreatorName(FinancingOrder $financingOrder)

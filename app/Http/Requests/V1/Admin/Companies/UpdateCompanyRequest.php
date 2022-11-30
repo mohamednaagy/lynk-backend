@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Companies;
 
+use App\Rules\CompanyUniqueNameRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -12,7 +13,7 @@ class UpdateCompanyRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -22,9 +23,8 @@ class UpdateCompanyRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
-        // __REVIEW__ see comments on app/Http/Requests/V1/Admin/Companies/StoreCompanyRequest.php
         return [
             'name' => [
                 'required',
@@ -35,13 +35,13 @@ class UpdateCompanyRequest extends FormRequest
                 'required',
                 'string',
                 'min:3',
-                'regex:/(^[a-zA-Z]+[a-zA-Z0-9\\-\\_]*$)/u',
+                new CompanyUniqueNameRule,
                 Rule::unique('companies', 'unique_name')
                     ->ignore($this->route('company')),
             ],
             'company_cr' => [
                 'string',
-                'min:1',
+                'size:10',
                 Rule::unique('companies', 'company_cr')
                     ->ignore($this->route('company')),
             ],
@@ -52,6 +52,16 @@ class UpdateCompanyRequest extends FormRequest
             'order_cost' => [
                 'required',
                 'numeric',
+            ],
+            'public_status_comment' => [
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+            'internal_status_comment' => [
+                'nullable',
+                'string',
+                'max:1000',
             ],
         ];
     }

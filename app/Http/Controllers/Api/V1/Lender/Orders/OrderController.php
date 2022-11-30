@@ -120,7 +120,7 @@ class OrderController extends Controller
         DeductOrderCreationFee $deductOrderCreationFee,
         CanCreateOrder $canCreateOrder
     ): JsonResponse {
-        return DB::transaction(
+        return DB::multipleTransaction(
             function () use ($request, $createFinancingOrder, $deductOrderCreationFee, $canCreateOrder) {
                 $company = tenant();
                 // throw exception is balance not enough
@@ -133,6 +133,7 @@ class OrderController extends Controller
                 $user = $request->user();
 
                 $financingOrder = $createFinancingOrder->handle(
+                    $company,
                     array_merge(
                         $request->validated(),
                         [
@@ -177,19 +178,17 @@ class OrderController extends Controller
      * @throws AuthorizationException
      */
     public function update(
-        UpdateOrderRequest $updateOrderRequest,
+        UpdateOrderRequest $request,
         UpdateFinancingOrder $updateFinancingOrder,
         FinancingOrder $order
     ): JsonResponse {
         $this->authorize('update', $order);
-
         if ($order->status->cantBeUpdated()) {
             return $this->errorResponse(
                 __('error.order_cannot_be_updated')
             );
         }
-
-        $financingOrder = $updateFinancingOrder->update($order, $updateOrderRequest->validated());
+        $financingOrder = $updateFinancingOrder->update($order, $request->validated());
 
         return fractal($financingOrder, new FinancingOrderTransformer())
             ->parseIncludes([

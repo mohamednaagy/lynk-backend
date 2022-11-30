@@ -92,10 +92,11 @@ class UserTransformer extends TransformerAbstract
     public function includePermissions(User $user)
     {
         $rolesQuery = $this->getRolesQueryBasedOnArea($user);
+        $directPermissionsQuery = $this->getPermissionsQueryBasedOnArea($user);
 
-        $subjectPermissions = Grantify::transformPermissionsToSubjectAction(
-            Permission::role($rolesQuery->get())->get()
-        );
+        $permissions = Permission::role($rolesQuery->get())->get()->merge($directPermissionsQuery->get());
+
+        $subjectPermissions = Grantify::transformPermissionsToSubjectAction($permissions);
 
         return $this->primitive($subjectPermissions);
     }
@@ -121,6 +122,17 @@ class UserTransformer extends TransformerAbstract
 
         $query = match ($this->area) {
             Area::Lender, Area::SuperAdmin => $query->whereIn('name', Area::roles($this->area)),
+        };
+
+        return $query;
+    }
+
+    protected function getPermissionsQueryBasedOnArea(User $user)
+    {
+        $query = $user->permissions();
+
+        $query = match ($this->area) {
+            Area::Lender, Area::SuperAdmin => $query->where('name', 'Like', $this->area.'-%'),
         };
 
         return $query;
