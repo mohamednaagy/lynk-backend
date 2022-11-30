@@ -21,8 +21,12 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
+            $table->string('virtual_company_id_email')
+                ->virtualAs('concat_ws(":",company_id,email)')
+                ->unique()
+                ->after('company_id');
+
             $table->dropUnique(['email']);
-            $table->unique(['email', (new Company())->getForeignKey()]);
         });
     }
 
@@ -36,7 +40,8 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeignIdFor(Company::class);
             $table->unique('email');
-            $table->dropUnique(['email', (new Company())->getForeignKey()]);
+            $table->dropUnique(['virtual_company_id_email']);
+            $table->dropColumn('virtual_company_id_email');
         });
     }
 };
