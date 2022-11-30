@@ -2,7 +2,7 @@
 
 namespace App\Support\Transactions\Descriptions;
 
-use Bavix\Wallet\Models\Transaction;
+use App\Models\Transaction;
 
 interface GeneratorInterface
 {

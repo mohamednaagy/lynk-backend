@@ -2,13 +2,14 @@
 
 namespace App\Transformers;
 
+use App\Models\Transaction;
 use App\Support\Transactions\Descriptions\DescriptionManager;
-use Bavix\Wallet\Models\Transaction;
 use Carbon\Carbon;
 use League\Fractal\TransformerAbstract;
 
 class TransactionTransformer extends TransformerAbstract
 {
+    // __REVIEW__ move transform values to $availableIncludes
     public function transform(Transaction $transaction): array
     {
         return [
@@ -17,7 +18,7 @@ class TransactionTransformer extends TransformerAbstract
             'description' => (! is_null($transaction->meta) && isset($transaction->meta['type']))
                 ? DescriptionManager::getDescription($transaction)
                 : null,
-            'amount' => $transaction->amount,
+            'amount' => $transaction->amount_float,
         ];
     }
 }

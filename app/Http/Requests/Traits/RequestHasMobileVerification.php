@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Traits;
 
+use App\Exceptions\MobileVerification\InvalidApiKeyException;
 use App\Exceptions\MobileVerification\InvalidMobileNumberException;
 use App\Exceptions\MobileVerification\InvalidPersonIdException;
+use App\Exceptions\MobileVerification\InvalidRequestFormatException;
 use App\Exceptions\MobileVerification\MobileNumberNotMatchedException;
 use App\Exceptions\MobileVerification\PersonNotFoundException;
 use App\Support\MobileVerification\Facades\MobileVerify;
@@ -42,13 +44,19 @@ trait RequestHasMobileVerification
             $phone = PhoneNumber::make($this->validated($this->phoneNumber), $this->validated($this->phoneCountryCode));
             MobileVerify::verify($phone, $this->validated($this->nationalId));
         } catch (MobileNumberNotMatchedException $e) {
-            $errors['national_id'] = __('error.phone_number_not_matched');
+            $errors['national_id'] = __('error.phone_number_does_not_belong_to_national_id');
         } catch (InvalidPersonIdException $e) {
             $errors['national_id'] = __('error.invalid_person_id');
         } catch (PersonNotFoundException $e) {
             $errors['national_id'] = __('error.person_id_not_found');
         } catch (InvalidMobileNumberException $e) {
             $errors['phone_number'] = __('error.invalid_mobile_number');
+        } catch (InvalidRequestFormatException $e) {
+            $errors['phone_number'] = __('error.invalid_request_format');
+        } catch (InvalidApiKeyException $e) {
+            $errors['phone_number'] = __('error.invalid_api_key');
+        } catch (\Throwable $e) {
+            $errors['phone_number'] = __('error.service_not_available');
         }
 
         foreach ($errors as $key => $message) {
