@@ -145,7 +145,7 @@ class FinancingOrderControllerUpdateTest extends TestCase
                         'The phone country code field is required when phone number is present.',
                     ],
                     'phone_number' => [
-                        'The phone number is not valid phone number.',
+                        'The phone number is not a valid phone number.',
                     ],
                 ],
             ]);
@@ -162,11 +162,9 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ->assertExactJson([
                 'message' => 'The phone number field is required. (and 1 more error)',
                 'errors' => [
-                    'national_id' => [
-                        'Phone number doesn’t belong to National ID/Iqama',
-                    ],
                     'phone_number' => [
                         'The phone number field is required.',
+                        'Service is not available',
                     ],
                 ],
             ]);
