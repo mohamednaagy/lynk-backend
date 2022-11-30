@@ -32,7 +32,8 @@ class UpdateMyProfileRequest extends FormRequest
                 'required',
                 'email',
                 Rule::unique(User::class, 'email')
-                    ->ignore($this->user()->getAuthIdentifier(), 'id'),
+                    ->ignore($this->user()->getAuthIdentifier(), 'id')
+                    ->whereNull('company_id'),
             ],
             'password' => ['nullable', 'string', 'confirmed'],
         ];

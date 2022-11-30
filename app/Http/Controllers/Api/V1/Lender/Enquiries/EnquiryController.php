@@ -42,7 +42,7 @@ class EnquiryController extends Controller
         $data = $storeEnquiryRequest->validated();
         $data['user_id'] = ($user = $storeEnquiryRequest->user())->id;
         $data['role_id'] = $user->roles()
-            ->whereIn('name', Area::getRolesPerAreaMap()[Area::Lender])
+            ->whereIn('name', Area::roles(Area::Lender))
             ->firstOrFail()
             ->id;
 

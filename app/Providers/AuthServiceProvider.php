@@ -3,9 +3,13 @@
 namespace App\Providers;
 
 use App\Enums\Role;
+use App\Models\FinancingOrder;
+use App\Policies\FinancingOrderPolicy;
+use App\Policies\MediaPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -15,7 +19,8 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+        Media::class => MediaPolicy::class,
+        FinancingOrder::class => FinancingOrderPolicy::class,
     ];
 
     /**

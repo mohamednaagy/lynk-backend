@@ -12,7 +12,7 @@ class EdaatRegisterWebhook extends Command
      *
      * @var string
      */
-    protected $signature = 'edaat:register-webhook {payment?} {bill?} {reconcile?}';
+    protected $signature = 'edaat:register-webhook {--payment=} {--bill=} {--reconcile=}';
 
     /**
      * The console command description.
@@ -29,9 +29,9 @@ class EdaatRegisterWebhook extends Command
     public function handle(EdaatService $edaatService)
     {
         if ($edaatService->registerWebhook(
-            $this->getUrl($this->argument('payment')),
-            $this->getUrl($this->argument('bill')),
-            $this->getUrl($this->argument('reconcile')),
+            $this->getUrl($this->option('payment')),
+            $this->getUrl($this->option('bill')),
+            $this->getUrl($this->option('reconcile')),
         )) {
             $this->line('webhook registered successfully');
 
@@ -44,8 +44,10 @@ class EdaatRegisterWebhook extends Command
 
     private function getUrl($route)
     {
-        return filter_var($route, FILTER_VALIDATE_URL)
-            ? $route
-            : route($route);
+        if (! $route || filter_var($route, FILTER_VALIDATE_URL)) {
+            return $route;
+        }
+
+        return route($route);
     }
 }

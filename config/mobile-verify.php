@@ -28,6 +28,7 @@ return [
     'drivers' => [
         'tcc' => [
             'api_key' => env('MOBILE_VERIFY_TCC_API_KEY'),
+            'base_url' => env('MOBILE_VERIFY_TCC_BASE_URL', 'http://158.101.230.247'),
         ],
     ],
 ];

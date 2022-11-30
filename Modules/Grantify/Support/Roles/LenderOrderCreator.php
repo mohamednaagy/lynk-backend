@@ -10,6 +10,9 @@ class LenderOrderCreator
     public static array $basePermissions = [
         Subject::FinancingOrders => [
             Action::Create,
+            Action::Index,
+            Action::Show,
+            Action::Edit,
         ],
     ];
 }

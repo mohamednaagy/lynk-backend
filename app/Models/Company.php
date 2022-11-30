@@ -3,19 +3,17 @@
 namespace App\Models;
 
 use App\Enums\CompanyStatus;
-use Bavix\Wallet\Interfaces\Wallet;
-use Bavix\Wallet\Traits\HasWallet;
-use Bavix\Wallet\Traits\HasWalletFloat;
-use Bavix\Wallet\Traits\HasWallets;
+use App\Support\Money\Casts\MoneyStringCast;
+use App\Support\Wallets\Traits\HasWallet;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Stancl\Tenancy\Database\Concerns\HasScopedValidationRules;
 use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
-class Company extends BaseTenant implements Wallet
+class Company extends BaseTenant
 {
-    use HasFactory, HasScopedValidationRules, HasWallet, HasWallets, HasWalletFloat, SoftDeletes;
+    use HasFactory, HasScopedValidationRules, SoftDeletes, HasWallet;
 
     protected $table = 'companies';
 
@@ -26,6 +24,8 @@ class Company extends BaseTenant implements Wallet
     protected $casts = [
         'status' => CompanyStatus::class,
         'does_order_require_approval' => 'boolean',
+        'webhook_secret_key' => 'encrypted',
+        'order_cost' => MoneyStringCast::class.':order_cost_currency',
     ];
 
     public static function getCustomColumns(): array
@@ -40,8 +40,10 @@ class Company extends BaseTenant implements Wallet
             'internal_status_comment',
             'does_order_require_approval',
             'order_cost',
+            'webhook_secret_key',
             'created_at',
             'updated_at',
+            'order_cost_currency',
         ];
     }
 
@@ -53,5 +55,10 @@ class Company extends BaseTenant implements Wallet
     public function orders(): HasMany
     {
         return $this->hasMany(FinancingOrder::class);
+    }
+
+    public function webhooks(): HasMany
+    {
+        return $this->hasMany(Webhook::class);
     }
 }

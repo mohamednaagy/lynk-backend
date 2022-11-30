@@ -18,14 +18,16 @@ class AcceptClientWakalaAction implements AcceptClientWakala
 
         $path = $order->id.'/client-wakala/'.$order->getNationalId().'.pdf';
 
-        PdfGenerator::outputFromHtml($wakalaTemplate, $path, [
-            'gotoOptions' => ['waitUntil' => 'networkidle0'],
-        ]);
+        $media = PdfGenerator::outputFromHtml($wakalaTemplate, $path, function ($fileResource) use ($order) {
+            return $order->addMediaFromStream($fileResource)
+                ->usingFileName($order->getNationalId().'.pdf')
+                ->toMediaCollection(FinancingOrderMediaCollection::ClientWakala);
+        });
 
         $order->update([
             'client_wakala_accepted_at' => now(),
         ]);
 
-        return $order->addMedia(storage_path('app/'.$path))->toMediaCollection(FinancingOrderMediaCollection::ClientWakala);
+        return $media;
     }
 }

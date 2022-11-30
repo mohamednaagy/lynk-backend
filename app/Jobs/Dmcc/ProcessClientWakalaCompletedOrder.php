@@ -1,0 +1,70 @@
+<?php
+
+namespace App\Jobs\Dmcc;
+
+use App\Enums\FinancingOrderStatus;
+use App\Enums\TraderOrderStatus;
+use App\Models\FinancingOrder;
+use App\Support\Traders\Facades\Trader;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
+
+class ProcessClientWakalaCompletedOrder implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected mixed $financingOrder;
+
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct($financingOrder)
+    {
+        $this->financingOrder = $financingOrder;
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle(): void
+    {
+        $driver = config('trader.default');
+        $trader = Trader::driver($driver);
+        DB::transaction(function () use ($trader) {
+            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
+            if ($financingOrder->traderOrders()->whereIn('status', [
+                TraderOrderStatus::InProgress,
+                TraderOrderStatus::Completed,
+            ])->count() > 0) {
+                return;
+            }
+
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::WaitingPurchasingCommodity)) {
+                return;
+            }
+
+            $trader->getTtiId($financingOrder);
+
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingPurchasingCommodity);
+        });
+    }
+
+    /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array
+     */
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping('financingOrder'.$this->financingOrder)];
+    }
+}

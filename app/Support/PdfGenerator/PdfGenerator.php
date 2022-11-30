@@ -2,11 +2,12 @@
 
 namespace App\Support\PdfGenerator;
 
+use Closure;
 use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static \App\Support\PdfGenerator\Contracts\GeneratorInterface generator($name = null)
- * @method static string outputFromHtml(string $html, string $path, array $options)
+ * @method static mixed outputFromHtml(string $html, string $path, array|Closure $options)
  *
  * @see \App\Support\PdfGenerator\PdfGeneratorManager
  */

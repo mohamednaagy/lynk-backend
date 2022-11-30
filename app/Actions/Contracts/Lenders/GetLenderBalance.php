@@ -9,7 +9,7 @@ interface GetLenderBalance
     /**
      * Create new user.
      *
-     * @param  \App\Models\Company  $company
+     * @param  Company  $company
      * @return array
      */
     public function handle(Company $company): array;

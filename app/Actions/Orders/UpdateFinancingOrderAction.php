@@ -3,8 +3,8 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
+use Cknow\Money\Money;
 use Illuminate\Support\Arr;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
@@ -19,6 +19,14 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
     {
         $data['phone_number'] = PhoneNumber::make($data['phone_number'], $data['phone_country_code']);
 
+        if (isset($data['amount'])) {
+            $data['amount'] = Money::parseByDecimal($data['amount'], $financingOrder->currency);
+        }
+
+        if (isset($data['selling_price'])) {
+            $data['selling_price'] = Money::parseByDecimal($data['selling_price'], $financingOrder->currency);
+        }
+
         $financingOrder->update(
             Arr::only(
                 $data,
@@ -31,16 +39,6 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
                 ]
             )
         );
-
-        if (isset($data['contract'])) {
-            $financingOrder->addMedia($data['contract'])
-                ->toMediaCollection(FinancingOrderMediaCollection::Contract);
-        }
-
-        if (isset($data['power_of_attorney'])) {
-            $financingOrder->addMedia($data['power_of_attorney'])
-                ->toMediaCollection(FinancingOrderMediaCollection::PowerOfAttorney);
-        }
 
         return $financingOrder;
     }

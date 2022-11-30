@@ -15,6 +15,8 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
+    'public_disk' => env('PUBLIC_DISK', 'public'),
+
     /*
     |--------------------------------------------------------------------------
     | Filesystem Disks
@@ -56,6 +58,29 @@ return [
             'throw' => false,
         ],
 
+        'oci' => [
+            'driver' => 's3',
+            'key' => env('OCI_ACCESS_KEY_ID'),
+            'secret' => env('OCI_SECRET_ACCESS_KEY'),
+            'region' => env('OCI_DEFAULT_REGION'),
+            'bucket' => env('OCI_BUCKET'),
+            'url' => env('OCI_URL'),
+            'endpoint' => env('OCI_ENDPOINT'),
+            'use_path_style_endpoint' => true,
+            'throw' => true,
+        ],
+
+        'oci_public' => [
+            'driver' => 's3',
+            'key' => env('OCI_PUBLIC_ACCESS_KEY_ID'),
+            'secret' => env('OCI_PUBLIC_SECRET_ACCESS_KEY'),
+            'region' => env('OCI_PUBLIC_DEFAULT_REGION'),
+            'bucket' => env('OCI_PUBLIC_BUCKET'),
+            'url' => env('OCI_PUBLIC_URL'),
+            'endpoint' => env('OCI_PUBLIC_ENDPOINT'),
+            'use_path_style_endpoint' => true,
+            'throw' => true,
+        ],
     ],
 
     /*

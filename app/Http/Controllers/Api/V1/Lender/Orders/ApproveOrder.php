@@ -9,6 +9,7 @@ use App\Models\FinancingOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class ApproveOrder extends Controller
 {
@@ -17,20 +18,23 @@ class ApproveOrder extends Controller
      *
      * @param  Request  $request
      * @param  ApproveOrderInterface  $approveOrder
-     * @param  FinancingOrder  $order
+     * @param  int  $order
      * @return JsonResponse
      */
-    public function __invoke(Request $request, ApproveOrderInterface $approveOrder, FinancingOrder $order)
+    public function __invoke(Request $request, ApproveOrderInterface $approveOrder, int $order): JsonResponse
     {
-        if (! $order->status->is(FinancingOrderStatus::PendingApproval)) {
-            return $this->errorResponse(
-                __('error.order_cannot_be_approved_because_it_is_approved'),
-                Response::HTTP_BAD_REQUEST
-            );
-        }
+        return DB::transaction(function () use ($request, $approveOrder, $order) {
+            $order = FinancingOrder::lockForUpdate()->findOrFail($order);
+            if ($order->status->cantMoveTo(FinancingOrderStatus::Approved)) {
+                return $this->errorResponse(
+                    __('error.order_cannot_be_approved_because_it_is_approved'),
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
 
-        $approveOrder->handle($order, $request->user());
+            $approveOrder->handle($order, $request->user());
 
-        return $this->successResponse();
+            return $this->successResponse();
+        });
     }
 }
