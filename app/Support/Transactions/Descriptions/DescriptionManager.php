@@ -56,9 +56,9 @@ class DescriptionManager
      * @param  Money  $amount
      * @param  int  $reason
      * @param  array  $meta
-     * @return string
+     * @return object
      */
-    public static function handleTransaction(Wallet $wallet, Money $amount, int $reason, array $meta): string
+    public static function handleTransaction(Wallet $wallet, Money $amount, int $reason, array $meta): Transaction
     {
         return self::getGenerator($reason)->handle($wallet, $amount, $reason, $meta);
     }
