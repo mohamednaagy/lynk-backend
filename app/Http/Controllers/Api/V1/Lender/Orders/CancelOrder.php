@@ -22,24 +22,24 @@ class CancelOrder extends Controller
      * @return JsonResponse
      */
     public function __invoke(
-        CancelOrderRequest $cancelOrderRequest,
+        CancelOrderRequest $request,
         CancelOrderInterface $cancelOrder,
         int $order
     ): JsonResponse {
-        return DB::transaction(function () use ($cancelOrderRequest, $cancelOrder, $order) {
+        return DB::transaction(function () use ($request, $cancelOrder, $order) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
 
             if ($order->status->cantMoveTo(FinancingOrderStatus::PendingCancellation)) {
                 return $this->errorResponse(
-                    __('error.unable_to_cancelled'),
+                    __('error.unable_to_cancel_order'),
                     ErrorCode::UNABLE_TO_CANCEL_ORDER
                 );
             }
 
             $cancelOrder->handle(
                 $order,
-                $cancelOrderRequest->user(),
-                $cancelOrderRequest->validated()
+                $request->user(),
+                $request->validated()
             );
 
             return $this->successResponse();
