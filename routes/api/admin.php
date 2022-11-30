@@ -39,9 +39,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('v1/admin')->group(function () {
-    Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.complete-register');
-
+Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
     Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::put('auth/profile', UpdateMyProfile::class);
@@ -93,4 +91,6 @@ Route::prefix('v1/admin')->group(function () {
 
         Route::post('/upload-image', [UploadImage::class, 'store']);
     });
+
+    Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.sign-up');
 });

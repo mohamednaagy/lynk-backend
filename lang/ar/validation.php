@@ -135,6 +135,10 @@ return [
     'phone' => 'حقل :attribute رقم هاتف غير صحيح.',
     'url_protocol' => ':attribute يجب ان  يبدأ بأحد القيم التالية: :values',
     'custom_validation' => [
+        'phone_number_does_not_belong_to_national_id' => 'Phone number doesn’t belong to National ID/Iqama',
+        'invalid_person_id' => 'Invalid National ID',
+        'person_id_not_found' => 'National ID not found',
+        'invalid_mobile_number' => 'Invalid mobile number',
     ],
 
     /*
@@ -207,6 +211,7 @@ return [
         'restored_at' => 'تاريخ الاستعادة',
         'result_text_under_image' => 'نص النتيجة أسفل الصورة',
         'role' => 'الصلاحية',
+        'permissions' => 'الأذونات',
         'second' => 'ثانية',
         'sex' => 'الجنس',
         'short_text' => 'نص مختصر',
