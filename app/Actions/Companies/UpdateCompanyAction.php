@@ -16,7 +16,9 @@ class UpdateCompanyAction implements UpdateCompany
      */
     public function handle(Company $company, array $data): Company
     {
-        $data['order_cost'] = Money::parseByDecimal($data['order_cost'], Money::getDefaultCurrency());
+        if (isset($data['order_cost'])) {
+            $data['order_cost'] = Money::parseByDecimal($data['order_cost'], Money::getDefaultCurrency());
+        }
 
         $company->update(
             Arr::only(

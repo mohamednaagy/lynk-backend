@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyBalance;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
+use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyStatuses;
 use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
@@ -67,6 +68,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::put('wakala-templates/{type}', [WakalaTemplateController::class, 'update'])
             ->where('type', 'client|company');
 
+        Route::get('companies/statuses', GetCompanyStatuses::class);
+
         Route::prefix('companies')->group(function () {
             Route::put('/{company}/status', UpdateCompanyStatus::class);
             Route::get('/{company}/balance ', GetCompanyBalance::class);
@@ -75,6 +78,9 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/{company}/transactions ', [FinancingOrderTransactionController::class, 'index']);
             Route::get('/{company}/settings ', GetCompanySetting::class);
         });
+
+        Route::apiResource('companies', CompanyController::class);
+        Route::apiResource('companies.users', UserController::class)->shallow();
 
         Route::apiResource('companies', CompanyController::class);
         Route::apiResource('companies.users', UserController::class)->shallow();

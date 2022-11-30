@@ -31,12 +31,12 @@ if (! function_exists('validate_said')) {
 }
 
 if (! function_exists('perm')) {
-    function perm($area, ...$permissions)
+    function perm($areas, ...$permissions)
     {
         $permissionsArray = [];
 
-        if (is_array($area)) {
-            foreach ($area as $area) {
+        if (is_array($areas)) {
+            foreach ($areas as $area) {
                 foreach ($permissions as $subjectWithPermissions) {
                     $subject = $subjectWithPermissions[0];
                     unset($subjectWithPermissions[0]);
@@ -50,7 +50,7 @@ if (! function_exists('perm')) {
         foreach ($permissions as $subjectWithPermissions) {
             $subject = $subjectWithPermissions[0];
             unset($subjectWithPermissions[0]);
-            array_push($permissionsArray, Grantify::transformToPermissionsFormat($area, $subject, $subjectWithPermissions));
+            array_push($permissionsArray, Grantify::transformToPermissionsFormat($areas, $subject, $subjectWithPermissions));
         }
 
         return implode('|', $permissionsArray);
@@ -58,9 +58,9 @@ if (! function_exists('perm')) {
 }
 
 if (! function_exists('perm_arr')) {
-    function perm_arr($area, ...$permissions)
+    function perm_arr($areas, ...$permissions)
     {
-        return explode('|', perm($area, ...$permissions));
+        return explode('|', perm($areas, ...$permissions));
     }
 }
 
