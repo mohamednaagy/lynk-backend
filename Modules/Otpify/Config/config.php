@@ -41,8 +41,8 @@ return [
             'ssl_verify_peer' => env('OTPIFY_TWILIO_SSL_VERIFY_PEER', false),
         ],
         'absher' => [
-            'api_key' => env('ABSHER_API_KEY', '9122385904480654204103/UjUEigInUUt8dzlpTP2PllXBsPQXHuPIqjYVDmg='),
-            'base_url' => env('ABSHER_HOST', '158.101.230.247').'/TCC-Web/api/iam/otp',
+            'api_key' => env('ABSHER_API_KEY'),
+            'base_url' => env('ABSHER_HOST', 'http://158.101.230.247').'/TCC-Web/api/iam/otp',
         ],
     ],
 ];
