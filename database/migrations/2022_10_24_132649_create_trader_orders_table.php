@@ -21,10 +21,8 @@ return new class extends Migration
                 ->cascadeOnDelete();
             $table->string('reference');
             $table->string('provider');
-            $table->string('type');
             $table->json('data')->nullable();
             $table->unsignedTinyInteger('status');
-            $table->dropColumn('type');
             $table->timestamps();
         });
     }
