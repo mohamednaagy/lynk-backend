@@ -4,7 +4,7 @@ namespace App\Actions\Contracts\Companies;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-interface GetCompanies
+interface GetPaginatedCompanies
 {
     public function handle(): LengthAwarePaginator;
 }
