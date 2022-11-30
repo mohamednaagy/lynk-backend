@@ -14,26 +14,29 @@ class CompleteAdminRegisterInvitation extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $user;
+    public $invitee;
 
     public $url;
+
+    public $inviter;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(User $user, string $externalUrl)
+    public function __construct(User $inviter, User $invitee, string $externalUrl)
     {
         $url = URL::signedExternalRoute(
             $externalUrl,
             'api.v1.admins.admin.sign-up',
-            ['admin' => $user->id],
+            ['admin' => $invitee->id],
             now()->addHours(48)
         );
 
         $this->url = $url;
-        $this->user = $user;
+        $this->invitee = $invitee;
+        $this->inviter = $inviter;
     }
 
     /**

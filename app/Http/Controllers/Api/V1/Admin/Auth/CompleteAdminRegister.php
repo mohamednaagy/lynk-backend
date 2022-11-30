@@ -18,18 +18,23 @@ class CompleteAdminRegister extends Controller
     }
 
     public function __invoke(
-        CompleteAdminRegisterRequest $completeAdminRegisterRequest,
+        CompleteAdminRegisterRequest $request,
         User $admin,
         CompleteAdminRegistration $completeAdminRegistration
     ): JsonResponse {
         if (! is_null($admin->passowrd)) {
-            return fractal($admin, new UserTransformer)->respond();
+            return $this->respond($admin);
         }
 
-        DB::transaction(function () use ($completeAdminRegistration, $admin, $completeAdminRegisterRequest) {
-            $completeAdminRegistration->handle($admin, $completeAdminRegisterRequest->validated());
+        DB::transaction(function () use ($completeAdminRegistration, $admin, $request) {
+            $completeAdminRegistration->handle($admin, $request->validated());
         });
 
+        return $this->respond($admin);
+    }
+
+    public function respond($admin)
+    {
         return fractal($admin, new UserTransformer)
             ->parseIncludes([
                 'id',
@@ -39,6 +44,7 @@ class CompleteAdminRegister extends Controller
                 'phone_number',
                 'phone_country_code',
                 'formatted_phone_number',
-            ])->respond();
+            ])
+            ->respond();
     }
 }

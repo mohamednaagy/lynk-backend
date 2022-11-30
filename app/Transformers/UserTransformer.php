@@ -132,7 +132,7 @@ class UserTransformer extends TransformerAbstract
         $query = $user->permissions();
 
         $query = match ($this->area) {
-            Area::Lender, Area::SuperAdmin => $query->where('name', 'Like', $this->area.'%'),
+            Area::Lender, Area::SuperAdmin => $query->where('name', 'Like', $this->area.'-%'),
         };
 
         return $query;

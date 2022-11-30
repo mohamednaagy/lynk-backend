@@ -74,16 +74,23 @@ class AdminController extends Controller
      * @return JsonResponse
      */
     public function store(
-        StoreAdminRequest $createAdminRequest,
+        StoreAdminRequest $request,
         CreateAdminWithRoleAndPermission $createAdminWithRoleAndPermission
     ): JsonResponse {
-        $data = $createAdminRequest->validated();
+        $data = $request->validated();
         $data = $this->transformPermissions($data);
 
-        return DB::transaction(function () use ($data, $createAdminWithRoleAndPermission) {
+        return DB::transaction(function () use ($request, $data, $createAdminWithRoleAndPermission) {
             $admin = $createAdminWithRoleAndPermission->handle($data);
 
-            Mail::to($admin)->send(new CompleteAdminRegisterInvitation($admin, $data['redirect_url']));
+            Mail::to($admin)
+                ->send(
+                    new CompleteAdminRegisterInvitation(
+                        $request->user(),
+                        $admin,
+                        $data['redirect_url']
+                    )
+                );
 
             return fractal($admin, new UserTransformer(Area::SuperAdmin))
                 ->parseIncludes([
@@ -110,15 +117,15 @@ class AdminController extends Controller
      */
     public function update(
         User $admin,
-        UpdateAdminRequest $updateAdminRequest,
+        UpdateAdminRequest $request,
         UpdateAdminWithRoleAndPermission $updateAdminWithRoleAndPermission,
     ): JsonResponse {
-        return DB::transaction(function () use ($updateAdminRequest, $admin, $updateAdminWithRoleAndPermission) {
+        return DB::transaction(function () use ($request, $admin, $updateAdminWithRoleAndPermission) {
             if (! $admin->hasRole(Area::roles(Area::SuperAdmin))) {
                 throw UnauthorizedException::forRoles(Area::roles(Area::SuperAdmin));
             }
 
-            $data = $updateAdminRequest->validated();
+            $data = $request->validated();
             $data = $this->transformPermissions($data);
 
             DB::transaction(function () use ($updateAdminWithRoleAndPermission, $data, $admin) {
@@ -136,7 +143,8 @@ class AdminController extends Controller
                     'phone_number',
                     'phone_country_code',
                     'formatted_phone_number',
-                ])->respond();
+                ])
+                ->respond();
         });
     }
 
