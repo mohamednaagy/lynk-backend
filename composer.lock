@@ -58,16 +58,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.249.0",
+            "version": "3.250.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "ec9108e2540167cbd7a524031a4b31b6fc0d857d"
+                "reference": "ea3b594a4fcc6a25caaaa7a9886c919ec7e4666d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/ec9108e2540167cbd7a524031a4b31b6fc0d857d",
-                "reference": "ec9108e2540167cbd7a524031a4b31b6fc0d857d",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/ea3b594a4fcc6a25caaaa7a9886c919ec7e4666d",
+                "reference": "ea3b594a4fcc6a25caaaa7a9886c919ec7e4666d",
                 "shasum": ""
             },
             "require": {
@@ -146,9 +146,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.249.0"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.250.0"
             },
-            "time": "2022-11-29T04:55:41+00:00"
+            "time": "2022-11-29T19:20:34+00:00"
         },
         {
             "name": "azjezz/psl",
@@ -2970,16 +2970,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v9.41.0",
+            "version": "v9.42.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "cc902ce61b4ca08ca7449664cfab2fa96a1d1e28"
+                "reference": "0bb828f0b8d1b320cac0b71874807ea2f334ea89"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/cc902ce61b4ca08ca7449664cfab2fa96a1d1e28",
-                "reference": "cc902ce61b4ca08ca7449664cfab2fa96a1d1e28",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/0bb828f0b8d1b320cac0b71874807ea2f334ea89",
+                "reference": "0bb828f0b8d1b320cac0b71874807ea2f334ea89",
                 "shasum": ""
             },
             "require": {
@@ -3152,7 +3152,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2022-11-22T15:10:46+00:00"
+            "time": "2022-11-29T15:18:16+00:00"
         },
         {
             "name": "laravel/sanctum",
@@ -12424,16 +12424,16 @@
         },
         {
             "name": "laravel-lang/lang",
-            "version": "12.5.3",
+            "version": "12.5.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Laravel-Lang/lang.git",
-                "reference": "8933af19013c11ba41c342ab4e5beecac117d265"
+                "reference": "94ae1763dd0750ed97034c20949e481ccf13baac"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Laravel-Lang/lang/zipball/8933af19013c11ba41c342ab4e5beecac117d265",
-                "reference": "8933af19013c11ba41c342ab4e5beecac117d265",
+                "url": "https://api.github.com/repos/Laravel-Lang/lang/zipball/94ae1763dd0750ed97034c20949e481ccf13baac",
+                "reference": "94ae1763dd0750ed97034c20949e481ccf13baac",
                 "shasum": ""
             },
             "require": {
@@ -12495,7 +12495,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2022-11-25T14:49:20+00:00"
+            "time": "2022-11-27T15:40:48+00:00"
         },
         {
             "name": "laravel-lang/publisher",
@@ -12605,16 +12605,16 @@
         },
         {
             "name": "laravel/pint",
-            "version": "v1.2.0",
+            "version": "v1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/pint.git",
-                "reference": "1d276e4c803397a26cc337df908f55c2a4e90d86"
+                "reference": "e60e2112ee779ce60f253695b273d1646a17d6f1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/pint/zipball/1d276e4c803397a26cc337df908f55c2a4e90d86",
-                "reference": "1d276e4c803397a26cc337df908f55c2a4e90d86",
+                "url": "https://api.github.com/repos/laravel/pint/zipball/e60e2112ee779ce60f253695b273d1646a17d6f1",
+                "reference": "e60e2112ee779ce60f253695b273d1646a17d6f1",
                 "shasum": ""
             },
             "require": {
@@ -12626,10 +12626,10 @@
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.11.0",
-                "illuminate/view": "^9.27",
-                "laravel-zero/framework": "^9.1.3",
-                "mockery/mockery": "^1.5.0",
-                "nunomaduro/larastan": "^2.2",
+                "illuminate/view": "^9.32.0",
+                "laravel-zero/framework": "^9.2.0",
+                "mockery/mockery": "^1.5.1",
+                "nunomaduro/larastan": "^2.2.0",
                 "nunomaduro/termwind": "^1.14.0",
                 "pestphp/pest": "^1.22.1"
             },
@@ -12667,7 +12667,7 @@
                 "issues": "https://github.com/laravel/pint/issues",
                 "source": "https://github.com/laravel/pint"
             },
-            "time": "2022-09-13T15:07:15+00:00"
+            "time": "2022-11-29T16:25:20+00:00"
         },
         {
             "name": "laravel/sail",
