@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Api\V1\Admin\Companies;
 use App\Enums\CompanyStatus;
 use App\Http\Controllers\Controller;
 
-class GetCompanyStatus extends Controller
+class GetCompanyStatuses extends Controller
 {
-    public function index()
+    public function __invoke()
     {
         return array_map(function ($value) {
             return [

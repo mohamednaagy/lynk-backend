@@ -10,7 +10,7 @@ use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
-use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyStatus;
+use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyStatuses;
 use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
 use App\Http\Controllers\Api\V1\Admin\Customers\CustomerController;
@@ -79,10 +79,10 @@ Route::prefix('v1/admin')->group(function () {
         Route::put('wakala-templates/{type}', [WakalaTemplateController::class, 'update'])
             ->where('type', 'client|company');
 
+        Route::get('companies/statuses', GetCompanyStatuses::class);
         Route::apiResource('companies', CompanyController::class);
         Route::apiResource('companies.users', UserController::class)->shallow();
 
-        Route::get('companies-status', [GetCompanyStatus::class, 'index']);
         Route::prefix('companies')->group(function () {
             Route::put('/{company}/status', UpdateCompanyStatus::class);
             Route::get('/{company}/balance ', GetBalance::class);
