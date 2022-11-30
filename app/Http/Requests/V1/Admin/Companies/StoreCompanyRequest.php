@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1\Admin\Companies;
 
 use App\Models\Company;
+use App\Rules\CompanyUniqueNameRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -13,7 +14,7 @@ class StoreCompanyRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -23,10 +24,8 @@ class StoreCompanyRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
-        // __REVIEW__ add translation for attributes
-        // https://laravel.com/docs/9.x/validation#specifying-attribute-in-language-files
         return [
             'name' => [
                 'required',
@@ -37,20 +36,14 @@ class StoreCompanyRequest extends FormRequest
                 'required',
                 'string',
                 'min:3',
-                // __REVIEW__ use same regex as in app/Http/Requests/V1/Lender/Auth/RegisterLenderRequest.php
-                // For better maintainability, use rule and use it here and in RegisterLenderRequest
-                // __REVIEW__ we need to add translation for this rule (see https://laravel.com/docs/9.x/validation#custom-messages-for-specific-attributes)
-                // Arabic: يجب أن يحتوي المعرف على أحرف إنجليزية وأرقام و _ فقط. بالإضافة يجب أن يبدأ بحرف إنجليزي
-                // English: Identifier should contain only English letters, numbers and _. It should start with English letter
-                'regex:/(^[a-zA-Z]+[a-zA-Z0-9\\-\\_]*$)/u',
+                new CompanyUniqueNameRule,
                 Rule::unique(Company::class, 'unique_name'),
 
             ],
             'company_cr' => [
                 'required',
                 'string',
-                // __REVIEW__ change min:1 to size:10
-                'min:1',
+                'size:10',
                 Rule::unique(Company::class, 'company_cr'),
             ],
             'does_order_require_approval' => [
@@ -60,6 +53,16 @@ class StoreCompanyRequest extends FormRequest
             'order_cost' => [
                 'required',
                 'numeric',
+            ],
+            'public_status_comment' => [
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+            'internal_status_comment' => [
+                'nullable',
+                'string',
+                'max:1000',
             ],
         ];
     }
