@@ -18,7 +18,22 @@ class GetAuthUser extends Controller
     public function __invoke(Request $request)
     {
         return fractal($request->user()->load(['roles']), new UserTransformer(Area::Lender))
-            ->parseIncludes(['is_email_verified', 'role', 'company', 'permissions', 'locale'])
-            ->respond();
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'is_email_verified',
+                'role',
+                'company.id',
+                'company.name',
+                'company.status',
+                'company.id',
+                'permissions',
+                'locale',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 }

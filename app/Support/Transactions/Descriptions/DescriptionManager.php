@@ -3,9 +3,10 @@
 namespace App\Support\Transactions\Descriptions;
 
 use App\Enums\TransactionReason;
+use App\Models\Transaction;
+use App\Models\Wallet;
 use App\Support\Transactions\Descriptions\Generators\DefaultGenerator;
-use Bavix\Wallet\Models\Transaction;
-use Bavix\Wallet\Models\Wallet;
+use Cknow\Money\Money;
 
 class DescriptionManager
 {
@@ -51,14 +52,14 @@ class DescriptionManager
     /**
      * Get transaction description
      *
-     * @param  int  $reason
      * @param  Wallet  $wallet
-     * @param  string  $amount
+     * @param  Money  $amount
+     * @param  int  $reason
      * @param  array  $meta
      * @return string
      */
-    public static function handleTransaction(int $reason, Wallet $wallet, string $amount, array $meta)
+    public static function handleTransaction(Wallet $wallet, Money $amount, int $reason, array $meta): string
     {
-        return self::getGenerator($reason)->handle($wallet, $amount, $meta);
+        return self::getGenerator($reason)->handle($wallet, $amount, $reason, $meta);
     }
 }

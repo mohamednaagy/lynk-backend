@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1\Admin\Companies;
 
 use App\Models\Company;
+use App\Rules\CompanyUniqueNameRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -13,7 +14,7 @@ class StoreCompanyRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -23,7 +24,7 @@ class StoreCompanyRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'name' => [
@@ -35,14 +36,14 @@ class StoreCompanyRequest extends FormRequest
                 'required',
                 'string',
                 'min:3',
-                'regex:/(^[a-zA-Z]+[a-zA-Z0-9\\-\\_]*$)/u',
+                new CompanyUniqueNameRule,
                 Rule::unique(Company::class, 'unique_name'),
 
             ],
             'company_cr' => [
                 'required',
                 'string',
-                'min:1',
+                'size:10',
                 Rule::unique(Company::class, 'company_cr'),
             ],
             'does_order_require_approval' => [
@@ -52,6 +53,16 @@ class StoreCompanyRequest extends FormRequest
             'order_cost' => [
                 'required',
                 'numeric',
+            ],
+            'public_status_comment' => [
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+            'internal_status_comment' => [
+                'nullable',
+                'string',
+                'max:1000',
             ],
         ];
     }

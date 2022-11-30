@@ -2,7 +2,7 @@
 
 namespace App\Actions\Contracts\Wallets;
 
-use Bavix\Wallet\Models\Wallet;
+use App\Models\Wallet;
 
 interface CreateTransactions
 {

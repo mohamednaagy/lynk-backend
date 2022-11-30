@@ -2,9 +2,10 @@
 
 namespace App\Support\Transactions\Descriptions\Generators;
 
+use App\Models\Transaction;
+use App\Models\Wallet;
 use App\Support\Transactions\Descriptions\GeneratorBase;
-use Bavix\Wallet\Models\Transaction;
-use Bavix\Wallet\Models\Wallet;
+use Cknow\Money\Money;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Support\Arr;
@@ -20,8 +21,8 @@ class OrderCreationFeeType extends GeneratorBase
         ], $locale);
     }
 
-    public function handleTransaction(Wallet $wallet, string $amount, array $meta)
+    public function handleTransaction(Wallet $wallet, Money $amount, int $reason, array $meta)
     {
-        return $wallet->withdrawFloat($amount, $meta);
+        return $wallet->withdraw($amount, $reason, $meta);
     }
 }

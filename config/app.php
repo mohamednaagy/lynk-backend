@@ -17,6 +17,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'currency' => env('APP_CURRENCY', 'SAR'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
@@ -83,6 +85,11 @@ return [
     */
 
     'locale' => 'en',
+
+    'locales' => [
+        'en',
+        'ar',
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -182,11 +189,13 @@ return [
         App\Providers\TenancyServiceProvider::class,
         App\Providers\MacroServiceProvider::class,
         App\Providers\PasswordResetServiceProvider::class,
+        App\Providers\DatabaseServiceProvider::class,
         // sms provider
         App\Providers\SmsServiceProvider::class,
         App\Providers\EdaatServiceProvider::class,
         App\Providers\PdfGeneratorServiceProvider::class,
         App\Providers\MobileVerifyServiceProvider::class,
+        App\Providers\WalletServiceProvider::class,
         App\Providers\WebhookServiceProvider::class,
         // \Shivella\Bitly\BitlyServiceProvider::class,
     ],

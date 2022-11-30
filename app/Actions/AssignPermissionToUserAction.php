@@ -16,7 +16,6 @@ class AssignPermissionToUserAction implements AssignPermissionToUser
      */
     public function handle(User $user, string|array|Permission $permission): void
     {
-        //2test
         Grantify::assignPermissionToModel($user, $permission);
     }
 }

@@ -2,13 +2,31 @@
 
 namespace App\Models;
 
-use Bavix\Wallet\Models\Transaction as BaseTransaction;
+use App\Support\Money\Casts\MoneyStringCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Config;
 
-class Transaction extends BaseTransaction implements HasMedia
+class Transaction extends Model
 {
     use HasFactory;
-    use InteractsWithMedia;
+
+    protected $fillable = [
+        'id',
+        'uuid',
+        'wallet_id',
+        'reference_number',
+        'amount',
+        'meta',
+    ];
+
+    protected $casts = [
+        'meta' => 'array',
+        'amount' => MoneyStringCast::class.':currency',
+    ];
+
+    public function getConnectionName()
+    {
+        return Config::get('wallet.database.connection', parent::getConnectionName());
+    }
 }

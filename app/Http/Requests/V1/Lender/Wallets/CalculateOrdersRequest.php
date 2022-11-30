@@ -25,7 +25,7 @@ class CalculateOrdersRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'orders_count' => ['required', 'integer', 'min:1'],
+            'orders_count' => ['required', 'integer', 'min:1', 'max:99999999999999'],
         ];
     }
 }

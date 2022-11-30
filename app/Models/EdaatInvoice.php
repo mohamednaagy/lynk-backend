@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EdaatInvoiceStatus;
+use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,10 +18,13 @@ class EdaatInvoice extends Model
         'amount',
         'invoice_number',
         'status',
+        'creator_id',
+        'company_id',
     ];
 
     protected $casts = [
         'status' => EdaatInvoiceStatus::class,
+        'amount' => MoneyStringCast::class.':currency',
     ];
 
     public function creator(): BelongsTo

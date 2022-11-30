@@ -2,9 +2,10 @@
 
 namespace App\Support\Transactions\Descriptions\Generators;
 
+use App\Models\Transaction;
+use App\Models\Wallet;
 use App\Support\Transactions\Descriptions\GeneratorBase;
-use Bavix\Wallet\Models\Transaction;
-use Bavix\Wallet\Models\Wallet;
+use Cknow\Money\Money;
 
 class DefaultGenerator extends GeneratorBase
 {
@@ -13,7 +14,7 @@ class DefaultGenerator extends GeneratorBase
         return '';
     }
 
-    public function handleTransaction(Wallet $wallet, string $amount, array $meta): Transaction
+    public function handleTransaction(Wallet $wallet, Money $amount, int $reason, array $meta)
     {
         return $wallet->depositFloat($amount, $meta);
     }
