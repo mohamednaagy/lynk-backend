@@ -38,6 +38,7 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
         'last_name',
         'phone_number',
         'email',
+        'email_verified_at',
         'password',
         'locale',
         'company_id',
@@ -123,7 +124,7 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
         return $this->belongsTo(Company::class);
     }
 
-    public function preferredLocale()
+    public function preferredLocale(): string
     {
         return $this->locale;
     }

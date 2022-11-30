@@ -121,9 +121,9 @@ class DmccDriver implements TraderInterface
     public function getTtiId(FinancingOrder $financingOrder): mixed
     {
         Log::debug('getTTiId2', [
-            'currency' => 'SAR',
-            'costPrice' => $financingOrder->amount,
-            'profit' => $financingOrder->selling_price - $financingOrder->amount,
+            'currency' => $financingOrder->currency,
+            'costPrice' => $financingOrder->amount->formatByDecimal(),
+            'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
             'paymentTerms' => config('trader.providers.dmcc.tti.payment_terms'),
             'unitOfDuration' => config('trader.providers.dmcc.tti.unit_of_duration'),
             'product' => null,
@@ -134,9 +134,9 @@ class DmccDriver implements TraderInterface
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('getTTIIDForIssuePTP'))
             ->call('getTTIIDForIssuePTP', [
-                'currency' => 'SAR',
-                'costPrice' => $financingOrder->amount,
-                'profit' => $financingOrder->selling_price - $financingOrder->amount,
+                'currency' => $financingOrder->currency,
+                'costPrice' => $financingOrder->amount->formatByDecimal(),
+                'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
                 'paymentTerms' => config('trader.providers.dmcc.tti.payment_terms'),
                 'unitOfDuration' => config('trader.providers.dmcc.tti.unit_of_duration'),
                 'product' => null,
@@ -151,9 +151,9 @@ class DmccDriver implements TraderInterface
                 'driver' => 'dmcc',
                 'step' => 'getTtiId',
                 'requestBody' => [
-                    'currency' => 'SAR',
-                    'costPrice' => $financingOrder->amount,
-                    'profit' => $financingOrder->selling_price - $financingOrder->amount,
+                    'currency' => $financingOrder->currency,
+                    'costPrice' => $financingOrder->amount->formatByDecimal(),
+                    'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
                     'paymentTerms' => config('trader.providers.dmcc.tti.payment_terms'),
                     'unitOfDuration' => config('trader.providers.dmcc.tti.unit_of_duration'),
                     'product' => null,

@@ -45,7 +45,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeOrderCost(Company $company): Primitive
     {
-        return $this->primitive($company->order_cost);
+        return $this->primitive($company->order_cost->formatByDecimal());
     }
 
     public function includeCompanyCr(Company $company): Primitive

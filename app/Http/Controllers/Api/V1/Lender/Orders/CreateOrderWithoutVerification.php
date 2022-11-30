@@ -38,7 +38,7 @@ class CreateOrderWithoutVerification extends Controller
         DeductOrderCreationFee $deductOrderCreationFee,
         CanCreateOrder $canCreateOrder
     ) {
-        return DB::transaction(
+        return DB::multipleTransaction(
             function () use ($request, $createFinancingOrder, $generateWakala, $deductOrderCreationFee, $canCreateOrder) {
                 $company = tenant();
                 // throw exception is balance not enough

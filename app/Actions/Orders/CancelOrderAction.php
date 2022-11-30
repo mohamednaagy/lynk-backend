@@ -7,20 +7,20 @@ use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Support\Traders\Facades\Trader;
-use Illuminate\Support\Facades\DB;
 
 class CancelOrderAction implements CancelOrder
 {
     public function handle(FinancingOrder $financingOrder, User $user, array $data): void
     {
-        $driver = config('trader.default');
-        $trader = Trader::driver($driver);
-        DB::transaction(function () use ($trader, $financingOrder, $data) {
-            $trader->cancelOrder($financingOrder);
+        $traderOrder = $financingOrder->activeTraderOrder()->first();
 
-            $financingOrder->status = FinancingOrderStatus::PendingCancellation;
-            $financingOrder->status_reason = $data['status_reason'] ?? null;
-            $financingOrder->save();
-        });
+        $trader = Trader::driver($traderOrder->provider);
+
+        $trader->cancelOrder($financingOrder);
+
+        $financingOrder->update([
+            'status' => FinancingOrderStatus::PendingCancellation,
+            'status_reason' => $data['status_reason'] ?? null,
+        ]);
     }
 }

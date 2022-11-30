@@ -10,16 +10,16 @@ use Illuminate\Http\JsonResponse;
 class CalculateOrderCost extends Controller
 {
     public function __invoke(
-        CalculateOrdersRequest $calculateOrdersRequest,
+        CalculateOrdersRequest $request,
         CalculateOrdersCost $calculateOrdersCost
     ): JsonResponse {
-        $response = $calculateOrdersCost->handle(
-            ordersCount: $calculateOrdersRequest->input('orders_count'),
+        $amount = $calculateOrdersCost->handle(
+            ordersCount: $request->validated('orders_count'),
             orderCost: tenant()->order_cost
         );
 
         return $this->successResponse(data: [
-            'amount' => $response,
+            'amount' => $amount->formatByDecimal(),
         ]);
     }
 }
