@@ -105,9 +105,10 @@ class OrderController extends Controller
      *
      * @param  StoreOrderRequest  $request
      * @param  CreateFinancingOrder  $createFinancingOrder
+     * @param  DeductOrderCreationFee  $deductOrderCreationFee
+     * @param  CanCreateOrder  $canCreateOrder
+     * @param  GenerateLenderWakala  $generateLenderWakala
      * @return JsonResponse
-     *
-     * @throws ExceptionInterface
      */
     public function store(
         StoreOrderRequest $request,
@@ -117,7 +118,7 @@ class OrderController extends Controller
         GenerateLenderWakala $generateLenderWakala
     ): JsonResponse {
         return DB::multipleTransaction(
-            function () use ($request, $createFinancingOrder, $deductOrderCreationFee, $canCreateOrder) {
+            function () use ($request, $createFinancingOrder, $deductOrderCreationFee, $canCreateOrder, $generateLenderWakala) {
                 $company = tenant();
                 // throw exception is balance not enough
                 $canCreateOrder->handle($company);
@@ -144,7 +145,6 @@ class OrderController extends Controller
 
                 $generateLenderWakala->handle($financingOrder);
 
-                return fractal($financingOrder, new FinancingOrderTransformer())->respond();
                 // deduct the cost from the wallet
                 $deductOrderCreationFee->handle($financingOrder);
 

@@ -4,6 +4,7 @@ namespace App\Actions\Wakala;
 
 use App\Actions\Contracts\Wakala\GenerateLenderWakala;
 use App\Actions\Contracts\Wakala\GetWakalaTemplate;
+use App\Actions\Contracts\Wakala\RenderLenderWakala;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
@@ -18,47 +19,28 @@ class GenerateLenderWakalaAction implements GenerateLenderWakala
 
     protected string $filePath = '';
 
-    public function __construct(protected GetWakalaTemplate $getWakalaTemplate)
-    {
+    public function __construct(
+        protected GetWakalaTemplate $getWakalaTemplate,
+        protected RenderLenderWakala $renderLenderWakala
+    ) {
     }
 
     public function handle(FinancingOrder $financingOrder)
     {
         $lenderTemplate = $this->getWakalaTemplate->handle('client')['wakala_template'];
+        $template = $this->renderLenderWakala->handle($financingOrder, $lenderTemplate);
 
-        $date = now()->toDateString();
-        $time = now()->toTimeString();
-        $commodityNumber = $financingOrder->reference_number;
-        $amount = $financingOrder->amount;
-        $orderNumber = $financingOrder->id;
-        $orderDate = $financingOrder->approved_at->format('Y-m-d');
-
-        $template = str_replace([
-            '{{signingContractDate}}',
-            '{{signingContractTime}}',
-            '{{commodityNumber}}',
-            '{{amount}}',
-            '{{orderNumber}}',
-            '{{orderDate}}',
-        ], [
-            $date,
-            $time,
-            $commodityNumber,
-            $amount,
-            $orderNumber,
-            $orderDate,
-        ], $lenderTemplate);
-
-        $html = view($this->getTemplate(), [
+        $wakalaTemplate = view($this->getTemplate(), [
             'template' => $template,
         ])->render();
 
         $path = $this->getFilePath($financingOrder).'.pdf';
-        PdfGenerator::outputFromHtml($html, $path);
 
-        return $financingOrder
-            ->addMediaFromDisk($path)
-            ->toMediaCollection($this->getCollectionName());
+        return PdfGenerator::outputFromHtml($wakalaTemplate, $path, function ($fileResource) use ($financingOrder) {
+            return $financingOrder->addMediaFromStream($fileResource)
+                ->usingFileName($financingOrder->getNationalId().'.pdf')
+                ->toMediaCollection($this->getCollectionName());
+        });
     }
 
     public function setTemplate(string $template)
@@ -85,7 +67,7 @@ class GenerateLenderWakalaAction implements GenerateLenderWakala
     public function getFilePath(FinancingOrder $financingOrder)
     {
         if (empty($this->filePath)) {
-            return $financingOrder->getKey().DIRECTORY_SEPARATOR.self::FILE_PATH.DIRECTORY_SEPARATOR.$financingOrder->getNationalId();
+            return $financingOrder->getKey().'-client-wakala';
         }
 
         return $this->filePath;
