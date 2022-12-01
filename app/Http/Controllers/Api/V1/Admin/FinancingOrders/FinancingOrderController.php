@@ -49,6 +49,7 @@ class FinancingOrderController extends Controller
                 'phone_number_formatted',
                 'is_approved',
                 'status_reason',
+                'is_updatable',
                 'creator',
                 'approver',
                 'history',
