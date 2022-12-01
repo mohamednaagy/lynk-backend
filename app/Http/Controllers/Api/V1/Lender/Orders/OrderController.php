@@ -115,10 +115,9 @@ class OrderController extends Controller
         CreateFinancingOrder $createFinancingOrder,
         DeductOrderCreationFee $deductOrderCreationFee,
         CanCreateOrder $canCreateOrder,
-        GenerateLenderWakala $generateLenderWakala
     ): JsonResponse {
         return DB::multipleTransaction(
-            function () use ($request, $createFinancingOrder, $deductOrderCreationFee, $canCreateOrder, $generateLenderWakala) {
+            function () use ($request, $createFinancingOrder, $deductOrderCreationFee, $canCreateOrder) {
                 $company = tenant();
                 // throw exception is balance not enough
                 $canCreateOrder->handle($company);
@@ -142,8 +141,6 @@ class OrderController extends Controller
                         ]
                     )
                 );
-
-                $generateLenderWakala->handle($financingOrder);
 
                 // deduct the cost from the wallet
                 $deductOrderCreationFee->handle($financingOrder);
