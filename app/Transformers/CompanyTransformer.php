@@ -18,6 +18,7 @@ class CompanyTransformer extends TransformerAbstract
         'orders_count',
         'created_at',
         'order_cost',
+        'webhook_secret_key',
     ];
 
     public function transform(Company $company): array
@@ -44,7 +45,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeOrderCost(Company $company): Primitive
     {
-        return $this->primitive($company->order_cost);
+        return $this->primitive($company->order_cost->formatByDecimal());
     }
 
     public function includeCompanyCr(Company $company): Primitive
@@ -68,6 +69,11 @@ class CompanyTransformer extends TransformerAbstract
     public function includeDoesOrderRequireApproval(Company $company): Primitive
     {
         return $this->primitive($company->does_order_require_approval);
+    }
+
+    public function includeWebhookSecretKey(Company $company): Primitive
+    {
+        return $this->primitive($company->webhook_secret_key);
     }
 
     public function includeCreatedAt(Company $company): Primitive

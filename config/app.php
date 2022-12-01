@@ -17,6 +17,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'currency' => env('APP_CURRENCY', 'SAR'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
@@ -165,7 +167,7 @@ return [
         Illuminate\Redis\RedisServiceProvider::class,
         // Illuminate\Auth\Passwords\PasswordResetServiceProvider::class,
         Illuminate\Session\SessionServiceProvider::class,
-        LaravelLang\JsonFallbackHotfix\TranslationServiceProvider::class,
+        Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         Mews\Purifier\PurifierServiceProvider::class,
@@ -187,13 +189,16 @@ return [
         App\Providers\TenancyServiceProvider::class,
         App\Providers\MacroServiceProvider::class,
         App\Providers\PasswordResetServiceProvider::class,
+        App\Providers\DatabaseServiceProvider::class,
         // sms provider
         App\Providers\SmsServiceProvider::class,
         App\Providers\EdaatServiceProvider::class,
         App\Providers\PdfGeneratorServiceProvider::class,
         App\Providers\MobileVerifyServiceProvider::class,
+        App\Providers\WalletServiceProvider::class,
         App\Providers\WebhookServiceProvider::class,
         // \Shivella\Bitly\BitlyServiceProvider::class,
+        Jenssegers\Agent\AgentServiceProvider::class,
     ],
 
     /*
@@ -217,6 +222,7 @@ return [
         'Sms' => App\Support\Sms\Sms::class,
         'Purifier' => Mews\Purifier\Facades\Purifier::class,
         'WebhookEvent' => \App\Support\Webhooks\Facades\WebhookEvent::class,
+        'Agent' => Jenssegers\Agent\Facades\Agent::class,
     ])->toArray(),
 
     /*

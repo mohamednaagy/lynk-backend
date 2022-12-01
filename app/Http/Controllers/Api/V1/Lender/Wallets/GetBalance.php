@@ -14,7 +14,7 @@ class GetBalance extends Controller
         $balances = $getBalance->handle(tenant());
 
         return $this->successResponse(data: [
-            'balance' => number_format($balances['balance'], 2),
+            'balance' => number_format($balances['balance']->formatByDecimal(), 2),
             'available_orders' => $balances['availableOrders'],
         ]);
     }

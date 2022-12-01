@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Companies;
 
-use App\Actions\Contracts\Companies\GetCompanyUsers;
+use App\Actions\Contracts\Companies\GetPaginatedCompanyUsers;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\GetCompanyUsersRequest;
 use App\Http\Requests\V1\Admin\Companies\Users\UpdateUserRequest;
@@ -14,6 +15,7 @@ use App\Mail\CompleteRegisterInvitation;
 use App\Models\Company;
 use App\Models\User;
 use App\Transformers\UserTransformer;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,14 +24,12 @@ use Illuminate\Support\Facades\Mail;
 class UserController extends Controller
 {
     public function index(
-        GetCompanyUsersRequest $getCompanyUsersRequest,
+        GetCompanyUsersRequest $request,
         Company $company,
-        // __REVIEW__ change to GetPaginatedCompanyUsers $getPaginatedCompanyUsers
-        GetCompanyUsers $getCompanyUsers
+        GetPaginatedCompanyUsers $getPaginatedCompanyUsers
     ): JsonResponse {
-        return fractal($getCompanyUsers->handle($company), new UserTransformer)
+        return fractal($getPaginatedCompanyUsers->handle($company), new UserTransformer(Area::Lender))
             ->parseIncludes([
-                // __REVIEW__ add number of orders created by each
                 'id',
                 'first_name',
                 'last_name',
@@ -37,6 +37,8 @@ class UserController extends Controller
                 'phone_number',
                 'phone_country_code',
                 'formatted_phone_number',
+                'orders_count',
+                'role',
             ])->respond();
     }
 
@@ -49,11 +51,16 @@ class UserController extends Controller
      */
     public function show(Request $request, User $user): JsonResponse
     {
-        // __REVIEW__ check if the user has one of the following roles:
-        // Role::LenderAdmin,
-        // Role::LenderOrderCreator,
-        // Role::LenderBilling,
-        // Role::LenderSupervisor,
+        if (! $user->hasAnyRole([
+            Role::LenderAdmin,
+            Role::LenderOrderCreator,
+            Role::LenderBilling,
+            Role::LenderSupervisor,
+        ])
+        ) {
+            throw new AuthorizationException();
+        }
+
         return fractal($user, new UserTransformer(Area::Lender))
             ->parseIncludes([
                 'id',
@@ -83,17 +90,16 @@ class UserController extends Controller
         CreateLenderUserWithRoleAndPermission $createUserWithRoleAndPermission
     ): JsonResponse {
         return DB::transaction(function () use ($company, $storeCompanyUserRequest, $createUserWithRoleAndPermission) {
-            // __REVIEW__ leave some spaces between lines of unrelated functions
-            // Example, between $invitationUrl... and create user, add new line
             $user = $createUserWithRoleAndPermission->handle(
                 $storeCompanyUserRequest->validated() +
-                    [
-                        'company_id' => $company->id,
-                    ]
+                [
+                    'company_id' => $company->id,
+                ]
             );
+
             $invitationUrl = $storeCompanyUserRequest->validated('redirect_url');
-            // __REVIEW__ pass $user not email to the "->to(...)"
-            Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
+
+            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
             return fractal($user, new UserTransformer())
                 ->parseIncludes([
