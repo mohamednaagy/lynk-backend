@@ -3,7 +3,6 @@
 namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
 
 use App\Enums\ErrorCode;
-use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
@@ -44,7 +43,14 @@ class MakeOrderProceedTest extends TestCase
 
         [self::$company] = $this->createCompany('2000', ['company_cr' => '1234567891']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$financingOrder = $this->createOrder(self::$company->id, self::$userLender->id);
+        self::$financingOrder = $this->createOrder(
+            self::$company->id,
+            self::$userLender->id,
+            [
+                'is_verification_required' => true,
+                'status' => FinancingOrderStatus::PendingApproval,
+            ]
+        );
         self::$orderProceedUrl = self::BaseUrl.self::$financingOrder->getOriginal('id').'/proceed';
     }
 
@@ -140,11 +146,6 @@ class MakeOrderProceedTest extends TestCase
             'status' => TraderOrderStatus::InProgress,
         ]);
 
-        // create trader history with contract signed action
-        $traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::ContractSigned,
-        ]);
-
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
@@ -164,10 +165,28 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
+    public function test_make_order_cannot_proceed_on_is_verification_required_set_as_true(): void
+    {
+        $response = $this->actingAs(self::$userLender)
+            ->withHeader('X-Company', self::$company->getOriginal('id'))
+            ->postJson(self::$orderProceedUrl, [
+                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+            ]);
+
+        $response->assertStatus(400)->assertExactJson([
+            'message' => __('error.order_status_doesnt_follow_sequence'),
+            'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
+        ]);
+    }
+
+    /**
+     * @return void
+     */
     public function test_make_order_proceed_on_client_wakala_accepted(): void
     {
         // update financing order is_verification_required to be able to move to client wakala accepted
         self::$financingOrder->is_verification_required = false;
+        self::$financingOrder->status = FinancingOrderStatus::WaitingClientWakala;
         self::$financingOrder->save();
 
         $response = $this->actingAs(self::$userLender)
