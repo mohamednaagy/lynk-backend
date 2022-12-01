@@ -2,12 +2,12 @@
 
 namespace App\Actions\Wakala;
 
-use App\Actions\Contracts\Wakala\GetLenderWakalaText;
+use App\Actions\Contracts\Wakala\GetClientWakalaText;
 use App\Models\FinancingOrder;
 
-class GetLenderWakalaTextAction implements GetLenderWakalaText
+class GetClientWakalaTextAction implements GetClientWakalaText
 {
-    public function handle(FinancingOrder $financingOrder, string $lenderTemplate)
+    public function handle(FinancingOrder $financingOrder, string $clientTemplate)
     {
         $date = now()->toDateString();
         $time = now()->toTimeString();

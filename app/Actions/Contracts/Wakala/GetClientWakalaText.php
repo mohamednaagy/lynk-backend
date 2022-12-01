@@ -4,7 +4,7 @@ namespace App\Actions\Contracts\Wakala;
 
 use App\Models\FinancingOrder;
 
-interface GetLenderWakalaText
+interface GetClientWakalaText
 {
     public function handle(FinancingOrder $financingOrder, string $template);
 }

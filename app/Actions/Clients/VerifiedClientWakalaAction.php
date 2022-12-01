@@ -3,7 +3,7 @@
 namespace App\Actions\Clients;
 
 use App\Actions\Contracts\Clients\VerifiedClientWakala;
-use App\Actions\Contracts\Wakala\GetLenderWakalaText;
+use App\Actions\Contracts\Wakala\GetClientWakalaText;
 use App\Actions\Contracts\Wakala\GetWakalaTemplate;
 use App\Models\FinancingOrder;
 use Illuminate\Support\Facades\Cache;
@@ -14,7 +14,7 @@ class VerifiedClientWakalaAction implements VerifiedClientWakala
 {
     public function __construct(
         protected GetWakalaTemplate $getWakalaTemplate,
-        protected GetLenderWakalaText $getLenderWakalaText
+        protected GetClientWakalaText $getClientWakalaText
     ) {
     }
 
@@ -30,8 +30,8 @@ class VerifiedClientWakalaAction implements VerifiedClientWakala
 
         $order->refresh();
 
-        $lenderTemplate = $this->getWakalaTemplate->handle('lender')['wakala_template'];
-        $template = $this->getLenderWakalaText->handle($order, $lenderTemplate);
+        $lenderTemplate = $this->getWakalaTemplate->handle('client')['wakala_template'];
+        $template = $this->getClientWakalaText->handle($order, $lenderTemplate);
 
         return [
             'token' => $token,

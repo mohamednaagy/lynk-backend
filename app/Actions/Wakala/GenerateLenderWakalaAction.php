@@ -2,17 +2,15 @@
 
 namespace App\Actions\Wakala;
 
-use App\Actions\Contracts\Wakala\GenerateLenderWakala;
-use App\Actions\Contracts\Wakala\GetLenderWakalaText;
+use App\Actions\Contracts\Wakala\GenerateClientWakala;
+use App\Actions\Contracts\Wakala\GetClientWakalaText;
 use App\Actions\Contracts\Wakala\GetWakalaTemplate;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 
-class GenerateLenderWakalaAction implements GenerateLenderWakala
+class GenerateClientWakalaAction implements GenerateClientWakala
 {
-    const FILE_PATH = 'lender_wakala';
-
     protected string $template = 'templates.lender-wakala';
 
     protected string $collectionName = FinancingOrderMediaCollection::LenderWakala;
@@ -21,14 +19,14 @@ class GenerateLenderWakalaAction implements GenerateLenderWakala
 
     public function __construct(
         protected GetWakalaTemplate $getWakalaTemplate,
-        protected GetLenderWakalaText $getLenderWakalaText
+        protected GetClientWakalaText $getClientWakalaText
     ) {
     }
 
     public function handle(FinancingOrder $financingOrder)
     {
         $lenderTemplate = $this->getWakalaTemplate->handle('client')['wakala_template'];
-        $template = $this->getLenderWakalaText->handle($financingOrder, $lenderTemplate);
+        $template = $this->getClientWakalaText->handle($financingOrder, $lenderTemplate);
 
         $wakalaTemplate = view($this->getTemplate(), [
             'template' => $template,
