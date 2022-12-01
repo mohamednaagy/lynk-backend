@@ -32,7 +32,7 @@ class CreateInvoiceTest extends TestCase
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
     }
 
-    public function testUnAuthUserCantCreateEdaatInvoiceWithValidData()
+    public function test_un_auth_user_cant_create_edaat_invoice_with_valid_data()
     {
         $this->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson('api/v1/lender/edaat-invoices')
@@ -42,7 +42,7 @@ class CreateInvoiceTest extends TestCase
             ]);
     }
 
-    public function testAuthUserCantCreateEdaatInvoiceWithoutOrderCount()
+    public function test_auth_user_cant_create_edaat_invoice_without_order_count()
     {
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
@@ -58,7 +58,7 @@ class CreateInvoiceTest extends TestCase
             ]);
     }
 
-    public function testAuthUserCanCreateEdaatInvoiceWithValidData()
+    public function test_auth_user_can_create_edaat_invoice_with_valid_data()
     {
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
