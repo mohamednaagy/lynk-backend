@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1\Admin\Auth;
 use App\Actions\Contracts\UpdateUser;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Auth\UpdateMyProfileRequest;
-use App\Transformers\UserTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 
@@ -31,15 +30,6 @@ class UpdateMyProfile extends Controller
 
         $updateUser->handle($user, $data);
 
-        return fractal($user, new UserTransformer)
-            ->parseIncludes([
-                'id',
-                'first_name',
-                'last_name',
-                'email',
-                'phone_number',
-                'phone_country_code',
-                'formatted_phone_number',
-            ])->respond();
+        return $this->successResponse();
     }
 }

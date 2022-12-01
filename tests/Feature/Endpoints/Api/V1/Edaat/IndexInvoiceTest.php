@@ -3,22 +3,21 @@
 namespace Tests\Feature\Endpoints\Api\V1\Edaat;
 
 use App\Enums\Role;
-use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\EdaatInvoice;
 use App\Models\User;
-use Bavix\Wallet\Internal\Exceptions\ExceptionInterface;
-use Bavix\Wallet\Models\Wallet;
+use App\Models\Wallet;
+use App\Transformers\EdaatInvoiceTransformer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Grantify\Facades\Grantify;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
+use Tests\Traits\InteractsWithLender;
 
 class IndexInvoiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, InteractsWithLender;
 
     private static Company $company;
 
@@ -30,51 +29,17 @@ class IndexInvoiceTest extends TestCase
 
     /**
      * @return void
-     *
-     * @throws ExceptionInterface
      */
     public function setUp(): void
     {
         parent::setUp();
 
-        self::$company = Company::factory()->create([
-            'first_name' => 'firstName',
-            'last_name' => 'lastName',
-            'phone_country_code' => 'SA',
-            'phone_number' => '503811000',
-            'email' => 'test@uselynk.test',
-            'password' => 'Qwer@1234',
-            'source' => 'Postman',
-            'company_name' => 'companyName',
-            'company_unique_name' => 'lynk05',
-            'company_cr' => '12345678910',
-        ]);
-
-        self::$wallet = self::$company->createWallet([
-            'name' => WalletType::CompanyWallet,
-            'slug' => WalletType::CompanyWallet,
-        ]);
-
-        self::$wallet->deposit(2000);
-
-        self::$userLender = User::factory()->create([
-            'email' => 'lender@bim.com',
-            'password' => bcrypt('12345678'),
-            'company_id' => self::$company->getOriginal('id'),
-        ]);
-
-        Grantify::assignRoleToModel(self::$userLender, Role::LenderAdmin);
-
-        self::$edaatInvoice = EdaatInvoice::query()->create([
-            'company_id' => self::$company->getOriginal('id'),
-            'creator_id' => self::$userLender->getOriginal('id'),
-            'invoice_number' => 1,
-            'amount' => 1,
-            'status' => 1,
-        ]);
+        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$edaatInvoice = $this->createEdaatInvoice(self::$company->id, self::$userLender->id);
     }
 
-    public function testUnAuthUserCantIndexEdaatInvoicesWithValidData()
+    public function test_un_auth_user_cant_index_edaat_invoices_with_valid_data()
     {
         $this->withHeader('X-Company', self::$company->getOriginal('id'))
             ->getJson('api/v1/lender/edaat-invoices')
@@ -84,37 +49,23 @@ class IndexInvoiceTest extends TestCase
             ]);
     }
 
-    public function testAuthUserCanIndexEdaatInvoicesWithValidData()
+    public function test_auth_user_can_index_edaat_invoices_with_valid_data()
     {
-        $response = $this->actingAs(self::$userLender)
+        $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->getJson('api/v1/lender/edaat-invoices')
             ->assertStatus(Response::HTTP_OK)
-            ->assertExactJson([
-                'data' => [
-                    [
-                        'id' => 1,
-                        'invoice_number' => '1',
-                        'amount' => 1,
-                        'amount_formatted' => '1.00',
-                        'company_name' => 'Edaat',
-                        'company_number' => 903,
-                        'status' => [
-                            'value' => 1,
-                            'description' => 'Pending',
-                        ],
-                    ],
-                ],
-                'meta' => [
-                    'pagination' => [
-                        'total' => 1,
-                        'count' => 1,
-                        'per_page' => 15,
-                        'current_page' => 1,
-                        'total_pages' => 1,
-                        'links' => [],
-                    ],
-                ],
-            ]);
+            ->assertExactJson(
+                fractal(EdaatInvoice::query()->paginate(), new EdaatInvoiceTransformer())
+                    ->parseIncludes([
+                        'id',
+                        'invoice_number',
+                        'amount',
+                        'amount_formatted',
+                        'company_name',
+                        'company_number',
+                        'status',
+                    ])->respond()->getData(true)
+            );
     }
 }

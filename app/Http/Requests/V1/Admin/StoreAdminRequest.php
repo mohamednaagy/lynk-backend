@@ -3,10 +3,12 @@
 namespace App\Http\Requests\V1\Admin;
 
 use App\Enums\Action;
+use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\User;
 use App\Rules\HostWhitelistRule;
+use App\Rules\UrlProtocolRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -39,7 +41,7 @@ class StoreAdminRequest extends FormRequest
                 Rule::unique(User::class, 'email')
                     ->whereNull('company_id'),
             ],
-            'role' => ['required', 'string', new EnumValue(Role::class)],
+            'role' => ['required', 'string', Rule::in(Area::roles(Area::SuperAdmin))],
             'permissions' => [
                 'exclude_if:role,'.Role::Admin,
                 'required',
@@ -68,7 +70,7 @@ class StoreAdminRequest extends FormRequest
                 'string',
                 new EnumValue(Action::class),
             ],
-            'redirect_url' => ['required', 'url', new HostWhitelistRule()],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
         ];
     }
 }

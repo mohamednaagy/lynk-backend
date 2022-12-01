@@ -4,7 +4,6 @@ namespace Modules\Otpify\Drivers;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
@@ -12,6 +11,7 @@ use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
 use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
 use Modules\Otpify\Exceptions\OtpCodeExpiredException;
 use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
+use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
 use Modules\Otpify\Models\OtpifyCode;
 use Modules\Otpify\Traits\CanOtpifyCode;
 
@@ -46,9 +46,9 @@ class AbsherDriver implements OtpifyDriverInterface
             'personId' => $otpifiable->getNationalId(),
         ];
 
-        $response = Http::post($sendUrl, $body)->toPsrResponse();
+        $response = Http::post($sendUrl, $body);
 
-        $tcn = $response['tcn'];
+        $tcn = $response->json('tcn');
 
         return $this->createOtpifyCode(null, $otpifiable, $otpifiable, ['tcn' => $tcn]);
     }
@@ -78,6 +78,10 @@ class AbsherDriver implements OtpifyDriverInterface
     {
         $otpifyCode = $this->getOtpifyCode($vid);
 
+        if (! isset($otpifyCode->data['tcn'])) {
+            throw new OtpCodeNotFoundException;
+        }
+
         if ($otpifyCode->expired_at != null) {
             throw new OtpCodeAlreadyUsedException();
         }
@@ -86,31 +90,29 @@ class AbsherDriver implements OtpifyDriverInterface
             throw new OtpCodeExpiredException();
         }
 
-        if ($additionalCheckCallback instanceof Closure && ! $additionalCheckCallback($request, $code)) {
+        if ($additionalCheckCallback instanceof Closure && ! $additionalCheckCallback($request, $otpifyCode)) {
             throw new OtpCodeAdditionalCheckException();
         }
 
-        $checkUrl = $this->url('check');
+        $checkUrl = $this->url('confirm');
 
         $data = [
             'apiKey' => $this->apiKey,
-            'tcn' => $vid,
+            'tcn' => $otpifyCode->data['tcn'],
             'otp' => $code,
         ];
 
-        $response = Http::post($checkUrl, $data)->toPsrResponse();
+        $response = Http::post($checkUrl, $data);
 
         if (
-            Arr::get($response, 'code') === 600 &&
-            isset($response['userDetails']) &&
-            $userDetails = $response['userDetails']
+            $response->json('code') === 600 &&
+            $userDetails = $response->json('userDetails')
         ) {
             $otpifyCode->otpifiable->update(['customer_details' => $userDetails]);
 
             $this->setOtpExpiredAt($otpifyCode);
 
             return true;
-        // return $this->createAuthorizationToken($request->all());
         } else {
             throw new OtpCodeIncorrectException();
         }
