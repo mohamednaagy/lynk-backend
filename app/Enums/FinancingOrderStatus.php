@@ -116,12 +116,12 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
      */
     public function canMoveTo(Status|int $status): bool
     {
-        if (! isset(self::$state[$status])) {
-            throw new UnexpectedValueException('no mapping for this status');
-        }
-
         if ($status instanceof Status) {
             $status = $status->value;
+        }
+
+        if (! isset(self::$state[$status])) {
+            throw new UnexpectedValueException('no mapping for this status');
         }
 
         return in_array($this->value, self::$state[$status]);
