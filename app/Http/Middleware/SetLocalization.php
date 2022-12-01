@@ -18,7 +18,10 @@ class SetLocalization
      */
     public function handle(Request $request, Closure $next)
     {
-        if ($request->hasHeader('X-Locale')) {
+        if (
+            $request->hasHeader('X-Locale') &&
+            in_array($request->header('X-Locale'), config('app.locales'))
+        ) {
             app()->setLocale($request->header('X-Locale'));
         } elseif ($request->user() && ! is_null($request->user()->locale)) {
             $locale = $request->user()->locale;
