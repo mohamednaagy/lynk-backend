@@ -98,7 +98,7 @@ class LenderRegistrationTest extends TestCase
                         'The phone country code field is required when phone number is present.',
                     ],
                     'phone_number' => [
-                        'The phone number is not valid phone number.',
+                        'The phone number is not a valid phone number.',
                     ],
 
                 ],
