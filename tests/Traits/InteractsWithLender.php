@@ -52,14 +52,14 @@ trait InteractsWithLender
     }
 
     /**
-     * @param  int  $companyId
+     * @param  int|null  $companyId
      * @param  string  $role
      * @param  string  $email
      * @param  array  $data
      * @return Collection|Model|mixed
      */
     public function createLenderUser(
-        int $companyId,
+        int|null $companyId,
         string $role,
         string $email = 'lender@bim.com',
         array $data = []

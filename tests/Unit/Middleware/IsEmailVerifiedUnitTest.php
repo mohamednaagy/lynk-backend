@@ -4,63 +4,91 @@ namespace Tests\Unit\Middleware;
 
 use App\Actions\GetSettingsClassInstanceAction;
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Http\Middleware\IsEmailVerified;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
+use Tests\Traits\InteractsWithLender;
 
 class IsEmailVerifiedUnitTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase , InteractsWithLender;
 
-    public function test_user_email_is_not_verified()
+    private static User $userLenderAdmin;
+
+    /**
+     * @return void
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+        self::$userLenderAdmin = $this->createLenderUser(null, Role::LenderAdmin);
+    }
+
+    public function test_is_email_verified_throws_exception_if_email_is_not_verified_with_area_that_requires_email_verification()
     {
         $this->expectException(HttpException::class);
         $this->expectExceptionMessage('You must verify your email address');
 
-        $this->user->email_verified_at = null;
-        $this->user->save();
+        self::$userLenderAdmin->email_verified_at = null;
+        self::$userLenderAdmin->save();
 
-        $this->actingAs($this->user);
+        $this->actingAs(self::$userLenderAdmin);
 
         $request = new Request();
 
         $request->setUserResolver(function () {
-            return $this->user;
+            return self::$userLenderAdmin;
         });
 
-        $middleware = new IsEmailVerified(new GetSettingsClassInstanceAction());
+        $settingsClass = new GetSettingsClassInstanceAction();
+        $middleware = new IsEmailVerified($settingsClass);
 
-        $middleware->handle($request, function ($request) {
-        }, Area::Lender);
+        foreach (Area::getValues() as $key => $area) {
+            $areaSettingsClass = $settingsClass->handle($area);
+            if (isset($areaSettingsClass->email_verification_enabled)) {
+                $areaSettingsClass->email_verification_enabled = true;
+                $areaSettingsClass->save();
+
+                $middleware->handle($request, function ($request) {
+                }, $area);
+            }
+        }
     }
 
-    public function test_pass_user_in_area_with_email_verified_not_required()
+    public function test_is_email_verified_does_not_throw_exception_if_email_verification_is_not_required()
     {
-        $this->user->email_verified_at = null;
-        $this->user->save();
+        self::$userLenderAdmin->email_verified_at = null;
+        self::$userLenderAdmin->save();
 
-        $this->actingAs($this->user);
+        $this->actingAs(self::$userLenderAdmin);
 
         $request = new Request();
 
         $request->setUserResolver(function () {
-            return $this->user;
+            return self::$userLenderAdmin;
         });
 
-        $middleware = new IsEmailVerified(new GetSettingsClassInstanceAction());
+        $settingsClass = new GetSettingsClassInstanceAction();
+        $middleware = new IsEmailVerified($settingsClass);
 
-        $middleware->handle($request, function ($request) {
-            $settingClass = (new GetSettingsClassInstanceAction())->handle(Area::SuperAdmin);
-            $this->assertFalse(
-                isset($settingClass->email_verification_enabled) &&
-                $settingClass->email_verification_enabled
-            );
-        }, Area::SuperAdmin);
+        foreach (Area::getValues() as $key => $area) {
+            $areaSettingsClass = $settingsClass->handle($area);
+            if (isset($areaSettingsClass->email_verification_enabled)) {
+                $areaSettingsClass->email_verification_enabled = false;
+                $areaSettingsClass->save();
+
+                $middleware->handle($request, function ($request) {
+                    $this->assertEmpty([]);
+                }, $area);
+            }
+        }
     }
 
-    public function test_user_email_is_verified_with_no_auth_user()
+    public function test_is_email_verified_throws_exception_if_user_is_not_auth()
     {
         $this->expectException(HttpException::class);
         $this->expectExceptionMessage('You must verify your email address');
@@ -70,23 +98,6 @@ class IsEmailVerifiedUnitTest extends TestCase
         $middleware = new IsEmailVerified(new GetSettingsClassInstanceAction());
 
         $middleware->handle($request, function ($request) {
-        }, Area::Lender);
-    }
-
-    public function test_user_email_is_verified()
-    {
-        $this->actingAs($this->user);
-
-        $request = new Request();
-
-        $request->setUserResolver(function () {
-            return $this->user;
-        });
-
-        $middleware = new IsEmailVerified(new GetSettingsClassInstanceAction());
-
-        $middleware->handle($request, function ($request) {
-            $this->assertNotNull($request->user()->email_verified_at);
         }, Area::Lender);
     }
 }
