@@ -7,6 +7,7 @@ use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
 use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
+use App\Actions\Contracts\Wallets\DeductVatPercentage;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\ErrorCode;
@@ -121,10 +122,11 @@ class OrderController extends Controller
         StoreOrderRequest $request,
         CreateFinancingOrder $createFinancingOrder,
         DeductOrderCreationFee $deductOrderCreationFee,
-        CanCreateOrder $canCreateOrder
+        CanCreateOrder $canCreateOrder,
+        DeductVatPercentage $deductVatPercentage
     ): JsonResponse {
         return DB::multipleTransaction(
-            function () use ($request, $createFinancingOrder, $deductOrderCreationFee, $canCreateOrder) {
+            function () use ($request, $createFinancingOrder, $deductOrderCreationFee, $canCreateOrder, $deductVatPercentage) {
                 $company = tenant();
                 // throw exception is balance not enough
                 $canCreateOrder->handle($company);
@@ -151,6 +153,8 @@ class OrderController extends Controller
 
                 // deduct the cost from the wallet
                 $deductOrderCreationFee->handle($financingOrder);
+
+                $deductVatPercentage->handle($financingOrder);
 
                 return fractal($financingOrder, new FinancingOrderTransformer())
                     ->parseIncludes([

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1\Lender\Orders;
 use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
-use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
+use App\Actions\Contracts\Wallets\DeductVatPercentage;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
@@ -35,7 +35,7 @@ class CreateOrderWithoutVerification extends Controller
         CreateOrderWithoutVerificationRequest $request,
         CreateFinancingOrder $createFinancingOrder,
         GenerateClientWakala $generateWakala,
-        DeductOrderCreationFee $deductOrderCreationFee,
+        DeductVatPercentage $deductOrderCreationFee,
         CanCreateOrder $canCreateOrder
     ) {
         return DB::multipleTransaction(
