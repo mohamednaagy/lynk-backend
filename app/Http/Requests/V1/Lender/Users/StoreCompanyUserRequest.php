@@ -6,6 +6,7 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Models\User;
 use App\Rules\HostWhitelistRule;
+use App\Rules\UrlProtocolRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
@@ -29,7 +30,6 @@ class StoreCompanyUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        // __REVIEW__ translate attributes if needed
         return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
@@ -41,7 +41,7 @@ class StoreCompanyUserRequest extends FormRequest
                 Rule::unique(User::class, 'email')
                     ->where('company_id', tenant('id')),
             ],
-            'redirect_url' => ['required', 'url', new HostWhitelistRule()],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
             'role' => [
                 'required',
                 Arr::except((array) Rule::in(Area::roles(Area::Lender)), [Role::LenderApiUser]),

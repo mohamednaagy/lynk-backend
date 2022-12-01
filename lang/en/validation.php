@@ -131,6 +131,8 @@ return [
     'host_whitelist' => 'The :attribute is not whitelisted.',
     'phone' => 'The :attribute is not a valid phone number.',
     'webhook_type_limit' => 'This webhook couldn\'t be used more than :limit time(s)',
+    'company_unique_name' => 'Identifier should contain only English letters, numbers and _. It should start with English letter',
+    'url_protocol' => 'The :attribute must start with one of the following URL protocols: :values.',
     'custom_validation' => [
     ],
     /*

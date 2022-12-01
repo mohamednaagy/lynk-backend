@@ -2,8 +2,9 @@
 
 namespace App\Support\Transactions\Descriptions;
 
-use Bavix\Wallet\Models\Transaction;
-use Bavix\Wallet\Models\Wallet;
+use App\Models\Transaction;
+use App\Models\Wallet;
+use Cknow\Money\Money;
 
 abstract class GeneratorBase implements GeneratorInterface
 {
@@ -12,12 +13,12 @@ abstract class GeneratorBase implements GeneratorInterface
         return $this->generateMessage($transaction, $locale);
     }
 
-    public function handle(Wallet $wallet, string $amount, array $meta): string
+    public function handle(Wallet $wallet, Money $amount, int $reason, array $meta): string
     {
-        return $this->handleTransaction($wallet, $amount, $meta);
+        return $this->handleTransaction($wallet, $amount, $reason, $meta);
     }
 
     abstract protected function generateMessage(Transaction $transaction, $locale);
 
-    abstract public function handleTransaction(Wallet $wallet, string $amount, array $meta);
+    abstract public function handleTransaction(Wallet $wallet, Money $amount, int $reason, array $meta);
 }

@@ -24,11 +24,11 @@ use Illuminate\Support\Facades\Mail;
 class UserController extends Controller
 {
     public function index(
-        GetCompanyUsersRequest $getCompanyUsersRequest,
+        GetCompanyUsersRequest $request,
         Company $company,
         GetPaginatedCompanyUsers $getPaginatedCompanyUsers
     ): JsonResponse {
-        return fractal($getPaginatedCompanyUsers->handle($company), new UserTransformer)
+        return fractal($getPaginatedCompanyUsers->handle($company), new UserTransformer(Area::Lender))
             ->parseIncludes([
                 'id',
                 'first_name',
@@ -38,6 +38,7 @@ class UserController extends Controller
                 'phone_country_code',
                 'formatted_phone_number',
                 'orders_count',
+                'role',
             ])->respond();
     }
 

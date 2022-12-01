@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1\Lender\Orders;
 
 use App\Rules\HostWhitelistRule;
+use App\Rules\UrlProtocolRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AskWakalaRequest extends FormRequest
@@ -25,7 +26,7 @@ class AskWakalaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'wakala_url' => ['required', 'url', new HostWhitelistRule()],
+            'wakala_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
         ];
     }
 }
