@@ -114,7 +114,7 @@ class OrderController extends Controller
         StoreOrderRequest $request,
         CreateFinancingOrder $createFinancingOrder,
         DeductOrderCreationFee $deductOrderCreationFee,
-        CanCreateOrder $canCreateOrder,
+        CanCreateOrder $canCreateOrder
     ): JsonResponse {
         return DB::multipleTransaction(
             function () use ($request, $createFinancingOrder, $deductOrderCreationFee, $canCreateOrder) {

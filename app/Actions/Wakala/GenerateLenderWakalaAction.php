@@ -3,8 +3,8 @@
 namespace App\Actions\Wakala;
 
 use App\Actions\Contracts\Wakala\GenerateLenderWakala;
+use App\Actions\Contracts\Wakala\GetLenderWakalaText;
 use App\Actions\Contracts\Wakala\GetWakalaTemplate;
-use App\Actions\Contracts\Wakala\RenderLenderWakala;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
@@ -21,14 +21,14 @@ class GenerateLenderWakalaAction implements GenerateLenderWakala
 
     public function __construct(
         protected GetWakalaTemplate $getWakalaTemplate,
-        protected RenderLenderWakala $renderLenderWakala
+        protected GetLenderWakalaText $getLenderWakalaText
     ) {
     }
 
     public function handle(FinancingOrder $financingOrder)
     {
         $lenderTemplate = $this->getWakalaTemplate->handle('client')['wakala_template'];
-        $template = $this->renderLenderWakala->handle($financingOrder, $lenderTemplate);
+        $template = $this->getLenderWakalaText->handle($financingOrder, $lenderTemplate);
 
         $wakalaTemplate = view($this->getTemplate(), [
             'template' => $template,

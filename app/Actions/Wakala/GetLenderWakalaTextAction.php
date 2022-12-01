@@ -2,10 +2,10 @@
 
 namespace App\Actions\Wakala;
 
-use App\Actions\Contracts\Wakala\RenderLenderWakala;
+use App\Actions\Contracts\Wakala\GetLenderWakalaText;
 use App\Models\FinancingOrder;
 
-class RenderLenderWakalaAction implements RenderLenderWakala
+class GetLenderWakalaTextAction implements GetLenderWakalaText
 {
     public function handle(FinancingOrder $financingOrder, string $lenderTemplate)
     {
