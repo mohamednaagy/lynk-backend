@@ -45,6 +45,7 @@ class CreateOrderWithoutVerification extends Controller
                 $canCreateOrder->handle($company);
 
                 $financingOrder = $createFinancingOrder->handle(
+                    $company,
                     array_merge(
                         $request->validated(),
                         [
