@@ -35,4 +35,6 @@ class ErrorCode
     public const BALANCE_NOT_ENOUGH = 1014;
 
     public const COMPANY_NOT_ACTIVE = 1015;
+
+    public const ORDER_NOT_UPDATABLE = 1016;
 }

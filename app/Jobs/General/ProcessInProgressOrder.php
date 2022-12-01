@@ -44,7 +44,12 @@ class ProcessInProgressOrder implements ShouldQueue
         DB::transaction(function () {
             /** @var FinancingOrder $financingOrder */
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-            app()->make(AskClientWakala::class)->handle($financingOrder, Str::replace('{order_id}', $financingOrder->id, Config::get('frontent.client_wakala_url')));
+
+            app()->make(AskClientWakala::class)->handle(
+                $financingOrder,
+                Str::replace('{order_id}', $financingOrder->id, Config::get('frontend.client_wakala_url'))
+            );
+
             $financingOrder->update([
                 'status' => FinancingOrderStatus::WaitingClientWakala,
             ]);

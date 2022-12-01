@@ -9,8 +9,7 @@ use League\Fractal\TransformerAbstract;
 
 class FinancingOrderTransformer extends TransformerAbstract
 {
-    protected array $defaultIncludes = [
-    ];
+    protected array $defaultIncludes = [];
 
     protected array $availableIncludes = [
         'id',
@@ -20,6 +19,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'national_id',
         'amount',
         'selling_price',
+        'is_updatable',
         'is_approved',
         'status_reason',
         'creator',
@@ -81,12 +81,12 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeAmount(FinancingOrder $financingOrder)
     {
-        return $this->primitive((string) $financingOrder->amount);
+        return $this->primitive($financingOrder->amount->formatByDecimal());
     }
 
     public function includeSellingPrice(FinancingOrder $financingOrder)
     {
-        return $this->primitive((string) $financingOrder->selling_price);
+        return $this->primitive($financingOrder->selling_price->formatByDecimal());
     }
 
     public function includeCreatorName(FinancingOrder $financingOrder)
@@ -105,6 +105,11 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeApprover(FinancingOrder $financingOrder)
     {
         return $this->primitive(optional($financingOrder->approver)->full_name);
+    }
+
+    public function includeIsUpdatable(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->is_updatable);
     }
 
     public function includeIsApproved(FinancingOrder $financingOrder)
