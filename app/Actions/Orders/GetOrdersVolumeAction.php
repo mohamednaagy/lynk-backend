@@ -67,14 +67,14 @@ class GetOrdersVolumeAction implements GetOrdersVolume
         }
 
         // get all periods even if not contain values
-        $period = $this->getPeriodBetween(
+        $periodBetween = $this->getPeriodBetween(
             $orders->keys()->first(),
             $orders->keys()->last(),
             $this->getFormatByPeriod($period)
         );
 
         // fill empty periods with 0
-        return array_replace(array_fill_keys($period, 0), $orders->toArray());
+        return array_replace(array_fill_keys($periodBetween, 0), $this->formatOrdersByPeriod($period, $orders->toArray()));
     }
 
     /**
@@ -87,44 +87,11 @@ class GetOrdersVolumeAction implements GetOrdersVolume
      */
     protected function getPeriodBetween($fromYear, $toYear, $format)
     {
-        if ($format == self::FORMAT_WEEKS) {
-            return $this->weeksFormat($fromYear, $toYear);
-        }
-
-        $range = CarbonPeriod::create(date($fromYear), date($toYear));
-        $periods = [];
-        foreach ($range as $month) {
-            $periods[] = $month->format($format);
-        }
-
-        return $periods;
-    }
-
-    /**
-     * get weeks between two dates
-     *
-     * @param  mixed  $from
-     * @param  mixed  $to
-     * @return array<string>
-     */
-    protected function weeksFormat($from, $to)
-    {
-        $arrayOfDateFrom = explode('-', $from);
-        $arrayOfDateTo = explode('-', $to);
-        $yearMonthFrom = $arrayOfDateFrom[0].'-'.$arrayOfDateFrom[1];
-        $yearMonthTo = $arrayOfDateTo[0].'-'.$arrayOfDateTo[1];
-        $range = CarbonPeriod::create(date($yearMonthFrom), date($yearMonthTo));
-
-        $yearInWeeks = [];
-        foreach ($range as $month) {
-            $formattedMonth = $month->format('Y-m (W)');
-            $month = Str::of($formattedMonth)->replace('(', '(week ');
-            if (! in_array($month, $yearInWeeks)) {
-                $yearInWeeks[] = $month;
-            }
-        }
-
-        return $yearInWeeks;
+        return match ($format) {
+            self::FORMAT_WEEKS => $this->weekFormat($fromYear, $toYear),
+            self::FORMAT_MONTH => $this->monthFormat($fromYear, $toYear),
+            self::FORMAT_YEAR => $this->yearFormat($fromYear, $toYear),
+        };
     }
 
     /**
@@ -153,5 +120,105 @@ class GetOrdersVolumeAction implements GetOrdersVolume
         }
 
         return $format;
+    }
+
+    /**
+     * determine orders format
+     *
+     * @param  mixed  $period
+     * @param  array  $orders
+     * @return array
+     */
+    protected function formatOrdersByPeriod(string $period, array $orders)
+    {
+        return match ($period) {
+            DatePeriod::WEEK => $this->formatOrdersInWeeks($orders),
+            default => $orders
+        };
+    }
+
+    /**
+     * format orders in weeks
+     *
+     * @param  array  $orders
+     * @return array
+     */
+    protected function formatOrdersInWeeks(array $orders)
+    {
+        $ordersInWeekFormat = [];
+        foreach ($orders as $date => $count) {
+            $dateArray = explode('-', $date);
+            $year = $dateArray[0];
+            $month = $dateArray[1];
+            $week = $dateArray[2];
+            // fill array by date with new format as key with count as value
+            $ordersInWeekFormat[$year.'-'.$month.' '.'(week '.$week.')'] = $count;
+        }
+
+        return $ordersInWeekFormat;
+    }
+
+    /**
+     * get weeks between two dates
+     *
+     * @param  mixed  $from
+     * @param  mixed  $to
+     * @return array<string>
+     */
+    protected function weekFormat($from, $to)
+    {
+        $arrayOfDateFrom = explode('-', $from);
+        $arrayOfDateTo = explode('-', $to);
+
+        $yearMonthFrom = $arrayOfDateFrom[0].'-'.$arrayOfDateFrom[1];
+        $yearMonthTo = $arrayOfDateTo[0].'-'.$arrayOfDateTo[1];
+        $range = CarbonPeriod::create(date($yearMonthFrom), date($yearMonthTo));
+
+        $yearInWeeks = [];
+        foreach ($range as $month) {
+            $formattedMonth = $month->format('Y-m (W)');
+            $month = Str::of($formattedMonth)->replace('(', '(week ');
+            if (! in_array($month, $yearInWeeks)) {
+                $yearInWeeks[] = $month;
+            }
+        }
+
+        return $yearInWeeks;
+    }
+
+    /**
+     * get weeks months two dates
+     *
+     * @param  mixed  $from
+     * @param  mixed  $to
+     * @return array<string>
+     */
+    protected function monthFormat($from, $to)
+    {
+        $range = CarbonPeriod::create(date($from), date($to));
+        $periods = [];
+        foreach ($range as $month) {
+            $periods[] = $month->format(self::FORMAT_MONTH);
+        }
+
+        return $periods;
+    }
+
+    /**
+     * get years between two dates
+     *
+     * @param  mixed  $from
+     * @param  mixed  $to
+     * @return array<string>
+     */
+    protected function yearFormat($from, $to)
+    {
+        $periods = [];
+
+        for ($i = $from; $i <= $to; $i++) {
+            array_push($periods, $i);
+        }
+
+        return $periods;
     }
 }
