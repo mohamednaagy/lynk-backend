@@ -79,7 +79,8 @@ class RejectOrderControllerTest extends TestCase
                 '/api/v1/lender/orders/'.self::$pendingApprovalOrder->id.'/reject',
                 ['status_reason' => self::$statusReason],
                 ['X-Company' => self::$company->id]
-            )->assertStatus(200);
+            )
+            ->assertStatus(200);
     }
 
     public function test_order_can_not_moved_to_reject_status()
@@ -90,7 +91,8 @@ class RejectOrderControllerTest extends TestCase
                 ['status_reason' => self::$statusReason],
                 ['X-Company' => self::$company->id]
             )
-            ->assertStatus(400)->assertJsonFragment([
+            ->assertStatus(400)
+            ->assertJsonFragment([
                 'message' => __('error.order_cannot_be_approved_because_it_is_approved'),
             ]);
     }
@@ -137,7 +139,8 @@ class RejectOrderControllerTest extends TestCase
                 [],
                 ['X-Company' => self::$company->id]
             )
-            ->assertStatus(403)->assertJsonFragment([
+            ->assertStatus(403)
+            ->assertJsonFragment([
                 'message' => __('error.must_verify_email'),
                 'code' => ErrorCode::EMAIL_NOT_VERIFIED,
             ]);
