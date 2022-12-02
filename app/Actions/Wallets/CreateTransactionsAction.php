@@ -7,7 +7,6 @@ use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Support\Transactions\Descriptions\DescriptionManager;
 use Cknow\Money\Money;
-use Illuminate\Support\Facades\Config;
 
 class CreateTransactionsAction implements CreateTransactions
 {
@@ -21,9 +20,9 @@ class CreateTransactionsAction implements CreateTransactions
     public function handle(
         Wallet $wallet,
         int $transactionReason,
-        string $amount,
+        Money $amount,
         array $meta
     ): Transaction {
-        return DescriptionManager::handleTransaction($wallet, Money::parseByDecimal($amount, Config::get('app.currency', 'SAR')), $transactionReason, $meta);
+        return DescriptionManager::handleTransaction($wallet, $amount, $transactionReason, $meta);
     }
 }
