@@ -19,9 +19,10 @@ class CreateCompanyAction implements CreateCompany
      */
     public function handle(array $data): Company
     {
-        $data['webhook_secret_key'] = $this->generateWebhookSecretKey->handle();
+        if (empty($data['webhook_secret_key'])) {
+            $data['webhook_secret_key'] = $this->generateWebhookSecretKey->handle();
+        }
 
-        // __REVIEW__ public_status_comment & internal_status_comment should be included here
         return Company::create(
             Arr::only(
                 $data,
@@ -33,6 +34,8 @@ class CreateCompanyAction implements CreateCompany
                     'order_cost',
                     'does_order_require_approval',
                     'webhook_secret_key',
+                    'public_status_comment',
+                    'internal_status_comment',
                 ]
             )
         );

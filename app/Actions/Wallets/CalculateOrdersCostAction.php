@@ -3,11 +3,12 @@
 namespace App\Actions\Wallets;
 
 use App\Actions\Contracts\Wallets\CalculateOrdersCost;
+use Cknow\Money\Money;
 
 class CalculateOrdersCostAction implements CalculateOrdersCost
 {
-    public function handle(int $ordersCount, $orderCost): float|int
+    public function handle(int $ordersCount, Money $orderCost): Money
     {
-        return $ordersCount * $orderCost;
+        return $orderCost->multiply($ordersCount);
     }
 }

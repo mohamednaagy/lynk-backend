@@ -36,6 +36,7 @@ class UpdateUserAction implements UpdateUser
                     'first_name',
                     'last_name',
                     'email',
+                    'email_verified_at',
                     'phone_number',
                     'password',
                     'company_id',

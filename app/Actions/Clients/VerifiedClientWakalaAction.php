@@ -3,6 +3,8 @@
 namespace App\Actions\Clients;
 
 use App\Actions\Contracts\Clients\VerifiedClientWakala;
+use App\Actions\Contracts\Wakala\GetClientWakalaText;
+use App\Actions\Contracts\Wakala\GetWakalaTemplate;
 use App\Models\FinancingOrder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -10,6 +12,12 @@ use Illuminate\Support\Str;
 
 class VerifiedClientWakalaAction implements VerifiedClientWakala
 {
+    public function __construct(
+        protected GetWakalaTemplate $getWakalaTemplate,
+        protected GetClientWakalaText $getClientWakalaText
+    ) {
+    }
+
     public function handle(FinancingOrder $order): array
     {
         $token = Str::random(100);
@@ -22,13 +30,12 @@ class VerifiedClientWakalaAction implements VerifiedClientWakala
 
         $order->refresh();
 
-        $wakalaTemplate = view('templates.client-wakala', [
-            'clientName' => $order->customer_details['englishName'],
-        ])->render();
+        $lenderTemplate = $this->getWakalaTemplate->handle('client')['wakala_template'];
+        $template = $this->getClientWakalaText->handle($order, $lenderTemplate);
 
         return [
             'token' => $token,
-            'template' => $wakalaTemplate,
+            'template' => $template,
         ];
     }
 }

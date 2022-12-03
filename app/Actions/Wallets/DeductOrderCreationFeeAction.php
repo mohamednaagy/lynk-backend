@@ -24,13 +24,13 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
 
         return $this->createTransactions->handle(
             $wallet,
-            TransactionReason::OrderCreationFee,
             $company->order_cost,
+            TransactionReason::OrderCreationFee,
             [
                 'financing_order_id' => $financingOrder->id,
                 'reference_number ' => $financingOrder->reference_number,
                 'amount' => $financingOrder->amount,
-                'order_cost' => $financingOrder->order_cost,
+                'order_cost' => $company->order_cost,
             ]
         );
     }
