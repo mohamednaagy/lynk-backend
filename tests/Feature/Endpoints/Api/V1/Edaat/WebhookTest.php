@@ -4,12 +4,14 @@ namespace Tests\Feature\Endpoints\Api\V1\Edaat;
 
 use App\Enums\Role;
 use App\Models\Company;
+use App\Models\Transaction;
 use App\Models\User;
-use Bavix\Wallet\Models\Transaction;
-use Bavix\Wallet\Models\Wallet;
+use App\Models\Wallet;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
@@ -52,14 +54,17 @@ class WebhookTest extends TestCase
                     'EPTN' => '638041377152960584',
                 ],
             ])->assertStatus(Response::HTTP_OK);
-        $transactions = Transaction::all();
 
-        $this->assertEquals(self::$edaatInvoice->amount, $transactions->last()->amount);
-        $this->assertEquals('deposit', $transactions->last()->type);
+        $transactions = DB::connection(Config::get('wallet.database.connection'))
+            ->table('transactions')
+            ->where('meta->invoice_number', self::$edaatInvoice->invoice_number)
+            ->first();
+
+        $this->assertEquals(self::$edaatInvoice->amount->getAmount(), $transactions->amount);
         $this->assertDatabaseCount(Transaction::class, 2);
     }
 
-    public function testEdaatInvoicesWebhookWithUnPaidInvoiceFail()
+    public function test_edaat_invoices_webhook_with_un_paid_invoice_fail()
     {
         $this->withHeader('X-Company', self::$company->id)
             ->postJson('api/edaat/webhook/payment', [

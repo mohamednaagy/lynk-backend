@@ -2,14 +2,14 @@
 
 namespace App\Actions\Wakala;
 
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
+use App\Actions\Contracts\Wakala\GenerateLenderWakala;
 use App\Actions\Contracts\Wakala\GetClientWakalaText;
 use App\Actions\Contracts\Wakala\GetWakalaTemplate;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 
-class GenerateClientWakalaAction implements GenerateClientWakala
+class GenerateLenderWakalaAction implements GenerateLenderWakala
 {
     protected string $template = 'templates.lender-wakala';
 
