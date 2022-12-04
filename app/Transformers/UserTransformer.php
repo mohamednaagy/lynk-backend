@@ -118,7 +118,7 @@ class UserTransformer extends TransformerAbstract
 
     protected function getRolesQueryBasedOnArea(User $user)
     {
-        $query = $user->roles();
+        $query = $user->roles;
 
         $query = match ($this->area) {
             Area::Lender, Area::SuperAdmin => $query->whereIn('name', Area::roles($this->area)),
