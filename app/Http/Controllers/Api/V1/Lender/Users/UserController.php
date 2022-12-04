@@ -80,7 +80,7 @@ class UserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
-        return fractal($user, new UserTransformer(Area::Lender))
+        return fractal($user->load('permissions'), new UserTransformer(Area::Lender))
             ->parseIncludes([
                 'id',
                 'first_name',
