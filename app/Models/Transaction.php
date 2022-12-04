@@ -6,10 +6,13 @@ use App\Support\Money\Casts\MoneyStringCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Transaction extends Model
+class Transaction extends Model implements HasMedia
 {
     use HasFactory;
+    use InteractsWithMedia;
 
     protected $fillable = [
         'id',

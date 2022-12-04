@@ -62,12 +62,12 @@ class GetOrdersStatsTest extends TestCase
           $this->actingAs(self::$userLenderAdmin)
               ->getJson('/api/v1/lender/orders/stats', ['X-Company' => self::$company->id])
               ->assertStatus(200)->assertJsonFragment([
-              'total_orders' => 27,
-              'total_cancelled_orders' => 7,
-              'total_active_orders' => 15,
-              'total_require_action_orders' => 5,
-              'total_completed_orders' => 5,
-          ]);
+                  'total_orders' => 27,
+                  'total_cancelled_orders' => 7,
+                  'total_active_orders' => 15,
+                  'total_require_action_orders' => 5,
+                  'total_completed_orders' => 5,
+              ]);
       }
 
     public function test_orders_stats_by_creator()
@@ -75,11 +75,11 @@ class GetOrdersStatsTest extends TestCase
         $this->actingAs(self::$userLenderOrderCreator)
             ->getJson('/api/v1/lender/orders/stats', ['X-Company' => self::$company->id])
             ->assertStatus(200)->assertJsonFragment([
-            'total_orders' => 7,
-            'total_active_orders' => 5,
-            'total_require_action_orders' => 0,
-            'total_cancelled_orders' => 2,
-            'total_completed_orders' => 0,
-        ]);
+                'total_orders' => 7,
+                'total_active_orders' => 5,
+                'total_require_action_orders' => 0,
+                'total_cancelled_orders' => 2,
+                'total_completed_orders' => 0,
+            ]);
     }
 }
