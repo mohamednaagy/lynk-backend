@@ -4,10 +4,11 @@ namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
 
 use App\Enums\ErrorCode;
 use App\Enums\Role;
+use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
-use Bavix\Wallet\Models\Wallet;
+use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Tests\TestCase;
@@ -65,7 +66,7 @@ class CreateOrderWithoutVerificationControllerTest extends TestCase
         ];
     }
 
-    public function test_wallet_is_empty()
+    public function test_create_order_without_verification_does_not_work_if_wallet_is_empty()
     {
         $this->actingAs(self::$userLenderAdminBelongsToCompanyHasEmptyWallet);
 
@@ -81,7 +82,7 @@ class CreateOrderWithoutVerificationControllerTest extends TestCase
         ]);
     }
 
-    public function test_national_id_is_not_valid()
+    public function test_create_order_without_verification_does_not_work_when_national_id_is_not_valid()
     {
         $this->actingAs(self::$userLenderAdmin);
         $response = $this->postJson(
@@ -93,7 +94,7 @@ class CreateOrderWithoutVerificationControllerTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_phone_number_is_not_valid()
+    public function test_create_order_without_verification_does_not_work_when_phone_number_is_not_valid()
     {
         $this->actingAs(self::$userLenderAdmin);
         $response = $this->postJson(
@@ -105,7 +106,7 @@ class CreateOrderWithoutVerificationControllerTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_amount_can_not_be_more_than_selling_price()
+    public function test_create_order_without_verification_does_not_work_if_amount_is_greater_than_selling_price()
     {
         $amount = 10;
         $sellingPrice = 9;
@@ -119,15 +120,33 @@ class CreateOrderWithoutVerificationControllerTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_order_created_successfully()
+    public function test_create_order_without_verification_works_successfully()
     {
+        $this->actingAs(self::$userLenderAdmin)
+            ->postJson(
+                '/api/v1/lender/orders/no-verification',
+                self::$orderDetails,
+                ['X-Company' => self::$company->id]
+            )
+            ->assertStatus(Response::HTTP_OK);
+    }
+
+    public function test_create_order_without_verification_assert_balance_after_creating_order()
+    {
+        $wallet = self::$company->balance(WalletType::CompanyWallet);
+        $balanceBeforeCreation = $wallet->getAmount();
+
         $this->actingAs(self::$userLenderAdmin);
-        $response = $this->postJson(
+        $this->postJson(
             '/api/v1/lender/orders/no-verification',
             self::$orderDetails,
             ['X-Company' => self::$company->id]
         );
 
-        $response->assertStatus(Response::HTTP_OK);
+        $wallet = self::$company->balance(WalletType::CompanyWallet);
+        $balanceAfterCreation = $wallet->getAmount();
+        $orderCost = self::$company->order_cost->getMoney()->getAmount();
+
+        $this->assertTrue(((int) $balanceBeforeCreation - (int) $orderCost) == $balanceAfterCreation);
     }
 }
