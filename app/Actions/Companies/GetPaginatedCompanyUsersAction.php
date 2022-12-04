@@ -26,7 +26,7 @@ class GetPaginatedCompanyUsersAction implements GetPaginatedCompanyUsers
                 ]);
             })
             ->where('company_id', $company->id)
-            ->withCount('orders')
+            ->withCount(['orders', 'roles'])
             ->paginate();
     }
 }
