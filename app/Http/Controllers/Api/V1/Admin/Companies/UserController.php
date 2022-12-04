@@ -48,6 +48,8 @@ class UserController extends Controller
      * @param  Request  $request
      * @param  User  $user
      * @return JsonResponse
+     *
+     * @throws AuthorizationException
      */
     public function show(Request $request, User $user): JsonResponse
     {

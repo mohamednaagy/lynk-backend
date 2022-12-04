@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\QueryScoper\Scopes\Lender\Edaat;
+namespace App\Support\QueryScoper\Scopes\Edaat;
 
 use App\Models\Company;
 use App\Support\QueryScoper\QueryScoper;
@@ -34,7 +34,7 @@ class InvoiceCompanyScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'company_id' => ['required', 'int', Rule::exists(Company::class, 'id')],
+                'company_id' => ['required', 'integer', Rule::exists(Company::class, 'id')],
             ]
         );
     }
