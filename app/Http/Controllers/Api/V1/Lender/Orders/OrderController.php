@@ -9,6 +9,7 @@ use App\Actions\Contracts\Orders\UpdateFinancingOrder;
 use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
@@ -17,8 +18,10 @@ use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
@@ -47,6 +50,7 @@ class OrderController extends Controller
     }
 
     /**
+     * @param  Request  $request
      * @param  GetPaginatedFinancingOrder  $getPaginatedOrders
      * @return JsonResponse
      */
@@ -73,6 +77,8 @@ class OrderController extends Controller
     /**
      * @param  FinancingOrder  $order
      * @return JsonResponse
+     *
+     * @throws AuthorizationException
      */
     public function show(FinancingOrder $order): JsonResponse
     {
@@ -91,6 +97,7 @@ class OrderController extends Controller
                 'phone_country_code',
                 'phone_number',
                 'phone_number_formatted',
+                'is_updatable',
                 'is_approved',
                 'status_reason',
                 'creator',
@@ -104,9 +111,11 @@ class OrderController extends Controller
      *
      * @param  StoreOrderRequest  $request
      * @param  CreateFinancingOrder  $createFinancingOrder
+     * @param  DeductOrderCreationFee  $deductOrderCreationFee
+     * @param  CanCreateOrder  $canCreateOrder
      * @return JsonResponse
      *
-     * @throws ExceptionInterface
+     * @throws \Throwable
      */
     public function store(
         StoreOrderRequest $request,
@@ -164,10 +173,12 @@ class OrderController extends Controller
     /**
      * Summary of update
      *
-     * @param  UpdateOrderRequest  $updateOrderRequest
+     * @param  UpdateOrderRequest  $request
      * @param  UpdateFinancingOrder  $updateFinancingOrder
      * @param  FinancingOrder  $order
      * @return JsonResponse
+     *
+     * @throws AuthorizationException
      */
     public function update(
         UpdateOrderRequest $request,
@@ -175,6 +186,13 @@ class OrderController extends Controller
         FinancingOrder $order
     ): JsonResponse {
         $this->authorize('update', $order);
+        if ($order->status->cantBeUpdated()) {
+            return $this->errorResponse(
+                __('error.order_cannot_be_updated'),
+                Response::HTTP_BAD_REQUEST,
+                ErrorCode::ORDER_NOT_UPDATABLE
+            );
+        }
         $financingOrder = $updateFinancingOrder->update($order, $request->validated());
 
         return fractal($financingOrder, new FinancingOrderTransformer())

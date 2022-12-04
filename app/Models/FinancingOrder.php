@@ -66,6 +66,13 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'selling_price' => MoneyStringCast::class.':currency',
     ];
 
+    protected function isUpdatable(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->status->canBeUpdated(),
+        );
+    }
+
     protected function phoneNumberCountryCode(): Attribute
     {
         return Attribute::make(
@@ -92,7 +99,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->addMediaCollection(FinancingOrderMediaCollection::ClientWakala)
             ->singleFile();
         $this
-            ->addMediaCollection(FinancingOrderMediaCollection::BankWakala)
+            ->addMediaCollection(FinancingOrderMediaCollection::LenderWakala)
             ->singleFile();
         $this
             ->addMediaCollection(FinancingOrderMediaCollection::Contract)

@@ -3,16 +3,20 @@
 namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Actions\Contracts\LoginUser;
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Auth\LoginRequest;
 use App\Models\Company;
 use App\Models\User;
+use App\Notifications\LoginNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Jenssegers\Agent\Facades\Agent;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
 
@@ -47,6 +51,18 @@ class LoginController extends Controller
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);
+        }
+
+        if (! $user->hasRole(Role::LenderApiUser)) {
+            $user->notify(
+                new LoginNotification(
+                    $request->ip(),
+                    Carbon::now()->toDateTimeString(),
+                    Agent::device(),
+                    Agent::platform(),
+                    Agent::browser()
+                )
+            );
         }
 
         return $this->successResponse(

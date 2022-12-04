@@ -19,8 +19,7 @@ class AcceptClientWakala extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  Request  $request
-     * @param  FinancingOrder  $order
+     * @param  AcceptClientWakalaRequest  $request
      * @param  AcceptWakalaInterface  $acceptClientWakala
      * @return JsonResponse
      */

@@ -136,7 +136,7 @@ class FinancingOrderControllerStoreTest extends TestCase
                         'The phone country code field is required when phone number is present.',
                     ],
                     'phone_number' => [
-                        'The phone number is not valid phone number.',
+                        'The phone number is not a valid phone number.',
                     ],
                 ],
             ]);
@@ -155,9 +155,7 @@ class FinancingOrderControllerStoreTest extends TestCase
                 'errors' => [
                     'phone_number' => [
                         'The phone number field is required.',
-                    ],
-                    'national_id' => [
-                        'Phone number doesn’t belong to National ID/Iqama',
+                        'Service is not available',
                     ],
                 ],
             ]);
