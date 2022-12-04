@@ -65,11 +65,15 @@ class RejectOrderControllerTest extends TestCase
             'userLenderAdminWithoutEmailVerification@bim.com',
             ['email_verified_at' => null]
         );
+        self::$statusReason = Str::random(80);
 
         self::$financingOrder = $this->createOrder(self::$company->id, self::$userLenderAdmin->id, []);
         self::$pendingApprovalOrder = $this->createOrder(self::$company->id, self::$userLenderAdmin->id, ['status' => FinancingOrderStatus::PendingApproval]);
-        self::$rejectedOrder = $this->createOrder(self::$company->id, self::$userLenderAdmin->id, ['status' => FinancingOrderStatus::Rejected]);
-        self::$statusReason = Str::random(80);
+
+        self::$rejectedOrder = $this->createOrder(self::$company->id, self::$userLenderAdmin->id, [
+            'status' => FinancingOrderStatus::Rejected,
+            'status_reason' => self::$statusReason,
+        ]);
     }
 
     public function test_order_rejected_successfully()
@@ -77,10 +81,20 @@ class RejectOrderControllerTest extends TestCase
         $this->actingAs(self::$userLenderAdmin)
             ->putJson(
                 '/api/v1/lender/orders/'.self::$pendingApprovalOrder->id.'/reject',
-                ['status_reason' => self::$statusReason],
+                ['status_reason' => 'ahmed'],
                 ['X-Company' => self::$company->id]
             )
             ->assertStatus(200);
+    }
+
+    public function test_rejection_reason_is_appear()
+    {
+        $this->actingAs(self::$userLenderAdmin)
+            ->getJson(
+                '/api/v1/lender/orders/'.self::$rejectedOrder->id,
+                ['X-Company' => self::$company->id]
+            )
+            ->assertJsonFragment(['status_reason' => self::$statusReason]);
     }
 
     public function test_order_can_not_moved_to_reject_status()
