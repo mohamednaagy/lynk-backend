@@ -19,7 +19,7 @@ class ForgotPasswordTest extends TestCase
      *
      * @return void
      */
-    public function testSendsPasswordResetEmail(): void
+    public function test_sending_reset_password_email(): void
     {
         Notification::fake();
 
@@ -40,7 +40,7 @@ class ForgotPasswordTest extends TestCase
      *
      * @return void
      */
-    public function testDoesNotSendPasswordResetEmail(): void
+    public function test_failure_of_sending_reset_password_email(): void
     {
         $this->doesntExpectJobs(ResetPassword::class);
 
@@ -52,7 +52,7 @@ class ForgotPasswordTest extends TestCase
      *
      * @return void
      */
-    public function testChangesAUsersPassword(): void
+    public function test_resetting_user_password(): void
     {
         $user = User::factory()->create();
 
