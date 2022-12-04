@@ -39,7 +39,7 @@ class RejectOrderControllerTest extends TestCase
 
     private static array $orderDetails;
 
-    private static FinancingOrder $financingOrder;
+    private static FinancingOrder $unrejectableOrder;
 
     private static FinancingOrder $rejectedOrder;
 
@@ -67,7 +67,7 @@ class RejectOrderControllerTest extends TestCase
         );
         self::$statusReason = Str::random(80);
 
-        self::$financingOrder = $this->createOrder(self::$company->id, self::$userLenderAdmin->id, []);
+        self::$unrejectableOrder = $this->createOrder(self::$company->id, self::$userLenderAdmin->id, ['status' => FinancingOrderStatus::ContractSigned]);
         self::$pendingApprovalOrder = $this->createOrder(self::$company->id, self::$userLenderAdmin->id, ['status' => FinancingOrderStatus::PendingApproval]);
 
         self::$rejectedOrder = $this->createOrder(self::$company->id, self::$userLenderAdmin->id, [
@@ -76,32 +76,29 @@ class RejectOrderControllerTest extends TestCase
         ]);
     }
 
-    public function test_order_rejected_successfully()
+    public function test_order_rejected_successfully_and_check_status_reason_message()
     {
+        $statusReason = 'issue with the company';
         $this->actingAs(self::$userLenderAdmin)
             ->putJson(
                 '/api/v1/lender/orders/'.self::$pendingApprovalOrder->id.'/reject',
-                ['status_reason' => 'ahmed'],
+                ['status_reason' => $statusReason],
                 ['X-Company' => self::$company->id]
             )
             ->assertStatus(200);
-    }
 
-    public function test_rejection_reason_is_appear()
-    {
-        $this->actingAs(self::$userLenderAdmin)
-            ->getJson(
-                '/api/v1/lender/orders/'.self::$rejectedOrder->id,
-                ['X-Company' => self::$company->id]
-            )
-            ->assertJsonFragment(['status_reason' => self::$statusReason]);
+        $this->getJson(
+            '/api/v1/lender/orders/'.self::$pendingApprovalOrder->id,
+            ['X-Company' => self::$company->id]
+        )
+            ->assertJsonFragment(['status_reason' => $statusReason]);
     }
 
     public function test_order_can_not_moved_to_reject_status()
     {
         $this->actingAs(self::$userLenderAdmin)
             ->putJson(
-                '/api/v1/lender/orders/'.self::$financingOrder->id.'/reject',
+                '/api/v1/lender/orders/'.self::$unrejectableOrder->id.'/reject',
                 ['status_reason' => self::$statusReason],
                 ['X-Company' => self::$company->id]
             )
@@ -115,10 +112,11 @@ class RejectOrderControllerTest extends TestCase
     {
         $this->actingAs(self::$userLenderAdmin)
             ->putJson(
-                '/api/v1/lender/orders/'.self::$financingOrder->id.'/reject',
+                '/api/v1/lender/orders/'.self::$unrejectableOrder->id.'/reject',
                 ['status_reason' => self::$statusReason],
                 ['X-Company' => self::$secondCompany->id]
-            )->assertStatus(404);
+            )
+            ->assertStatus(404);
     }
 
     public function test_order_not_exists()
@@ -149,7 +147,7 @@ class RejectOrderControllerTest extends TestCase
     {
         $this->actingAs(self::$userLenderAdminWithoutEmailVerification)
             ->putJson(
-                '/api/v1/lender/orders/'.self::$financingOrder->id.'/reject',
+                '/api/v1/lender/orders/'.self::$unrejectableOrder->id.'/reject',
                 [],
                 ['X-Company' => self::$company->id]
             )
@@ -170,6 +168,17 @@ class RejectOrderControllerTest extends TestCase
             )
             ->assertStatus(403);
     }
+
+      public function test_lender_order_creator_can_not_reject_order()
+      {
+          $this->actingAs(self::$userLenderCreator)
+              ->putJson(
+                  '/api/v1/lender/orders/'.self::$pendingApprovalOrder->id.'/reject',
+                  ['status_reason' => self::$statusReason],
+                  ['X-Company' => self::$company->id]
+              )
+              ->assertStatus(403);
+      }
 
     public function test_lender_order_supervisor_can_reject_order()
     {
