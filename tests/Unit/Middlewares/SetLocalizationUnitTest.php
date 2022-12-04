@@ -4,6 +4,7 @@ namespace Tests\Unit\Middlewares;
 
 use App\Enums\Role;
 use App\Http\Middleware\SetLocalization;
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
@@ -14,6 +15,8 @@ class SetLocalizationUnitTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
+    private static Company $company;
+
     private static User $userLenderAdmin;
 
     /**
@@ -22,7 +25,8 @@ class SetLocalizationUnitTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        self::$userLenderAdmin = $this->createLenderUser(null, Role::LenderAdmin);
+        [self::$company] = $this->createCompany();
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->getOriginal('id'), Role::LenderAdmin);
     }
 
     public function test_set_localization_from_not_supported_header_x_locale()
