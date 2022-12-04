@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Lender\Orders;
 use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
+use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Actions\Contracts\Wallets\DeductVatPercentage;
 use App\Enums\Action;
 use App\Enums\Area;
@@ -33,13 +34,14 @@ class CreateOrderWithoutVerification extends Controller
      */
     public function __invoke(
         CreateOrderWithoutVerificationRequest $request,
+        CanCreateOrder $canCreateOrder,
         CreateFinancingOrder $createFinancingOrder,
         GenerateClientWakala $generateWakala,
-        DeductVatPercentage $deductOrderCreationFee,
-        CanCreateOrder $canCreateOrder
+        DeductOrderCreationFee $deductOrderCreationFee,
+        DeductVatPercentage $deductVatPercentage
     ) {
         return DB::multipleTransaction(
-            function () use ($request, $createFinancingOrder, $generateWakala, $deductOrderCreationFee, $canCreateOrder) {
+            function () use ($request, $createFinancingOrder, $generateWakala, $deductOrderCreationFee, $deductVatPercentage, $canCreateOrder) {
                 $company = tenant();
                 // throw exception is balance not enough
                 $canCreateOrder->handle($company);
@@ -60,6 +62,8 @@ class CreateOrderWithoutVerification extends Controller
 
                 // deduct the cost from the wallet
                 $deductOrderCreationFee->handle($financingOrder);
+
+                $deductVatPercentage->handle($financingOrder);
 
                 $generateWakala->handle($financingOrder);
 

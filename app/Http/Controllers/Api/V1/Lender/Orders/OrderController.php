@@ -31,22 +31,22 @@ class OrderController extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::Lender, [Subject::FinancingOrders, Action::Index, Action::Manage])
+            perm(Area::Lender, [Subject::FinancingOrders, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-                perm(Area::Lender, [Subject::FinancingOrders, Action::Show, Action::Manage])
+            perm(Area::Lender, [Subject::FinancingOrders, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-                perm(Area::Lender, [Subject::FinancingOrders, Action::Create, Action::Manage])
+            perm(Area::Lender, [Subject::FinancingOrders, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-                perm(Area::Lender, [Subject::FinancingOrders, Action::Edit, Action::Manage])
+            perm(Area::Lender, [Subject::FinancingOrders, Action::Edit, Action::Manage])
         )->only('update');
     }
 
@@ -120,9 +120,9 @@ class OrderController extends Controller
      */
     public function store(
         StoreOrderRequest $request,
+        CanCreateOrder $canCreateOrder,
         CreateFinancingOrder $createFinancingOrder,
         DeductOrderCreationFee $deductOrderCreationFee,
-        CanCreateOrder $canCreateOrder,
         DeductVatPercentage $deductVatPercentage
     ): JsonResponse {
         return DB::multipleTransaction(
