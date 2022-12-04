@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 interface GetPaginatedFinancingOrder
 {
-    public function handle($paginate = null): LengthAwarePaginator;
+    public function handle($perPage = null): LengthAwarePaginator;
 
     public function setCreator(Model $creator);
 

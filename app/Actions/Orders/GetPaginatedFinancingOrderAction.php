@@ -19,9 +19,9 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
 
     protected ?Company $company = null;
 
-    public function handle($paginate = null): LengthAwarePaginator
+    public function handle($perPage = null): LengthAwarePaginator
     {
-        return $this->baseQuery()->toScopes($this->scopes())->paginate();
+        return $this->baseQuery()->toScopes($this->scopes())->paginate($perPage);
     }
 
     private function scopes()
