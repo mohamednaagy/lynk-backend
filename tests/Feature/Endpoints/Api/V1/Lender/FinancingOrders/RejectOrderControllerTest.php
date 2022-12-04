@@ -148,14 +148,13 @@ class RejectOrderControllerTest extends TestCase
 
     public function test_lender_order_billing_can_not_reject_order()
     {
-        $this->actingAs(self::$userLenderBilling);
-        // WIP billing has permissions
-        $this->putJson(
-            '/api/v1/lender/orders/'.self::$pendingApprovalOrder->id.'/reject',
-            ['status_reason' => self::$statusReason],
-            ['X-Company' => self::$company->id]
-        )
-            ->assertStatus(400);
+        $this->actingAs(self::$userLenderBilling)
+            ->putJson(
+                '/api/v1/lender/orders/'.self::$pendingApprovalOrder->id.'/reject',
+                ['status_reason' => self::$statusReason],
+                ['X-Company' => self::$company->id]
+            )
+            ->assertStatus(403);
     }
 
     public function test_lender_order_supervisor_can_reject_order()
