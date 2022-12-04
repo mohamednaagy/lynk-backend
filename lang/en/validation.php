@@ -127,16 +127,13 @@ return [
     'uploaded' => 'The :attribute failed to upload.',
     'url' => 'The :attribute must be a valid URL.',
     'uuid' => 'The :attribute must be a valid UUID.',
-    'national_id_wrong_format' => 'National ID format is not valid',
+    'national_id_wrong_format' => ':attribute format is not valid',
     'host_whitelist' => 'The :attribute is not whitelisted.',
     'phone' => 'The :attribute is not a valid phone number.',
     'webhook_type_limit' => 'This webhook couldn\'t be used more than :limit time(s)',
+    'company_unique_name' => 'Identifier should contain only English letters, numbers and _. It should start with English letter',
+    'url_protocol' => 'The :attribute must start with one of the following URL protocols: :values.',
     'custom_validation' => [
-        'phone_number_not_matched' => 'Phone number does\'t belong to national ID/Iqama',
-        'invalid_person_id' => 'Invalid national ID/Iqama',
-        'person_id_not_found' => 'Invalid national ID/Iqama',
-        'invalid_mobile_number' => 'Invalid phone number',
-
     ],
     /*
      |--------------------------------------------------------------------------
@@ -170,4 +167,5 @@ return [
         'company_cr' => 'company CR',
         'national_id' => 'national ID',
     ],
+
 ];

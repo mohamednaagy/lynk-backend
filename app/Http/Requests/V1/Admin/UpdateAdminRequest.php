@@ -3,13 +3,13 @@
 namespace App\Http\Requests\V1\Admin;
 
 use App\Enums\Action;
+use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\User;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use function trans;
 
 class UpdateAdminRequest extends FormRequest
 {
@@ -41,24 +41,62 @@ class UpdateAdminRequest extends FormRequest
                     ->ignore($this->admin->id),
             ],
             'password' => ['nullable', 'string', 'confirmed'],
-            'role' => ['required', 'string', new EnumValue(Role::class)],
-            'permissions' => ['required', 'array', 'min:1'],
-            'permissions.*' => ['required', 'array'],
-            'permissions.*.subject' => ['required', 'string', new EnumValue(Subject::class)],
-            'permissions.*.actions' => ['required', 'array'],
-            'permissions.*.actions.*' => ['required', 'string', new EnumValue(Action::class)],
-        ];
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function messages(): array
-    {
-        return [
-            'phone_number.phone' => trans('validation.phone'),
+            'role' => ['required', 'string', Rule::in(Area::roles(Area::SuperAdmin))],
+            'permissions' => [
+                'exclude_if:role,'.Role::Admin,
+                'required',
+                'array',
+                'min:1',
+            ],
+            'permissions.*' => [
+                'exclude_if:role,'.Role::Admin,
+                'required',
+                'array',
+            ],
+            'permissions.*.subject' => [
+                'exclude_if:role,'.Role::Admin,
+                'required',
+                'string',
+                new EnumValue(Subject::class),
+            ],
+            'permissions.*.actions' => [
+                'exclude_if:role,'.Role::Admin,
+                'required',
+                'array',
+            ],
+            'permissions.*.actions.*' => [
+                'exclude_if:role,'.Role::Admin,
+                'required',
+                'string',
+                new EnumValue(Action::class),
+            ],
+            'permissions' => [
+                'exclude_if:role,'.Role::Admin,
+                'required',
+                'array',
+            ],
+            'permissions.*' => [
+                'exclude_if:role,'.Role::Admin,
+                'required',
+                'array',
+            ],
+            'permissions.*.subject' => [
+                'exclude_if:role,'.Role::Admin,
+                'required',
+                'string',
+                new EnumValue(Subject::class),
+            ],
+            'permissions.*.actions' => [
+                'exclude_if:role,'.Role::Admin,
+                'required',
+                'array',
+            ],
+            'permissions.*.actions.*' => [
+                'exclude_if:role,'.Role::Admin,
+                'required',
+                'string',
+                new EnumValue(Action::class),
+            ],
         ];
     }
 }

@@ -10,5 +10,5 @@ interface GetPaginatedUsersByRole
      * @param  string  $role
      * @return LengthAwarePaginator
      */
-    public function handle(string $role): LengthAwarePaginator;
+    public function handle(string|array $role): LengthAwarePaginator;
 }

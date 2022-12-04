@@ -27,6 +27,15 @@ class UpdateMyProfile extends Controller
 
         $updateUser->handle($updateLenderRequest->user(), $validated);
 
-        return fractal($updateLenderRequest->user(), new UserTransformer())->respond();
+        return fractal($updateLenderRequest->user(), new UserTransformer())
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 }

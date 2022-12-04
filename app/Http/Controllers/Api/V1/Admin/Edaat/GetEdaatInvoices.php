@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Edaat;
 
-use App\Actions\Contracts\Wallets\GetEdaatInvoices as GetEdaatInvoicesInterface;
+use App\Actions\Contracts\Edaat\GetEdaatInvoices as GetEdaatInvoicesInterface;
 use App\Http\Controllers\Controller;
-use App\Support\QueryScoper\Scopes\Lender\Edaat\InvoiceCompanyScope;
-use App\Support\QueryScoper\Scopes\Lender\Edaat\InvoiceNumberScope;
+use App\Support\QueryScoper\Scopes\Edaat\InvoiceCompanyScope;
+use App\Support\QueryScoper\Scopes\Edaat\InvoiceNumberScope;
 use App\Transformers\EdaatInvoiceTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,7 +26,17 @@ class GetEdaatInvoices extends Controller
             ->paginate();
 
         return fractal($edaatInvoices, new EdaatInvoiceTransformer())
-            ->parseIncludes(['company'])
+            ->parseIncludes([
+                'id',
+                'invoice_number',
+                'amount',
+                'amount_formatted',
+                'creator',
+                'company_name',
+                'company_number',
+                'status',
+                'company',
+            ])
             ->respond();
     }
 

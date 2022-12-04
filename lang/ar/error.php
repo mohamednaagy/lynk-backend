@@ -1,11 +1,27 @@
 <?php
 
+use App\Enums\FinancingOrderStatus;
+
 return [
     'order_cannot_be_approved_because_it_is_approved' => 'تمت الموافقة من قبل على هذا الطلب',
     'enquiry_closed_already' => 'لقد تم غلق هذا الاستفسار من قبل',
-    'unable_to_cancelled' => 'هذا الطلب لا يمكن إلغاؤه',
+    'unable_to_cancel_order' => 'لا يمكن إلغاء الطلب في الوقت الحالي',
     'media_class_not_supported' => 'هذا العنصر غير مدعوم',
+    'phone_number_does_not_belong_to_national_id' => 'رقم الهاتف لا ينتمي لرقم الهوية/الإقامة',
+    'invalid_person_id' => 'رقم الهوية غير صحيح',
+    'person_id_not_found' => 'رقم الهوية غير موجود',
+    'invalid_mobile_number' => 'رقم الهاتف غير صحيح',
+    'invalid_request_format' => 'صيغة JSON غير صحيحة',
+    'invalid_api_key' => 'API key غير صحيح',
+    'service_not_available' => 'الخدمة غير متاحة',
+    'invalid_nationality' => 'الجنسية غير صحيحة',
+    'invalid_person_id_type' => 'نوع رقم الهوية غير صحيح',
+    'invalid_operator_tcn' => 'معامل TCN غير صحيح',
+    'no_enough_balance' => 'لا يوجد رصيد كافي',
     'order_status_doesnt_follow_sequence' => 'حالة الطلب التمويلي لا يمكن تغييرها لأنها لا تتبع التسلسل الصحيح',
+    'order_cannot_be_updated' => 'لا يمكن تعديل الطلب إذا كانت الحالة '.FinancingOrderStatus::joinDescription(FinancingOrderStatus::AllowedToUpdateStatuses),
     'webhook_type_not_supported' => 'هذا النوع غير مدعوم',
     'must_verify_email' => 'يجب عليك التحقق من البريد الإلكتروني',
+    'x_company_invalid' => 'الشركة غير صحيحة',
+    'company_not_active' => 'الشركة غير مفعلة',
 ];
