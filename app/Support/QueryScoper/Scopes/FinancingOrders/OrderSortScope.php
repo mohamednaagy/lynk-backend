@@ -49,10 +49,6 @@ class OrderSortScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data)
     {
-        if ($sort = $data['sort']) {
-            return $builder->orderBy($sort, $data['direction'] ?? 'asc');
-        }
-
-        return $builder;
+        return $builder->orderBy($data['sort'], $data['direction'] ?? 'asc');
     }
 }

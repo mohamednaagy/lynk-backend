@@ -2,9 +2,10 @@
 
 namespace App\Support\QueryScoper\Scopes\FinancingOrders;
 
+use App\Enums\FinancingOrderStatus;
 use App\Support\QueryScoper\QueryScoper;
+use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,8 +18,12 @@ class OrderStatusScope extends QueryScoper
      */
     public function prepareData()
     {
+        $status = Request::query('status');
+
         return [
-            'status' => Request::query('status'),
+            'status' => is_array($status)
+                ? $status
+                : explode(',', Request::query('status')),
         ];
     }
 
@@ -33,7 +38,7 @@ class OrderStatusScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'status' => ['required'],
+                'status' => ['required', 'array', new EnumValue(FinancingOrderStatus::class)],
             ]
         );
     }
@@ -47,13 +52,6 @@ class OrderStatusScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data)
     {
-        $statuses = Arr::wrap($data['status']);
-        if (count($statuses)) {
-            return $builder->where(function (Builder $builder) use ($statuses) {
-                $builder->whereIn('status', $statuses);
-            });
-        }
-
-        return $builder;
+        return $builder->whereIn('status', $data['status']);
     }
 }

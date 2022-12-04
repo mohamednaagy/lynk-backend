@@ -46,15 +46,13 @@ class OrderSearchScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data)
     {
-        if ($search = $data['search']) {
-            return $builder->where(function (Builder $builder) use ($search) {
-                $builder->where('id', $search)
-                    ->orWhere('reference_number', $search)
-                    ->orWhere('national_id', 'LIKE', "%$search%")
-                    ->orWhere('phone_number', 'LIKE', "%$search%");
-            });
-        }
+        $search = $data['search'];
 
-        return $builder;
+        return $builder->where(function (Builder $builder) use ($search) {
+            $builder->where('id', $search)
+                ->orWhere('reference_number', $search)
+                ->orWhere('national_id', 'LIKE', "%$search%")
+                ->orWhere('phone_number', 'LIKE', "%$search%");
+        });
     }
 }
