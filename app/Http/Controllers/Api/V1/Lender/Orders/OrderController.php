@@ -60,7 +60,7 @@ class OrderController extends Controller
             $getPaginatedOrders->setCreator($request->user());
         }
 
-        $financingOrders = $getPaginatedOrders->handle(10);
+        $financingOrders = $getPaginatedOrders->handle();
 
         return fractal($financingOrders, new FinancingOrderTransformer())
             ->parseIncludes([

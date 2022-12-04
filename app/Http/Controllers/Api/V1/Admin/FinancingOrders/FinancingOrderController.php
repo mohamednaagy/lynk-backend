@@ -13,7 +13,7 @@ class FinancingOrderController extends Controller
 {
     public function index(Company $company, GetPaginatedFinancingOrder $getPaginatedOrders)
     {
-        $orders = $getPaginatedOrders->setCompany($company)->handle(15);
+        $orders = $getPaginatedOrders->setCompany($company)->handle();
 
         return fractal($orders, new FinancingOrderTransformer())
             ->parseIncludes([
