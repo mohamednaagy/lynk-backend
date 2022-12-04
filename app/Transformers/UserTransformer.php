@@ -129,7 +129,7 @@ class UserTransformer extends TransformerAbstract
 
     protected function getPermissionsQueryBasedOnArea(User $user)
     {
-        $query = $user->permissions();
+        $query = $user->permissions;
 
         $query = match ($this->area) {
             Area::Lender, Area::SuperAdmin => $query->where('name', 'Like', $this->area.'-%'),
