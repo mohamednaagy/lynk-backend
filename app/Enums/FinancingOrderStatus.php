@@ -105,18 +105,23 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         self::Rejected,
     ];
 
+    public const AllowedToUpdateStatuses = [
+        self::PendingApproval,
+        self::Rejected,
+    ];
+
     /**
      * @param  Status|int  $status
      * @return bool
      */
     public function canMoveTo(Status|int $status): bool
     {
-        if (! isset(self::$state[$status])) {
-            throw new UnexpectedValueException('no mapping for this status');
-        }
-
         if ($status instanceof Status) {
             $status = $status->value;
+        }
+
+        if (! isset(self::$state[$status])) {
+            throw new UnexpectedValueException('no mapping for this status');
         }
 
         return in_array($this->value, self::$state[$status]);
@@ -129,5 +134,21 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
     public function cantMoveTo(Status|int $status): bool
     {
         return ! $this->canMoveTo($status);
+    }
+
+    /**
+     * @return bool
+     */
+    public function canBeUpdated(): bool
+    {
+        return in_array($this->value, self::AllowedToUpdateStatuses);
+    }
+
+    /**.
+     * @return bool
+     */
+    public function cantBeUpdated(): bool
+    {
+        return ! $this->canBeUpdated();
     }
 }

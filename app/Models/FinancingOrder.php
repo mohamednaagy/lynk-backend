@@ -53,6 +53,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'client_wakala_accepted_at',
         'is_verification_required',
         'company_id',
+        'created_at',
     ];
 
     protected $casts = [
@@ -65,6 +66,13 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'amount' => MoneyStringCast::class.':currency',
         'selling_price' => MoneyStringCast::class.':currency',
     ];
+
+    protected function isUpdatable(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->status->canBeUpdated(),
+        );
+    }
 
     protected function phoneNumberCountryCode(): Attribute
     {
@@ -92,7 +100,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->addMediaCollection(FinancingOrderMediaCollection::ClientWakala)
             ->singleFile();
         $this
-            ->addMediaCollection(FinancingOrderMediaCollection::BankWakala)
+            ->addMediaCollection(FinancingOrderMediaCollection::LenderWakala)
             ->singleFile();
         $this
             ->addMediaCollection(FinancingOrderMediaCollection::Contract)

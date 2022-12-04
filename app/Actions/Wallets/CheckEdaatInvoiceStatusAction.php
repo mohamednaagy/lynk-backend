@@ -20,18 +20,19 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
 
     public function handle(EdaatInvoice $edaatInvoice): void
     {
-        if ($edaatInvoice->status == EdaatInvoiceStatus::Pending()) {
-            if ($this->edaatService->isPaidInvoice($edaatInvoice->invoice_number)) {
-                $edaatInvoice->update(['status' => EdaatInvoiceStatus::Paid]);
-                $this->createTransactions->handle(
-                    $edaatInvoice->company->getWallet(WalletType::CompanyWallet),
-                    TransactionReason::DepositByEdaat,
-                    $edaatInvoice->amount,
-                    [
-                        'invoice_number' => $edaatInvoice->invoice_number,
-                    ]
-                );
-            }
+        if (
+            $edaatInvoice->status === EdaatInvoiceStatus::Pending &&
+            $this->edaatService->isPaidInvoice($edaatInvoice->invoice_number)
+        ) {
+            $edaatInvoice->update(['status' => EdaatInvoiceStatus::Paid]);
+            $this->createTransactions->handle(
+                $edaatInvoice->company->getWallet(WalletType::CompanyWallet),
+                $edaatInvoice->amount,
+                TransactionReason::DepositByEdaat,
+                [
+                    'invoice_number' => $edaatInvoice->invoice_number,
+                ]
+            );
         }
     }
 }

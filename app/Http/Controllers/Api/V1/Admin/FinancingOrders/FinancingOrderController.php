@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\FinancingOrders;
 
+use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
+use Illuminate\Http\JsonResponse;
 
 class FinancingOrderController extends Controller
 {
-    public function index(Company $company)
+    public function index(Company $company, GetPaginatedFinancingOrder $getPaginatedOrders)
     {
-        $orders = $company->orders()->with('creator')->paginate();
+        $orders = $getPaginatedOrders->setCompany($company)->handle();
 
         return fractal($orders, new FinancingOrderTransformer())
             ->parseIncludes([
@@ -29,8 +31,9 @@ class FinancingOrderController extends Controller
     }
 
     /**
+     * @param  Company  $company
      * @param  FinancingOrder  $order
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function show(Company $company, FinancingOrder $order)
     {
@@ -49,6 +52,7 @@ class FinancingOrderController extends Controller
                 'phone_number_formatted',
                 'is_approved',
                 'status_reason',
+                'is_updatable',
                 'creator',
                 'approver',
                 'history',

@@ -30,7 +30,6 @@ class StoreCompanyUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        // __REVIEW__ translate attributes if needed
         return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],

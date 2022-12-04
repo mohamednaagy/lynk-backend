@@ -5,6 +5,7 @@ namespace Tests\Traits;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\WalletType;
 use App\Models\Company;
+use App\Models\EdaatInvoice;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
@@ -93,6 +94,17 @@ trait InteractsWithLender
             'selling_price' => 220,
             'status' => FinancingOrderStatus::WaitingClientWakala,
             'is_verification_required' => true,
+        ], $data));
+    }
+
+    public function createEdaatInvoice(int $companyId, int $userId, array $data = []): Model|Builder
+    {
+        return EdaatInvoice::query()->create(array_merge([
+            'company_id' => $companyId,
+            'creator_id' => $userId,
+            'invoice_number' => 1,
+            'amount' => 1,
+            'status' => 1,
         ], $data));
     }
 }
