@@ -11,7 +11,6 @@ use App\Models\EdaatInvoice;
 use App\Support\Edaat\EdaatService;
 use Cknow\Money\Money;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
@@ -32,7 +31,7 @@ class WebhookController extends Controller
                 $createTransactions->handle(
                     $wallet,
                     TransactionReason::DepositByEdaat,
-                    Money::parseByDecimal($invoice->amount, Config::get('app.currency', 'SAR')),
+                    Money::parseByDecimal($invoice->amount, $wallet->currency),
                     [
                         'invoice_number' => $invoice->invoice_number,
                     ]

@@ -18,12 +18,12 @@ class ChargeLenderBalanceManually extends Controller
      * @return \Illuminate\Http\Response
      */
     public function __invoke(
-        StoreTransactionRequest $storeTransactionRequest,
+        StoreTransactionRequest $request,
         Company $company,
         ChargeLenderBalanceManuallyInterface $chargeBalanceManuallyInterface
     ): JsonResponse {
-        return DB::transaction(function () use ($storeTransactionRequest, $company, $chargeBalanceManuallyInterface) {
-            $chargeBalanceManuallyInterface->handle($company, $storeTransactionRequest->validated());
+        return DB::transaction(function () use ($request, $company, $chargeBalanceManuallyInterface) {
+            $chargeBalanceManuallyInterface->handle($company, $request->validated());
 
             return $this->successResponse();
         });
