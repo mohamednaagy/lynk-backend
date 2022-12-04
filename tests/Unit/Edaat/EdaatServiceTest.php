@@ -72,10 +72,11 @@ class EdaatServiceTest extends TestCase
     public function test_that_register_webhook_return_success(): void
     {
         $response = self::$edaatService->registerWebhook(
-            env('EDAAT_PAYMENT_URL'),
-            env('EDAAT_PAYMENT_URL'),
-            env('EDAAT_PAYMENT_URL')
+            config('edaat.payment_url'),
+            config('edaat.bill_url'),
+            config('edaat.reconcile_url')
         );
+
         $this->assertNotNull($response);
         $this->assertIsBool($response);
         $this->assertTrue($response);
