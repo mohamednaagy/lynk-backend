@@ -9,7 +9,7 @@ use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 
-class GenerateClientWakalaAction implements GenerateClientWakala
+class GenerateLenderWakalaAction implements GenerateClientWakala
 {
     protected string $template = 'templates.lender-wakala';
 
