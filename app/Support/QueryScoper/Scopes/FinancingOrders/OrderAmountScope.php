@@ -18,7 +18,8 @@ class OrderAmountScope extends QueryScoper
     public function prepareData()
     {
         return [
-            'amount' => Request::query('amount'),
+            'amount_lte' => Request::query('amount_lte'),
+            'amount_gte' => Request::query('amount_gte'),
         ];
     }
 
@@ -33,7 +34,8 @@ class OrderAmountScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'amount' => ['required', 'numeric'],
+                'amount_lte' => ['nullable', 'numeric', isset($data['amount_gte']) ? 'gte:amount_gte' : ''],
+                'amount_gte' => ['nullable', 'numeric', isset($data['amount_lte']) ? 'lte:amount_lte' : ''],
             ]
         );
     }
@@ -47,17 +49,24 @@ class OrderAmountScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data)
     {
-        if ($amount = $data['amount']) {
-            $amount = Money::parseByDecimal($amount, Money::getDefaultCurrency());
-            $operator = '>=';
-            if ($amount->isNegative()) {
-                $amount = $amount->multiply(-1);
-                $operator = '<=';
-            }
+        $amountLTE = isset($data['amount_lte'])
+            ? Money::parseByDecimal($data['amount_lte'], Money::getDefaultCurrency())
+            : null;
+        $amountGTE = isset($data['amount_gte'])
+            ? Money::parseByDecimal($data['amount_gte'], Money::getDefaultCurrency())
+            : null;
 
-            return $builder->where(function (Builder $builder) use ($operator, $amount) {
-                $builder->where('amount', $operator, $amount->getAmount());
-            });
+        if ($amountLTE && $amountGTE) {
+//            dd($amountGTE, $amountLTE);
+            return $builder->whereBetween('amount', [$amountGTE->getAmount(), $amountLTE->getAmount()]);
+        }
+
+        if ($amountLTE) {
+            return $builder->where('amount', '<=', $amountLTE->getAmount());
+        }
+
+        if ($amountGTE) {
+            return $builder->where('amount', '>=', $amountGTE->getAmount());
         }
 
         return $builder;
