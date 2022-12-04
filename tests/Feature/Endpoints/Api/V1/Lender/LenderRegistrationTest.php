@@ -2,20 +2,26 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Lender;
 
+use App\Enums\Area;
+use App\Enums\Role;
+use App\Enums\WalletType;
+use App\Models\Company;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithSettings;
 
 class LenderRegistrationTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithLender, InteractsWithSettings;
 
     /**
      * A basic feature test example.
      *
      * @return void
      */
-    public function test_valid_all_inputs_register(): void
+    public function test_register_on_all_valid_inputs(): void
     {
         $response = $this->postJson('/api/v1/lender/register', [
             'first_name' => 'Joe',
@@ -39,6 +45,192 @@ class LenderRegistrationTest extends TestCase
                     'company_id',
                 ],
             ]
+        );
+    }
+
+    /**
+     * A basic feature test example.
+     *
+     * @return void
+     */
+    public function test_register_and_check_if_lender_has_wallet(): void
+    {
+        $response = $this->postJson('/api/v1/lender/register', [
+            'first_name' => 'Joe',
+            'last_name' => 'Doe',
+            'phone_country_code' => 'SA',
+            'phone_number' => '503811000',
+            'email' => 'test@uselynk.test',
+            'password' => 'Qwer@1234',
+            'password_confirmation' => 'Qwer@1234',
+            'source' => 'Postman',
+            'company_name' => 'test company1',
+            'company_unique_name' => 'lynk06',
+            'company_cr' => '1234567891',
+        ]);
+
+        $response->assertStatus(201)->assertJsonStructure(
+            [
+                'data' => [
+                    'token',
+                    'type',
+                    'company_id',
+                ],
+            ]
+        );
+
+        $this->assertTrue(
+            Company::find($response->json('data.company_id'))
+                ->hasWallet(WalletType::CompanyWallet)
+        );
+    }
+
+    /**
+     * A basic feature test example.
+     *
+     * @return void
+     */
+    public function test_register_and_check_if_lender_order_cost_as_in_default_settings(): void
+    {
+        $response = $this->postJson('/api/v1/lender/register', [
+            'first_name' => 'Joe',
+            'last_name' => 'Doe',
+            'phone_country_code' => 'SA',
+            'phone_number' => '503811000',
+            'email' => 'test@uselynk.test',
+            'password' => 'Qwer@1234',
+            'password_confirmation' => 'Qwer@1234',
+            'source' => 'Postman',
+            'company_name' => 'test company1',
+            'company_unique_name' => 'lynk06',
+            'company_cr' => '1234567891',
+        ]);
+
+        $response->assertStatus(201)->assertJsonStructure(
+            [
+                'data' => [
+                    'token',
+                    'type',
+                    'company_id',
+                ],
+            ]
+        );
+
+        $this->assertEquals(
+            $this->getSettingsClass(Area::Lender)->default_order_cost,
+            Company::find($response->json('data.company_id'))->order_cost->formatByDecimal()
+        );
+    }
+
+    /**
+     * A basic feature test example.
+     *
+     * @return void
+     */
+    public function test_register_and_check_if_lender_status_as_in_default_settings(): void
+    {
+        $response = $this->postJson('/api/v1/lender/register', [
+            'first_name' => 'Joe',
+            'last_name' => 'Doe',
+            'phone_country_code' => 'SA',
+            'phone_number' => '503811000',
+            'email' => 'test@uselynk.test',
+            'password' => 'Qwer@1234',
+            'password_confirmation' => 'Qwer@1234',
+            'source' => 'Postman',
+            'company_name' => 'test company1',
+            'company_unique_name' => 'lynk06',
+            'company_cr' => '1234567891',
+        ]);
+
+        $response->assertStatus(201)->assertJsonStructure(
+            [
+                'data' => [
+                    'token',
+                    'type',
+                    'company_id',
+                ],
+            ]
+        );
+
+        $this->assertEquals(
+            $this->getSettingsClass(Area::Lender)->default_company_registration_status,
+            Company::find($response->json('data.company_id'))->status->value
+        );
+    }
+
+    /**
+     * A basic feature test example.
+     *
+     * @return void
+     */
+    public function test_register_and_check_if_lender_does_order_require_approval_as_in_default_settings(): void
+    {
+        $response = $this->postJson('/api/v1/lender/register', [
+            'first_name' => 'Joe',
+            'last_name' => 'Doe',
+            'phone_country_code' => 'SA',
+            'phone_number' => '503811000',
+            'email' => 'test@uselynk.test',
+            'password' => 'Qwer@1234',
+            'password_confirmation' => 'Qwer@1234',
+            'source' => 'Postman',
+            'company_name' => 'test company1',
+            'company_unique_name' => 'lynk06',
+            'company_cr' => '1234567891',
+        ]);
+
+        $response->assertStatus(201)->assertJsonStructure(
+            [
+                'data' => [
+                    'token',
+                    'type',
+                    'company_id',
+                ],
+            ]
+        );
+
+        $this->assertEquals(
+            $this->getSettingsClass(Area::Lender)->default_does_order_require_approval,
+            Company::find($response->json('data.company_id'))->does_order_require_approval
+        );
+    }
+
+    /**
+     * A basic feature test example.
+     *
+     * @return void
+     */
+    public function test_register_and_check_if_lender_user_has_been_created_with_role_lender_admin(): void
+    {
+        $response = $this->postJson('/api/v1/lender/register', [
+            'first_name' => 'Joe',
+            'last_name' => 'Doe',
+            'phone_country_code' => 'SA',
+            'phone_number' => '503811000',
+            'email' => 'test@uselynk.test',
+            'password' => 'Qwer@1234',
+            'password_confirmation' => 'Qwer@1234',
+            'source' => 'Postman',
+            'company_name' => 'test company1',
+            'company_unique_name' => 'lynk06',
+            'company_cr' => '1234567891',
+        ]);
+
+        $response->assertStatus(201)->assertJsonStructure(
+            [
+                'data' => [
+                    'token',
+                    'type',
+                    'company_id',
+                ],
+            ]
+        );
+
+        $this->assertTrue(
+            User::where('company_id', $response->json('data.company_id'))
+                ->first()
+                ->hasRole(Role::LenderAdmin)
         );
     }
 
@@ -309,7 +501,11 @@ class LenderRegistrationTest extends TestCase
 
     public function test_register_lender_throw_exception_on_exist_company_unique_name(): void
     {
-        $this->createCompany();
+        $this->createCompany(data: [
+            'name' => 'companyName',
+            'unique_name' => 'lynk05',
+            'company_cr' => '1234567891',
+        ]);
 
         $response = $this->postJson('/api/v1/lender/register', [
             'first_name' => 'youssof',
@@ -367,7 +563,11 @@ class LenderRegistrationTest extends TestCase
 
     public function test_register_lender_throw_exception_on_exist_company_cr(): void
     {
-        $this->createCompany();
+        $this->createCompany(data: [
+            'name' => 'companyName',
+            'unique_name' => 'lynk05',
+            'company_cr' => '1234567891',
+        ]);
 
         $response = $this->postJson('/api/v1/lender/register', [
             'first_name' => 'youssof',

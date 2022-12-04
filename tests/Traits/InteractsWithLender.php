@@ -27,9 +27,16 @@ trait InteractsWithLender
         array $data = []
     ): array {
         $company = Company::factory()->create(array_merge([
-            'name' => 'companyName',
-            'unique_name' => 'lynk05',
-            'company_cr' => '1234567891',
+            'first_name' => 'firstName',
+            'last_name' => 'lastName',
+            'phone_country_code' => 'SA',
+            'phone_number' => '503811000',
+            'email' => 'test@uselynk.test',
+            'password' => 'Qwer@1234',
+            'source' => 'Postman',
+            'company_name' => 'companyName',
+            'company_unique_name' => 'lynk05',
+            'company_cr' => '12345678910',
         ], $data));
 
         $wallet = $company->createWallet(WalletType::CompanyWallet, 'SAR');
