@@ -2,13 +2,12 @@
 
 namespace Tests\Traits;
 
-use App\Actions\GetSettingsClassInstanceAction;
-use Spatie\LaravelSettings\Settings;
+use App\Actions\Contracts\GetSettingsClassInstance;
 
 trait InteractsWithSettings
 {
-    public function getSettingsClass(string $area): Settings
+    public function getSettingsClass(string $area)
     {
-        return (new GetSettingsClassInstanceAction())->handle($area);
+        return app(GetSettingsClassInstance::class)->handle($area);
     }
 }
