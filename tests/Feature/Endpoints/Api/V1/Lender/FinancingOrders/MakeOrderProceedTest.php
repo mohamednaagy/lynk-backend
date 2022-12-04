@@ -165,7 +165,7 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
-    public function test_make_order_cannot_proceed_on_is_verification_required_set_as_true(): void
+    public function test_make_order_proceed_cannot_work_if_is_verification_required_set_as_true(): void
     {
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
