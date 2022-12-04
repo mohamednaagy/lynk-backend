@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
-use App\Http\Controllers\Api\V1\Admin\Companies\ChargeBalanceManually;
+use App\Http\Controllers\Api\V1\Admin\Companies\ChargeLenderBalanceManually;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyBalance;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
@@ -74,7 +74,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/{company}/orders/{order}', [FinancingOrderController::class, 'show']);
             Route::get('{company}/orders', [FinancingOrderController::class, 'index']);
             Route::get('/{company}/transactions ', [FinancingOrderTransactionController::class, 'index']);
-            Route::post('/{company}/wallet/manual-deposit', ChargeBalanceManually::class);
+            Route::post('/{company}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{company}/settings ', GetCompanySetting::class);
         });
 

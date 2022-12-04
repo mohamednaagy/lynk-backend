@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Companies;
 
-use App\Actions\Contracts\Companies\ChargeBalanceManually  as ChargeBalanceManuallyInterface;
+use App\Actions\Contracts\Companies\ChargeLenderBalanceManually as ChargeLenderBalanceManuallyInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\StoreTransactionRequest;
 use App\Models\Company;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
-class ChargeBalanceManually extends Controller
+class ChargeLenderBalanceManually extends Controller
 {
     /**
      * Handle the incoming request.
@@ -20,7 +20,7 @@ class ChargeBalanceManually extends Controller
     public function __invoke(
         StoreTransactionRequest $storeTransactionRequest,
         Company $company,
-        ChargeBalanceManuallyInterface $chargeBalanceManuallyInterface
+        ChargeLenderBalanceManuallyInterface $chargeBalanceManuallyInterface
     ): JsonResponse {
         return DB::transaction(function () use ($storeTransactionRequest, $company, $chargeBalanceManuallyInterface) {
             $chargeBalanceManuallyInterface->handle($company, $storeTransactionRequest->validated());

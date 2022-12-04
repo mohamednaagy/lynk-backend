@@ -2,7 +2,7 @@
 
 namespace App\Actions\Companies;
 
-use App\Actions\Contracts\Companies\ChargeBalanceManually;
+use App\Actions\Contracts\Companies\ChargeLenderBalanceManually;
 use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
@@ -10,9 +10,8 @@ use App\Enums\WalletType;
 use App\Models\Company;
 use Cknow\Money\Money;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Config;
 
-class ChargeBalanceManuallyAction implements ChargeBalanceManually
+class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
 {
     public function __construct(protected CreateTransactions $createTransactions)
     {
@@ -20,10 +19,12 @@ class ChargeBalanceManuallyAction implements ChargeBalanceManually
 
     public function handle(Company $company, array $data)
     {
+        $wallet = $company->getWallet(WalletType::CompanyWallet);
+
         $transaction = $this->createTransactions->handle(
-            $company->getWallet(WalletType::CompanyWallet),
+            $wallet,
             TransactionReason::ManualDeposit,
-            Money::parseByDecimal(Arr::get($data, 'amount'), Config::get('app.currency', 'SAR')),
+            Money::parseByDecimal(Arr::get($data, 'amount'), $wallet->currency),
             Arr::only($data, ['description_en', 'description_ar'])
         );
 
