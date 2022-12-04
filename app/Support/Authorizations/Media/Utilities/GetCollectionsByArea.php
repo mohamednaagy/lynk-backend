@@ -3,7 +3,7 @@
 namespace App\Support\Authorizations\Media\Utilities;
 
 use App\Enums\Area;
-use App\Enums\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 
 class GetCollectionsByArea
 {

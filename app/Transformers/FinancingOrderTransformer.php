@@ -19,6 +19,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'national_id',
         'amount',
         'selling_price',
+        'is_updatable',
         'is_approved',
         'status_reason',
         'creator',
@@ -104,6 +105,11 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeApprover(FinancingOrder $financingOrder)
     {
         return $this->primitive(optional($financingOrder->approver)->full_name);
+    }
+
+    public function includeIsUpdatable(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->is_updatable);
     }
 
     public function includeIsApproved(FinancingOrder $financingOrder)

@@ -15,6 +15,7 @@ use App\Mail\CompleteRegisterInvitation;
 use App\Models\Company;
 use App\Models\User;
 use App\Transformers\UserTransformer;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,11 +24,11 @@ use Illuminate\Support\Facades\Mail;
 class UserController extends Controller
 {
     public function index(
-        GetCompanyUsersRequest $getCompanyUsersRequest,
+        GetCompanyUsersRequest $request,
         Company $company,
         GetPaginatedCompanyUsers $getPaginatedCompanyUsers
     ): JsonResponse {
-        return fractal($getPaginatedCompanyUsers->handle($company), new UserTransformer)
+        return fractal($getPaginatedCompanyUsers->handle($company), new UserTransformer(Area::Lender))
             ->parseIncludes([
                 'id',
                 'first_name',
@@ -37,6 +38,7 @@ class UserController extends Controller
                 'phone_country_code',
                 'formatted_phone_number',
                 'orders_count',
+                'role',
             ])->respond();
     }
 
@@ -46,6 +48,8 @@ class UserController extends Controller
      * @param  Request  $request
      * @param  User  $user
      * @return JsonResponse
+     *
+     * @throws AuthorizationException
      */
     public function show(Request $request, User $user): JsonResponse
     {

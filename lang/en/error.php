@@ -1,9 +1,11 @@
 <?php
 
+use App\Enums\FinancingOrderStatus;
+
 return [
     'order_cannot_be_approved_because_it_is_approved' => 'This order is already approved',
     'enquiry_closed_already' => 'This Enquiry is already closed',
-    'unable_to_cancelled' => 'This order can\'t be cancelled',
+    'unable_to_cancel_order' => 'Order cannot be cancelled',
     'media_class_not_supported' => 'This class not supported',
     'phone_number_does_not_belong_to_national_id' => 'Phone number doesn’t belong to National ID/Iqama',
     'invalid_person_id' => 'Invalid National ID',
@@ -17,6 +19,7 @@ return [
     'invalid_operator_tcn' => 'Invalid operator TCN',
     'no_enough_balance' => 'No enough balance',
     'order_status_doesnt_follow_sequence' => 'Order status cannot be updated because it doesn\'t follow the right sequence',
+    'order_cannot_be_updated' => 'Order can be updated only if the status is '.FinancingOrderStatus::joinDescription(FinancingOrderStatus::AllowedToUpdateStatuses),
     'webhook_type_not_supported' => 'Unsupported webhook type',
     'must_verify_email' => 'You must verify your email address',
     'x_company_invalid' => 'Invalid company',

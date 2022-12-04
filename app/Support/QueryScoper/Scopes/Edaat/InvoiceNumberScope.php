@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\QueryScoper\Scopes\Lender\Edaat;
+namespace App\Support\QueryScoper\Scopes\Edaat;
 
 use App\Support\QueryScoper\QueryScoper;
 use Illuminate\Database\Eloquent\Builder;
@@ -46,6 +46,6 @@ class InvoiceNumberScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data): Builder
     {
-        return $builder->Where('invoice_number', $data['invoice_number']);
+        return $builder->where('invoice_number', $data['invoice_number']);
     }
 }

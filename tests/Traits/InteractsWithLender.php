@@ -5,8 +5,10 @@ namespace Tests\Traits;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\WalletType;
 use App\Models\Company;
+use App\Models\EdaatInvoice;
 use App\Models\FinancingOrder;
 use App\Models\User;
+use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -37,12 +39,11 @@ trait InteractsWithLender
             'company_cr' => '12345678910',
         ], $data));
 
-        $wallet = $company->createWallet([
-            'name' => WalletType::CompanyWallet,
-            'slug' => WalletType::CompanyWallet,
-        ]);
+        $wallet = $company->createWallet(WalletType::CompanyWallet, 'SAR');
 
-        $wallet->depositFloat($walletInitialAmount);
+        app()->make(TransactionServiceInterface::class)->deposit(
+            $wallet, \money($walletInitialAmount, 'SAR'), 1, 1, []
+        );
 
         return [
             $company,
@@ -93,6 +94,17 @@ trait InteractsWithLender
             'selling_price' => 220,
             'status' => FinancingOrderStatus::WaitingClientWakala,
             'is_verification_required' => true,
+        ], $data));
+    }
+
+    public function createEdaatInvoice(int $companyId, int $userId, array $data = []): Model|Builder
+    {
+        return EdaatInvoice::query()->create(array_merge([
+            'company_id' => $companyId,
+            'creator_id' => $userId,
+            'invoice_number' => 1,
+            'amount' => 1,
+            'status' => 1,
         ], $data));
     }
 }

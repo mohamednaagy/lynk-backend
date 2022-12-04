@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\Admin\Companies\ChargeLenderBalanceManually;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyBalance;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
+use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyStatuses;
 use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
 use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
@@ -68,6 +69,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::put('wakala-templates/{type}', [WakalaTemplateController::class, 'update'])
             ->where('type', 'client|company');
 
+        Route::get('companies/statuses', GetCompanyStatuses::class);
+
         Route::prefix('companies')->group(function () {
             Route::put('/{company}/status', UpdateCompanyStatus::class);
             Route::get('/{company}/balance ', GetCompanyBalance::class);
@@ -81,10 +84,11 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('companies', CompanyController::class);
         Route::apiResource('companies.users', UserController::class)->shallow();
 
-        Route::prefix('wallet')->group(function () {
-            Route::get('/edaat-invoices', GetEdaatInvoices::class);
-            Route::post('/edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
-        });
+        Route::apiResource('companies', CompanyController::class);
+        Route::apiResource('companies.users', UserController::class)->shallow();
+
+        Route::get('edaat-invoices', GetEdaatInvoices::class);
+        Route::post('edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
 
         Route::apiResource('enquiries', EnquiryController::class);
         Route::apiResource('enquiries.replies', EnquiryReplyController::class);

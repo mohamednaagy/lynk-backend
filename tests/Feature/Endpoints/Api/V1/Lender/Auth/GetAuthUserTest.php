@@ -1,31 +1,27 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Edaat;
+namespace Tests\Feature\Endpoints\Api\V1\Lender\Auth;
 
+use App\Enums\Area;
 use App\Enums\Role;
 use App\Models\Company;
-use App\Models\EdaatInvoice;
 use App\Models\User;
 use App\Models\Wallet;
-use App\Transformers\EdaatInvoiceTransformer;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
+use App\Transformers\UserTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class IndexInvoiceTest extends TestCase
+class GetAuthUserTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
     private static Company $company;
 
-    private static User $userLender;
-
     private static Wallet $wallet;
 
-    private static Builder|Model $edaatInvoice;
+    private static User $userLender;
 
     /**
      * @return void
@@ -36,35 +32,48 @@ class IndexInvoiceTest extends TestCase
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$edaatInvoice = $this->createEdaatInvoice(self::$company->id, self::$userLender->id);
     }
 
-    public function test_un_auth_user_cant_index_edaat_invoices_with_valid_data()
+    /**
+     * @return void
+     */
+    public function test_that_un_auth_user_cant_fetch_his_details(): void
     {
         $this->withHeader('X-Company', self::$company->getOriginal('id'))
-            ->getJson('api/v1/lender/edaat-invoices')
+            ->getJson('api/v1/lender/auth')
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
                 'message' => 'Unauthenticated.',
             ]);
     }
 
-    public function test_auth_user_can_index_edaat_invoices_with_valid_data()
+    /**
+     * @return void
+     */
+    public function test_that_lender_can_fetch_his_details(): void
     {
-        $this->actingAs(self::$userLender)
+        $data = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
-            ->getJson('api/v1/lender/edaat-invoices')
+            ->getJson('api/v1/lender/auth')
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(EdaatInvoice::query()->paginate(), new EdaatInvoiceTransformer())
+                fractal(self::$userLender->load(['roles']), new UserTransformer(Area::Lender))
                     ->parseIncludes([
                         'id',
-                        'invoice_number',
-                        'amount',
-                        'amount_formatted',
-                        'company_name',
-                        'company_number',
-                        'status',
+                        'first_name',
+                        'last_name',
+                        'email',
+                        'is_email_verified',
+                        'role',
+                        'company.id',
+                        'company.name',
+                        'company.status',
+                        'company.id',
+                        'permissions',
+                        'locale',
+                        'phone_number',
+                        'phone_country_code',
+                        'formatted_phone_number',
                     ])->respond()->getData(true)
             );
     }
