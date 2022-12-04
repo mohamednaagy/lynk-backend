@@ -10,7 +10,7 @@ use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
