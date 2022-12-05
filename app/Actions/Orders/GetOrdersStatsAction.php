@@ -26,8 +26,9 @@ class GetOrdersStatsAction implements GetOrdersStats
     {
         return [
             'total_orders' => $this->baseQuery()->count(),
-            'total_cancelled_orders' => $this->baseQuery()->canceled()->count(),
+            'total_cancelled_orders' => $this->baseQuery()->cancelled()->count(),
             'total_active_orders' => $this->baseQuery()->active()->count(),
+            'total_require_action_orders' => $this->baseQuery()->requireAction()->count(),
             'total_completed_orders' => $this->baseQuery()->completed()->count(),
         ];
     }

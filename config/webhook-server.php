@@ -4,6 +4,8 @@ use App\Enums\WebhookType;
 
 return [
 
+    'secret_key_length' => 40,
+
     /*
      *  The default queue that should be used to send webhook requests.
      */

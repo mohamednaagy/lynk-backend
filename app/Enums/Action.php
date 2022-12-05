@@ -33,5 +33,7 @@ final class Action extends Enum
 
     const Charge = 'charge';
 
+    const Proceed = 'proceed';
+
     const SyncStatusWithEdaat = 'syncStatusWithEdaat';
 }

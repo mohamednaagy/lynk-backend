@@ -12,6 +12,7 @@ class LenderApiUser
             Action::Create,
             Action::Index,
             Action::Show,
+            Action::Proceed,
         ],
     ];
 }

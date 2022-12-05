@@ -58,11 +58,11 @@ class ProcessDmccCancelNotification implements ShouldQueue
 
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::Canceled)) {
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::Cancelled)) {
                 return;
             }
 
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::Canceled);
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::Cancelled);
 
             $trader->createTraderOrderHistory(
                 $traderOrder,

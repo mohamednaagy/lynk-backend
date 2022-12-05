@@ -182,12 +182,12 @@ class GrantifyManager extends Manager
      * Sync direct permissions to a model.
      *
      * @param  Grantifiable  $grantifiable
-     * @param  array  $permission
+     * @param  array  $permissions
      * @return void
      */
-    public function syncPermissionToModel(Grantifiable $grantifiable, array $permission): void
+    public function syncPermissionToModel(Grantifiable $grantifiable, array $permissions): void
     {
-        $permission = $this->transformSubjectActionToPermissionName($permission);
+        $permission = $this->transformSubjectActionToPermissionName($permissions);
         $grantifiable->syncPermissions($permission);
     }
 

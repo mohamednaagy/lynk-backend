@@ -3,19 +3,17 @@
 namespace Tests\Feature\Endpoints\Api\V1\Edaat;
 
 use App\Enums\Role;
-use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\User;
-use Bavix\Wallet\Internal\Exceptions\ExceptionInterface;
-use Bavix\Wallet\Models\Wallet;
+use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Grantify\Facades\Grantify;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
+use Tests\Traits\InteractsWithLender;
 
 class CreateInvoiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, InteractsWithLender;
 
     private static Company $company;
 
@@ -25,43 +23,16 @@ class CreateInvoiceTest extends TestCase
 
     /**
      * @return void
-     *
-     * @throws ExceptionInterface
      */
     public function setUp(): void
     {
         parent::setUp();
 
-        self::$company = Company::factory()->create([
-            'first_name' => 'firstName',
-            'last_name' => 'lastName',
-            'phone_country_code' => 'SA',
-            'phone_number' => '503811000',
-            'email' => 'test@uselynk.test',
-            'password' => 'Qwer@1234',
-            'source' => 'Postman',
-            'company_name' => 'companyName',
-            'company_unique_name' => 'lynk05',
-            'company_cr' => '12345678910',
-        ]);
-
-        self::$wallet = self::$company->createWallet([
-            'name' => WalletType::CompanyWallet,
-            'slug' => WalletType::CompanyWallet,
-        ]);
-
-        self::$wallet->deposit(2000);
-
-        self::$userLender = User::factory()->create([
-            'email' => 'lender@bim.com',
-            'password' => bcrypt('12345678'),
-            'company_id' => self::$company->getOriginal('id'),
-        ]);
-
-        Grantify::assignRoleToModel(self::$userLender, Role::LenderAdmin);
+        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
     }
 
-    public function testUnAuthUserCantCreateEdaatInvoiceWithValidData()
+    public function test_un_auth_user_cant_create_edaat_invoice_with_valid_data()
     {
         $this->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson('api/v1/lender/edaat-invoices')
@@ -71,7 +42,7 @@ class CreateInvoiceTest extends TestCase
             ]);
     }
 
-    public function testAuthUserCantCreateEdaatInvoiceWithoutOrderCount()
+    public function test_auth_user_cant_create_edaat_invoice_without_order_count()
     {
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
@@ -87,7 +58,7 @@ class CreateInvoiceTest extends TestCase
             ]);
     }
 
-    public function testAuthUserCanCreateEdaatInvoiceWithValidData()
+    public function test_auth_user_can_create_edaat_invoice_with_valid_data()
     {
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))

@@ -31,4 +31,10 @@ class ErrorCode
     public const WEBHOOK_LIMIT_TYPE_NOT_FOUND = 1012;
 
     public const X_COMPANY_INVALID = 1013;
+
+    public const BALANCE_NOT_ENOUGH = 1014;
+
+    public const COMPANY_NOT_ACTIVE = 1015;
+
+    public const ORDER_NOT_UPDATABLE = 1016;
 }

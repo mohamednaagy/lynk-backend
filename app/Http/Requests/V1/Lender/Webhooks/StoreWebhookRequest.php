@@ -27,7 +27,7 @@ class StoreWebhookRequest extends FormRequest
     public function rules()
     {
         return [
-            'url' => ['required', 'url', 'max:265'],
+            'url' => ['bail', 'required', 'url', 'active_url', 'max:265'],
             'type' => ['required', new EnumValue(WebhookType::class), new WebhookTypeLimitRule(tenant())],
         ];
     }

@@ -5,19 +5,20 @@ namespace App\Http\Controllers\Api\V1\Lender\Wallets;
 use App\Actions\Contracts\Wallets\CheckEdaatInvoiceStatus as CheckEdaatInvoiceStatusInterface;
 use App\Http\Controllers\Controller;
 use App\Models\EdaatInvoice;
-use Bavix\Wallet\Internal\Service\DatabaseServiceInterface;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class CheckEdaatInvoiceStatus extends Controller
 {
     public function __invoke(
         CheckEdaatInvoiceStatusInterface $checkEdaatInvoiceStatus,
-        EdaatInvoice $invoice
+        int $invoice
     ): JsonResponse {
-        app(DatabaseServiceInterface::class)->transaction(static function () use (
+        DB::multipleTransaction(function () use (
             $checkEdaatInvoiceStatus,
             $invoice
         ) {
+            $invoice = EdaatInvoice::lockForUpdate()->findOrFail($invoice);
             $checkEdaatInvoiceStatus->handle($invoice);
         });
 

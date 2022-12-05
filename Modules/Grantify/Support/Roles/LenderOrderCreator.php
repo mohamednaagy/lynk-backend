@@ -12,6 +12,8 @@ class LenderOrderCreator
             Action::Create,
             Action::Index,
             Action::Show,
+            Action::Edit,
+            Action::Proceed,
         ],
     ];
 }

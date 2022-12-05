@@ -3,6 +3,7 @@
 namespace App\Actions\Wallets;
 
 use App\Actions\Contracts\Wallets\GetTransactions;
+use App\Enums\WalletType;
 
 class GetTransactionsAction implements GetTransactions
 {
@@ -11,6 +12,6 @@ class GetTransactionsAction implements GetTransactions
      */
     public function handle(): mixed
     {
-        return tenant()->transactions()->paginate();
+        return tenant()->transactions(WalletType::CompanyWallet)->paginate();
     }
 }
