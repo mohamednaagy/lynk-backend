@@ -7,6 +7,7 @@ use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\MakeOrderProceedRequest;
 use App\Models\FinancingOrder;
@@ -18,6 +19,15 @@ use Throwable;
 
 class MakeOrderProceed extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'role:'.implode('|', [
+                Role::LenderAdmin, Role::LenderSupervisor, Role::LenderApiUser,
+            ])
+        );
+    }
+
     /**
      * Handle the incoming request.
      *
