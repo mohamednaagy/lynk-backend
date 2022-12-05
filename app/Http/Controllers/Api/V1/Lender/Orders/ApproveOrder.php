@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Lender\Orders;
 use App\Actions\Contracts\Orders\ApproveOrder as ApproveOrderInterface;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Lender\Orders\ApproveOrderRequest;
 use App\Models\FinancingOrder;
 use App\Notifications\OrderApproved;
 use Illuminate\Http\JsonResponse;
@@ -17,14 +18,14 @@ class ApproveOrder extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  Request  $request
+     * @param  ApproveOrderRequest  $approveOrderRequest
      * @param  ApproveOrderInterface  $approveOrder
      * @param  int  $order
      * @return JsonResponse
      */
-    public function __invoke(Request $request, ApproveOrderInterface $approveOrder, int $order): JsonResponse
+    public function __invoke(ApproveOrderRequest $approveOrderRequest, ApproveOrderInterface $approveOrder, int $order): JsonResponse
     {
-        return DB::transaction(function () use ($request, $approveOrder, $order) {
+        return DB::transaction(function () use ($approveOrderRequest, $approveOrder, $order) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
             if ($order->status->cantMoveTo(FinancingOrderStatus::Approved)) {
                 return $this->errorResponse(
@@ -33,10 +34,12 @@ class ApproveOrder extends Controller
                 );
             }
 
-            $approveOrder->handle($order, $request->user());
+            $data = $approveOrderRequest->validated();
 
-            if ($order->creator->id !== $request->user()->id) {
-                $order->creator->notify(new OrderApproved($order, $request->user()));
+            $approveOrder->handle($order, $approveOrderRequest->user());
+
+            if ($order->creator->id !== $approveOrderRequest->user()->id) {
+                $order->creator->notify(new OrderApproved($order, $approveOrderRequest->user(), $data['redirect_url']));
             }
 
             return $this->successResponse();

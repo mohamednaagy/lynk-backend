@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'subject' => 'Order #:orderId Approved',
+    'subject' => 'Order #:order_id Approved',
     'greeting' => 'Hello',
-    'approved_message' => 'Order #:orderId has been approved at :approvedAt',
+    'approved_message' => 'Order #:order_id has been approved at :approved_at',
     'view_order' => 'View Order',
 ];

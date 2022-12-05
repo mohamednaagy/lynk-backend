@@ -4,22 +4,33 @@ namespace App\Notifications;
 
 use App\Models\FinancingOrder;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\URL;
 
 class OrderApproved extends Notification
 {
     use Queueable;
+
+    private Carbon $approvalTime;
+
+    private $url;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct(private FinancingOrder $financingOrder, private User $approver)
+    public function __construct(private FinancingOrder $financingOrder, private User $approver, string $externalUrl)
     {
-        //
+        $this->approvalTime = new Carbon();
+        $this->url = URL::signedExternalRoute(
+            $externalUrl,
+            'api.v1.orders.show',
+            ['order' => $this->financingOrder->id]
+        );
     }
 
     /**
@@ -43,16 +54,16 @@ class OrderApproved extends Notification
     {
         return (new MailMessage)
             ->subject(trans('emails/order-approved.subject', [
-                'orderId' => $this->financingOrder->getOriginal('id'),
+                'order_id' => $this->financingOrder->id,
             ]))
-            ->greeting(trans('emails/order-approved.greeting'))
+            ->greeting(__('Hello'))
             ->line(trans('emails/order-approved.approved_message', [
-                'orderId' => $this->financingOrder->getOriginal('id'),
-                'approvedAt' => now()->format('Y-m-d H:i:s'),
+                'order_id' => $this->financingOrder->id,
+                'approved_at' => $this->approvalTime->toDateTimeString(),
             ]))
             ->action(
                 trans('emails/order-approved.view_order'),
-                url('/api/v1/lender/orders/'.$this->financingOrder->getOriginal('id'))
+                $this->url
             );
     }
 
@@ -67,7 +78,7 @@ class OrderApproved extends Notification
         return [
             'approver_id' => $this->approver->id,
             'approver_name' => $this->approver->full_name,
-            'approved_at' => now(),
+            'approved_at' => $this->approvalTime,
         ];
     }
 }
