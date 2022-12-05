@@ -152,9 +152,9 @@ class OrderController extends Controller
                 );
 
                 // deduct the cost from the wallet
-                $deductOrderCreationFee->handle($financingOrder);
+                $transaction = $deductOrderCreationFee->handle($financingOrder);
 
-                $deductVatPercentage->handle($financingOrder);
+                $deductVatPercentage->handle($financingOrder, $transaction);
 
                 return fractal($financingOrder, new FinancingOrderTransformer())
                     ->parseIncludes([
