@@ -10,7 +10,7 @@ final class TransactionReason extends Enum
 
     const DepositByEdaat = 2;
 
-    const VatPercentageFee = 3;
+    const ManualDeposit = 3;
 
-    const ManualDeposit = 4;
+    const VatPercentageFee = 4;
 }
