@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Middleware;
+namespace Middlewares;
 
 use App\Actions\GetSettingsClassInstanceAction;
 use App\Enums\Area;
