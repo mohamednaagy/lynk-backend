@@ -35,6 +35,4 @@ final class Subject extends Enum
     const Enquiries = 'enquiries';
 
     const EnquiryReplies = 'enquiryReplies';
-
-    const Companies = 'Companies';
 }

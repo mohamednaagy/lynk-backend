@@ -6,19 +6,26 @@ use App\Models\Company;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\URL;
 
-class CompanyRegistered extends Notification
+class LenderRegistered extends Notification
 {
     use Queueable;
+
+    private $url;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct(private Company $company)
+    public function __construct(private Company $company, string $externalUrl)
     {
-        //
+        $this->url = URL::signedExternalRoute(
+            $externalUrl,
+            'api.v1.admins.companies.show',
+            ['company' => $this->company->id]
+        );
     }
 
     /**
@@ -41,18 +48,18 @@ class CompanyRegistered extends Notification
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject(trans('emails/company-registered.subject', [
-                'companyName' => $this->company->getOriginal('name'),
-                'appName' => config('app.name'),
+            ->subject(trans('emails/lender-registered.subject', [
+                'company_name' => $this->company->name,
+                'app_name' => config('app.name'),
             ]))
-            ->greeting(trans('emails/company-registered.greeting'))
-            ->line(trans('emails/company-registered.registered_message', [
-                'companyName' => $this->company->getOriginal('name'),
-                'statusDescription' => $this->company->status->description,
+            ->greeting(__('Hello'))
+            ->line(trans('emails/lender-registered.registered_message', [
+                'company_name' => $this->company->name,
+                'status_description' => $this->company->status->description,
             ]))
             ->action(
-                trans('emails/company-registered.view_information'),
-                url('/api/v1/admin/companies/'.$this->company->getOriginal('id'))
+                trans('emails/lender-registered.view_information'),
+                $this->url
             );
     }
 
@@ -67,7 +74,7 @@ class CompanyRegistered extends Notification
         return [
             'company_id' => $this->company->id,
             'company_name' => $this->company->name,
-            'registered_at' => now(),
+            'registered_at' => $this->company->created_at,
         ];
     }
 }

@@ -8,6 +8,7 @@ use App\Actions\Contracts\LoginUser;
 use App\Enums\Area;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\RegisterLenderRequest;
+use App\Jobs\Lenders\NotifyAdminsAboutLenderRegistration;
 use Cknow\Money\Money;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -38,6 +39,8 @@ class Register extends Controller
             );
 
             $lender = $registerLender->handle($data);
+
+            dispatch(new NotifyAdminsAboutLenderRegistration(tenant(), $data['redirect_url']));
 
             return $this->successResponse(
                 $loginUser->handle($lender, $request->validated('source'), $request),

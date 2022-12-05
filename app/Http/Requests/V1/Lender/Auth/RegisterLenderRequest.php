@@ -4,6 +4,8 @@ namespace App\Http\Requests\V1\Lender\Auth;
 
 use App\Models\Company;
 use App\Rules\CompanyUniqueNameRule;
+use App\Rules\HostWhitelistRule;
+use App\Rules\UrlProtocolRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -44,6 +46,7 @@ class RegisterLenderRequest extends FormRequest
                 'size:10',
             ],
             'source' => ['required', 'string'],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
         ];
     }
 }

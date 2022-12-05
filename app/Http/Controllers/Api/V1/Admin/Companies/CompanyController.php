@@ -11,7 +11,6 @@ use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\StoreCompanyRequest;
 use App\Http\Requests\V1\Admin\Companies\UpdateCompanyRequest;
-use App\Jobs\Company\CompanyRegisteredNotification;
 use App\Models\Company;
 use App\Transformers\CompanyTransformer;
 use Cknow\Money\Money;
@@ -57,10 +56,6 @@ class CompanyController extends Controller
             $company = $createCompany->handle($data);
 
             $company->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
-            $company = $createCompany->handle($data);
-            dispatch(new CompanyRegisteredNotification($company));
-
-            $company = $createCompany->handle($data);
 
             return fractal($company, new CompanyTransformer())
                 ->parseIncludes([
