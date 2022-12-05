@@ -1,25 +1,25 @@
 <?php
 
-namespace App\Support\QueryScoper\Scopes\Lender\Edaat;
+namespace App\Support\QueryScoper\Scopes\FinancingOrders;
 
-use App\Models\Company;
 use App\Support\QueryScoper\QueryScoper;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class InvoiceCompanyScope extends QueryScoper
+class OrderSortScope extends QueryScoper
 {
     /**
-     * Prepare data for violation
+     * Prepare data for vailation
      *
      * @return array
      */
-    public function prepareData(): array
+    public function prepareData()
     {
         return [
-            'company_id' => Request::query('company_id'),
+            'sort' => Request::query('sort'),
+            'direction' => Request::query('direction'),
         ];
     }
 
@@ -29,12 +29,13 @@ class InvoiceCompanyScope extends QueryScoper
      * @param  array  $data
      * @return \Illuminate\Contracts\Validation\Validator
      */
-    public function validator($data): \Illuminate\Contracts\Validation\Validator
+    public function validator($data)
     {
         return Validator::make(
             $data,
             [
-                'company_id' => ['required', 'int', Rule::exists(Company::class, 'id')],
+                'sort' => ['required', Rule::in('created_at', 'amount')],
+                'direction' => ['nullable', Rule::in('asc', 'desc')],
             ]
         );
     }
@@ -46,8 +47,8 @@ class InvoiceCompanyScope extends QueryScoper
      * @param  array  $data
      * @return Builder
      */
-    public function prepareBuilder($builder, $data): Builder
+    public function prepareBuilder($builder, $data)
     {
-        return $builder->where('company_id', $data['company_id']);
+        return $builder->orderBy($data['sort'], $data['direction'] ?? 'asc');
     }
 }

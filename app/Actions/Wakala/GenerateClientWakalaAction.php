@@ -3,34 +3,38 @@
 namespace App\Actions\Wakala;
 
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
+use App\Actions\Contracts\Wakala\GetClientWakalaText;
+use App\Actions\Contracts\Wakala\GetWakalaTemplate;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class GenerateClientWakalaAction implements GenerateClientWakala
 {
-    const FILE_PATH = 'client_wakala';
-
     protected string $template = 'templates.client-wakala';
 
-    protected string $collectionName = FinancingOrderMediaCollection::ClientWakala;
+    protected string $collectionName = FinancingOrderMediaCollection::LenderWakala;
 
     protected string $filePath = '';
 
-    /**
-     * @param  FinancingOrder  $financingOrder
-     * @return Media
-     */
-    public function handle(FinancingOrder $financingOrder): Media
+    public function __construct(
+        protected GetWakalaTemplate $getWakalaTemplate,
+        protected GetClientWakalaText $getClientWakalaText
+    ) {
+    }
+
+    public function handle(FinancingOrder $financingOrder)
     {
-        $html = view($this->getTemplate(), [
-            'clientName' => $financingOrder->company->name,
+        $lenderTemplate = $this->getWakalaTemplate->handle('client')['wakala_template'];
+        $template = $this->getClientWakalaText->handle($financingOrder, $lenderTemplate);
+
+        $wakalaTemplate = view($this->getTemplate(), [
+            'template' => $template,
         ])->render();
 
         $path = $this->getFilePath($financingOrder).'.pdf';
 
-        return PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($financingOrder) {
+        return PdfGenerator::outputFromHtml($wakalaTemplate, $path, function ($fileResource) use ($financingOrder) {
             return $financingOrder->addMediaFromStream($fileResource)
                 ->usingFileName($financingOrder->getNationalId().'.pdf')
                 ->toMediaCollection($this->getCollectionName());
@@ -61,7 +65,7 @@ class GenerateClientWakalaAction implements GenerateClientWakala
     public function getFilePath(FinancingOrder $financingOrder)
     {
         if (empty($this->filePath)) {
-            return $financingOrder->getKey().DIRECTORY_SEPARATOR.self::FILE_PATH.DIRECTORY_SEPARATOR.$financingOrder->getNationalId();
+            return $financingOrder->getKey().'-client-wakala';
         }
 
         return $this->filePath;

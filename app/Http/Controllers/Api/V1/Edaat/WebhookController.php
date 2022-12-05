@@ -9,6 +9,7 @@ use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Models\EdaatInvoice;
 use App\Support\Edaat\EdaatService;
+use Cknow\Money\Money;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -29,8 +30,8 @@ class WebhookController extends Controller
 
                 $createTransactions->handle(
                     $wallet,
-                    $invoice->amount,
                     TransactionReason::DepositByEdaat,
+                    Money::parseByDecimal($invoice->amount, $wallet->currency),
                     [
                         'invoice_number' => $invoice->invoice_number,
                     ]

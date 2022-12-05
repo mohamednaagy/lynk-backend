@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Support\QueryScoper\Scopes\Lender\Edaat;
+namespace App\Support\QueryScoper\Scopes\Edaat;
 
+use App\Models\Company;
 use App\Support\QueryScoper\QueryScoper;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
-class InvoiceNumberScope extends QueryScoper
+class InvoiceCompanyScope extends QueryScoper
 {
     /**
      * Prepare data for violation
@@ -17,7 +19,7 @@ class InvoiceNumberScope extends QueryScoper
     public function prepareData(): array
     {
         return [
-            'invoice_number' => Request::query('invoice_number'),
+            'company_id' => Request::query('company_id'),
         ];
     }
 
@@ -32,7 +34,7 @@ class InvoiceNumberScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'invoice_number' => ['required', 'string', 'max:255'],
+                'company_id' => ['required', 'integer', Rule::exists(Company::class, 'id')],
             ]
         );
     }
@@ -46,6 +48,6 @@ class InvoiceNumberScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data): Builder
     {
-        return $builder->Where('invoice_number', $data['invoice_number']);
+        return $builder->where('company_id', $data['company_id']);
     }
 }

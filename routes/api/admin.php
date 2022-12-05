@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
+use App\Http\Controllers\Api\V1\Admin\Companies\ChargeLenderBalanceManually;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyBalance;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
@@ -76,6 +77,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/{company}/orders/{order}', [FinancingOrderController::class, 'show']);
             Route::get('{company}/orders', [FinancingOrderController::class, 'index']);
             Route::get('/{company}/transactions ', [FinancingOrderTransactionController::class, 'index']);
+            Route::post('/{company}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{company}/settings ', GetCompanySetting::class);
         });
 
@@ -85,10 +87,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('companies', CompanyController::class);
         Route::apiResource('companies.users', UserController::class)->shallow();
 
-        Route::prefix('wallet')->group(function () {
-            Route::get('/edaat-invoices', GetEdaatInvoices::class);
-            Route::post('/edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
-        });
+        Route::get('edaat-invoices', GetEdaatInvoices::class);
+        Route::post('edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
 
         Route::apiResource('enquiries', EnquiryController::class);
         Route::apiResource('enquiries.replies', EnquiryReplyController::class);
