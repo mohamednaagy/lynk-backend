@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Orders\ApproveOrder as ApproveOrderInterface;
-use App\Enums\Area;
+use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
@@ -21,8 +21,6 @@ class ApproveOrder extends Controller
             'role:'.implode('|', [
                 Role::LenderAdmin, Role::LenderSupervisor,
             ]),
-            'checkCompanyStatus',
-            'verified.email:'.Area::Lender,
         ]
         );
     }
@@ -42,7 +40,8 @@ class ApproveOrder extends Controller
             if ($order->status->cantMoveTo(FinancingOrderStatus::Approved)) {
                 return $this->errorResponse(
                     __('error.order_cannot_be_approved_because_it_is_approved'),
-                    Response::HTTP_BAD_REQUEST
+                    Response::HTTP_BAD_REQUEST,
+                    ErrorCode::ORDER_ALREADY_APPROVED
                 );
             }
 
