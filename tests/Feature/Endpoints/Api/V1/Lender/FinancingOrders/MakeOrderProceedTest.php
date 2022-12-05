@@ -132,14 +132,14 @@ class MakeOrderProceedTest extends TestCase
 
         Grantify::syncRoleToModel(self::$userLender, Role::LenderBilling);
 
-        $response = $this->actingAs(self::$userLender)
+        $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
                 'case' => FinancingOrderProceedCase::ContractSigned,
             ])
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJson(
-                fn (AssertableJson $json) => $json->where('message', 'User does not have the right roles.')
+                fn (AssertableJson $json) => $json->where('message', 'User does not have the right permissions.')
                     ->etc()
             );
     }
@@ -147,7 +147,7 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_unauthorized_lender_creator_cannot_make_order_proceed_on_contract_signed(): void
+    public function test_that_unauthorized_lender_order_creator_can_make_order_proceed_on_contract_signed(): void
     {
         // update financing order status to commodity purchased to be able to move to contract signed
         self::$financingOrder->status = FinancingOrderStatus::CommodityPurchased;
@@ -160,10 +160,9 @@ class MakeOrderProceedTest extends TestCase
             ->postJson(self::$orderProceedUrl, [
                 'case' => FinancingOrderProceedCase::ContractSigned,
             ])
-            ->assertStatus(Response::HTTP_FORBIDDEN)
+            ->assertStatus(200)
             ->assertJson(
-                fn (AssertableJson $json) => $json->where('message', 'User does not have the right roles.')
-                    ->etc()
+                fn (AssertableJson $json) => $json->has('data')->where('data', [])
             );
     }
 
