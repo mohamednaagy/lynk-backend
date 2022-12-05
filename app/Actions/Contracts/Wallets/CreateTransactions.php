@@ -2,16 +2,19 @@
 
 namespace App\Actions\Contracts\Wallets;
 
-use Bavix\Wallet\Models\Wallet;
+use App\Models\Wallet;
+use Cknow\Money\Money;
 
 interface CreateTransactions
 {
     /**
+     * Summary of handle
+     *
      * @param  Wallet  $wallet
      * @param  int  $transactionReason
-     * @param  string  $amount
+     * @param  Money  $amount
      * @param  array  $meta
-     * @return string
+     * @return void
      */
-    public function handle(Wallet $wallet, int $transactionReason, string $amount, array $meta): string;
+    public function handle(Wallet $wallet, int $transactionReason, Money $amount, array $meta);
 }

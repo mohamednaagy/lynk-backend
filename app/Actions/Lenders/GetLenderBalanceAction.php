@@ -5,6 +5,7 @@ namespace App\Actions\Lenders;
 use App\Actions\Contracts\Lenders\GetLenderBalance;
 use App\Enums\WalletType;
 use App\Models\Company;
+use Money\Money;
 
 class GetLenderBalanceAction implements GetLenderBalance
 {
@@ -16,11 +17,12 @@ class GetLenderBalanceAction implements GetLenderBalance
      */
     public function handle(Company $company): array
     {
-        $wallet = $company->getWallet(WalletType::CompanyWallet);
+        $balance = $company->balance(WalletType::CompanyWallet);
 
         return [
-            'balance' => $wallet->balanceFloat,
-            'availableOrders' => floor($wallet->balanceFloat / $company->order_cost),
+            'balance' => $balance,
+            'availableOrders' => $balance->divide($company->order_cost->getAmount(), Money::ROUND_DOWN)
+                ->getAmount(),
         ];
     }
 }

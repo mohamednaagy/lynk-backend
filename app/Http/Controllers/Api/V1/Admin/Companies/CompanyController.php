@@ -3,30 +3,31 @@
 namespace App\Http\Controllers\Api\V1\Admin\Companies;
 
 use App\Actions\Contracts\Companies\CreateCompany;
-use App\Actions\Contracts\Companies\GetCompanies;
+use App\Actions\Contracts\Companies\GetPaginatedCompanies;
 use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Area;
+use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\StoreCompanyRequest;
 use App\Http\Requests\V1\Admin\Companies\UpdateCompanyRequest;
 use App\Jobs\Company\CompanyRegisteredNotification;
 use App\Models\Company;
 use App\Transformers\CompanyTransformer;
+use Cknow\Money\Money;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class CompanyController extends Controller
 {
     /**
-     * @param  GetCompanies  $getCompanies
+     * @param  GetPaginatedCompanies  $getPaginatedCompanies
      * @return JsonResponse
      */
     public function index(
-        // __REVIEW__ Change name to GetPaginatedCompanies $getPaginatedCompanies
-        GetCompanies $getCompanies
+        GetPaginatedCompanies $getPaginatedCompanies
     ): JsonResponse {
-        return fractal($getCompanies->handle(), new CompanyTransformer())
+        return fractal($getPaginatedCompanies->handle(), new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',
@@ -49,15 +50,31 @@ class CompanyController extends Controller
         CreateCompany $createCompany,
         GetSettingsClassInstance $getSettingsClassInstance
     ): JsonResponse {
-        // __REVIEW__ use DB::transaction(...)
-        $data = $createCompanyRequest->validated();
-        $data['status'] = $getSettingsClassInstance->handle(Area::Lender)->default_company_status_created_by_operation;
+        return DB::transaction(function () use ($createCompanyRequest, $getSettingsClassInstance, $createCompany) {
+            $data = $createCompanyRequest->validated();
+            $data['status'] = $getSettingsClassInstance->handle(Area::Lender)->default_company_status_created_by_operation;
 
-        $company = $createCompany->handle($data);
-        dispatch(new CompanyRegisteredNotification($company));
+            $company = $createCompany->handle($data);
 
-        // __REVIEW__ return company with transformer
-        return $this->successResponse();
+            $company->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
+            $company = $createCompany->handle($data);
+            dispatch(new CompanyRegisteredNotification($company));
+
+            $company = $createCompany->handle($data);
+
+            return fractal($company, new CompanyTransformer())
+                ->parseIncludes([
+                    'id',
+                    'name',
+                    'status',
+                    'created_at',
+                    'unique_name',
+                    'company_cr',
+                    'does_order_require_approval',
+                    'order_cost',
+                ])
+                ->respond();
+        });
     }
 
     /**
@@ -91,10 +108,11 @@ class CompanyController extends Controller
         UpdateCompany $updateCompany,
         Company $company
     ): JsonResponse {
-        // __REVIEW__ use DB::transaction(...)
-        $updateCompany->handle($company, $updateCompanyRequest->validated());
+        return DB::transaction(function () use ($updateCompanyRequest, $updateCompany, $company) {
+            $updateCompany->handle($company, $updateCompanyRequest->validated());
 
-        return $this->successResponse();
+            return $this->successResponse();
+        });
     }
 
     /**

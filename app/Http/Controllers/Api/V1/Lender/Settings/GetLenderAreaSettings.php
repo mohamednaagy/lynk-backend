@@ -6,6 +6,7 @@ use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Area;
 use App\Http\Controllers\Controller;
 use App\Transformers\LenderSettingsTransformer;
+use Illuminate\Http\JsonResponse;
 
 class GetLenderAreaSettings extends Controller
 {
@@ -13,7 +14,7 @@ class GetLenderAreaSettings extends Controller
      * Handle the incoming request.
      *
      * @param  GetSettingsClassInstance  $getSettingsClassInstance
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function __invoke(GetSettingsClassInstance $getSettingsClassInstance)
     {

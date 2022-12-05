@@ -9,4 +9,6 @@ final class TransactionReason extends Enum
     const OrderCreationFee = 1;
 
     const DepositByEdaat = 2;
+
+    const ManualDeposit = 3;
 }

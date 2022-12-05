@@ -10,7 +10,7 @@ class SuperAdmin
 {
     public static array $roles = [
         Role::Admin,
-        Role::Management,
+        Role::Manager,
     ];
 
     public static array $basePermissions = [

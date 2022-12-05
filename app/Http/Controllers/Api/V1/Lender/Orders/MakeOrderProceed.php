@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala;
+use App\Enums\Action;
+use App\Enums\Area;
 use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\MakeOrderProceedRequest;
 use App\Models\FinancingOrder;
@@ -18,6 +21,14 @@ use Throwable;
 
 class MakeOrderProceed extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+                perm(Area::Lender, [Subject::FinancingOrders, Action::Proceed, Action::Manage])
+        );
+    }
+
     /**
      * Handle the incoming request.
      *
@@ -34,6 +45,8 @@ class MakeOrderProceed extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($request, $order) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
+
+            $this->authorize('view', $order);
 
             if ($request->validated('case') === FinancingOrderProceedCase::ClientWakalaAccepted) {
                 return $this->handleClientWakalaAccepted($order);

@@ -8,6 +8,7 @@ use App\Http\Requests\V1\Admin\Auth\CompleteAdminRegisterRequest;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class CompleteAdminRegister extends Controller
 {
@@ -17,13 +18,24 @@ class CompleteAdminRegister extends Controller
     }
 
     public function __invoke(
-        User $user,
-        CompleteAdminRegisterRequest $completeAdminRegisterRequest,
+        CompleteAdminRegisterRequest $request,
+        User $admin,
         CompleteAdminRegistration $completeAdminRegistration
     ): JsonResponse {
-        $user = $completeAdminRegistration->handle($user, $completeAdminRegisterRequest->validated());
+        if (! is_null($admin->passowrd)) {
+            return $this->respond($admin);
+        }
 
-        return fractal($user, new UserTransformer)
+        DB::transaction(function () use ($completeAdminRegistration, $admin, $request) {
+            $completeAdminRegistration->handle($admin, $request->validated());
+        });
+
+        return $this->respond($admin);
+    }
+
+    public function respond($admin)
+    {
+        return fractal($admin, new UserTransformer)
             ->parseIncludes([
                 'id',
                 'first_name',
@@ -32,6 +44,7 @@ class CompleteAdminRegister extends Controller
                 'phone_number',
                 'phone_country_code',
                 'formatted_phone_number',
-            ])->respond();
+            ])
+            ->respond();
     }
 }

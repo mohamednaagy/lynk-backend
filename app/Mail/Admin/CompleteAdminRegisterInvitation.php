@@ -14,24 +14,29 @@ class CompleteAdminRegisterInvitation extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $user;
+    public $invitee;
 
     public $url;
+
+    public $inviter;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(User $user, string $externalUrl)
+    public function __construct(User $inviter, User $invitee, string $externalUrl)
     {
-        $url = URL::signedExternalRoute($externalUrl,
-            'admin.complete-register',
-            ['admin' => $user->id]
+        $url = URL::signedExternalRoute(
+            $externalUrl,
+            'api.v1.admins.admin.sign-up',
+            ['admin' => $invitee->id],
+            now()->addHours(48)
         );
 
         $this->url = $url;
-        $this->user = $user;
+        $this->invitee = $invitee;
+        $this->inviter = $inviter;
     }
 
     /**
@@ -42,7 +47,12 @@ class CompleteAdminRegisterInvitation extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: __('emails.invitation-complete-register.complete_registration', ['app_name' => config('app.name')]),
+            subject: __(
+                'emails/admin-invitation.subject',
+                [
+                    'app_name' => config('app.name'),
+                ]
+            ),
         );
     }
 
@@ -54,7 +64,7 @@ class CompleteAdminRegisterInvitation extends Mailable
     public function content()
     {
         return new Content(
-            markdown: 'emails.invitation-complete-register',
+            markdown: 'emails.admin-invitation',
         );
     }
 
