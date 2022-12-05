@@ -7,5 +7,14 @@ use Cknow\Money\Money;
 
 interface CreateTransactions
 {
-    public function handle(Wallet $wallet, Money $amount, int $transactionReason, array $meta): string;
+    /**
+     * Summary of handle
+     *
+     * @param  Wallet  $wallet
+     * @param  int  $transactionReason
+     * @param  Money  $amount
+     * @param  array  $meta
+     * @return void
+     */
+    public function handle(Wallet $wallet, int $transactionReason, Money $amount, array $meta);
 }

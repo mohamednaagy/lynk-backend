@@ -3,6 +3,7 @@
 namespace App\Actions\Wallets;
 
 use App\Actions\Contracts\Wallets\CreateTransactions;
+use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Support\Transactions\Descriptions\DescriptionManager;
 use Cknow\Money\Money;
@@ -18,10 +19,10 @@ class CreateTransactionsAction implements CreateTransactions
      */
     public function handle(
         Wallet $wallet,
-        Money $amount,
         int $transactionReason,
+        Money $amount,
         array $meta
-    ): string {
+    ): Transaction {
         return DescriptionManager::handleTransaction($wallet, $amount, $transactionReason, $meta);
     }
 }

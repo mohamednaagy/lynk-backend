@@ -13,7 +13,7 @@ abstract class GeneratorBase implements GeneratorInterface
         return $this->generateMessage($transaction, $locale);
     }
 
-    public function handle(Wallet $wallet, Money $amount, int $reason, array $meta): string
+    public function handle(Wallet $wallet, Money $amount, int $reason, array $meta): Transaction
     {
         return $this->handleTransaction($wallet, $amount, $reason, $meta);
     }
