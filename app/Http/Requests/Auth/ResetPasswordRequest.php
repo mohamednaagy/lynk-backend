@@ -2,10 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
-use App\Models\Company;
-use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class ResetPasswordRequest extends FormRequest
@@ -30,7 +27,7 @@ class ResetPasswordRequest extends FormRequest
         return [
             'token' => ['required', 'string'],
             'email' => ['required', 'email'],
-            'company_unique_name' => ['nullable', 'string', Rule::exists(Company::class, 'unique_name')],
+            'company_unique_name' => ['nullable', 'string'],
             'password' => ['required', 'confirmed', Password::defaults()],
         ];
     }

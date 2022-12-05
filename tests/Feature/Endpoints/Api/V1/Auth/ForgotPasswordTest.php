@@ -241,33 +241,6 @@ class ForgotPasswordTest extends TestCase
      *
      * @return void
      */
-    public function test_resetting_user_password_on_invalid_company_unique_name(): void
-    {
-        $token = Password::createToken(self::$userLender);
-
-        $response = $this->postJson(self::$resetPasswordUrl, [
-            'token' => $token,
-            'email' => self::$userLender->email,
-            'company_unique_name' => 'unique_name',
-            'password' => 'Password@1234',
-            'password_confirmation' => 'Password@1234',
-        ]);
-
-        $response->assertStatus(422)->assertJson([
-            'message' => 'The selected company identifier is invalid.',
-            'errors' => [
-                'company_unique_name' => [
-                    'The selected company identifier is invalid.',
-                ],
-            ],
-        ]);
-    }
-
-    /**
-     * Allows a user to reset their password.
-     *
-     * @return void
-     */
     public function test_resetting_user_password_on_invalid_password(): void
     {
         $token = Password::createToken(self::$userLender);
