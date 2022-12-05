@@ -23,7 +23,7 @@ class MoneyValueRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        $regex = '/^[1-9][0-9]?+(\.\d{1,'.$this->decimal.'})?$|(^0\.+(\d{1,'.$this->decimal.'}))|(^\.+(\d{1,'.$this->decimal.'}))$/';
+        $regex = '/^[1-9][0-9]{0,}+(\.\d{1,'.$this->decimal.'})?$|(^0\.+(\d{1,'.$this->decimal.'}))|(^\.+(\d{1,'.$this->decimal.'}))$/';
 
         return preg_match($regex, $value) > 0;
     }
