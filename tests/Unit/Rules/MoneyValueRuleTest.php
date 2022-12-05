@@ -29,9 +29,9 @@ class MoneyValueRuleTest extends TestCase
         $this->assertIsBool($this->rule->passes($this->attribute, 0));
     }
 
-    public function test_money_value_rule_passes_method_return_false_when_value_is_zero()
+    public function test_money_value_rule_passes_method_return_true_when_value_is_zero()
     {
-        $this->assertFalse($this->rule->passes($this->attribute, 0));
+        $this->assertTrue($this->rule->passes($this->attribute, 0));
     }
 
     public function test_money_value_rule_passes_method_return_false_when_value_is_negative()
