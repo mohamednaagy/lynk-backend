@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Orders\ApproveOrder as ApproveOrderInterface;
+use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Models\FinancingOrder;
 use Illuminate\Http\JsonResponse;
@@ -13,6 +15,18 @@ use Illuminate\Support\Facades\DB;
 
 class ApproveOrder extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware([
+            'role:'.implode('|', [
+                Role::LenderAdmin, Role::LenderSupervisor,
+            ]),
+            'checkCompanyStatus',
+            'verified.email:'.Area::Lender,
+        ]
+        );
+    }
+
     /**
      * Handle the incoming request.
      *
