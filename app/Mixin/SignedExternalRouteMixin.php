@@ -17,6 +17,7 @@ class SignedExternalRouteMixin
             if (! filter_var($externalUrl, FILTER_VALIDATE_URL)) {
                 throw new InvalidArgumentException('Provided url not correct');
             }
+
             $externalUrl = preg_replace_callback('/:([a-zA-Z_]{1,})/', function ($matches) use ($parameters) {
                 return isset($parameters[$matches[1]]) && $parameters[$matches[1]] !== '' ? $parameters[$matches[1]] : $matches[0];
             }, $externalUrl);
