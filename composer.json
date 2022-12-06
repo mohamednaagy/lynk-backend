@@ -27,6 +27,7 @@
         "predis/predis": "^2.0",
         "propaganistas/laravel-phone": "^4.3",
         "shivella/laravel-bitly": "^1.1",
+        "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/fractalistic": "^2.9",
         "spatie/laravel-activitylog": "^4.6",
         "spatie/laravel-fractal": "^6.0",

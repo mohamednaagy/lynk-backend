@@ -3,6 +3,7 @@
 namespace App\Support\ProjectSettings;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Config;
 
 class Project
 {
@@ -44,7 +45,7 @@ class Project
     public function getCompanyName(string $locale = null): array|string
     {
         if (is_null($locale)) {
-            return $this->companyName;
+            return Arr::get($this->companyName, Config::get('app.locale', 'en'));
         }
 
         return Arr::get($this->companyName, $locale);
