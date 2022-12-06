@@ -21,6 +21,7 @@ class Transaction extends Model implements HasMedia
         'reference_number',
         'amount',
         'meta',
+        'reason',
     ];
 
     protected $casts = [
