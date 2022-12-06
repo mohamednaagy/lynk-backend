@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
 
+use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
@@ -49,8 +50,8 @@ class FinancingOrderControllerUpdateTest extends TestCase
         self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'lenderSupervisor@bim.com');
         self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'lenderBilling@bim.com');
         self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'lenderOrderCreator@bim.com');
-        self::$order = $this->createOrder(self::$company->id, self::$userLenderAdmin->id);
-        self::$orderOwnedByOrderCreator = $this->createOrder(self::$company->id, self::$userLenderOrderCreator->id);
+        self::$order = $this->createOrder(self::$company->id, self::$userLenderAdmin->id, ['status' => FinancingOrderStatus::PendingApproval]);
+        self::$orderOwnedByOrderCreator = $this->createOrder(self::$company->id, self::$userLenderOrderCreator->id, ['status' => FinancingOrderStatus::PendingApproval]);
         self::$updatedOrderDetails = [
             'national_id' => '2553451234',
             'amount' => '300',
@@ -164,7 +165,9 @@ class FinancingOrderControllerUpdateTest extends TestCase
                 'errors' => [
                     'phone_number' => [
                         'The phone number field is required.',
-                        'Service is not available',
+                    ],
+                    'national_id' => [
+                        'Phone number doesn’t belong to National ID/Iqama',
                     ],
                 ],
             ]);
