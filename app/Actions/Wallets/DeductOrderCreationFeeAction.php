@@ -7,7 +7,6 @@ use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Models\FinancingOrder;
-use Cknow\Money\Money;
 
 class DeductOrderCreationFeeAction implements DeductOrderCreationFee
 {
@@ -26,7 +25,7 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
         return $this->createTransactions->handle(
             $wallet,
             TransactionReason::OrderCreationFee,
-            Money::parseByDecimal($company->order_cost, $wallet->currency),
+            $company->order_cost,
             [
                 'financing_order_id' => $financingOrder->id,
                 'reference_number ' => $financingOrder->reference_number,
