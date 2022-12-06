@@ -22,7 +22,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->unsignedTinyInteger('reason')->after('meta')->nullable();
+            $table->unsignedTinyInteger('reason')->after('reference_number')->nullable();
         });
     }
 
