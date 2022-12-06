@@ -24,12 +24,10 @@ class SignedExternalRouteMixin
 
             $signedRoute = $this->signedRoute($name, $parameters, $expiration, $absolute);
             $parsedSignedRouteQuery = parse_url($signedRoute, PHP_URL_QUERY);
-            $parametersToQuery = http_build_query($parameters);
-            $parsedSignedRouteQuery .= is_null($parsedSignedRouteQuery) ?
-                $parametersToQuery
-                : '&'.$parametersToQuery;
 
-            return $externalUrl.'?'.$parsedSignedRouteQuery ?? '';
+            return is_null($parsedSignedRouteQuery) ?
+                $externalUrl
+                : $externalUrl.'?'.$parsedSignedRouteQuery;
         };
     }
 }
