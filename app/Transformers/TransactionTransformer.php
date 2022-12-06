@@ -18,7 +18,7 @@ class TransactionTransformer extends TransformerAbstract
             'description' => ! is_null($transaction->reason)
                 ? DescriptionManager::getDescription($transaction)
                 : null,
-            'amount' => $transaction->amount_float,
+            'amount' => $transaction->amount->formatByDecimal(),
         ];
     }
 }
