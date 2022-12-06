@@ -12,13 +12,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
-use Tests\Traits\MailTracking;
 
 class ResendInvitationTest extends TestCase
 {
     use RefreshDatabase;
     use InteractsWithLender;
-    use MailTracking;
 
     private static Company $company;
 
@@ -88,9 +86,9 @@ class ResendInvitationTest extends TestCase
                 ]
             )
             ->assertStatus(403)->assertJsonFragment([
-              'message' => __('error.company_not_active'),
-              'code' => ErrorCode::COMPANY_NOT_ACTIVE,
-          ]);
+                'message' => __('error.company_not_active'),
+                'code' => ErrorCode::COMPANY_NOT_ACTIVE,
+            ]);
     }
 
     public function test_resend_invitation_can_not_access_without_verify_email()
@@ -177,6 +175,16 @@ class ResendInvitationTest extends TestCase
 
     public function test_resend_invitation_email_is_sent()
     {
+        $this->withHeader('X-Company', self::$company->id)
+            ->actingAs(self::$lenerAdmin)
+            ->postJson(
+                'api/v1/lender/users/'.self::$lender->id.'/resend-invitation',
+                [
+                    'redirect_url' => self::$redirectUrl,
+                ]
+            )
+            ->assertStatus(200);
+
         Mail::fake();
         Mail::send(new CompleteRegisterInvitation(self::$lender, self::$redirectUrl));
         Mail::assertSent(CompleteRegisterInvitation::class, function ($mail) {
