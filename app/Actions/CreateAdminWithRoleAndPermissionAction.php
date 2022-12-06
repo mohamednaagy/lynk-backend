@@ -44,6 +44,6 @@ class CreateAdminWithRoleAndPermissionAction implements CreateAdminWithRoleAndPe
         }
 
         // return user
-        return $user->load('roles');
+        return $user;
     }
 }
