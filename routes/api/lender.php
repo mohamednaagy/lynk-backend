@@ -56,9 +56,8 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
         Route::get('auth', GetAuthUser::class);
 
         Route::middleware('verified.email:'.Area::Lender)->group(function () {
-            Route::put('auth/profile', UpdateMyProfile::class);
-
             Route::middleware('checkCompanyStatus')->group(function () {
+                Route::put('auth/profile', UpdateMyProfile::class);
                 Route::apiResource('edaat-invoices', EdaatInvoiceController::class)->only('index', 'store');
                 Route::get('orders/volume', GetOrdersVolume::class);
                 Route::get('orders/stats', GetOrdersStats::class);
