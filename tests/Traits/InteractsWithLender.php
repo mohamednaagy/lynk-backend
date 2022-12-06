@@ -10,6 +10,7 @@ use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use Carbon\Carbon;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -21,6 +22,8 @@ trait InteractsWithLender
      * @param  int  $walletInitialAmount
      * @param  array  $data
      * @return array
+     *
+     * @throws BindingResolutionException
      */
     public function createCompany(
         int $walletInitialAmount = 2000,
