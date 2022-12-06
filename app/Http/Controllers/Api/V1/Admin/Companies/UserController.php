@@ -103,7 +103,7 @@ class UserController extends Controller
 
             Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
-            return fractal($user, new UserTransformer())
+            return fractal($user->load('permissions'), new UserTransformer())
                 ->parseIncludes([
                     'id',
                     'first_name',

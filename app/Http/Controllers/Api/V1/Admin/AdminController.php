@@ -92,7 +92,7 @@ class AdminController extends Controller
                     )
                 );
 
-            return fractal($admin, new UserTransformer(Area::SuperAdmin))
+            return fractal($admin->load('permissions'), new UserTransformer(Area::SuperAdmin))
                 ->parseIncludes([
                     'id',
                     'first_name',

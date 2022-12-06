@@ -129,13 +129,12 @@ class UserTransformer extends TransformerAbstract
 
     protected function getPermissionsQueryBasedOnArea(User $user)
     {
-        $query = $user->permissions;
+        $permissions = $user->permissions;
 
-        $query = match ($this->area) {
-            Area::Lender, Area::SuperAdmin => $query->where('name', 'Like', $this->area.'-%'),
+        return match ($this->area) {
+            Area::Lender, Area::SuperAdmin => $permissions->where('name', 'Like', $this->area.'-%'),
+            default => $permissions
         };
-
-        return $query;
     }
 
     public function includeLocale(User $user): Primitive

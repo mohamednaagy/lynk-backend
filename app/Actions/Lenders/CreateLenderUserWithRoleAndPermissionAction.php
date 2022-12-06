@@ -55,6 +55,6 @@ class CreateLenderUserWithRoleAndPermissionAction implements CreateLenderUserWit
         }
 
         // return user
-        return $user->load('permissions');
+        return $user;
     }
 }
