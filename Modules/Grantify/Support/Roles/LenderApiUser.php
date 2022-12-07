@@ -14,5 +14,10 @@ class LenderApiUser
             Action::Show,
             Action::Proceed,
         ],
+        Subject::LenderSettings => [
+            Action::Manage,
+            Action::Index,
+            Action::Edit,
+        ],
     ];
 }
