@@ -31,6 +31,8 @@ class CreateVisitorEnquiryReply extends Controller
             ]
         );
 
+        // __REVIEW__ make handle in a separate line form the transformer
+
         return fractal($replyToEnquiry->handle($data), new EnquiryReplyTransformer())->respond();
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Permission\Models\Role;
 
+// __REVIEW__ always model name is singular not plural unless there is a valid reason !!!!
 class EnquiryReplies extends Model
 {
     use HasFactory;

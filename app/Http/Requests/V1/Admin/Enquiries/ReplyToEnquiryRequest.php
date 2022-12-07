@@ -29,6 +29,7 @@ class ReplyToEnquiryRequest extends FormRequest
     {
         return [
             'body' => ['required', 'string', 'max:1000'],
+            // __REVIEW__ change int to integer
             'status' => ['nullable', 'int', new EnumValue(EnquiryStatus::class)],
             'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
         ];

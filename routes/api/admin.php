@@ -90,6 +90,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::get('edaat-invoices', GetEdaatInvoices::class);
         Route::post('edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
 
+        // __REVIEW__ use only(...)
         Route::apiResource('enquiries', EnquiryController::class);
         Route::apiResource('enquiries.replies', EnquiryReplyController::class);
 

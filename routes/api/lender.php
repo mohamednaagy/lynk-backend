@@ -84,8 +84,11 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
                 Route::put('/settings', [SettingsController::class, 'update']);
             });
 
+            // __REVIEW__ add only(...) to the apiResource
             Route::apiResource('enquiries', EnquiryController::class);
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)->only('index', 'store');
+
+            // __REVIEW__ remove this redundant resource
             Route::apiResource('enquiries.replies', EnquiryReplyController::class);
         });
     });

@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1/visitor')->name('api.v1.')->group(function () {
+    // __REVIEW__ Missing enquiry replies route (to show enquiry replies)
+
+    // __REVIEW__ this route is missing `signed` middleware
     Route::get('enquiries/{enquiry}', GetVisitorEnquiry::class)->name('visitor.enquiry');
     Route::post('enquiries', CreateVisitorEnquiry::class);
     Route::post('enquiries/{enquiry}/reply', CreateVisitorEnquiryReply::class)->name('visitor.enquiry.reply');

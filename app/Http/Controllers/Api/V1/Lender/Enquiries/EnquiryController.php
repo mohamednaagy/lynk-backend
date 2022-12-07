@@ -59,6 +59,8 @@ class EnquiryController extends Controller
      */
     public function show(Enquiry $enquiry): JsonResponse
     {
+        // __REVIEW__ you add authorization here that the user can show only their enquiries
+
         return fractal($enquiry, new EnquiryTransformer())
             ->parseIncludes(['creator', 'body'])
             ->respond();

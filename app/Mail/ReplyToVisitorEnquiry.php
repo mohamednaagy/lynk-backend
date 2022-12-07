@@ -37,6 +37,11 @@ class ReplyToVisitorEnquiry extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
+            // __REVIEW__ change emails/visitor-enquiry.subject to emails/visitor-enquiry.subject_of_reply_to_enquiry
+            // __REVIEW__ subject_of_reply_to_enquiry should have the following values:
+            // __REVIEW__ English: New Reply to Your Enquiry #XX
+            // __REVIEW__ Arabic: رد جديد على استفسارك #XX
+            // __REVIEW__ app_name should not exist!!!
             subject: __('emails/visitor-enquiry.subject', ['app_name' => config('app.name')]),
         );
     }

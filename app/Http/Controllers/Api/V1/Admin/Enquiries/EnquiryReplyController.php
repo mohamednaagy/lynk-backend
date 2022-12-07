@@ -24,6 +24,7 @@ class EnquiryReplyController extends Controller
      */
     public function index(Enquiry $enquiry): JsonResponse
     {
+        // __REVIEW__ N+1 query problem is here
         $enquiryReplies = $enquiry->replies()->latest()->get();
 
         return fractal($enquiryReplies, new EnquiryReplyTransformer())
@@ -40,17 +41,22 @@ class EnquiryReplyController extends Controller
      * @return JsonResponse
      */
     public function store(
+        // __REVIEW__ change variable name to $request instead of $replyToEnquiryRequest
         ReplyToEnquiryRequest $replyToEnquiryRequest,
         ReplyToEnquiryInterface $replyToEnquiry,
         Enquiry $enquiry
     ): JsonResponse {
         return DB::transaction(function () use ($replyToEnquiryRequest, $replyToEnquiry, $enquiry) {
+            // __REVIEW__ admin can send reply even if it is closed
             // check if the enquiry is closed already
             if ($enquiry->status->is(EnquiryStatus::Closed)) {
                 return $this->errorResponse(
                     __('error.enquiry_closed_already')
                 );
             }
+
+            // __REVIEW__ form line to line I belive it can be extracted to an action to be used here and in
+            // __REIVEW__ app/Http/Controllers/Api/V1/Admin/Enquiries/EnquiryReplyController.php
 
             // create the enquiry reply
             $data = $replyToEnquiryRequest->validated();
@@ -65,6 +71,7 @@ class EnquiryReplyController extends Controller
             // change the enquiry status to be resolved
             if ($enquiry->status->is(EnquiryStatus::UnderReview)) {
                 $enquiry->update([
+                    // __REVIEW__ use Null Coalescing Operator instead of ternary operator
                     'status' => ! empty($data['status']) ? $data['status'] : EnquiryStatus::Resolved,
                 ]);
             }

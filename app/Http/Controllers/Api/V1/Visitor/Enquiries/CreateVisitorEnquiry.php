@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Mail;
 
 class CreateVisitorEnquiry extends Controller
 {
+    // __REVIEW__ change $storeEnquiryRequest to $request
     public function __invoke(StoreVisitorEnquiryRequest $storeEnquiryRequest, CreateEnquiry $createEnquiry): JsonResponse
     {
         return DB::transaction(function () use ($storeEnquiryRequest, $createEnquiry) {

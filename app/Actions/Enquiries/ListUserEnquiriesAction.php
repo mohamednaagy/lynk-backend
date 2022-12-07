@@ -7,6 +7,7 @@ use App\Models\Enquiry;
 use App\Support\QueryScoper\Scopes\Enquiry\EnquiryStatusScope;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
+// __REVIEW__ change name to GetPaginatedUserEnquiriesAction to be consistent with the application
 class ListUserEnquiriesAction implements ListUserEnquiries
 {
     /**
@@ -17,6 +18,7 @@ class ListUserEnquiriesAction implements ListUserEnquiries
      */
     public function handle(int $userId): LengthAwarePaginator
     {
+        // __REVIEW__ break down chain methods on new lines to be easier to read
         return Enquiry::where('user_id', $userId)->latest()->toScopes($this->scopes())->paginate();
     }
 

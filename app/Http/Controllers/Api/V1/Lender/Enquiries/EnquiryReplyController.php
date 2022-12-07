@@ -21,6 +21,9 @@ class EnquiryReplyController extends Controller
      */
     public function index(Enquiry $enquiry): JsonResponse
     {
+        // __REVIEW__ you add authorization here that the user can show only their enquiries
+
+        // __REVIEW__ there is N+1 query problem here
         $replies = $enquiry->replies()->latest()->get();
 
         return fractal($replies, new EnquiryReplyTransformer())
@@ -37,12 +40,17 @@ class EnquiryReplyController extends Controller
      */
     public function store(
         Enquiry $enquiry,
+        // __REVIEW__ make request first argument.
+        // __REVIEW__ change $storeReplyToEnquiryRequest to $request
         StoreReplyToEnquiryRequest $storeReplyToEnquiryRequest,
         ReplyToEnquiryInterface $replyToEnquiry
     ): JsonResponse {
         return DB::transaction(function () use ($storeReplyToEnquiryRequest, $replyToEnquiry, $enquiry) {
+            // __REVIEW__ you add authorization here that the user can show only their enquiries
+
             // check if the enquiry is closed already
             if ($enquiry->status->is(EnquiryStatus::Closed)) {
+                // __REVIEW__ add error code
                 return $this->errorResponse(
                     __('error.enquiry_closed_already')
                 );

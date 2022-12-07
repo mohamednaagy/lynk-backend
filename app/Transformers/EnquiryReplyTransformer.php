@@ -8,12 +8,15 @@ use League\Fractal\TransformerAbstract;
 
 class EnquiryReplyTransformer extends TransformerAbstract
 {
+    // __REVIEW__ move all to available includes
     protected array $defaultIncludes = [
         'creator',
     ];
 
     protected array $availableIncludes = [];
 
+    // __REVIEW__ move all to available includes
+    // __REVIEW__ here argument name should singular not plural !!! (this applies to all includeXXXX)
     public function transform(EnquiryReplies $enquiryReplies): array
     {
         return [
