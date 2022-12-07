@@ -761,7 +761,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         <div>
             <h2 class="text-2xl font-bold">{{ __('zatca/e-invoice.tax_invoice') }}</h2>
             <p class="text-lg">
-                {{ __('zatca/e-invoice.invoice_number', ['number' => $transaction->reference_number]) }}</p>
+                {{ __('zatca/e-invoice.invoice_number', ['number' => $creationFeeTransaction->reference_number]) }}</p>
         </div>
     </div>
 
@@ -826,33 +826,32 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         </div>
     </div>
 
-    {{--    @foreach ($order->getItems() as $item)--}}
-    {{--        <div class="flex px-2 py-3 text-gray-600">--}}
-    {{--            <div class="w-3/12">--}}
-    {{--                <div>{{ $item->getName() }}</div>--}}
-    {{--            </div>--}}
+    <div class="flex px-2 py-3 text-gray-600">
+        <div class="w-3/12">
+            <div>{{__('zatca/e-invoice.create_order_cost')}}</div>
+        </div>
 
-    {{--            <div class="w-1/12">--}}
-    {{--                <div>{{ $item->getQty() }}</div>--}}
-    {{--            </div>--}}
+        <div class="w-2/12">
+            <div>{{ $creationFeeTransaction->amount->formatByDecimal() }}</div>
+        </div>
 
-    {{--            <div class="w-2/12">--}}
-    {{--                <div>{{ $item->getItemPrice()->formatByDecimal() }}</div>--}}
-    {{--            </div>--}}
+        <div class="w-3/12">
+            <div>{{ __('zatca/e-invoice.vat') }}</div>
+        </div>
 
-    {{--            <div class="w-2/12">--}}
-    {{--                <div>{{ $item->getDiscountPercentage() ?? 0 }}%</div>--}}
-    {{--            </div>--}}
+        <div class="w-2/12">
+            <div>{{ 0 }}%</div>
+        </div>
 
-    {{--            <div class="w-2/12">--}}
-    {{--                <div>{{ $item->getVatPercentage() === null ? 'N' : 'V' }}</div>--}}
-    {{--            </div>--}}
+        <div class="w-2/12">
+            <div>total</div>
+        </div>
 
-    {{--            <div class="w-2/12">--}}
-    {{--                <div>{{ $item->getLineTotalWithoutVat()->formatByDecimal() }}</div>--}}
-    {{--            </div>--}}
-    {{--        </div>--}}
-    {{--    @endforeach--}}
+        <div class="w-2/12">
+            <div>{{ $creationFeeTransaction->amount->formatByDecimal() }}</div>
+        </div>
+    </div>
+
     <div class="bg-primary-700 h-px w-full"></div>
 
     <div class="flex items-center justify-between">

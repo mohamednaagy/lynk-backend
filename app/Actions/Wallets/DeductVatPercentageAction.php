@@ -23,7 +23,7 @@ class DeductVatPercentageAction implements DeductVatPercentage
         $company = tenant();
         $vatPercentageFee = $financingOrder->amount->multiply($this->getProjectSettings->handle()->getVatRate());
 
-        $this->createTransactions->handle(
+        return $this->createTransactions->handle(
             $company->getWallet(WalletType::CompanyWallet),
             TransactionReason::VatPercentageFee,
             $vatPercentageFee,

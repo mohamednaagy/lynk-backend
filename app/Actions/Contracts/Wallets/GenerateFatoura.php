@@ -7,5 +7,5 @@ use App\Models\Transaction;
 
 interface GenerateFatoura
 {
-    public function handel(FinancingOrder $financingOrder, Transaction $transaction, array $data);
+    public function handel(FinancingOrder $financingOrder, Transaction $creationFeeTransaction, Transaction $vatPercentageTransaction);
 }

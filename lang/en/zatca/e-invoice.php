@@ -27,4 +27,6 @@ return [
     'tax_rates' => 'Tax Rates',
     'invoice_number' => 'Invoice #:number',
     'amount_with_currency' => 'SAR :amount',
+    'create_order_cost' => 'Create Order Cost',
+    'vat' => 'VAT percentage',
 ];

@@ -27,4 +27,6 @@ return [
     'total' => 'إجمالي قيمة الفاتورة شامل الضريبة',
     'invoice_number' => 'فاتورة #:number',
     'amount_with_currency' => ':amount ريال',
+    'create_order_cost' => 'نكلفه انشاء الطلب',
+    'vat' => 'نسبه قيمه الضريبه المضافه',
 ];

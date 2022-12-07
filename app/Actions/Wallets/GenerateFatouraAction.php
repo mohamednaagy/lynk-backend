@@ -20,10 +20,11 @@ class GenerateFatouraAction implements GenerateFatoura
     {
     }
 
-    public function handel(FinancingOrder $financingOrder, Transaction $transaction, array $data)
+    public function handel(FinancingOrder $financingOrder, Transaction $creationFeeTransaction, Transaction $vatPercentageTransaction)
     {
         $seller = $this->getProjectSettings->handle();
-        DB::transaction(function () use ($financingOrder, $seller, $transaction) {
+
+        DB::transaction(function () use ($financingOrder, $seller, $creationFeeTransaction, $vatPercentageTransaction) {
             $displayQRCodeAsBase64 = \GenerateQrCode::size(120)->eyeColor(0, 5, 124, 148, 0, 0, 0)->generate("
                Company name: {$seller->getCompanyName()}, \r\n
                VAT ID: {$seller->getVatId()}, \r\n
@@ -37,7 +38,8 @@ class GenerateFatouraAction implements GenerateFatoura
                 'order' => $financingOrder,
                 'qr_code' => $displayQRCodeAsBase64,
                 'buyer' => $financingOrder->company,
-                'transaction' => $transaction,
+                'creationFeeTransaction' => $creationFeeTransaction,
+                'vatPercentageTransaction' => $vatPercentageTransaction,
             ])->render();
 
             $path = "zatca-{$financingOrder->reference_number}.pdf";
