@@ -151,13 +151,10 @@ class FinancingOrderControllerStoreTest extends TestCase
             ->postJson('api/v1/lender/orders', Arr::except(self::$orderDetails, ['phone_number']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertExactJson([
-                'message' => 'The phone number field is required. (and 1 more error)',
+                'message' => 'The phone number field is required.',
                 'errors' => [
                     'phone_number' => [
                         'The phone number field is required.',
-                    ],
-                    'national_id' => [
-                        'Phone number doesn’t belong to National ID/Iqama',
                     ],
                 ],
             ]);
