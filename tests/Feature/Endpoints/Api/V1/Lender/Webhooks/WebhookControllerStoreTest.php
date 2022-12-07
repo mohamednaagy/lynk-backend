@@ -150,8 +150,8 @@ class WebhookControllerStoreTest extends TestCase
                 'type' => WebhookType::OrderUpdates,
             ])
             ->assertStatus(422)->assertJsonFragment([
-            'message' => __('validation.webhook_type_limit', ['limit' => $limit]),
-        ]);
+                'message' => __('validation.webhook_type_limit', ['limit' => $limit]),
+            ]);
     }
 
     public function test_webhook_controller_store_lender_can_not_access_without_verify_email()
@@ -178,9 +178,9 @@ class WebhookControllerStoreTest extends TestCase
                  'type' => WebhookType::OrderUpdates,
              ])
              ->assertStatus(403)->assertJsonFragment([
-                'message' => __('error.company_not_active'),
-                'code' => ErrorCode::COMPANY_NOT_ACTIVE,
-            ]);
+                 'message' => __('error.company_not_active'),
+                 'code' => ErrorCode::COMPANY_NOT_ACTIVE,
+             ]);
      }
 
     public function test_webhook_controller_store_lender_admin_can_access()
@@ -194,7 +194,7 @@ class WebhookControllerStoreTest extends TestCase
             ->assertStatus(200);
     }
 
-    public function test_webhook_controller_store_lender_billing_can_access()
+    public function test_webhook_controller_store_lender_billing_can_not_access()
     {
         $this->withHeader('X-Company', self::$company->id)
             ->actingAs(self::$lenderBilling)
@@ -202,10 +202,10 @@ class WebhookControllerStoreTest extends TestCase
                 'url' => self::$url,
                 'type' => WebhookType::OrderUpdates,
             ])
-            ->assertStatus(200);
+            ->assertStatus(403);
     }
 
-    public function test_webhook_controller_store_lender_creator_can_access()
+    public function test_webhook_controller_store_lender_creator_can_not_access()
     {
         $this->withHeader('X-Company', self::$company->id)
             ->actingAs(self::$lenderCreator)
@@ -213,10 +213,10 @@ class WebhookControllerStoreTest extends TestCase
                 'url' => self::$url,
                 'type' => WebhookType::OrderUpdates,
             ])
-            ->assertStatus(200);
+            ->assertStatus(403);
     }
 
-    public function test_webhook_controller_store_lender_supervisor_can_access()
+    public function test_webhook_controller_store_lender_supervisor_can_not_access()
     {
         $this->withHeader('X-Company', self::$company->id)
             ->actingAs(self::$lenderSuperVisor)
@@ -224,7 +224,7 @@ class WebhookControllerStoreTest extends TestCase
                 'url' => self::$url,
                 'type' => WebhookType::OrderUpdates,
             ])
-            ->assertStatus(200);
+            ->assertStatus(403);
     }
 
     public function test_webhook_controller_store_lender_api_user_can_access()

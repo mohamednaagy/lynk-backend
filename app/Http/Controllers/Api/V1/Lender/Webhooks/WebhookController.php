@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api\V1\Lender\Webhooks;
 
 use App\Actions\Contracts\Webhooks\CreateWebhook;
 use App\Actions\Contracts\Webhooks\UpdateWebhookSecretKey;
+use App\Enums\Action;
+use App\Enums\Area;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Webhooks\StoreWebhookRequest;
 use App\Transformers\CompanyTransformer;
@@ -12,6 +15,21 @@ use Illuminate\Http\JsonResponse;
 
 class WebhookController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::LenderWebhooks, Action::Create, Action::Manage])
+        )
+            ->only('store');
+
+        $this->middleware(
+            'permission:'.
+                   perm(Area::Lender, [Subject::LenderWebhooks, Action::Refresh, Action::Manage])
+        )
+            ->only('refreshSecret');
+    }
+
     /**
      * Handle the incoming request.
      *

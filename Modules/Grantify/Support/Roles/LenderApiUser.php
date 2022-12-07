@@ -14,5 +14,9 @@ class LenderApiUser
             Action::Show,
             Action::Proceed,
         ],
+        Subject::LenderWebhooks => [
+            Action::Create,
+            Action::Refresh,
+        ],
     ];
 }
