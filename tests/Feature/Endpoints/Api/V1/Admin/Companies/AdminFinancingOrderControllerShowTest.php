@@ -124,7 +124,7 @@ class AdminFinancingOrderControllerShowTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_admin_financing_order_controller_index_manager_can_access_when_has_permisson()
+    public function test_admin_financing_order_controller_show_manager_can_access_when_has_permisson()
     {
         Grantify::assignPermissionToModel(self::$manager, perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show]));
         $order = FinancingOrder::where('company_id', self::$company->id)->first();
@@ -134,7 +134,7 @@ class AdminFinancingOrderControllerShowTest extends TestCase
             ->assertStatus(200);
     }
 
-    public function test_admin_financing_order_controller_index_lender_can_not_access()
+    public function test_admin_financing_order_controller_show_lender_can_not_access()
     {
         $order = FinancingOrder::where('company_id', self::$company->id)->first();
 
@@ -143,7 +143,7 @@ class AdminFinancingOrderControllerShowTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_admin_financing_order_controller_index_billing_can_not_access()
+    public function test_admin_financing_order_controller_show_billing_can_not_access()
     {
         $order = FinancingOrder::where('company_id', self::$company->id)->first();
 
@@ -152,7 +152,7 @@ class AdminFinancingOrderControllerShowTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_admin_financing_order_controller_index_supervisor_can_not_access()
+    public function test_admin_financing_order_controller_show_supervisor_can_not_access()
     {
         $order = FinancingOrder::where('company_id', self::$company->id)->first();
 
@@ -161,7 +161,7 @@ class AdminFinancingOrderControllerShowTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_admin_financing_order_controller_index_order_creator_can_not_access()
+    public function test_admin_financing_order_controller_show_order_creator_can_not_access()
     {
         $order = FinancingOrder::where('company_id', self::$company->id)->first();
 
