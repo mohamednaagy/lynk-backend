@@ -78,6 +78,7 @@ class WebhookTest extends TestCase
                     'EPTN' => '1',
                 ],
             ])->assertStatus(Response::HTTP_OK);
+
         $this->assertDatabaseCount(Transaction::class, 1);
     }
 }
