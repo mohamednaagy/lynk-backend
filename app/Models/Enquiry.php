@@ -15,6 +15,7 @@ use Spatie\Permission\Models\Role;
 
 class Enquiry extends Model
 {
+    // __REVIEW__ we need to add BelongsToTenant (See user model)
     use HasFactory, SoftDeletes, HasScopes;
 
     /**
