@@ -43,7 +43,7 @@ class FinancingOrderControllerStoreTest extends TestCase
         self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'lenderBilling@bim.com');
         self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'lenderOrderCreator@bim.com');
         self::$orderDetails = [
-            'national_id' => '2553451234',
+            'national_id' => '1001280070',
             'amount' => '200',
             'selling_price' => '220',
             'phone_country_code' => 'SA',
@@ -155,7 +155,9 @@ class FinancingOrderControllerStoreTest extends TestCase
                 'errors' => [
                     'phone_number' => [
                         'The phone number field is required.',
-                        'Service is not available',
+                    ],
+                    'national_id' => [
+                        'Phone number doesn’t belong to National ID/Iqama',
                     ],
                 ],
             ]);
