@@ -2,8 +2,11 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Companies;
 
+use App\Enums\Action;
+use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
+use App\Enums\Subject;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
@@ -11,6 +14,7 @@ use App\Transformers\FinancingOrderTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
@@ -108,8 +112,17 @@ class AdminFinancingOrderControllerIndexTest extends TestCase
             ->assertStatus(200);
     }
 
-    public function test_admin_financing_order_controller_index_manager_can_access()
+    public function test_admin_financing_order_controller_index_manager_can_not_access()
     {
+        $this->actingAs(self::$manager)
+            ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders')
+            ->assertStatus(403);
+    }
+
+    public function test_admin_financing_order_controller_index_manager_can_access_when_has_permisson()
+    {
+        Grantify::assignPermissionToModel(self::$manager, perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Index]));
+
         $this->actingAs(self::$manager)
             ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders')
             ->assertStatus(200);
