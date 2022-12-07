@@ -2,48 +2,54 @@
 
 namespace App\Transformers;
 
-use App\Models\EnquiryReplies;
+use App\Models\EnquiryReply;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
 class EnquiryReplyTransformer extends TransformerAbstract
 {
-    // __REVIEW__ move all to available includes
-    protected array $defaultIncludes = [
+    protected array $defaultIncludes = [];
+
+    protected array $availableIncludes = [
+        'id',
+        'body',
+        'creation_date',
         'creator',
     ];
 
-    protected array $availableIncludes = [];
-
-    // __REVIEW__ move all to available includes
-    // __REVIEW__ here argument name should singular not plural !!! (this applies to all includeXXXX)
-    public function transform(EnquiryReplies $enquiryReplies): array
+    public function transform(EnquiryReply $enquiryReply): array
     {
-        return [
-            'id' => $enquiryReplies->id,
-            'body' => $enquiryReplies->body,
-            'creation_date' => $enquiryReplies->created_at->format('Y-m-d h:m A'),
-        ];
+        return [];
     }
 
-    public function includeBody(EnquiryReplies $enquiryReplies): Primitive
+    public function includeId(EnquiryReply $enquiryReply): Primitive
     {
-        return $this->primitive($enquiryReplies->body);
+        return $this->primitive($enquiryReply->id);
     }
 
-    public function includeCreator(EnquiryReplies $enquiryReplies): Primitive
+    public function includeBody(EnquiryReply $enquiryReply): Primitive
     {
-        if ($enquiryReplies->user) {
+        return $this->primitive($enquiryReply->body);
+    }
+
+    public function includeCreationDate(EnquiryReply $enquiryReply): Primitive
+    {
+        return $this->primitive($enquiryReply->created_at->format('Y-m-d h:m A'));
+    }
+
+    public function includeCreator(EnquiryReply $enquiryReply): Primitive
+    {
+        if ($enquiryReply->user) {
             return $this->primitive([
-                'id' => $enquiryReplies->user->id,
-                'name' => $enquiryReplies->user->full_name,
+                'id' => $enquiryReply->user->id,
+                'name' => $enquiryReply->user->full_name,
             ]);
         }
 
         return $this->primitive([
-            'email' => $enquiryReplies->enquiry->email,
-            'name' => $enquiryReplies->enquiry->name,
-            'phone_number' => $enquiryReplies->enquiry->phone_number,
+            'email' => $enquiryReply->enquiry->email,
+            'name' => $enquiryReply->enquiry->name,
+            'phone_number' => $enquiryReply->enquiry->phone_number,
         ]);
     }
 }
