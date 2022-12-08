@@ -27,7 +27,7 @@ class TransactionService implements TransactionServiceInterface
         return Transaction::create([
             'wallet_id' => $wallet->getKey(),
             'amount' => $amount->isNegative() ? $amount : $amount->negative(),
-            'type' => $type,
+            'reason' => $type,
             'uuid' => Str::uuid(),
             'reference_number' => $referenceNumber ?? $this->referenceNumberGeneratorInterface->generate(),
             'meta' => $meta,
@@ -44,7 +44,7 @@ class TransactionService implements TransactionServiceInterface
         return Transaction::create([
             'wallet_id' => $wallet->getKey(),
             'amount' => $amount,
-            'type' => $type,
+            'reason' => $type,
             'uuid' => Str::uuid(),
             'reference_number' => $referenceNumber ?? $this->referenceNumberGeneratorInterface->generate(),
             'meta' => $meta,
