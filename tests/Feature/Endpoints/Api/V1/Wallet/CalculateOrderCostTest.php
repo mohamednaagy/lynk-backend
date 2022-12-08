@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Support\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
@@ -162,7 +163,7 @@ class CalculateOrderCostTest extends TestCase
             ]);
     }
 
-    public function test_calculate_order_can_lender_order_creator_access(): void
+    public function test_calculate_order_cant_lender_order_creator_access(): void
     {
         $orderCount = rand(1, 200);
         /** @var Money $orderCost */
@@ -174,12 +175,11 @@ class CalculateOrderCostTest extends TestCase
             ->postJson('api/v1/lender/wallet/calculate', [
                 'orders_count' => $orderCount,
             ])
-            ->assertStatus(Response::HTTP_OK)
-            ->assertExactJson([
-                'data' => [
-                    'amount' => $total->formatByDecimal(),
-                ],
-            ]);
+            ->assertStatus(Response::HTTP_FORBIDDEN)
+            ->assertJson(
+                fn (AssertableJson $json) => $json->where('message', 'User does not have the right permissions.')
+                    ->etc()
+            );
     }
 
     public function test_calculate_order_lender_with_not_verified_email_access(): void
@@ -197,7 +197,7 @@ class CalculateOrderCostTest extends TestCase
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertExactJson([
                 'code' => 1008,
-                'message' => __('must_verify_email'),
+                'message' => __('error.must_verify_email'),
             ]);
     }
 
@@ -215,7 +215,7 @@ class CalculateOrderCostTest extends TestCase
             ])
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertExactJson([
-                'message' => __('company_not_active'),
+                'message' => __('error.company_not_active'),
                 'code' => 1015,
             ]);
     }

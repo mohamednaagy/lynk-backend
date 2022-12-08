@@ -14,5 +14,8 @@ class LenderApiUser
             Action::Show,
             Action::Proceed,
         ],
+        Subject::LenderFinancingOrderCost => [
+            Action::Calculate,
+        ],
     ];
 }
