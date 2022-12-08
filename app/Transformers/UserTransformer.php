@@ -72,14 +72,14 @@ class UserTransformer extends TransformerAbstract
 
     public function includeRole(User $user)
     {
-        $query = $this->getRolesQueryBasedOnArea($user);
+        $query = $this->getRolesBasedOnArea($user);
 
         return $this->primitive($query->first()->name);
     }
 
     public function includeRoles(User $user)
     {
-        $query = $this->getRolesQueryBasedOnArea($user);
+        $query = $this->getRolesBasedOnArea($user);
 
         return $this->primitive($query->get()->pluck('name'));
     }
@@ -91,7 +91,7 @@ class UserTransformer extends TransformerAbstract
 
     public function includePermissions(User $user)
     {
-        $rolesQuery = $this->getRolesQueryBasedOnArea($user);
+        $rolesQuery = $this->getRolesBasedOnArea($user);
         $directPermissionsQuery = $this->getPermissionsQueryBasedOnArea($user);
 
         $permissions = Permission::role($rolesQuery->get())->get()->merge($directPermissionsQuery->get());
@@ -116,7 +116,7 @@ class UserTransformer extends TransformerAbstract
         return $this->primitive($user->phoneNumberCountryCode);
     }
 
-    protected function getRolesQueryBasedOnArea(User $user)
+    protected function getRolesBasedOnArea(User $user)
     {
         $roles = $user->roles;
 
