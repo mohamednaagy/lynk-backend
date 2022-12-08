@@ -63,7 +63,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeOrdersCount(Company $company): Primitive
     {
-        return $this->primitive($company->orders_count);
+        return $this->primitive($company->orders_count ?? 0);
     }
 
     public function includeDoesOrderRequireApproval(Company $company): Primitive
