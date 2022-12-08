@@ -15,8 +15,10 @@ class LenderApiUser
             Action::Proceed,
         ],
         Subject::LenderWebhookSecret => [
+            Action::Refresh,
+        ],
+        Subject::LenderWebhooks => [
             Action::Create,
-            Action::Update,
         ],
     ];
 }

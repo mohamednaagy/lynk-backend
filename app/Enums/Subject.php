@@ -37,4 +37,6 @@ final class Subject extends Enum
     const EnquiryReplies = 'enquiryReplies';
 
     const LenderWebhookSecret = 'lenderWebhookSecret';
+
+    const LenderWebhooks = 'lenderWebhooks';
 }

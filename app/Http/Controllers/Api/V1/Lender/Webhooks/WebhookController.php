@@ -19,13 +19,13 @@ class WebhookController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderWebhookSecret, Action::Create, Action::Manage])
+            perm(Area::Lender, [Subject::LenderWebhooks, Action::Create, Action::Manage])
         )
             ->only('store');
 
         $this->middleware(
             'permission:'.
-                   perm(Area::Lender, [Subject::LenderWebhookSecret, Action::Update, Action::Manage])
+                   perm(Area::Lender, [Subject::LenderWebhookSecret, Action::Refresh])
         )
             ->only('refreshSecret');
     }
