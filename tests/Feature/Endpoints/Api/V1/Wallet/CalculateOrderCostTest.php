@@ -197,7 +197,7 @@ class CalculateOrderCostTest extends TestCase
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertExactJson([
                 'code' => 1008,
-                'message' => 'You must verify your email address',
+                'message' => __('must_verify_email'),
             ]);
     }
 
@@ -215,7 +215,7 @@ class CalculateOrderCostTest extends TestCase
             ])
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertExactJson([
-                'message' => 'The company is not active',
+                'message' => __('company_not_active'),
                 'code' => 1015,
             ]);
     }
