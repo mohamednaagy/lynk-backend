@@ -16,7 +16,6 @@ trait InteractsWithAdmin
      * @return Collection|Model|mixed
      */
     public function createAdmin(
-        string $role = Role::Admin,
         string $email = 'admin@bim.com',
         array $data = []
     ): mixed {
@@ -25,7 +24,7 @@ trait InteractsWithAdmin
             'password' => bcrypt('12345678'),
         ], $data));
 
-        Grantify::assignRoleToModel($admin, $role);
+        Grantify::assignRoleToModel($admin, Role::Admin);
 
         return $admin;
     }
