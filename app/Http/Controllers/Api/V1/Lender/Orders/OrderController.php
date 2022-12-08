@@ -8,6 +8,7 @@ use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
 use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Actions\Contracts\Wallets\DeductVatPercentage;
+use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\ErrorCode;
@@ -123,10 +124,11 @@ class OrderController extends Controller
         CanCreateOrder $canCreateOrder,
         CreateFinancingOrder $createFinancingOrder,
         DeductOrderCreationFee $deductOrderCreationFee,
-        DeductVatPercentage $deductVatPercentage
+        DeductVatPercentage $deductVatPercentage,
+        GenerateZatcaInvoice $generateFatoura
     ): JsonResponse {
         return DB::multipleTransaction(
-            function () use ($request, $createFinancingOrder, $deductOrderCreationFee, $canCreateOrder, $deductVatPercentage) {
+            function () use ($request, $createFinancingOrder, $deductOrderCreationFee, $canCreateOrder, $deductVatPercentage, $generateFatoura) {
                 $company = tenant();
                 // throw exception is balance not enough
                 $canCreateOrder->handle($company);
@@ -152,9 +154,14 @@ class OrderController extends Controller
                 );
 
                 // deduct the cost from the wallet
-                $transaction = $deductOrderCreationFee->handle($financingOrder);
+                $creationFeeTransaction = $deductOrderCreationFee->handle($financingOrder);
+                $vatPercentageTransaction = $deductVatPercentage->handle($financingOrder, $creationFeeTransaction, $company);
 
-                $deductVatPercentage->handle($financingOrder, $transaction);
+                $generateFatoura->handel(
+                    $financingOrder,
+                    creationFeeTransaction: $creationFeeTransaction,
+                    vatPercentageTransaction: $vatPercentageTransaction
+                );
 
                 return fractal($financingOrder, new FinancingOrderTransformer())
                     ->parseIncludes([
