@@ -44,18 +44,18 @@ class WebhookControllerStoreTest extends TestCase
     {
         parent::setUp();
         self::$url = 'http://localhost.com';
-        self::$company = $this->createCompany('2000', ['company_cr' => '12345678910'])[0];
-        self::$companyNotActivated = $this->createCompany('2000', [
+        [self::$company] = $this->createCompany(
+            '2000',
+            [
+                'company_cr' => '12345678910',
+            ]
+        );
+
+        [self::$companyNotActivated] = $this->createCompany('2000', [
             'company_cr' => '12345678999',
             'status' => CompanyStatus::Pending,
-        ])[0];
+        ]);
 
-        self::$userLenderAdminBelongToCompanyNotActivated = $this->createLenderUser(self::$companyNotActivated->id, Role::LenderAdmin, 'lenderAdmin1@bim.com');
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$lenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
-        self::$lenderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'LenderOrderCreator@bim.com');
-        self::$lenderSuperVisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
-        self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'LenderSupervisor@bim.com');
         self::$lenerAdminNotVerified = $this->createLenderUser(
             self::$company->id,
             Role::LenderAdmin,
@@ -64,6 +64,13 @@ class WebhookControllerStoreTest extends TestCase
                 'email_verified_at' => null,
             ]
         );
+
+        self::$userLenderAdminBelongToCompanyNotActivated = $this->createLenderUser(self::$companyNotActivated->id, Role::LenderAdmin, 'lenderAdmin1@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$lenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
+        self::$lenderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'LenderOrderCreator@bim.com');
+        self::$lenderSuperVisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
+        self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'LenderSupervisor@bim.com');
     }
 
     public function test_webhook_controller_store_success()
@@ -82,7 +89,8 @@ class WebhookControllerStoreTest extends TestCase
                     'type' => [
                         'description',
                         'value',
-                    ], ],
+                    ],
+                ],
             ]);
     }
 
@@ -105,7 +113,7 @@ class WebhookControllerStoreTest extends TestCase
             ]);
     }
 
-    public function test_webhook_controller_store_invalid_type()
+    public function test_webhook_controller_store_with_invalid_type()
     {
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
@@ -119,7 +127,7 @@ class WebhookControllerStoreTest extends TestCase
             ]);
     }
 
-    public function test_webhook_controller_store_require_fields()
+    public function test_webhook_controller_store_with_missing_fields()
     {
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
@@ -138,11 +146,23 @@ class WebhookControllerStoreTest extends TestCase
             ]);
     }
 
-    public function test_webhook_controller_store_webhook_count_can_not_be_more_the_limitation()
+    public function test_webhook_controller_store_webhook_count_can_not_be_more_the_type_limit()
     {
-        $limit = 0;
+        $limit = 5;
         config()->set('webhook-server.limits.'.WebhookType::OrderUpdates, $limit);
 
+        // passed till btween the limit
+        for ($i = 0; $i < $limit; $i++) {
+            $this->actingAs(self::$userLenderAdmin)
+                ->withHeader('X-Company', self::$company->id)
+                ->postJson('/api/v1/lender/webhooks', [
+                    'url' => self::$url,
+                    'type' => WebhookType::OrderUpdates,
+                ])
+                ->assertStatus(200);
+        }
+
+        // assert 422 when arrive to the limit
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
             ->postJson('/api/v1/lender/webhooks', [
@@ -169,19 +189,19 @@ class WebhookControllerStoreTest extends TestCase
             ]);
     }
 
-     public function test_webhook_controller_store_lender_can_not_access_when_company_not_active()
-     {
-         $this->withHeader('X-Company', self::$companyNotActivated->id)
-             ->actingAs(self::$userLenderAdminBelongToCompanyNotActivated)
-             ->postJson('/api/v1/lender/webhooks', [
-                 'url' => self::$url,
-                 'type' => WebhookType::OrderUpdates,
-             ])
-             ->assertStatus(403)->assertJsonFragment([
-                 'message' => __('error.company_not_active'),
-                 'code' => ErrorCode::COMPANY_NOT_ACTIVE,
-             ]);
-     }
+    public function test_webhook_controller_store_lender_can_not_access_when_company_not_active()
+    {
+        $this->withHeader('X-Company', self::$companyNotActivated->id)
+            ->actingAs(self::$userLenderAdminBelongToCompanyNotActivated)
+            ->postJson('/api/v1/lender/webhooks', [
+                'url' => self::$url,
+                'type' => WebhookType::OrderUpdates,
+            ])
+            ->assertStatus(403)->assertJsonFragment([
+                'message' => __('error.company_not_active'),
+                'code' => ErrorCode::COMPANY_NOT_ACTIVE,
+            ]);
+    }
 
     public function test_webhook_controller_store_lender_admin_can_access()
     {
@@ -205,7 +225,7 @@ class WebhookControllerStoreTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_webhook_controller_store_lender_creator_can_not_access()
+    public function test_webhook_controller_store_lender_order_creator_can_not_access()
     {
         $this->withHeader('X-Company', self::$company->id)
             ->actingAs(self::$lenderCreator)

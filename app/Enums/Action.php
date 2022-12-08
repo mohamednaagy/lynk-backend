@@ -37,5 +37,5 @@ final class Action extends Enum
 
     const SyncStatusWithEdaat = 'syncStatusWithEdaat';
 
-    const Refresh = 'refresh';
+    const Update = 'update';
 }

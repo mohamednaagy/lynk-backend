@@ -41,25 +41,23 @@ class WebhookControllerRefreshSecretTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        self::$company = $this->createCompany(
+
+        [self::$company] = $this->createCompany(
             '2000',
             [
                 'company_cr' => '12345678910',
                 'webhook_secret_key' => 'secret_key',
             ]
-        )[0];
+        );
 
-        self::$companyNotActivated = $this->createCompany('2000', [
-            'company_cr' => '12345678999',
-            'status' => CompanyStatus::Pending,
-        ])[0];
+        [self::$companyNotActivated] = $this->createCompany(
+            '2000',
+            [
+                'company_cr' => '12345678999',
+                'status' => CompanyStatus::Pending,
+            ]
+        );
 
-        self::$userLenderAdminBelongToCompanyNotActivated = $this->createLenderUser(self::$companyNotActivated->id, Role::LenderAdmin, 'lenderAdmin1@bim.com');
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$lenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
-        self::$lenderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'LenderOrderCreator@bim.com');
-        self::$lenderSuperVisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
-        self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'LenderSupervisor@bim.com');
         self::$lenerAdminNotVerified = $this->createLenderUser(
             self::$company->id,
             Role::LenderAdmin,
@@ -68,6 +66,13 @@ class WebhookControllerRefreshSecretTest extends TestCase
                 'email_verified_at' => null,
             ]
         );
+
+        self::$userLenderAdminBelongToCompanyNotActivated = $this->createLenderUser(self::$companyNotActivated->id, Role::LenderAdmin, 'lenderAdmin1@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$lenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
+        self::$lenderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'LenderOrderCreator@bim.com');
+        self::$lenderSuperVisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
+        self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'LenderSupervisor@bim.com');
     }
 
     public function test_webhook_controller_refresh_secret_successed()
@@ -89,11 +94,11 @@ class WebhookControllerRefreshSecretTest extends TestCase
             ->withHeader('X-Company', self::$company->id)
             ->putJson('/api/v1/lender/webhooks/refresh-secret');
 
-        $secretKeyFromDatabaseWitoutCasts = Company::find(self::$company->id)->getRawOriginal('webhook_secret_key');
+        $secretKeyFromDatabaseWithoutCasts = Company::find(self::$company->id)->getRawOriginal('webhook_secret_key');
 
         // can not decrypt string that not enypted
         $this->assertIsString(
-            Crypt::decryptString($secretKeyFromDatabaseWitoutCasts)
+            Crypt::decryptString($secretKeyFromDatabaseWithoutCasts)
         );
     }
 
@@ -128,7 +133,7 @@ class WebhookControllerRefreshSecretTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_webhook_controller_refresh_secret_lender_creator_can_not_access()
+    public function test_webhook_controller_refresh_secret_lender_order_creator_can_not_access()
     {
         $this->withHeader('X-Company', self::$company->id)
             ->actingAs(self::$lenderCreator)
