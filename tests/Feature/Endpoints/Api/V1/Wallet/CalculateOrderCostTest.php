@@ -42,8 +42,8 @@ class CalculateOrderCostTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        [self::$company, $_] = $this->createCompany();
-        [self::$notApprovedCompany, $_] = $this->createCompany(data: ['company_cr' => '12345678911', 'status' => CompanyStatus::Pending]);
+        [self::$company] = $this->createCompany();
+        [self::$notApprovedCompany] = $this->createCompany(data: ['company_cr' => '12345678911', 'status' => CompanyStatus::Pending]);
         self::$lenderAdminUserNotApproved = $this->createLenderUser(self::$notApprovedCompany->id, Role::LenderAdmin);
         self::$lenderAdminUserNotVerified = $this->createLenderUser(self::$company->id, Role::LenderAdmin, data: ['email_verified_at' => null]);
         self::$lenderAdminUser = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
