@@ -9,11 +9,11 @@ use Modules\Grantify\Facades\Grantify;
 trait InteractsWithAdmin
 {
     /**
-     * @param  int  $companyId
-     * @param  string  $role
+     * Summary of createAdmin
+     *
      * @param  string  $email
      * @param  array  $data
-     * @return Collection|Model|mixed
+     * @return mixed
      */
     public function createAdmin(
         string $email = 'admin@bim.com',
