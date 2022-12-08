@@ -22,6 +22,8 @@ class GetPaginatedLenderUsersAction implements GetPaginatedLenderUsers
                     Role::LenderBilling,
                     Role::LenderSupervisor,
                 ]);
-            })->paginate();
+            })
+            ->with('roles')
+            ->paginate();
     }
 }
