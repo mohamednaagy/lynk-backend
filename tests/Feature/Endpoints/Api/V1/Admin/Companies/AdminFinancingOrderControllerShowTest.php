@@ -56,13 +56,12 @@ class AdminFinancingOrderControllerShowTest extends TestCase
 
         self::$managerHasPermissionToShowMethod = $this->createManager(
             'managerHasPermissionToShowMethod@bim.com',
-            [],
             perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show])
         );
 
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
         self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager();
+        self::$manager = $this->createManager('Manager@bim.com');
         self::$userBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
         self::$userSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
         self::$userOrderCrearor = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'LenderOrderCreator@bim.com');
@@ -147,22 +146,12 @@ class AdminFinancingOrderControllerShowTest extends TestCase
 
     public function test_admin_financing_order_controller_show_other_roles_can_not_access()
     {
-        $order = FinancingOrder::where('company_id', self::$company->id)->first();
+        $this->assertLenderUserCannotAccess(function ($user, $role) {
+            $order = FinancingOrder::where('company_id', self::$company->id)
+                ->first();
 
-        $this->actingAs(self::$userOrderCrearor)
-            ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders/'.$order->id)
-            ->assertStatus(403);
-
-        $this->actingAs(self::$userSupervisor)
-            ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders/'.$order->id)
-            ->assertStatus(403);
-
-        $this->actingAs(self::$userBilling)
-            ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders/'.$order->id)
-            ->assertStatus(403);
-
-        $this->actingAs(self::$userLender)
-            ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders/'.$order->id)
-            ->assertStatus(403);
+            return $this->actingAs($user)
+                ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders/'.$order->id);
+        });
     }
 }

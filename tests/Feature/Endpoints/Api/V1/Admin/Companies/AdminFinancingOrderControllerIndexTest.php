@@ -49,18 +49,28 @@ class AdminFinancingOrderControllerIndexTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        [self::$sconedCompany] = $this->createCompany('2000', ['company_cr' => '12345676666']);
+        [self::$company] = $this->createCompany(
+            '2000',
+            [
+                'company_cr' => '12345678910',
+            ]
+        );
+
+        [self::$sconedCompany] = $this->createCompany(
+            '2000',
+            [
+                'company_cr' => '12345676666',
+            ]
+        );
 
         self::$managerHasPermisionToIndexMethod = $this->createManager(
             'ManagerHasPermission@bim.com',
-            [],
             perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Index])
         );
 
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
         self::$admin = $this->createAdmin();
-        self::$manager = $this->createAdmin(Role::Manager, 'Manager@bim.com');
+        self::$manager = $this->createManager('Manager@bim.com');
         self::$userBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
         self::$userSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
         self::$userOrderCrearor = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'LenderOrderCreator@bim.com');
@@ -138,20 +148,9 @@ class AdminFinancingOrderControllerIndexTest extends TestCase
 
     public function test_admin_financing_order_controller_index_other_roles_can_not_access()
     {
-        $this->actingAs(self::$userOrderCrearor)
-            ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders')
-            ->assertStatus(403);
-
-        $this->actingAs(self::$userSupervisor)
-            ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders')
-            ->assertStatus(403);
-
-        $this->actingAs(self::$userBilling)
-            ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders')
-            ->assertStatus(403);
-
-        $this->actingAs(self::$userLender)
-            ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders')
-            ->assertStatus(403);
+        $this->assertLenderUserCannotAccess(function ($user, $role) {
+            return $this->actingAs($user)
+                ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders');
+        });
     }
 }

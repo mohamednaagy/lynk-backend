@@ -25,7 +25,7 @@
         <env name="DB_DATABASE" value="lynk_testing"/>
         <env name="WALLET_DB_HOST" value="127.0.0.1"/>
         <env name="WALLET_DB_PORT" value="3306"/>
-        <env name="WALLET_DB_DATABASE" value="lynk_wallet"/>
+        <env name="WALLET_DB_DATABASE" value="lynk_wallet_testing"/>
         <env name="WALLET_DB_USERNAME" value="root"/>
         <env name="WALLET_DB_PASSWORD" value=""/>
         <env name="MAIL_MAILER" value="array"/>
@@ -33,6 +33,7 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="MOBILE_VERIFY_DEFAULT_DRIVER" value="fake_tcc"/>
+        <env name="MOBILE_VERIFY_TCC_API_KEY" value="9122385904480654204103/UjUEigInUUt8dzlpTP2PllXBsPQXHuPIqjYVDmg="/>
         <env name="DEFAULT_TRADER" value="fake"/>
     </php>
 </phpunit>

@@ -14,6 +14,8 @@ class GetPaginatedUsersByRoleAction implements GetPaginatedUsersByRole
      */
     public function handle(string|array $role): LengthAwarePaginator
     {
-        return User::role($role)->with('roles')->paginate();
+        return User::role($role)
+            ->with('roles', 'permissions')
+            ->paginate();
     }
 }
