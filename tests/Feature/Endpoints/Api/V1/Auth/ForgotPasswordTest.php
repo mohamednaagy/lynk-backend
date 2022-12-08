@@ -122,14 +122,8 @@ class ForgotPasswordTest extends TestCase
             'redirect_url' => 'http://localhost:8000/api/v1/reset-password',
         ]);
 
-        $response->assertStatus(422)->assertJson([
-            'message' => 'The selected company identifier is invalid.',
-            'errors' => [
-                'company_unique_name' => [
-                    'The selected company identifier is invalid.',
-                ],
-            ],
-        ]);
+        $response->assertStatus(200);
+        Notification::assertNothingSent();
     }
 
     /**
