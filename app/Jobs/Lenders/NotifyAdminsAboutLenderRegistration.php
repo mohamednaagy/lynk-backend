@@ -14,7 +14,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Notification;
-use Modules\Grantify\Facades\Grantify;
 
 class NotifyAdminsAboutLenderRegistration implements ShouldQueue
 {
@@ -38,16 +37,12 @@ class NotifyAdminsAboutLenderRegistration implements ShouldQueue
     public function handle(): void
     {
         $users = User::permission(
-            Grantify::transformSubjectActionToPermissionName([
-                [
-                    'subject' => Area::SuperAdmin.'-'.Subject::All,
-                    'actions' => [Action::Manage],
-                ],
-                [
-                    'subject' => Area::SuperAdmin.'-'.Subject::Lenders,
-                    'actions' => [Action::Edit, Action::Show],
-                ],
-            ]))
+            perm_arr(
+                Area::SuperAdmin,
+                [Subject::All, Action::Manage],
+                [Subject::Lenders, Action::Edit, Action::Show]
+            )
+        )
             ->withoutTenancy()
             ->get();
 
