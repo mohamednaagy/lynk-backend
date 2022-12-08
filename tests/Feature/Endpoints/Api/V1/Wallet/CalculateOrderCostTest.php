@@ -201,7 +201,7 @@ class CalculateOrderCostTest extends TestCase
             ]);
     }
 
-    public function test_calculate_order_cant_lender_not_approved_access(): void
+    public function test_calculate_order_lender_of_not_approved_company_cant_access(): void
     {
         $orderCount = rand(1, 200);
         /** @var Money $orderCost */
