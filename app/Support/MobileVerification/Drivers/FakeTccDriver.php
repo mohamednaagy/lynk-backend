@@ -10,13 +10,13 @@ use Propaganistas\LaravelPhone\PhoneNumber;
 class FakeTccDriver implements MobileVerifyDriverInterface
 {
     /**
-     * @param  string  $mobileNumber
+     * @param  \Propaganistas\LaravelPhone\PhoneNumber  $mobileNumber
      * @param  string  $personId
      * @return bool
      */
     public function verify(PhoneNumber $mobileNumber, string $personId): bool
     {
-        $responseCode = $mobileNumber == '+966500112233'
+        $responseCode = $mobileNumber->formatE164() == '+966500112233'
             ? TccResponseCode::MobileNumberMatched
             : TccResponseCode::MobileNumberUnmatched;
 
