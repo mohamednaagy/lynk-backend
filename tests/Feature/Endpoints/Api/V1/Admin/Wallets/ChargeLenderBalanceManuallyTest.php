@@ -54,10 +54,19 @@ class ChargeLenderBalanceManuallyTest extends TestCase
         parent::setUp();
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(
+            self::$company->id,
+            Role::LenderAdmin,
+            'lenderAdmin@bim.com'
+        );
+
+        self::$managerHasPermission = $this->createManager(
+            'managerHasPermission@bim.com',
+            perm(Area::SuperAdmin, [Subject::LenderWallet, Action::Charge])
+        );
+
         self::$admin = $this->createAdmin();
         self::$manager = $this->createManager();
-        self::$managerHasPermission = $this->createManager('managerHasPermission@bim.com', perm(Area::SuperAdmin, [Subject::LenderWallet, Action::Charge]));
         self::$lenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'LenderAdmin@bim.com');
         self::$lenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
         self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'LenderApiUser@bim.com');
