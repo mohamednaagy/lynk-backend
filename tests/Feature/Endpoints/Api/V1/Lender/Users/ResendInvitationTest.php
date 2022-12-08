@@ -26,14 +26,6 @@ class ResendInvitationTest extends TestCase
 
     private static User $lenderBelongsToCompanyNotActive;
 
-    private static User $LenderSupervisor;
-
-    private static User $LenderBilling;
-
-    private static User $lenderApiUser;
-
-    private static User $lenderCrearor;
-
     private static User $lenerAdmin;
 
     private static User $lenerAdminBelonsToCompanyNotActive;
@@ -56,11 +48,7 @@ class ResendInvitationTest extends TestCase
             ]
         );
 
-        self::$LenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
-        self::$LenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
         self::$lenerAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'LenderAdmin@bim.com');
-        self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'LenderAdmin1@bim.com');
-        self::$lenderCrearor = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'LenderAdmin1@bim.com');
         self::$lenderAdminNotJoined = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'LenderAdmin1@bim.com', ['password' => null]);
         self::$lenerAdminBelonsToCompanyNotActive = $this->createLenderUser(self::$companyNotActive->id, Role::LenderAdmin, 'LenderAdmin2@bim.com');
 
@@ -109,19 +97,6 @@ class ResendInvitationTest extends TestCase
                 'message' => __('error.must_verify_email'),
                 'code' => ErrorCode::EMAIL_NOT_VERIFIED,
             ]);
-    }
-
-    public function test_resend_invitation_lender_supervisor_can_access()
-    {
-        $this->withHeader('X-Company', self::$company->id)
-            ->actingAs(self::$LenderSupervisor)
-            ->postJson(
-                'api/v1/lender/users/'.self::$lenderAdminNotJoined->id.'/resend-invitation',
-                [
-                    'redirect_url' => self::$redirectUrl,
-                ]
-            )
-            ->assertStatus(403);
     }
 
     public function test_resend_invitation_lender_admin_can_access()
