@@ -33,6 +33,7 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="MOBILE_VERIFY_DEFAULT_DRIVER" value="fake_tcc"/>
+        <env name="MOBILE_VERIFY_TCC_API_KEY" value="9122385904480654204103/UjUEigInUUt8dzlpTP2PllXBsPQXHuPIqjYVDmg="/>
         <env name="DEFAULT_TRADER" value="fake"/>
     </php>
 </phpunit>
