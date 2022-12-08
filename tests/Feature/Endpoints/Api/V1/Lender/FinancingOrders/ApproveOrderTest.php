@@ -43,8 +43,6 @@ class ApproveOrderTest extends TestCase
 
     public function test_order_approve_for_only_pending_approval_status(): void
     {
-        $this->assertEquals(self::$financingOrder->getRawOriginal('status'), FinancingOrderStatus::PendingApproval);
-
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getRawOriginal('id'))
             ->putJson(self::$apiUrl);
@@ -111,7 +109,7 @@ class ApproveOrderTest extends TestCase
             ->putJson(self::$apiUrl);
 
         $response->assertStatus(403)->assertJson(
-            fn (AssertableJson $json) => $json->where('message', 'User does not have the right roles.')
+            fn (AssertableJson $json) => $json->where('message', 'User does not have the right permissions.')
                 ->etc()
         );
     }
@@ -125,7 +123,7 @@ class ApproveOrderTest extends TestCase
             ->putJson(self::$apiUrl);
 
         $response->assertStatus(403)->assertJson(
-            fn (AssertableJson $json) => $json->where('message', 'User does not have the right roles.')
+            fn (AssertableJson $json) => $json->where('message', 'User does not have the right permissions.')
                 ->etc()
         );
     }
@@ -139,7 +137,7 @@ class ApproveOrderTest extends TestCase
             ->putJson(self::$apiUrl);
 
         $response->assertStatus(403)->assertJson(
-            fn (AssertableJson $json) => $json->where('message', 'User does not have the right roles.')
+            fn (AssertableJson $json) => $json->where('message', 'User does not have the right permissions.')
                 ->etc()
         );
     }
@@ -159,7 +157,7 @@ class ApproveOrderTest extends TestCase
         );
     }
 
-    public function test_approve_order_on_auth_user_with_email_verified(): void
+    public function test_approve_order_on_auth_user_fails_if_email_is_not_verified(): void
     {
         self::$userLender->email_verified_at = null;
         self::$userLender->save();
