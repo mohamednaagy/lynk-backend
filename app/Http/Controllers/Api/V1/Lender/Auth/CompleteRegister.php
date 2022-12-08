@@ -20,10 +20,13 @@ class CompleteRegister extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  User  $user
      * @param  CompleteRegisterRequest  $request
-     * @param  CompleteUserRegistration  $CompleteUserRegistration
+     * @param  User  $user
+     * @param  CompleteUserRegistration  $completeUserRegistration
+     * @param  LoginUser  $loginUser
      * @return JsonResponse
+     *
+     * @throws \Throwable
      */
     public function __invoke(
         CompleteRegisterRequest $request,
