@@ -20,10 +20,12 @@ trait InteractsWithAdmin
         string $email = 'admin@bim.com',
         array $data = []
     ): mixed {
-        $admin = User::factory()->create(array_merge([
-            'email' => $email,
-            'password' => bcrypt('12345678'),
-        ], $data));
+        $admin = User::factory()->create(
+            array_merge([
+                'email' => $email,
+                'password' => bcrypt('12345678'),
+            ], $data)
+        );
 
         Grantify::assignRoleToModel($admin, $role);
 
@@ -40,13 +42,15 @@ trait InteractsWithAdmin
      */
     public function createManager(
         string $email = 'Manager@bim.com',
-        array $data = [],
-        string|array $permissions = []
+        string|array $permissions = [],
+        array $data = []
     ): mixed {
-        $manager = User::factory()->create(array_merge([
-            'email' => $email,
-            'password' => bcrypt('12345678'),
-        ], $data));
+        $manager = User::factory()->create(
+            array_merge([
+                'email' => $email,
+                'password' => bcrypt('12345678'),
+            ], $data)
+        );
 
         Grantify::assignRoleToModel($manager, Role::Manager);
 
