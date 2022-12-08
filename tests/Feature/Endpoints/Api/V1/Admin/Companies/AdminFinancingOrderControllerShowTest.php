@@ -34,12 +34,6 @@ class AdminFinancingOrderControllerShowTest extends TestCase
 
     private static User $managerHasPermissionToShowMethod;
 
-    private static User $userBilling;
-
-    private static User $userSupervisor;
-
-    private static User $userOrderCrearor;
-
     /**
      * @return void
      */
@@ -62,9 +56,6 @@ class AdminFinancingOrderControllerShowTest extends TestCase
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
         self::$admin = $this->createAdmin();
         self::$manager = $this->createManager('Manager@bim.com');
-        self::$userBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
-        self::$userSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
-        self::$userOrderCrearor = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'LenderOrderCreator@bim.com');
 
         FinancingOrder::factory(5)->create([
             'company_id' => self::$company->id,
