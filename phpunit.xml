@@ -23,6 +23,11 @@
         <env name="CACHE_DRIVER" value="array"/>
         <env name="DB_CONNECTION" value="mysql"/>
         <env name="DB_DATABASE" value="lynk_testing"/>
+        <env name="WALLET_DB_HOST" value="127.0.0.1"/>
+        <env name="WALLET_DB_PORT" value="3306"/>
+        <env name="WALLET_DB_DATABASE" value="lynk2wallet"/>
+        <env name="WALLET_DB_USERNAME" value="root"/>
+        <env name="WALLET_DB_PASSWORD" value=""/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
