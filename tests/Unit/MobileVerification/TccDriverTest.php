@@ -90,7 +90,6 @@ class TccDriverTest extends TestCase
      */
     public function test_mobile_verification_tcc_that_api_key_invalid(): void
     {
-        //valid api key is 9122385904480654204103/UjUEigInUUt8dzlpTP2PllXBsPQXHuPIqjYVDmg=
         Config::set('mobile-verify.drivers.tcc.api_key', '122385904480654204103/UjUEigInUUt8dzlpTP2PllXBsPQXHuPIqjYVDmg=');
         $this->expectException(InvalidApiKeyException::class);
         $phoneNumber = PhoneNumber::make('500112233', self::$phoneCountryCode);
