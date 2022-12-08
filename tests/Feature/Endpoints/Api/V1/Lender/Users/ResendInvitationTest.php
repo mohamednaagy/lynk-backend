@@ -137,43 +137,20 @@ class ResendInvitationTest extends TestCase
             ->assertStatus(200);
     }
 
-    public function test_resend_invitation_lender_billing_can_access()
+    public function test_resend_invitation_only_lender_admin_can_access()
     {
-        $this->withHeader('X-Company', self::$company->id)
-            ->actingAs(self::$LenderBilling)
-            ->postJson(
-                'api/v1/lender/users/'.self::$lenderAdminNotJoined->id.'/resend-invitation',
-                [
-                    'redirect_url' => self::$redirectUrl,
-                ]
-            )
-            ->assertStatus(403);
-    }
+        $roles = [Role::LenderBilling, Role::LenderApiUser, Role::LenderOrderCreator, Role::LenderSupervisor];
 
-    public function test_resend_invitation_lender_api_user_can_access()
-    {
-        $this->withHeader('X-Company', self::$company->id)
-            ->actingAs(self::$lenderApiUser)
-            ->postJson(
-                'api/v1/lender/users/'.self::$lenderAdminNotJoined->id.'/resend-invitation',
-                [
-                    'redirect_url' => self::$redirectUrl,
-                ]
-            )
-            ->assertStatus(403);
-    }
-
-    public function test_resend_invitation_lender_order_creator_can_access()
-    {
-        $this->withHeader('X-Company', self::$company->id)
-            ->actingAs(self::$lenderCrearor)
-            ->postJson(
-                'api/v1/lender/users/'.self::$lenderAdminNotJoined->id.'/resend-invitation',
-                [
-                    'redirect_url' => self::$redirectUrl,
-                ]
-            )
-            ->assertStatus(403);
+        $this->assertStatusToSpecificRoles(403, $roles, self::$company, function (User $user, string $role) {
+            return  $this->actingAs($user)
+                ->withHeader('X-Company', self::$company->getOriginal('id'))
+                ->postJson(
+                    'api/v1/lender/users/'.self::$lenderAdminNotJoined->id.'/resend-invitation',
+                    [
+                        'redirect_url' => self::$redirectUrl,
+                    ]
+                );
+        });
     }
 
     public function test_resend_invitation_email_is_sent()

@@ -44,7 +44,11 @@ trait InteractsWithLender
         $wallet = $company->createWallet(WalletType::CompanyWallet, 'SAR');
 
         app()->make(TransactionServiceInterface::class)->deposit(
-            $wallet, \money($walletInitialAmount, 'SAR'), 1, 1, []
+            $wallet,
+            \money($walletInitialAmount, 'SAR'),
+            1,
+            1,
+            []
         );
 
         return [
@@ -124,6 +128,25 @@ trait InteractsWithLender
         foreach ($roles as $role) {
             $user = $this->createLenderUser($company->id, $role, (string) Str::uuid().'@test.test');
             $request($user, $role)->assertStatus(403);
+        }
+
+        return $request;
+    }
+
+    public function assertStatusToSpecificRoles(int $status, array $roles, Company $company = null, $request)
+    {
+        if (is_null($company)) {
+            [$company] = $this->createCompany(
+                2000,
+                [
+                    'company_cr' => (string) Str::uuid(),
+                ]
+            );
+        }
+
+        foreach ($roles as $role) {
+            $user = $this->createLenderUser($company->id, $role, (string) Str::uuid().'@test.test');
+            $request($user, $role)->assertStatus($status);
         }
 
         return $request;
