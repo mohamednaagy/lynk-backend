@@ -2,6 +2,7 @@
 
 namespace Tests\Traits;
 
+use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\WalletType;
 use App\Models\Company;
@@ -13,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Modules\Grantify\Facades\Grantify;
 
 trait InteractsWithLender
@@ -106,5 +108,24 @@ trait InteractsWithLender
             'amount' => 1,
             'status' => 1,
         ], $data));
+    }
+
+    public function assertLenderUserCannotAccess($request)
+    {
+        $roles = Area::roles(Area::Lender);
+
+        [$company] = $this->createCompany(
+            2000,
+            [
+                'company_cr' => (string) Str::uuid(),
+            ]
+        );
+
+        foreach ($roles as $role) {
+            $user = $this->createLenderUser($company->id, $role, (string) Str::uuid().'@test.test');
+            $request($user, $role)->assertStatus(403);
+        }
+
+        return $request;
     }
 }

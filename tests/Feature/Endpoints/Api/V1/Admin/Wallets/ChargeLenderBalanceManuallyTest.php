@@ -10,19 +10,18 @@ use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
+use Cknow\Money\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithAdmin;
 use Tests\Traits\InteractsWithLender;
-use Tests\Traits\UsersInteractsWithRoute;
 
 class ChargeLenderBalanceManuallyTest extends TestCase
 {
     use RefreshDatabase;
     use InteractsWithLender;
     use InteractsWithAdmin;
-    use UsersInteractsWithRoute;
 
     private static Company $company;
 
@@ -74,7 +73,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
         self::$lenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
     }
 
-    public function test_charge_Lender_balance_manually_controller_validation_rules()
+    public function test_charge_lender_balance_manually_controller_validation_rules()
     {
         $this->actingAs(self::$admin)
             ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit')
@@ -98,7 +97,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
             ]);
     }
 
-    public function test_charge_Lender_balance_manually_controller_successed()
+    public function test_charge_lender_balance_manually_controller_successed()
     {
         $this->actingAs(self::$admin)
             ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
@@ -114,7 +113,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
             ]);
     }
 
-    public function test_charge_Lender_balance_manually_controller_transaction_description()
+    public function test_charge_lender_balance_manually_controller_transaction_description()
     {
         $this->actingAs(self::$admin);
         $this->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
@@ -129,7 +128,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
         $this->assertTrue($response->getOriginalContent()->data[1]->description == __('transaction-description.manual_deposit'));
     }
 
-    public function test_charge_Lender_balance_manually_controller_check_wallet_before_and_after_charge()
+    public function test_charge_lender_balance_manually_controller_check_wallet_before_and_after_charge()
     {
         $balance = self::$company->balance(WalletType::CompanyWallet);
         $this->actingAs(self::$admin);
@@ -142,10 +141,10 @@ class ChargeLenderBalanceManuallyTest extends TestCase
         ]);
 
         $balanceAfterDeposit = self::$company->balance(WalletType::CompanyWallet);
-        $this->assertTrue($balance->add(money(50, 'SAR', true))->equals($balanceAfterDeposit));
+        $this->assertTrue($balance->add(Money::parseByDecimal(50, 'SAR'))->equals($balanceAfterDeposit));
     }
 
-    public function test_charge_Lender_balance_manually_admin_can_access()
+    public function test_charge_lender_balance_manually_admin_can_access()
     {
         $this->actingAs(self::$admin)
             ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
@@ -158,7 +157,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
             ->assertStatus(200);
     }
 
-    public function test_charge_Lender_balance_manually_manager_can_not_access_with_no_permission()
+    public function test_charge_lender_balance_manually_manager_can_not_access_with_no_permission()
     {
         $this->actingAs(self::$manager)
             ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
@@ -171,7 +170,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_charge_Lender_balance_manually_manager_can_access_when_has_permission()
+    public function test_charge_lender_balance_manually_manager_can_access_when_has_permission()
     {
         $this->actingAs(self::$managerHasPermission)
             ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
