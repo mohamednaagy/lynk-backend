@@ -57,8 +57,6 @@ class CompanyController extends Controller
 
             $company->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
 
-            $company = $createCompany->handle($data);
-
             return fractal($company, new CompanyTransformer())
                 ->parseIncludes([
                     'id',
