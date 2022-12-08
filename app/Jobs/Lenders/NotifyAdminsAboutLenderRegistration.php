@@ -4,7 +4,6 @@ namespace App\Jobs\Lenders;
 
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\Company;
 use App\Models\User;
@@ -26,7 +25,7 @@ class NotifyAdminsAboutLenderRegistration implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(private Company $company, private string $externalUrl)
+    public function __construct(private Company $company)
     {
         //
     }
@@ -38,20 +37,20 @@ class NotifyAdminsAboutLenderRegistration implements ShouldQueue
      */
     public function handle(): void
     {
-        $users = User::role([Role::Admin, Role::Manager])
-            ->permission(
-                Grantify::transformSubjectActionToPermissionName([
-                    [
-                        'subject' => Area::SuperAdmin.'-'.Subject::All,
-                        'actions' => [Action::Manage],
-                    ],
-                    [
-                        'subject' => Area::SuperAdmin.'-'.Subject::Lenders,
-                        'actions' => [Action::Edit],
-                    ],
-                ]))
+        $users = User::permission(
+            Grantify::transformSubjectActionToPermissionName([
+                [
+                    'subject' => Area::SuperAdmin.'-'.Subject::All,
+                    'actions' => [Action::Manage],
+                ],
+                [
+                    'subject' => Area::SuperAdmin.'-'.Subject::Lenders,
+                    'actions' => [Action::Edit, Action::Show],
+                ],
+            ]))
+            ->withoutTenancy()
             ->get();
 
-        Notification::send($users, new LenderRegistered($this->company, $this->externalUrl));
+        Notification::send($users, new LenderRegistered($this->company));
     }
 }

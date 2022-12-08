@@ -38,12 +38,12 @@ class Register extends Controller
                 ]
             );
 
-            $lender = $registerLender->handle($data);
+            $user = $registerLender->handle($data);
 
-            dispatch(new NotifyAdminsAboutLenderRegistration(tenant(), $data['redirect_url']));
+            dispatch(new NotifyAdminsAboutLenderRegistration(tenant()));
 
             return $this->successResponse(
-                $loginUser->handle($lender, $request->validated('source'), $request),
+                $loginUser->handle($user, $request->validated('source'), $request),
                 Response::HTTP_CREATED
             );
         });
