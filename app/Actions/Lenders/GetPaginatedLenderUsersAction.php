@@ -23,7 +23,7 @@ class GetPaginatedLenderUsersAction implements GetPaginatedLenderUsers
                     Role::LenderSupervisor,
                 ]);
             })
-            ->with('roles')
+            ->with('permissions', 'roles')
             ->paginate();
     }
 }

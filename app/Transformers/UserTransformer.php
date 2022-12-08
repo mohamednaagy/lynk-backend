@@ -91,10 +91,10 @@ class UserTransformer extends TransformerAbstract
 
     public function includePermissions(User $user)
     {
-        $rolesQuery = $this->getRolesBasedOnArea($user);
-        $directPermissionsQuery = $this->getPermissionsQueryBasedOnArea($user);
+        $roles = $this->getRolesBasedOnArea($user);
+        $directPermissions = $this->getPermissionsBasedOnArea($user);
 
-        $permissions = Permission::role($rolesQuery->get())->get()->merge($directPermissionsQuery->get());
+        $permissions = Permission::role($roles)->get()->merge($directPermissions);
 
         $subjectPermissions = Grantify::transformPermissionsToSubjectAction($permissions);
 
@@ -126,15 +126,14 @@ class UserTransformer extends TransformerAbstract
         };
     }
 
-    protected function getPermissionsQueryBasedOnArea(User $user)
+    protected function getPermissionsBasedOnArea(User $user)
     {
-        $query = $user->permissions();
+        $permissions = $user->permissions;
 
-        $query = match ($this->area) {
-            Area::Lender, Area::SuperAdmin => $query->where('name', 'Like', $this->area.'-%'),
+        return match ($this->area) {
+            Area::Lender, Area::SuperAdmin => $permissions->where('name', 'Like', $this->area.'-%'),
+            default => $permissions
         };
-
-        return $query;
     }
 
     public function includeLocale(User $user): Primitive
