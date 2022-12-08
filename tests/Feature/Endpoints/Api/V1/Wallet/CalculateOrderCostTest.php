@@ -182,7 +182,7 @@ class CalculateOrderCostTest extends TestCase
             ]);
     }
 
-    public function test_calculate_order_cant_lender_not_verified_access(): void
+    public function test_calculate_order_lender_with_not_verified_email_access(): void
     {
         $orderCount = rand(1, 200);
         /** @var Money $orderCost */
