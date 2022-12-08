@@ -29,8 +29,8 @@ class WebhookController extends Controller
 
                 $createTransactions->handle(
                     $wallet,
-                    $invoice->amount,
                     TransactionReason::DepositByEdaat,
+                    $invoice->amount,
                     [
                         'invoice_number' => $invoice->invoice_number,
                     ]

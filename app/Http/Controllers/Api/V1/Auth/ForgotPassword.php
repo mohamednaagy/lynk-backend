@@ -20,8 +20,11 @@ class ForgotPassword extends Controller
         $company = null;
 
         if (($companyUniqueName = $request->validated('company_unique_name')) != null) {
-            $company = Company::where('unique_name', $companyUniqueName)->firstOrFail();
-            tenancy()->initialize($company);
+            $company = Company::where('unique_name', $companyUniqueName)->first();
+
+            if ($company) {
+                tenancy()->initialize($company);
+            }
         }
 
         Password::sendResetLink([

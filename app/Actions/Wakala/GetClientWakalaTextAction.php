@@ -30,7 +30,7 @@ class GetClientWakalaTextAction implements GetClientWakalaText
             $amount,
             $orderNumber,
             $orderDate,
-        ], $lenderTemplate);
+        ], $clientTemplate);
 
         return $template;
     }

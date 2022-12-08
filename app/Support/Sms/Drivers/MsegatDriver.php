@@ -6,6 +6,7 @@ use App\Exceptions\BalanceIsNotEnoughException;
 use App\Exceptions\InvalidLoginInfoException;
 use App\Exceptions\MobileNumbersIsNotCorrectException;
 use App\Exceptions\MSGDuplicatedException;
+use App\Support\Sms\Events\SmsSent;
 use App\Support\Sms\SmsDriverInterface;
 use Illuminate\Support\Facades\Http;
 
@@ -46,12 +47,18 @@ class MsegatDriver implements SmsDriverInterface
 
         $response = Http::post($this->baseUrl, $body);
 
-        // store the response data of the sms for tracking
-        activity()
-            ->event('verified')
-            ->log($response);
+        SmsSent::dispatch(
+            'msegat',
+            [
+                'url' => $this->baseUrl,
+                'body' => $body,
+            ],
+            $response->json(),
+            now()
+        );
 
         $code = $response->object()->code;
+
         throw match ($code) {
             '1020' => new InvalidLoginInfoException(),
             '1060' => new BalanceIsNotEnoughException(),
