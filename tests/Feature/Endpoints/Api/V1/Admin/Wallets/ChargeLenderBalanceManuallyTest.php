@@ -12,14 +12,17 @@ use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
+use Tests\Traits\InteractsWithAdmin;
 use Tests\Traits\InteractsWithLender;
+use Tests\Traits\UsersInteractsWithRoute;
 
 class ChargeLenderBalanceManuallyTest extends TestCase
 {
     use RefreshDatabase;
     use InteractsWithLender;
+    use InteractsWithAdmin;
+    use UsersInteractsWithRoute;
 
     private static Company $company;
 
@@ -30,6 +33,8 @@ class ChargeLenderBalanceManuallyTest extends TestCase
     private static User $admin;
 
     private static User $manager;
+
+    private static User $managerHasPermission;
 
     private static User $lenderAdmin;
 
@@ -50,8 +55,9 @@ class ChargeLenderBalanceManuallyTest extends TestCase
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$admin = $this->createLenderUser(self::$company->id, Role::Admin, 'Admin@bim.com');
-        self::$manager = $this->createLenderUser(self::$company->id, Role::Manager, 'Manager@bim.com');
+        self::$admin = $this->createAdmin();
+        self::$manager = $this->createManager();
+        self::$managerHasPermission = $this->createManager('managerHasPermission@bim.com', perm(Area::SuperAdmin, [Subject::LenderWallet, Action::Charge]));
         self::$lenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'LenderAdmin@bim.com');
         self::$lenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
         self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'LenderApiUser@bim.com');
@@ -116,7 +122,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
 
     public function test_charge_Lender_balance_manually_controller_check_wallet_before_and_after_charge()
     {
-        $wallet = self::$company->balance(WalletType::CompanyWallet);
+        $balance = self::$company->balance(WalletType::CompanyWallet);
         $this->actingAs(self::$admin);
         $this->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
             'amount' => 50,
@@ -126,8 +132,8 @@ class ChargeLenderBalanceManuallyTest extends TestCase
                 ->create('attachment.pdf'),
         ]);
 
-        $walletAfterDeposit = self::$company->balance(WalletType::CompanyWallet);
-        $this->assertTrue($wallet->add(money(50, 'SAR', true))->equals($walletAfterDeposit));
+        $balanceAfterDeposit = self::$company->balance(WalletType::CompanyWallet);
+        $this->assertTrue($balance->add(money(50, 'SAR', true))->equals($balanceAfterDeposit));
     }
 
     public function test_charge_Lender_balance_manually_admin_can_access()
@@ -143,7 +149,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
             ->assertStatus(200);
     }
 
-    public function test_charge_Lender_balance_manually_manager_can_not_access_without_permission()
+    public function test_charge_Lender_balance_manually_manager_can_not_access_with_no_permission()
     {
         $this->actingAs(self::$manager)
             ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
@@ -158,9 +164,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
 
     public function test_charge_Lender_balance_manually_manager_can_access_when_has_permission()
     {
-        Grantify::assignPermissionToModel(self::$manager, perm(Area::SuperAdmin, [Subject::LenderWallet, Action::Charge]));
-
-        $this->actingAs(self::$manager)
+        $this->actingAs(self::$managerHasPermission)
             ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
                 'amount' => 10,
                 'description_en' => 'deposit some money',
@@ -171,55 +175,25 @@ class ChargeLenderBalanceManuallyTest extends TestCase
             ->assertStatus(200);
     }
 
-    public function test_charge_Lender_balance_manually_lender_billing_can_not_access()
+    public function test_charge_Lender_balance_manually_other_roles_can_not_access()
     {
-        $this->actingAs(self::$lenderBilling)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
-                'amount' => 10,
-                'description_en' => 'deposit some money',
-                'description_ar' => 'deposit some money',
-                'attachment' => UploadedFile::fake()
-                    ->create('attachment.pdf', 10),
-            ])
-            ->assertStatus(403);
-    }
+        $this->assertUsersStatusToPostRoute(
+            'api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit',
+            403,
+            [
+                self::$lenderOrderCreator,
+                self::$lenderApiUser,
+                self::$lenderSupervisor,
+                self::$lenderBilling,
 
-    public function test_charge_Lender_balance_manually_lender_supervisor_can_not_access()
-    {
-        $this->actingAs(self::$lenderSupervisor)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
+            ],
+            [
                 'amount' => 10,
                 'description_en' => 'deposit some money',
                 'description_ar' => 'deposit some money',
                 'attachment' => UploadedFile::fake()
                     ->create('attachment.pdf', 10),
-            ])
-            ->assertStatus(403);
-    }
-
-    public function test_charge_Lender_balance_manually_lender_api_user_can_not_access()
-    {
-        $this->actingAs(self::$lenderApiUser)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
-                'amount' => 10,
-                'description_en' => 'deposit some money',
-                'description_ar' => 'deposit some money',
-                'attachment' => UploadedFile::fake()
-                    ->create('attachment.pdf', 10),
-            ])
-            ->assertStatus(403);
-    }
-
-    public function test_charge_Lender_balance_manually_lender_order_creator_can_not_access()
-    {
-        $this->actingAs(self::$lenderOrderCreator)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
-                'amount' => 10,
-                'description_en' => 'deposit some money',
-                'description_ar' => 'deposit some money',
-                'attachment' => UploadedFile::fake()
-                    ->create('attachment.pdf', 10),
-            ])
-            ->assertStatus(403);
+            ]
+        );
     }
 }
