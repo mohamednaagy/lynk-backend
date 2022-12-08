@@ -27,7 +27,7 @@ class AbsherDriverTest extends TestCase
     {
         parent::setUp();
 
-        config()->set('otpify.default', 'Absher');
+        config()->set('otpify.default', 'absher');
         $company = $this->createCompany('2000', ['company_cr' => '12345678910'])[0];
         $lender = $this->createLenderUser($company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
 
@@ -41,7 +41,7 @@ class AbsherDriverTest extends TestCase
         $this->assertInstanceOf(OtpifyCode::class, $otp);
     }
 
-    public function test_absher_driver_verify_method_tcn_is_not_exists()
+    public function test_absher_driver_verify_method_fails_if_tcn_does_not_exist()
     {
         $this->expectException(OtpCodeNotFoundException::class);
 
@@ -50,7 +50,7 @@ class AbsherDriverTest extends TestCase
         Otpify::verify(new Request(), $otp->id, 123);
     }
 
-    public function test_absher_driver_verify_method_code_is_used()
+    public function test_absher_driver_verify_method_fails_if_code_is_already_used()
     {
         $this->expectException(OtpCodeAlreadyUsedException::class);
 
@@ -59,7 +59,7 @@ class AbsherDriverTest extends TestCase
         Otpify::verify(new Request(), $otp->id, 123);
     }
 
-    public function test_absher_driver_verify_method_code_is_expired()
+    public function test_absher_driver_verify_method_fails_if_code_is_expired()
     {
         $this->expectException(OtpCodeExpiredException::class);
 
@@ -68,7 +68,7 @@ class AbsherDriverTest extends TestCase
         Otpify::verify(new Request(), $otp->id, 123);
     }
 
-    public function test_absher_driver_otp_code_is_not_correct()
+    public function test_absher_driver_otp_code_is_fails_if_code_is_not_correct()
     {
         $this->expectException(OtpCodeIncorrectException::class);
 
@@ -76,7 +76,7 @@ class AbsherDriverTest extends TestCase
         Otpify::verify(new Request(), $otp->id, 123);
     }
 
-    public function test_absher_driver_otp_code_additional_check_callback_exception()
+    public function test_absher_driver_otp_code_fails_if_additional_check_callback_returns_false()
     {
         $this->expectException(OtpCodeAdditionalCheckException::class);
 
