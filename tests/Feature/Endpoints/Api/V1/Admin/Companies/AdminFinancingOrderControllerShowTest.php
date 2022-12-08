@@ -14,24 +14,25 @@ use App\Transformers\FinancingOrderTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
-use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
+use Tests\Traits\InteractsWithAdmin;
 use Tests\Traits\InteractsWithLender;
 
 class AdminFinancingOrderControllerShowTest extends TestCase
 {
     use RefreshDatabase;
     use InteractsWithLender;
+    use InteractsWithAdmin;
 
     private static Company $company;
-
-    private static Company $sconedCompany;
 
     private static User $userLender;
 
     private static User $admin;
 
     private static User $manager;
+
+    private static User $managerHasPermissionToShowMethod;
 
     private static User $userBilling;
 
@@ -46,11 +47,22 @@ class AdminFinancingOrderControllerShowTest extends TestCase
     {
         parent::setUp();
 
-        self::$company = $this->createCompany('2000', ['company_cr' => '12345678910'])[0];
-        self::$sconedCompany = $this->createCompany('2000', ['company_cr' => '12345676666'])[0];
+        [self::$company] = $this->createCompany(
+            '2000',
+            [
+                'company_cr' => '12345678910',
+            ]
+        );
+
+        self::$managerHasPermissionToShowMethod = $this->createManager(
+            'managerHasPermissionToShowMethod@bim.com',
+            [],
+            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show])
+        );
+
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$admin = $this->createLenderUser(self::$company->id, Role::Admin, 'admin@bim.com');
-        self::$manager = $this->createLenderUser(self::$company->id, Role::Manager, 'Manager@bim.com');
+        self::$admin = $this->createAdmin();
+        self::$manager = $this->createManager();
         self::$userBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
         self::$userSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
         self::$userOrderCrearor = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'LenderOrderCreator@bim.com');
@@ -116,7 +128,7 @@ class AdminFinancingOrderControllerShowTest extends TestCase
             ->assertStatus(200);
     }
 
-    public function test_admin_financing_order_controller_show_manager_can_not_access()
+    public function test_admin_financing_order_controller_show_manager_can_not_access_with_no_permission()
     {
         $order = FinancingOrder::where('company_id', self::$company->id)->first();
         $this->actingAs(self::$manager)
@@ -126,46 +138,30 @@ class AdminFinancingOrderControllerShowTest extends TestCase
 
     public function test_admin_financing_order_controller_show_manager_can_access_when_has_permisson()
     {
-        Grantify::assignPermissionToModel(self::$manager, perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show]));
         $order = FinancingOrder::where('company_id', self::$company->id)->first();
 
-        $this->actingAs(self::$manager)
+        $this->actingAs(self::$managerHasPermissionToShowMethod)
             ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders/'.$order->id)
             ->assertStatus(200);
     }
 
-    public function test_admin_financing_order_controller_show_lender_can_not_access()
-    {
-        $order = FinancingOrder::where('company_id', self::$company->id)->first();
-
-        $this->actingAs(self::$userLender)
-            ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders/'.$order->id)
-            ->assertStatus(403);
-    }
-
-    public function test_admin_financing_order_controller_show_billing_can_not_access()
-    {
-        $order = FinancingOrder::where('company_id', self::$company->id)->first();
-
-        $this->actingAs(self::$userBilling)
-            ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders/'.$order->id)
-            ->assertStatus(403);
-    }
-
-    public function test_admin_financing_order_controller_show_supervisor_can_not_access()
-    {
-        $order = FinancingOrder::where('company_id', self::$company->id)->first();
-
-        $this->actingAs(self::$userSupervisor)
-            ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders/'.$order->id)
-            ->assertStatus(403);
-    }
-
-    public function test_admin_financing_order_controller_show_order_creator_can_not_access()
+    public function test_admin_financing_order_controller_show_other_roles_can_not_access()
     {
         $order = FinancingOrder::where('company_id', self::$company->id)->first();
 
         $this->actingAs(self::$userOrderCrearor)
+            ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders/'.$order->id)
+            ->assertStatus(403);
+
+        $this->actingAs(self::$userSupervisor)
+            ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders/'.$order->id)
+            ->assertStatus(403);
+
+        $this->actingAs(self::$userBilling)
+            ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders/'.$order->id)
+            ->assertStatus(403);
+
+        $this->actingAs(self::$userLender)
             ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders/'.$order->id)
             ->assertStatus(403);
     }
