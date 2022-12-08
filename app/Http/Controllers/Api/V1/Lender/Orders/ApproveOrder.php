@@ -6,6 +6,7 @@ use App\Actions\Contracts\Orders\ApproveOrder as ApproveOrderInterface;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\FinancingOrder;
+use App\Notifications\OrderApproved;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -25,6 +26,7 @@ class ApproveOrder extends Controller
     {
         return DB::transaction(function () use ($request, $approveOrder, $order) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
+
             if ($order->status->cantMoveTo(FinancingOrderStatus::Approved)) {
                 return $this->errorResponse(
                     __('error.order_cannot_be_approved_because_it_is_approved'),
@@ -33,6 +35,12 @@ class ApproveOrder extends Controller
             }
 
             $approveOrder->handle($order, $request->user());
+
+            if (! $order->creator->is($request->user())) {
+                $order->creator->notify(
+                    new OrderApproved($order, $request->user(), now())
+                );
+            }
 
             return $this->successResponse();
         });
