@@ -17,7 +17,7 @@ class GetWalletTransactions extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderTransactions, Action::Manage])
+            perm(Area::Lender, [Subject::LenderTransactions, Action::Index])
         );
     }
 

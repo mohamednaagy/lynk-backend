@@ -12,7 +12,7 @@ class LenderBilling
             Action::Manage,
         ],
         Subject::LenderTransactions => [
-            Action::Manage,
+            Action::Index,
         ],
     ];
 }

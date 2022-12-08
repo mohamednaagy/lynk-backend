@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Lender\Wallets;
+namespace Endpoints\Api\V1\Lender\Wallet;
 
 use App\Enums\Role;
 use App\Enums\TransactionReason;
@@ -8,6 +8,7 @@ use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Support\Money\Money;
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use App\Transformers\TransactionTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -45,13 +46,15 @@ class GetWalletTransactionsTest extends TestCase
             ->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
-                json_decode(fractal(
+                fractal(
                     self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer()
-                )->toJson(), true)
+                )
+                    ->respond()
+                    ->getData(true)
             );
 
         app()->make(TransactionServiceInterface::class)->deposit(
-            self::$wallet, \money(20000, 'SAR'), TransactionReason::DepositByEdaat, 2, []
+            self::$wallet, new Money(20000, 'SAR'), TransactionReason::DepositByEdaat, 2, []
         );
 
         $this->actingAs(self::$userLender)
@@ -74,9 +77,11 @@ class GetWalletTransactionsTest extends TestCase
             ->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
-                json_decode(fractal(
+                fractal(
                     self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer()
-                )->toJson(), true)
+                )
+                    ->respond()
+                    ->getData(true)
             );
     }
 
@@ -89,9 +94,11 @@ class GetWalletTransactionsTest extends TestCase
             ->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
-                json_decode(fractal(
+                fractal(
                     self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer()
-                )->toJson(), true)
+                )
+                    ->respond()
+                    ->getData(true)
             );
     }
 
@@ -104,9 +111,11 @@ class GetWalletTransactionsTest extends TestCase
             ->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
-                json_decode(fractal(
+                fractal(
                     self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer()
-                )->toJson(), true)
+                )
+                    ->respond()
+                    ->getData(true)
             );
     }
 

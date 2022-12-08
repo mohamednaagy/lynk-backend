@@ -15,7 +15,7 @@ class LenderApiUser
             Action::Proceed,
         ],
         Subject::LenderTransactions => [
-            Action::Manage,
+            Action::Index,
         ],
     ];
 }
