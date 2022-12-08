@@ -2,32 +2,27 @@
 
 namespace Tests\Traits;
 
+use App\Enums\Area;
+use Illuminate\Support\Str;
+
 trait UsersInteractsWithRoute
 {
-    private function assertUsersStatusToPostRoute(string $route, int $status, array $users, array $data = [])
+    public function assertLenderUserCannotAccess($request)
     {
-        foreach ($users as $user) {
-            $this->actingAs($user)
-                ->postJson($route, $data)
-                ->assertStatus($status);
-        }
-    }
+        $roles = Area::roles(Area::Lender);
 
-    private function assertUsersStatusToGetRoute(string $route, int $status, array $users, array $headers = [])
-    {
-        foreach ($users as $user) {
-            $this->actingAs($user)
-                ->getJson($route, $headers)
-                ->assertStatus($status);
-        }
-    }
+        [$company] = $this->createCompany(
+            2000,
+            [
+                'company_cr' => Str::uuid(),
+            ]
+        );
 
-    private function assertUsersStatusToPutRoute(string $route, int $status, array $users, array $data = [], array $headers = [])
-    {
-        foreach ($users as $user) {
-            $this->actingAs($user)
-                ->putJson($route, $data, $headers)
-                ->assertStatus($status);
+        foreach ($roles as $role) {
+            $user = $this->createLenderUser($company->id, $role, (string) Str::uuid().'@test.test');
+            $request($user, $role)->assertStatus(403);
         }
+
+        return $request;
     }
 }

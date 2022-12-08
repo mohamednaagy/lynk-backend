@@ -175,25 +175,12 @@ class ChargeLenderBalanceManuallyTest extends TestCase
             ->assertStatus(200);
     }
 
-    public function test_charge_Lender_balance_manually_other_roles_can_not_access()
+    public function test_that_order_show_cannot_be_accessed_by_lender_users()
     {
-        $this->assertUsersStatusToPostRoute(
-            'api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit',
-            403,
-            [
-                self::$lenderOrderCreator,
-                self::$lenderApiUser,
-                self::$lenderSupervisor,
-                self::$lenderBilling,
-
-            ],
-            [
-                'amount' => 10,
-                'description_en' => 'deposit some money',
-                'description_ar' => 'deposit some money',
-                'attachment' => UploadedFile::fake()
-                    ->create('attachment.pdf', 10),
-            ]
-        );
+        $this->assertLenderUserCannotAccess(function (User $user, string $role) {
+            return  $this->actingAs($user)
+                ->withHeader('X-Company', self::$company->getOriginal('id'))
+                ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit');
+        });
     }
 }
