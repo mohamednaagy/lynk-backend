@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Api\V1\Lender\Users;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
+use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Lender\Users\ShowUserRequest;
 use App\Http\Requests\V1\Lender\Users\StoreUserRequest;
 use App\Http\Requests\V1\Lender\Users\UpdateUserRequest;
 use App\Mail\CompleteRegisterInvitation;
@@ -20,6 +23,14 @@ use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::LenderUsers, Action::Manage])
+        );
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -75,11 +86,14 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
+     * @param  ShowUserRequest  $showUserRequest
      * @param  User  $user
      * @return JsonResponse
      */
-    public function show(User $user): JsonResponse
-    {
+    public function show(
+        ShowUserRequest $showUserRequest,
+        User $user
+    ): JsonResponse {
         return fractal($user, new UserTransformer(Area::Lender))
             ->parseIncludes([
                 'id',

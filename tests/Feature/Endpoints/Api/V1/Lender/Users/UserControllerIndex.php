@@ -10,7 +10,6 @@ use App\Models\Wallet;
 use App\Transformers\UserTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
@@ -20,9 +19,9 @@ class UserControllerIndex extends TestCase
 
     private static Company $company;
 
-    private static Company $otherCompany;
-
     private static Wallet $wallet;
+
+    private static Company $otherCompany;
 
     private static Wallet $otherWallet;
 
@@ -54,7 +53,7 @@ class UserControllerIndex extends TestCase
         self::$userLenderApi = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'lenderApi@bim.com');
         self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'lenderBilling@bim.com');
         self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'lenderOrderCreator@bim.com');
-        self::$otherUserLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'otherLenderAdmin@bim.com');
+        self::$otherUserLenderAdmin = $this->createLenderUser(self::$otherCompany->id, Role::LenderAdmin, 'otherLenderAdmin@bim.com');
         self::$lenderUsersCollection = self::$company->users()->whereHas('roles', function ($query) {
             return $query->whereIn('name', [
                 Role::LenderAdmin,
@@ -72,9 +71,9 @@ class UserControllerIndex extends TestCase
     {
         $this->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/users')
-            ->assertStatus(Response::HTTP_UNAUTHORIZED)
+            ->assertUnauthorized()
             ->assertExactJson([
-                'message' => 'Unauthenticated.',
+                'message' => __('Unauthenticated.'),
             ]);
     }
 
@@ -106,100 +105,44 @@ class UserControllerIndex extends TestCase
     /**
      * @return void
      */
-    public function test_that_supervisor_user_can_index_lender_users(): void
+    public function test_that_supervisor_user_cant_index_lender_users(): void
     {
         $this->actingAs(self::$userLenderSupervisor)
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/users')
-            ->assertOk()
-            ->assertExactJson(
-                fractal(self::$lenderUsersCollection, new UserTransformer(Area::Lender))
-                    ->parseIncludes([
-                        'id',
-                        'first_name',
-                        'last_name',
-                        'email',
-                        'phone_number',
-                        'phone_country_code',
-                        'formatted_phone_number',
-                        'role',
-                    ])->respond()
-                    ->getData(true)
-            );
+            ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_that_billing_user_can_index_lender_users(): void
+    public function test_that_billing_user_cant_index_lender_users(): void
     {
         $this->actingAs(self::$userLenderBilling)
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/users')
-            ->assertOk()
-            ->assertExactJson(
-                fractal(self::$lenderUsersCollection, new UserTransformer(Area::Lender))
-                    ->parseIncludes([
-                        'id',
-                        'first_name',
-                        'last_name',
-                        'email',
-                        'phone_number',
-                        'phone_country_code',
-                        'formatted_phone_number',
-                        'role',
-                    ])->respond()
-                    ->getData(true)
-            );
+            ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_that_api_user_can_index_lender_users(): void
+    public function test_that_api_user_cant_index_lender_users(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/users')
-            ->assertOk()
-            ->assertExactJson(
-                fractal(self::$lenderUsersCollection, new UserTransformer(Area::Lender))
-                    ->parseIncludes([
-                        'id',
-                        'first_name',
-                        'last_name',
-                        'email',
-                        'phone_number',
-                        'phone_country_code',
-                        'formatted_phone_number',
-                        'role',
-                    ])->respond()
-                    ->getData(true)
-            );
+            ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_that_order_creator_user_can_index_lender_users(): void
+    public function test_that_order_creator_user_cant_index_lender_users(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/users')
-            ->assertOk()
-            ->assertExactJson(
-                fractal(self::$lenderUsersCollection, new UserTransformer(Area::Lender))
-                    ->parseIncludes([
-                        'id',
-                        'first_name',
-                        'last_name',
-                        'email',
-                        'phone_number',
-                        'phone_country_code',
-                        'formatted_phone_number',
-                        'role',
-                    ])->respond()
-                    ->getData(true)
-            );
+            ->assertForbidden();
     }
 }

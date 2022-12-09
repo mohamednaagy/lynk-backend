@@ -217,57 +217,45 @@ class UserControllerUpdate extends TestCase
     /**
      * @return void
      */
-    public function test_that_supervisor_user_can_update_lender_user_with_valid_data(): void
+    public function test_that_supervisor_user_cant_update_lender_user_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderSupervisor)
             ->withHeader('X-Company', self::$company->id)
             ->putJson('api/v1/lender/users/'.self::$userLenderBilling->id, Arr::except(self::$lenderDetails, ['redirect_url']))
-            ->assertOk()
-            ->assertJsonStructure([
-                'data',
-            ]);
+            ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_that_billing_user_can_update_lender_user_with_valid_data(): void
+    public function test_that_billing_user_cant_update_lender_user_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderBilling)
             ->withHeader('X-Company', self::$company->id)
             ->putJson('api/v1/lender/users/'.self::$userLenderOrderCreator->id, Arr::except(self::$lenderDetails, ['redirect_url']))
-            ->assertOk()
-            ->assertJsonStructure([
-                'data',
-            ]);
+            ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_that_order_creator_user_can_update_lender_user_with_valid_data(): void
+    public function test_that_order_creator_user_cant_update_lender_user_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
             ->withHeader('X-Company', self::$company->id)
             ->putJson('api/v1/lender/users/'.self::$userLenderBilling->id, Arr::except(self::$lenderDetails, ['redirect_url']))
-            ->assertOk()
-            ->assertJsonStructure([
-                'data',
-            ]);
+            ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_that_api_user_can_update_lender_user_with_valid_data(): void
+    public function test_that_api_user_cant_update_lender_user_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderApi)
             ->withHeader('X-Company', self::$company->id)
             ->putJson('api/v1/lender/users/'.self::$userLenderBilling->id, Arr::except(self::$lenderDetails, ['redirect_url']))
-            ->assertOk()
-            ->assertJsonStructure([
-                'data',
-            ]);
+            ->assertForbidden();
     }
 
     /**

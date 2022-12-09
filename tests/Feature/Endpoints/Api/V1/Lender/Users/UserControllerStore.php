@@ -251,100 +251,73 @@ class UserControllerStore extends TestCase
     /**
      * @return void
      */
-    public function test_that_supervisor_user_can_store_lender_user_with_valid_data(): void
+    public function test_that_supervisor_user_cant_store_lender_user_with_valid_data(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderSupervisor)
             ->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/users', self::$lenderDetails)
-            ->assertOk()
-            ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'first_name',
-                    'last_name',
-                    'email',
-                    'phone_number',
-                    'phone_country_code',
-                    'formatted_phone_number',
-                    'role',
-                ],
-            ]);
-        Mail::assertSent(CompleteRegisterInvitation::class);
+            ->assertForbidden();
+        Mail::assertNotSent(CompleteRegisterInvitation::class);
     }
 
     /**
      * @return void
      */
-    public function test_that_billing_user_can_store_lender_user_with_valid_data(): void
+    public function test_that_billing_user_cant_store_lender_user_with_valid_data(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderBilling)
             ->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/users', self::$lenderDetails)
-            ->assertOk()
-            ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'first_name',
-                    'last_name',
-                    'email',
-                    'phone_number',
-                    'phone_country_code',
-                    'formatted_phone_number',
-                    'role',
-                ],
-            ]);
-        Mail::assertSent(CompleteRegisterInvitation::class);
+            ->assertForbidden();
+        Mail::assertNotSent(CompleteRegisterInvitation::class);
     }
 
     /**
      * @return void
      */
-    public function test_that_order_creator_user_can_store_lender_user_with_valid_data(): void
+    public function test_that_order_creator_user_cant_store_lender_user_with_valid_data(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderOrderCreator)
             ->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/users', self::$lenderDetails)
-            ->assertOk()
-            ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'first_name',
-                    'last_name',
-                    'email',
-                    'phone_number',
-                    'phone_country_code',
-                    'formatted_phone_number',
-                    'role',
-                ],
-            ]);
-        Mail::assertSent(CompleteRegisterInvitation::class);
+            ->assertForbidden();
+        Mail::assertNotSent(CompleteRegisterInvitation::class);
     }
 
     /**
      * @return void
      */
-    public function test_that_api_user_can_store_lender_user_with_valid_data(): void
+    public function test_that_api_user_cant_store_lender_user_with_valid_data(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderApi)
             ->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/users', self::$lenderDetails)
-            ->assertOk()
-            ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'first_name',
-                    'last_name',
-                    'email',
-                    'phone_number',
-                    'phone_country_code',
-                    'formatted_phone_number',
-                    'role',
+            ->assertForbidden();
+        Mail::assertNotSent(CompleteRegisterInvitation::class);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_admin_user_cant_store_api_user_with_valid_data(): void
+    {
+        Mail::fake();
+        $this->actingAs(self::$userLenderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->postJson('api/v1/lender/users', array_merge(self::$lenderDetails, ['role' => Role::LenderApiUser]))
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The selected role is invalid.',
+                'errors' => [
+                    'role' => [
+                        'The selected role is invalid.',
+                    ],
                 ],
             ]);
-        Mail::assertSent(CompleteRegisterInvitation::class);
+        Mail::assertNotSent(CompleteRegisterInvitation::class);
     }
 }
