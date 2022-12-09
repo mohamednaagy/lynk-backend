@@ -16,7 +16,7 @@ class GetBalance extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderWallet, Action::Manage])
+            perm(Area::Lender, [Subject::LenderWallet, Action::Show, Action::Manage])
         );
     }
 

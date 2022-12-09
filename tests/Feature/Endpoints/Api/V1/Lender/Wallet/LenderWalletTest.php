@@ -7,8 +7,8 @@ use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
@@ -23,6 +23,8 @@ class LenderWalletTest extends TestCase
     private static Company $underReviewCompany;
 
     private static Company $rejectedCompany;
+
+    private static Company $approvedCompany;
 
     private static User $userLenderAdmin;
 
@@ -44,8 +46,12 @@ class LenderWalletTest extends TestCase
 
     private static Wallet $rejectedWallet;
 
+    private static Wallet $approvedWallet;
+
     /**
      * @return void
+     *
+     * @throws BindingResolutionException
      */
     public function setUp(): void
     {
@@ -55,6 +61,7 @@ class LenderWalletTest extends TestCase
         [self::$pendingCompany, self::$pendingWallet] = $this->createCompany('2000', ['company_cr' => '12345678911', 'status' => CompanyStatus::Pending()->value]);
         [self::$underReviewCompany, self::$underReviewWallet] = $this->createCompany('2000', ['company_cr' => '12345678912', 'status' => CompanyStatus::UnderReview()->value]);
         [self::$rejectedCompany, self::$rejectedWallet] = $this->createCompany('2000', ['company_cr' => '12345678913', 'status' => CompanyStatus::Rejected()->value]);
+        [self::$approvedCompany, self::$approvedWallet] = $this->createCompany('2000', ['company_cr' => '12345678914', 'status' => CompanyStatus::Approved()->value]);
         self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
         self::$userLenderAdminWithoutVerifiedEmail = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com', ['email_verified_at' => null]);
         self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'lenderSupervisor@bim.com');
@@ -70,9 +77,9 @@ class LenderWalletTest extends TestCase
     {
         $this->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/wallet/balance')
-            ->assertStatus(Response::HTTP_UNAUTHORIZED)
+            ->assertUnauthorized()
             ->assertExactJson([
-                'message' => 'Unauthenticated.',
+                'message' => __('Unauthenticated.'),
             ]);
     }
 
@@ -84,7 +91,7 @@ class LenderWalletTest extends TestCase
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/wallet/balance')
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertExactJson([
                 'data' => [
                     'available_orders' => '10',
@@ -101,7 +108,7 @@ class LenderWalletTest extends TestCase
         $this->actingAs(self::$userLenderSupervisor)
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/wallet/balance')
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertExactJson([
                 'data' => [
                     'available_orders' => '10',
@@ -118,7 +125,7 @@ class LenderWalletTest extends TestCase
         $this->actingAs(self::$userLenderBilling)
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/wallet/balance')
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertExactJson([
                 'data' => [
                     'available_orders' => '10',
@@ -135,7 +142,7 @@ class LenderWalletTest extends TestCase
         $res = $this->actingAs(self::$userLenderApi)
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/wallet/balance')
-            ->assertStatus(Response::HTTP_OK)
+            ->assertOk()
             ->assertExactJson([
                 'data' => [
                     'available_orders' => '10',
@@ -152,7 +159,7 @@ class LenderWalletTest extends TestCase
         $this->actingAs(self::$userLenderOrderCreator)
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/wallet/balance')
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+            ->assertForbidden();
     }
 
     /**
@@ -163,10 +170,10 @@ class LenderWalletTest extends TestCase
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$pendingCompany->id)
             ->getJson('api/v1/lender/wallet/balance')
-            ->assertStatus(Response::HTTP_FORBIDDEN)
+            ->assertForbidden()
             ->assertExactJson([
                 'code' => 1015,
-                'message' => 'The company is not active',
+                'message' => __('The company is not active'),
             ]);
     }
 
@@ -178,10 +185,10 @@ class LenderWalletTest extends TestCase
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$underReviewCompany->id)
             ->getJson('api/v1/lender/wallet/balance')
-            ->assertStatus(Response::HTTP_FORBIDDEN)
+            ->assertForbidden()
             ->assertExactJson([
                 'code' => 1015,
-                'message' => 'The company is not active',
+                'message' => __('The company is not active'),
             ]);
     }
 
@@ -193,10 +200,10 @@ class LenderWalletTest extends TestCase
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$rejectedCompany->id)
             ->getJson('api/v1/lender/wallet/balance')
-            ->assertStatus(Response::HTTP_FORBIDDEN)
+            ->assertForbidden()
             ->assertExactJson([
                 'code' => 1015,
-                'message' => 'The company is not active',
+                'message' => __('The company is not active'),
             ]);
     }
 
@@ -208,10 +215,25 @@ class LenderWalletTest extends TestCase
         $this->actingAs(self::$userLenderAdminWithoutVerifiedEmail)
             ->withHeader('X-Company', self::$underReviewCompany->id)
             ->getJson('api/v1/lender/wallet/balance')
-            ->assertStatus(Response::HTTP_FORBIDDEN)
+            ->assertForbidden()
             ->assertExactJson([
                 'code' => 1008,
-                'message' => 'You must verify your email address',
+                'message' => __('You must verify your email address'),
+            ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_admin_user_without_verified_email_cant_get_wallet_balance_with_approved_company(): void
+    {
+        $this->actingAs(self::$userLenderAdminWithoutVerifiedEmail)
+            ->withHeader('X-Company', self::$approvedCompany->id)
+            ->getJson('api/v1/lender/wallet/balance')
+            ->assertForbidden()
+            ->assertExactJson([
+                'code' => 1008,
+                'message' => __('You must verify your email address'),
             ]);
     }
 }
