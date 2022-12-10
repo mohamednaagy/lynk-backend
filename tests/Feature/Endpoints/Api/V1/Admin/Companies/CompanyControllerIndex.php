@@ -43,7 +43,7 @@ class CompanyControllerIndex extends TestCase
         $this->getJson('api/v1/admin/companies')
             ->assertUnauthorized()
             ->assertExactJson([
-                'message' => 'Unauthenticated.',
+                'message' => __('Unauthenticated.'),
             ]);
     }
 
@@ -72,28 +72,28 @@ class CompanyControllerIndex extends TestCase
             );
     }
 
-//    /**
-//     * @return void
-//     */
-//    public function test_that_auth_manager_user_can_index_companies(): void
-//    {
-//        $companies = Company::query()->paginate();
-//
-//        $this->actingAs(self::$userManager)
-//            ->getJson('api/v1/admin/companies')
-//            ->assertOk()
-//            ->assertExactJson(
-//                fractal($companies, new CompanyTransformer())
-//                    ->parseIncludes([
-//                        'id',
-//                        'name',
-//                        'status',
-//                        'orders_count',
-//                        'created_at',
-//                        'order_cost',
-//                    ])
-//                    ->respond()
-//                    ->getData(true)
-//            );
-//    }
+    /**
+     * @return void
+     */
+    public function test_that_auth_manager_user_can_index_companies(): void
+    {
+        $companies = Company::query()->paginate();
+
+        $this->actingAs(self::$userManager)
+            ->getJson('api/v1/admin/companies')
+            ->assertOk()
+            ->assertExactJson(
+                fractal($companies, new CompanyTransformer())
+                    ->parseIncludes([
+                        'id',
+                        'name',
+                        'status',
+                        'orders_count',
+                        'created_at',
+                        'order_cost',
+                    ])
+                    ->respond()
+                    ->getData(true)
+            );
+    }
 }

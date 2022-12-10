@@ -8,7 +8,7 @@ use App\Enums\Subject;
 class Manager
 {
     public static array $basePermissions = [
-        Subject::All => [
+        Subject::Lenders => [
             Action::Manage,
         ],
     ];
