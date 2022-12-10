@@ -11,5 +11,8 @@ class Manager
         Subject::Lenders => [
             Action::Manage,
         ],
+        Subject::LenderTransactions => [
+            Action::Manage,
+        ],
     ];
 }

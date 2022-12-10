@@ -11,7 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class CompanyControllerShow extends TestCase
+class CompanyControllerShowTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 

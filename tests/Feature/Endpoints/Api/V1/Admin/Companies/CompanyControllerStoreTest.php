@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Companies;
 
+use App\Actions\Contracts\GetSettingsClassInstance;
+use App\Enums\Area;
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Models\Company;
@@ -14,7 +16,7 @@ use Illuminate\Support\Str;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class CompanyControllerUpdate extends TestCase
+class CompanyControllerStoreTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -51,9 +53,9 @@ class CompanyControllerUpdate extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_update_company(): void
+    public function test_that_un_auth_user_cant_store_company(): void
     {
-        $this->putJson('api/v1/admin/companies/'.self::$company->id, self::$companyDetails)
+        $this->postJson('api/v1/admin/companies', self::$companyDetails)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -63,40 +65,82 @@ class CompanyControllerUpdate extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_can_update_company(): void
+    public function test_that_admin_can_store_company(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->putJson('api/v1/admin/companies/'.self::$company->id, self::$companyDetails)
+            ->postJson('api/v1/admin/companies', self::$companyDetails)
             ->assertOk()
-            ->assertExactJson([
-                'data' => [],
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'status',
+                    'created_at',
+                    'unique_name',
+                    'company_cr',
+                    'does_order_require_approval',
+                    'order_cost',
+                ],
             ]);
 
-        $this->assertEquals(self::$company->refresh()->unique_name, 'companyUniqueName');
+        $company = Company::query()
+            ->where('unique_name', 'companyUniqueName')
+            ->first();
+
+        $defaultStatus = $this->app->make(GetSettingsClassInstance::class)->handle(Area::Lender)
+            ->default_company_status_created_by_operation;
+        $hasWallet = $company->getWallets()->count() > 0;
+        $hasOrderCost = $company->order_cost->getAmount() > 0;
+
+        $this->assertEquals($defaultStatus, $company->status->value);
+        $this->assertTrue($hasWallet);
+        $this->assertTrue($hasOrderCost);
+        $this->assertNotNull($company->webhook_secret_key);
     }
 
     /**
      * @return void
      */
-    public function test_that_manager_can_update_company(): void
+    public function test_that_manager_can_store_company(): void
     {
         $this->actingAs(self::$userManager)
-            ->putJson('api/v1/admin/companies/'.self::$company->id, self::$companyDetails)
+            ->postJson('api/v1/admin/companies', self::$companyDetails)
             ->assertOk()
-            ->assertExactJson([
-                'data' => [],
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'status',
+                    'created_at',
+                    'unique_name',
+                    'company_cr',
+                    'does_order_require_approval',
+                    'order_cost',
+                ],
             ]);
 
-        $this->assertEquals(self::$company->refresh()->unique_name, 'companyUniqueName');
+        $company = Company::query()
+            ->where('unique_name', 'companyUniqueName')
+            ->first();
+
+        $defaultStatus = $this->app->make(GetSettingsClassInstance::class)->handle(Area::Lender)
+            ->default_company_status_created_by_operation;
+        $hasWallet = $company->getWallets()->count() > 0;
+        $hasOrderCost = $company->order_cost->getAmount() > 0;
+
+        $this->assertEquals($defaultStatus, $company->status->value);
+        $this->assertTrue($hasWallet);
+        $this->assertTrue($hasOrderCost);
+        $this->assertNotNull($company->webhook_secret_key);
     }
 
     /**
      * @return void
      */
-    public function test_that_admin_cant_update_company_without_name(): void
+    public function test_that_admin_cant_store_company_without_name(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->putJson('api/v1/admin/companies/'.self::$company->id, Arr::except(self::$companyDetails, 'name'))
+            ->postJson('api/v1/admin/companies', Arr::except(self::$companyDetails, 'name'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The name field is required.',
@@ -111,23 +155,28 @@ class CompanyControllerUpdate extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_can_update_company_without_company_cr(): void
+    public function test_that_admin_cant_store_company_without_company_cr(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->putJson('api/v1/admin/companies/'.self::$company->id, Arr::except(self::$companyDetails, 'company_cr'))
-            ->assertOk()
+            ->postJson('api/v1/admin/companies', Arr::except(self::$companyDetails, 'company_cr'))
+            ->assertUnprocessable()
             ->assertExactJson([
-                'data' => [],
+                'message' => 'The company CR field is required.',
+                'errors' => [
+                    'company_cr' => [
+                        'The company CR field is required.',
+                    ],
+                ],
             ]);
     }
 
     /**
      * @return void
      */
-    public function test_that_admin_cant_update_company_without_does_order_require_approval(): void
+    public function test_that_admin_cant_store_company_without_does_order_require_approval(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->putJson('api/v1/admin/companies/'.self::$company->id, Arr::except(self::$companyDetails, 'does_order_require_approval'))
+            ->postJson('api/v1/admin/companies', Arr::except(self::$companyDetails, 'does_order_require_approval'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The does order require approval field is required.',
@@ -142,10 +191,10 @@ class CompanyControllerUpdate extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_cant_update_company_without_order_cost(): void
+    public function test_that_admin_cant_store_company_without_order_cost(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->putJson('api/v1/admin/companies/'.self::$company->id, Arr::except(self::$companyDetails, 'order_cost'))
+            ->postJson('api/v1/admin/companies', Arr::except(self::$companyDetails, 'order_cost'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The order cost field is required.',
@@ -160,10 +209,10 @@ class CompanyControllerUpdate extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_cant_update_company_without_unique_name(): void
+    public function test_that_admin_cant_store_company_without_unique_name(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->putJson('api/v1/admin/companies/'.self::$company->id, Arr::except(self::$companyDetails, 'unique_name'))
+            ->postJson('api/v1/admin/companies', Arr::except(self::$companyDetails, 'unique_name'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The unique name field is required.',
@@ -178,14 +227,14 @@ class CompanyControllerUpdate extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_cant_update_company_with_exist_unique_name(): void
+    public function test_that_admin_cant_store_company_with_exist_unique_name(): void
     {
         Company::query()->create(array_merge(self::$companyDetails, [
             'status' => CompanyStatus::Approved(),
         ]));
 
         $this->actingAs(self::$userAdmin)
-            ->putJson('api/v1/admin/companies/'.self::$company->id, self::$companyDetails)
+            ->postJson('api/v1/admin/companies', self::$companyDetails)
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The unique name has already been taken. (and 1 more error)',
@@ -203,14 +252,14 @@ class CompanyControllerUpdate extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_can_update_company_with_exist_unique_name_after_delete(): void
+    public function test_that_admin_can_store_company_with_exist_unique_name_after_delete(): void
     {
         $company = Company::query()->create(array_merge(self::$companyDetails, [
             'status' => CompanyStatus::Approved(),
         ]));
 
         $this->actingAs(self::$userAdmin)
-            ->putJson('api/v1/admin/companies/'.self::$company->id, self::$companyDetails)
+            ->postJson('api/v1/admin/companies', self::$companyDetails)
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The unique name has already been taken. (and 1 more error)',
@@ -227,10 +276,19 @@ class CompanyControllerUpdate extends TestCase
         $company->forceDelete();
 
         $this->actingAs(self::$userAdmin)
-            ->putJson('api/v1/admin/companies/'.self::$company->id, self::$companyDetails)
+            ->postJson('api/v1/admin/companies', self::$companyDetails)
             ->assertOk()
             ->assertJsonStructure([
-                'data' => [],
+                'data' => [
+                    'id',
+                    'name',
+                    'status',
+                    'created_at',
+                    'unique_name',
+                    'company_cr',
+                    'does_order_require_approval',
+                    'order_cost',
+                ],
             ]);
     }
 }

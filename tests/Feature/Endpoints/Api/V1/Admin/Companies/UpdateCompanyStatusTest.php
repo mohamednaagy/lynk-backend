@@ -1,0 +1,137 @@
+<?php
+
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Companies;
+
+use App\Enums\CompanyStatus;
+use App\Enums\Role;
+use App\Models\Company;
+use App\Models\User;
+use App\Models\Wallet;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Arr;
+use Tests\TestCase;
+use Tests\Traits\InteractsWithLender;
+
+class UpdateCompanyStatusTest extends TestCase
+{
+    use RefreshDatabase, InteractsWithLender;
+
+    private static Company $company;
+
+    private static Wallet $wallet;
+
+    private static User $userAdmin;
+
+    private static User $userManager;
+
+    private static array $companyStatusDetails;
+
+    /**
+     * @return void
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        self::$userAdmin = $this->createLenderUser(self::$company->id, Role::Admin, 'admin@bim.com');
+        self::$userManager = $this->createLenderUser(self::$company->id, Role::Manager, 'manager@bim.com');
+        self::$companyStatusDetails = [
+            'status' => CompanyStatus::Approved(),
+            'public_status_comment' => 'Approved',
+            'internal_status_comment' => 'Approved',
+        ];
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_un_auth_user_cant_update_company_status(): void
+    {
+        $this->putJson('api/v1/admin/companies/'.self::$company->id.'/status', self::$companyStatusDetails)
+            ->assertUnauthorized()
+            ->assertExactJson([
+                'message' => __('Unauthenticated.'),
+            ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_admin_can_update_company_status(): void
+    {
+        $this->actingAs(self::$userAdmin)
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/status', self::$companyStatusDetails)
+            ->assertOk()
+            ->assertExactJson([
+                'data' => [],
+            ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_manager_can_update_company_status(): void
+    {
+        $this->actingAs(self::$userManager)
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/status', self::$companyStatusDetails)
+            ->assertOk()
+            ->assertExactJson([
+                'data' => [],
+            ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_admin_cant_update_company_status_without_status(): void
+    {
+        $this->actingAs(self::$userAdmin)
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/status', Arr::except(self::$companyStatusDetails, 'status'))
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The status field is required.',
+                'errors' => [
+                    'status' => [
+                        'The status field is required.',
+                    ],
+                ],
+            ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_admin_cant_update_company_status_without_public_status_comment(): void
+    {
+        $this->actingAs(self::$userAdmin)
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/status', Arr::except(self::$companyStatusDetails, 'public_status_comment'))
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The public status comment field is required.',
+                'errors' => [
+                    'public_status_comment' => [
+                        'The public status comment field is required.',
+                    ],
+                ],
+            ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_admin_cant_update_company_status_without_internal_status_comment(): void
+    {
+        $this->actingAs(self::$userAdmin)
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/status', Arr::except(self::$companyStatusDetails, 'internal_status_comment'))
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The internal status comment field is required.',
+                'errors' => [
+                    'internal_status_comment' => [
+                        'The internal status comment field is required.',
+                    ],
+                ],
+            ]);
+    }
+}

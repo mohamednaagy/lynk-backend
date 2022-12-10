@@ -16,7 +16,7 @@ class FinancingOrderTransactionController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderTransactions, Action::Index, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::LenderTransactions, Action::Index, Action::Manage])
         )->only('index');
     }
 

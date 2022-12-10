@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class CompanyControllerDelete extends TestCase
+class GetCompanyBalanceTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -29,7 +29,7 @@ class CompanyControllerDelete extends TestCase
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910', 'order_cost' => '200']);
         self::$userAdmin = $this->createLenderUser(self::$company->id, Role::Admin, 'admin@bim.com');
         self::$userManager = $this->createLenderUser(self::$company->id, Role::Manager, 'manager@bim.com');
     }
@@ -37,9 +37,9 @@ class CompanyControllerDelete extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_delete_companies(): void
+    public function test_that_un_auth_user_cant_get_company_balance(): void
     {
-        $this->deleteJson('api/v1/admin/companies/'.self::$company->id)
+        $this->getJson('api/v1/admin/companies/'.self::$company->id.'/balance')
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -49,38 +49,32 @@ class CompanyControllerDelete extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_can_delete_companies(): void
+    public function test_that_admin_can_get_company_balance(): void
     {
-        $companiesCount = Company::query()->count();
-
         $this->actingAs(self::$userAdmin)
-            ->deleteJson('api/v1/admin/companies/'.self::$company->id)
+            ->getJson('api/v1/admin/companies/'.self::$company->id.'/balance')
             ->assertOk()
             ->assertExactJson([
-                'data' => [],
+                'data' => [
+                    'available_orders' => '10',
+                    'balance' => '20.00',
+                ],
             ]);
-
-        $newCompaniesCount = Company::query()->count();
-
-        $this->assertEquals($newCompaniesCount, $companiesCount - 1);
     }
 
     /**
      * @return void
      */
-    public function test_that_auth_manager_user_can_delete_companies(): void
+    public function test_that_manager_can_get_company_balance(): void
     {
-        $companiesCount = Company::query()->count();
-
         $this->actingAs(self::$userManager)
-            ->deleteJson('api/v1/admin/companies/'.self::$company->id)
+            ->getJson('api/v1/admin/companies/'.self::$company->id.'/balance')
             ->assertOk()
             ->assertExactJson([
-                'data' => [],
+                'data' => [
+                    'available_orders' => '10',
+                    'balance' => '20.00',
+                ],
             ]);
-
-        $newCompaniesCount = Company::query()->count();
-
-        $this->assertEquals($newCompaniesCount, $companiesCount - 1);
     }
 }
