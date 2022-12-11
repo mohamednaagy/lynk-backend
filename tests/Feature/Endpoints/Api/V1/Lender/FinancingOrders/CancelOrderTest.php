@@ -60,7 +60,7 @@ class CancelOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_cannot_cancel_order_with_user(): void
+    public function test_cannot_cancel_order_without_user(): void
     {
         $this->withHeader('X-Company', self::$company->id)
             ->putJson(self::$orderCancledUrl)
@@ -73,7 +73,7 @@ class CancelOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_cancel_order_with_lender_admin(): void
+    public function test_can_cancel_order_with_lender_admin(): void
     {
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
@@ -94,7 +94,7 @@ class CancelOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_cancel_order_with_lender_supervisor(): void
+    public function test_can_cancel_order_with_lender_supervisor(): void
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderSupervisor);
 
@@ -110,7 +110,7 @@ class CancelOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_cancel_order_with_lender_api_user(): void
+    public function test_can_cancel_order_with_lender_api_user(): void
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderApiUser);
 
@@ -124,7 +124,7 @@ class CancelOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_cannot_cancel_order_with_lender_billinge(): void
+    public function test_cannot_cancel_order_with_lender_billing(): void
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderBilling);
 
@@ -201,7 +201,7 @@ class CancelOrderTest extends TestCase
             ->assertJsonPath('data', []);
     }
 
-    public function test_can_cancel_order_statuses()
+    public function test_can_cancel_order_with_cancellable_statuses()
     {
         $statuses = [
             FinancingOrderStatus::Rejected,
@@ -225,7 +225,7 @@ class CancelOrderTest extends TestCase
         }
     }
 
-    public function test_cannot_cancel_order_statuses()
+    public function test_cannot_cancel_order_with_not_cancellable_statuses()
     {
         $statuses = [
             FinancingOrderStatus::Cancelled,
