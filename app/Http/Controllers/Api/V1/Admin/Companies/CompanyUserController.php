@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api\V1\Admin\Companies;
 use App\Actions\Contracts\Companies\GetPaginatedCompanyUsers;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
+use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\GetCompanyUsersRequest;
 use App\Http\Requests\V1\Admin\Companies\Users\UpdateUserRequest;
@@ -21,8 +23,31 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
-class UserController extends Controller
+class CompanyUserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Index, Action::Manage])
+        )->only('index');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Show, Action::Manage])
+        )->only('show');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Create, Action::Manage])
+        )->only('store');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Edit, Action::Manage])
+        )->only('update');
+    }
+
     public function index(
         GetCompanyUsersRequest $request,
         Company $company,
@@ -46,12 +71,13 @@ class UserController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  Request  $request
+     * @param  Company  $company
      * @param  User  $user
      * @return JsonResponse
      *
      * @throws AuthorizationException
      */
-    public function show(Request $request, User $user): JsonResponse
+    public function show(Request $request, Company $company, User $user): JsonResponse
     {
         if (! $user->hasAnyRole([
             Role::LenderAdmin,
@@ -120,12 +146,14 @@ class UserController extends Controller
      * Update the specified resource in storage.
      *
      * @param  UpdateUserRequest  $updateUserRequest
+     * @param  Company  $company
      * @param  User  $user
      * @param  UpdateLenderUserWithRoleAndPermission  $updateUserWithRoleAndPermission
      * @return JsonResponse
      */
     public function update(
         UpdateUserRequest $updateUserRequest,
+        Company $company,
         User $user,
         UpdateLenderUserWithRoleAndPermission $updateUserWithRoleAndPermission,
     ): JsonResponse {

@@ -10,11 +10,11 @@ use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Companies\ChargeLenderBalanceManually;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
+use App\Http\Controllers\Api\V1\Admin\Companies\CompanyUserController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyBalance;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyStatuses;
 use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
-use App\Http\Controllers\Api\V1\Admin\Companies\UserController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
-    Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->group(function () {
+    Route::middleware(['auth:sanctum', 'role:'.implode('|', [Role::Admin, Role::Manager])])->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::put('auth/profile', UpdateMyProfile::class);
 
@@ -82,10 +82,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         });
 
         Route::apiResource('companies', CompanyController::class);
-        Route::apiResource('companies.users', UserController::class)->shallow();
-
-        Route::apiResource('companies', CompanyController::class);
-        Route::apiResource('companies.users', UserController::class)->shallow();
+        Route::apiResource('companies.users', CompanyUserController::class);
 
         Route::get('edaat-invoices', GetEdaatInvoices::class);
         Route::post('edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
