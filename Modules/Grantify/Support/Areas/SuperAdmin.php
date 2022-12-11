@@ -62,5 +62,10 @@ class SuperAdmin
             Action::Index,
             Action::Create,
         ],
+        Subject::ProjectSettings => [
+            Action::Index,
+            Action::Edit,
+            Action::Manage,
+        ],
     ];
 }
