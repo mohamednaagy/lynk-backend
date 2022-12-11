@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Auth;
 
-use App\Actions\Contracts\Lenders\Auth\UpdateMyProfile as UpdateMyProfileInterface;
+use App\Actions\Contracts\Auth\UpdateMyProfile as UpdateMyProfileInterface;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
@@ -32,7 +32,7 @@ class UpdateMyProfile extends Controller
             throw UnauthorizedException::forRoles([Role::LenderApiUser]);
         }
 
-        if (array_key_exists('password', $data) && is_null($data['password'])) {
+        if (empty($data['password'])) {
             $data = Arr::except($data, 'password');
         }
 

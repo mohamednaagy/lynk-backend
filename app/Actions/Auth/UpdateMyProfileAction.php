@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Actions\Lenders\Auth;
+namespace App\Actions\Auth;
 
+use App\Actions\Contracts\Auth\UpdateMyProfile;
 use App\Actions\Contracts\GetSettingsClassInstance;
-use App\Actions\Contracts\Lenders\Auth\UpdateMyProfile;
 use App\Actions\Contracts\UpdateUser;
 use App\Models\User;
 

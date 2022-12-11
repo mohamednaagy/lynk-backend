@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Auth;
 
-use App\Actions\Contracts\Lenders\Auth\UpdateMyProfile as UpdateMyProfileInterface;
-use App\Actions\Contracts\UpdateUser;
+use App\Actions\Contracts\Auth\UpdateMyProfile as UpdateMyProfileInterface;
 use App\Enums\Area;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Auth\UpdateMyProfileRequest;
@@ -16,7 +15,7 @@ class UpdateMyProfile extends Controller
      * Handle an authentication attempt.
      *
      * @param  UpdateMyProfileRequest  $request
-     * @param  UpdateUser  $updateUser
+     * @param  UpdateMyProfileInterface  $updateMyProfile
      * @return JsonResponse
      */
     public function __invoke(
@@ -26,7 +25,7 @@ class UpdateMyProfile extends Controller
         $user = $request->user();
         $data = $request->validated();
 
-        if (array_key_exists('password', $data) && is_null($data['password'])) {
+        if (empty($data['password'])) {
             $data = Arr::except($data, 'password');
         }
 

@@ -22,6 +22,8 @@ class UpdateMyProfileTest extends TestCase
 
     private static User $userLenderWithApprovedCompany;
 
+    private static User $userLenderWithApprovedCompany1;
+
     private static User $notApprovedCompanyUserLender;
 
     private static User $emailNotVerifiedUserLender;
@@ -35,8 +37,8 @@ class UpdateMyProfileTest extends TestCase
     {
         parent::setUp();
 
-        [self::$approvedCompany, $_] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        [self::$notApprovedCompany, $_] = $this->createCompany('2000', [
+        [self::$approvedCompany] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        [self::$notApprovedCompany] = $this->createCompany('2000', [
             'company_cr' => '12345678911',
             'status' => CompanyStatus::UnderReview,
         ]);
@@ -65,7 +67,7 @@ class UpdateMyProfileTest extends TestCase
     /**
      * @return void
      */
-    public function test_lender_can_update_his_profile_and_password_not_updated(): void
+    public function test_lender_can_update_his_profile_without_updating_password(): void
     {
         $oldPassword = self::$userLenderWithApprovedCompany->password;
         $this->actingAs(self::$userLenderWithApprovedCompany)
@@ -96,7 +98,7 @@ class UpdateMyProfileTest extends TestCase
     /**
      * @return void
      */
-    public function test_lender_can_update_his_profile_and_password_updated(): void
+    public function test_lender_can_update_his_profile__with_updating_password(): void
     {
         $oldPassword = self::$userLenderWithApprovedCompany->password;
         $this->actingAs(self::$userLenderWithApprovedCompany)
@@ -142,7 +144,7 @@ class UpdateMyProfileTest extends TestCase
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertExactJson([
                 'code' => 1015,
-                'message' => 'The company is not active',
+                'message' => __('error.company_not_active'),
             ]);
     }
 
@@ -179,7 +181,7 @@ class UpdateMyProfileTest extends TestCase
             ])
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertExactJson([
-                'message' => 'You must verify your email address',
+                'message' => __('error.must_verify_email'),
                 'code' => 1008,
             ]);
     }
@@ -204,7 +206,6 @@ class UpdateMyProfileTest extends TestCase
             ->putJson('api/v1/lender/auth/profile', [
                 'first_name' => 'test name',
                 'last_name' => 'test name',
-                'email' => self::$userLenderWithApprovedCompany->email,
                 'phone_number' => self::$userLenderWithApprovedCompany->mobileDialingPhoneNumber,
                 'phone_country_code' => self::$userLenderWithApprovedCompany->phoneNumberCountryCode,
             ])
