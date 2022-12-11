@@ -60,7 +60,7 @@ class CancelOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_cannot_cancel_order_with_user(): void
+    public function test_cannot_cancel_order_with_unauthorized_user(): void
     {
         $this->withHeader('X-Company', self::$company->id)
             ->putJson(self::$orderCancledUrl)
