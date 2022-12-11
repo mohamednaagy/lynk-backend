@@ -21,5 +21,8 @@ class LenderSupervisor
         Subject::LenderFinancingOrderCost => [
             Action::Calculate,
         ],
+        Subject::LenderWallet => [
+            Action::Manage,
+        ],
     ];
 }

@@ -24,5 +24,8 @@ class LenderApiUser
         Subject::LenderWebhooks => [
             Action::Create,
         ],
+        Subject::LenderWallet => [
+            Action::Manage,
+        ],
     ];
 }
