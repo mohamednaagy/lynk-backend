@@ -47,8 +47,14 @@ class GetWalletTransactionsTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
                 fractal(
-                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer()
-                )->respond()
+                    self::$company->fresh()->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer())
+                    ->parseIncludes([
+                        'id',
+                        'date',
+                        'description',
+                        'amount',
+                    ])
+                    ->respond()
                     ->getData(true)
             );
 
@@ -62,8 +68,14 @@ class GetWalletTransactionsTest extends TestCase
             ->assertJsonCount(2, 'data')
             ->assertExactJson(
                 fractal(
-                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer()
-                )->respond()
+                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer())
+                    ->parseIncludes([
+                        'id',
+                        'date',
+                        'description',
+                        'amount',
+                    ])
+                    ->respond()
                     ->getData(true)
             );
     }
@@ -78,8 +90,13 @@ class GetWalletTransactionsTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
                 fractal(
-                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer()
-                )
+                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer())
+                    ->parseIncludes([
+                        'id',
+                        'date',
+                        'description',
+                        'amount',
+                    ])
                     ->respond()
                     ->getData(true)
             );
@@ -95,8 +112,13 @@ class GetWalletTransactionsTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
                 fractal(
-                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer()
-                )
+                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer())
+                    ->parseIncludes([
+                        'id',
+                        'date',
+                        'description',
+                        'amount',
+                    ])
                     ->respond()
                     ->getData(true)
             );
@@ -112,8 +134,13 @@ class GetWalletTransactionsTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
                 fractal(
-                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer()
-                )
+                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer())
+                    ->parseIncludes([
+                        'id',
+                        'date',
+                        'description',
+                        'amount',
+                    ])
                     ->respond()
                     ->getData(true)
             );
