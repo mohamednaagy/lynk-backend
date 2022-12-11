@@ -13,6 +13,7 @@ class LenderSupervisor
         ],
         Subject::FinancingOrders => [
             Action::Manage,
+            Action::Approve,
         ],
         Subject::LenderEdaatInvoices => [
             Action::Manage,

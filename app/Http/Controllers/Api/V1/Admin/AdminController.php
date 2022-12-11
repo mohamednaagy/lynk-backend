@@ -52,6 +52,8 @@ class AdminController extends Controller
             throw UnauthorizedException::forRoles(Area::roles(Area::SuperAdmin));
         }
 
+        $admin->load('permissions', 'roles');
+
         return fractal($admin, new UserTransformer(Area::SuperAdmin))
             ->parseIncludes([
                 'id',
@@ -91,6 +93,8 @@ class AdminController extends Controller
                         $data['redirect_url']
                     )
                 );
+
+            $admin->load('permissions', 'roles');
 
             return fractal($admin, new UserTransformer(Area::SuperAdmin))
                 ->parseIncludes([

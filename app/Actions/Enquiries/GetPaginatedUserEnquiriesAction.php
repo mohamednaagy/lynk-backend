@@ -2,12 +2,12 @@
 
 namespace App\Actions\Enquiries;
 
-use App\Actions\Contracts\Enquiries\ListUserEnquiries;
+use App\Actions\Contracts\Enquiries\GetPaginatedUserEnquiries;
 use App\Models\Enquiry;
 use App\Support\QueryScoper\Scopes\Enquiry\EnquiryStatusScope;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-class ListUserEnquiriesAction implements ListUserEnquiries
+class GetPaginatedUserEnquiriesAction implements GetPaginatedUserEnquiries
 {
     /**
      * Create new enquiry.
@@ -17,7 +17,10 @@ class ListUserEnquiriesAction implements ListUserEnquiries
      */
     public function handle(int $userId): LengthAwarePaginator
     {
-        return Enquiry::where('user_id', $userId)->latest()->toScopes($this->scopes())->paginate();
+        return Enquiry::where('user_id', $userId)
+            ->latest()
+            ->toScopes($this->scopes())
+            ->paginate();
     }
 
     private function scopes()

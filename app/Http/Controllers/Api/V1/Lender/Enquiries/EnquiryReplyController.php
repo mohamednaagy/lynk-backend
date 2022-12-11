@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Lender\Enquiries;
 
 use App\Actions\Contracts\Enquiries\ReplyToEnquiry as ReplyToEnquiryInterface;
 use App\Enums\EnquiryStatus;
+use App\Enums\ErrorCode;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Enquiries\Replies\StoreReplyToEnquiryRequest;
 use App\Models\Enquiry;
@@ -21,9 +22,18 @@ class EnquiryReplyController extends Controller
      */
     public function index(Enquiry $enquiry): JsonResponse
     {
-        $replies = $enquiry->replies()->latest()->get();
+        $this->authorize('view', $enquiry);
 
-        return fractal($replies, new EnquiryReplyTransformer())
+        $enquiry->load(['replies' => function ($query) {
+            $query->latest();
+        }]);
+
+        return fractal($enquiry->replies, new EnquiryReplyTransformer())
+            ->parseIncludes([
+                'id',
+                'body',
+                'creation_date',
+            ])
             ->respond();
     }
 
@@ -31,25 +41,28 @@ class EnquiryReplyController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  Enquiry  $enquiry
-     * @param  StoreReplyToEnquiryRequest  $storeReplyToEnquiryRequest
+     * @param  StoreReplyToEnquiryRequest  $request
      * @param  ReplyToEnquiryInterface  $replyToEnquiry
      * @return JsonResponse
      */
     public function store(
+        StoreReplyToEnquiryRequest $request,
+        ReplyToEnquiryInterface $replyToEnquiry,
         Enquiry $enquiry,
-        StoreReplyToEnquiryRequest $storeReplyToEnquiryRequest,
-        ReplyToEnquiryInterface $replyToEnquiry
     ): JsonResponse {
-        return DB::transaction(function () use ($storeReplyToEnquiryRequest, $replyToEnquiry, $enquiry) {
+        return DB::transaction(function () use ($request, $replyToEnquiry, $enquiry) {
+            $this->authorize('view', $enquiry);
+
             // check if the enquiry is closed already
             if ($enquiry->status->is(EnquiryStatus::Closed)) {
                 return $this->errorResponse(
-                    __('error.enquiry_closed_already')
+                    __('error.enquiry_closed_already'),
+                    code: ErrorCode::ENQUIRY_CLOSED_ALREADY
                 );
             }
 
-            $data = $storeReplyToEnquiryRequest->validated();
-            $data['user_id'] = $storeReplyToEnquiryRequest->user()->id;
+            $data = $request->validated();
+            $data['user_id'] = $request->user()->id;
             $data['enquiry_id'] = $enquiry->id;
 
             $enquiryReply = $replyToEnquiry->handle($data);
@@ -61,7 +74,13 @@ class EnquiryReplyController extends Controller
                 ]);
             }
 
-            return fractal($enquiryReply, new EnquiryReplyTransformer())->respond();
+            return fractal($enquiryReply, new EnquiryReplyTransformer())
+                ->parseIncludes([
+                    'id',
+                    'body',
+                    'creation_date',
+                ])
+                ->respond();
         });
     }
 }

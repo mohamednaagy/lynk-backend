@@ -80,7 +80,7 @@ class FinancingOrderControllerIndexTest extends TestCase
      */
     public function test_that_admin_user_can_index_orders_in_same_company(): void
     {
-        $orders = self::$firstCompany->orders()->paginate(10);
+        $orders = self::$firstCompany->orders()->paginate();
 
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$firstCompany->id)
@@ -107,7 +107,7 @@ class FinancingOrderControllerIndexTest extends TestCase
      */
     public function test_that_supervisor_user_can_index_orders_in_same_company(): void
     {
-        $orders = self::$firstCompany->orders()->paginate(10);
+        $orders = self::$firstCompany->orders()->paginate();
 
         $this->actingAs(self::$userLenderSupervisor)
             ->withHeader('X-Company', self::$firstCompany->id)
@@ -147,7 +147,7 @@ class FinancingOrderControllerIndexTest extends TestCase
     {
         $orders = FinancingOrder::query()
             ->where('creator_id', self::$userLenderOrderCreator->id)
-            ->paginate(10);
+            ->paginate();
 
         $this->actingAs(self::$userLenderOrderCreator)
             ->withHeader('X-Company', self::$firstCompany->id)

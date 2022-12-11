@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
-    Route::middleware(['auth:sanctum', 'role:'.Role::Admin])->group(function () {
+    Route::middleware(['auth:sanctum', 'role:'.implode('|', [Role::Admin, Role::Manager])])->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::put('auth/profile', UpdateMyProfile::class);
 
@@ -90,8 +90,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::get('edaat-invoices', GetEdaatInvoices::class);
         Route::post('edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
 
-        Route::apiResource('enquiries', EnquiryController::class);
-        Route::apiResource('enquiries.replies', EnquiryReplyController::class);
+        Route::apiResource('enquiries', EnquiryController::class)->only(['index', 'show']);
+        Route::apiResource('enquiries.replies', EnquiryReplyController::class)->only(['index', 'store']);
 
         Route::get('media/{media}/download', DownloadMedia::class);
 

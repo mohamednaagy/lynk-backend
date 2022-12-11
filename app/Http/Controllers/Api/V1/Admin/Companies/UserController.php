@@ -58,8 +58,7 @@ class UserController extends Controller
             Role::LenderOrderCreator,
             Role::LenderBilling,
             Role::LenderSupervisor,
-        ])
-        ) {
+        ])) {
             throw new AuthorizationException();
         }
 
@@ -94,14 +93,16 @@ class UserController extends Controller
         return DB::transaction(function () use ($company, $storeCompanyUserRequest, $createUserWithRoleAndPermission) {
             $user = $createUserWithRoleAndPermission->handle(
                 $storeCompanyUserRequest->validated() +
-                [
-                    'company_id' => $company->id,
-                ]
+                    [
+                        'company_id' => $company->id,
+                    ]
             );
 
             $invitationUrl = $storeCompanyUserRequest->validated('redirect_url');
 
             Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl));
+
+            $user->load('roles', 'permissions');
 
             return fractal($user, new UserTransformer())
                 ->parseIncludes([
@@ -112,7 +113,8 @@ class UserController extends Controller
                     'phone_number',
                     'phone_country_code',
                     'formatted_phone_number',
-                ])->respond();
+                ])
+                ->respond();
         });
     }
 

@@ -26,6 +26,7 @@ class SuperAdmin
         ],
         Subject::LenderWallet => [
             Action::Show,
+            Action::Charge,
         ],
         Subject::LenderUsers => [
             Action::Index,

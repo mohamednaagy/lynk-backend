@@ -16,6 +16,13 @@ class GetWalletTransactions extends Controller
     ): JsonResponse {
         $response = $getTransactions->handle();
 
-        return fractal($response, new TransactionTransformer())->respond();
+        return fractal($response, new TransactionTransformer())
+            ->parseIncludes([
+                'id',
+                'date',
+                'description',
+                'amount',
+            ])
+            ->respond();
     }
 }

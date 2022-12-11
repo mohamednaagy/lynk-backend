@@ -12,10 +12,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Spatie\Permission\Models\Role;
+use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 class Enquiry extends Model
 {
-    use HasFactory, SoftDeletes, HasScopes;
+    use HasFactory, SoftDeletes, HasScopes, BelongsToTenant;
 
     /**
      * The attributes that are mass assignable.
@@ -71,6 +72,6 @@ class Enquiry extends Model
      */
     public function replies(): HasMany
     {
-        return $this->hasMany(EnquiryReplies::class);
+        return $this->hasMany(EnquiryReply::class);
     }
 }

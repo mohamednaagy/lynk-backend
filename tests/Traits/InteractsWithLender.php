@@ -2,6 +2,7 @@
 
 namespace Tests\Traits;
 
+use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\WalletType;
 use App\Models\Company;
@@ -14,6 +15,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Modules\Grantify\Facades\Grantify;
 
 trait InteractsWithLender
@@ -45,7 +47,11 @@ trait InteractsWithLender
         $wallet = $company->createWallet(WalletType::CompanyWallet, 'SAR');
 
         app()->make(TransactionServiceInterface::class)->deposit(
-            $wallet, \money($walletInitialAmount, 'SAR'), 1, 1, []
+            $wallet,
+            \money($walletInitialAmount, 'SAR'),
+            1,
+            1,
+            []
         );
 
         return [
@@ -109,5 +115,43 @@ trait InteractsWithLender
             'amount' => 1,
             'status' => 1,
         ], $data));
+    }
+
+    public function assertLenderUserCannotAccess($request)
+    {
+        $roles = Area::roles(Area::Lender);
+
+        [$company] = $this->createCompany(
+            2000,
+            [
+                'company_cr' => (string) Str::uuid(),
+            ]
+        );
+
+        foreach ($roles as $role) {
+            $user = $this->createLenderUser($company->id, $role, (string) Str::uuid().'@test.test');
+            $request($user, $role)->assertStatus(403);
+        }
+
+        return $request;
+    }
+
+    public function assertStatusToSpecificRoles(int $status, array $roles, Company $company = null, $request)
+    {
+        if (is_null($company)) {
+            [$company] = $this->createCompany(
+                2000,
+                [
+                    'company_cr' => (string) Str::uuid(),
+                ]
+            );
+        }
+
+        foreach ($roles as $role) {
+            $user = $this->createLenderUser($company->id, $role, (string) Str::uuid().'@test.test');
+            $request($user, $role)->assertStatus($status);
+        }
+
+        return $request;
     }
 }

@@ -46,7 +46,7 @@ class DescriptionManager
      */
     public static function getDescription(Transaction $transaction, $locale = null): string
     {
-        return self::getGenerator($transaction->meta['type'])->generate($transaction, $locale);
+        return self::getGenerator($transaction->reason)->generate($transaction, $locale);
     }
 
     /**
