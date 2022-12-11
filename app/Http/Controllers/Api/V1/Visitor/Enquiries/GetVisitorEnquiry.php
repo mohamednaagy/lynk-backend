@@ -16,6 +16,10 @@ class GetVisitorEnquiry extends Controller
 
     public function __invoke(Enquiry $enquiry): JsonResponse
     {
+        $enquiry->load(['replies' => function ($query) {
+            $query->latest();
+        }]);
+
         return fractal($enquiry, new EnquiryTransformer())
             ->parseIncludes([
                 'id',
@@ -23,6 +27,7 @@ class GetVisitorEnquiry extends Controller
                 'status',
                 'creation_date',
                 'body',
+                'replies',
             ])
             ->respond();
     }

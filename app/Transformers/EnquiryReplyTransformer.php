@@ -8,14 +8,14 @@ use League\Fractal\TransformerAbstract;
 
 class EnquiryReplyTransformer extends TransformerAbstract
 {
-    protected array $defaultIncludes = [];
-
-    protected array $availableIncludes = [
+    protected array $defaultIncludes = [
         'id',
         'body',
         'creation_date',
         'creator',
     ];
+
+    protected array $availableIncludes = [];
 
     public function transform(EnquiryReply $enquiryReply): array
     {

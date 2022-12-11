@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Models\Enquiry;
+use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -67,5 +68,10 @@ class EnquiryTransformer extends TransformerAbstract
             'name' => $enquiry->name,
             'phone_number' => $enquiry->phone_number,
         ]);
+    }
+
+    public function includeReplies(Enquiry $enquiry): Collection
+    {
+        return $this->collection($enquiry->replies, new EnquiryReplyTransformer);
     }
 }
