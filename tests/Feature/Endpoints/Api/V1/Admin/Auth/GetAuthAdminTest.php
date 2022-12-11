@@ -9,7 +9,6 @@ use App\Models\User;
 use App\Models\Wallet;
 use App\Transformers\UserTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Grantify\Facades\Grantify;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithAdmin;
@@ -45,8 +44,7 @@ class GetAuthAdminTest extends TestCase
         parent::setUp();
 
         self::$userAdmin = $this->createAdmin();
-        self::$userManager = $this->createAdmin();
-        Grantify::syncRoleToModel(self::$userManager, Role::Manager);
+        self::$userManager = $this->createManager();
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
