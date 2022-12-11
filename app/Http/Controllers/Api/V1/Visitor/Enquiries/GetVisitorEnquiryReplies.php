@@ -4,25 +4,23 @@ namespace App\Http\Controllers\Api\V1\Visitor\Enquiries;
 
 use App\Http\Controllers\Controller;
 use App\Models\Enquiry;
-use App\Transformers\EnquiryTransformer;
+use App\Transformers\EnquiryReplyTransformer;
 use Illuminate\Http\JsonResponse;
 
-class GetVisitorEnquiry extends Controller
+class GetVisitorEnquiryReplies extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['signed', 'throttle:6,1']);
-    }
-
     public function __invoke(Enquiry $enquiry): JsonResponse
     {
-        return fractal($enquiry, new EnquiryTransformer())
+        $enquiry->load(['replies' => function ($query) {
+            $query->latest();
+        }]);
+
+        return fractal($enquiry->replies, new EnquiryReplyTransformer())
             ->parseIncludes([
                 'id',
-                'subject',
-                'status',
-                'creation_date',
                 'body',
+                'creation_date',
+                'creator',
             ])
             ->respond();
     }

@@ -84,9 +84,8 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
                 Route::put('/settings', [SettingsController::class, 'update']);
             });
 
-            Route::apiResource('enquiries', EnquiryController::class);
-            Route::apiResource('enquiries.replies', EnquiryReplyController::class)->only('index', 'store');
-            Route::apiResource('enquiries.replies', EnquiryReplyController::class);
+            Route::apiResource('enquiries', EnquiryController::class)->only(['index', 'show', 'store']);
+            Route::apiResource('enquiries.replies', EnquiryReplyController::class)->only('index', 'store')->only(['index', 'store']);
         });
     });
 
