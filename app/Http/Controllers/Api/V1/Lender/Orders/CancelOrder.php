@@ -21,7 +21,7 @@ class CancelOrder extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::FinancingOrders, Action::Proceed, Action::Manage])
+            perm(Area::Lender, [Subject::FinancingOrders, Action::Manage, Action::Cancel])
         );
     }
 

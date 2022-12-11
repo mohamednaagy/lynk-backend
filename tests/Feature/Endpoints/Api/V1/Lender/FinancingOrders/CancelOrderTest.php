@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
-use Illuminate\Testing\Fluent\AssertableJson;
 use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
@@ -61,7 +60,7 @@ class CancelOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_cant_cancel_order_with_unauthorized_user_(): void
+    public function test_cannot_cancel_order_with_user(): void
     {
         $this->withHeader('X-Company', self::$company->id)
             ->putJson(self::$orderCancledUrl)
@@ -74,19 +73,15 @@ class CancelOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_cancel_order_with_auth_user_has_lender_supervisor_role(): void
+    public function test_cancel_order_with_lender_admin(): void
     {
-        Grantify::syncRoleToModel(self::$userLender, Role::LenderSupervisor);
-
-        $response = $this->actingAs(self::$userLender)
+        $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
             ->putJson(self::$orderCancledUrl, [
                 'status_reason' => 'test reason',
-            ]);
-
-        $response->assertStatus(200)->assertJson(
-            fn (AssertableJson $json) => $json->has('data')->where('data', [])
-        );
+            ])
+            ->assertStatus(Response::HTTP_OK)
+            ->assertJsonPath('data', []);
 
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
@@ -99,22 +94,37 @@ class CancelOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_cancel_order_with_auth_user_has_lender_api_user_role(): void
+    public function test_cancel_order_with_lender_supervisor(): void
     {
-        Grantify::syncRoleToModel(self::$userLender, Role::LenderApiUser);
+        Grantify::syncRoleToModel(self::$userLender, Role::LenderSupervisor);
 
-        $response = $this->actingAs(self::$userLender)
+        $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
-            ->putJson(self::$orderCancledUrl);
-
-        $response->assertStatus(200)
+            ->putJson(self::$orderCancledUrl, [
+                'status_reason' => 'test reason',
+            ])
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonPath('data', []);
     }
 
     /**
      * @return void
      */
-    public function test_cannot_cancel_order_with_unauthorized_lender_billinge(): void
+    public function test_cancel_order_with_lender_api_user(): void
+    {
+        Grantify::syncRoleToModel(self::$userLender, Role::LenderApiUser);
+
+        $this->actingAs(self::$userLender)
+            ->withHeader('X-Company', self::$company->id)
+            ->putJson(self::$orderCancledUrl)
+            ->assertStatus(Response::HTTP_OK)
+            ->assertJsonPath('data', []);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_cannot_cancel_order_with_lender_billinge(): void
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderBilling);
 
@@ -128,15 +138,15 @@ class CancelOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_can_cancel_order_with_unauthorized_lender_order_creator(): void
+    public function test_cannot_cancel_order_with_lender_order_creator(): void
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderOrderCreator);
 
-        $response = $this->actingAs(self::$userLender)
+        $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
             ->putJson(self::$orderCancledUrl)
-            ->assertStatus(200)
-            ->assertJsonPath('data', []);
+            ->assertStatus(Response::HTTP_FORBIDDEN)
+            ->assertJsonPath('message', 'User does not have the right permissions.');
     }
 
     /**
@@ -148,7 +158,7 @@ class CancelOrderTest extends TestCase
         self::$userLender->email_verified_at = null;
         self::$userLender->save();
 
-        $response = $this->actingAs(self::$userLender)
+        $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
             ->putJson(self::$orderCancledUrl)
             ->assertStatus(Response::HTTP_FORBIDDEN)
@@ -167,7 +177,7 @@ class CancelOrderTest extends TestCase
         self::$company->status = CompanyStatus::Pending;
         self::$company->save();
 
-        $response = $this->actingAs(self::$userLender)
+        $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
             ->putJson(self::$orderCancledUrl)
             ->assertStatus(Response::HTTP_FORBIDDEN)
@@ -182,12 +192,58 @@ class CancelOrderTest extends TestCase
      */
     public function test_cancel_order_with_empty_status_reason(): void
     {
-        $response = $this->actingAs(self::$userLender)
+        $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
             ->putJson(self::$orderCancledUrl, [
                 'status_reason' => '',
             ])
-            ->assertStatus(200)
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonPath('data', []);
+    }
+
+    public function test_can_cancel_order_statuses()
+    {
+        $statuses = [
+            FinancingOrderStatus::Rejected,
+            FinancingOrderStatus::Approved,
+            FinancingOrderStatus::RespondedToPtp,
+            FinancingOrderStatus::PendingApproval,
+            FinancingOrderStatus::CommodityPurchased,
+            FinancingOrderStatus::WaitingClientWakala,
+            FinancingOrderStatus::PtpDocumentRetrieved,
+            FinancingOrderStatus::ClientWakalaCompleted,
+            FinancingOrderStatus::CommoditySoldToCustomer,
+            FinancingOrderStatus::WaitingPurchasingCommodity,
+        ];
+        foreach ($statuses as $status) {
+            self::$financingOrder->update(['status' => $status]);
+            $this->actingAs(self::$userLender)
+                ->withHeader('X-Company', self::$company->id)
+                ->putJson(self::$orderCancledUrl)
+                ->assertStatus(Response::HTTP_OK)
+                ->assertJsonPath('data', []);
+        }
+    }
+
+    public function test_cannot_cancel_order_statuses()
+    {
+        $statuses = [
+            FinancingOrderStatus::Cancelled,
+            FinancingOrderStatus::Completed,
+            FinancingOrderStatus::MurabhaOfferIssued,
+            FinancingOrderStatus::MurabahaSaleCompleted,
+            FinancingOrderStatus::ContractSigned,
+            FinancingOrderStatus::PendingCancellation,
+        ];
+        foreach ($statuses as $status) {
+            self::$financingOrder->update(['status' => $status]);
+            $this->actingAs(self::$userLender)
+                ->withHeader('X-Company', self::$company->id)
+                ->putJson(self::$orderCancledUrl)->assertStatus(Response::HTTP_FORBIDDEN)
+                ->assertJsonFragment([
+                    'message' => __('error.unable_to_cancel_order'),
+                    'code' => 1010,
+                ]);
+        }
     }
 }
