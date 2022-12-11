@@ -46,7 +46,7 @@ class CompanyController extends Controller
         $this->middleware(
             'permission:'.
             perm(Area::SuperAdmin, [Subject::Lenders, Action::Delete, Action::Manage])
-        )->only('update');
+        )->only('destroy');
     }
 
     /**
