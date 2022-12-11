@@ -9,7 +9,6 @@ use App\Models\User;
 use App\Support\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
@@ -103,7 +102,7 @@ class CalculateOrderCostTest extends TestCase
             ->assertJsonValidationErrorFor('orders_count');
     }
 
-    public function test_calculate_order_can_lender_supervisor_access(): void
+    public function test_calculate_order_lender_supervisor_can_access(): void
     {
         $orderCount = rand(1, 200);
         /** @var Money $orderCost */
@@ -123,7 +122,7 @@ class CalculateOrderCostTest extends TestCase
             ]);
     }
 
-    public function test_calculate_order_can_lender_billing_access(): void
+    public function test_calculate_order_lender_billing_can_access(): void
     {
         $orderCount = rand(1, 200);
         /** @var Money $orderCost */
@@ -143,7 +142,7 @@ class CalculateOrderCostTest extends TestCase
             ]);
     }
 
-    public function test_calculate_order_can_lender_api_access(): void
+    public function test_calculate_order_with_lender_api_user_can_access(): void
     {
         $orderCount = rand(1, 200);
         /** @var Money $orderCost */
@@ -163,7 +162,7 @@ class CalculateOrderCostTest extends TestCase
             ]);
     }
 
-    public function test_calculate_order_cant_lender_order_creator_access(): void
+    public function test_calculate_order_with_lender_order_creator_cant_access(): void
     {
         $orderCount = rand(1, 200);
         /** @var Money $orderCost */
@@ -176,13 +175,10 @@ class CalculateOrderCostTest extends TestCase
                 'orders_count' => $orderCount,
             ])
             ->assertStatus(Response::HTTP_FORBIDDEN)
-            ->assertJson(
-                fn (AssertableJson $json) => $json->where('message', 'User does not have the right permissions.')
-                    ->etc()
-            );
+            ->assertJsonPath('message', 'User does not have the right permissions.');
     }
 
-    public function test_calculate_order_lender_with_not_verified_email_access(): void
+    public function test_calculate_order_lender_with_not_verified_email_cannot_access(): void
     {
         $orderCount = rand(1, 200);
         /** @var Money $orderCost */
@@ -201,7 +197,7 @@ class CalculateOrderCostTest extends TestCase
             ]);
     }
 
-    public function test_calculate_order_lender_of_not_approved_company_cant_access(): void
+    public function test_calculate_order_lender_of_not_approved_company_cannot_access(): void
     {
         $orderCount = rand(1, 200);
         /** @var Money $orderCost */

@@ -37,5 +37,5 @@ final class Action extends Enum
 
     const SyncStatusWithEdaat = 'syncStatusWithEdaat';
 
-    const Calculate = 'syncStatusWithEdaat';
+    const Calculate = 'calculate';
 }
