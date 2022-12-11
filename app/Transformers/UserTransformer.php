@@ -72,14 +72,14 @@ class UserTransformer extends TransformerAbstract
 
     public function includeRole(User $user)
     {
-        $query = $this->getRolesQueryBasedOnArea($user);
+        $query = $this->getRolesBasedOnArea($user);
 
         return $this->primitive($query->first()->name);
     }
 
     public function includeRoles(User $user)
     {
-        $query = $this->getRolesQueryBasedOnArea($user);
+        $query = $this->getRolesBasedOnArea($user);
 
         return $this->primitive($query->get()->pluck('name'));
     }
@@ -91,10 +91,10 @@ class UserTransformer extends TransformerAbstract
 
     public function includePermissions(User $user)
     {
-        $rolesQuery = $this->getRolesQueryBasedOnArea($user);
-        $directPermissionsQuery = $this->getPermissionsQueryBasedOnArea($user);
+        $roles = $this->getRolesBasedOnArea($user);
+        $directPermissions = $this->getPermissionsBasedOnArea($user);
 
-        $permissions = Permission::role($rolesQuery->get())->get()->merge($directPermissionsQuery->get());
+        $permissions = Permission::role($roles)->get()->merge($directPermissions);
 
         $subjectPermissions = Grantify::transformPermissionsToSubjectAction($permissions);
 
@@ -116,26 +116,24 @@ class UserTransformer extends TransformerAbstract
         return $this->primitive($user->phoneNumberCountryCode);
     }
 
-    protected function getRolesQueryBasedOnArea(User $user)
+    protected function getRolesBasedOnArea(User $user)
     {
-        $query = $user->roles();
+        $roles = $user->roles;
 
-        $query = match ($this->area) {
-            Area::Lender, Area::SuperAdmin => $query->whereIn('name', Area::roles($this->area)),
+        return match ($this->area) {
+            Area::Lender, Area::SuperAdmin => $roles->whereIn('name', Area::roles($this->area)),
+            default => $roles
         };
-
-        return $query;
     }
 
-    protected function getPermissionsQueryBasedOnArea(User $user)
+    protected function getPermissionsBasedOnArea(User $user)
     {
-        $query = $user->permissions();
+        $permissions = $user->permissions;
 
-        $query = match ($this->area) {
-            Area::Lender, Area::SuperAdmin => $query->where('name', 'Like', $this->area.'-%'),
+        return match ($this->area) {
+            Area::Lender, Area::SuperAdmin => $permissions->where('name', 'Like', $this->area.'-%'),
+            default => $permissions
         };
-
-        return $query;
     }
 
     public function includeLocale(User $user): Primitive

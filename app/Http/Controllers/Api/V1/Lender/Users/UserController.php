@@ -58,6 +58,8 @@ class UserController extends Controller
             $invitationUrl = $storeUserRequest->validated('redirect_url');
             Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
+            $user->load('roles', 'permissions');
+
             return fractal($user, new UserTransformer(Area::Lender))
                 ->parseIncludes([
                     'id',
@@ -80,6 +82,8 @@ class UserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
+        $user->load('roles', 'permissions');
+
         return fractal($user, new UserTransformer(Area::Lender))
             ->parseIncludes([
                 'id',
