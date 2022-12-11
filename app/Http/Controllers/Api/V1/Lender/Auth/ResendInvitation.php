@@ -17,7 +17,7 @@ class ResendInvitation extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderUsers, Action::Resend, Action::Manage])
+            perm(Area::Lender, [Subject::LenderUsers, Action::Create, Action::Manage])
         );
     }
 
