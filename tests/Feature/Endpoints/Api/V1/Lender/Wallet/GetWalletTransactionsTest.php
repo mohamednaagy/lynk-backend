@@ -39,7 +39,7 @@ class GetWalletTransactionsTest extends TestCase
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
     }
 
-    public function test_can_lender_admin_get_wallet_transaction_successfully()
+    public function test_get_wallet_transaction_successfully_with_lender_admin()
     {
         $this->actingAs(self::$userLender)
             ->getJson('/api/v1/lender/wallet/transactions', ['X-Company' => self::$company->id])
@@ -48,8 +48,7 @@ class GetWalletTransactionsTest extends TestCase
             ->assertExactJson(
                 fractal(
                     self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer()
-                )
-                    ->respond()
+                )->respond()
                     ->getData(true)
             );
 
@@ -62,13 +61,14 @@ class GetWalletTransactionsTest extends TestCase
             ->assertStatus(200)
             ->assertJsonCount(2, 'data')
             ->assertExactJson(
-                json_decode(fractal(
+                fractal(
                     self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer()
-                )->toJson(), true)
+                )->respond()
+                    ->getData(true)
             );
     }
 
-    public function test_can_lender_supervisor_get_wallet_transaction_successfully()
+    public function test_get_wallet_transaction_successfully_with_lender_supervisor()
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderSupervisor);
 
@@ -85,7 +85,7 @@ class GetWalletTransactionsTest extends TestCase
             );
     }
 
-    public function test_can_lender_billing_get_wallet_transaction_successfully()
+    public function test_get_wallet_transaction_successfully_with_lender_billing()
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderBilling);
 
@@ -102,7 +102,7 @@ class GetWalletTransactionsTest extends TestCase
             );
     }
 
-    public function test_can_lender_api_get_wallet_transaction_successfully()
+    public function test_get_wallet_transaction_successfully_with_lender_api()
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderApiUser);
 
@@ -119,7 +119,7 @@ class GetWalletTransactionsTest extends TestCase
             );
     }
 
-    public function test_can_lender_creator_get_wallet_transaction_successfully()
+    public function test_get_wallet_transaction_unsuccessfully_with_lender_creator()
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderOrderCreator);
 
