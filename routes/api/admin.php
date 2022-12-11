@@ -44,7 +44,10 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
     Route::middleware(['auth:sanctum', 'role:'.implode('|', [Role::Admin, Role::Manager])])->group(function () {
         Route::get('auth', GetAuthUser::class);
-        Route::put('auth/profile', UpdateMyProfile::class);
+        Route::middleware('verified.email:'.Area::SuperAdmin)
+            ->group(function () {
+                Route::put('auth/profile', UpdateMyProfile::class);
+            });
 
         Route::apiResource('admins', AdminController::class);
 
