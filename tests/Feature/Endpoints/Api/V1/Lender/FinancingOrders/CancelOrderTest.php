@@ -61,7 +61,7 @@ class CancelOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_unauth_user_cant_cancel_order(): void
+    public function test_cant_cancel_order_with_unauthorized_user_(): void
     {
         $this->withHeader('X-Company', self::$company->id)
             ->putJson(self::$orderCancledUrl)
@@ -74,7 +74,7 @@ class CancelOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_cancel_order_for_auth_user_has_lender_supervisor_role(): void
+    public function test_cancel_order_with_auth_user_has_lender_supervisor_role(): void
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderSupervisor);
 
@@ -88,13 +88,18 @@ class CancelOrderTest extends TestCase
             fn (AssertableJson $json) => $json->has('data')->where('data', [])
         );
 
-        $this->assertEquals('test reason', self::$financingOrder->fresh()->status_reason);
+        $this->actingAs(self::$userLender)
+            ->withHeader('X-Company', self::$company->id)
+            ->getJson(self::BaseUrl.self::$financingOrder->id)
+            ->assertJsonFragment([
+                'status_reason' => 'test reason',
+            ]);
     }
 
     /**
      * @return void
      */
-    public function test_cancel_order_for_auth_user_has_lender_api_user_role(): void
+    public function test_cancel_order_with_auth_user_has_lender_api_user_role(): void
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderApiUser);
 
@@ -102,15 +107,14 @@ class CancelOrderTest extends TestCase
             ->withHeader('X-Company', self::$company->id)
             ->putJson(self::$orderCancledUrl);
 
-        $response->assertStatus(200)->assertJson(
-            fn (AssertableJson $json) => $json->has('data')->where('data', [])
-        );
+        $response->assertStatus(200)
+            ->assertJsonPath('data', []);
     }
 
     /**
      * @return void
      */
-    public function test_that_unauthorized_lender_billing_cannot_cancel_order(): void
+    public function test_cannot_cancel_order_with_unauthorized_lender_billinge(): void
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderBilling);
 
@@ -118,16 +122,13 @@ class CancelOrderTest extends TestCase
             ->withHeader('X-Company', self::$company->id)
             ->putJson(self::$orderCancledUrl)
             ->assertStatus(Response::HTTP_FORBIDDEN)
-            ->assertJson(
-                fn (AssertableJson $json) => $json->where('message', 'User does not have the right permissions.')
-                    ->etc()
-            );
+            ->assertJsonPath('message', 'User does not have the right permissions.');
     }
 
     /**
      * @return void
      */
-    public function test_that_unauthorized_lender_order_creator_can_cancel_order(): void
+    public function test_can_cancel_order_with_unauthorized_lender_order_creator(): void
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderOrderCreator);
 
@@ -135,15 +136,13 @@ class CancelOrderTest extends TestCase
             ->withHeader('X-Company', self::$company->id)
             ->putJson(self::$orderCancledUrl)
             ->assertStatus(200)
-            ->assertJson(
-                fn (AssertableJson $json) => $json->has('data')->where('data', [])
-            );
+            ->assertJsonPath('data', []);
     }
 
     /**
      * @return void
      */
-    public function test_that_unauthorized_user_with_not_verified_email_cannot_cancel_order(): void
+    public function test_cannot_cancel_order_with_not_verified_email_user(): void
     {
         // update user email verified at to be null
         self::$userLender->email_verified_at = null;
@@ -153,16 +152,16 @@ class CancelOrderTest extends TestCase
             ->withHeader('X-Company', self::$company->id)
             ->putJson(self::$orderCancledUrl)
             ->assertStatus(Response::HTTP_FORBIDDEN)
-            ->assertJson(
-                fn (AssertableJson $json) => $json->where('message', __('error.must_verify_email'))
-                    ->where('code', 1008)
-            );
+            ->assertJsonFragment([
+                'message' => __('error.must_verify_email'),
+                'code' => 1008,
+            ]);
     }
 
     /**
      * @return void
      */
-    public function test_that_unauthorized_user_when_company_not_active_cannot_cancel_order(): void
+    public function test_cannot_cancel_order_with_company_not_active(): void
     {
         // update user email verified at to be null
         self::$company->status = CompanyStatus::Pending;
@@ -172,16 +171,16 @@ class CancelOrderTest extends TestCase
             ->withHeader('X-Company', self::$company->id)
             ->putJson(self::$orderCancledUrl)
             ->assertStatus(Response::HTTP_FORBIDDEN)
-            ->assertJson(
-                fn (AssertableJson $json) => $json->where('message', __('error.company_not_active'))
-                    ->where('code', 1015)
-            );
+            ->assertJsonFragment([
+                'message' => __('error.company_not_active'),
+                'code' => 1015,
+            ]);
     }
 
     /**
      * @return void
      */
-    public function test_cancel_order_on_empty_status_reason(): void
+    public function test_cancel_order_with_empty_status_reason(): void
     {
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
@@ -189,8 +188,6 @@ class CancelOrderTest extends TestCase
                 'status_reason' => '',
             ])
             ->assertStatus(200)
-            ->assertJson(
-                fn (AssertableJson $json) => $json->has('data')->where('data', [])
-            );
+            ->assertJsonPath('data', []);
     }
 }
