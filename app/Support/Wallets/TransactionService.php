@@ -9,7 +9,6 @@ use App\Support\Generator\ReferenceNumber\Contracts\ReferenceNumberGeneratorInte
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use Brick\Math\BigDecimal;
 use Cknow\Money\Money;
-use Illuminate\Support\Str;
 
 class TransactionService implements TransactionServiceInterface
 {
@@ -28,7 +27,6 @@ class TransactionService implements TransactionServiceInterface
             'wallet_id' => $wallet->getKey(),
             'amount' => $amount->isNegative() ? $amount : $amount->negative(),
             'reason' => $type,
-            'uuid' => Str::uuid(),
             'reference_number' => $referenceNumber ?? $this->referenceNumberGeneratorInterface->generate(),
             'meta' => $meta,
         ]);
@@ -45,7 +43,6 @@ class TransactionService implements TransactionServiceInterface
             'wallet_id' => $wallet->getKey(),
             'amount' => $amount,
             'reason' => $type,
-            'uuid' => Str::uuid(),
             'reference_number' => $referenceNumber ?? $this->referenceNumberGeneratorInterface->generate(),
             'meta' => $meta,
         ]);
