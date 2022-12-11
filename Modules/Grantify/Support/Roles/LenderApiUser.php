@@ -17,5 +17,11 @@ class LenderApiUser
         Subject::LenderFinancingOrderCost => [
             Action::Calculate,
         ],
+        Subject::LenderWebhookSecret => [
+            Action::Refresh,
+        ],
+        Subject::LenderWebhooks => [
+            Action::Create,
+        ],
     ];
 }

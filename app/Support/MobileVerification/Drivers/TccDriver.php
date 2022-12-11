@@ -83,7 +83,7 @@ class TccDriver implements MobileVerifyDriverInterface
         $typeNumber = substr($personId, 0, 1);
 
         if (! in_array($typeNumber, TccPersonIdType::getValues())) {
-            throw new InvalidPersonIdException();
+            throw new InvalidPersonIdTypeException();
         }
 
         return $typeNumber;
