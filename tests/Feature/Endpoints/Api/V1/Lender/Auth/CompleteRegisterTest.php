@@ -26,12 +26,11 @@ class CompleteRegisterTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company] = $this->createCompany('2000', [
-            'company_cr' => '12345678910',
+        [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com', [
             'password' => null,
             'email_verified_at' => null,
         ]);
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
     }
 
     /**
@@ -39,6 +38,9 @@ class CompleteRegisterTest extends TestCase
      */
     public function test_complete_register_success(): void
     {
+        $this->assertFalse(self::$userLender->hasVerifiedEmail());
+        $this->assertNull(self::$userLender->password);
+
         $this->withoutMiddleware(ValidateSignature::class)
             ->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
                 'first_name' => self::$userLender->first_name,
@@ -55,6 +57,7 @@ class CompleteRegisterTest extends TestCase
                     'type',
                 ],
             ]);
+        self::$userLender = self::$userLender->refresh();
         $this->assertTrue(self::$userLender->hasVerifiedEmail());
         $this->assertNotNull(self::$userLender->password);
     }
@@ -62,7 +65,7 @@ class CompleteRegisterTest extends TestCase
     /**
      * @return void
      */
-    public function test_complete_register_without_signature(): void
+    public function test_complete_register_fail_without_signature(): void
     {
         $this->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
             'first_name' => self::$userLender->first_name,
@@ -80,7 +83,7 @@ class CompleteRegisterTest extends TestCase
     /**
      * @return void
      */
-    public function test_complete_register_validation(): void
+    public function test_complete_register_validation_rules(): void
     {
         $this->withoutMiddleware(ValidateSignature::class)
             ->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
