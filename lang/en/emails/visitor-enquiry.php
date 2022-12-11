@@ -7,5 +7,5 @@ return [
     'subject_of_reply_to_enquiry' => 'New Reply to Your Enquiry #:enquiry_id',
     'visitor_enquiry_message' => 'We received your enquiry and we will answer as soon as possible',
     'access_enquiry' => 'Access your enquiry',
-    'enquiry_reply_message' => 'The support team has answered to your enquiry',
+    'enquiry_reply_message' => 'The support team has answered your enquiry',
 ];
