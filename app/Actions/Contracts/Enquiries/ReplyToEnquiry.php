@@ -2,7 +2,7 @@
 
 namespace App\Actions\Contracts\Enquiries;
 
-use App\Models\EnquiryReplies;
+use App\Models\EnquiryReply;
 
 interface ReplyToEnquiry
 {
@@ -10,7 +10,7 @@ interface ReplyToEnquiry
      * Create new enquiry.
      *
      * @param  array  $data
-     * @return EnquiryReplies
+     * @return EnquiryReply
      */
-    public function handle(array $data): EnquiryReplies;
+    public function handle(array $data): EnquiryReply;
 }
