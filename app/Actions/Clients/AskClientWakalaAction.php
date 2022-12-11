@@ -14,7 +14,7 @@ class AskClientWakalaAction implements AskClientWakala
     {
         $url = URL::signedExternalRoute(
             $url,
-            'client.order.verify',
+            'api.v1.verify.client.wakala',
             [
                 'order' => $order,
                 'national_id' => $order->getNationalId(),

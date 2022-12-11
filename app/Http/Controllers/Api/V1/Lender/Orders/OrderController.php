@@ -131,7 +131,7 @@ class OrderController extends Controller
 
                 $status = tenant()->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval
-                    : FinancingOrderStatus::WaitingClientWakala;
+                    : FinancingOrderStatus::Approved;
 
                 $user = $request->user();
 
@@ -143,7 +143,7 @@ class OrderController extends Controller
                             'status' => $status,
                             'creator_id' => $user->id,
                             'creator_type' => $user->getMorphClass(),
-                            'approved_at' => $status === FinancingOrderStatus::WaitingClientWakala ? now() : null,
+                            'approved_at' => $status === FinancingOrderStatus::Approved ? now() : null,
                             'is_verification_required' => true,
                         ]
                     )

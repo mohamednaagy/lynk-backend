@@ -74,7 +74,7 @@ class MakeOrderProceed extends Controller
         $media = app(AcceptClientWakala::class)->handle($order);
 
         $order->update([
-            'status' => FinancingOrderStatus::WaitingPurchasingCommodity,
+            'status' => FinancingOrderStatus::ClientWakalaCompleted,
         ]);
 
         Trader::driver(config('trader.default'))->getTti($order);
