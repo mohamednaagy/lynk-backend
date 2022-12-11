@@ -173,7 +173,7 @@ class LenderWalletTest extends TestCase
             ->assertForbidden()
             ->assertExactJson([
                 'code' => 1015,
-                'message' => __('The company is not active'),
+                'message' => __('error.company_not_active'),
             ]);
     }
 
@@ -188,7 +188,7 @@ class LenderWalletTest extends TestCase
             ->assertForbidden()
             ->assertExactJson([
                 'code' => 1015,
-                'message' => __('The company is not active'),
+                'message' => __('error.company_not_active'),
             ]);
     }
 
@@ -203,7 +203,7 @@ class LenderWalletTest extends TestCase
             ->assertForbidden()
             ->assertExactJson([
                 'code' => 1015,
-                'message' => __('The company is not active'),
+                'message' => __('error.company_not_active'),
             ]);
     }
 
@@ -218,7 +218,7 @@ class LenderWalletTest extends TestCase
             ->assertForbidden()
             ->assertExactJson([
                 'code' => 1008,
-                'message' => __('You must verify your email address'),
+                'message' => __('error.must_verify_email'),
             ]);
     }
 
@@ -233,7 +233,7 @@ class LenderWalletTest extends TestCase
             ->assertForbidden()
             ->assertExactJson([
                 'code' => 1008,
-                'message' => __('You must verify your email address'),
+                'message' => __('error.must_verify_email'),
             ]);
     }
 }
