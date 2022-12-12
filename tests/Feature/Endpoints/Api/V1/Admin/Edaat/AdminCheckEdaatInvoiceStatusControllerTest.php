@@ -105,8 +105,8 @@ class AdminCheckEdaatInvoiceStatusControllerTest extends TestCase
 
         $companyBalanceAfterDeposit = self::$edaatInvoice->company->balance(WalletType::CompanyWallet);
 
-        $this->assertFalse(
-            $companyBalanceBeforeDeposit->equals($companyBalanceAfterDeposit)
+        $this->assertTrue(
+            $companyBalanceBeforeDeposit->add(self::$edaatInvoice->amount)->equals($companyBalanceAfterDeposit)
         );
     }
 
