@@ -96,11 +96,18 @@ class AdminCheckEdaatInvoiceStatusControllerTest extends TestCase
     public function test_admin_check_edaat_invoice_status_controller_invoice_changed_from_pending_to_paid()
     {
         $this->assertTrue(self::$edaatInvoice->status->is(EdaatInvoiceStatus::Pending));
+        $companyBalanceBeforeDeposit = self::$edaatInvoice->company->balance(WalletType::CompanyWallet);
 
         $this->actingAs(self::$admin)
             ->postJson('api/v1/admin/edaat-invoices/'.self::$edaatInvoice->id.'/check-status');
 
         $this->assertTrue(self::$edaatInvoice->refresh()->status->is(EdaatInvoiceStatus::Paid));
+
+        $companyBalanceAfterDeposit = self::$edaatInvoice->company->balance(WalletType::CompanyWallet);
+
+        $this->assertTrue(
+            $companyBalanceBeforeDeposit->add(self::$edaatInvoice->amount)->equals($companyBalanceAfterDeposit)
+        );
     }
 
     public function test_admin_get_edaat_invoices_controller_can_not_deposit_twice()
