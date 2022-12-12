@@ -15,8 +15,13 @@ class SettingsController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderSettings, Action::Index, Action::Edit, Action::Manage])
-        );
+            perm(Area::Lender, [Subject::LenderSettings, Action::Index, Action::Manage])
+        )->only('index');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::LenderSettings, Action::Edit, Action::Manage])
+        )->only('update');
     }
 
     public function index()

@@ -15,7 +15,6 @@ class LenderApiUser
             Action::Proceed,
         ],
         Subject::LenderSettings => [
-            Action::Manage,
             Action::Index,
             Action::Edit,
         ],
