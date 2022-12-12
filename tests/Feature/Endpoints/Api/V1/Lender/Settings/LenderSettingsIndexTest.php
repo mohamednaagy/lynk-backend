@@ -1,11 +1,12 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Settings;
+namespace Tests\Feature\Endpoints\Api\V1\Lender\Settings;
 
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
+use App\Transformers\CompanyTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Modules\Grantify\Facades\Grantify;
@@ -13,7 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class LenderSettingsUpdateTest extends TestCase
+class LenderSettingsIndexTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -22,8 +23,6 @@ class LenderSettingsUpdateTest extends TestCase
     private static Company $company;
 
     private static User $userLender;
-
-    private static array $updatedLenderSettingsDetails;
 
     /**
      * @return void
@@ -34,9 +33,6 @@ class LenderSettingsUpdateTest extends TestCase
 
         [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$updatedLenderSettingsDetails = [
-            'does_order_require_approval' => true,
-        ];
     }
 
     /**
@@ -45,7 +41,7 @@ class LenderSettingsUpdateTest extends TestCase
     public function test_that_un_auth_user_cant_index_lender_settings(): void
     {
         $this->withHeader('X-Company', self::$company->id)
-            ->putJson(self::BaseUrl)
+            ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
                 'message' => 'Unauthenticated.',
@@ -55,54 +51,45 @@ class LenderSettingsUpdateTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_lender_settings_on_empty_does_order_require_approval(): void
+    public function test_that_auth_user_has_lender_admin_role_can_index_lender_settings(): void
     {
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
-            ->putJson(self::BaseUrl, [])
-            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertExactJson([
-                'message' => 'The does order require approval field is required.',
-                'errors' => [
-                    'does_order_require_approval' => [
-                        'The does order require approval field is required.',
-                    ],
-                ],
-            ]);
+            ->getJson(self::BaseUrl)
+            ->assertStatus(Response::HTTP_OK)
+            ->assertExactJson(
+                fractal(self::$company, new CompanyTransformer())
+                    ->parseIncludes([
+                        'order_cost',
+                        'does_order_require_approval',
+                        'webhook_secret_key',
+                    ])
+                    ->respond()
+                    ->getData(true)
+            );
     }
 
     /**
      * @return void
      */
-    public function test_that_auth_user_has_lender_admin_role_can_update_lender_settings(): void
-    {
-        $this->actingAs(self::$userLender)
-            ->withHeader('X-Company', self::$company->id)
-            ->putJson(self::BaseUrl, self::$updatedLenderSettingsDetails)
-            ->assertStatus(Response::HTTP_OK);
-
-        $this->assertEquals(
-            Company::find(self::$company->id)->does_order_require_approval,
-            self::$updatedLenderSettingsDetails['does_order_require_approval']
-        );
-    }
-
-    /**
-     * @return void
-     */
-    public function test_that_auth_user_has_lender_api_user_role_can_update_lender_settings(): void
+    public function test_that_auth_user_has_lender_api_user_role_can_index_lender_settings(): void
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderApiUser);
 
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
-            ->putJson(self::BaseUrl, self::$updatedLenderSettingsDetails)
-            ->assertStatus(Response::HTTP_OK);
-
-        $this->assertEquals(
-            Company::find(self::$company->id)->does_order_require_approval,
-            self::$updatedLenderSettingsDetails['does_order_require_approval']
-        );
+            ->getJson(self::BaseUrl)
+            ->assertStatus(Response::HTTP_OK)
+            ->assertExactJson(
+                fractal(self::$company, new CompanyTransformer())
+                    ->parseIncludes([
+                        'order_cost',
+                        'does_order_require_approval',
+                        'webhook_secret_key',
+                    ])
+                    ->respond()
+                    ->getData(true)
+            );
     }
 
     /**
@@ -114,7 +101,7 @@ class LenderSettingsUpdateTest extends TestCase
 
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
-            ->putJson(self::BaseUrl, self::$updatedLenderSettingsDetails)
+            ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJson(
                 fn (AssertableJson $json) => $json->where('message', 'User does not have the right permissions.')
@@ -131,7 +118,7 @@ class LenderSettingsUpdateTest extends TestCase
 
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
-            ->putJson(self::BaseUrl, self::$updatedLenderSettingsDetails)
+            ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJson(
                 fn (AssertableJson $json) => $json->where('message', 'User does not have the right permissions.')
@@ -148,7 +135,7 @@ class LenderSettingsUpdateTest extends TestCase
 
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
-            ->putJson(self::BaseUrl, self::$updatedLenderSettingsDetails)
+            ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJson(
                 fn (AssertableJson $json) => $json->where('message', 'User does not have the right permissions.')
@@ -167,7 +154,7 @@ class LenderSettingsUpdateTest extends TestCase
 
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
-            ->putJson(self::BaseUrl, self::$updatedLenderSettingsDetails)
+            ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJson(
                 fn (AssertableJson $json) => $json->where('message', __('error.must_verify_email'))
@@ -186,7 +173,7 @@ class LenderSettingsUpdateTest extends TestCase
 
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)
-            ->putJson(self::BaseUrl, self::$updatedLenderSettingsDetails)
+            ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJson(
                 fn (AssertableJson $json) => $json->where('message', __('error.company_not_active'))
