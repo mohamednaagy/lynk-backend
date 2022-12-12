@@ -30,5 +30,9 @@ class LenderApiUser
         Subject::LenderWallet => [
             Action::Manage,
         ],
+        Subject::LenderSettings => [
+            Action::Index,
+            Action::Edit,
+        ],
     ];
 }
