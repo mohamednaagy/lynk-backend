@@ -9,7 +9,6 @@ use App\Models\User;
 use App\Transformers\CompanyTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
-use Modules\Grantify\Facades\Grantify;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
@@ -24,6 +23,14 @@ class LenderSettingsIndexTest extends TestCase
 
     private static User $userLender;
 
+    private static User $userLenderApiUser;
+
+    private static User $userLenderSupervisor;
+
+    private static User $userLenderBilling;
+
+    private static User $userLenderOrderCreator;
+
     /**
      * @return void
      */
@@ -33,6 +40,10 @@ class LenderSettingsIndexTest extends TestCase
 
         [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'lenderApiUser@bim.com');
+        self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'lenderSupervisor@bim.com');
+        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'lenderBilling@bim.com');
+        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'lenderOrderCreator@bim.com');
     }
 
     /**
@@ -74,9 +85,7 @@ class LenderSettingsIndexTest extends TestCase
      */
     public function test_that_auth_user_has_lender_api_user_role_can_index_lender_settings(): void
     {
-        Grantify::syncRoleToModel(self::$userLender, Role::LenderApiUser);
-
-        $this->actingAs(self::$userLender)
+        $this->actingAs(self::$userLenderApiUser)
             ->withHeader('X-Company', self::$company->id)
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_OK)
@@ -97,9 +106,7 @@ class LenderSettingsIndexTest extends TestCase
      */
     public function test_that_auth_user_has_lender_supervisor_role_cannot_index_lender_settings(): void
     {
-        Grantify::syncRoleToModel(self::$userLender, Role::LenderSupervisor);
-
-        $this->actingAs(self::$userLender)
+        $this->actingAs(self::$userLenderSupervisor)
             ->withHeader('X-Company', self::$company->id)
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_FORBIDDEN)
@@ -112,11 +119,9 @@ class LenderSettingsIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_user_has_lender_belling_role_cannot_index_lender_settings(): void
+    public function test_that_auth_user_has_lender_billing_role_cannot_index_lender_settings(): void
     {
-        Grantify::syncRoleToModel(self::$userLender, Role::LenderBilling);
-
-        $this->actingAs(self::$userLender)
+        $this->actingAs(self::$userLenderBilling)
             ->withHeader('X-Company', self::$company->id)
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_FORBIDDEN)
@@ -131,9 +136,7 @@ class LenderSettingsIndexTest extends TestCase
      */
     public function test_that_auth_user_has_lender_creator_role_cannot_index_lender_settings(): void
     {
-        Grantify::syncRoleToModel(self::$userLender, Role::LenderOrderCreator);
-
-        $this->actingAs(self::$userLender)
+        $this->actingAs(self::$userLenderOrderCreator)
             ->withHeader('X-Company', self::$company->id)
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_FORBIDDEN)
@@ -146,7 +149,7 @@ class LenderSettingsIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_unauthorized_user_with_not_verified_email_cannot_index_lender_settings(): void
+    public function test_that_user_with_not_verified_email_cannot_index_lender_settings(): void
     {
         // update user email verified at to be null
         self::$userLender->email_verified_at = null;
@@ -165,7 +168,7 @@ class LenderSettingsIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_unauthorized_user_when_company_not_active_cannot_index_lender_settings(): void
+    public function test_that_user_when_company_not_active_cannot_index_lender_settings(): void
     {
         // update user email verified at to be null
         self::$company->status = CompanyStatus::Pending;
