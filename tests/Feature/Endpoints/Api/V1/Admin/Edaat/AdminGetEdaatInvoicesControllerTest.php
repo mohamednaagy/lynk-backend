@@ -243,7 +243,7 @@ class AdminGetEdaatInvoicesControllerTest extends TestCase
             );
     }
 
-    public function test_admin_get_edaat_invoices_controller_other_roles_can_not_access()
+    public function test_admin_get_edaat_invoices_controller_lender_roles_can_not_access()
     {
         $this->assertLenderUserCannotAccess(function ($user, $role) {
             return $this->actingAs($user)
@@ -258,7 +258,7 @@ class AdminGetEdaatInvoicesControllerTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_admin_get_edaat_invoices_controller_manager_can_when_has_permission()
+    public function test_admin_get_edaat_invoices_controller_manager_can_access_when_has_permission()
     {
         $this->actingAs(self::$managerHasPermission)
             ->getJson('api/v1/admin/edaat-invoices')
