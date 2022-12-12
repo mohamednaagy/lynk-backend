@@ -14,6 +14,7 @@ use App\Models\Wallet;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithAdmin;
 use Tests\Traits\InteractsWithLender;
@@ -32,7 +33,7 @@ class AdminCheckEdaatInvoiceStatusControllerTest extends TestCase
 
     private static Builder|Model $edaatInvoice;
 
-    private static Builder|Model $paidEdaatInvoice;
+    private static Builder|Model $expiredEdaatInvoice;
 
     private static User $userLender;
 
@@ -51,6 +52,13 @@ class AdminCheckEdaatInvoiceStatusControllerTest extends TestCase
     {
         parent::setUp();
 
+        Http::fake(function ($request) {
+            return Http::response([
+                'Status' => ['Success' => true, 'Code' => 'E000'],
+                'Body' => ['StatusEn' => 'Paid'],
+            ], 200);
+        });
+
         [self::$company, self::$wallet] = $this->createCompany(
             '2000',
             [
@@ -63,24 +71,36 @@ class AdminCheckEdaatInvoiceStatusControllerTest extends TestCase
                 'company_cr' => '12345678999',
             ]
         );
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLenderForSecondCompany = $this->createLenderUser(self::$secondCompany->id, Role::LenderAdmin, 'lenderAdmin2@bim.com');
+        self::$admin = $this->createAdmin();
+        self::$manager = $this->createManager();
         self::$managerHasPermission = $this->createManager(
             'managerHasPermission@bim.com',
             perm(Area::SuperAdmin, [Subject::LenderEdaatInvoices, Action::SyncStatusWithEdaat])
         );
 
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$userLenderForSecondCompany = $this->createLenderUser(self::$secondCompany->id, Role::LenderAdmin, 'lenderAdmin2@bim.com');
-        self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager();
-        self::$edaatInvoice = $this->createEdaatInvoice(self::$company->id, self::$userLender->id);
-        self::$paidEdaatInvoice = $this->createEdaatInvoice(self::$company->id, self::$userLender->id, ['statud' => EdaatInvoiceStatus::Expired]);
+        self::$expiredEdaatInvoice = $this->createEdaatInvoice(self::$company->id, self::$userLender->id, [
+            'status' => EdaatInvoiceStatus::Expired,
+        ]);
+
+        self::$edaatInvoice = $this->createEdaatInvoice(
+            self::$company->id,
+            self::$userLender->id,
+            [
+                'amount' => 100,
+            ]
+        );
     }
 
-    public function test_admin_check_edaat_invoice_status_controller_successed()
+    public function test_admin_check_edaat_invoice_status_controller_invoice_changed_from_pending_to_paid()
     {
+        $this->assertTrue(self::$edaatInvoice->status->is(EdaatInvoiceStatus::Pending));
+
         $this->actingAs(self::$admin)
-            ->postJson('api/v1/admin/edaat-invoices/'.self::$edaatInvoice->id.'/check-status')
-            ->assertStatus(200);
+            ->postJson('api/v1/admin/edaat-invoices/'.self::$edaatInvoice->id.'/check-status');
+
+        $this->assertTrue(self::$edaatInvoice->refresh()->status->is(EdaatInvoiceStatus::Paid));
     }
 
     public function test_admin_get_edaat_invoices_controller_can_not_deposit_twice()
@@ -88,6 +108,8 @@ class AdminCheckEdaatInvoiceStatusControllerTest extends TestCase
         $this->actingAs(self::$admin)
             ->postJson('api/v1/admin/edaat-invoices/'.self::$edaatInvoice->id.'/check-status')
             ->assertStatus(200);
+
+        $this->assertTrue(self::$edaatInvoice->refresh()->status->is(EdaatInvoiceStatus::Paid));
 
         $balanceAfterFirstDeposit = self::$edaatInvoice->company->balance(WalletType::CompanyWallet);
 
@@ -100,12 +122,12 @@ class AdminCheckEdaatInvoiceStatusControllerTest extends TestCase
         $this->assertTrue($balanceAfterFirstDeposit->equals($balanceAfterSecondDeposit));
     }
 
-    public function test_admin_get_edaat_invoices_controller_deposit_working_when_sync_status()
+    public function test_admin_get_edaat_invoices_controller_no_deposit_when_invoice_status_is_expired()
     {
-        $balanceBeforeDeposit = self::$paidEdaatInvoice->company->balance(WalletType::CompanyWallet);
+        $balanceBeforeDeposit = self::$expiredEdaatInvoice->company->balance(WalletType::CompanyWallet);
 
         $this->actingAs(self::$admin)
-            ->postJson('api/v1/admin/edaat-invoices/'.self::$paidEdaatInvoice->id.'/check-status')
+            ->postJson('api/v1/admin/edaat-invoices/'.self::$expiredEdaatInvoice->id.'/check-status')
             ->assertStatus(200);
 
         $balanceAfterDeposit = self::$edaatInvoice->company->balance(WalletType::CompanyWallet);

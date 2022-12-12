@@ -9,7 +9,6 @@ use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Models\EdaatInvoice;
 use App\Support\Edaat\EdaatService;
-use Cknow\Money\Money;
 
 class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
 {
@@ -28,7 +27,7 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
                 $this->createTransactions->handle(
                     $wallet,
                     TransactionReason::DepositByEdaat,
-                    Money::parseByDecimal($edaatInvoice->amount, $wallet->currency),
+                    $edaatInvoice->amount,
                     [
                         'invoice_number' => $edaatInvoice->invoice_number,
                     ]
