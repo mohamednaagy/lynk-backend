@@ -11,5 +11,10 @@ class LenderBilling
         Subject::LenderWallet => [
             Action::Manage,
         ],
+        Subject::Enquiries => [
+            Action::Index,
+            Action::Create,
+            Action::Show,
+        ],
     ];
 }

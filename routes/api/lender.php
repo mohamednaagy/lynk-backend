@@ -91,17 +91,6 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
                     );
                 }
             );
-        }
-    );
-
-    Route::middleware([
-        'auth:sanctum',
-        'role:'.implode('|', [
-            Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator,
-        ]),
-        InitializeTenancyByRequestData::class,
-    ])->group(
-        function () {
             Route::apiResource('enquiries', EnquiryController::class)->only(['index', 'show', 'store']);
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)->only('index', 'store')->only(['index', 'store']);
         }

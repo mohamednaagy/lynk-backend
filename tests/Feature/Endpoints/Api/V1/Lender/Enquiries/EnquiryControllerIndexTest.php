@@ -39,10 +39,6 @@ class EnquiryControllerIndexTest extends TestCase
 
     private static Enquiry $anotherEnquiry;
 
-    private static Enquiry $enquiryBelongsToPendingCompany;
-
-    private static Enquiry $enquiryBelongsToUnderRevirwCompany;
-
     public function setUp(): void
     {
         parent::setUp();
@@ -81,8 +77,6 @@ class EnquiryControllerIndexTest extends TestCase
 
         self::$enquiry = Enquiry::factory()->create(['user_id' => self::$userLenderAdmin->id]);
         self::$anotherEnquiry = Enquiry::factory()->create(['user_id' => self::$userWithoutEmailVerification->id]);
-        self::$enquiryBelongsToPendingCompany = Enquiry::factory()->create(['user_id' => self::$userLenderAdminBelongsToPendingCompany->id]);
-        self::$enquiryBelongsToUnderRevirwCompany = Enquiry::factory()->create(['user_id' => self::$userLenderAdminBelongsToCompanyUnderReview->id]);
     }
 
     public function test_enquiry_controller_index_successed()
