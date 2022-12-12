@@ -3,10 +3,8 @@
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Auth;
 
 use App\Actions\Contracts\GetSettingsClassInstance;
-use App\Enums\Area;
 use App\Enums\Role;
 use App\Models\User;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Grantify\Facades\Grantify;
 use Symfony\Component\HttpFoundation\Response;
@@ -107,32 +105,6 @@ class UpdateMyProfileTest extends TestCase
             ->assertJsonPath('data', []);
 
         $this->assertNotEquals($oldPassword, self::$adminUser->password);
-    }
-
-    /**
-     * @return void
-     */
-    public function test_admin_cant_update_his_profile_when_email_not_verified(): void
-    {
-        self::$adminUser->update(['email_verified_at' => null]);
-        self::$adminUser->fresh();
-        $check = ! self::$adminUser || (self::$adminUser instanceof MustVerifyEmail && $this->isEmailVerifiedRequired(Area::SuperAdmin) && ! self::$adminUser->hasVerifiedEmail());
-
-        $this->actingAs(self::$adminUser)
-            ->putJson('api/v1/admin/auth/profile', [
-                'first_name' => 'test name',
-                'last_name' => 'test name',
-                'email' => self::$adminUser->email,
-                'phone_number' => self::$adminUser->mobileDialingPhoneNumber,
-                'phone_country_code' => self::$adminUser->phoneNumberCountryCode,
-            ])
-            ->assertStatus($check ? Response::HTTP_FORBIDDEN : Response::HTTP_OK)
-            ->assertExactJson($check ? [
-                'message' => __('error.must_verify_email'),
-                'code' => 1008,
-            ] : [
-                'data' => [],
-            ]);
     }
 
     /**
