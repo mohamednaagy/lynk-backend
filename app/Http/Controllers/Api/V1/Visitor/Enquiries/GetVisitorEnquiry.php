@@ -27,7 +27,10 @@ class GetVisitorEnquiry extends Controller
                 'status',
                 'creation_date',
                 'body',
-                'replies',
+                'replies.id',
+                'replies.body',
+                'replies.creation_date',
+                'replies.creator',
             ])
             ->respond();
     }
