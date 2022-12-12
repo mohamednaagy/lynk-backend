@@ -62,5 +62,11 @@ class SuperAdmin
             Action::Index,
             Action::Create,
         ],
+
+        Subject::WakalaTemplates => [
+            Action::Index,
+            Action::Edit,
+            Action::Manage,
+        ],
     ];
 }
