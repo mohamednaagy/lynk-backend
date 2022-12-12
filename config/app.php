@@ -199,8 +199,6 @@ return [
         App\Providers\WebhookServiceProvider::class,
         // \Shivella\Bitly\BitlyServiceProvider::class,
         Jenssegers\Agent\AgentServiceProvider::class,
-        //QR code provider
-        SimpleSoftwareIO\QrCode\QrCodeServiceProvider::class,
     ],
 
     /*
@@ -225,7 +223,6 @@ return [
         'Purifier' => Mews\Purifier\Facades\Purifier::class,
         'WebhookEvent' => \App\Support\Webhooks\Facades\WebhookEvent::class,
         'Agent' => Jenssegers\Agent\Facades\Agent::class,
-        'GenerateQrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
     ])->toArray(),
 
     /*

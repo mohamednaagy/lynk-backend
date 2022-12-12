@@ -3,7 +3,6 @@
 namespace App\Support\ProjectSettings;
 
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Config;
 
 class ProjectAddress
 {
@@ -37,7 +36,7 @@ class ProjectAddress
     public function getAddressLineOne(string $locale = null): array|string
     {
         if (is_null($locale)) {
-            return Arr::get($this->addressLineOne, Config::get('app.locale', 'en'));
+            return $this->addressLineOne;
         }
 
         return Arr::get($this->addressLineOne, $locale);
@@ -50,7 +49,7 @@ class ProjectAddress
     public function getAddressLineTwo(string $locale = null): array|string
     {
         if (is_null($locale)) {
-            return Arr::get($this->addressLineTwo, Config::get('app.locale', 'en'));
+            return $this->addressLineTwo;
         }
 
         return Arr::get($this->addressLineTwo, $locale);
