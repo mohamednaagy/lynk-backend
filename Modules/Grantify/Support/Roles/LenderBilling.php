@@ -14,5 +14,8 @@ class LenderBilling
         Subject::LenderFinancingOrderCost => [
             Action::Calculate,
         ],
+        Subject::LenderTransactions => [
+            Action::Index,
+        ],
     ];
 }

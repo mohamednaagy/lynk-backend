@@ -15,6 +15,9 @@ class LenderSupervisor
             Action::Manage,
             Action::Approve,
         ],
+        Subject::LenderTransactions => [
+            Action::Index,
+        ],
         Subject::LenderEdaatInvoices => [
             Action::Manage,
         ],
