@@ -167,6 +167,28 @@ class AdminControllerTest extends TestCase
         Mail::assertSent(CompleteAdminRegisterInvitation::class);
     }
 
+    public function test_admin_controller_create_with_super_admin_unsuccessful()
+    {
+        $this->actingAs(self::$superAdminUser)
+            ->postJson('api/v1/admin/admins', [
+                'email' => 'newadmin@bim.com',
+                'role' => Role::Admin,
+            ])
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('first_name')
+            ->assertJsonValidationErrorFor('last_name');
+
+        $this->actingAs(self::$superAdminUser)
+            ->postJson('api/v1/admin/admins', [
+                'first_name' => 'admin',
+                'last_name' => 'admin',
+                'email' => 'admin@bim.com',
+                'role' => Role::Admin,
+            ])
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('email');
+    }
+
     public function test_admin_controller_show_with_super_admin_success()
     {
         $newSuperAdminUser = $this->createAdmin('newadmin@bim.com');
@@ -277,6 +299,30 @@ class AdminControllerTest extends TestCase
             );
     }
 
+    public function test_admin_controller_update_with_super_admin_unsuccessful()
+    {
+        $newSuperAdminUser = $this->createAdmin('newadmin@bim.com');
+
+        $this->actingAs(self::$superAdminUser)
+            ->putJson('api/v1/admin/admins/'.$newSuperAdminUser->id, [
+                'email' => 'newadmin@bim.com',
+                'role' => Role::Admin,
+            ])
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('first_name')
+            ->assertJsonValidationErrorFor('last_name');
+
+        $this->actingAs(self::$superAdminUser)
+            ->putJson('api/v1/admin/admins/'.$newSuperAdminUser->id, [
+                'first_name' => 'admin',
+                'last_name' => 'admin',
+                'email' => 'admin@bim.com',
+                'role' => Role::Admin,
+            ])
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('email');
+    }
+
     public function test_admin_controller_delete_with_super_admin_success()
     {
         $newSuperAdminUser = $this->createAdmin('newadmin@bim.com');
@@ -312,6 +358,14 @@ class AdminControllerTest extends TestCase
                 'last_name' => 'admin',
                 'email' => 'newadmin@bim.com',
                 'role' => Role::Manager,
+                'permissions' => [
+                    [
+                        'subject' => Subject::Admins,
+                        'actions' => [
+                            Action::Manage,
+                        ],
+                    ],
+                ],
                 'redirect_url' => 'http://localhost:8000/api/v1/admin/sign-up',
             ])
             ->assertStatus(Response::HTTP_CREATED);
