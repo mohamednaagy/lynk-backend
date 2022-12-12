@@ -60,6 +60,17 @@ class CompleteRegisterTest extends TestCase
         self::$userLender = self::$userLender->refresh();
         $this->assertTrue(self::$userLender->hasVerifiedEmail());
         $this->assertNotNull(self::$userLender->password);
+
+        $this->withoutMiddleware(ValidateSignature::class)
+            ->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
+                'first_name' => self::$userLender->first_name,
+                'last_name' => self::$userLender->last_name,
+                'password' => '123456789Aa$$',
+                'password_confirmation' => '123456789Aa$$',
+                'source' => 'test',
+            ])
+            ->assertStatus(Response::HTTP_FORBIDDEN)
+            ->assertJsonPath('message', __('This action is unauthorized.'));
     }
 
     /**
