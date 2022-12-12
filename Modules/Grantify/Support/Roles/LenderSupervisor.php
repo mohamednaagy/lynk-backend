@@ -13,6 +13,10 @@ class LenderSupervisor
         ],
         Subject::FinancingOrders => [
             Action::Manage,
+            Action::Approve,
+        ],
+        Subject::LenderTransactions => [
+            Action::Index,
         ],
         Subject::LenderEdaatInvoices => [
             Action::Manage,
@@ -21,6 +25,12 @@ class LenderSupervisor
             Action::Index,
             Action::Create,
             Action::Show,
+        ],
+        Subject::LenderFinancingOrderCost => [
+            Action::Calculate,
+        ],
+        Subject::LenderWallet => [
+            Action::Manage,
         ],
     ];
 }
