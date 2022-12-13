@@ -2,19 +2,18 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Lender\Users;
 
+use App\Enums\CompanyStatus;
 use App\Enums\Role;
-use App\Mail\CompleteRegisterInvitation;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class UserControllerStore extends TestCase
+class UserControllerUpdateTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -61,52 +60,38 @@ class UserControllerStore extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_store_lender_user(): void
+    public function test_that_un_auth_user_cant_update_lender_user(): void
     {
-        Mail::fake();
         $this->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/lender/users')
+            ->putJson('api/v1/lender/users/'.self::$userLenderAdmin->id, self::$lenderDetails)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
                 'message' => 'Unauthenticated.',
             ]);
-        Mail::assertNothingSent();
     }
 
     /**
      * @return void
      */
-    public function test_that_admin_user_can_store_lender_user_with_valid_data(): void
+    public function test_that_admin_user_can_update_lender_user_with_valid_data(): void
     {
-        Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/lender/users', self::$lenderDetails)
+            ->putJson('api/v1/lender/users/'.self::$userLenderSupervisor->id, self::$lenderDetails)
             ->assertOk()
             ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'first_name',
-                    'last_name',
-                    'email',
-                    'phone_number',
-                    'phone_country_code',
-                    'formatted_phone_number',
-                    'role',
-                ],
+                'data',
             ]);
-        Mail::assertSent(CompleteRegisterInvitation::class);
     }
 
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_lender_user_without_first_name(): void
+    public function test_that_admin_user_cant_update_lender_user_without_first_name(): void
     {
-        Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/lender/users', Arr::except(self::$lenderDetails, ['first_name']))
+            ->putJson('api/v1/lender/users/'.self::$userLenderSupervisor->id, Arr::except(self::$lenderDetails, ['first_name']))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The first name field is required.',
@@ -116,18 +101,16 @@ class UserControllerStore extends TestCase
                     ],
                 ],
             ]);
-        Mail::assertNothingSent();
     }
 
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_lender_user_without_last_name(): void
+    public function test_that_admin_user_cant_update_lender_user_without_last_name(): void
     {
-        Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/lender/users', Arr::except(self::$lenderDetails, ['last_name']))
+            ->putJson('api/v1/lender/users/'.self::$userLenderSupervisor->id, Arr::except(self::$lenderDetails, ['last_name']))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The last name field is required.',
@@ -137,18 +120,16 @@ class UserControllerStore extends TestCase
                     ],
                 ],
             ]);
-        Mail::assertNothingSent();
     }
 
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_lender_user_without_phone_country_code(): void
+    public function test_that_admin_user_cant_update_lender_user_without_phone_country_code(): void
     {
-        Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/lender/users', Arr::except(self::$lenderDetails, ['phone_country_code']))
+            ->putJson('api/v1/lender/users/'.self::$userLenderSupervisor->id, Arr::except(self::$lenderDetails, ['phone_country_code']))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The phone country code field is required when phone number is present. (and 1 more error)',
@@ -161,18 +142,16 @@ class UserControllerStore extends TestCase
                     ],
                 ],
             ]);
-        Mail::assertNothingSent();
     }
 
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_lender_user_without_phone_number(): void
+    public function test_that_admin_user_cant_update_lender_user_without_phone_number(): void
     {
-        Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/lender/users', Arr::except(self::$lenderDetails, ['phone_number']))
+            ->putJson('api/v1/lender/users/'.self::$userLenderSupervisor->id, Arr::except(self::$lenderDetails, ['phone_number']))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The phone number field is required.',
@@ -182,18 +161,16 @@ class UserControllerStore extends TestCase
                     ],
                 ],
             ]);
-        Mail::assertNothingSent();
     }
 
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_lender_user_without_email(): void
+    public function test_that_admin_user_cant_update_lender_user_without_email(): void
     {
-        Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/lender/users', Arr::except(self::$lenderDetails, ['email']))
+            ->putJson('api/v1/lender/users/'.self::$userLenderSupervisor->id, Arr::except(self::$lenderDetails, ['email']))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The email field is required.',
@@ -203,39 +180,30 @@ class UserControllerStore extends TestCase
                     ],
                 ],
             ]);
-        Mail::assertNothingSent();
     }
 
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_lender_user_without_redirect_url(): void
+    public function test_that_admin_user_can_update_lender_user_without_redirect_url(): void
     {
-        Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/lender/users', Arr::except(self::$lenderDetails, ['redirect_url']))
-            ->assertUnprocessable()
-            ->assertExactJson([
-                'message' => 'The redirect url field is required.',
-                'errors' => [
-                    'redirect_url' => [
-                        'The redirect url field is required.',
-                    ],
-                ],
+            ->putJson('api/v1/lender/users/'.self::$userLenderSupervisor->id, Arr::except(self::$lenderDetails, ['redirect_url']))
+            ->assertOk()
+            ->assertJsonStructure([
+                'data',
             ]);
-        Mail::assertNothingSent();
     }
 
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_lender_user_without_role(): void
+    public function test_that_admin_user_cant_update_lender_user_without_role(): void
     {
-        Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/lender/users', Arr::except(self::$lenderDetails, ['role']))
+            ->putJson('api/v1/lender/users/'.self::$userLenderSupervisor->id, Arr::except(self::$lenderDetails, ['role']))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The role field is required.',
@@ -245,79 +213,120 @@ class UserControllerStore extends TestCase
                     ],
                 ],
             ]);
-        Mail::assertNothingSent();
     }
 
     /**
      * @return void
      */
-    public function test_that_supervisor_user_cant_store_lender_user_with_valid_data(): void
+    public function test_that_supervisor_user_cant_update_lender_user_with_valid_data(): void
     {
-        Mail::fake();
         $this->actingAs(self::$userLenderSupervisor)
             ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/lender/users', self::$lenderDetails)
+            ->putJson('api/v1/lender/users/'.self::$userLenderBilling->id, Arr::except(self::$lenderDetails, ['redirect_url']))
             ->assertForbidden();
-        Mail::assertNotSent(CompleteRegisterInvitation::class);
     }
 
     /**
      * @return void
      */
-    public function test_that_billing_user_cant_store_lender_user_with_valid_data(): void
+    public function test_that_billing_user_cant_update_lender_user_with_valid_data(): void
     {
-        Mail::fake();
         $this->actingAs(self::$userLenderBilling)
             ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/lender/users', self::$lenderDetails)
+            ->putJson('api/v1/lender/users/'.self::$userLenderOrderCreator->id, Arr::except(self::$lenderDetails, ['redirect_url']))
             ->assertForbidden();
-        Mail::assertNotSent(CompleteRegisterInvitation::class);
     }
 
     /**
      * @return void
      */
-    public function test_that_order_creator_user_cant_store_lender_user_with_valid_data(): void
+    public function test_that_order_creator_user_cant_update_lender_user_with_valid_data(): void
     {
-        Mail::fake();
         $this->actingAs(self::$userLenderOrderCreator)
             ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/lender/users', self::$lenderDetails)
+            ->putJson('api/v1/lender/users/'.self::$userLenderBilling->id, Arr::except(self::$lenderDetails, ['redirect_url']))
             ->assertForbidden();
-        Mail::assertNotSent(CompleteRegisterInvitation::class);
     }
 
     /**
      * @return void
      */
-    public function test_that_api_user_cant_store_lender_user_with_valid_data(): void
+    public function test_that_api_user_cant_update_lender_user_with_valid_data(): void
     {
-        Mail::fake();
         $this->actingAs(self::$userLenderApi)
             ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/lender/users', self::$lenderDetails)
+            ->putJson('api/v1/lender/users/'.self::$userLenderBilling->id, Arr::except(self::$lenderDetails, ['redirect_url']))
             ->assertForbidden();
-        Mail::assertNotSent(CompleteRegisterInvitation::class);
     }
 
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_api_user_with_valid_data(): void
+    public function test_that_admin_user_cant_update_api_user_with_valid_data(): void
     {
-        Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/lender/users', array_merge(self::$lenderDetails, ['role' => Role::LenderApiUser]))
-            ->assertUnprocessable()
-            ->assertExactJson([
-                'message' => 'The selected role is invalid.',
-                'errors' => [
-                    'role' => [
-                        'The selected role is invalid.',
-                    ],
-                ],
-            ]);
-        Mail::assertNotSent(CompleteRegisterInvitation::class);
+            ->putJson('api/v1/lender/users/'.self::$userLenderApi->id, Arr::except(self::$lenderDetails, ['redirect_url']))
+            ->assertForbidden();
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_lender_admin_user_cant_index_lender_users_case_company_pending(): void
+    {
+        self::$company->update([
+            'status' => CompanyStatus::Pending,
+        ]);
+
+        $this->actingAs(self::$userLenderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->putJson('api/v1/lender/users/'.self::$userLenderSupervisor->id, self::$lenderDetails)
+            ->assertForbidden();
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_lender_admin_user_cant_index_lender_users_case_company_under_review(): void
+    {
+        self::$company->update([
+            'status' => CompanyStatus::UnderReview,
+        ]);
+
+        $this->actingAs(self::$userLenderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->putJson('api/v1/lender/users/'.self::$userLenderSupervisor->id, self::$lenderDetails)
+            ->assertForbidden();
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_lender_admin_user_cant_index_lender_users_case_company_rejected(): void
+    {
+        self::$company->update([
+            'status' => CompanyStatus::Rejected,
+        ]);
+
+        $this->actingAs(self::$userLenderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->putJson('api/v1/lender/users/'.self::$userLenderSupervisor->id, self::$lenderDetails)
+            ->assertForbidden();
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_lender_admin_user_cant_index_lender_users_case_email_not_verified(): void
+    {
+        self::$userLenderAdmin->update([
+            'email_verified_at' => null,
+        ]);
+
+        $this->actingAs(self::$userLenderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->putJson('api/v1/lender/users/'.self::$userLenderSupervisor->id, self::$lenderDetails)
+            ->assertForbidden();
     }
 }

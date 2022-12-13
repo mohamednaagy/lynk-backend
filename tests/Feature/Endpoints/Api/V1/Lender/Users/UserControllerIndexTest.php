@@ -3,6 +3,7 @@
 namespace Tests\Feature\Endpoints\Api\V1\Lender\Users;
 
 use App\Enums\Area;
+use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
@@ -13,7 +14,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class UserControllerIndex extends TestCase
+class UserControllerIndexTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -141,6 +142,66 @@ class UserControllerIndex extends TestCase
     public function test_that_order_creator_user_cant_index_lender_users(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
+            ->withHeader('X-Company', self::$company->id)
+            ->getJson('api/v1/lender/users')
+            ->assertForbidden();
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_lender_admin_user_cant_index_lender_users_case_company_pending(): void
+    {
+        self::$company->update([
+            'status' => CompanyStatus::Pending,
+        ]);
+
+        $this->actingAs(self::$userLenderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->getJson('api/v1/lender/users')
+            ->assertForbidden();
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_lender_admin_user_cant_index_lender_users_case_company_under_review(): void
+    {
+        self::$company->update([
+            'status' => CompanyStatus::UnderReview,
+        ]);
+
+        $this->actingAs(self::$userLenderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->getJson('api/v1/lender/users')
+            ->assertForbidden();
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_lender_admin_user_cant_index_lender_users_case_company_rejected(): void
+    {
+        self::$company->update([
+            'status' => CompanyStatus::Rejected,
+        ]);
+
+        $this->actingAs(self::$userLenderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->getJson('api/v1/lender/users')
+            ->assertForbidden();
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_lender_admin_user_cant_index_lender_users_case_email_not_verified(): void
+    {
+        self::$userLenderAdmin->update([
+            'email_verified_at' => null,
+        ]);
+
+        $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/users')
             ->assertForbidden();
