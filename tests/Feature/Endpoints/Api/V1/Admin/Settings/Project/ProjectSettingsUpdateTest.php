@@ -10,8 +10,7 @@ use App\Models\User;
 use App\Settings\Classes\ProjectSettings;
 use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\Fluent\AssertableJson;
-use Modules\Grantify\Facades\Grantify;
+use Illuminate\Support\Arr;
 use Spatie\LaravelSettings\Settings;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
@@ -28,6 +27,8 @@ class ProjectSettingsUpdateTest extends TestCase
 
     private static User $manager;
 
+    private static User $managerHasPermission;
+
     private static $projectSettings;
 
     private static Settings $projectSettingsClass;
@@ -42,7 +43,11 @@ class ProjectSettingsUpdateTest extends TestCase
         parent::setUp();
 
         self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager(permissions: perm(Area::SuperAdmin, [Subject::ProjectSettings, Action::Edit]));
+        self::$manager = $this->createManager();
+        self::$managerHasPermission = $this->createManager(
+            'managerHasPermission@bim.com',
+            perm(Area::SuperAdmin, [Subject::ProjectSettings, Action::Edit])
+        );
         self::$projectSettings = $this->app->make(GetProjectSettings::class)->handle();
         self::$projectSettingsClass = $this->app->make(ProjectSettings::class);
         self::$projectSettingsData = [
@@ -67,7 +72,7 @@ class ProjectSettingsUpdateTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_index_lender_settings(): void
+    public function test_that_un_auth_user_cant_index_lender_settings_failed(): void
     {
         $this->putJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
@@ -81,12 +86,10 @@ class ProjectSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_project_settings_on_empty_company_name(): void
+    public function test_update_project_settings_on_empty_company_name_failed(): void
     {
-        unset(self::$projectSettingsData['company_name']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$projectSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$projectSettingsData, ['company_name']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The company name field is required. (and 2 more errors)',
@@ -109,12 +112,10 @@ class ProjectSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_project_settings_on_empty_company_name_en(): void
+    public function test_update_project_settings_on_empty_company_name_en_failed(): void
     {
-        unset(self::$projectSettingsData['company_name']['en']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$projectSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$projectSettingsData, ['company_name.en']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The company name must contain 2 items. (and 1 more error)',
@@ -134,12 +135,10 @@ class ProjectSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_project_settings_on_empty_company_name_ar(): void
+    public function test_update_project_settings_on_empty_company_name_ar_failed(): void
     {
-        unset(self::$projectSettingsData['company_name']['ar']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$projectSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$projectSettingsData, ['company_name.ar']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The company name must contain 2 items. (and 1 more error)',
@@ -159,12 +158,10 @@ class ProjectSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_project_settings_on_empty_address_line_one(): void
+    public function test_update_project_settings_on_empty_address_line_one_failed(): void
     {
-        unset(self::$projectSettingsData['address_line_one']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$projectSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$projectSettingsData, ['address_line_one']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The address line one field is required. (and 2 more errors)',
@@ -187,12 +184,10 @@ class ProjectSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_project_settings_on_empty_address_line_one_en(): void
+    public function test_update_project_settings_on_empty_address_line_one_en_failed(): void
     {
-        unset(self::$projectSettingsData['address_line_one']['en']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$projectSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$projectSettingsData, ['address_line_one.en']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The address line one must contain 2 items. (and 1 more error)',
@@ -212,12 +207,10 @@ class ProjectSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_project_settings_on_empty_address_line_one_ar(): void
+    public function test_update_project_settings_on_empty_address_line_one_ar_failed(): void
     {
-        unset(self::$projectSettingsData['address_line_one']['ar']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$projectSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$projectSettingsData, ['address_line_one.ar']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The address line one must contain 2 items. (and 1 more error)',
@@ -237,12 +230,10 @@ class ProjectSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_project_settings_on_empty_address_line_two(): void
+    public function test_update_project_settings_on_empty_address_line_two_failed(): void
     {
-        unset(self::$projectSettingsData['address_line_two']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$projectSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$projectSettingsData, ['address_line_two']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The address line two field is required. (and 2 more errors)',
@@ -265,12 +256,10 @@ class ProjectSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_project_settings_on_empty_address_line_two_en(): void
+    public function test_update_project_settings_on_empty_address_line_two_en_failed(): void
     {
-        unset(self::$projectSettingsData['address_line_two']['en']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$projectSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$projectSettingsData, ['address_line_two.en']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The address line two must contain 2 items. (and 1 more error)',
@@ -290,12 +279,10 @@ class ProjectSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_project_settings_on_empty_address_line_two_ar(): void
+    public function test_update_project_settings_on_empty_address_line_two_ar_failed(): void
     {
-        unset(self::$projectSettingsData['address_line_two']['ar']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$projectSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$projectSettingsData, ['address_line_two.ar']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The address line two must contain 2 items. (and 1 more error)',
@@ -315,12 +302,10 @@ class ProjectSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_project_settings_on_empty_company_cr(): void
+    public function test_update_project_settings_on_empty_company_cr_failed(): void
     {
-        unset(self::$projectSettingsData['company_cr']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$projectSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$projectSettingsData, ['company_cr']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The company CR field is required.',
@@ -337,12 +322,10 @@ class ProjectSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_project_settings_on_empty_vat_id(): void
+    public function test_update_project_settings_on_empty_vat_id_failed(): void
     {
-        unset(self::$projectSettingsData['vat_id']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$projectSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$projectSettingsData, ['vat_id']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The vat id field is required.',
@@ -359,12 +342,10 @@ class ProjectSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_project_settings_on_empty_vat_rate(): void
+    public function test_update_project_settings_on_empty_vat_rate_failed(): void
     {
-        unset(self::$projectSettingsData['vat_rate']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$projectSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$projectSettingsData, ['vat_rate']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The vat rate field is required.',
@@ -381,7 +362,7 @@ class ProjectSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_project_settings_on_invalid_vat_rate(): void
+    public function test_update_project_settings_on_invalid_vat_rate_failed(): void
     {
         $this->actingAs(self::$admin)
             ->putJson(self::BaseUrl, array_merge(
@@ -404,7 +385,7 @@ class ProjectSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_that_auth_user_has_admin_role_can_update_project_settings(): void
+    public function test_that_auth_user_has_admin_role_can_update_project_settings_succeed(): void
     {
         $this->actingAs(self::$admin)
             ->putJson(self::BaseUrl, self::$projectSettingsData)
@@ -424,30 +405,24 @@ class ProjectSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_that_auth_user_has_manager_role_can_update_project_settings(): void
+    public function test_that_auth_user_has_manager_role_and_right_permission_can_update_project_settings_succeed(): void
     {
-        $this->actingAs(self::$manager)
+        $this->actingAs(self::$managerHasPermission)
             ->putJson(self::BaseUrl, self::$projectSettingsData)
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'data',
-            ]
-            );
+            ]);
     }
 
     /**
      * @return void
      */
-    public function test_that_auth_user_without_right_permissions_cannot_update_project_settings(): void
+    public function test_that_auth_user_without_right_permissions_cannot_update_project_settings_failed(): void
     {
-        Grantify::syncPermissionToModel(self::$manager, []);
-
         $this->actingAs(self::$manager)
             ->putJson(self::BaseUrl, self::$projectSettingsData)
             ->assertStatus(Response::HTTP_FORBIDDEN)
-            ->assertJson(
-                fn (AssertableJson $json) => $json->where('message', 'User does not have the right permissions.')
-                    ->etc()
-            );
+            ->assertJsonPath('message', 'User does not have the right permissions.');
     }
 }

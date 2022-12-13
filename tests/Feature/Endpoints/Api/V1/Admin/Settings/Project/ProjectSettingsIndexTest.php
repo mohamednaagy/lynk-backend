@@ -10,8 +10,6 @@ use App\Models\User;
 use App\Transformers\ProjectSettingsTransformer;
 use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\Fluent\AssertableJson;
-use Modules\Grantify\Facades\Grantify;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithAdmin;
@@ -27,6 +25,8 @@ class ProjectSettingsIndexTest extends TestCase
 
     private static User $manager;
 
+    private static User $managerHasPermission;
+
     private static $projectSettings;
 
     /**
@@ -37,14 +37,18 @@ class ProjectSettingsIndexTest extends TestCase
         parent::setUp();
 
         self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager(permissions: perm(Area::SuperAdmin, [Subject::ProjectSettings, Action::Index]));
+        self::$manager = $this->createManager();
+        self::$managerHasPermission = $this->createManager(
+            'managerHasPermission@bim.com',
+            perm(Area::SuperAdmin, [Subject::ProjectSettings, Action::Index])
+        );
         self::$projectSettings = $this->app->make(GetProjectSettings::class)->handle();
     }
 
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_index_lender_settings(): void
+    public function test_that_un_auth_user_cant_index_lender_settings_failed(): void
     {
         $this->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
@@ -58,7 +62,7 @@ class ProjectSettingsIndexTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_that_auth_user_has_admin_role_can_index_project_settings(): void
+    public function test_that_auth_user_has_admin_role_can_index_project_settings_succeed(): void
     {
         $this->actingAs(self::$admin)
             ->getJson(self::BaseUrl)
@@ -75,9 +79,9 @@ class ProjectSettingsIndexTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_that_auth_user_has_manager_role_can_index_project_settings(): void
+    public function test_that_auth_user_has_manager_role_can_index_project_settings_succeed(): void
     {
-        $this->actingAs(self::$manager)
+        $this->actingAs(self::$managerHasPermission)
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
@@ -90,16 +94,11 @@ class ProjectSettingsIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_user_without_right_permissions_cannot_index_project_settings(): void
+    public function test_that_auth_user_without_right_permissions_cannot_index_project_settings_failed(): void
     {
-        Grantify::syncPermissionToModel(self::$manager, []);
-
         $this->actingAs(self::$manager)
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_FORBIDDEN)
-            ->assertJson(
-                fn (AssertableJson $json) => $json->where('message', 'User does not have the right permissions.')
-                    ->etc()
-            );
+            ->assertJsonPath('message', 'User does not have the right permissions.');
     }
 }
