@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Companies;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Enums\Role;
 use App\Enums\WalletType;

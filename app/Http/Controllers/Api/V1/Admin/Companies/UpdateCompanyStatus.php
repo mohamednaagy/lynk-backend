@@ -17,7 +17,7 @@ class UpdateCompanyStatus extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::Lenders, Action::ChangeStatus, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Edit, Action::Manage])
         );
     }
 

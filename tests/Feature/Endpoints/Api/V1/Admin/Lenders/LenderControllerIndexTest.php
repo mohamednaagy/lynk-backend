@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Companies;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Enums\Role;
 use App\Models\Company;
@@ -11,7 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class CompanyControllerIndexTest extends TestCase
+class LenderControllerIndexTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -52,7 +52,7 @@ class CompanyControllerIndexTest extends TestCase
      */
     public function test_that_auth_admin_user_can_index_companies(): void
     {
-        $companies = Company::query()->paginate();
+        $companies = Company::query()->withCount('orders')->paginate();
 
         $this->actingAs(self::$userAdmin)
             ->getJson('api/v1/admin/companies')
@@ -77,7 +77,7 @@ class CompanyControllerIndexTest extends TestCase
      */
     public function test_that_auth_manager_user_can_index_companies(): void
     {
-        $companies = Company::query()->paginate();
+        $companies = Company::query()->withCount('orders')->paginate();
 
         $this->actingAs(self::$userManager)
             ->getJson('api/v1/admin/companies')

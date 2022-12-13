@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Companies;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class CompanyControllerUpdateTest extends TestCase
+class LenderControllerUpdateTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -218,6 +218,25 @@ class CompanyControllerUpdateTest extends TestCase
                     'unique_name' => [
                         'The unique name has already been taken.',
                     ],
+                    'company_cr' => [
+                        'The company CR has already been taken.',
+                    ],
+                ],
+            ]);
+
+        $this->actingAs(self::$userAdmin)
+            ->deleteJson('api/v1/admin/companies/'.$company->id)
+            ->assertOk()
+            ->assertExactJson([
+                'data' => [],
+            ]);
+
+        $this->actingAs(self::$userAdmin)
+            ->putJson('api/v1/admin/companies/'.self::$company->id, self::$companyDetails)
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The company CR has already been taken.',
+                'errors' => [
                     'company_cr' => [
                         'The company CR has already been taken.',
                     ],

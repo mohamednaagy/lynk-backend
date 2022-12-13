@@ -19,6 +19,7 @@ class CompanyTransformer extends TransformerAbstract
         'created_at',
         'order_cost',
         'webhook_secret_key',
+        'public_status_comment',
     ];
 
     public function transform(Company $company): array
@@ -63,7 +64,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeOrdersCount(Company $company): Primitive
     {
-        return $this->primitive($company->orders_count ?? 0);
+        return $this->primitive($company->orders_count);
     }
 
     public function includeDoesOrderRequireApproval(Company $company): Primitive
@@ -79,5 +80,10 @@ class CompanyTransformer extends TransformerAbstract
     public function includeCreatedAt(Company $company): Primitive
     {
         return $this->primitive(optional($company->created_at)->format('Y-m-d'));
+    }
+
+    public function includePublicStatusComment(Company $company): Primitive
+    {
+        return $this->primitive($company->public_status_comment);
     }
 }

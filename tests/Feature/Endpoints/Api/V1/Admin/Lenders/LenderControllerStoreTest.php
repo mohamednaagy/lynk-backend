@@ -1,11 +1,12 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Companies;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Area;
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
+use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
@@ -16,7 +17,7 @@ use Illuminate\Support\Str;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class CompanyControllerStoreTest extends TestCase
+class LenderControllerStoreTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -89,7 +90,7 @@ class CompanyControllerStoreTest extends TestCase
 
         $defaultStatus = $this->app->make(GetSettingsClassInstance::class)->handle(Area::Lender)
             ->default_company_status_created_by_operation;
-        $hasWallet = $company->getWallets()->count() > 0;
+        $hasWallet = $company->getWallets(WalletType::CompanyWallet)->count() > 0;
         $hasOrderCost = $company->order_cost->getAmount() > 0;
 
         $this->assertEquals($defaultStatus, $company->status->value);
@@ -125,7 +126,7 @@ class CompanyControllerStoreTest extends TestCase
 
         $defaultStatus = $this->app->make(GetSettingsClassInstance::class)->handle(Area::Lender)
             ->default_company_status_created_by_operation;
-        $hasWallet = $company->getWallets()->count() > 0;
+        $hasWallet = $company->getWallets(WalletType::CompanyWallet)->count() > 0;
         $hasOrderCost = $company->order_cost->getAmount() > 0;
 
         $this->assertEquals($defaultStatus, $company->status->value);
@@ -267,6 +268,24 @@ class CompanyControllerStoreTest extends TestCase
                     'unique_name' => [
                         'The unique name has already been taken.',
                     ],
+                    'company_cr' => [
+                        'The company CR has already been taken.',
+                    ],
+                ],
+            ]);
+        $this->actingAs(self::$userAdmin)
+            ->deleteJson('api/v1/admin/companies/'.$company->id)
+            ->assertOk()
+            ->assertExactJson([
+                'data' => [],
+            ]);
+
+        $this->actingAs(self::$userAdmin)
+            ->putJson('api/v1/admin/companies/'.self::$company->id, self::$companyDetails)
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The company CR has already been taken.',
+                'errors' => [
                     'company_cr' => [
                         'The company CR has already been taken.',
                     ],

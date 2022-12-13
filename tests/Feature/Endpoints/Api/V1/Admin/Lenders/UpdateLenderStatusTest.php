@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Companies;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
@@ -12,7 +12,7 @@ use Illuminate\Support\Arr;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class UpdateCompanyStatusTest extends TestCase
+class UpdateLenderStatusTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -23,6 +23,8 @@ class UpdateCompanyStatusTest extends TestCase
     private static User $userAdmin;
 
     private static User $userManager;
+
+    private static User $userLenderAdmin;
 
     private static array $companyStatusDetails;
 
@@ -36,10 +38,11 @@ class UpdateCompanyStatusTest extends TestCase
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userAdmin = $this->createLenderUser(self::$company->id, Role::Admin, 'admin@bim.com');
         self::$userManager = $this->createLenderUser(self::$company->id, Role::Manager, 'manager@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
         self::$companyStatusDetails = [
             'status' => CompanyStatus::Approved(),
-            'public_status_comment' => 'Approved',
-            'internal_status_comment' => 'Approved',
+            'public_status_comment' => 'Approved public',
+            'internal_status_comment' => 'Approved internal',
         ];
     }
 
@@ -78,6 +81,27 @@ class UpdateCompanyStatusTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [],
+            ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_admin_can_update_company_status_and_see_updates_in_get_auth(): void
+    {
+        $this->actingAs(self::$userAdmin)
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/status', self::$companyStatusDetails)
+            ->assertOk()
+            ->assertExactJson([
+                'data' => [],
+            ]);
+
+        $this->actingAs(self::$userLenderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->getJson('api/v1/lender/auth')
+            ->assertOk()
+            ->assertSee([
+                'public_status_comment' => 'Approved public',
             ]);
     }
 

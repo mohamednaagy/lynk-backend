@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Companies;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Enums\Role;
 use App\Models\Company;
@@ -11,7 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class CompanyControllerShowTest extends TestCase
+class LenderControllerShowTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -38,7 +38,7 @@ class CompanyControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_Show_company(): void
+    public function test_that_un_auth_user_cant_show_company(): void
     {
         $this->getJson('api/v1/admin/companies/'.self::$company->id)
             ->assertUnauthorized()
