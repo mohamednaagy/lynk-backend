@@ -143,8 +143,8 @@ class WalletServiceTest extends TestCase
 
     public function test_wallet_service_transactions_method_return_query_builder_of_the_model()
     {
-        // $wallet = self::$walletService->create(self::$model, self::$walletInformation);
         Transaction::factory(2)->create(['wallet_id' => self::$wallet->id]);
+
         $this->assertEquals(
             3,
             self::$walletService->transactions(self::$model, self::$wallet->name)->count()
