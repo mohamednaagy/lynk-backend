@@ -9,8 +9,8 @@ use App\Enums\Subject;
 use App\Models\User;
 use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Arr;
 use Illuminate\Testing\Fluent\AssertableJson;
-use Modules\Grantify\Facades\Grantify;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithAdmin;
@@ -26,6 +26,8 @@ class LenderSettingsUpdateTest extends TestCase
 
     private static User $manager;
 
+    private static User $managerHasPermission;
+
     private static $lenderSettings;
 
     private static array $lenderSettingsData = [];
@@ -38,7 +40,11 @@ class LenderSettingsUpdateTest extends TestCase
         parent::setUp();
 
         self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager(permissions: perm(Area::SuperAdmin, [Subject::LenderAreaSettings, Action::Manage]));
+        self::$manager = $this->createManager();
+        self::$managerHasPermission = $this->createManager(
+            'managerHasPermission@bim.com',
+            perm(Area::SuperAdmin, [Subject::LenderAreaSettings, Action::Edit])
+        );
         self::$lenderSettings = $this->getSettingsClass(Area::Lender);
         self::$lenderSettingsData = [
             'default_order_cost' => 150,
@@ -52,7 +58,7 @@ class LenderSettingsUpdateTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_index_lender_settings(): void
+    public function test_that_un_auth_user_cant_index_lender_settings_failed(): void
     {
         $this->putJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
@@ -66,12 +72,10 @@ class LenderSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_lender_settings_on_empty_default_order_cost(): void
+    public function test_update_lender_settings_on_empty_default_order_cost_failed(): void
     {
-        unset(self::$lenderSettingsData['default_order_cost']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$lenderSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$lenderSettingsData, ['default_order_cost']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The default order cost field is required.',
@@ -88,7 +92,7 @@ class LenderSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_lender_settings_on_invalid_default_order_cost(): void
+    public function test_update_lender_settings_on_invalid_default_order_cost_failed(): void
     {
         $this->actingAs(self::$admin)
             ->putJson(self::BaseUrl, array_merge(
@@ -111,12 +115,10 @@ class LenderSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_lender_settings_on_empty_email_verification_enabled(): void
+    public function test_update_lender_settings_on_empty_email_verification_enabled_failed(): void
     {
-        unset(self::$lenderSettingsData['email_verification_enabled']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$lenderSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$lenderSettingsData, ['email_verification_enabled']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The email verification enabled field is required.',
@@ -133,7 +135,7 @@ class LenderSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_lender_settings_on_invalid_email_verification_enabled(): void
+    public function test_update_lender_settings_on_invalid_email_verification_enabled_failed(): void
     {
         $this->actingAs(self::$admin)
             ->putJson(self::BaseUrl, array_merge(
@@ -156,12 +158,10 @@ class LenderSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_lender_settings_on_empty_default_does_order_require_approval(): void
+    public function test_update_lender_settings_on_empty_default_does_order_require_approval_failed(): void
     {
-        unset(self::$lenderSettingsData['default_does_order_require_approval']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$lenderSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$lenderSettingsData, ['default_does_order_require_approval']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The default does order require approval field is required.',
@@ -178,10 +178,8 @@ class LenderSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_lender_settings_on_invalid_default_does_order_require_approval(): void
+    public function test_update_lender_settings_on_invalid_default_does_order_require_approval_failed(): void
     {
-        unset(self::$lenderSettingsData['default_does_order_require_approval']);
-
         $this->actingAs(self::$admin)
             ->putJson(self::BaseUrl, array_merge(
                 self::$lenderSettingsData,
@@ -203,12 +201,10 @@ class LenderSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_lender_settings_on_empty_default_company_registration_status(): void
+    public function test_update_lender_settings_on_empty_default_company_registration_status_failed(): void
     {
-        unset(self::$lenderSettingsData['default_company_registration_status']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$lenderSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$lenderSettingsData, ['default_company_registration_status']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The default company registration status field is required.',
@@ -225,7 +221,7 @@ class LenderSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_lender_settings_on_invalid_and_not_integer_default_company_registration_status(): void
+    public function test_update_lender_settings_on_invalid_and_not_integer_default_company_registration_status_failed(): void
     {
         $this->actingAs(self::$admin)
             ->putJson(self::BaseUrl, array_merge(
@@ -249,7 +245,7 @@ class LenderSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_lender_settings_on_invalid_default_company_registration_status(): void
+    public function test_update_lender_settings_on_invalid_default_company_registration_status_failed(): void
     {
         $this->actingAs(self::$admin)
             ->putJson(self::BaseUrl, array_merge(
@@ -272,12 +268,10 @@ class LenderSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_lender_settings_on_empty_default_company_status_created_by_operation(): void
+    public function test_update_lender_settings_on_empty_default_company_status_created_by_operation_failed(): void
     {
-        unset(self::$lenderSettingsData['default_company_status_created_by_operation']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, self::$lenderSettingsData)
+            ->putJson(self::BaseUrl, Arr::except(self::$lenderSettingsData, ['default_company_status_created_by_operation']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The default company status created by operation field is required.',
@@ -294,7 +288,7 @@ class LenderSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_lender_settings_on_invalid_and_not_integer_default_company_status_created_by_operation(): void
+    public function test_update_lender_settings_on_invalid_and_not_integer_default_company_status_created_by_operation_failed(): void
     {
         $this->actingAs(self::$admin)
             ->putJson(self::BaseUrl, array_merge(
@@ -318,7 +312,7 @@ class LenderSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_update_lender_settings_on_invalid_default_company_status_created_by_operation(): void
+    public function test_update_lender_settings_on_invalid_default_company_status_created_by_operation_failed(): void
     {
         $this->actingAs(self::$admin)
             ->putJson(self::BaseUrl, array_merge(
@@ -341,7 +335,7 @@ class LenderSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_that_auth_user_has_admin_role_can_update_lender_settings(): void
+    public function test_that_auth_user_has_admin_role_can_update_lender_settings_succeed(): void
     {
         $this->actingAs(self::$admin)
             ->putJson(self::BaseUrl, self::$lenderSettingsData)
@@ -356,24 +350,21 @@ class LenderSettingsUpdateTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_that_auth_user_has_manager_role_can_update_lender_settings(): void
+    public function test_that_auth_user_has_manager_role_and_right_permission_can_update_lender_settings_succeed(): void
     {
-        $this->actingAs(self::$manager)
+        $this->actingAs(self::$managerHasPermission)
             ->putJson(self::BaseUrl, self::$lenderSettingsData)
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'data',
-            ]
-            );
+            ]);
     }
 
     /**
      * @return void
      */
-    public function test_that_auth_user_without_right_permissions_cannot_update_lender_settings(): void
+    public function test_that_auth_user_without_right_permissions_cannot_update_lender_settings_failed(): void
     {
-        Grantify::syncPermissionToModel(self::$manager, []);
-
         $this->actingAs(self::$manager)
             ->putJson(self::BaseUrl, self::$lenderSettingsData)
             ->assertStatus(Response::HTTP_FORBIDDEN)

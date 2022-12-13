@@ -10,7 +10,6 @@ use App\Transformers\LenderSettingsTransformer;
 use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
-use Modules\Grantify\Facades\Grantify;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithAdmin;
@@ -26,6 +25,8 @@ class LenderSettingsIndexTest extends TestCase
 
     private static User $manager;
 
+    private static User $managerHasPermission;
+
     private static $lenderSettings;
 
     /**
@@ -36,14 +37,18 @@ class LenderSettingsIndexTest extends TestCase
         parent::setUp();
 
         self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager(permissions: perm(Area::SuperAdmin, [Subject::LenderAreaSettings, Action::Manage]));
+        self::$manager = $this->createManager();
+        self::$managerHasPermission = $this->createManager(
+            'managerHasPermission@bim.com',
+            perm(Area::SuperAdmin, [Subject::LenderAreaSettings, Action::Index])
+        );
         self::$lenderSettings = $this->getSettingsClass(Area::Lender);
     }
 
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_index_lender_settings(): void
+    public function test_that_un_auth_user_cant_index_lender_settings_failed(): void
     {
         $this->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
@@ -57,7 +62,7 @@ class LenderSettingsIndexTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_that_auth_user_has_admin_role_can_index_lender_settings(): void
+    public function test_that_auth_user_has_admin_role_can_index_lender_settings_succeed(): void
     {
         $this->actingAs(self::$admin)
             ->getJson(self::BaseUrl)
@@ -81,9 +86,9 @@ class LenderSettingsIndexTest extends TestCase
      *
      * @throws Exception
      */
-    public function test_that_auth_user_has_manager_role_can_index_lender_settings(): void
+    public function test_that_auth_user_has_manager_role_and_right_permission_can_index_lender_settings_succeed(): void
     {
-        $this->actingAs(self::$manager)
+        $this->actingAs(self::$managerHasPermission)
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
@@ -103,10 +108,8 @@ class LenderSettingsIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_user_without_right_permissions_cannot_index_lender_settings(): void
+    public function test_that_auth_user_without_right_permissions_cannot_index_lender_settings_failed(): void
     {
-        Grantify::syncPermissionToModel(self::$manager, []);
-
         $this->actingAs(self::$manager)
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_FORBIDDEN)
