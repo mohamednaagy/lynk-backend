@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Companies;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Enums\Area;
 use App\Enums\Role;
@@ -12,7 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class CompanyUserControllerShowTest extends TestCase
+class LenderUserControllerShowTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -105,7 +105,7 @@ class CompanyUserControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_cant_show_company_api_user(): void
+    public function test_that_auth_admin_user_cant_show_lender_api_user(): void
     {
         $this->actingAs(self::$userAdmin)
             ->getJson('api/v1/admin/companies/'.self::$company->id.'/users/'.(int) self::$userLenderApi->id)

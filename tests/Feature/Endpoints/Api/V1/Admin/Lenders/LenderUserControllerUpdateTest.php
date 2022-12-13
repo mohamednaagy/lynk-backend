@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Companies;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Enums\Role;
 use App\Models\Company;
@@ -11,7 +11,7 @@ use Illuminate\Support\Arr;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class CompanyUserControllerStoreTest extends TestCase
+class LenderUserControllerUpdateTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -22,6 +22,8 @@ class CompanyUserControllerStoreTest extends TestCase
     private static User $userAdmin;
 
     private static User $userManager;
+
+    private static User $userLenderAdmin;
 
     private static array $userDetails;
 
@@ -35,6 +37,7 @@ class CompanyUserControllerStoreTest extends TestCase
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userAdmin = $this->createLenderUser(self::$company->id, Role::Admin, 'admin@bim.com');
         self::$userManager = $this->createLenderUser(self::$company->id, Role::Manager, 'manager@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
         self::$userDetails = [
             'first_name' => 'first_name',
             'last_name' => 'last_name',
@@ -49,9 +52,9 @@ class CompanyUserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_store_company_user(): void
+    public function test_that_un_auth_user_cant_update_company_user(): void
     {
-        $this->postJson('api/v1/admin/companies/'.self::$company->id.'/users', self::$userDetails)
+        $this->putJson('api/v1/admin/companies/'.self::$company->id.'/users/'.self::$userLenderAdmin->id, self::$userDetails)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -61,52 +64,36 @@ class CompanyUserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_can_store_company_user_with_valid_data(): void
+    public function test_that_auth_admin_user_can_update_company_user_with_valid_data(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/users', self::$userDetails)
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/users/'.self::$userLenderAdmin->id, self::$userDetails)
             ->assertOk()
-            ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'first_name',
-                    'last_name',
-                    'email',
-                    'phone_number',
-                    'phone_country_code',
-                    'formatted_phone_number',
-                ],
+            ->assertExactJson([
+                'data' => [],
             ]);
     }
 
     /**
      * @return void
      */
-    public function test_that_auth_manager_user_can_store_company_user_with_valid_data(): void
+    public function test_that_auth_manager_user_can_update_company_user_with_valid_data(): void
     {
         $this->actingAs(self::$userManager)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/users', self::$userDetails)
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/users/'.self::$userLenderAdmin->id, self::$userDetails)
             ->assertOk()
-            ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'first_name',
-                    'last_name',
-                    'email',
-                    'phone_number',
-                    'phone_country_code',
-                    'formatted_phone_number',
-                ],
+            ->assertExactJson([
+                'data' => [],
             ]);
     }
 
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_cant_store_company_user_without_first_name(): void
+    public function test_that_auth_admin_user_cant_update_company_user_without_first_name(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/users', Arr::except(self::$userDetails, 'first_name'))
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/users/'.self::$userLenderAdmin->id, Arr::except(self::$userDetails, 'first_name'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The first name field is required.',
@@ -121,10 +108,10 @@ class CompanyUserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_cant_store_company_user_without_last_name(): void
+    public function test_that_auth_admin_user_cant_update_company_user_without_last_name(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/users', Arr::except(self::$userDetails, 'last_name'))
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/users/'.self::$userLenderAdmin->id, Arr::except(self::$userDetails, 'last_name'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The last name field is required.',
@@ -139,10 +126,10 @@ class CompanyUserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_cant_store_company_user_without_phone_country_code(): void
+    public function test_that_auth_admin_user_cant_update_company_user_without_phone_country_code(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/users', Arr::except(self::$userDetails, 'phone_country_code'))
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/users/'.self::$userLenderAdmin->id, Arr::except(self::$userDetails, 'phone_country_code'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The phone country code field is required when phone number is present. (and 1 more error)',
@@ -160,10 +147,10 @@ class CompanyUserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_cant_store_company_user_without_phone_number(): void
+    public function test_that_auth_admin_user_cant_update_company_user_without_phone_number(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/users', Arr::except(self::$userDetails, 'phone_number'))
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/users/'.self::$userLenderAdmin->id, Arr::except(self::$userDetails, 'phone_number'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The phone number field is required.',
@@ -178,10 +165,10 @@ class CompanyUserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_cant_store_company_user_without_email(): void
+    public function test_that_auth_admin_user_cant_update_company_user_without_email(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/users', Arr::except(self::$userDetails, 'email'))
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/users/'.self::$userLenderAdmin->id, Arr::except(self::$userDetails, 'email'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The email field is required.',
@@ -196,28 +183,23 @@ class CompanyUserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_cant_store_company_user_without_redirect_url(): void
+    public function test_that_auth_admin_user_can_update_company_user_without_redirect_url(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/users', Arr::except(self::$userDetails, 'redirect_url'))
-            ->assertUnprocessable()
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/users/'.self::$userLenderAdmin->id, Arr::except(self::$userDetails, 'redirect_url'))
+            ->assertOk()
             ->assertExactJson([
-                'message' => 'The redirect url field is required.',
-                'errors' => [
-                    'redirect_url' => [
-                        'The redirect url field is required.',
-                    ],
-                ],
+                'data' => [],
             ]);
     }
 
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_cant_store_company_user_without_role(): void
+    public function test_that_auth_admin_user_cant_update_company_user_without_role(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/users', Arr::except(self::$userDetails, 'role'))
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/users/'.self::$userLenderAdmin->id, Arr::except(self::$userDetails, 'role'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The role field is required.',
@@ -232,10 +214,10 @@ class CompanyUserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_cant_store_company_user_with_api_role(): void
+    public function test_that_auth_admin_user_cant_update_company_user_with_lender_api_user_role(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/users', array_merge(self::$userDetails, ['role' => Role::LenderApiUser]))
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/users/'.self::$userLenderAdmin->id, array_merge(self::$userDetails, ['role' => Role::LenderApiUser]))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The selected role is invalid.',

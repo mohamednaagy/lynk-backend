@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\V1\Lender\Users;
+namespace App\Http\Requests\V1\Admin\Companies\Users;
 
 use App\Enums\Area;
 use App\Enums\Role;
@@ -10,7 +10,7 @@ use App\Rules\UrlProtocolRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreCompanyUserRequest extends FormRequest
+class StoreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

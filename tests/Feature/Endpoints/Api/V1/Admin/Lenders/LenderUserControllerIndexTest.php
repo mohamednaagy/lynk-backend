@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Companies;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Enums\Area;
 use App\Enums\Role;
@@ -13,7 +13,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class CompanyUserControllerIndexTest extends TestCase
+class LenderUserControllerIndexTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
