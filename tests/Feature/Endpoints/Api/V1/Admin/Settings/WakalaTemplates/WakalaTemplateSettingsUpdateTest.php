@@ -7,8 +7,7 @@ use App\Enums\Area;
 use App\Enums\Subject;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\Fluent\AssertableJson;
-use Modules\Grantify\Facades\Grantify;
+use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithAdmin;
@@ -19,7 +18,9 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
 
     const BaseUrl = 'api/v1/admin/wakala-templates/';
 
-    private static string $wakalaUrl;
+    private static string $clientWakalaUrl;
+
+    private static string $companyWakalaUrl;
 
     private static array $wakalaTemplatesTypes = [
         'client' => 'client',
@@ -31,6 +32,8 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
 
     private static User $manager;
 
+    private static User $managerHasPermission;
+
     private static array $wakalaSettingsData = [];
 
     /**
@@ -41,8 +44,13 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
         parent::setUp();
 
         self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager(permissions: perm(Area::SuperAdmin, [Subject::WakalaTemplates, Action::Edit]));
-        self::$wakalaUrl = self::BaseUrl.self::$wakalaTemplatesTypes['client'];
+        self::$manager = $this->createManager();
+        self::$managerHasPermission = $this->createManager(
+            'managerHasPermission@bim.com',
+            perm(Area::SuperAdmin, [Subject::WakalaTemplates, Action::Edit])
+        );
+        self::$clientWakalaUrl = self::BaseUrl.self::$wakalaTemplatesTypes['client'];
+        self::$companyWakalaUrl = self::BaseUrl.self::$wakalaTemplatesTypes['company'];
         self::$wakalaSettingsData = [
             'wakala_template' => '<p>This is the wakala template test</p>',
         ];
@@ -51,9 +59,9 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_index_wakala_template_settings(): void
+    public function test_that_un_auth_user_cant_index_wakala_template_settings_failed(): void
     {
-        $this->putJson(self::$wakalaUrl)
+        $this->putJson(self::$clientWakalaUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
                 'message' => 'Unauthenticated.',
@@ -63,12 +71,10 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_wakala_template_settings_on_empty_wakala_template(): void
+    public function test_update_client_wakala_template_settings_on_empty_wakala_template_failed(): void
     {
-        unset(self::$wakalaSettingsData['wakala_template']);
-
         $this->actingAs(self::$admin)
-            ->putJson(self::$wakalaUrl, self::$wakalaSettingsData)
+            ->putJson(self::$clientWakalaUrl, Arr::except(self::$wakalaSettingsData, ['wakala_template']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The wakala template field is required.',
@@ -83,24 +89,39 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_user_cannot_index_wakala_template_settings_on_invalid_wakala_template_type_parameter(): void
+    public function test_update_company_wakala_template_settings_on_empty_wakala_template_failed(): void
     {
-        $this->actingAs(self::$manager)
-            ->getJson(self::BaseUrl.self::$wakalaTemplatesTypes['invalid'])
-            ->assertStatus(Response::HTTP_NOT_FOUND)
-            ->assertJson(
-                fn (AssertableJson $json) => $json->where('message', '')
-                    ->etc()
-            );
+        $this->actingAs(self::$admin)
+            ->putJson(self::$companyWakalaUrl, Arr::except(self::$wakalaSettingsData, ['wakala_template']))
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonFragment([
+                'message' => 'The wakala template field is required.',
+                'errors' => [
+                    'wakala_template' => [
+                        'The wakala template field is required.',
+                    ],
+                ],
+            ]);
     }
 
     /**
      * @return void
      */
-    public function test_that_auth_user_has_admin_role_can_update_wakala_template_settings(): void
+    public function test_that_auth_user_cannot_index_wakala_template_settings_on_invalid_wakala_template_type_parameter_failed(): void
     {
         $this->actingAs(self::$admin)
-            ->putJson(self::$wakalaUrl, self::$wakalaSettingsData)
+            ->getJson(self::BaseUrl.self::$wakalaTemplatesTypes['invalid'])
+            ->assertStatus(Response::HTTP_NOT_FOUND)
+            ->assertJsonPath('message', '');
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_auth_user_has_admin_role_can_update_client_wakala_template_settings_succeed(): void
+    {
+        $this->actingAs(self::$admin)
+            ->putJson(self::$clientWakalaUrl, self::$wakalaSettingsData)
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'data',
@@ -110,30 +131,61 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_user_has_manager_role_can_update_wakala_template_settings(): void
+    public function test_that_auth_user_has_admin_role_can_update_company_wakala_template_settings_succeed(): void
     {
-        $this->actingAs(self::$manager)
-            ->putJson(self::$wakalaUrl, self::$wakalaSettingsData)
+        $this->actingAs(self::$admin)
+            ->putJson(self::$companyWakalaUrl, self::$wakalaSettingsData)
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'data',
-            ]
-            );
+            ]);
     }
 
     /**
      * @return void
      */
-    public function test_that_auth_user_without_right_permissions_cannot_update_wakala_template_settings(): void
+    public function test_that_auth_user_has_manager_role_and_right_permission_can_update_client_wakala_template_settings_succeed(): void
     {
-        Grantify::syncPermissionToModel(self::$manager, []);
+        $this->actingAs(self::$managerHasPermission)
+            ->putJson(self::$clientWakalaUrl, self::$wakalaSettingsData)
+            ->assertStatus(Response::HTTP_OK)
+            ->assertJsonStructure([
+                'data',
+            ]);
+    }
 
+    /**
+     * @return void
+     */
+    public function test_that_auth_user_has_manager_role_and_right_permission_can_update_company_wakala_template_settings_succeed(): void
+    {
+        $this->actingAs(self::$managerHasPermission)
+            ->putJson(self::$companyWakalaUrl, self::$wakalaSettingsData)
+            ->assertStatus(Response::HTTP_OK)
+            ->assertJsonStructure([
+                'data',
+            ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_auth_user_without_right_permissions_cannot_update_client_wakala_template_settings_failed(): void
+    {
         $this->actingAs(self::$manager)
-            ->putJson(self::$wakalaUrl, self::$wakalaSettingsData)
+            ->putJson(self::$clientWakalaUrl, self::$wakalaSettingsData)
             ->assertStatus(Response::HTTP_FORBIDDEN)
-            ->assertJson(
-                fn (AssertableJson $json) => $json->where('message', 'User does not have the right permissions.')
-                    ->etc()
-            );
+            ->assertJsonPath('message', 'User does not have the right permissions.');
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_auth_user_without_right_permissions_cannot_update_company_wakala_template_settings_failed(): void
+    {
+        $this->actingAs(self::$manager)
+            ->putJson(self::$companyWakalaUrl, self::$wakalaSettingsData)
+            ->assertStatus(Response::HTTP_FORBIDDEN)
+            ->assertJsonPath('message', 'User does not have the right permissions.');
     }
 }
