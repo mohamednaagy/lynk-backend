@@ -28,7 +28,7 @@ return [
         FinancingOrderStatus::WaitingPurchasingCommodity => 'في انتظار شراء السلعة',
         FinancingOrderStatus::ClientWakalaCompleted => 'تم استكمال وكالة العميل',
         FinancingOrderStatus::RespondedToPtp => ' الرد بالوعد بالشراء',
-        FinancingOrderStatus::PtpDocumentRetrieved => ' تم استرداد المستند الوعد بالشراء',
+        FinancingOrderStatus::PtpDocumentRetrieved => ' تم استرداد مستند الوعد بالشراء',
         FinancingOrderStatus::PendingCancellation => 'في انتظار الإلغاء',
     ],
 ];
