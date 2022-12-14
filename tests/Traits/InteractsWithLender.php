@@ -11,6 +11,7 @@ use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use Carbon\Carbon;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -20,15 +21,13 @@ use Modules\Grantify\Facades\Grantify;
 trait InteractsWithLender
 {
     /**
-     * @param  int  $walletInitialAmount
      * @param  array  $data
-     * @return array
+     * @return Company
      */
-    public function createCompany(
-        int $walletInitialAmount = 2000,
+    public function createCompanyWithoutWallet(
         array $data = []
-    ): array {
-        $company = Company::factory()->create(array_merge([
+    ): Company {
+        return Company::factory()->create(array_merge([
             'first_name' => 'firstName',
             'last_name' => 'lastName',
             'phone_country_code' => 'SA',
@@ -40,11 +39,29 @@ trait InteractsWithLender
             'company_unique_name' => 'lynk05',
             'company_cr' => '12345678910',
         ], $data));
+    }
+
+    /**
+     * @param  int  $walletInitialAmount
+     * @param  array  $data
+     * @return array
+     *
+     * @throws BindingResolutionException
+     */
+    public function createCompany(
+        int $walletInitialAmount = 2000,
+        array $data = []
+    ): array {
+        $company = $this->createCompanyWithoutWallet($data);
 
         $wallet = $company->createWallet(WalletType::CompanyWallet, 'SAR');
 
         app()->make(TransactionServiceInterface::class)->deposit(
-            $wallet, \money($walletInitialAmount, 'SAR'), 1, 1, []
+            $wallet,
+            \money($walletInitialAmount, 'SAR'),
+            1,
+            1,
+            []
         );
 
         return [
@@ -124,6 +141,25 @@ trait InteractsWithLender
         foreach ($roles as $role) {
             $user = $this->createLenderUser($company->id, $role, (string) Str::uuid().'@test.test');
             $request($user, $role)->assertStatus(403);
+        }
+
+        return $request;
+    }
+
+    public function assertStatusToSpecificRoles(int $status, array $roles, Company $company = null, $request)
+    {
+        if (is_null($company)) {
+            [$company] = $this->createCompany(
+                2000,
+                [
+                    'company_cr' => (string) Str::uuid(),
+                ]
+            );
+        }
+
+        foreach ($roles as $role) {
+            $user = $this->createLenderUser($company->id, $role, (string) Str::uuid().'@test.test');
+            $request($user, $role)->assertStatus($status);
         }
 
         return $request;

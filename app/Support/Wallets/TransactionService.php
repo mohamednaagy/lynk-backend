@@ -63,13 +63,13 @@ class TransactionService implements TransactionServiceInterface
         $deposit = $this->deposit($toWallet, $amount, $type, $referenceNumber, $meta);
 
         return Transfer::create([
-            'from_type' => $fromWallet->getMorphClass(),
+            'uuid' => Str::uuid(),
+            'amount' => $amount,
             'from_id' => $fromWallet->getKey(),
-            'to_type' => $toWallet->getMorphClass(),
             'to_id' => $toWallet->getKey(),
             'deposit_id' => $deposit->getKey(),
             'withdraw_id' => $withdraw->getKey(),
-            'meta' => $meta,
+            'data' => $meta,
         ]);
     }
 

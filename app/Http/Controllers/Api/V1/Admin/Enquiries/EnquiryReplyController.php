@@ -24,38 +24,38 @@ class EnquiryReplyController extends Controller
      */
     public function index(Enquiry $enquiry): JsonResponse
     {
-        $enquiryReplies = $enquiry->replies()->latest()->get();
+        $enquiry->load(['replies' => function ($query) {
+            $query->latest();
+        }]);
 
-        return fractal($enquiryReplies, new EnquiryReplyTransformer())
-            ->parseIncludes(['creator'])
+        return fractal($enquiry->replies, new EnquiryReplyTransformer())
+            ->parseIncludes([
+                'id',
+                'body',
+                'creation_date',
+                'creator',
+            ])
             ->respond();
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  ReplyToEnquiryRequest  $replyToEnquiryRequest
+     * @param  ReplyToEnquiryRequest  $request
      * @param  ReplyToEnquiryInterface  $replyToEnquiry
      * @param  Enquiry  $enquiry
      * @return JsonResponse
      */
     public function store(
-        ReplyToEnquiryRequest $replyToEnquiryRequest,
+        ReplyToEnquiryRequest $request,
         ReplyToEnquiryInterface $replyToEnquiry,
         Enquiry $enquiry
     ): JsonResponse {
-        return DB::transaction(function () use ($replyToEnquiryRequest, $replyToEnquiry, $enquiry) {
-            // check if the enquiry is closed already
-            if ($enquiry->status->is(EnquiryStatus::Closed)) {
-                return $this->errorResponse(
-                    __('error.enquiry_closed_already')
-                );
-            }
-
+        return DB::transaction(function () use ($request, $replyToEnquiry, $enquiry) {
             // create the enquiry reply
-            $data = $replyToEnquiryRequest->validated();
+            $data = $request->validated();
             $data['enquiry_id'] = $enquiry->id;
-            $data['user_id'] = ($user = $replyToEnquiryRequest->user())->id;
+            $data['user_id'] = ($user = $request->user())->id;
             $data['role_id'] = $user->roles()
                 ->whereIn('name', Area::roles(Area::SuperAdmin))
                 ->firstOrFail()
@@ -65,18 +65,23 @@ class EnquiryReplyController extends Controller
             // change the enquiry status to be resolved
             if ($enquiry->status->is(EnquiryStatus::UnderReview)) {
                 $enquiry->update([
-                    'status' => ! empty($data['status']) ? $data['status'] : EnquiryStatus::Resolved,
+                    'status' => $data['status'] ?? EnquiryStatus::Resolved,
                 ]);
             }
 
             // send email to notify the visitor with the reply
             if ($enquiry->email) {
-                $invitationUrl = $replyToEnquiryRequest->validated('redirect_url');
+                $invitationUrl = $request->validated('redirect_url');
                 Mail::to($enquiry->email)->send(new ReplyToVisitorEnquiry($enquiry, $invitationUrl));
             }
 
             return fractal($enquiryReply, new EnquiryReplyTransformer())
-                ->parseIncludes(['creator'])
+                ->parseIncludes([
+                    'id',
+                    'body',
+                    'creation_date',
+                    'creator',
+                ])
                 ->respond();
         });
     }

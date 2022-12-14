@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Rules\HostWhitelistRule;
 use App\Rules\UrlProtocolRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
@@ -43,9 +42,8 @@ class StoreUserRequest extends FormRequest
             'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
             'role' => [
                 'required',
-                Rule::in(
-                    Arr::except(Area::roles(Area::Lender), [Role::LenderApiUser])
-                ),
+                Rule::in(Area::roles(Area::Lender)),
+                Rule::notIn([Role::LenderApiUser]),
             ],
         ];
     }

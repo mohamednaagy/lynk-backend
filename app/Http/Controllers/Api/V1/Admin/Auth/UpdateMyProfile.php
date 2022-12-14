@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Auth;
 
-use App\Actions\Contracts\UpdateUser;
+use App\Actions\Contracts\Auth\UpdateMyProfile as UpdateMyProfileInterface;
+use App\Enums\Area;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Auth\UpdateMyProfileRequest;
 use Illuminate\Http\JsonResponse;
@@ -13,22 +14,22 @@ class UpdateMyProfile extends Controller
     /**
      * Handle an authentication attempt.
      *
-     * @param  UpdateMyProfileRequest  $updateMyProfileRequest
-     * @param  UpdateUser  $updateUser
+     * @param  UpdateMyProfileRequest  $request
+     * @param  UpdateMyProfileInterface  $updateMyProfile
      * @return JsonResponse
      */
     public function __invoke(
-        UpdateMyProfileRequest $updateMyProfileRequest,
-        UpdateUser $updateUser
+        UpdateMyProfileRequest $request,
+        UpdateMyProfileInterface $updateMyProfile
     ): JsonResponse {
-        $user = $updateMyProfileRequest->user();
-        $data = $updateMyProfileRequest->validated();
+        $user = $request->user();
+        $data = $request->validated();
 
-        if (array_key_exists('password', $data) && is_null($data['password'])) {
+        if (empty($data['password'])) {
             $data = Arr::except($data, 'password');
         }
 
-        $updateUser->handle($user, $data);
+        $updateMyProfile->handle($user, $data, Area::SuperAdmin);
 
         return $this->successResponse();
     }

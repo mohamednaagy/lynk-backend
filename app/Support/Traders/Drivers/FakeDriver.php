@@ -146,31 +146,7 @@ class FakeDriver implements TraderInterface
      */
     public function cancelOrder(FinancingOrder $financingOrder): mixed
     {
-        $traderOrder = $financingOrder->activeTraderOrder()->first();
-        $response = $this->soap
-            ->baseWsdl($this->buildUrl('cancelTTI'))
-            ->call('cancelTTI', [
-                'ttiId' => $traderOrder->reference,
-                'comments' => 'Cancel Order',
-                'confirmAction' => 'true',
-            ]);
-
-        if (! $this->isSuccess($response)) {
-            throw new TraderException(collect([
-                'driver' => 'fake',
-                'step' => 'cancelOrder',
-                'requestBody' => [
-                    'ttiId' => $traderOrder->reference,
-                    'comments' => 'Cancel Order',
-                    'confirmAction' => 'true',
-                ],
-                'responseBody' => $response->body(),
-                'financingOrderId' => $financingOrder->id,
-                'traderOrderId' => $traderOrder->id,
-            ]));
-        }
-
-        return $response->object();
+        return true;
     }
 
     /**

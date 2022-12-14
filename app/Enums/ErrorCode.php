@@ -37,4 +37,8 @@ class ErrorCode
     public const COMPANY_NOT_ACTIVE = 1015;
 
     public const ORDER_NOT_UPDATABLE = 1016;
+
+    public const ENQUIRY_CLOSED_ALREADY = 1017;
+
+    public const ORDER_ALREADY_APPROVED = 1018;
 }

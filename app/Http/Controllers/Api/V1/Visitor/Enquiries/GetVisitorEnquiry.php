@@ -9,10 +9,21 @@ use Illuminate\Http\JsonResponse;
 
 class GetVisitorEnquiry extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['signed', 'throttle:6,1']);
+    }
+
     public function __invoke(Enquiry $enquiry): JsonResponse
     {
         return fractal($enquiry, new EnquiryTransformer())
-            ->parseIncludes(['body'])
+            ->parseIncludes([
+                'id',
+                'subject',
+                'status',
+                'creation_date',
+                'body',
+            ])
             ->respond();
     }
 }

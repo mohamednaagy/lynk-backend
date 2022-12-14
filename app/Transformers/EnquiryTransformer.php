@@ -11,6 +11,10 @@ class EnquiryTransformer extends TransformerAbstract
     protected array $defaultIncludes = [];
 
     protected array $availableIncludes = [
+        'id',
+        'subject',
+        'status',
+        'creation_date',
         'body',
         'creator',
         'replies',
@@ -18,15 +22,30 @@ class EnquiryTransformer extends TransformerAbstract
 
     public function transform(Enquiry $enquiry): array
     {
-        return [
-            'id' => $enquiry->id,
-            'subject' => $enquiry->subject,
-            'status' => [
-                'description' => $enquiry->status->description,
-                'value' => $enquiry->status->value,
-            ],
-            'creation_date' => $enquiry->created_at->format('Y-m-d h:m A'),
-        ];
+        return [];
+    }
+
+    public function includeId(Enquiry $enquiry): Primitive
+    {
+        return $this->primitive($enquiry->id);
+    }
+
+    public function includeSubject(Enquiry $enquiry): Primitive
+    {
+        return $this->primitive($enquiry->subject);
+    }
+
+    public function includeStatus(Enquiry $enquiry): Primitive
+    {
+        return $this->primitive([
+            'description' => $enquiry->status->description,
+            'value' => $enquiry->status->value,
+        ]);
+    }
+
+    public function includeCreationDate(Enquiry $enquiry): Primitive
+    {
+        return $this->primitive($enquiry->created_at->format('Y-m-d h:m A'));
     }
 
     public function includeBody(Enquiry $enquiry): Primitive
