@@ -42,5 +42,7 @@ final class Subject extends Enum
 
     const LenderWebhooks = 'lenderWebhooks';
 
+    const LenderAreaSettings = 'lenderAreaSettings';
+
     const ProjectSettings = 'projectSettings';
 }

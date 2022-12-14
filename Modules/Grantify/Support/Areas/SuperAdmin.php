@@ -62,6 +62,11 @@ class SuperAdmin
             Action::Index,
             Action::Create,
         ],
+        Subject::LenderAreaSettings => [
+            Action::Index,
+            Action::Edit,
+            Action::Manage,
+        ],
         Subject::ProjectSettings => [
             Action::Index,
             Action::Edit,
