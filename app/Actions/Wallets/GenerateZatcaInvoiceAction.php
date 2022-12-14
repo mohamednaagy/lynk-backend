@@ -8,7 +8,8 @@ use App\Enums\MediaCollections\ZatcaInvoiceMediaCollection;
 use App\Models\FinancingOrder;
 use App\Models\Transaction;
 use App\Support\PdfGenerator\PdfGenerator;
-use App\Support\ZatcaEinvoice\Order;
+use App\Support\ZatcaEInvoice\Order;
+use App\Support\ZatcaEInvoice\PurchaseLine;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Salla\ZATCA\GenerateQrCode;
@@ -43,7 +44,20 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
 
             $html = view($this->getTemplate(), [
                 'seller' => $seller,
-                'order' => new Order($financingOrder, $seller->getVatRate()),
+                'order' => new Order(
+                    $creationFeeTransaction->reference_number,
+                    [
+                        new PurchaseLine(
+                            __('zatca/e-invoice.create_order_cost', [
+                                'number' => $financingOrder->getKey(),
+                            ]),
+                            tenant()->order_cost,
+                            $seller->getVatRateInPercentage()
+                        ),
+                    ],
+                    now('Asia/Riyadh'),
+                    $financingOrder
+                ),
                 'qr_code' => $displayQRCodeAsBase64,
                 'buyer' => $financingOrder->company,
                 'creationFeeTransaction' => $creationFeeTransaction,

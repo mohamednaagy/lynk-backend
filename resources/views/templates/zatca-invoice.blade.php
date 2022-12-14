@@ -756,7 +756,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 <div dir="{{ App::getLocale() === 'en' ? 'ltr' : 'rtl' }}">
     <div class="mb-6 flex items-center justify-between">
         <div>
-            <img class="mx-auto h-20 w-auto" src="{{ asset('color-logo.svg') }}"/>
+            <img class="mx-auto h-20 w-auto" src="{{ asset('color-logo.svg') }}" />
         </div>
         <div>
             <h2 class="text-2xl font-bold">{{ __('zatca/e-invoice.tax_invoice') }}</h2>
@@ -785,7 +785,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             </div>
             <h2 class="mb-1 font-semibold">{{ $buyer->name }}</h2>
             <ul class="text-xs text-gray-500">
-                <li>{{ __('zatca/e-invoice.contact_number') }}: {{ $buyer->mobileDialingPhoneNumber }}</li>
+{{--                <li>{{ __('zatca/e-invoice.contact_number') }}: {{ $buyer->mobile_dialing_phone_number }}</li>--}}
             </ul>
         </div>
 
@@ -826,32 +826,33 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         </div>
     </div>
 
-    <div class="flex px-2 py-3 text-gray-600">
-        <div class="w-3/12">
-            <div>{{__('zatca/e-invoice.create_order_cost')}}</div>
-        </div>
+    @foreach ($order->getItems() as $item)
+        <div class="flex px-2 py-3 text-gray-600">
+            <div class="w-3/12">
+                <div>{{ $item->getName() }}</div>
+            </div>
 
-        <div class="w-2/12">
-            <div>{{ $creationFeeTransaction->amount->formatByDecimal() }}</div>
-        </div>
+            <div class="w-1/12">
+                <div>{{ $item->getQuantity() }}</div>
+            </div>
 
-        <div class="w-3/12">
-            <div>{{__('zatca/e-invoice.vat' )}}</div>
-        </div>
+            <div class="w-2/12">
+                <div>{{ $item->getItemPrice()->formatByDecimal() }}</div>
+            </div>
 
-        <div class="w-2/12">
-            <div>{{ $seller->getVatRateInPercentage() ?? 0 }}%</div>
-        </div>
+            <div class="w-2/12">
+                <div>{{ $item->getDiscountPercentage() ?? 0 }}%</div>
+            </div>
 
-        <div class="w-2/12">
-            <div>total</div>
-        </div>
+            <div class="w-2/12">
+                <div>{{ $item->getVatPercentage() === null ? 'N' : 'V' }}</div>
+            </div>
 
-        <div class="w-2/12">
-            <div>{{ $creationFeeTransaction->amount->formatByDecimal() }}</div>
+            <div class="w-2/12">
+                <div>{{ $item->getLineTotalWithoutVat()->formatByDecimal() }}</div>
+            </div>
         </div>
-    </div>
-
+    @endforeach
     <div class="bg-primary-700 h-px w-full"></div>
 
     <div class="flex items-center justify-between">
@@ -861,7 +862,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 <h2 class="text-xl font-bold">{{ __('zatca/e-invoice.tax_rates') }}</h2>
                 <ul class="mt-2">
                     <li>"V"
-                        {{ __('zatca/e-invoice.vat_symbol_v', ['percentage' => $seller->getVatRateInPercentage()]) }}
+                        {{ __('zatca/e-invoice.vat_symbol_v', ['percentage' => collect($order->getItems())->filter(fn($item) => $item->getVatPercentage() !== null)->first()->getVatPercentage()]) }}
                     </li>
                     <li>"N" {{ __('zatca/e-invoice.vat_symbol_n') }}</li>
                 </ul>
@@ -871,21 +872,29 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             <div class="grid grid-cols-2 gap-4 py-3">
                 <div>{{ __('zatca/e-invoice.subtotal') }}</div>
                 <div>
-                    {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getSubtotal()]) }}
+                    {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getSubtotal()->formatByDecimal()]) }}
                 </div>
+
+                @if ($order->getTotalDiscount()->getAmount() > 0)
+                    <div>{{ __('zatca/e-invoice.total_discount') }}</div>
+                    <div>
+                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalDiscount()->formatByDecimal()]) }}
+                    </div>
+                @endif
+
                 <div>{{ __('zatca/e-invoice.total_before_vat') }}</div>
                 <div>
-                    {{ __('zatca/e-invoice.amount_with_currency', [ 'amount' => $order->getTotalWithoutVat() ]) }}
+                    {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalWithoutVat()->formatByDecimal()]) }}
                 </div>
 
                 <div>{{ __('zatca/e-invoice.vat_total') }}</div>
                 <div>
-                    {{ __('zatca/e-invoice.amount_with_currency', [ 'amount' => $order->getTotalVat() ]) }}
+                    {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalVat()->formatByDecimal()]) }}
                 </div>
 
                 <div>{{ __('zatca/e-invoice.total') }}</div>
                 <div class="font-bold text-gray-800">
-                    {{ __('zatca/e-invoice.amount_with_currency', ['amount' =>  $order->getTotalAmount()]) }}
+                    {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalAmount()->formatByDecimal()]) }}
                 </div>
             </div>
             <div class="bg-primary-800 h-px w-full"></div>
@@ -893,6 +902,44 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
     </div>
 </div>
 
+<!-- Code injected by live-server -->
+<script>
+    // <![CDATA[  <-- For SVG support
+    if ('WebSocket' in window) {
+        (function () {
+            function refreshCSS() {
+                var sheets = [].slice.call(document.getElementsByTagName("link"));
+                var head = document.getElementsByTagName("head")[0];
+                for (var i = 0; i < sheets.length; ++i) {
+                    var elem = sheets[i];
+                    var parent = elem.parentElement || head;
+                    parent.removeChild(elem);
+                    var rel = elem.rel;
+                    if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                        var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                        elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                    }
+                    parent.appendChild(elem);
+                }
+            }
+            var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+            var address = protocol + window.location.host + window.location.pathname + '/ws';
+            var socket = new WebSocket(address);
+            socket.onmessage = function (msg) {
+                if (msg.data == 'reload') window.location.reload();
+                else if (msg.data == 'refreshcss') refreshCSS();
+            };
+            if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                console.log('Live reload enabled.');
+                sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+            }
+        })();
+    }
+    else {
+        console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+    }
+    // ]]>
+</script>
 </body>
 
 </html>

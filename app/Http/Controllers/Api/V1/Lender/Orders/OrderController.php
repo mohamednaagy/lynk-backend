@@ -128,7 +128,14 @@ class OrderController extends Controller
         GenerateZatcaInvoice $generateFatoura
     ): JsonResponse {
         return DB::multipleTransaction(
-            function () use ($request, $createFinancingOrder, $deductOrderCreationFee, $canCreateOrder, $deductVatPercentage, $generateFatoura) {
+            function () use (
+                $request,
+                $createFinancingOrder,
+                $deductOrderCreationFee,
+                $canCreateOrder,
+                $deductVatPercentage,
+                $generateFatoura
+            ) {
                 $company = tenant();
                 // throw exception is balance not enough
                 $canCreateOrder->handle($company);

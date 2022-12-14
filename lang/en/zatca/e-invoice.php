@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'tax_invoice' => 'Fee of financing order',
+    'tax_invoice' => 'Simplified tax invoice',
     'bill_from' => 'Bill From',
     'bill_to' => 'Bill To',
     'order_details' => 'Order Details',
@@ -27,6 +27,6 @@ return [
     'tax_rates' => 'Tax Rates',
     'invoice_number' => 'Invoice #:number',
     'amount_with_currency' => 'SAR :amount',
-    'create_order_cost' => 'Create Order Cost',
+    'create_order_cost' => 'Fee of financing order #:number',
     'vat' => 'VAT percentage',
 ];

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'tax_invoice' => 'تكلفة طلب تمويلي رقم',
+    'tax_invoice' => 'الفاتورة الضريبية المبسطه',
     'bill_from' => 'فاتورة من',
     'bill_to' => 'فاتورة إلى',
     'order_details' => 'بيانات الطلب',
@@ -27,6 +27,6 @@ return [
     'total' => 'إجمالي قيمة الفاتورة شامل الضريبة',
     'invoice_number' => 'فاتورة #:number',
     'amount_with_currency' => ':amount ريال',
-    'create_order_cost' => 'نكلفه انشاء الطلب',
+    'create_order_cost' => 'تكلفة طلب تمويلي رقم #number:',
     'vat' => 'نسبه قيمه الضريبه المضافه',
 ];
