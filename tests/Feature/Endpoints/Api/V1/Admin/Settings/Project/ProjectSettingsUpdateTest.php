@@ -5,7 +5,9 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Settings\Project;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Enums\Subject;
+use App\Models\Company;
 use App\Models\User;
 use App\Settings\Classes\ProjectSettings;
 use Exception;
@@ -15,11 +17,12 @@ use Spatie\LaravelSettings\Settings;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithAdmin;
+use Tests\Traits\InteractsWithLender;
 use Tests\Traits\InteractsWithSettings;
 
 class ProjectSettingsUpdateTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin, InteractsWithSettings;
+    use RefreshDatabase, InteractsWithAdmin, InteractsWithSettings, InteractsWithLender;
 
     const BaseUrl = 'api/v1/admin/settings/project';
 
@@ -28,6 +31,10 @@ class ProjectSettingsUpdateTest extends TestCase
     private static User $manager;
 
     private static User $managerHasPermission;
+
+    private static Company $company;
+
+    private static User $userLenderAdmin;
 
     private static $projectSettings;
 
@@ -48,6 +55,8 @@ class ProjectSettingsUpdateTest extends TestCase
             'managerHasPermission@bim.com',
             perm(Area::SuperAdmin, [Subject::ProjectSettings, Action::Edit])
         );
+        [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
         self::$projectSettings = $this->app->make(GetProjectSettings::class)->handle();
         self::$projectSettingsClass = $this->app->make(ProjectSettings::class);
         self::$projectSettingsData = [
@@ -72,13 +81,24 @@ class ProjectSettingsUpdateTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_index_lender_settings_failed(): void
+    public function test_that_un_auth_user_cant_update_lender_settings_failed(): void
     {
         $this->putJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
-                'message' => 'Unauthenticated.',
+                'message' => __('Unauthenticated.'),
             ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_un_authorized_user_without_right_role_cant_update_lender_settings_failed(): void
+    {
+        $this->actingAs(self::$userLenderAdmin)
+            ->getJson(self::BaseUrl)
+            ->assertStatus(Response::HTTP_FORBIDDEN)
+            ->assertJsonPath('message', 'User does not have the right roles.');
     }
 
     /**
