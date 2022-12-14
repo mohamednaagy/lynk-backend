@@ -43,42 +43,49 @@ class WalletServiceTest extends TestCase
     {
         $wallet = self::$walletService->create(self::$model, self::$walletInformation);
         $this->assertInstanceOf(Wallet::class, $wallet);
+        $this->assertSame($wallet->name, self::$walletInformation['name']);
     }
 
     public function test_wallet_service_find_by_id_method_return_wallet_model()
     {
         $wallet = self::$walletService->findById(self::$wallet->id);
         $this->assertInstanceOf(Wallet::class, $wallet);
+        $this->assertSame($wallet->id, self::$wallet->id);
     }
 
     public function test_wallet_service_find_by_uuid_method_return_wallet_model()
     {
         $wallet = self::$walletService->findByUuid(self::$wallet->uuid);
         $this->assertInstanceOf(Wallet::class, $wallet);
+        $this->assertSame($wallet->uuid, self::$wallet->uuid);
     }
 
     public function test_wallet_service_find_by_name_method_return_wallet_model()
     {
         $wallet = self::$walletService->findByName(self::$model, self::$wallet->name);
         $this->assertInstanceOf(Wallet::class, $wallet);
+        $this->assertSame($wallet->name, self::$wallet->name);
     }
 
     public function test_wallet_service_find_by_id_or_fail_method_return_wallet_model()
     {
         $wallet = self::$walletService->findByIdOrFail(self::$wallet->id);
         $this->assertInstanceOf(Wallet::class, $wallet);
+        $this->assertSame($wallet->id, self::$wallet->id);
     }
 
     public function test_wallet_service_find_by_uuid_or_fail_method_return_wallet_model()
     {
         $wallet = self::$walletService->findByUuidOrFail(self::$wallet->uuid);
         $this->assertInstanceOf(Wallet::class, $wallet);
+        $this->assertSame($wallet->uuid, self::$wallet->uuid);
     }
 
     public function test_wallet_service_find_by_name_or_fail_method_return_wallet_model()
     {
         $wallet = self::$walletService->findByNameOrFail(self::$model, self::$wallet->name);
         $this->assertInstanceOf(Wallet::class, $wallet);
+        $this->assertSame($wallet->name, self::$wallet->name);
     }
 
     public function test_wallet_service_find_by_id_method_return_null_when_model_not_found()
