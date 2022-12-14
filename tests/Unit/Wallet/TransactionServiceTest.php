@@ -45,7 +45,7 @@ class TransactionServiceTest extends TestCase
         $this->assertInstanceOf(Transaction::class, $transaction);
     }
 
-    public function test_transaction_service_withdraw_method_always_convert_money_to_negtive()
+    public function test_transaction_service_withdraw_method_always_convert_money_to_negative()
     {
         $transaction = self::$transactionService->withdraw(self::$wallet, Money::parseByDecimal(100, 'SAR'), 1);
 
@@ -59,7 +59,7 @@ class TransactionServiceTest extends TestCase
         $this->assertInstanceOf(Transaction::class, $transaction);
     }
 
-    public function test_transaction_service_deposit_method_always_convert_money_to_postive()
+    public function test_transaction_service_deposit_method_always_convert_money_to_positive()
     {
         $transaction = self::$transactionService->deposit(self::$wallet, Money::parseByDecimal(-100, 'SAR'), 1);
 

@@ -34,7 +34,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('transfers', function (Blueprint $table) {
-            $table->dropColumn('meta');
+            $table->renameColumn('meta', 'data');
         });
     }
 };
