@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Wallet\Traits;
+namespace Tests\Unit\Wallets\Traits;
 
 use App\Enums\TransactionReason;
 use App\Models\Wallet;
