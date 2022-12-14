@@ -73,7 +73,7 @@ class TransactionServiceTest extends TestCase
         $this->assertInstanceOf(Transfer::class, $transfer);
     }
 
-    public function test_transaction_service_transfer_money_transfared_successfully()
+    public function test_transaction_service_transfer_money_transfered_successfully()
     {
         $amount = Money::parseByDecimal(100, 'SAR');
         $fromWallet = self::$wallet;
