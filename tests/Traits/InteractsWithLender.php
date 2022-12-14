@@ -21,17 +21,13 @@ use Modules\Grantify\Facades\Grantify;
 trait InteractsWithLender
 {
     /**
-     * @param  int  $walletInitialAmount
      * @param  array  $data
-     * @return array
-     *
-     * @throws BindingResolutionException
+     * @return Company
      */
-    public function createCompany(
-        int $walletInitialAmount = 2000,
+    public function createCompanyWithoutWallet(
         array $data = []
-    ): array {
-        $company = Company::factory()->create(array_merge([
+    ): Company {
+        return Company::factory()->create(array_merge([
             'first_name' => 'firstName',
             'last_name' => 'lastName',
             'phone_country_code' => 'SA',
@@ -43,6 +39,20 @@ trait InteractsWithLender
             'company_unique_name' => 'lynk05',
             'company_cr' => '12345678910',
         ], $data));
+    }
+
+    /**
+     * @param  int  $walletInitialAmount
+     * @param  array  $data
+     * @return array
+     *
+     * @throws BindingResolutionException
+     */
+    public function createCompany(
+        int $walletInitialAmount = 2000,
+        array $data = []
+    ): array {
+        $company = $this->createCompanyWithoutWallet($data);
 
         $wallet = $company->createWallet(WalletType::CompanyWallet, 'SAR');
 

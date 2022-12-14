@@ -26,18 +26,7 @@ class HasWalletTest extends TestCase
     {
         parent::setUp();
 
-        self::$company = Company::factory()->create(array_merge([
-            'first_name' => 'firstName',
-            'last_name' => 'lastName',
-            'phone_country_code' => 'SA',
-            'phone_number' => '503811000',
-            'email' => 'test@uselynk.test',
-            'password' => 'Qwer@1234',
-            'source' => 'Postman',
-            'company_name' => 'companyName',
-            'company_unique_name' => 'lynk05',
-            'company_cr' => '12345678910',
-        ]));
+        self::$company = $this->createCompanyWithoutWallet();
     }
 
     public function test_has_wallet_get_wallet()
