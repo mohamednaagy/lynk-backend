@@ -12,7 +12,6 @@ use App\Models\User;
 use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
-use Illuminate\Testing\Fluent\AssertableJson;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithAdmin;
@@ -388,9 +387,6 @@ class LenderSettingsUpdateTest extends TestCase
         $this->actingAs(self::$manager)
             ->putJson(self::BaseUrl, self::$lenderSettingsData)
             ->assertStatus(Response::HTTP_FORBIDDEN)
-            ->assertJson(
-                fn (AssertableJson $json) => $json->where('message', 'User does not have the right permissions.')
-                    ->etc()
-            );
+            ->assertJsonPath('message', 'User does not have the right permissions.');
     }
 }
