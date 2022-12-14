@@ -3,50 +3,111 @@
 namespace App\Support\ZatcaEInvoice;
 
 use App\Models\FinancingOrder;
+use Cknow\Money\Money;
+use Illuminate\Support\Carbon;
 
 class Order
 {
-    public function __construct(protected FinancingOrder $order, protected float $vat)
-    {
+    public function __construct(
+        protected string $reference,
+        protected array $items,
+        protected Carbon $invoiceDate,
+        protected FinancingOrder $order,
+    ) {
     }
 
-    public function getSubtotal()
+    public static function fromArray(array $data): Order
     {
-        return $this->order->amount->formatByDecimal();
+        return new static(
+            $data['reference'],
+            $data['items'],
+            $data['invoiceDate'],
+            $data['order']
+        );
     }
 
-    public function getInvoiceDate()
+    public function getItems(): array
     {
-        return $this->order->created_at;
+        return $this->items;
+    }
+
+    /**
+     * Get order date
+     *
+     * @return \Carbon\Carbon
+     */
+    public function getInvoiceDate(): Carbon|\Carbon\Carbon
+    {
+        return $this->invoiceDate;
+    }
+
+    /**
+     * Get order subtotal (without VAT or without discount)
+     *
+     * @return Money
+     */
+    public function getSubtotal(): Money
+    {
+        return collect($this->getItems())->reduce(
+            function ($carry, $item) {
+                return $carry->add($item->getLineSubtotal());
+            },
+            money(0)
+        );
     }
 
     /**
      * Get order total amount
      *
-     * @return \Cknow\Money\Money
+     * @return Money
      */
-    public function getTotalAmount()
+    public function getTotalAmount(): Money
     {
-        return $this->order->amount->formatByDecimal();
+        return collect($this->getItems())->reduce(
+            function ($carry, $item) {
+                return $carry->add($item->getLineTotal());
+            },
+            money(0)
+        );
+    }
+
+    /**
+     * Get order total discount
+     *
+     * @return Money
+     */
+    public function getTotalDiscount(): Money
+    {
+        return collect($this->getItems())->reduce(
+            function ($carry, $item) {
+                return $carry->add($item->getTotalDiscountAmount());
+            },
+            money(0)
+        );
     }
 
     /**
      * Get order total amount without VAT
      *
-     * @return \Cknow\Money\Money
+     * @return Money
      */
-    public function getTotalWithoutVat()
+    public function getTotalWithoutVat(): Money
     {
-        return $this->order->amount->subtract($this->order->amount->multiply($this->vat))->formatByDecimal();
+        return $this->getSubtotal()->subtract($this->getTotalDiscount());
     }
 
     /**
      * Get order total VAT
      *
-     * @return \Cknow\Money\Money
+     * @return Money
      */
-    public function getTotalVat()
+    public function getTotalVat(): Money
     {
-        return $this->order->amount->multiply($this->vat)->formatByDecimal();
+        return collect($this->getItems())->reduce(
+            function ($carry, $item) {
+                return $carry->add($item->getTotalVatAmount());
+            },
+            money(0)
+        );
     }
 }
