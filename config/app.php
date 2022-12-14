@@ -197,6 +197,7 @@ return [
         App\Providers\MobileVerifyServiceProvider::class,
         App\Providers\WalletServiceProvider::class,
         App\Providers\WebhookServiceProvider::class,
+        App\Providers\TransactionUtilServiceProvider::class,
         // \Shivella\Bitly\BitlyServiceProvider::class,
         Jenssegers\Agent\AgentServiceProvider::class,
     ],

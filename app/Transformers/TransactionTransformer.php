@@ -3,7 +3,7 @@
 namespace App\Transformers;
 
 use App\Models\Transaction;
-use App\Support\Transactions\Descriptions\DescriptionManager;
+use App\Support\Wallets\Contracts\TransactionUtilInterface;
 use Carbon\Carbon;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
@@ -36,7 +36,7 @@ class TransactionTransformer extends TransformerAbstract
     {
         return $this->primitive(
             ! is_null($transaction->reason)
-            ? DescriptionManager::getDescription($transaction)
+            ? app(TransactionUtilInterface::class)->getDescription($transaction)
             : null
         );
     }

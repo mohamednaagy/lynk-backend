@@ -5,17 +5,17 @@ namespace App\Actions\Wallets;
 use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Models\Transaction;
 use App\Models\Wallet;
-use App\Support\Transactions\Descriptions\DescriptionManager;
+use App\Support\Wallets\Contracts\TransactionUtilInterface;
 use Cknow\Money\Money;
 
 class CreateTransactionsAction implements CreateTransactions
 {
     /**
      * @param  Wallet  $wallet
-     * @param  Money  $amount
      * @param  int  $transactionReason
+     * @param  Money  $amount
      * @param  array  $meta
-     * @return string
+     * @return Transaction
      */
     public function handle(
         Wallet $wallet,
@@ -23,6 +23,6 @@ class CreateTransactionsAction implements CreateTransactions
         Money $amount,
         array $meta
     ): Transaction {
-        return DescriptionManager::handleTransaction($wallet, $amount, $transactionReason, $meta);
+        return app(TransactionUtilInterface::class)->process($wallet, $amount, $transactionReason, $meta);
     }
 }
