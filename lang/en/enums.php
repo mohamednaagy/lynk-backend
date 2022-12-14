@@ -21,7 +21,7 @@ return [
         FinancingOrderStatus::Rejected => 'Rejected',
         FinancingOrderStatus::CommodityPurchased => 'Commodity Purchased',
         FinancingOrderStatus::CommoditySoldToCustomer => 'Commodity Sold To Customer',
-        FinancingOrderStatus::MurabhaOfferIssued => 'MurabhaOffer Issued',
+        FinancingOrderStatus::MurabhaOfferIssued => 'Murabha Offer Issued',
         FinancingOrderStatus::MurabahaSaleCompleted => 'Murabaha Sale Completed',
         FinancingOrderStatus::ContractSigned => 'Contract Signed',
         FinancingOrderStatus::WaitingClientWakala => 'Waiting Client Wakala',
