@@ -66,7 +66,7 @@ class TransactionServiceTest extends TestCase
         $this->assertTrue($transaction->amount->getAmount() == 10000);
     }
 
-    public function test_transaction_service_transfer_method_return_transaction_instance()
+    public function test_transaction_service_transfer_method_return_transfer_instance()
     {
         $transfer = self::$transactionService->transfer(self::$wallet, self::$secondWallet, Money::parseByDecimal(-100, 'SAR'), 1);
 
