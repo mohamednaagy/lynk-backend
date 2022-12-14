@@ -4,17 +4,20 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Settings\WakalaTemplates;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Enums\Subject;
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithAdmin;
+use Tests\Traits\InteractsWithLender;
 
 class WakalaTemplateSettingsUpdateTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin;
+    use RefreshDatabase, InteractsWithAdmin, InteractsWithLender;
 
     const BaseUrl = 'api/v1/admin/wakala-templates/';
 
@@ -34,6 +37,10 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
 
     private static User $managerHasPermission;
 
+    private static Company $company;
+
+    private static User $userLenderAdmin;
+
     private static array $wakalaSettingsData = [];
 
     /**
@@ -49,6 +56,8 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
             'managerHasPermission@bim.com',
             perm(Area::SuperAdmin, [Subject::WakalaTemplates, Action::Edit])
         );
+        [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
         self::$clientWakalaUrl = self::BaseUrl.self::$wakalaTemplatesTypes['client'];
         self::$companyWakalaUrl = self::BaseUrl.self::$wakalaTemplatesTypes['company'];
         self::$wakalaSettingsData = [
@@ -59,13 +68,24 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_index_wakala_template_settings_failed(): void
+    public function test_that_un_auth_user_cant_update_wakala_template_settings_failed(): void
     {
         $this->putJson(self::$clientWakalaUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
-                'message' => 'Unauthenticated.',
+                'message' => __('Unauthenticated.'),
             ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_un_authorized_user_without_right_role_cant_update_wakala_template_settings_failed(): void
+    {
+        $this->actingAs(self::$userLenderAdmin)
+            ->getJson(self::$clientWakalaUrl)
+            ->assertStatus(Response::HTTP_FORBIDDEN)
+            ->assertJsonPath('message', 'User does not have the right roles.');
     }
 
     /**
@@ -107,7 +127,7 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_user_cannot_index_wakala_template_settings_on_invalid_wakala_template_type_parameter_failed(): void
+    public function test_that_auth_user_cannot_update_wakala_template_settings_on_invalid_wakala_template_type_parameter_failed(): void
     {
         $this->actingAs(self::$admin)
             ->getJson(self::BaseUrl.self::$wakalaTemplatesTypes['invalid'])
