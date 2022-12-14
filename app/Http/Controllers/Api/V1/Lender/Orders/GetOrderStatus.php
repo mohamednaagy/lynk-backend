@@ -9,8 +9,6 @@ class GetOrderStatus extends Controller
 {
     public function __invoke()
     {
-        // return FinancingOrderStatus::getValues();
-
         $OrdersStatus = array_map(function ($value) {
             return [
                 'key' => FinancingOrderStatus::getKey($value),
