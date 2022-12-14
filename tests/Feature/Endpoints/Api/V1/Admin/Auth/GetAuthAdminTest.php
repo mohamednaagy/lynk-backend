@@ -24,7 +24,7 @@ class GetAuthAdminTest extends TestCase
 
     private static User $userLender;
 
-    private static User $LenderApiUser;
+    private static User $lenderApiUser;
 
     private static User $userLenderSupervisor;
 
@@ -48,7 +48,7 @@ class GetAuthAdminTest extends TestCase
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$LenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'LenderApiUser@bim.com');
+        self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'LenderApiUser@bim.com');
         self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'LenderOrderCreator@bim.com');
         self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
         self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
@@ -62,7 +62,7 @@ class GetAuthAdminTest extends TestCase
         $this->getJson('api/v1/admin/auth')
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
-                'message' => 'Unauthenticated.',
+                'message' => __('Unauthenticated.'),
             ]);
     }
 
@@ -132,7 +132,7 @@ class GetAuthAdminTest extends TestCase
      */
     public function test_that_lender_api_user_can_not_fetch_his_details(): void
     {
-        $this->actingAs(self::$LenderApiUser)
+        $this->actingAs(self::$lenderApiUser)
             ->getJson('api/v1/admin/auth')
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJsonPath(
