@@ -11,9 +11,18 @@ class Transfer extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'uuid',
+        'amount',
+        'from_id',
+        'to_id',
+        'deposit_id',
+        'withdraw_id',
+        'data',
+    ];
 
     protected $casts = [
+        'data' => 'array',
         'amount' => MoneyStringCast::class.':currency',
         'meta' => 'array',
     ];
