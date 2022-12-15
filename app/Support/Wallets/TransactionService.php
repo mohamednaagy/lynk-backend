@@ -9,6 +9,7 @@ use App\Support\Generator\ReferenceNumber\Contracts\ReferenceNumberGeneratorInte
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use Brick\Math\BigDecimal;
 use Cknow\Money\Money;
+use Illuminate\Support\Str;
 
 class TransactionService implements TransactionServiceInterface
 {
