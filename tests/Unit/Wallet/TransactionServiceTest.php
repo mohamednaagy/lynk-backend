@@ -15,8 +15,7 @@ use Tests\Traits\InteractsWithLender;
 
 class TransactionServiceTest extends TestCase
 {
-    use RefreshDatabase;
-    use InteractsWithLender;
+    use RefreshDatabase, InteractsWithLender;
 
     private static TransactionService $transactionService;
 
@@ -49,12 +48,12 @@ class TransactionServiceTest extends TestCase
     {
         $transaction = self::$transactionService->withdraw(self::$wallet, Money::parseByDecimal(100, 'SAR'), 1);
 
-        $this->assertTrue($transaction->amount->getAmount() == -10000);
+        $this->assertEquals(-10000, $transaction->amount->getAmount());
     }
 
     public function test_transaction_service_deposit_method_return_transaction_instance()
     {
-        $transaction = self::$transactionService->withdraw(self::$wallet, Money::parseByDecimal(100, 'SAR'), 1);
+        $transaction = self::$transactionService->deposit(self::$wallet, Money::parseByDecimal(-100, 'SAR'), 1);
 
         $this->assertInstanceOf(Transaction::class, $transaction);
     }
@@ -63,7 +62,7 @@ class TransactionServiceTest extends TestCase
     {
         $transaction = self::$transactionService->deposit(self::$wallet, Money::parseByDecimal(-100, 'SAR'), 1);
 
-        $this->assertTrue($transaction->amount->getAmount() == 10000);
+        $this->assertEquals(10000, $transaction->amount->getAmount());
     }
 
     public function test_transaction_service_transfer_method_return_transfer_instance()
@@ -73,7 +72,7 @@ class TransactionServiceTest extends TestCase
         $this->assertInstanceOf(Transfer::class, $transfer);
     }
 
-    public function test_transaction_service_transfer_money_transfered_successfully()
+    public function test_transaction_service_transfer_money_transferred_successfully()
     {
         $amount = Money::parseByDecimal(100, 'SAR');
         $fromWallet = self::$wallet;
