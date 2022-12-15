@@ -67,7 +67,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
                     Route::put('orders/{order}/reject', RejectOrder::class);
                     Route::put('orders/{order}/cancel', CancelOrder::class);
                     Route::post('orders/no-verification', CreateOrderWithoutVerification::class);
-                    Route::get('orders/status', GetOrderStatus::class);
+                    Route::get('orders/statuses', GetOrderStatus::class);
                     Route::apiResource('orders', OrderController::class);
                     Route::post('users/{user}/resend-invitation', ResendInvitation::class);
                     Route::apiResource('users', UserController::class);
