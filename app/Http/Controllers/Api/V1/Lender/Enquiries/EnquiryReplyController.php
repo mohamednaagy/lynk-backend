@@ -62,8 +62,11 @@ class EnquiryReplyController extends Controller
             }
 
             $data = $request->validated();
-            $data['user_id'] = $request->user()->id;
+            $user = $request->user();
+
+            $data['user_id'] = $user->id;
             $data['enquiry_id'] = $enquiry->id;
+            $data['role_id'] = $user->roles->first()->id;
 
             $enquiryReply = $replyToEnquiry->handle($data);
 
