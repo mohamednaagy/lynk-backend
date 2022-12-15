@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Support\Wallets\Traits\CanPay;
 use Cknow\Money\Money;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -14,13 +15,17 @@ use Illuminate\Support\Facades\Config;
  */
 class Wallet extends Model
 {
-    use HasFactory, CanPay;
+    use HasFactory, CanPay, HasUuids;
+
+    public function uniqueIds()
+    {
+        return ['uuid'];
+    }
 
     protected $fillable = [
         'holder_type',
         'holder_id',
         'name',
-        'uuid',
         'currency',
     ];
 
