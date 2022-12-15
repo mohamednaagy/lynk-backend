@@ -43,7 +43,7 @@ trait CanPay
         }
 
         // $parameters count is 1 and it is string,
-        // that means that it is $refrenceNumber
+        // that means that it is $referenceNumber
         if (is_string($parameters[0])) {
             return [$parameters[0], []];
         }
