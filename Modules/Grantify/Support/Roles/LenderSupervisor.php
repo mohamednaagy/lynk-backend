@@ -21,6 +21,11 @@ class LenderSupervisor
         Subject::LenderEdaatInvoices => [
             Action::Manage,
         ],
+        Subject::Enquiries => [
+            Action::Index,
+            Action::Create,
+            Action::Show,
+        ],
         Subject::LenderFinancingOrderCost => [
             Action::Calculate,
         ],

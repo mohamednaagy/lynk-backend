@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api\V1\Lender\Enquiries;
 
 use App\Actions\Contracts\Enquiries\CreateEnquiry;
 use App\Actions\Contracts\Enquiries\GetPaginatedUserEnquiries;
+use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Enquiries\StoreEnquiryRequest;
 use App\Models\Enquiry;
@@ -15,6 +17,27 @@ use Illuminate\Http\Request;
 
 class EnquiryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Index])
+        )
+            ->only('index');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Create])
+        )
+            ->only('store');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Show])
+        )
+            ->only('show');
+    }
+
     /**
      * Display a listing of the resource.
      *

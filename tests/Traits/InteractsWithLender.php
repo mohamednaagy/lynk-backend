@@ -121,7 +121,7 @@ trait InteractsWithLender
         return EdaatInvoice::query()->create(array_merge([
             'company_id' => $companyId,
             'creator_id' => $userId,
-            'invoice_number' => 1,
+            'invoice_number' => Str::uuid(),
             'amount' => 1,
             'status' => 1,
         ], $data));

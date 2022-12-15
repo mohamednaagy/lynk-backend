@@ -28,7 +28,6 @@ class TransactionService implements TransactionServiceInterface
             'wallet_id' => $wallet->getKey(),
             'amount' => $amount->isNegative() ? $amount : $amount->negative(),
             'reason' => $type,
-            'uuid' => Str::uuid(),
             'reference_number' => $referenceNumber ?? $this->referenceNumberGeneratorInterface->generate(),
             'meta' => $meta,
         ]);
@@ -45,7 +44,6 @@ class TransactionService implements TransactionServiceInterface
             'wallet_id' => $wallet->getKey(),
             'amount' => $amount->isPositive() ? $amount : $amount->absolute(),
             'reason' => $type,
-            'uuid' => Str::uuid(),
             'reference_number' => $referenceNumber ?? $this->referenceNumberGeneratorInterface->generate(),
             'meta' => $meta,
         ]);
