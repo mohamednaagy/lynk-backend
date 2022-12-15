@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CancelOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CreateOrderWithoutVerification;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersStats;
+use App\Http\Controllers\Api\V1\Lender\Orders\GetOrderStatus;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersVolume;
 use App\Http\Controllers\Api\V1\Lender\Orders\MakeOrderProceed;
 use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
@@ -55,7 +56,6 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     ])->group(
         function () {
             Route::get('auth', GetAuthUser::class);
-
             Route::middleware('verified.email:'.Area::Lender)->group(function () {
                 Route::middleware('checkCompanyStatus')->group(function () {
                     Route::put('auth/profile', UpdateMyProfile::class);
@@ -67,6 +67,7 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
                     Route::put('orders/{order}/reject', RejectOrder::class);
                     Route::put('orders/{order}/cancel', CancelOrder::class);
                     Route::post('orders/no-verification', CreateOrderWithoutVerification::class);
+                    Route::get('orders/statuses', GetOrderStatus::class);
                     Route::apiResource('orders', OrderController::class);
                     Route::post('users/{user}/resend-invitation', ResendInvitation::class);
                     Route::apiResource('users', UserController::class);
@@ -84,14 +85,11 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
 
                     Route::get('/settings', [SettingsController::class, 'index']);
                     Route::put('/settings', [SettingsController::class, 'update']);
-                }
-                );
-            }
-            );
+                });
+            });
             Route::apiResource('enquiries', EnquiryController::class)->only(['index', 'show', 'store']);
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)->only('index', 'store')->only(['index', 'store']);
-        }
-    );
+        });
 
     Route::post('{user}/complete-register', CompleteRegister::class)->name('lender.complete-register');
 });
