@@ -56,7 +56,6 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     ])->group(
         function () {
             Route::get('auth', GetAuthUser::class);
-
             Route::middleware('verified.email:'.Area::Lender)->group(function () {
                 Route::middleware('checkCompanyStatus')->group(function () {
                     Route::put('auth/profile', UpdateMyProfile::class);
@@ -86,14 +85,11 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
 
                     Route::get('/settings', [SettingsController::class, 'index']);
                     Route::put('/settings', [SettingsController::class, 'update']);
-                }
-                );
-            }
-            );
+                });
+            });
             Route::apiResource('enquiries', EnquiryController::class)->only(['index', 'show', 'store']);
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)->only('index', 'store')->only(['index', 'store']);
-        }
-    );
+        });
 
     Route::post('{user}/complete-register', CompleteRegister::class)->name('lender.complete-register');
 });
