@@ -18,12 +18,12 @@ class Transfer extends Model
         'to_id',
         'deposit_id',
         'withdraw_id',
-        'data',
+        'meta',
     ];
 
     protected $casts = [
-        'data' => 'array',
         'amount' => MoneyStringCast::class.':currency',
+        'meta' => 'array',
     ];
 
     public function getConnectionName()
