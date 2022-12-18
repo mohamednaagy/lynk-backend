@@ -20,6 +20,8 @@ final class Subject extends Enum
 
     const LenderWallet = 'lenderWallet';
 
+    const LenderFinancingOrderCost = 'lenderFinancingOrderCost';
+
     const LenderUsers = 'lenderUsers';
 
     const LenderSettings = 'lenderSettings';
@@ -39,4 +41,8 @@ final class Subject extends Enum
     const LenderWebhookSecret = 'lenderWebhookSecret';
 
     const LenderWebhooks = 'lenderWebhooks';
+
+    const LenderAreaSettings = 'lenderAreaSettings';
+
+    const ProjectSettings = 'projectSettings';
 }
