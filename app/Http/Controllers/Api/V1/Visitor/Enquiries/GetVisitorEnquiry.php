@@ -31,6 +31,7 @@ class GetVisitorEnquiry extends Controller
                 'replies.body',
                 'replies.creation_date',
                 'replies.creator',
+                'replySignature',
             ])
             ->respond();
     }
