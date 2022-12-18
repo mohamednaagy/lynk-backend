@@ -84,9 +84,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('companies', CompanyController::class);
         Route::apiResource('companies.users', UserController::class)->shallow();
 
-        Route::apiResource('companies', CompanyController::class);
-        Route::apiResource('companies.users', UserController::class)->shallow();
-
         Route::get('edaat-invoices', GetEdaatInvoices::class);
         Route::post('edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
 
