@@ -13,15 +13,22 @@ use Illuminate\Support\Facades\Mail;
 
 class CreateVisitorEnquiry extends Controller
 {
-    public function __invoke(StoreVisitorEnquiryRequest $storeEnquiryRequest, CreateEnquiry $createEnquiry): JsonResponse
+    public function __invoke(StoreVisitorEnquiryRequest $request, CreateEnquiry $createEnquiry): JsonResponse
     {
-        return DB::transaction(function () use ($storeEnquiryRequest, $createEnquiry) {
-            $enquiry = $createEnquiry->handle($storeEnquiryRequest->validated());
+        return DB::transaction(function () use ($request, $createEnquiry) {
+            $enquiry = $createEnquiry->handle($request->validated());
 
-            $invitationUrl = $storeEnquiryRequest->validated('redirect_url');
+            $invitationUrl = $request->validated('redirect_url');
             Mail::to($enquiry->email)->send(new AccessVisitorEnquiry($enquiry, $invitationUrl));
 
-            return fractal($enquiry, new EnquiryTransformer())->respond();
+            return fractal($enquiry, new EnquiryTransformer())
+                ->parseIncludes([
+                    'id',
+                    'subject',
+                    'status',
+                    'creation_date',
+                ])
+                ->respond();
         });
     }
 }

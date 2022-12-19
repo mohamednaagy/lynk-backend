@@ -41,7 +41,8 @@ class WebhookTest extends TestCase
 
     public function test_edaat_invoices_webhook_with_paid_invoice_success()
     {
-        $transactionsCount = Transaction::query()->count();
+        $transactionsCount = DB::connection(Config::get('wallet.database.connection'))
+            ->table('transactions')->count();
         $this->withHeader('X-Company', self::$company->id)
             ->postJson('api/edaat/webhook/payment', [
                 [

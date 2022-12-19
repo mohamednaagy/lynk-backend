@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api\V1\Admin\Settings;
 
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Actions\Contracts\UpdateSettings;
+use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Settings\UpdateLenderSettingsRequest;
 use App\Transformers\LenderSettingsTransformer;
@@ -12,6 +14,19 @@ use Illuminate\Http\JsonResponse;
 
 class LenderSettingsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::LenderAreaSettings, Action::Index, Action::Manage])
+        )->only('index');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::LenderAreaSettings, Action::Edit, Action::Manage])
+        )->only('update');
+    }
+
     /**
      * Display a listing of the resource.
      *

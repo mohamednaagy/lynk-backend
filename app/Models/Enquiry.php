@@ -71,6 +71,6 @@ class Enquiry extends Model
      */
     public function replies(): HasMany
     {
-        return $this->hasMany(EnquiryReplies::class);
+        return $this->hasMany(EnquiryReply::class);
     }
 }

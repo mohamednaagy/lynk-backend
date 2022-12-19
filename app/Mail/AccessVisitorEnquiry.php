@@ -37,7 +37,7 @@ class AccessVisitorEnquiry extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('emails/visitor-enquiry.subject', ['app_name' => config('app.name')]),
+            subject: __('emails/visitor-enquiry.subject_of_access_to_enquiry', ['enquiry_id' => $this->enquiry->id]),
         );
     }
 
