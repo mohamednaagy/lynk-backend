@@ -129,6 +129,11 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
         return $this->locale;
     }
 
+    public function isRegisterCompleted()
+    {
+        return ! is_null($this->password);
+    }
+
     /**
      * @return HasMany
      */
