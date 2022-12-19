@@ -69,7 +69,7 @@ class VerifyOtpClientWakalaTest extends TestCase
             'vid' => self::$otpifyCode->getVid(),
             'code' => '2023',
         ])
-            ->assertStatus(Response::HTTP_UNAUTHORIZED);
+            ->assertNotFound();
     }
 
     public function test_verify_otp_client_wakala_with_already_verified_order_unsuccessful()
@@ -93,30 +93,30 @@ class VerifyOtpClientWakalaTest extends TestCase
             'vid' => self::$otherOtpifyCode->getVid(),
             'code' => '2023',
         ])
-            ->assertStatus(Response::HTTP_UNAUTHORIZED);
+            ->assertNotFound();
     }
 
     public function test_verify_otp_client_wakala_with_vid_not_for_order_national_id_unsuccessful()
     {
         $this->postJson('api/v1/client/wakala/verify', [
             'national_id' => self::$order->national_id,
-            'order_id' => self::$otherOrder->id,
+            'order_id' => self::$order->id,
             'vid' => self::$otherOtpifyCode->getVid(),
             'code' => '2023',
         ])
-            ->assertStatus(Response::HTTP_UNAUTHORIZED);
+            ->assertUnauthorized();
     }
 
     public function test_verify_otp_client_wakala_with_vid_expired_unsuccessful()
     {
         self::$otpifyCode->update(['expiration_date' => now()->subDay()]);
         $this->postJson('api/v1/client/wakala/verify', [
-            'national_id' => self::$otherOrder->national_id,
+            'national_id' => self::$order->national_id,
             'order_id' => self::$order->id,
             'vid' => self::$otpifyCode->getVid(),
             'code' => '2023',
         ])
-            ->assertStatus(Response::HTTP_UNAUTHORIZED);
+            ->assertUnauthorized();
     }
 
     public function test_verify_otp_client_wakala_with_vid_already_used_unsuccessful()
