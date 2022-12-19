@@ -64,7 +64,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::put('/project', [ProjectSettingsController::class, 'update']);
         });
 
-        Route::get('wakala-templates/{type}', [WakalaTemplateController::class, 'show'])
+        Route::get('wakala-templates/{type}', [WakalaTemplateController::class, 'index'])
             ->where('type', 'client|company');
         Route::put('wakala-templates/{type}', [WakalaTemplateController::class, 'update'])
             ->where('type', 'client|company');
