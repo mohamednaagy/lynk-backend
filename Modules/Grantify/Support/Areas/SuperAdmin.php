@@ -53,6 +53,7 @@ class SuperAdmin
             Action::Edit,
             Action::Show,
             Action::Delete,
+            Action::Manage,
         ],
         Subject::Enquiries => [
             Action::Index,
