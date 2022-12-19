@@ -59,7 +59,7 @@ class CompleteRegisterTest extends TestCase
             ]);
         self::$userLender = self::$userLender->refresh();
         $this->assertTrue(self::$userLender->hasVerifiedEmail());
-        $this->assertNotNull(self::$userLender->password);
+        $this->assertTrue(self::$userLender->isRegisterCompleted());
 
         $this->withoutMiddleware(ValidateSignature::class)
             ->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
