@@ -60,11 +60,11 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/lender', [LenderSettingsController::class, 'index']);
             Route::put('/lender', [LenderSettingsController::class, 'update']);
 
-            Route::get('/project', [ProjectSettingsController::class, 'show']);
+            Route::get('/project', [ProjectSettingsController::class, 'index']);
             Route::put('/project', [ProjectSettingsController::class, 'update']);
         });
 
-        Route::get('wakala-templates/{type}', [WakalaTemplateController::class, 'show'])
+        Route::get('wakala-templates/{type}', [WakalaTemplateController::class, 'index'])
             ->where('type', 'client|company');
         Route::put('wakala-templates/{type}', [WakalaTemplateController::class, 'update'])
             ->where('type', 'client|company');
@@ -80,9 +80,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::post('/{company}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{company}/settings ', GetCompanySetting::class);
         });
-
-        Route::apiResource('companies', CompanyController::class);
-        Route::apiResource('companies.users', UserController::class)->shallow();
 
         Route::apiResource('companies', CompanyController::class);
         Route::apiResource('companies.users', UserController::class)->shallow();
