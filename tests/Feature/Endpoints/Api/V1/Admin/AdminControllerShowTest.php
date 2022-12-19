@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin;
+namespace Tests\Feature\Endpoints\Api\V1\Admin;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -34,6 +34,17 @@ class AdminControllerShowTest extends TestCase
             'manager@bim.com',
             perm(Area::SuperAdmin, [Subject::Admins, Action::Show]),
         );
+    }
+
+    public function test_un_auth_cant_show_admin()
+    {
+        $newSuperAdminUser = $this->createAdmin('newadmin@bim.com');
+
+        $this->getJson('api/v1/admin/admins/'.$newSuperAdminUser->id)
+            ->assertUnauthorized()
+            ->assertExactJson([
+                'message' => __('Unauthenticated.'),
+            ]);
     }
 
     public function test_admin_controller_show_with_super_admin_success()

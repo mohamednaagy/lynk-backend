@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin;
+namespace Tests\Feature\Endpoints\Api\V1\Admin;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -35,6 +35,21 @@ class AdminControllerUpdateTest extends TestCase
             'manager@bim.com',
             perm(Area::SuperAdmin, [Subject::Admins, Action::Edit]),
         );
+    }
+
+    public function test_un_auth_cant_update_admin()
+    {
+        $newSuperAdminUser = $this->createAdmin('newadmin@bim.com');
+
+        $this->putJson('api/v1/admin/admins/'.$newSuperAdminUser->id, [
+            'first_name' => 'admin',
+            'last_name' => 'admin',
+            'email' => 'newadmin@bim.com',
+            'role' => Role::Admin,
+        ])->assertUnauthorized()
+            ->assertExactJson([
+                'message' => __('Unauthenticated.'),
+            ]);
     }
 
     public function test_admin_controller_update_with_super_admin_success()
@@ -128,7 +143,7 @@ class AdminControllerUpdateTest extends TestCase
             ->assertJsonValidationErrorFor('last_name');
     }
 
-    public function test_admin_controller_update_witt_email_already_exists_unsuccessful()
+    public function test_admin_controller_update_with_email_already_exists_unsuccessful()
     {
         $newSuperAdminUser = $this->createAdmin('newadmin@bim.com');
 
@@ -137,6 +152,20 @@ class AdminControllerUpdateTest extends TestCase
                 'first_name' => 'admin',
                 'last_name' => 'admin',
                 'email' => 'admin@bim.com',
+                'role' => Role::Admin,
+            ])
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('email');
+    }
+
+    public function test_admin_controller_update_without_email_unsuccessful()
+    {
+        $newSuperAdminUser = $this->createAdmin('newadmin@bim.com');
+
+        $this->actingAs(self::$superAdminUser)
+            ->putJson('api/v1/admin/admins/'.$newSuperAdminUser->id, [
+                'first_name' => 'admin',
+                'last_name' => 'admin',
                 'role' => Role::Admin,
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)

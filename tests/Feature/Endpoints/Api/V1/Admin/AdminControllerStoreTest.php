@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin;
+namespace Tests\Feature\Endpoints\Api\V1\Admin;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -37,6 +37,20 @@ class AdminControllerStoreTest extends TestCase
             'manager@bim.com',
             perm(Area::SuperAdmin, [Subject::Admins, Action::Create]),
         );
+    }
+
+    public function test_un_auth_cant_create_admin()
+    {
+        $this->postJson('api/v1/admin/admins', [
+            'first_name' => 'admin',
+            'last_name' => 'admin',
+            'email' => 'admin@bim.com',
+            'role' => Role::Admin,
+        ])
+            ->assertUnauthorized()
+            ->assertExactJson([
+                'message' => __('Unauthenticated.'),
+            ]);
     }
 
     public function test_admin_controller_create_with_super_admin_success()
@@ -148,6 +162,18 @@ class AdminControllerStoreTest extends TestCase
                 'first_name' => 'admin',
                 'last_name' => 'admin',
                 'email' => 'admin@bim.com',
+                'role' => Role::Admin,
+            ])
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('email');
+    }
+
+    public function test_admin_controller_create_without_email_unsuccessful()
+    {
+        $this->actingAs(self::$superAdminUser)
+            ->postJson('api/v1/admin/admins', [
+                'first_name' => 'admin',
+                'last_name' => 'admin',
                 'role' => Role::Admin,
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)

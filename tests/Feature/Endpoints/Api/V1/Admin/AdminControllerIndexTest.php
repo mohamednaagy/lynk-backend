@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin;
+namespace Tests\Feature\Endpoints\Api\V1\Admin;
 
 use App\Actions\Contracts\GetPaginatedUsersByRole;
 use App\Enums\Action;
@@ -35,6 +35,15 @@ class AdminControllerIndexTest extends TestCase
             'manager@bim.com',
             perm(Area::SuperAdmin, [Subject::Admins, Action::Index]),
         );
+    }
+
+    public function test_un_auth_cant_index_admins()
+    {
+        $this->getJson('api/v1/admin/admins')
+            ->assertUnauthorized()
+            ->assertExactJson([
+                'message' => __('Unauthenticated.'),
+            ]);
     }
 
     public function test_admin_controller_index_with_super_admin_success()
@@ -85,7 +94,7 @@ class AdminControllerIndexTest extends TestCase
             );
     }
 
-    public function test_admin_controller_index_with_manager_no_permissions_success()
+    public function test_admin_controller_index_with_manager_no_permissions_failed()
     {
         Grantify::syncPermissionToModel(self::$managerAdminUser, []);
 

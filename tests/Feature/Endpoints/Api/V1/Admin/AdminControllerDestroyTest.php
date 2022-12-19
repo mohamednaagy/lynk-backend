@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin;
+namespace Tests\Feature\Endpoints\Api\V1\Admin;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -34,6 +34,17 @@ class AdminControllerDestroyTest extends TestCase
             'manager@bim.com',
             perm(Area::SuperAdmin, [Subject::Admins, Action::Delete])
         );
+    }
+
+    public function test_un_auth_cant_index_admins()
+    {
+        $newSuperAdminUser = $this->createAdmin('newadmin@bim.com');
+
+        $this->deleteJson('api/v1/admin/admins/'.$newSuperAdminUser->id)
+            ->assertUnauthorized()
+            ->assertExactJson([
+                'message' => __('Unauthenticated.'),
+            ]);
     }
 
     public function test_admin_controller_delete_with_super_admin_success()
