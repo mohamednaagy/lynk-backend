@@ -14,7 +14,7 @@ class CompleteAdminRegister extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['signed', 'throttle:6,1']);
+        $this->middleware(['signed', 'guest', 'throttle:6,1']);
     }
 
     public function __invoke(

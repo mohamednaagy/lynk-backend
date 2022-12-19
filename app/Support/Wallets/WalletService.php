@@ -7,7 +7,6 @@ use App\Models\Wallet;
 use App\Support\Wallets\Contracts\WalletServiceInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 
 class WalletService implements WalletServiceInterface
 {
@@ -23,7 +22,6 @@ class WalletService implements WalletServiceInterface
             [
                 'holder_type' => $model->getMorphClass(),
                 'holder_id' => $model->getKey(),
-                'uuid' => Str::uuid()->toString(),
             ]
         ));
     }

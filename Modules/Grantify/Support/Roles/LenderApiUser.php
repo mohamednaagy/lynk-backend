@@ -18,6 +18,9 @@ class LenderApiUser
         Subject::LenderFinancingOrderCost => [
             Action::Calculate,
         ],
+        Subject::LenderTransactions => [
+            Action::Index,
+        ],
         Subject::LenderWebhookSecret => [
             Action::Refresh,
         ],
@@ -26,6 +29,10 @@ class LenderApiUser
         ],
         Subject::LenderWallet => [
             Action::Manage,
+        ],
+        Subject::LenderSettings => [
+            Action::Index,
+            Action::Edit,
         ],
     ];
 }

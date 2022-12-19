@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 trait HasWallet
 {
-    public function getWallet(string $name, bool $lock = true): Wallet
+    public function getWallet(string $name, bool $lock = true): ?Wallet
     {
         return app(WalletServiceInterface::class)->findByName($this, $name, $lock);
     }
