@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Lender\Auth;
+namespace Tests\Feature\Endpoints\Api\V1\Lender\Auth;
 
 use App\Enums\Role;
 use App\Models\Company;
