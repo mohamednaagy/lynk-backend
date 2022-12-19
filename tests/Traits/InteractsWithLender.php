@@ -98,9 +98,9 @@ trait InteractsWithLender
      * @param  int  $companyId
      * @param  int  $userId
      * @param  array  $data
-     * @return Model|Builder
+     * @return FinancingOrder|Model|Builder
      */
-    public function createOrder(int $companyId, int $userId, $data = []): Model|Builder
+    public function createOrder(int $companyId, int $userId, array $data = []): FinancingOrder|Model|Builder
     {
         return FinancingOrder::query()->create(array_merge([
             'company_id' => $companyId,
