@@ -63,7 +63,7 @@ class AcceptClientWakalaTest extends TestCase
                 'data' => ['wakala_file_url'],
             ]);
 
-        $this->assertFalse(Cache::get($cacheKey));
+        $this->assertNull(Cache::get($cacheKey));
 
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::WaitingPurchasingCommodity));
     }
