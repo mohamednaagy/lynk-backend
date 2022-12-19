@@ -59,7 +59,7 @@ class SuperAdmin
             Action::Show,
         ],
         Subject::EnquiryReplies => [
-            Action::Index,
+            Action::Show,
             Action::Create,
         ],
 
