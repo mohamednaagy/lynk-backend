@@ -17,7 +17,7 @@ class UpdateMyProfileTest extends TestCase
 
     private static User $adminUser;
 
-    private static $getSettingsClassInstance;
+    private static mixed $getSettingsClassInstance;
 
     /**
      * @return void
@@ -35,9 +35,9 @@ class UpdateMyProfileTest extends TestCase
     public function test_un_auth_user_cant_update_his_profile(): void
     {
         $this->putJson('api/v1/admin/auth/profile')
-            ->assertStatus(Response::HTTP_UNAUTHORIZED)
+            ->assertUnauthorized()
             ->assertExactJson([
-                'message' => 'Unauthenticated.',
+                'message' => __('Unauthenticated.'),
             ]);
     }
 
@@ -47,6 +47,8 @@ class UpdateMyProfileTest extends TestCase
     public function test_admin_can_update_his_profile_without_updating_password(): void
     {
         $oldPassword = self::$adminUser->password;
+        $oldFirstName = self::$adminUser->first_name;
+        $oldLastName = self::$adminUser->last_name;
         $this->actingAs(self::$adminUser)
             ->putJson('api/v1/admin/auth/profile', [
                 'first_name' => 'test name',
@@ -59,12 +61,14 @@ class UpdateMyProfileTest extends TestCase
             ->assertJsonPath('data', []);
 
         $this->assertEquals($oldPassword, self::$adminUser->password);
+        $this->assertNotEquals($oldFirstName, self::$adminUser->first_name);
+        $this->assertNotEquals($oldLastName, self::$adminUser->last_name);
     }
 
     /**
      * @return void
      */
-    public function test_admin_can_update_his_profile__with_updating_password(): void
+    public function test_admin_can_update_his_profile_with_updating_password(): void
     {
         $oldPassword = self::$adminUser->password;
         $this->actingAs(self::$adminUser)
@@ -110,7 +114,7 @@ class UpdateMyProfileTest extends TestCase
     /**
      * @return void
      */
-    public function test_admin_update_his_profile_validation_rules(): void
+    public function test_admin_update_his_profile_without_first_last_and_email(): void
     {
         $this->actingAs(self::$adminUser)
             ->putJson('api/v1/admin/auth/profile')
@@ -118,7 +122,45 @@ class UpdateMyProfileTest extends TestCase
             ->assertJsonValidationErrorFor('first_name')
             ->assertJsonValidationErrorFor('last_name')
             ->assertJsonValidationErrorFor('email');
+    }
 
+    /**
+     * @return void
+     */
+    public function test_admin_update_his_profile_without_first_name(): void
+    {
+        $this->actingAs(self::$adminUser)
+            ->putJson('api/v1/admin/auth/profile', [
+                'email' => 'test@bim.com',
+                'last_name' => 'test name',
+                'phone_number' => self::$adminUser->mobileDialingPhoneNumber,
+                'phone_country_code' => self::$adminUser->phoneNumberCountryCode,
+            ])
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('first_name');
+    }
+
+    /**
+     * @return void
+     */
+    public function test_admin_update_his_profile_without_last_name(): void
+    {
+        $this->actingAs(self::$adminUser)
+            ->putJson('api/v1/admin/auth/profile', [
+                'first_name' => 'test name',
+                'email' => 'test@bim.com',
+                'phone_number' => self::$adminUser->mobileDialingPhoneNumber,
+                'phone_country_code' => self::$adminUser->phoneNumberCountryCode,
+            ])
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('last_name');
+    }
+
+    /**
+     * @return void
+     */
+    public function test_admin_update_his_profile_without_email(): void
+    {
         $this->actingAs(self::$adminUser)
             ->putJson('api/v1/admin/auth/profile', [
                 'first_name' => 'test name',
@@ -128,12 +170,5 @@ class UpdateMyProfileTest extends TestCase
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonValidationErrorFor('email');
-    }
-
-    private function isEmailVerifiedRequired($area)
-    {
-        $setting = self::$getSettingsClassInstance->handle($area);
-
-        return isset($setting->email_verification_enabled) && (bool) $setting->email_verification_enabled;
     }
 }
