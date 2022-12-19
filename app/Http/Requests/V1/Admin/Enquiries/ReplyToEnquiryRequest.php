@@ -4,6 +4,7 @@ namespace App\Http\Requests\V1\Admin\Enquiries;
 
 use App\Enums\EnquiryStatus;
 use App\Rules\HostWhitelistRule;
+use App\Rules\UrlProtocolRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -28,8 +29,8 @@ class ReplyToEnquiryRequest extends FormRequest
     {
         return [
             'body' => ['required', 'string', 'max:1000'],
-            'status' => ['nullable', 'int', new EnumValue(EnquiryStatus::class)],
-            'redirect_url' => ['required', 'url', new HostWhitelistRule()],
+            'status' => ['nullable', 'integer', new EnumValue(EnquiryStatus::class)],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
         ];
     }
 }

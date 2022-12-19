@@ -3,23 +3,65 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
+use App\Models\Company;
 use App\Models\FinancingOrder;
-use App\Support\QueryScoper\Scopes\Lender\Orders\OrderNeedActionScope;
+use App\Support\QueryScoper\Scopes\FinancingOrders\OrderAmountScope;
+use App\Support\QueryScoper\Scopes\FinancingOrders\OrderNeedActionScope;
+use App\Support\QueryScoper\Scopes\FinancingOrders\OrderSearchScope;
+use App\Support\QueryScoper\Scopes\FinancingOrders\OrderSortScope;
+use App\Support\QueryScoper\Scopes\FinancingOrders\OrderStatusScope;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Model;
 
 class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
 {
-    // __REVIEW__ change $paginate = 10 -> $perPage = null
-    // null will the model use its default $perPage
-    public function handle($paginate = 10): LengthAwarePaginator
+    protected ?Model $creator = null;
+
+    protected ?Company $company = null;
+
+    public function handle($perPage = null): LengthAwarePaginator
     {
-        return FinancingOrder::toScopes($this->scopes())->paginate($paginate);
+        return $this->baseQuery()->toScopes($this->scopes())->paginate($perPage);
     }
 
     private function scopes()
     {
         return [
-            'need_action' => new OrderNeedActionScope,
+            'need_action' => new OrderNeedActionScope(),
+            'search' => new OrderSearchScope(),
+            'status' => new OrderStatusScope(),
+            'sort' => new OrderSortScope(),
+            'amount' => new OrderAmountScope(),
         ];
+    }
+
+    public function setCreator(Model $creator)
+    {
+        $this->creator = $creator;
+
+        return $this;
+    }
+
+    public function setCompany(Company $company)
+    {
+        $this->company = $company;
+
+        return $this;
+    }
+
+    protected function baseQuery()
+    {
+        return FinancingOrder::when(
+            $this->creator,
+            function ($query) {
+                $query->byCreator($this->creator);
+            }
+        )->when(
+            $this->company,
+            function ($query) {
+                $query->with('creator')
+                    ->where('company_id', $this->company->id);
+            }
+        );
     }
 }

@@ -29,4 +29,16 @@ class ErrorCode
     public const ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE = 1011;
 
     public const WEBHOOK_LIMIT_TYPE_NOT_FOUND = 1012;
+
+    public const X_COMPANY_INVALID = 1013;
+
+    public const BALANCE_NOT_ENOUGH = 1014;
+
+    public const COMPANY_NOT_ACTIVE = 1015;
+
+    public const ORDER_NOT_UPDATABLE = 1016;
+
+    public const ENQUIRY_CLOSED_ALREADY = 1017;
+
+    public const ORDER_ALREADY_APPROVED = 1018;
 }

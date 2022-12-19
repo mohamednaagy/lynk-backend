@@ -3,14 +3,26 @@
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Orders\RejectOrder as RejectOrderInterface;
+use App\Enums\Action;
+use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\RejectOrderRequest;
 use App\Models\FinancingOrder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class RejectOrder extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::FinancingOrders, Action::Reject, Action::Manage])
+        );
+    }
+
     /**
      * Handle the incoming request.
      *
@@ -19,19 +31,23 @@ class RejectOrder extends Controller
      * @param  FinancingOrder  $order
      * @return JsonResponse
      */
-    // __REVIEW__ break down the arguments on lines to be easier to read
-    public function __invoke(RejectOrderRequest $rejectOrderRequest, RejectOrderInterface $rejectOrder, FinancingOrder $order): JsonResponse
-    {
-        // __REVIEW__ use $order->status->cantMoveTo(...)
-        // See app/Http/Controllers/Api/V1/Lender/Orders/MakeOrderProceed.php for reference
-        if (! $order->status->is(FinancingOrderStatus::PendingApproval)) {
-            return $this->errorResponse(
-                __('error.order_cannot_be_approved_because_it_is_approved')
-            );
-        }
+    public function __invoke(
+        RejectOrderRequest $rejectOrderRequest,
+        RejectOrderInterface $rejectOrder,
+        int $order
+    ): JsonResponse {
+        return DB::transaction(function () use ($rejectOrderRequest, $rejectOrder, $order) {
+            $order = FinancingOrder::lockForUpdate()->findOrFail($order);
 
-        $rejectOrder->handle($order, $rejectOrderRequest->user(), $rejectOrderRequest->validated());
+            if ($order->status->cantMoveTo(FinancingOrderStatus::Rejected)) {
+                return $this->errorResponse(
+                    __('error.order_cannot_be_approved_because_it_is_approved')
+                );
+            }
 
-        return $this->successResponse();
+            $rejectOrder->handle($order, $rejectOrderRequest->user(), $rejectOrderRequest->validated());
+
+            return $this->successResponse();
+        });
     }
 }

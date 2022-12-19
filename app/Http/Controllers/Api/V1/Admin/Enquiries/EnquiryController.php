@@ -19,7 +19,13 @@ class EnquiryController extends Controller
     public function index(GetPaginatedEnquiries $getPaginatedEnquiries): JsonResponse
     {
         return fractal($getPaginatedEnquiries->handle(), new EnquiryTransformer())
-            ->parseIncludes(['creator'])
+            ->parseIncludes([
+                'id',
+                'subject',
+                'status',
+                'creation_date',
+                'creator',
+            ])
             ->respond();
     }
 
@@ -32,7 +38,14 @@ class EnquiryController extends Controller
     public function show(Enquiry $enquiry): JsonResponse
     {
         return fractal($enquiry, new EnquiryTransformer())
-            ->parseIncludes(['creator', 'body'])
+            ->parseIncludes([
+                'id',
+                'subject',
+                'status',
+                'creation_date',
+                'creator',
+                'body',
+            ])
             ->respond();
     }
 }

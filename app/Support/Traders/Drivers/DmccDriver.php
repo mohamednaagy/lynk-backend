@@ -6,9 +6,11 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\TraderHelper;
+use Carbon\Carbon;
 use CodeDredd\Soap\Client\Response;
 use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
@@ -119,9 +121,9 @@ class DmccDriver implements TraderInterface
     public function getTtiId(FinancingOrder $financingOrder): mixed
     {
         Log::debug('getTTiId2', [
-            'currency' => 'SAR',
-            'costPrice' => $financingOrder->amount,
-            'profit' => $financingOrder->selling_price - $financingOrder->amount,
+            'currency' => $financingOrder->currency,
+            'costPrice' => $financingOrder->amount->formatByDecimal(),
+            'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
             'paymentTerms' => config('trader.providers.dmcc.tti.payment_terms'),
             'unitOfDuration' => config('trader.providers.dmcc.tti.unit_of_duration'),
             'product' => null,
@@ -132,9 +134,9 @@ class DmccDriver implements TraderInterface
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('getTTIIDForIssuePTP'))
             ->call('getTTIIDForIssuePTP', [
-                'currency' => 'SAR',
-                'costPrice' => $financingOrder->amount,
-                'profit' => $financingOrder->selling_price - $financingOrder->amount,
+                'currency' => $financingOrder->currency,
+                'costPrice' => $financingOrder->amount->formatByDecimal(),
+                'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
                 'paymentTerms' => config('trader.providers.dmcc.tti.payment_terms'),
                 'unitOfDuration' => config('trader.providers.dmcc.tti.unit_of_duration'),
                 'product' => null,
@@ -149,9 +151,9 @@ class DmccDriver implements TraderInterface
                 'driver' => 'dmcc',
                 'step' => 'getTtiId',
                 'requestBody' => [
-                    'currency' => 'SAR',
-                    'costPrice' => $financingOrder->amount,
-                    'profit' => $financingOrder->selling_price - $financingOrder->amount,
+                    'currency' => $financingOrder->currency,
+                    'costPrice' => $financingOrder->amount->formatByDecimal(),
+                    'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
                     'paymentTerms' => config('trader.providers.dmcc.tti.payment_terms'),
                     'unitOfDuration' => config('trader.providers.dmcc.tti.unit_of_duration'),
                     'product' => null,
@@ -225,9 +227,26 @@ class DmccDriver implements TraderInterface
         }
     }
 
+    /**
+     * @throws TraderException
+     */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
-        $html = view('selling-commodity-to-customer')->render();
+        $response = $this->getInventoryBasket($traderOrder->reference);
+
+        $html = view('selling-commodity-to-customer', [
+            'ttiId' => $traderOrder->reference,
+            'companyName' => $traderOrder->order->company->name,
+            'orderNumber' => $traderOrder->financing_order_id,
+            'amount' => $response->inventoryDetails[0]->totalValue.' '.$response->inventoryDetails[0]->currency,
+            'hsCodeDescription' => $response->inventoryDetails[0]->hsCodeDescription,
+            'quantity' => $response->inventoryDetails[0]->quantity,
+            'warehouse' => $response->inventoryDetails[0]->warehouseOrVaultId,
+            'owner' => $response->inventoryDetails[0]->owner,
+            'date' => Carbon::now()->toDateString(),
+            'time' => Carbon::now()->toTimeString(),
+        ])->render();
+
         $path = $traderOrder->financing_order_id.'/DMCC-SCTC/'.$traderOrder->reference.'.pdf';
         PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($traderOrder) {
             $this->attachDocumentToOrder(
@@ -282,9 +301,26 @@ class DmccDriver implements TraderInterface
         }
     }
 
+    /**
+     * @throws TraderException
+     */
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
-        $html = view('transfer-ownership-to-lender')->render();
+        $response = $this->getInventoryBasket($traderOrder->reference);
+
+        $html = view('transfer-ownership-to-lender', [
+            'ttiId' => $traderOrder->reference,
+            'companyName' => $traderOrder->order->company->name,
+            'orderNumber' => $traderOrder->financing_order_id,
+            'amount' => $response->inventoryDetails[0]->totalValue.' '.$response->inventoryDetails[0]->currency,
+            'hsCodeDescription' => $response->inventoryDetails[0]->hsCodeDescription,
+            'quantity' => $response->inventoryDetails[0]->quantity,
+            'warehouse' => $response->inventoryDetails[0]->warehouseOrVaultId,
+            'owner' => $response->inventoryDetails[0]->owner,
+            'date' => Carbon::now()->toDateString(),
+            'time' => Carbon::now()->toTimeString(),
+        ])->render();
+
         $path = $traderOrder->financing_order_id.'/DMCC-TOTL/'.$traderOrder->reference.'.pdf';
         PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($traderOrder) {
             $this->attachDocumentToOrder(
@@ -293,6 +329,39 @@ class DmccDriver implements TraderInterface
                 FinancingOrderMediaCollection::TransferOwnershipToLender
             );
         });
+    }
+
+    /**
+     * @throws TraderException
+     */
+    private function getInventoryBasket(string $ttiId): object
+    {
+        $response = $this->soap
+            ->baseWsdl($this->prefixUrl('getInventoryBasket'))
+            ->call('getInventoryBasket', [
+                'ttiId' => $ttiId,
+            ]);
+
+        if ($response->object()->errorCode != '') {
+            throw new TraderException(collect([
+                'driver' => 'dmcc',
+                'step' => 'getInventoryBasket',
+                'requestBody' => [
+                    'ttiId' => $ttiId,
+                ],
+                'responseBody' => $response->body(),
+            ]));
+        }
+
+        $response = $response->object();
+
+        $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
+        $traderOrder->update([
+            'product' => $response->inventoryDetails[0]->hsCodeDescription,
+            'quantity' => $response->inventoryDetails[0]->quantity,
+        ]);
+
+        return $response;
     }
 
     /**

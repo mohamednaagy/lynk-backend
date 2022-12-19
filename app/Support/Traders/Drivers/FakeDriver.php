@@ -9,6 +9,7 @@ use App\Models\FinancingOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\TraderHelper;
+use Carbon\Carbon;
 use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
 use Illuminate\Http\Client\Response;
@@ -108,9 +109,9 @@ class FakeDriver implements TraderInterface
     public function getTtiId(FinancingOrder $financingOrder): mixed
     {
         $response = Http::post($this->buildUrl('getTTIIdForIssuePTP'), [
-            'currency' => 'SAR',
-            'costPrice' => $financingOrder->amount,
-            'profit' => $financingOrder->selling_price - $financingOrder->amount,
+            'currency' => $financingOrder->currency,
+            'costPrice' => $financingOrder->amount->formatByDecimal(),
+            'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
             'paymentTerms' => config('trader.providers.fake.tti.payment_terms'),
             'unitOfDuration' => config('trader.providers.fake.tti.unit_of_duration'),
             'product' => null,
@@ -123,9 +124,9 @@ class FakeDriver implements TraderInterface
                 'driver' => 'fake',
                 'step' => 'getTtiId',
                 'requestBody' => [
-                    'currency' => 'SAR',
-                    'costPrice' => $financingOrder->amount,
-                    'profit' => $financingOrder->selling_price - $financingOrder->amount,
+                    'currency' => $financingOrder->currency,
+                    'costPrice' => $financingOrder->amount->formatByDecimal(),
+                    'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
                     'paymentTerms' => config('trader.providers.fake.tti.payment_terms'),
                     'unitOfDuration' => config('trader.providers.fake.tti.unit_of_duration'),
                     'product' => null,
@@ -145,31 +146,7 @@ class FakeDriver implements TraderInterface
      */
     public function cancelOrder(FinancingOrder $financingOrder): mixed
     {
-        $traderOrder = $financingOrder->activeTraderOrder()->first();
-        $response = $this->soap
-            ->baseWsdl($this->buildUrl('cancelTTI'))
-            ->call('cancelTTI', [
-                'ttiId' => $traderOrder->reference,
-                'comments' => 'Cancel Order',
-                'confirmAction' => 'true',
-            ]);
-
-        if (! $this->isSuccess($response)) {
-            throw new TraderException(collect([
-                'driver' => 'fake',
-                'step' => 'cancelOrder',
-                'requestBody' => [
-                    'ttiId' => $traderOrder->reference,
-                    'comments' => 'Cancel Order',
-                    'confirmAction' => 'true',
-                ],
-                'responseBody' => $response->body(),
-                'financingOrderId' => $financingOrder->id,
-                'traderOrderId' => $traderOrder->id,
-            ]));
-        }
-
-        return $response->object();
+        return true;
     }
 
     /**
@@ -199,7 +176,18 @@ class FakeDriver implements TraderInterface
 
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
-        $html = view('selling-commodity-to-customer')->render();
+        $html = view('selling-commodity-to-customer', [
+            'ttiId' => $traderOrder->reference,
+            'companyName' => $traderOrder->order->company->name,
+            'orderNumber' => $traderOrder->financing_order_id,
+            'amount' => $traderOrder->order->amount->formatByDecimal(),
+            'hsCodeDescription' => 'product description',
+            'quantity' => 100,
+            'warehouse' => 'warehouse',
+            'owner' => 'owner',
+            'date' => Carbon::now()->toDateString(),
+            'time' => Carbon::now()->toTimeString(),
+        ])->render();
         $path = $traderOrder->financing_order_id.'/DMCC-SCTC/'.$traderOrder->reference.'.pdf';
         PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($traderOrder) {
             $this->attachDocumentToOrder(
@@ -254,7 +242,18 @@ class FakeDriver implements TraderInterface
 
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
-        $html = view('transfer-ownership-to-lender')->render();
+        $html = view('transfer-ownership-to-lender', [
+            'ttiId' => $traderOrder->reference,
+            'companyName' => $traderOrder->order->company->name,
+            'orderNumber' => $traderOrder->financing_order_id,
+            'amount' => $traderOrder->order->amount->formatByDecimal(),
+            'hsCodeDescription' => 'product description',
+            'quantity' => 100,
+            'warehouse' => 'warehouse',
+            'owner' => 'owner',
+            'date' => Carbon::now()->toDateString(),
+            'time' => Carbon::now()->toTimeString(),
+        ])->render();
         $path = $traderOrder->financing_order_id.'/DMCC-TOTL/'.$traderOrder->reference.'.pdf';
         PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($traderOrder) {
             $this->attachDocumentToOrder(

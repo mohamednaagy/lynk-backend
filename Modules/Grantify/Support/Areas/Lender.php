@@ -3,10 +3,19 @@
 namespace Modules\Grantify\Support\Areas;
 
 use App\Enums\Action;
+use App\Enums\Role;
 use App\Enums\Subject;
 
 class Lender
 {
+    public static array $roles = [
+        Role::LenderAdmin,
+        Role::LenderBilling,
+        Role::LenderSupervisor,
+        Role::LenderOrderCreator,
+        Role::LenderApiUser,
+    ];
+
     public static array $basePermissions = [
         Subject::FinancingOrders => [
             Action::Manage,
@@ -39,6 +48,12 @@ class Lender
         ],
         Subject::LenderTransactions => [
             Action::Index,
+        ],
+        Subject::LenderWebhooks => [
+            Action::Create,
+        ],
+        Subject::LenderWebhookSecret => [
+            Action::Refresh,
         ],
     ];
 }

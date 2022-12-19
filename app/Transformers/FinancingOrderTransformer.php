@@ -9,9 +9,9 @@ use League\Fractal\TransformerAbstract;
 
 class FinancingOrderTransformer extends TransformerAbstract
 {
-    //__REVIEW__ move defaultIncludes to availableIncludes
-    // and change all the requests that use this transformer to not break the frontend
-    protected array $defaultIncludes = [
+    protected array $defaultIncludes = [];
+
+    protected array $availableIncludes = [
         'id',
         'status',
         'company_id',
@@ -19,27 +19,31 @@ class FinancingOrderTransformer extends TransformerAbstract
         'national_id',
         'amount',
         'selling_price',
-        'contract',
-        'power_of_attorney',
+        'is_updatable',
         'is_approved',
         'status_reason',
-    ];
-
-    protected array $availableIncludes = [
         'creator',
         'approver',
+        'phone_country_code',
+        'phone_number',
+        'phone_number_formatted',
         'created_at',
         'history',
     ];
 
     public function transform(FinancingOrder $financingOrder)
     {
-        // __REVIEW__ remove from here and add to includeXXX functions
-        return [
-            'phone_country_code' => $financingOrder->phone_number_country_code,
-            'phone_number' => $financingOrder->mobile_dialing_phone_number,
-            'phone_number_formatted' => $financingOrder->phone_number->formatInternational(),
-        ];
+        return [];
+    }
+
+    public function includePhoneCountryCode(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->phone_number_country_code);
+    }
+
+    public function includePhoneNumberFormatted(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->phone_number->formatInternational());
     }
 
     public function includeId(FinancingOrder $financingOrder)
@@ -67,34 +71,22 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeNationalId(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->national_id);
+        return $this->primitive((string) $financingOrder->national_id);
     }
 
     public function includePhoneNumber(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->phone_number);
+        return $this->primitive($financingOrder->mobile_dialing_phone_number);
     }
 
     public function includeAmount(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->amount);
+        return $this->primitive($financingOrder->amount->formatByDecimal());
     }
 
     public function includeSellingPrice(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->selling_price);
-    }
-
-    // __REVIEW__ remove this pls
-    public function includeContract(FinancingOrder $financingOrder)
-    {
-        return $this->primitive($financingOrder->contract);
-    }
-
-    // __REVIEW__ remove this pls
-    public function includePowerOfAttorney(FinancingOrder $financingOrder)
-    {
-        return $this->primitive($financingOrder->power_of_attorney);
+        return $this->primitive($financingOrder->selling_price->formatByDecimal());
     }
 
     public function includeCreatorName(FinancingOrder $financingOrder)
@@ -113,6 +105,11 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeApprover(FinancingOrder $financingOrder)
     {
         return $this->primitive(optional($financingOrder->approver)->full_name);
+    }
+
+    public function includeIsUpdatable(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->is_updatable);
     }
 
     public function includeIsApproved(FinancingOrder $financingOrder)

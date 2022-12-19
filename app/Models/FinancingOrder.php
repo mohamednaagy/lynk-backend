@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
+use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,7 +26,11 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  */
 class FinancingOrder extends Model implements HasMedia, Otpifiable
 {
-    use HasFactory, InteractsWithMedia, BelongsToTenant, LogsActivity, HasScopes;
+    use HasFactory;
+    use InteractsWithMedia;
+    use BelongsToTenant;
+    use LogsActivity;
+    use HasScopes;
 
     /**
      * The attributes that are mass assignable.
@@ -47,6 +52,8 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'status_reason',
         'client_wakala_accepted_at',
         'is_verification_required',
+        'company_id',
+        'created_at',
     ];
 
     protected $casts = [
@@ -56,7 +63,16 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'data' => 'array',
         'customer_details' => 'array',
         'phone_number' => E164PhoneNumberCast::class,
+        'amount' => MoneyStringCast::class.':currency',
+        'selling_price' => MoneyStringCast::class.':currency',
     ];
+
+    protected function isUpdatable(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->status->canBeUpdated(),
+        );
+    }
 
     protected function phoneNumberCountryCode(): Attribute
     {
@@ -84,7 +100,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->addMediaCollection(FinancingOrderMediaCollection::ClientWakala)
             ->singleFile();
         $this
-            ->addMediaCollection(FinancingOrderMediaCollection::BankWakala)
+            ->addMediaCollection(FinancingOrderMediaCollection::LenderWakala)
             ->singleFile();
         $this
             ->addMediaCollection(FinancingOrderMediaCollection::Contract)
@@ -163,14 +179,29 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return true;
     }
 
-    public function scopeCanceled($query)
+    public function scopeCancelled($query)
     {
-        return $query->whereStatus(FinancingOrderStatus::Canceled);
+        return $query->whereStatus(FinancingOrderStatus::Cancelled);
     }
 
     public function scopeActive($query)
     {
-        return $query->whereIn('status', [FinancingOrderStatus::PendingApproval, FinancingOrderStatus::Approved]);
+        return $query->whereNotIn(
+            'status',
+            [
+                FinancingOrderStatus::Cancelled,
+                FinancingOrderStatus::Completed,
+                FinancingOrderStatus::Rejected,
+            ]
+        );
+    }
+
+    public function scopeRequireAction($query)
+    {
+        return $query->whereIn(
+            'status',
+            FinancingOrderStatus::$requireActionStatuses
+        );
     }
 
     public function scopeCompleted($query)

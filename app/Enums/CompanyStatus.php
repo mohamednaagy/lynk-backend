@@ -2,6 +2,7 @@
 
 namespace App\Enums;
 
+use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
 
 /**
@@ -10,7 +11,7 @@ use BenSampo\Enum\Enum;
  * @method static static Approved()
  * @method static static Rejected()
  */
-final class CompanyStatus extends Enum
+final class CompanyStatus extends Enum implements LocalizedEnum
 {
     const Pending = 1;
 

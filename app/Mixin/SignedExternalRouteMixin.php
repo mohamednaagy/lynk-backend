@@ -24,9 +24,7 @@ class SignedExternalRouteMixin
 
             $signedRoute = $this->signedRoute($name, $parameters, $expiration, $absolute);
 
-            $parsedSignedRoute = parse_url($signedRoute);
-
-            return $externalUrl.'?'.$parsedSignedRoute['query'] ?? '';
+            return $externalUrl.'?'.parse_url($signedRoute, PHP_URL_QUERY);
         };
     }
 }

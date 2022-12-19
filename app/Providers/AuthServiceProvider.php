@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use App\Enums\Role;
+use App\Models\Enquiry;
+use App\Models\FinancingOrder;
+use App\Policies\EnquiryPolicy;
+use App\Policies\FinancingOrderPolicy;
 use App\Policies\MediaPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -18,6 +22,8 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Media::class => MediaPolicy::class,
+        FinancingOrder::class => FinancingOrderPolicy::class,
+        Enquiry::class => EnquiryPolicy::class,
     ];
 
     /**

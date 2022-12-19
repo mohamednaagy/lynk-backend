@@ -37,7 +37,7 @@ class ReplyToVisitorEnquiry extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('emails/visitor-enquiry.subject', ['app_name' => config('app.name')]),
+            subject: __('emails/visitor-enquiry.subject_of_reply_to_enquiry', ['enquiry_id' => $this->enquiry->id]),
         );
     }
 

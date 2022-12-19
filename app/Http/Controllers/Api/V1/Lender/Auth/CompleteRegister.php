@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api\V1\Lender\Auth;
 
 use App\Actions\Contracts\Lenders\Auth\CompleteUserRegistration;
+use App\Actions\Contracts\LoginUser;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\CompleteRegisterRequest;
 use App\Models\User;
-use App\Transformers\UserTransformer;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class CompleteRegister extends Controller
 {
@@ -19,18 +21,30 @@ class CompleteRegister extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  User  $user
      * @param  CompleteRegisterRequest  $request
-     * @param  CompleteUserRegistration  $CompleteUserRegistration
+     * @param  User  $user
+     * @param  CompleteUserRegistration  $completeUserRegistration
+     * @param  LoginUser  $loginUser
      * @return JsonResponse
+     *
+     * @throws \Throwable
      */
     public function __invoke(
-        User $user,
         CompleteRegisterRequest $request,
-        CompleteUserRegistration $CompleteUserRegistration
+        User $user,
+        CompleteUserRegistration $completeUserRegistration,
+        LoginUser $loginUser
     ): JsonResponse {
-        $user = $CompleteUserRegistration->handle($user, $request->validated());
+        if ($user->isRegisterCompleted()) {
+            throw new AuthorizationException();
+        }
 
-        return fractal($user, new UserTransformer)->respond();
+        return DB::transaction(function () use ($request, $user, $completeUserRegistration, $loginUser) {
+            $user = $completeUserRegistration->handle($user, $request->validated());
+
+            return $this->successResponse(
+                $loginUser->handle($user, $request->validated('source'), $request)
+            );
+        });
     }
 }

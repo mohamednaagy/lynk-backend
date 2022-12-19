@@ -8,6 +8,8 @@ use App\Actions\Contracts\LoginUser;
 use App\Enums\Area;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\RegisterLenderRequest;
+use App\Jobs\Lenders\NotifyAdminsAboutLenderRegistration;
+use Cknow\Money\Money;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -20,19 +22,28 @@ class Register extends Controller
         LoginUser $loginUser,
         GetSettingsClassInstance $getSettingsClassInstance
     ): JsonResponse {
-        return DB::transaction(function () use ($loginUser, $request, $registerLender, $getSettingsClassInstance) {
+        return DB::multipleTransaction(function () use ($loginUser, $request, $registerLender, $getSettingsClassInstance) {
             $data = array_merge(
                 $request->validated(),
                 [
-                    'company_status' => $getSettingsClassInstance->handle(Area::Lender)->company_registration_status,
-                    'order_cost' => $getSettingsClassInstance->handle(Area::Lender)->order_cost,
+                    'does_order_require_approval' => $getSettingsClassInstance->handle(Area::Lender)
+                        ->default_does_order_require_approval,
+                    'company_status' => $getSettingsClassInstance->handle(Area::Lender)
+                        ->default_company_registration_status,
+                    'order_cost' => Money::parseByDecimal(
+                        $getSettingsClassInstance
+                            ->handle(Area::Lender)->default_order_cost,
+                        Money::getDefaultCurrency()
+                    ),
                 ]
             );
 
-            $lender = $registerLender->handle($data);
+            $user = $registerLender->handle($data);
+
+            dispatch(new NotifyAdminsAboutLenderRegistration(tenant()));
 
             return $this->successResponse(
-                $loginUser->handle($lender, $request->source, $request),
+                $loginUser->handle($user, $request->validated('source'), $request),
                 Response::HTTP_CREATED
             );
         });

@@ -23,8 +23,9 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
         if ($edaatInvoice->status == EdaatInvoiceStatus::Pending()) {
             if ($this->edaatService->isPaidInvoice($edaatInvoice->invoice_number)) {
                 $edaatInvoice->update(['status' => EdaatInvoiceStatus::Paid]);
+                $wallet = $edaatInvoice->company->getWallet(WalletType::CompanyWallet);
                 $this->createTransactions->handle(
-                    $edaatInvoice->company->getWallet(WalletType::CompanyWallet),
+                    $wallet,
                     TransactionReason::DepositByEdaat,
                     $edaatInvoice->amount,
                     [

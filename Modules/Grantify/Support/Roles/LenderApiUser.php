@@ -12,6 +12,27 @@ class LenderApiUser
             Action::Create,
             Action::Index,
             Action::Show,
+            Action::Proceed,
+            Action::Cancel,
+        ],
+        Subject::LenderFinancingOrderCost => [
+            Action::Calculate,
+        ],
+        Subject::LenderTransactions => [
+            Action::Index,
+        ],
+        Subject::LenderWebhookSecret => [
+            Action::Refresh,
+        ],
+        Subject::LenderWebhooks => [
+            Action::Create,
+        ],
+        Subject::LenderWallet => [
+            Action::Manage,
+        ],
+        Subject::LenderSettings => [
+            Action::Index,
+            Action::Edit,
         ],
     ];
 }

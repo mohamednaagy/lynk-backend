@@ -4,12 +4,19 @@ namespace App\Support\MobileVerification\Drivers;
 
 use App\Enums\TccPersonIdType;
 use App\Enums\TccResponseCode;
+use App\Exceptions\MobileVerification\InvalidApiKeyException;
 use App\Exceptions\MobileVerification\InvalidMobileNumberException;
+use App\Exceptions\MobileVerification\InvalidNationalityException;
+use App\Exceptions\MobileVerification\InvalidOperatorTcnException;
 use App\Exceptions\MobileVerification\InvalidPersonIdException;
+use App\Exceptions\MobileVerification\InvalidPersonIdTypeException;
+use App\Exceptions\MobileVerification\InvalidRequestFormatException;
 use App\Exceptions\MobileVerification\MobileNumberNotMatchedException;
 use App\Exceptions\MobileVerification\PersonNotFoundException;
+use App\Exceptions\MobileVerification\ServiceNotAvailableException;
 use App\Support\MobileVerification\Contracts\MobileVerifyDriverInterface;
 use Exception;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Propaganistas\LaravelPhone\PhoneNumber;
@@ -28,20 +35,21 @@ class TccDriver implements MobileVerifyDriverInterface
      */
     public function verify(PhoneNumber $mobileNumber, string $personId): bool
     {
+        $url = $this->url('TCC-Web/api/mobile/verify');
+
         $response = Http::post(
-            'https://IP:PORT/TCC-Web/api/mobile/verify',
-            $this->prepareRequestData(ltrim($mobileNumber->formatE164(), '+'), $personId)
+            $url,
+            $data = $this->prepareRequestData(ltrim($mobileNumber->formatE164(), '+'), $personId)
         );
 
         $response = $response->json();
 
         activity()
-            ->withProperties(
-                ['response' => $response]
-            )
-            ->log(
-                'Mobile Number Verification'
-            );
+            ->withProperties([
+                'request' => $data,
+                'response' => $response,
+            ])
+            ->log('Mobile Number Verification');
 
         return $this->verifyResponse($response);
     }
@@ -75,7 +83,7 @@ class TccDriver implements MobileVerifyDriverInterface
         $typeNumber = substr($personId, 0, 1);
 
         if (! in_array($typeNumber, TccPersonIdType::getValues())) {
-            throw new InvalidPersonIdException();
+            throw new InvalidPersonIdTypeException();
         }
 
         return $typeNumber;
@@ -96,7 +104,7 @@ class TccDriver implements MobileVerifyDriverInterface
         switch ($response['code']) {
             case TccResponseCode::MobileNumberMatched:
                 return true;
-            case TccResponseCode::MobileNumberUnMatched:
+            case TccResponseCode::MobileNumberUnmatched:
                 throw new MobileNumberNotMatchedException();
             case TccResponseCode::InvalidMobileNumber:
                 throw new InvalidMobileNumberException();
@@ -104,8 +112,25 @@ class TccDriver implements MobileVerifyDriverInterface
                 throw new PersonNotFoundException();
             case TccResponseCode::InvalidPersonId:
                 throw new InvalidPersonIdException();
+            case TccResponseCode::InvalidRequestFormat:
+                throw new InvalidRequestFormatException();
+            case TccResponseCode::InvalidApiKey:
+                throw new InvalidApiKeyException();
+            case TccResponseCode::ServiceNotAvailable:
+                throw new ServiceNotAvailableException();
+            case TccResponseCode::InvalidNationality:
+                throw new InvalidNationalityException();
+            case TccResponseCode::InvalidPersonIdType:
+                throw new InvalidPersonIdTypeException();
+            case TccResponseCode::InvalidOperatorTcn:
+                throw new InvalidOperatorTcnException();
             default:
                 throw new Exception();
         }
+    }
+
+    public function url($path)
+    {
+        return rtrim(Config::get('mobile-verify.drivers.tcc.base_url'), '/').'/'.ltrim($path, '/');
     }
 }

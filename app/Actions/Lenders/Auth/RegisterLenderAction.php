@@ -9,6 +9,7 @@ use App\Actions\Contracts\Lenders\Auth\RegisterLender;
 use App\Enums\Role;
 use App\Enums\WalletType;
 use App\Models\User;
+use Cknow\Money\Money;
 use Illuminate\Support\Arr;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
 
@@ -42,14 +43,12 @@ class RegisterLenderAction implements RegisterLender
             'company_cr' => $data['company_cr'],
             'status' => $data['company_status'],
             'order_cost' => $data['order_cost'],
+            'does_order_require_approval' => $data['does_order_require_approval'],
         ]);
 
         tenancy()->initialize($company);
 
-        $company->createWallet([
-            'name' => WalletType::CompanyWallet,
-            'slug' => WalletType::CompanyWallet,
-        ]);
+        $company->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
 
         $user = $this->createUser->handle(
             Arr::only($data, [

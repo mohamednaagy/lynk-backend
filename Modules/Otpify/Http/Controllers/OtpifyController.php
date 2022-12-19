@@ -39,7 +39,7 @@ class OtpifyController extends Controller
                 'message' => trans('response.otp_generated_successfully'),
                 'vid' => $otpCode->id,
             ]);
-        } catch (ConfigurationException | TwilioException) {
+        } catch (ConfigurationException|TwilioException) {
             return $this->errorResponse(
                 message: trans('response.something_went_wrong'),
                 code: ErrorCode::OTPIFY_DRIVERS_CONFIGURATION
@@ -74,7 +74,7 @@ class OtpifyController extends Controller
         } catch (OtpCodeExpiredException) {
             $message = trans('response.otp_code_expired');
             $code = ErrorCode::OTPIFY_EXPIRED;
-        } catch (OtpCodeIncorrectException | OtpCodeNotFoundException) {
+        } catch (OtpCodeIncorrectException|OtpCodeNotFoundException) {
             $message = trans('response.otp_code_invalid');
             $code = ErrorCode::OTPIFY_INVALID;
         }

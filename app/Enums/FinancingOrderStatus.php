@@ -13,7 +13,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
 
     const Approved = 2;
 
-    const Canceled = 3;
+    const Cancelled = 3;
 
     const Completed = 4;
 
@@ -39,7 +39,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
 
     const PtpDocumentRetrieved = 15;
 
-    const PendingCancel = 16;
+    const PendingCancellation = 16;
 
     private static array $state = [
         self::Approved => [
@@ -51,10 +51,10 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         self::Completed => [
             self::MurabahaSaleCompleted,
         ],
-        self::Canceled => [
-            self::PendingCancel,
+        self::Cancelled => [
+            self::PendingCancellation,
         ],
-        self::PendingCancel => [
+        self::PendingCancellation => [
             self::Rejected,
             self::Approved,
             self::RespondedToPtp,
@@ -98,18 +98,30 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         ],
     ];
 
+    public static array $requireActionStatuses = [
+        self::PendingApproval,
+        self::CommodityPurchased,
+        self::MurabahaSaleCompleted,
+        self::Rejected,
+    ];
+
+    public static array $allowedToUpdateStatuses = [
+        self::PendingApproval,
+        self::Rejected,
+    ];
+
     /**
      * @param  Status|int  $status
      * @return bool
      */
     public function canMoveTo(Status|int $status): bool
     {
-        if (! isset(self::$state[$status])) {
-            throw new UnexpectedValueException('no mapping for this status');
-        }
-
         if ($status instanceof Status) {
             $status = $status->value;
+        }
+
+        if (! isset(self::$state[$status])) {
+            throw new UnexpectedValueException('no mapping for this status');
         }
 
         return in_array($this->value, self::$state[$status]);
@@ -122,5 +134,21 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
     public function cantMoveTo(Status|int $status): bool
     {
         return ! $this->canMoveTo($status);
+    }
+
+    /**
+     * @return bool
+     */
+    public function canBeUpdated(): bool
+    {
+        return in_array($this->value, self::$allowedToUpdateStatuses);
+    }
+
+    /**.
+     * @return bool
+     */
+    public function cantBeUpdated(): bool
+    {
+        return ! $this->canBeUpdated();
     }
 }

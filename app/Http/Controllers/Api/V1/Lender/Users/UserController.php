@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api\V1\Lender\Users;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
+use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Users\StoreUserRequest;
 use App\Http\Requests\V1\Lender\Users\UpdateUserRequest;
@@ -14,12 +16,36 @@ use App\Mail\CompleteRegisterInvitation;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::LenderUsers, Action::Index, Action::Manage])
+        )->only('index');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::LenderUsers, Action::Create, Action::Manage])
+        )->only('store');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::LenderUsers, Action::Show, Action::Manage])
+        )->only('show');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::LenderUsers, Action::Edit, Action::Manage])
+        )->only('update');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -28,7 +54,17 @@ class UserController extends Controller
      */
     public function index(GetPaginatedLenderUsers $getPaginatedLenders): JsonResponse
     {
-        return fractal($getPaginatedLenders->handle(), new UserTransformer)->respond();
+        return fractal($getPaginatedLenders->handle(), new UserTransformer(Area::Lender))
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+                'role',
+            ])->respond();
     }
 
     /**
@@ -44,10 +80,23 @@ class UserController extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($storeUserRequest, $createLenderWithRoleAndPermission) {
             $user = $createLenderWithRoleAndPermission->handle($storeUserRequest->validated());
-            $invitationUrl = $storeUserRequest->validated('redirect_url');
-            Mail::to($user->email)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
-            return fractal($user, new UserTransformer())->respond();
+            $invitationUrl = $storeUserRequest->validated('redirect_url');
+            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl));
+
+            $user->load('roles', 'permissions');
+
+            return fractal($user, new UserTransformer(Area::Lender))
+                ->parseIncludes([
+                    'id',
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'phone_number',
+                    'phone_country_code',
+                    'formatted_phone_number',
+                    'role',
+                ])->respond();
         });
     }
 
@@ -57,12 +106,25 @@ class UserController extends Controller
      * @param  User  $user
      * @return JsonResponse
      */
-    public function show(
-        User $user
-    ): JsonResponse {
-        return fractal($user, new UserTransformer(Area::Lender))->parseIncludes([
-            'role',
-        ])->respond();
+    public function show(User $user): JsonResponse
+    {
+        if ($user->hasRole(Role::LenderApiUser)) {
+            throw new ModelNotFoundException();
+        }
+
+        $user->load('roles', 'permissions');
+
+        return fractal($user, new UserTransformer(Area::Lender))
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'role',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
     }
 
     /**
@@ -79,7 +141,7 @@ class UserController extends Controller
         UpdateLenderUserWithRoleAndPermission $updateLenderUserWithRoleAndPermission,
     ): JsonResponse {
         return DB::transaction((function () use ($updateUserRequest, $user, $updateLenderUserWithRoleAndPermission) {
-            if ($user->hasRole(Role::LenderApiUser)) {
+            if ($user->hasRole(Role::LenderApiUser) || $user->id == auth()->user()->getAuthIdentifier()) {
                 throw new AuthorizationException();
             }
 
@@ -97,6 +159,5 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
     }
 }

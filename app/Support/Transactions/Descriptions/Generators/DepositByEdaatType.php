@@ -2,9 +2,10 @@
 
 namespace App\Support\Transactions\Descriptions\Generators;
 
+use App\Models\Transaction;
+use App\Models\Wallet;
 use App\Support\Transactions\Descriptions\GeneratorBase;
-use Bavix\Wallet\Models\Transaction;
-use Bavix\Wallet\Models\Wallet;
+use Cknow\Money\Money;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Support\Arr;
@@ -18,10 +19,8 @@ class DepositByEdaatType extends GeneratorBase
         ], $locale);
     }
 
-    public function handleTransaction(Wallet $wallet, string $amount, array $meta)
+    public function handleTransaction(Wallet $wallet, Money $amount, int $reason, array $meta)
     {
-        $wallet->deposit($amount, $meta);
-
-        return $wallet->balanceFloat;
+        return $wallet->deposit($amount, $reason, $meta);
     }
 }

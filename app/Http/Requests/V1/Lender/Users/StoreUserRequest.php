@@ -6,8 +6,8 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Models\User;
 use App\Rules\HostWhitelistRule;
+use App\Rules\UrlProtocolRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
@@ -33,14 +33,17 @@ class StoreUserRequest extends FormRequest
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
-            'phone_number' => ['required', 'phone:phone_country_code', 'string'],
-            'email' => ['required', 'email', tenant()->unique(User::class)],
-            'redirect_url' => ['required', 'url', new HostWhitelistRule()],
+            'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],
+            'email' => [
+                'required',
+                'email',
+                tenant()->unique(User::class, 'email'),
+            ],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
             'role' => [
                 'required',
-                Rule::in(
-                    Arr::except(Area::getRolesPerAreaMap()[Area::Lender], [Role::LenderApiUser])
-                ),
+                Rule::in(Area::roles(Area::Lender)),
+                Rule::notIn([Role::LenderApiUser]),
             ],
         ];
     }

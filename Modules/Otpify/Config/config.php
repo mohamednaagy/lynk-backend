@@ -42,7 +42,7 @@ return [
         ],
         'absher' => [
             'api_key' => env('ABSHER_API_KEY'),
-            'base_url' => env('ABSHER_SEND_URL'),
+            'base_url' => env('ABSHER_HOST', 'http://158.101.230.247').'/TCC-Web/api/iam/otp',
         ],
     ],
 ];

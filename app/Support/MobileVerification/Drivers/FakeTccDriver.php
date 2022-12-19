@@ -3,26 +3,22 @@
 namespace App\Support\MobileVerification\Drivers;
 
 use App\Enums\TccResponseCode;
-use App\Exceptions\MobileVerification\InvalidMobileNumberException;
-use App\Exceptions\MobileVerification\InvalidPersonIdException;
 use App\Exceptions\MobileVerification\MobileNumberNotMatchedException;
-use App\Exceptions\MobileVerification\PersonNotFoundException;
 use App\Support\MobileVerification\Contracts\MobileVerifyDriverInterface;
-use Exception;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
 class FakeTccDriver implements MobileVerifyDriverInterface
 {
     /**
-     * @param  string  $mobileNumber
+     * @param  \Propaganistas\LaravelPhone\PhoneNumber  $mobileNumber
      * @param  string  $personId
      * @return bool
      */
     public function verify(PhoneNumber $mobileNumber, string $personId): bool
     {
-        $responseCode = $mobileNumber == '+966500112233'
+        $responseCode = $mobileNumber->formatE164() == '+966500112233'
             ? TccResponseCode::MobileNumberMatched
-            : TccResponseCode::MobileNumberUnMatched;
+            : TccResponseCode::MobileNumberUnmatched;
 
         return $this->verifyResponse(['code' => $responseCode]);
     }
@@ -32,16 +28,8 @@ class FakeTccDriver implements MobileVerifyDriverInterface
         switch ($response['code']) {
             case TccResponseCode::MobileNumberMatched:
                 return true;
-            case TccResponseCode::MobileNumberUnMatched:
+            case TccResponseCode::MobileNumberUnmatched:
                 throw new MobileNumberNotMatchedException();
-            case TccResponseCode::InvalidMobileNumber:
-                throw new InvalidMobileNumberException();
-            case TccResponseCode::PersonNotFound:
-                throw new PersonNotFoundException();
-            case TccResponseCode::InvalidPersonId:
-                throw new InvalidPersonIdException();
-            default:
-                throw new Exception();
         }
     }
 }
