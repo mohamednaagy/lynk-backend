@@ -58,12 +58,12 @@ class EnquiryReplyControllerIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_index_enquiries(): void
+    public function test_that_un_auth_user_cant_index_enquiry_replies(): void
     {
         $this->getJson(self::$enquiryReplyUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
-                'message' => 'Unauthenticated.',
+                'message' => __('Unauthenticated.'),
             ]);
     }
 

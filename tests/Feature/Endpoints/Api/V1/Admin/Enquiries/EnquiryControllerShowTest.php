@@ -29,7 +29,7 @@ class EnquiryControllerShowTest extends TestCase
 
     private static Enquiry $visitorEnquiry;
 
-    private static $paginatedEnquiries;
+    private static mixed $paginatedEnquiries;
 
     /**
      * @return void
@@ -51,19 +51,19 @@ class EnquiryControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_index_enquiries(): void
+    public function test_that_un_auth_user_cant_show_enquiry(): void
     {
         $this->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
-                'message' => 'Unauthenticated.',
+                'message' => __('Unauthenticated.'),
             ]);
     }
 
     /**
      * @return void
      */
-    public function test_that_auth_user_has_admin_role_can_index_enquiries(): void
+    public function test_that_auth_user_has_admin_role_can_show_enquiry(): void
     {
         $this->actingAs(self::$admin)
             ->getJson(self::BaseUrl.'/'.self::$visitorEnquiry->id)
@@ -86,7 +86,7 @@ class EnquiryControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_user_has_manager_role_and_right_permission_can_index_lender_settings(): void
+    public function test_that_auth_user_has_manager_role_and_right_permission_can_show_enquiry(): void
     {
         $this->actingAs(self::$managerHasPermission)
             ->getJson(self::BaseUrl.'/'.self::$visitorEnquiry->id)
@@ -109,7 +109,7 @@ class EnquiryControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_user_has_manager_role_cannot_index_lender_settings_with_no_permission(): void
+    public function test_that_auth_user_has_manager_role_cannot_show_enquiry_with_no_permission(): void
     {
         $this->actingAs(self::$manager)
             ->getJson(self::BaseUrl.'/'.self::$visitorEnquiry->id)

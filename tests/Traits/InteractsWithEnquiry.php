@@ -65,9 +65,4 @@ trait InteractsWithEnquiry
             ], $data)
         );
     }
-
-    public function findEnquiry($enquiryId): Enquiry
-    {
-        return Enquiry::find($enquiryId);
-    }
 }

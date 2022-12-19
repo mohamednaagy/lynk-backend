@@ -66,7 +66,7 @@ class EnquiryReplyControllerStoreTest extends TestCase
         $this->getJson(self::$enquiryReplyUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
-                'message' => 'Unauthenticated.',
+                'message' => __('Unauthenticated.'),
             ]);
     }
 
@@ -79,7 +79,12 @@ class EnquiryReplyControllerStoreTest extends TestCase
             ->postJson(self::$enquiryReplyUrl, self::$enquiryReplyData)
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
-                'data',
+                'data' => [
+                    'id',
+                    'body',
+                    'creation_date',
+                    'creator',
+                ],
             ]);
     }
 
@@ -92,7 +97,12 @@ class EnquiryReplyControllerStoreTest extends TestCase
             ->postJson(self::$enquiryReplyUrl, self::$enquiryReplyData)
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
-                'data',
+                'data' => [
+                    'id',
+                    'body',
+                    'creation_date',
+                    'creator',
+                ],
             ]);
     }
 
@@ -118,10 +128,13 @@ class EnquiryReplyControllerStoreTest extends TestCase
             ->postJson(self::$enquiryReplyUrl, self::$enquiryReplyData)
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
-                'data',
+                'data' => [
+                    'id',
+                    'body',
+                    'creation_date',
+                    'creator',
+                ],
             ]);
-
-        Mail::assertSent(ReplyToVisitorEnquiry::class);
 
         $userEmail = self::$visitorEnquiry->email;
         Mail::assertSent(ReplyToVisitorEnquiry::class, function ($mail) use ($userEmail) {
@@ -138,10 +151,9 @@ class EnquiryReplyControllerStoreTest extends TestCase
             ->postJson(self::$enquiryReplyUrl, self::$enquiryReplyData)
             ->assertStatus(Response::HTTP_OK);
 
-        $enquiry = $this->findEnquiry(self::$visitorEnquiry->id);
         $this->assertEquals(
             EnquiryStatus::Resolved,
-            $enquiry->status->value
+            self::$visitorEnquiry->refresh()->status->value
         );
     }
 
@@ -151,13 +163,12 @@ class EnquiryReplyControllerStoreTest extends TestCase
     public function test_that_enquiry_reply_has_been_created_and_status_changed_to_specific_status(): void
     {
         $this->actingAs(self::$admin)
-            ->postJson(self::$enquiryReplyUrl, array_merge(['status' => EnquiryStatus::Closed], self::$enquiryReplyData))
+            ->postJson(self::$enquiryReplyUrl, array_merge(self::$enquiryReplyData, ['status' => EnquiryStatus::Closed]))
             ->assertStatus(Response::HTTP_OK);
 
-        $enquiry = $this->findEnquiry(self::$visitorEnquiry->id);
         $this->assertEquals(
             EnquiryStatus::Closed,
-            $enquiry->status->value
+            self::$visitorEnquiry->refresh()->status->value
         );
     }
 

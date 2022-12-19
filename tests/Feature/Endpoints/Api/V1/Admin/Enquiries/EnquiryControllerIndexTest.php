@@ -40,7 +40,7 @@ class EnquiryControllerIndexTest extends TestCase
 
     private static Enquiry $visitorEnquiry;
 
-    private static $paginatedEnquiries;
+    private static mixed $paginatedEnquiries;
 
     /**
      * @return void
@@ -72,7 +72,7 @@ class EnquiryControllerIndexTest extends TestCase
         $this->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
-                'message' => 'Unauthenticated.',
+                'message' => __('Unauthenticated.'),
             ]);
     }
 
@@ -137,7 +137,7 @@ class EnquiryControllerIndexTest extends TestCase
     public function test_index_filtered_enquiries_by_status_succeed(): void
     {
         $response = $this->actingAs(self::$admin)
-            ->getJson(route('api.v1.admins.enquiries.index', ['status' => EnquiryStatus::UnderReview]))
+            ->getJson(self::BaseUrl.'?status='.EnquiryStatus::UnderReview)
             ->assertStatus(Response::HTTP_OK);
 
         $this->assertEquals(EnquiryStatus::UnderReview, $response['data'][0]['status']['value']);
@@ -149,7 +149,7 @@ class EnquiryControllerIndexTest extends TestCase
     public function test_index_filtered_enquiries_by_creator_succeed(): void
     {
         $response = $this->actingAs(self::$admin)
-            ->getJson(route('api.v1.admins.enquiries.index', ['creator' => self::$userLenderAdmin->first_name]))
+            ->getJson(self::BaseUrl.'?creator='.self::$userLenderAdmin->first_name)
             ->assertStatus(Response::HTTP_OK);
 
         $this->assertEquals(self::$userLenderAdmin->id, $response['data'][0]['creator']['id']);
