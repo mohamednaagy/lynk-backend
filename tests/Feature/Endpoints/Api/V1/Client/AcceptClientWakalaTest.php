@@ -1,12 +1,13 @@
 <?php
 
-namespace Endpoints\Api\V1\Client;
+namespace Tests\Feature\Endpoints\Api\V1\Client;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -24,7 +25,7 @@ class AcceptClientWakalaTest extends TestCase
 
     private static User $userLender;
 
-    private static FinancingOrder $order;
+    private static FinancingOrder|Model $order;
 
     private static OtpifyCode $otpifyCode;
 
@@ -62,7 +63,7 @@ class AcceptClientWakalaTest extends TestCase
                 'data' => ['wakala_file_url'],
             ]);
 
-        $this->assertTrue(! Cache::get($cacheKey));
+        $this->assertFalse(Cache::get($cacheKey));
 
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::WaitingPurchasingCommodity));
     }
