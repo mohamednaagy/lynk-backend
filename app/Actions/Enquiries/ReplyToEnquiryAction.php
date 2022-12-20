@@ -3,7 +3,7 @@
 namespace App\Actions\Enquiries;
 
 use App\Actions\Contracts\Enquiries\ReplyToEnquiry;
-use App\Models\EnquiryReplies;
+use App\Models\EnquiryReply;
 use Illuminate\Support\Arr;
 
 class ReplyToEnquiryAction implements ReplyToEnquiry
@@ -12,11 +12,11 @@ class ReplyToEnquiryAction implements ReplyToEnquiry
      * Create new enquiry.
      *
      * @param  array  $data
-     * @return EnquiryReplies
+     * @return EnquiryReply
      */
-    public function handle(array $data): EnquiryReplies
+    public function handle(array $data): EnquiryReply
     {
-        return EnquiryReplies::create(Arr::only(
+        return EnquiryReply::create(Arr::only(
             $data,
             [
                 'body',

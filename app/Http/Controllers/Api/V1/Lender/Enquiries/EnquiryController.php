@@ -3,31 +3,62 @@
 namespace App\Http\Controllers\Api\V1\Lender\Enquiries;
 
 use App\Actions\Contracts\Enquiries\CreateEnquiry;
-use App\Actions\Contracts\Enquiries\ListUserEnquiries;
+use App\Actions\Contracts\Enquiries\GetPaginatedUserEnquiries;
+use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Enquiries\StoreEnquiryRequest;
 use App\Models\Enquiry;
 use App\Transformers\EnquiryTransformer;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class EnquiryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Index])
+        )
+            ->only('index');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Create])
+        )
+            ->only('store');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Show])
+        )
+            ->only('show');
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @param  Request  $request
-     * @param  ListUserEnquiries  $listUserEnquiries
+     * @param  GetPaginatedUserEnquiries  $getPaginatedUserEnquiries
      * @return JsonResponse
      */
     public function index(
         Request $request,
-        ListUserEnquiries $listUserEnquiries
+        GetPaginatedUserEnquiries $getPaginatedUserEnquiries
     ): JsonResponse {
-        $enquiries = $listUserEnquiries->handle($request->user()->id);
+        $enquiries = $getPaginatedUserEnquiries->handle($request->user()->id);
 
-        return fractal($enquiries, new EnquiryTransformer())->respond();
+        return fractal($enquiries, new EnquiryTransformer())
+            ->parseIncludes([
+                'id',
+                'subject',
+                'status',
+                'creation_date',
+            ])
+            ->respond();
     }
 
     /**
@@ -48,7 +79,14 @@ class EnquiryController extends Controller
 
         $enquiry = $createEnquiry->handle($data);
 
-        return fractal($enquiry, new EnquiryTransformer())->respond();
+        return fractal($enquiry, new EnquiryTransformer())
+            ->parseIncludes([
+                'id',
+                'subject',
+                'status',
+                'creation_date',
+            ])
+            ->respond();
     }
 
     /**
@@ -56,11 +94,22 @@ class EnquiryController extends Controller
      *
      * @param  Enquiry  $enquiry
      * @return JsonResponse
+     *
+     * @throws AuthorizationException
      */
     public function show(Enquiry $enquiry): JsonResponse
     {
+        $this->authorize('view', $enquiry);
+
         return fractal($enquiry, new EnquiryTransformer())
-            ->parseIncludes(['creator', 'body'])
+            ->parseIncludes([
+                'id',
+                'subject',
+                'status',
+                'creation_date',
+                'creator',
+                'body',
+            ])
             ->respond();
     }
 

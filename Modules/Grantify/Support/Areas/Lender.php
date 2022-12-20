@@ -49,5 +49,11 @@ class Lender
         Subject::LenderTransactions => [
             Action::Index,
         ],
+        Subject::LenderWebhooks => [
+            Action::Create,
+        ],
+        Subject::LenderWebhookSecret => [
+            Action::Refresh,
+        ],
     ];
 }

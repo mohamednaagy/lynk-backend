@@ -10,6 +10,7 @@ class LenderAdmin
     public static array $basePermissions = [
         Subject::All => [
             Action::Manage,
+            Action::Approve,
         ],
     ];
 }

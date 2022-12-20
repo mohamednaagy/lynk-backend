@@ -3,14 +3,31 @@
 namespace App\Http\Controllers\Api\V1\Admin\FinancingOrders;
 
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
+use App\Enums\Action;
+use App\Enums\Area;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
-use Illuminate\Http\JsonResponse;
 
 class FinancingOrderController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+                  perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Manage, Action::Index])
+        )
+            ->only('index');
+
+        $this->middleware(
+            'permission:'.
+                          perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Manage, Action::Show])
+        )
+            ->only('show');
+    }
+
     public function index(Company $company, GetPaginatedFinancingOrder $getPaginatedOrders)
     {
         $orders = $getPaginatedOrders->setCompany($company)->handle();
