@@ -2,20 +2,25 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
+use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
+use App\Enums\Subject;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Transformers\UserTransformer;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
+use Tests\Traits\InteractsWithAdmin;
 use Tests\Traits\InteractsWithLender;
 
 class LenderUserControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithLender, InteractsWithAdmin;
 
     private static Company $company;
 
@@ -29,14 +34,19 @@ class LenderUserControllerIndexTest extends TestCase
 
     /**
      * @return void
+     *
+     * @throws BindingResolutionException
      */
     public function setUp(): void
     {
         parent::setUp();
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userAdmin = $this->createLenderUser(self::$company->id, Role::Admin, 'admin@bim.com');
-        self::$userManager = $this->createLenderUser(self::$company->id, Role::Manager, 'manager@bim.com');
+        self::$userAdmin = $this->createAdmin('admin@bim.com');
+        self::$userManager = $this->createManager(
+            'manager@bim.com',
+            perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Index]),
+        );
         self::$users = self::$company->users()->whereHas('roles', function ($query) {
             return $query->whereIn('name', [
                 Role::LenderAdmin,
@@ -84,6 +94,18 @@ class LenderUserControllerIndexTest extends TestCase
                     ])->respond()
                     ->getData(true)
             );
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_auth_manager_user_without_permissions_cant_index_company_users(): void
+    {
+        Grantify::syncPermissionToModel(self::$userManager, []);
+
+        $this->actingAs(self::$userManager)
+            ->getJson('api/v1/admin/companies/'.self::$company->id.'/users')
+            ->assertForbidden();
     }
 
     /**

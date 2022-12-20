@@ -2,18 +2,24 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
+use App\Enums\Action;
+use App\Enums\Area;
 use App\Enums\Role;
+use App\Enums\Subject;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
+use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
+use Tests\Traits\InteractsWithAdmin;
 use Tests\Traits\InteractsWithLender;
 
 class LenderUserControllerUpdateTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithLender, InteractsWithAdmin;
 
     private static Company $company;
 
@@ -29,14 +35,19 @@ class LenderUserControllerUpdateTest extends TestCase
 
     /**
      * @return void
+     *
+     * @throws BindingResolutionException
      */
     public function setUp(): void
     {
         parent::setUp();
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userAdmin = $this->createLenderUser(self::$company->id, Role::Admin, 'admin@bim.com');
-        self::$userManager = $this->createLenderUser(self::$company->id, Role::Manager, 'manager@bim.com');
+        self::$userAdmin = $this->createAdmin('admin@bim.com');
+        self::$userManager = $this->createManager(
+            'manager@bim.com',
+            perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Edit]),
+        );
         self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
         self::$userDetails = [
             'first_name' => 'first_name',
@@ -85,6 +96,18 @@ class LenderUserControllerUpdateTest extends TestCase
             ->assertExactJson([
                 'data' => [],
             ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_auth_manager_user_without_permissions_cant_update_company_user_with_valid_data(): void
+    {
+        Grantify::syncPermissionToModel(self::$userManager, []);
+
+        $this->actingAs(self::$userManager)
+            ->putJson('api/v1/admin/companies/'.self::$company->id.'/users/'.self::$userLenderAdmin->id, self::$userDetails)
+            ->assertForbidden();
     }
 
     /**
