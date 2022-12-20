@@ -16,16 +16,14 @@ use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
-use App\Mail\OrderCreated;
+use App\Jobs\FinancingOrders\NotifyAdminsAboutOrderCreated;
 use App\Models\FinancingOrder;
-use App\Models\User;
 use App\Transformers\FinancingOrderTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -53,6 +51,7 @@ class OrderController extends Controller
     }
 
     /**
+     * @param  Request  $request
      * @param  GetPaginatedFinancingOrder  $getPaginatedOrders
      * @return JsonResponse
      */
@@ -154,10 +153,8 @@ class OrderController extends Controller
                 // deduct the cost from the wallet
                 $deductOrderCreationFee->handle($financingOrder);
 
-                $notification = 'notification model';
-                $admins = User::role([Role::LenderAdmin, Role::LenderSupervisor])->get();
-
-                Mail::cc($admins)->queue(new OrderCreated($notification));
+                $user = auth()->user();
+                dispatch(new NotifyAdminsAboutOrderCreated($financingOrder, $user));
 
                 return fractal($financingOrder, new FinancingOrderTransformer())
                     ->parseIncludes([
