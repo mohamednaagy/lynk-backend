@@ -34,6 +34,7 @@ class SuperAdmin
             Action::Edit,
             Action::Show,
             Action::Delete,
+            Action::Manage,
         ],
         Subject::FinancingOrders => [
             Action::Index,
