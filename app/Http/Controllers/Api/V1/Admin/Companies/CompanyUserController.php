@@ -84,8 +84,7 @@ class CompanyUserController extends Controller
             Role::LenderOrderCreator,
             Role::LenderBilling,
             Role::LenderSupervisor,
-        ])
-        ) {
+        ])) {
             throw new AuthorizationException();
         }
 

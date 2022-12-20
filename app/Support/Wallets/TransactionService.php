@@ -28,7 +28,6 @@ class TransactionService implements TransactionServiceInterface
             'wallet_id' => $wallet->getKey(),
             'amount' => $amount->isNegative() ? $amount : $amount->negative(),
             'reason' => $type,
-            'uuid' => Str::uuid(),
             'reference_number' => $referenceNumber ?? $this->referenceNumberGeneratorInterface->generate(),
             'meta' => $meta,
         ]);
@@ -43,9 +42,8 @@ class TransactionService implements TransactionServiceInterface
     ) {
         return Transaction::create([
             'wallet_id' => $wallet->getKey(),
-            'amount' => $amount,
+            'amount' => $amount->isPositive() ? $amount : $amount->absolute(),
             'reason' => $type,
-            'uuid' => Str::uuid(),
             'reference_number' => $referenceNumber ?? $this->referenceNumberGeneratorInterface->generate(),
             'meta' => $meta,
         ]);
@@ -63,12 +61,13 @@ class TransactionService implements TransactionServiceInterface
         $deposit = $this->deposit($toWallet, $amount, $type, $referenceNumber, $meta);
 
         return Transfer::create([
-            'from_type' => $fromWallet->getMorphClass(),
             'from_id' => $fromWallet->getKey(),
-            'to_type' => $toWallet->getMorphClass(),
             'to_id' => $toWallet->getKey(),
             'deposit_id' => $deposit->getKey(),
             'withdraw_id' => $withdraw->getKey(),
+            'amount' => $amount->isPositive() ? $amount : $amount->absolute(),
+            'currency' => $amount->getCurrency(),
+            'uuid' => Str::uuid(),
             'meta' => $meta,
         ]);
     }

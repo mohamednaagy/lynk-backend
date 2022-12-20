@@ -60,11 +60,11 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/lender', [LenderSettingsController::class, 'index']);
             Route::put('/lender', [LenderSettingsController::class, 'update']);
 
-            Route::get('/project', [ProjectSettingsController::class, 'show']);
+            Route::get('/project', [ProjectSettingsController::class, 'index']);
             Route::put('/project', [ProjectSettingsController::class, 'update']);
         });
 
-        Route::get('wakala-templates/{type}', [WakalaTemplateController::class, 'show'])
+        Route::get('wakala-templates/{type}', [WakalaTemplateController::class, 'index'])
             ->where('type', 'client|company');
         Route::put('wakala-templates/{type}', [WakalaTemplateController::class, 'update'])
             ->where('type', 'client|company');
@@ -87,8 +87,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::get('edaat-invoices', GetEdaatInvoices::class);
         Route::post('edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
 
-        Route::apiResource('enquiries', EnquiryController::class);
-        Route::apiResource('enquiries.replies', EnquiryReplyController::class);
+        Route::apiResource('enquiries', EnquiryController::class)->only(['index', 'show']);
+        Route::apiResource('enquiries.replies', EnquiryReplyController::class)->only(['index', 'store']);
 
         Route::get('media/{media}/download', DownloadMedia::class);
 

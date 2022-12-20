@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Auth;
 
-use App\Models\Company;
 use App\Models\User;
 use App\Rules\HostWhitelistRule;
 use App\Rules\UrlProtocolRule;
@@ -30,7 +29,7 @@ class SendLinkRequest extends FormRequest
     {
         return [
             'email' => ['required', 'email', Rule::exists(User::class, 'email')],
-            'company_unique_name' => ['nullable', 'string', Rule::exists(Company::class, 'unique_name')],
+            'company_unique_name' => ['nullable', 'string'],
             'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
         ];
     }

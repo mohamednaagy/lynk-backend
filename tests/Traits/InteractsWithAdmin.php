@@ -1,0 +1,63 @@
+<?php
+
+namespace Tests\Traits;
+
+use App\Enums\Role;
+use App\Models\User;
+use Modules\Grantify\Facades\Grantify;
+
+trait InteractsWithAdmin
+{
+    /**
+     * Summary of createAdmin
+     *
+     * @param  string  $email
+     * @param  array  $data
+     * @return mixed
+     */
+    public function createAdmin(
+        string $email = 'admin@bim.com',
+        array $data = []
+    ): mixed {
+        $admin = User::factory()->create(
+            array_merge([
+                'email' => $email,
+                'password' => bcrypt('12345678'),
+            ], $data)
+        );
+
+        Grantify::assignRoleToModel($admin, Role::Admin);
+
+        return $admin;
+    }
+
+    /**
+     * Summary of createManager
+     *
+     * @param  string  $email
+     * @param  array  $data
+     * @param  string|array  $permissions
+     * @return mixed
+     */
+    public function createManager(
+        string $email = 'Manager@bim.com',
+        string|array $permissions = [],
+        array $data = []
+    ): mixed {
+        $manager = User::factory()->create(
+            array_merge([
+                'email' => $email,
+                'password' => bcrypt('12345678'),
+            ], $data)
+        );
+
+        Grantify::assignRoleToModel($manager, Role::Manager);
+
+        $permissions = (array) $permissions;
+        foreach ($permissions as $permission) {
+            Grantify::assignPermissionToModel($manager, $permission);
+        }
+
+        return $manager;
+    }
+}

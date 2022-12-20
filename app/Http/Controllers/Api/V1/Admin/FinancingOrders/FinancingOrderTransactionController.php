@@ -11,6 +11,16 @@ class FinancingOrderTransactionController extends Controller
 {
     public function index(Company $company)
     {
-        return fractal($company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer())->respond();
+        return fractal(
+            $company->transactions(WalletType::CompanyWallet)->paginate(),
+            new TransactionTransformer()
+        )
+            ->parseIncludes([
+                'id',
+                'date',
+                'description',
+                'amount',
+            ])
+            ->respond();
     }
 }
