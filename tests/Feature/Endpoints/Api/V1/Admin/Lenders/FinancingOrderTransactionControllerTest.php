@@ -2,19 +2,24 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
-use App\Enums\Role;
+use App\Enums\Action;
+use App\Enums\Area;
+use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Transformers\TransactionTransformer;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
+use Tests\Traits\InteractsWithAdmin;
 use Tests\Traits\InteractsWithLender;
 
 class FinancingOrderTransactionControllerTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithLender, InteractsWithAdmin;
 
     private static Company $company;
 
@@ -26,14 +31,19 @@ class FinancingOrderTransactionControllerTest extends TestCase
 
     /**
      * @return void
+     *
+     * @throws BindingResolutionException
      */
     public function setUp(): void
     {
         parent::setUp();
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910', 'order_cost' => '200']);
-        self::$userAdmin = $this->createLenderUser(self::$company->id, Role::Admin, 'admin@bim.com');
-        self::$userManager = $this->createLenderUser(self::$company->id, Role::Manager, 'manager@bim.com');
+        self::$userAdmin = $this->createAdmin('admin@bim.com');
+        self::$userManager = $this->createManager(
+            'manager@bim.com',
+            perm(Area::SuperAdmin, [Subject::LenderTransactions, Action::Index]),
+        );
     }
 
     /**
@@ -57,7 +67,15 @@ class FinancingOrderTransactionControllerTest extends TestCase
             ->getJson('api/v1/admin/companies/'.self::$company->id.'/transactions')
             ->assertOk()
             ->assertExactJson(
-                fractal(self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer())->respond()->getData(true)
+                fractal(
+                    self::$company->transactions(WalletType::CompanyWallet)->paginate(),
+                    new TransactionTransformer()
+                )->parseIncludes([
+                    'id',
+                    'date',
+                    'description',
+                    'amount',
+                ])->respond()->getData(true)
             );
     }
 
@@ -70,7 +88,27 @@ class FinancingOrderTransactionControllerTest extends TestCase
             ->getJson('api/v1/admin/companies/'.self::$company->id.'/transactions')
             ->assertOk()
             ->assertExactJson(
-                fractal(self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer())->respond()->getData(true)
+                fractal(
+                    self::$company->transactions(WalletType::CompanyWallet)->paginate(),
+                    new TransactionTransformer()
+                )->parseIncludes([
+                    'id',
+                    'date',
+                    'description',
+                    'amount',
+                ])->respond()->getData(true)
             );
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_manager_without_permissions_cant_get_company_transactions(): void
+    {
+        Grantify::syncPermissionToModel(self::$userManager, []);
+
+        $this->actingAs(self::$userManager)
+            ->getJson('api/v1/admin/companies/'.self::$company->id.'/transactions')
+            ->assertForbidden();
     }
 }

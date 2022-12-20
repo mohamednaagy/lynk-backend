@@ -80,5 +80,8 @@ class SuperAdmin
             Action::Edit,
             Action::Manage,
         ],
+        Subject::LenderTransactions => [
+            Action::Index,
+        ],
     ];
 }
