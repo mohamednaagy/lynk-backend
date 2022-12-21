@@ -5,7 +5,6 @@ namespace App\Actions\Admins\Auth;
 use App\Actions\Contracts\Admins\Auth\CompleteAdminRegistration;
 use App\Actions\Contracts\UpdateUser;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 
 class CompleteAdminRegistrationAction implements CompleteAdminRegistration
 {
@@ -15,7 +14,7 @@ class CompleteAdminRegistrationAction implements CompleteAdminRegistration
 
     public function handle(User $user, $data): User
     {
-        $data['password'] = Hash::make($data['password']);
+        $data['password'] = $data['password'];
         $data['email_verified_at'] = now();
 
         $this->updateUser->handle($user, $data);
