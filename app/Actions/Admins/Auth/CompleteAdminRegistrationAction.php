@@ -14,7 +14,6 @@ class CompleteAdminRegistrationAction implements CompleteAdminRegistration
 
     public function handle(User $user, $data): User
     {
-        $data['password'] = $data['password'];
         $data['email_verified_at'] = now();
 
         $this->updateUser->handle($user, $data);
