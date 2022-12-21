@@ -756,7 +756,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 <div dir="{{ App::getLocale() === 'en' ? 'ltr' : 'rtl' }}">
     <div class="mb-6 flex items-center justify-between">
         <div>
-            <img class="mx-auto h-20 w-auto" src="{{ asset('color-logo.svg') }}" />
+            <img class="mx-auto h-20 w-auto" src="{{ "data:image/png;base64,". base64_encode(file_get_contents(public_path('color-logo.png'))) }}" />
         </div>
         <div>
             <h2 class="text-2xl font-bold">{{ __('zatca/e-invoice.tax_invoice') }}</h2>
