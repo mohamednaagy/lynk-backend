@@ -63,7 +63,7 @@ class EnquiryReplyControllerStoreTest extends TestCase
      */
     public function test_that_un_auth_user_cant_create_enquiry_reply(): void
     {
-        $this->getJson(self::$enquiryReplyUrl)
+        $this->postJson(self::$enquiryReplyUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
