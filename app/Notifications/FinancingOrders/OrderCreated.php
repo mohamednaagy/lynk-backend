@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Config;
 
 class OrderCreated extends Notification
 {
@@ -37,11 +38,11 @@ class OrderCreated extends Notification
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
+     * @return MailMessage
      */
     public function toMail($notifiable)
     {
-        $url = url('/invoice/'.$this->financingOrder->id);
+        $url = Config::get('front-end.prod.base_url').'/orders/'.$this->financingOrder->id;
 
         return (new MailMessage)
             ->subject(__('emails/order-created.subject', [
