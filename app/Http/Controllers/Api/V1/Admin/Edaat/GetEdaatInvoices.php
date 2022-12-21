@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\V1\Admin\Edaat;
 
 use App\Actions\Contracts\Edaat\GetEdaatInvoices as GetEdaatInvoicesInterface;
+use App\Enums\Action;
+use App\Enums\Area;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Support\QueryScoper\Scopes\Edaat\InvoiceCompanyScope;
 use App\Support\QueryScoper\Scopes\Edaat\InvoiceNumberScope;
@@ -12,6 +15,14 @@ use Illuminate\Http\Request;
 
 class GetEdaatInvoices extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::LenderEdaatInvoices, Action::Manage, Action::Index])
+        );
+    }
+
     /**
      * Handle the incoming request.
      *

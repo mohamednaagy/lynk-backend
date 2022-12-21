@@ -6,7 +6,9 @@ use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\Companies\GetPaginatedCompanies;
 use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Actions\Contracts\GetSettingsClassInstance;
+use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\StoreCompanyRequest;
@@ -19,6 +21,34 @@ use Illuminate\Support\Facades\DB;
 
 class CompanyController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Index, Action::Manage])
+        )->only('index');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Show, Action::Manage])
+        )->only('show');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Create, Action::Manage])
+        )->only('store');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Edit, Action::Manage])
+        )->only('update');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Delete, Action::Manage])
+        )->only('destroy');
+    }
+
     /**
      * @param  GetPaginatedCompanies  $getPaginatedCompanies
      * @return JsonResponse
@@ -56,8 +86,6 @@ class CompanyController extends Controller
             $company = $createCompany->handle($data);
 
             $company->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
-
-            $company = $createCompany->handle($data);
 
             return fractal($company, new CompanyTransformer())
                 ->parseIncludes([

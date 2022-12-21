@@ -13,6 +13,12 @@ class LenderOrderCreator
             Action::Index,
             Action::Show,
             Action::Edit,
+            Action::Proceed,
+        ],
+        Subject::Enquiries => [
+            Action::Index,
+            Action::Create,
+            Action::Show,
         ],
     ];
 }

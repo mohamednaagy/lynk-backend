@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\Money\Casts\MoneyStringCast;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
@@ -11,16 +12,20 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Transaction extends Model implements HasMedia
 {
-    use HasFactory;
-    use InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, HasUuids;
+
+    public function uniqueIds()
+    {
+        return ['uuid'];
+    }
 
     protected $fillable = [
         'id',
-        'uuid',
         'wallet_id',
         'reference_number',
         'amount',
         'meta',
+        'reason',
     ];
 
     protected $casts = [

@@ -2,6 +2,7 @@
 
 namespace App\Support\Sms\Drivers;
 
+use App\Support\Sms\Events\SmsSent;
 use App\Support\Sms\SmsDriverInterface;
 
 class FakeDriver implements SmsDriverInterface
@@ -15,6 +16,11 @@ class FakeDriver implements SmsDriverInterface
      */
     public function send(string $message, string $phoneNumber): void
     {
-       //
+        SmsSent::dispatch(
+            'fake',
+            [],
+            [],
+            now()
+        );
     }
 }

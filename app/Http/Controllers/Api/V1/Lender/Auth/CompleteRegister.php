@@ -7,6 +7,7 @@ use App\Actions\Contracts\LoginUser;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\CompleteRegisterRequest;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -20,10 +21,13 @@ class CompleteRegister extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  User  $user
      * @param  CompleteRegisterRequest  $request
-     * @param  CompleteUserRegistration  $CompleteUserRegistration
+     * @param  User  $user
+     * @param  CompleteUserRegistration  $completeUserRegistration
+     * @param  LoginUser  $loginUser
      * @return JsonResponse
+     *
+     * @throws \Throwable
      */
     public function __invoke(
         CompleteRegisterRequest $request,
@@ -31,6 +35,10 @@ class CompleteRegister extends Controller
         CompleteUserRegistration $completeUserRegistration,
         LoginUser $loginUser
     ): JsonResponse {
+        if ($user->isRegisterCompleted()) {
+            throw new AuthorizationException();
+        }
+
         return DB::transaction(function () use ($request, $user, $completeUserRegistration, $loginUser) {
             $user = $completeUserRegistration->handle($user, $request->validated());
 
