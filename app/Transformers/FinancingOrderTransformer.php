@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use League\Fractal\Resource\Collection;
 use League\Fractal\TransformerAbstract;
@@ -109,7 +110,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeIsUpdatable(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->is_updatable);
+        return $this->primitive($financingOrder->status->isNot(FinancingOrderStatus::PendingApproval));
     }
 
     public function includeIsApproved(FinancingOrder $financingOrder)
