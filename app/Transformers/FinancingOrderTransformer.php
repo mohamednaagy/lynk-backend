@@ -110,7 +110,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeIsUpdatable(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->status->isNot(FinancingOrderStatus::PendingApproval));
+        return $this->primitive($financingOrder->status->is(FinancingOrderStatus::PendingApproval));
     }
 
     public function includeIsApproved(FinancingOrder $financingOrder)
