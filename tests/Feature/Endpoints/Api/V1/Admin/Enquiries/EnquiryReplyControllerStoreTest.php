@@ -63,7 +63,7 @@ class EnquiryReplyControllerStoreTest extends TestCase
      */
     public function test_that_un_auth_user_cant_create_enquiry_reply(): void
     {
-        $this->getJson(self::$enquiryReplyUrl)
+        $this->postJson(self::$enquiryReplyUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -137,7 +137,7 @@ class EnquiryReplyControllerStoreTest extends TestCase
             ]);
 
         $userEmail = self::$visitorEnquiry->email;
-        Mail::assertSent(ReplyToVisitorEnquiry::class, function ($mail) use ($userEmail) {
+        Mail::assertQueued(ReplyToVisitorEnquiry::class, function ($mail) use ($userEmail) {
             return $mail->hasTo($userEmail);
         });
     }
