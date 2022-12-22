@@ -132,7 +132,7 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
         $this->actingAs(self::$admin)
             ->getJson(self::BaseUrl.self::$wakalaTemplatesTypes['invalid'])
             ->assertStatus(Response::HTTP_NOT_FOUND)
-            ->assertJsonPath('message', '');
+            ->assertJsonPath('message', 'The route api/v1/admin/wakala-templates/invalidType could not be found.');
     }
 
     /**
