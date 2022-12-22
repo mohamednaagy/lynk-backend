@@ -137,7 +137,7 @@ class EnquiryReplyControllerStoreTest extends TestCase
             ]);
 
         $userEmail = self::$visitorEnquiry->email;
-        Mail::assertSent(ReplyToVisitorEnquiry::class, function ($mail) use ($userEmail) {
+        Mail::assertQueued(ReplyToVisitorEnquiry::class, function ($mail) use ($userEmail) {
             return $mail->hasTo($userEmail);
         });
     }

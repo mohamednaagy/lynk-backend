@@ -66,7 +66,7 @@ class CreateVisitorEnquiryTest extends TestCase
             ]);
 
         $userEmail = self::$enquiryData['email'];
-        Mail::assertSent(AccessVisitorEnquiry::class, function ($mail) use ($userEmail) {
+        Mail::assertQueued(AccessVisitorEnquiry::class, function ($mail) use ($userEmail) {
             return $mail->hasTo($userEmail);
         });
     }
