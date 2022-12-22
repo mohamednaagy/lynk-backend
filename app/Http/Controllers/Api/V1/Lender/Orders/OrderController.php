@@ -7,6 +7,8 @@ use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
 use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
+use App\Actions\Contracts\Wallets\DeductVatPercentage;
+use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\ErrorCode;
@@ -30,22 +32,22 @@ class OrderController extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::Lender, [Subject::FinancingOrders, Action::Index, Action::Manage])
+            perm(Area::Lender, [Subject::FinancingOrders, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-                perm(Area::Lender, [Subject::FinancingOrders, Action::Show, Action::Manage])
+            perm(Area::Lender, [Subject::FinancingOrders, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-                perm(Area::Lender, [Subject::FinancingOrders, Action::Create, Action::Manage])
+            perm(Area::Lender, [Subject::FinancingOrders, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-                perm(Area::Lender, [Subject::FinancingOrders, Action::Edit, Action::Manage])
+            perm(Area::Lender, [Subject::FinancingOrders, Action::Edit, Action::Manage])
         )->only('update');
     }
 
@@ -119,12 +121,21 @@ class OrderController extends Controller
      */
     public function store(
         StoreOrderRequest $request,
+        CanCreateOrder $canCreateOrder,
         CreateFinancingOrder $createFinancingOrder,
         DeductOrderCreationFee $deductOrderCreationFee,
-        CanCreateOrder $canCreateOrder
+        DeductVatPercentage $deductVatPercentage,
+        GenerateZatcaInvoice $generateFatoura
     ): JsonResponse {
         return DB::multipleTransaction(
-            function () use ($request, $createFinancingOrder, $deductOrderCreationFee, $canCreateOrder) {
+            function () use (
+                $request,
+                $createFinancingOrder,
+                $deductOrderCreationFee,
+                $canCreateOrder,
+                $deductVatPercentage,
+                $generateFatoura
+            ) {
                 $company = tenant();
                 // throw exception is balance not enough
                 $canCreateOrder->handle($company);
@@ -150,7 +161,14 @@ class OrderController extends Controller
                 );
 
                 // deduct the cost from the wallet
-                $deductOrderCreationFee->handle($financingOrder);
+                $creationFeeTransaction = $deductOrderCreationFee->handle($financingOrder);
+                $vatPercentageTransaction = $deductVatPercentage->handle($financingOrder, $creationFeeTransaction, $company);
+
+                $generateFatoura->handel(
+                    $financingOrder,
+                    creationFeeTransaction: $creationFeeTransaction,
+                    vatPercentageTransaction: $vatPercentageTransaction
+                );
 
                 return fractal($financingOrder, new FinancingOrderTransformer())
                     ->parseIncludes([

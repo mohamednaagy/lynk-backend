@@ -7,8 +7,8 @@ return new class extends SettingsMigration
     public function up(): void
     {
         $this->migrator->add('project.company_name', [
-            'ar' => 'LYNK',
-            'en' => 'لينك',
+            'ar' => 'لينك',
+            'en' => 'LYNK',
         ]);
         $this->migrator->add('project.address_line_one', [
             'ar' => 'شارع الأمير فيصل',
