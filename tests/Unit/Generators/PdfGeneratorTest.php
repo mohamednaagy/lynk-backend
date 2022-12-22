@@ -7,6 +7,7 @@ use App\Support\PdfGenerator\Exceptions\MissingStorageCallbackException;
 use App\Support\PdfGenerator\Generators\BrowserlessGenerator;
 use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
 use function Psl\Type\mixed;
 use Tests\TestCase;
 
@@ -73,7 +74,7 @@ class PdfGeneratorTest extends TestCase
         $this->expectException(GeneratingPdfException::class);
         //make sure the server is running
         $browserlessGenerator = new BrowserlessGenerator([
-            'base_url' => 'http://localhost:8000',
+            'base_url' => Config::get('app.url'),
             'storage_disk' => 'test_disk',
         ]);
 
