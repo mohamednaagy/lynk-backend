@@ -87,7 +87,7 @@ class AdminControllerStoreTest extends TestCase
                 ->getData(true)
         );
 
-        Mail::assertSent(CompleteAdminRegisterInvitation::class);
+        Mail::assertQueued(CompleteAdminRegisterInvitation::class);
     }
 
     public function test_admin_controller_create_with_manager_success()
@@ -124,7 +124,7 @@ class AdminControllerStoreTest extends TestCase
                 ->getData(true)
         );
 
-        Mail::assertSent(CompleteAdminRegisterInvitation::class);
+        Mail::assertQueued(CompleteAdminRegisterInvitation::class);
     }
 
     public function test_admin_controller_create_with_manager_no_permissions_unsuccessful()
