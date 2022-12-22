@@ -141,11 +141,11 @@ class ResendInvitationTest extends TestCase
             )
             ->assertStatus(200);
 
-        Mail::assertSent(CompleteRegisterInvitation::class, function ($mail) {
+        Mail::assertQueued(CompleteRegisterInvitation::class, function ($mail) {
             return $mail->user instanceof User;
         });
 
-        Mail::assertSent(CompleteRegisterInvitation::class, function ($mail) {
+        Mail::assertQueued(CompleteRegisterInvitation::class, function ($mail) {
             return $mail->user->id == self::$lenderAdminNotJoined->id;
         });
     }

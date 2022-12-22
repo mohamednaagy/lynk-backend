@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api\V1\Admin\Enquiries;
 
 use App\Actions\Contracts\Enquiries\ReplyToEnquiry as ReplyToEnquiryInterface;
+use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\EnquiryStatus;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Enquiries\ReplyToEnquiryRequest;
 use App\Mail\ReplyToVisitorEnquiry;
@@ -16,6 +18,19 @@ use Illuminate\Support\Facades\Mail;
 
 class EnquiryReplyController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::EnquiryReplies, Action::Show, Action::Manage])
+        )->only('index');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::EnquiryReplies, Action::Create, Action::Manage])
+        )->only('store');
+    }
+
     /**
      * Display a listing of the resource.
      *

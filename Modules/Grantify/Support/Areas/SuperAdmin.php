@@ -34,6 +34,7 @@ class SuperAdmin
             Action::Edit,
             Action::Show,
             Action::Delete,
+            Action::Manage,
         ],
         Subject::FinancingOrders => [
             Action::Index,
@@ -53,14 +54,34 @@ class SuperAdmin
             Action::Edit,
             Action::Show,
             Action::Delete,
+            Action::Manage,
         ],
         Subject::Enquiries => [
             Action::Index,
             Action::Show,
         ],
         Subject::EnquiryReplies => [
-            Action::Index,
+            Action::Show,
             Action::Create,
+        ],
+
+        Subject::WakalaTemplates => [
+            Action::Index,
+            Action::Edit,
+            Action::Manage,
+        ],
+        Subject::LenderAreaSettings => [
+            Action::Index,
+            Action::Edit,
+            Action::Manage,
+        ],
+        Subject::ProjectSettings => [
+            Action::Index,
+            Action::Edit,
+            Action::Manage,
+        ],
+        Subject::LenderTransactions => [
+            Action::Index,
         ],
     ];
 }

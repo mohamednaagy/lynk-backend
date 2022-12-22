@@ -70,33 +70,6 @@ class UpdateAdminRequest extends FormRequest
                 'string',
                 new EnumValue(Action::class),
             ],
-            'permissions' => [
-                'exclude_if:role,'.Role::Admin,
-                'required',
-                'array',
-            ],
-            'permissions.*' => [
-                'exclude_if:role,'.Role::Admin,
-                'required',
-                'array',
-            ],
-            'permissions.*.subject' => [
-                'exclude_if:role,'.Role::Admin,
-                'required',
-                'string',
-                new EnumValue(Subject::class),
-            ],
-            'permissions.*.actions' => [
-                'exclude_if:role,'.Role::Admin,
-                'required',
-                'array',
-            ],
-            'permissions.*.actions.*' => [
-                'exclude_if:role,'.Role::Admin,
-                'required',
-                'string',
-                new EnumValue(Action::class),
-            ],
         ];
     }
 }

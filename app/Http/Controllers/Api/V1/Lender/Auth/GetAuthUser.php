@@ -29,6 +29,7 @@ class GetAuthUser extends Controller
                 'company.name',
                 'company.status',
                 'company.id',
+                'company.public_status_comment',
                 'permissions',
                 'locale',
                 'phone_number',

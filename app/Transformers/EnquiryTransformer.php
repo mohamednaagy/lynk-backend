@@ -3,6 +3,8 @@
 namespace App\Transformers;
 
 use App\Models\Enquiry;
+use Illuminate\Support\Facades\URL;
+use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -18,6 +20,7 @@ class EnquiryTransformer extends TransformerAbstract
         'body',
         'creator',
         'replies',
+        'replySignature',
     ];
 
     public function transform(Enquiry $enquiry): array
@@ -67,5 +70,18 @@ class EnquiryTransformer extends TransformerAbstract
             'name' => $enquiry->name,
             'phone_number' => $enquiry->phone_number,
         ]);
+    }
+
+    public function includeReplies(Enquiry $enquiry): Collection
+    {
+        return $this->collection($enquiry->replies, new EnquiryReplyTransformer);
+    }
+
+    public function includeReplySignature(Enquiry $enquiry): Primitive
+    {
+        return $this->primitive(explode(
+            'signature=',
+            URL::signedRoute('api.v1.visitor.enquiry.reply', ['enquiry' => $enquiry->id]))[1]
+        );
     }
 }
