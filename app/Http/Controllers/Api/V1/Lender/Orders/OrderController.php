@@ -18,6 +18,7 @@ use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
+use App\Jobs\FinancingOrders\NotifyAdminsAboutOrderCreated;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -169,6 +170,9 @@ class OrderController extends Controller
                     creationFeeTransaction: $creationFeeTransaction,
                     vatPercentageTransaction: $vatPercentageTransaction
                 );
+
+                $user = auth()->user();
+                dispatch(new NotifyAdminsAboutOrderCreated($financingOrder, $user));
 
                 return fractal($financingOrder, new FinancingOrderTransformer())
                     ->parseIncludes([
