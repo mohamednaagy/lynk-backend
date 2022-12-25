@@ -64,9 +64,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
                 'vatPercentageTransaction' => $vatPercentageTransaction,
             ])->render();
 
-            $path = "zatca-{$financingOrder->reference_number}.pdf";
-
-            PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($financingOrder) {
+            PdfGenerator::outputFromHtml($html, function ($fileResource) use ($financingOrder) {
                 return $financingOrder->addMediaFromStream($fileResource)
                     ->usingFileName("zatca-{$financingOrder->getKey()}".'.pdf')
                     ->toMediaCollection($this->getCollectionName());
