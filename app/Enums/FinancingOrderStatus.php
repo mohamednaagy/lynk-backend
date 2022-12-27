@@ -99,14 +99,14 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         ],
     ];
 
-    public const RequireActionStatuses = [
+    public static array $requireActionStatuses = [
         self::PendingApproval,
         self::CommodityPurchased,
         self::MurabahaSaleCompleted,
         self::Rejected,
     ];
 
-    public const AllowedToUpdateStatuses = [
+    public static array $allowedToUpdateStatuses = [
         self::PendingApproval,
         self::Rejected,
     ];
@@ -142,7 +142,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
      */
     public function canBeUpdated(): bool
     {
-        return in_array($this->value, self::AllowedToUpdateStatuses);
+        return in_array($this->value, self::$allowedToUpdateStatuses);
     }
 
     /**.

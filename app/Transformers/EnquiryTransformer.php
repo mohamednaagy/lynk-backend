@@ -3,6 +3,8 @@
 namespace App\Transformers;
 
 use App\Models\Enquiry;
+use Illuminate\Support\Facades\URL;
+use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -11,22 +13,42 @@ class EnquiryTransformer extends TransformerAbstract
     protected array $defaultIncludes = [];
 
     protected array $availableIncludes = [
+        'id',
+        'subject',
+        'status',
+        'creation_date',
         'body',
         'creator',
         'replies',
+        'replySignature',
     ];
 
     public function transform(Enquiry $enquiry): array
     {
-        return [
-            'id' => $enquiry->id,
-            'subject' => $enquiry->subject,
-            'status' => [
-                'description' => $enquiry->status->description,
-                'value' => $enquiry->status->value,
-            ],
-            'creation_date' => $enquiry->created_at->format('Y-m-d h:m A'),
-        ];
+        return [];
+    }
+
+    public function includeId(Enquiry $enquiry): Primitive
+    {
+        return $this->primitive($enquiry->id);
+    }
+
+    public function includeSubject(Enquiry $enquiry): Primitive
+    {
+        return $this->primitive($enquiry->subject);
+    }
+
+    public function includeStatus(Enquiry $enquiry): Primitive
+    {
+        return $this->primitive([
+            'description' => $enquiry->status->description,
+            'value' => $enquiry->status->value,
+        ]);
+    }
+
+    public function includeCreationDate(Enquiry $enquiry): Primitive
+    {
+        return $this->primitive($enquiry->created_at->format('Y-m-d h:m A'));
     }
 
     public function includeBody(Enquiry $enquiry): Primitive
@@ -48,5 +70,18 @@ class EnquiryTransformer extends TransformerAbstract
             'name' => $enquiry->name,
             'phone_number' => $enquiry->phone_number,
         ]);
+    }
+
+    public function includeReplies(Enquiry $enquiry): Collection
+    {
+        return $this->collection($enquiry->replies, new EnquiryReplyTransformer);
+    }
+
+    public function includeReplySignature(Enquiry $enquiry): Primitive
+    {
+        return $this->primitive(explode(
+            'signature=',
+            URL::signedRoute('api.v1.visitor.enquiry.reply', ['enquiry' => $enquiry->id]))[1]
+        );
     }
 }

@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('email')->nullable();
             $table->string('phone_number', '50')->nullable();
             $table->unsignedTinyInteger('status')->default(EnquiryStatus::UnderReview);
+            // __REVIEW__ we need to add company_id in a new migration
             $table->foreignIdFor(User::class)
                 ->nullable()
                 ->constrained()

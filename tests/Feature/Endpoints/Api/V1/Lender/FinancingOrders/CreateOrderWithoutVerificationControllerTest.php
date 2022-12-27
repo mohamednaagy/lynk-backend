@@ -9,15 +9,18 @@ use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Settings\Classes\ProjectSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithSettings;
 
 class CreateOrderWithoutVerificationControllerTest extends TestCase
 {
     use RefreshDatabase;
     use InteractsWithLender;
+    use InteractsWithSettings;
 
     private static Company $company;
 
@@ -49,13 +52,16 @@ class CreateOrderWithoutVerificationControllerTest extends TestCase
 
     private static FinancingOrder $pendingApprovalOrder;
 
+    private static $projectSettings;
+
     public function setUp(): void
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000');
+        [self::$company, self::$wallet] = $this->createCompany('2000', ['order_cost' => 200]);
         [self::$companyWithEmptyWallet, self::$emptyWallet] = $this->createCompany('0', ['company_cr' => '12345678911']);
 
+        self::$projectSettings = $this->app->make(ProjectSettings::class);
         self::$userLenderAdminBelongsToCompanyHasEmptyWallet = $this->createLenderUser(self::$companyWithEmptyWallet->id, Role::LenderAdmin, 'lenderAdmin2@bim.com');
         self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'LenderAdmin@bim.com');
         self::$LenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'LenderApiUser@bim.com');
@@ -142,16 +148,20 @@ class CreateOrderWithoutVerificationControllerTest extends TestCase
     {
         $wallet = self::$company->balance(WalletType::CompanyWallet);
 
-        $this->actingAs(self::$userLenderAdmin)
+        $response = $this->actingAs(self::$userLenderAdmin)
             ->postJson(
                 '/api/v1/lender/orders/no-verification',
                 self::$orderDetails,
                 ['X-Company' => self::$company->id]
             );
-
         $walletAfterCreation = self::$company->balance(WalletType::CompanyWallet);
         $orderCost = self::$company->order_cost->getMoney();
-        $this->assertTrue($wallet->subtract($orderCost)->equals($walletAfterCreation));
+        $vatRate = self::$projectSettings->vat_rate;
+
+        $financingOrder = $response->getOriginalContent()->data;
+        $vatPercentageFee = money($financingOrder->amount * $vatRate)->getMoney();
+
+        $this->assertTrue($wallet->subtract($orderCost->add($vatPercentageFee))->equals($walletAfterCreation));
     }
 
     public function test_create_order_without_verification_lender_user_can_not_ceate_order_without_email_verification()

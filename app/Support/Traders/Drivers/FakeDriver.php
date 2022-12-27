@@ -146,31 +146,7 @@ class FakeDriver implements TraderInterface
      */
     public function cancelOrder(FinancingOrder $financingOrder): mixed
     {
-        $traderOrder = $financingOrder->activeTraderOrder()->first();
-        $response = $this->soap
-            ->baseWsdl($this->buildUrl('cancelTTI'))
-            ->call('cancelTTI', [
-                'ttiId' => $traderOrder->reference,
-                'comments' => 'Cancel Order',
-                'confirmAction' => 'true',
-            ]);
-
-        if (! $this->isSuccess($response)) {
-            throw new TraderException(collect([
-                'driver' => 'fake',
-                'step' => 'cancelOrder',
-                'requestBody' => [
-                    'ttiId' => $traderOrder->reference,
-                    'comments' => 'Cancel Order',
-                    'confirmAction' => 'true',
-                ],
-                'responseBody' => $response->body(),
-                'financingOrderId' => $financingOrder->id,
-                'traderOrderId' => $traderOrder->id,
-            ]));
-        }
-
-        return $response->object();
+        return true;
     }
 
     /**
@@ -212,8 +188,8 @@ class FakeDriver implements TraderInterface
             'date' => Carbon::now()->toDateString(),
             'time' => Carbon::now()->toTimeString(),
         ])->render();
-        $path = $traderOrder->financing_order_id.'/DMCC-SCTC/'.$traderOrder->reference.'.pdf';
-        PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($traderOrder) {
+
+        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
             $this->attachDocumentToOrder(
                 $traderOrder,
                 $fileResource,
@@ -278,8 +254,8 @@ class FakeDriver implements TraderInterface
             'date' => Carbon::now()->toDateString(),
             'time' => Carbon::now()->toTimeString(),
         ])->render();
-        $path = $traderOrder->financing_order_id.'/DMCC-TOTL/'.$traderOrder->reference.'.pdf';
-        PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($traderOrder) {
+
+        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
             $this->attachDocumentToOrder(
                 $traderOrder,
                 $fileResource,

@@ -177,7 +177,7 @@ class FinancingOrderStatusUnitTest extends TestCase
 
     public function test_require_action_statuses()
     {
-        $this->assertSame(FinancingOrderStatus::RequireActionStatuses, [
+        $this->assertSame(FinancingOrderStatus::$requireActionStatuses, [
             FinancingOrderStatus::PendingApproval,
             FinancingOrderStatus::CommodityPurchased,
             FinancingOrderStatus::MurabahaSaleCompleted,
@@ -187,7 +187,7 @@ class FinancingOrderStatusUnitTest extends TestCase
 
     public function test_allowed_to_update_statuses()
     {
-        $this->assertSame(FinancingOrderStatus::AllowedToUpdateStatuses, [
+        $this->assertSame(FinancingOrderStatus::$allowedToUpdateStatuses, [
             FinancingOrderStatus::PendingApproval,
             FinancingOrderStatus::Rejected,
         ]);

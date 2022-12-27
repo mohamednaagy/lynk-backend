@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api\V1\Visitor\Enquiries;
 
 use App\Actions\Contracts\Enquiries\ReplyToEnquiry;
+use App\Enums\EnquiryStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Visitor\Enquiries\StoreVisitorEnquiryReply;
 use App\Models\Enquiry;
 use App\Transformers\EnquiryReplyTransformer;
+use Illuminate\Http\JsonResponse;
 
 class CreateVisitorEnquiryReply extends Controller
 {
@@ -20,9 +22,10 @@ class CreateVisitorEnquiryReply extends Controller
      *
      * @param  StoreVisitorEnquiryReply  $request
      * @param  ReplyToEnquiry  $replyToEnquiry
-     * @return \Illuminate\Http\JsonResponse
+     * @param  Enquiry  $enquiry
+     * @return JsonResponse
      */
-    public function __invoke(StoreVisitorEnquiryReply $request, ReplyToEnquiry $replyToEnquiry, Enquiry $enquiry)
+    public function __invoke(StoreVisitorEnquiryReply $request, ReplyToEnquiry $replyToEnquiry, Enquiry $enquiry): JsonResponse
     {
         $data = array_merge(
             $request->validated(),
@@ -31,6 +34,17 @@ class CreateVisitorEnquiryReply extends Controller
             ]
         );
 
-        return fractal($replyToEnquiry->handle($data), new EnquiryReplyTransformer())->respond();
+        $enquiryReply = $replyToEnquiry->handle($data);
+
+        //change the enquiry status to be UnderReview
+        $enquiry->update(['status' => EnquiryStatus::UnderReview]);
+
+        return fractal($enquiryReply, new EnquiryReplyTransformer())
+            ->parseIncludes([
+                'id',
+                'body',
+                'creation_date',
+            ])
+            ->respond();
     }
 }

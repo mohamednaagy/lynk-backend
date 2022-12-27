@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\V1\Lender\Users;
+namespace App\Http\Requests\V1\Admin\Companies\Users;
 
 use App\Enums\Area;
 use App\Enums\Role;
@@ -8,10 +8,9 @@ use App\Models\User;
 use App\Rules\HostWhitelistRule;
 use App\Rules\UrlProtocolRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
-class StoreCompanyUserRequest extends FormRequest
+class StoreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -44,7 +43,8 @@ class StoreCompanyUserRequest extends FormRequest
             'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
             'role' => [
                 'required',
-                Arr::except((array) Rule::in(Area::roles(Area::Lender)), [Role::LenderApiUser]),
+                Rule::in(Area::roles(Area::Lender)),
+                Rule::notIn(Role::LenderApiUser),
             ],
         ];
     }

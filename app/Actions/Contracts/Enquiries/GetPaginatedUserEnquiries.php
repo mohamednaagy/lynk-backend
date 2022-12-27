@@ -4,7 +4,7 @@ namespace App\Actions\Contracts\Enquiries;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-interface ListUserEnquiries
+interface GetPaginatedUserEnquiries
 {
     /**
      * Create new enquiry.

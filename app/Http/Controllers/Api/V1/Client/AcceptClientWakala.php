@@ -42,7 +42,10 @@ class AcceptClientWakala extends Controller
                 throw new AuthorizationException();
             }
 
-            abort_if($order->getNationalId() !== $request->validated('national_id'), 404);
+            $canProceed = $order->getNationalId() === $request->validated('national_id')
+                && $order->client_wakala_accepted_at === null;
+
+            abort_if(! $canProceed, 404);
 
             $media = $acceptClientWakala->handle($order);
 

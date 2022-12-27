@@ -4,13 +4,14 @@ namespace App\Mail;
 
 use App\Models\Enquiry;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\URL;
 
-class ReplyToVisitorEnquiry extends Mailable
+class ReplyToVisitorEnquiry extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -37,7 +38,7 @@ class ReplyToVisitorEnquiry extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('emails/visitor-enquiry.subject', ['app_name' => config('app.name')]),
+            subject: __('emails/visitor-enquiry.subject_of_reply_to_enquiry', ['enquiry_id' => $this->enquiry->id]),
         );
     }
 

@@ -67,6 +67,7 @@ class GetAuthUserTest extends TestCase
                         'role',
                         'company.id',
                         'company.name',
+                        'company.public_status_comment',
                         'company.status',
                         'company.id',
                         'permissions',
