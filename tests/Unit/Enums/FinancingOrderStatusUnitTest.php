@@ -105,11 +105,11 @@ class FinancingOrderStatusUnitTest extends TestCase
         $this->assertTrue($waitingPurchasingCommodity->canMoveTo($pendingCancellation));
     }
 
-    public function test_can_move_from_approved_to_waiting_client_wakala()
+    public function test_can_move_from_approved_to_waiting_purchasing_commodity()
     {
         $approved = FinancingOrderStatus::fromValue(FinancingOrderStatus::Approved);
-        $waitingClientWakala = FinancingOrderStatus::fromValue(FinancingOrderStatus::WaitingClientWakala);
-        $this->assertTrue($approved->canMoveTo($waitingClientWakala));
+        $waitingPurchasingCommodity = FinancingOrderStatus::fromValue(FinancingOrderStatus::WaitingPurchasingCommodity);
+        $this->assertTrue($approved->canMoveTo($waitingPurchasingCommodity));
     }
 
     public function test_can_move_from_waiting_client_wakala_to_client_wakala_completed()
@@ -161,11 +161,11 @@ class FinancingOrderStatusUnitTest extends TestCase
         $this->assertTrue($contractSigned->canMoveTo($commoditySoldToCustomer));
     }
 
-    public function test_can_move_from_commodity_sold_to_customer_to_murabha_offer_issued()
+    public function test_can_move_from_commodity_sold_to_customer_to_waiting_client_wakala()
     {
         $commoditySoldToCustomer = FinancingOrderStatus::fromValue(FinancingOrderStatus::CommoditySoldToCustomer);
-        $murabhaOfferIssued = FinancingOrderStatus::fromValue(FinancingOrderStatus::MurabhaOfferIssued);
-        $this->assertTrue($commoditySoldToCustomer->canMoveTo($murabhaOfferIssued));
+        $waitingClientWakala = FinancingOrderStatus::fromValue(FinancingOrderStatus::WaitingClientWakala);
+        $this->assertTrue($commoditySoldToCustomer->canMoveTo($waitingClientWakala));
     }
 
     public function test_can_move_from_murabha_offer_issued_to_murabaha_sale_completed()

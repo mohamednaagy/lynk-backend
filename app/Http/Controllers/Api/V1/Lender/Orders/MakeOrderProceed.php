@@ -13,7 +13,6 @@ use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\MakeOrderProceedRequest;
 use App\Models\FinancingOrder;
-use App\Support\Traders\Facades\Trader;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -74,10 +73,8 @@ class MakeOrderProceed extends Controller
         $media = app(AcceptClientWakala::class)->handle($order);
 
         $order->update([
-            'status' => FinancingOrderStatus::WaitingPurchasingCommodity,
+            'status' => FinancingOrderStatus::ClientWakalaCompleted,
         ]);
-
-        Trader::driver(config('trader.default'))->getTti($order);
 
         return $this->successResponse([
             'wakala_file_url' => route('api.v1.media.download', ['media' => $media->uuid]),
