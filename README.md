@@ -1,139 +1,64 @@
-# Lynk System
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
 
+<p align="center">
+<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
-## requirements
+## About Laravel
 
-- webserver
-- composer
-- PHP 8.0.2
-- MySQL database
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-## Installation
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-`You can get the project via composer using:
-`
+## Learning Laravel
 
-``` bash
-git clone https://gitlab.com/businessinnovationmine/lynk/lynk-backend.git
-```
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-- create two tables for example [lynk - lynk-wallet]
-- create .env file in the main directory it should be like this:
+If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
+## Laravel Sponsors
 
-```
-APP_NAME=Laravel
-APP_ENV=local
-APP_KEY=base64:MZo4oo/P3ICB2/xnVx/y2EWgLlm3i1KQvfAaTIr0EI0=
-APP_DEBUG=true
-APP_URL=http://localhost
+We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
 
-LOG_CHANNEL=stack
-LOG_DEPRECATIONS_CHANNEL=null
-LOG_LEVEL=debug
+### Premium Partners
 
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=lynk
-DB_USERNAME=root
-DB_PASSWORD=
+- **[Vehikl](https://vehikl.com/)**
+- **[Tighten Co.](https://tighten.co)**
+- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+- **[64 Robots](https://64robots.com)**
+- **[Cubet Techno Labs](https://cubettech.com)**
+- **[Cyber-Duck](https://cyber-duck.co.uk)**
+- **[Many](https://www.many.co.uk)**
+- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
+- **[DevSquad](https://devsquad.com)**
+- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
+- **[OP.GG](https://op.gg)**
+- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
+- **[Lendio](https://lendio.com)**
 
-WALLET_DB_HOST=127.0.0.1
-WALLET_DB_PORT=3306
-WALLET_DB_DATABASE=lynk_wallet
-WALLET_DB_USERNAME=root
-WALLET_DB_PASSWORD=
+## Contributing
 
-BROADCAST_DRIVER=log
-CACHE_DRIVER=array
-FILESYSTEM_DISK=local
-QUEUE_CONNECTION=database
-SESSION_DRIVER=file
-SESSION_LIFETIME=120
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-MEMCACHED_HOST=127.0.0.1
+## Code of Conduct
 
-REDIS_HOST=127.0.0.1
-REDIS_PASSWORD=null
-REDIS_PORT=6379
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-MAIL_MAILER=log
-MAIL_HOST=mailhog
-MAIL_PORT=1025
-MAIL_USERNAME=null
-MAIL_PASSWORD=null
-MAIL_ENCRYPTION=null
-MAIL_FROM_ADDRESS="hello@example.com"
-MAIL_FROM_NAME="${APP_NAME}"
+## Security Vulnerabilities
 
-OCI_ACCESS_KEY_ID=f02e8cde155d7cfbb33e18207977ba52a1c82f38
-OCI_SECRET_ACCESS_KEY=X2lcaX/nw3NaoNhCcCWp9maBReWC140XZau55mdWZ5M=
-OCI_DEFAULT_REGION=me-jeddah-1
-OCI_BUCKET=testing-bucket
-OCI_ENDPOINT=https://axluzxsuyumj.compat.objectstorage.me-jeddah-1.oraclecloud.com
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-OCI_PUBLIC_ACCESS_KEY_ID=f02e8cde155d7cfbb33e18207977ba52a1c82f38
-OCI_PUBLIC_SECRET_ACCESS_KEY=X2lcaX/nw3NaoNhCcCWp9maBReWC140XZau55mdWZ5M=
-OCI_PUBLIC_DEFAULT_REGION=me-jeddah-1
-OCI_PUBLIC_BUCKET=public-testing-bucket
-OCI_PUBLIC_ENDPOINT=https://axluzxsuyumj.compat.objectstorage.me-jeddah-1.oraclecloud.com
+## License
 
-PUSHER_APP_ID=
-PUSHER_APP_KEY=
-PUSHER_APP_SECRET=
-PUSHER_APP_CLUSTER=mt1
-
-MIX_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
-MIX_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
-
-OTPIFY_DEFAULT_DRIVER=
-OTPIFY_CODE_LENGTH=4
-OTPIFY_CODE_EXPIRATION_TIME=10
-
-OTPIFY_TWILIO_SID=
-OTPIFY_TWILIO_TOKEN=
-OTPIFY_TWILIO_FROM=
-OTPIFY_TWILIO_VERIFY_SID=
-OTPIFY_TWILIO_SSL_VERIFY_PEER=
-OTPIFY_TWILIO_SSL_VERIFY_HOST=
-AUTHORIZED_TOKEN_LENGTH=
-
-PERMISSION_GUARDS=web,api
-
-GRANTIFY_DEFAULT_DRIVER=
-
-SETTINGS_CACHE_ENABLED=
-HOST_WHITELIST=localhost
-BITLY_ACCESS_TOKEN=5c67bf1e06f40fcb04c1aa89643e52bca93c15d1
-MOBILE_VERIFY_DEFAULT_DRIVER=fake_tcc
-SMS_DEFAULT_DRIVER=fake_sms
-OTPIFY_NATIONAL_ID_DEFAULT_DRIVER=fake_absher
-DEFAULT_TRADER=dmcc
-DEFAULT_PDF_GENERATOR=browserless
-BROWSERLESS_BASE_URL=http://dev-docker.uselynk.com
-BROWSERLESS_STORAGE_DRIVER=local
-
-MEDIA_DISK=local
-```
-
-
-### To install the project via the composer rune this command
-
-``` Bash
-composer install
-```
-
-### To create the database migration & seed important data
-
-``` Bash
-php artisan migrate --seed
-```
-
-### now you have a super admin account with the following credentials
-
-```
-email: admin@bim.com
-password: 12345678
-```
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
