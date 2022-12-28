@@ -131,11 +131,11 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeHistory(FinancingOrder $financingOrder): Collection
     {
         return $this->collection(collect([
-            'client_wakala',
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
             FinancingOrderHistory::ContractSigned,
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
             FinancingOrderHistory::IssueMurabahaOffer,
+            'client_wakala',
             FinancingOrderHistory::MurabahaSaleCompleted,
         ]), new TraderHistoryTransformer($financingOrder, $financingOrder->traderOrders->last()->traderHistories ?? collect()));
     }
