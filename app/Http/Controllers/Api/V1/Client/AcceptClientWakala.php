@@ -58,7 +58,7 @@ class AcceptClientWakala extends Controller
             Cache::forget($tokenCacheKey);
 
             return $this->successResponse([
-                'wakala_file_url' => $media->getUrl(),
+                'wakala_file_url' => route('api.v1.client.media.download', ['media' => $media->uuid]),
             ]);
         });
     }
