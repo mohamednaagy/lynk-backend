@@ -65,7 +65,7 @@ class AcceptClientWakalaTest extends TestCase
 
         $this->assertNull(Cache::get($cacheKey));
 
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::WaitingPurchasingCommodity));
+        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::ClientWakalaCompleted));
     }
 
     public function test_accept_client_wakala_with_invalid_national_id_unsuccessful()

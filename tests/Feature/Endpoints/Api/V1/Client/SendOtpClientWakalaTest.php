@@ -50,7 +50,7 @@ class SendOtpClientWakalaTest extends TestCase
             'national_id' => '1591192305',
             'order_id' => self::$order->id,
         ])
-            ->assertStatus(Response::HTTP_NOT_FOUND);
+            ->assertStatus(Response::HTTP_BAD_REQUEST);
     }
 
     public function test_send_otp_client_wakala_with_already_verified_order_unsuccessful()
@@ -61,6 +61,6 @@ class SendOtpClientWakalaTest extends TestCase
             'national_id' => '2553451234',
             'order_id' => self::$order->id,
         ])
-            ->assertStatus(Response::HTTP_NOT_FOUND);
+            ->assertStatus(Response::HTTP_BAD_REQUEST);
     }
 }

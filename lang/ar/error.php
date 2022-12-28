@@ -24,4 +24,8 @@ return [
     'must_verify_email' => 'يجب عليك التحقق من البريد الإلكتروني',
     'x_company_invalid' => 'الشركة غير صحيحة',
     'company_not_active' => 'الشركة غير مفعلة',
+    'wrong_data' => 'البيانات المدخلة غير صحيحة',
+    'client_wakala_already_accepted' => 'تم قبول الطلب مسبقا',
+    'order_still_pending' => 'حالة الطلب مازالت معلقة',
+    'order_is_rejected' => 'تم رفض الطلب الرجاء التواصل مع الدعم الفني',
 ];
