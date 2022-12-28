@@ -24,4 +24,8 @@ return [
     'must_verify_email' => 'You must verify your email address',
     'x_company_invalid' => 'Invalid company',
     'company_not_active' => 'The company is not active',
+    'wrong_data' => 'Entered data not valid',
+    'client_wakala_already_accepted' => 'Order has been accepted',
+    'order_still_pending' => 'Order still pending for approval',
+    'order_is_rejected' => 'Order has been rejected please contact customer support',
 ];
