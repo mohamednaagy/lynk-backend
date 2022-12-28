@@ -2,7 +2,9 @@
 
 namespace App\Jobs\Dmcc;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -50,6 +52,50 @@ class ProcessDmccContractSignedOrder implements ShouldQueue
             $trader->createSellingCommodityToCustomerDocument($lastTraderOrder);
 
             $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommoditySoldToCustomer);
+
+            $mpoDocument = $trader->getDocumentByTypeAndTransaction(
+                $lastTraderOrder->reference,
+                'Murabaha Purchase Offer Document'
+            );
+
+            $trader->createTraderOrderHistory(
+                $lastTraderOrder,
+                FinancingOrderHistory::GetMurabahaPurchaseOfferDocument
+            );
+
+            $trader->attachDocumentToOrder(
+                $lastTraderOrder,
+                $mpoDocument,
+                FinancingOrderMediaCollection::MurabahaPurchaseOrder,
+                'base64'
+            );
+
+            $trader->createTraderOrderHistory(
+                $lastTraderOrder,
+                FinancingOrderHistory::AttachMpoDocument
+            );
+
+            $warrantDocument = $trader->getDocumentByTypeAndTransaction(
+                $lastTraderOrder->reference,
+                'Warrant Amendment Except Warrant No'
+            );
+
+            $trader->createTraderOrderHistory(
+                $lastTraderOrder,
+                FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument
+            );
+
+            $trader->attachDocumentToOrder(
+                $lastTraderOrder,
+                $warrantDocument,
+                FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
+                'base64'
+            );
+
+            $trader->createTraderOrderHistory(
+                $lastTraderOrder,
+                FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument
+            );
         });
     }
 
