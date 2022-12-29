@@ -13,7 +13,7 @@ class GenerateClientWakalaAction implements GenerateClientWakala
 {
     protected string $template = 'templates.client-wakala';
 
-    protected string $collectionName = FinancingOrderMediaCollection::LenderWakala;
+    protected string $collectionName = FinancingOrderMediaCollection::ClientWakala;
 
     protected string $filePath = '';
 
@@ -32,9 +32,7 @@ class GenerateClientWakalaAction implements GenerateClientWakala
             'template' => $template,
         ])->render();
 
-        $path = $this->getFilePath($financingOrder).'.pdf';
-
-        return PdfGenerator::outputFromHtml($wakalaTemplate, $path, function ($fileResource) use ($financingOrder) {
+        return PdfGenerator::outputFromHtml($wakalaTemplate, function ($fileResource) use ($financingOrder) {
             return $financingOrder->addMediaFromStream($fileResource)
                 ->usingFileName($financingOrder->getNationalId().'.pdf')
                 ->toMediaCollection($this->getCollectionName());

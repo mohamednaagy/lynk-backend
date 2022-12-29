@@ -19,7 +19,7 @@ class EnquiryStatusScope extends QueryScoper
     public function prepareData(): array
     {
         return [
-            'status' => Request::query('status'),
+            'status' => (int) Request::query('status'),
         ];
     }
 

@@ -96,7 +96,7 @@ class UserControllerStoreTest extends TestCase
                     'role',
                 ],
             ]);
-        Mail::assertSent(CompleteRegisterInvitation::class);
+        Mail::assertQueued(CompleteRegisterInvitation::class);
     }
 
     /**

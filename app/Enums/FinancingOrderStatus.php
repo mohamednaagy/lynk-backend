@@ -66,13 +66,11 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
             self::CommoditySoldToCustomer,
             self::WaitingPurchasingCommodity,
         ],
-        self::WaitingClientWakala => [
-            self::Approved,
-        ],
         self::ClientWakalaCompleted => [
             self::WaitingClientWakala,
         ],
         self::WaitingPurchasingCommodity => [
+            self::Approved,
             self::ClientWakalaCompleted,
         ],
         self::RespondedToPtp => [
@@ -90,22 +88,25 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         self::CommoditySoldToCustomer => [
             self::ContractSigned,
         ],
-        self::MurabhaOfferIssued => [
+        self::WaitingClientWakala => [
             self::CommoditySoldToCustomer,
         ],
         self::MurabahaSaleCompleted => [
             self::MurabhaOfferIssued,
         ],
+        self::MurabhaOfferIssued => [
+            self::ClientWakalaCompleted,
+        ],
     ];
 
-    public const RequireActionStatuses = [
+    public static array $requireActionStatuses = [
         self::PendingApproval,
         self::CommodityPurchased,
         self::MurabahaSaleCompleted,
         self::Rejected,
     ];
 
-    public const AllowedToUpdateStatuses = [
+    public static array $allowedToUpdateStatuses = [
         self::PendingApproval,
         self::Rejected,
     ];
@@ -141,7 +142,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
      */
     public function canBeUpdated(): bool
     {
-        return in_array($this->value, self::AllowedToUpdateStatuses);
+        return in_array($this->value, self::$allowedToUpdateStatuses);
     }
 
     /**.

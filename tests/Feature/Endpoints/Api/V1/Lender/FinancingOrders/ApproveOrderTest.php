@@ -60,7 +60,7 @@ class ApproveOrderTest extends TestCase
 
         self::$financingOrder = FinancingOrder::find(self::$financingOrder->getRawOriginal('id'));
 
-        $this->assertEquals(self::$financingOrder->getRawOriginal('status'), FinancingOrderStatus::WaitingClientWakala);
+        $this->assertEquals(self::$financingOrder->getRawOriginal('status'), FinancingOrderStatus::Approved);
     }
 
     public function test_approve_order_fails_if_order_is_approved(): void

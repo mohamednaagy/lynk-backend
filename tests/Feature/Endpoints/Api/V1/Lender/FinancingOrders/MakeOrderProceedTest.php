@@ -343,7 +343,7 @@ class MakeOrderProceedTest extends TestCase
 
         $this->assertEquals(
             FinancingOrder::find(self::$financingOrder->getOriginal('id'))->status->value,
-            FinancingOrderStatus::WaitingPurchasingCommodity
+            FinancingOrderStatus::ClientWakalaCompleted
         );
     }
 }

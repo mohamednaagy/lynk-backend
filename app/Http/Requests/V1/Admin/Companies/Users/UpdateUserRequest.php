@@ -6,7 +6,6 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
@@ -41,7 +40,8 @@ class UpdateUserRequest extends FormRequest
             'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],
             'role' => [
                 'required',
-                Arr::except(Rule::in(Area::roles(Area::Lender)), [Role::LenderApiUser]),
+                Rule::in(Area::roles(Area::Lender)),
+                Rule::notIn(Role::LenderApiUser),
             ],
         ];
     }

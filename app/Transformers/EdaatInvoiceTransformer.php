@@ -77,8 +77,8 @@ class EdaatInvoiceTransformer extends TransformerAbstract
     public function includeCompany(EdaatInvoice $edaatInvoice): Primitive
     {
         return $this->primitive([
-            'id' => $edaatInvoice->company->id,
-            'name' => $edaatInvoice->company->name,
+            'id' => optional($edaatInvoice->company)->id,
+            'name' => optional($edaatInvoice->company)->name,
         ]);
     }
 

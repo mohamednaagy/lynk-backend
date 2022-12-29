@@ -51,8 +51,11 @@ class DmccDriver implements TraderInterface
     public function getTti(FinancingOrder $financingOrder): string
     {
         $ttiId = $this->getTtiId($financingOrder);
-        $traderOrder = $this->createTraderOrder($financingOrder, $ttiId, 'dmcc');
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+
+        if (! blank($ttiId)) {
+            $traderOrder = $this->createTraderOrder($financingOrder, $ttiId, 'dmcc');
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+        }
 
         return $ttiId;
     }
@@ -247,8 +250,7 @@ class DmccDriver implements TraderInterface
             'time' => Carbon::now()->toTimeString(),
         ])->render();
 
-        $path = $traderOrder->financing_order_id.'/DMCC-SCTC/'.$traderOrder->reference.'.pdf';
-        PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($traderOrder) {
+        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
             $this->attachDocumentToOrder(
                 $traderOrder,
                 $fileResource,
@@ -321,8 +323,7 @@ class DmccDriver implements TraderInterface
             'time' => Carbon::now()->toTimeString(),
         ])->render();
 
-        $path = $traderOrder->financing_order_id.'/DMCC-TOTL/'.$traderOrder->reference.'.pdf';
-        PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($traderOrder) {
+        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
             $this->attachDocumentToOrder(
                 $traderOrder,
                 $fileResource,
@@ -359,6 +360,9 @@ class DmccDriver implements TraderInterface
         $traderOrder->update([
             'product' => $response->inventoryDetails[0]->hsCodeDescription,
             'quantity' => $response->inventoryDetails[0]->quantity,
+            'amount' => $response->inventoryDetails[0]->totalValue.' '.$response->inventoryDetails[0]->currency,
+            'warehouse' => $response->inventoryDetails[0]->warehouseOrVaultId,
+            'owner' => $response->inventoryDetails[0]->owner,
         ]);
 
         return $response;

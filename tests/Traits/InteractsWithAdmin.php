@@ -53,8 +53,9 @@ trait InteractsWithAdmin
 
         Grantify::assignRoleToModel($manager, Role::Manager);
 
-        if (! empty($permissions)) {
-            Grantify::assignPermissionToModel($manager, $permissions);
+        $permissions = (array) $permissions;
+        foreach ($permissions as $permission) {
+            Grantify::assignPermissionToModel($manager, $permission);
         }
 
         return $manager;

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Visitor\Enquiries;
 
 use App\Actions\Contracts\Enquiries\ReplyToEnquiry;
+use App\Enums\EnquiryStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Visitor\Enquiries\StoreVisitorEnquiryReply;
 use App\Models\Enquiry;
@@ -34,6 +35,9 @@ class CreateVisitorEnquiryReply extends Controller
         );
 
         $enquiryReply = $replyToEnquiry->handle($data);
+
+        //change the enquiry status to be UnderReview
+        $enquiry->update(['status' => EnquiryStatus::UnderReview]);
 
         return fractal($enquiryReply, new EnquiryReplyTransformer())
             ->parseIncludes([

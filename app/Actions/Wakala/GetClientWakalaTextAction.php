@@ -9,10 +9,12 @@ class GetClientWakalaTextAction implements GetClientWakalaText
 {
     public function handle(FinancingOrder $financingOrder, string $clientTemplate)
     {
+        $traderDetails = $financingOrder->activeTraderOrder()->first();
         $date = now()->toDateString();
         $time = now()->toTimeString();
         $commodityNumber = $financingOrder->reference_number;
-        $amount = $financingOrder->amount;
+        $amount = $traderDetails->amount ?? '';
+        $commodity = $traderDetails->product ?? '';
         $orderNumber = $financingOrder->id;
         $orderDate = $financingOrder->created_at->format('Y-m-d');
 
@@ -21,6 +23,7 @@ class GetClientWakalaTextAction implements GetClientWakalaText
             '{{signingContractTime}}',
             '{{commodityNumber}}',
             '{{amount}}',
+            '{{commodity}}',
             '{{orderNumber}}',
             '{{orderDate}}',
         ], [
@@ -28,6 +31,7 @@ class GetClientWakalaTextAction implements GetClientWakalaText
             $time,
             $commodityNumber,
             $amount,
+            $commodity,
             $orderNumber,
             $orderDate,
         ], $clientTemplate);

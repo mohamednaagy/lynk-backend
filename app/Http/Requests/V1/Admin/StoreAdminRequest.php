@@ -39,7 +39,8 @@ class StoreAdminRequest extends FormRequest
                 'required',
                 'email',
                 Rule::unique(User::class, 'email')
-                    ->whereNull('company_id'),
+                    ->whereNull('company_id')
+                    ->withoutTrashed(),
             ],
             'role' => ['required', 'string', Rule::in(Area::roles(Area::SuperAdmin))],
             'permissions' => [

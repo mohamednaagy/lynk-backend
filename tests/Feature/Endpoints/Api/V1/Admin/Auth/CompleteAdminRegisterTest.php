@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Auth;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Auth;
 
 use App\Models\User;
 use App\Transformers\UserTransformer;

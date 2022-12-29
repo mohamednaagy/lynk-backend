@@ -36,7 +36,7 @@ class BrowserlessGenerator implements GeneratorInterface
         ], $options);
     }
 
-    public function outputFromHtml($html, $path, $options = [])
+    public function outputFromHtml($html, $options = [])
     {
         $tmpFileResource = tmpfile();
 
