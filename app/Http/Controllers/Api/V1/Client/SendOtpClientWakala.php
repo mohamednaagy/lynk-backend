@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Api\V1\Client;
 
 use App\Actions\Contracts\Clients\SendOtpClientWakala as SendOTPClientWakalaInterface;
+use App\Enums\ErrorCode;
+use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Client\SendOtpRequest;
 use App\Models\FinancingOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Response;
 
 class SendOtpClientWakala extends Controller
 {
@@ -27,12 +30,39 @@ class SendOtpClientWakala extends Controller
     ) {
         return DB::transaction(function () use ($request, $sendOTPClientWakala) {
             $order = FinancingOrder::lockForUpdate()
-                ->findOrFail($request->validated('order_id'));
+                ->find($request->validated('order_id'));
 
-            $canProceed = $order->getNationalId() !== $request->validated('national_id')
-                || $order->client_wakala_accepted_at === null;
+            if (! $order || $order->getNationalId() !== $request->validated('national_id')) {
+                return $this->errorResponse(
+                    __('error.wrong_data'),
+                    Response::HTTP_BAD_REQUEST,
+                    ErrorCode::WRONG_DATA
+                );
+            }
 
-            abort_if(! $canProceed, 404);
+            if ($order->status->is(FinancingOrderStatus::PendingApproval)) {
+                return $this->errorResponse(
+                    __('error.order_still_pending'),
+                    Response::HTTP_BAD_REQUEST,
+                    ErrorCode::ORDER_STILL_PENDING
+                );
+            }
+
+            if ($order->status->is(FinancingOrderStatus::Rejected)) {
+                return $this->errorResponse(
+                    __('error.order_is_rejected'),
+                    Response::HTTP_BAD_REQUEST,
+                    ErrorCode::ORDER_IS_REJECTED
+                );
+            }
+
+            if ($order->client_wakala_accepted_at !== null) {
+                return $this->errorResponse(
+                    __('error.client_wakala_already_accepted'),
+                    Response::HTTP_BAD_REQUEST,
+                    ErrorCode::CLIENT_WAKALA_ACCEPTED
+                );
+            }
 
             $vid = $sendOTPClientWakala->handle($request, $order);
 

@@ -188,8 +188,8 @@ class FakeDriver implements TraderInterface
             'date' => Carbon::now()->toDateString(),
             'time' => Carbon::now()->toTimeString(),
         ])->render();
-        $path = $traderOrder->financing_order_id.'/DMCC-SCTC/'.$traderOrder->reference.'.pdf';
-        PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($traderOrder) {
+
+        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
             $this->attachDocumentToOrder(
                 $traderOrder,
                 $fileResource,
@@ -254,8 +254,8 @@ class FakeDriver implements TraderInterface
             'date' => Carbon::now()->toDateString(),
             'time' => Carbon::now()->toTimeString(),
         ])->render();
-        $path = $traderOrder->financing_order_id.'/DMCC-TOTL/'.$traderOrder->reference.'.pdf';
-        PdfGenerator::outputFromHtml($html, $path, function ($fileResource) use ($traderOrder) {
+
+        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
             $this->attachDocumentToOrder(
                 $traderOrder,
                 $fileResource,

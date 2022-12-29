@@ -8,9 +8,8 @@ interface GeneratorInterface
      * output from html file
      *
      * @param  string  $html
-     * @param  string  $path
      * @param  array  $options
      * @return mixed
      */
-    public function outputFromHtml($html, $path, $options);
+    public function outputFromHtml($html, $options);
 }

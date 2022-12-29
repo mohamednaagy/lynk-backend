@@ -30,7 +30,7 @@ class AcceptClientWakala extends Controller
         $driver = config('trader.default');
         $trader = Trader::driver($driver);
 
-        return DB::transaction(function () use ($trader, $request, $acceptClientWakala) {
+        return DB::transaction(function () use ($request, $acceptClientWakala) {
             $order = FinancingOrder::lockForUpdate()
                 ->findOrFail($request->validated('order_id'));
 
@@ -42,20 +42,21 @@ class AcceptClientWakala extends Controller
                 throw new AuthorizationException();
             }
 
-            abort_if($order->getNationalId() !== $request->validated('national_id'), 404);
+            $canProceed = $order->getNationalId() === $request->validated('national_id')
+                && $order->client_wakala_accepted_at === null;
+
+            abort_if(! $canProceed, 404);
 
             $media = $acceptClientWakala->handle($order);
 
             $order->update([
-                'status' => FinancingOrderStatus::WaitingPurchasingCommodity,
+                'status' => FinancingOrderStatus::ClientWakalaCompleted,
             ]);
-
-            $trader->getTti($order);
 
             Cache::forget($tokenCacheKey);
 
             return $this->successResponse([
-                'wakala_file_url' => $media->getUrl(),
+                'wakala_file_url' => route('api.v1.client.media.download', ['media' => $media->uuid]),
             ]);
         });
     }

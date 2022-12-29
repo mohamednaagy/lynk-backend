@@ -41,4 +41,12 @@ class ErrorCode
     public const ENQUIRY_CLOSED_ALREADY = 1017;
 
     public const ORDER_ALREADY_APPROVED = 1018;
+
+    public const WRONG_DATA = 1019;
+
+    public const CLIENT_WAKALA_ACCEPTED = 1020;
+
+    public const ORDER_STILL_PENDING = 1021;
+
+    public const ORDER_IS_REJECTED = 1022;
 }

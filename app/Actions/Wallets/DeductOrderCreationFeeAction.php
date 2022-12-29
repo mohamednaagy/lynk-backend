@@ -10,11 +10,8 @@ use App\Models\FinancingOrder;
 
 class DeductOrderCreationFeeAction implements DeductOrderCreationFee
 {
-    protected $createTransactions;
-
-    public function __construct(CreateTransactions $createTransactions)
+    public function __construct(protected CreateTransactions $createTransactions)
     {
-        $this->createTransactions = $createTransactions;
     }
 
     public function handle(FinancingOrder $financingOrder)

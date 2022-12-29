@@ -98,9 +98,9 @@ trait InteractsWithLender
      * @param  int  $companyId
      * @param  int  $userId
      * @param  array  $data
-     * @return Model|Builder
+     * @return FinancingOrder|Model|Builder
      */
-    public function createOrder(int $companyId, int $userId, $data = []): Model|Builder
+    public function createOrder(int $companyId, int $userId, array $data = []): FinancingOrder|Model|Builder
     {
         return FinancingOrder::query()->create(array_merge([
             'company_id' => $companyId,
@@ -121,7 +121,7 @@ trait InteractsWithLender
         return EdaatInvoice::query()->create(array_merge([
             'company_id' => $companyId,
             'creator_id' => $userId,
-            'invoice_number' => 1,
+            'invoice_number' => Str::uuid(),
             'amount' => 1,
             'status' => 1,
         ], $data));

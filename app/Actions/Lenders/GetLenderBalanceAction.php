@@ -18,11 +18,11 @@ class GetLenderBalanceAction implements GetLenderBalance
     public function handle(Company $company): array
     {
         $balance = $company->balance(WalletType::CompanyWallet);
+        $orderCost = $company->order_cost->getAmount();
 
         return [
             'balance' => $balance,
-            'availableOrders' => $balance->divide($company->order_cost->getAmount(), Money::ROUND_DOWN)
-                ->getAmount(),
+            'availableOrders' => $orderCost ? $balance->divide($orderCost, Money::ROUND_DOWN)->getAmount() : 0,
         ];
     }
 }

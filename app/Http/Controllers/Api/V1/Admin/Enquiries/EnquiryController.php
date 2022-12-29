@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\V1\Admin\Enquiries;
 
 use App\Actions\Contracts\Enquiries\GetPaginatedEnquiries;
+use App\Enums\Action;
+use App\Enums\Area;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Models\Enquiry;
 use App\Transformers\EnquiryTransformer;
@@ -10,6 +13,19 @@ use Illuminate\Http\JsonResponse;
 
 class EnquiryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::Enquiries, Action::Index, Action::Manage])
+        )->only('index');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::Enquiries, Action::Show, Action::Manage])
+        )->only('show');
+    }
+
     /**
      * Display a listing of the resource.
      *
