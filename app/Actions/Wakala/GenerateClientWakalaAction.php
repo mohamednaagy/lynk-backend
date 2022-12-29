@@ -13,7 +13,7 @@ class GenerateClientWakalaAction implements GenerateClientWakala
 {
     protected string $template = 'templates.client-wakala';
 
-    protected string $collectionName = FinancingOrderMediaCollection::LenderWakala;
+    protected string $collectionName = FinancingOrderMediaCollection::ClientWakala;
 
     protected string $filePath = '';
 
