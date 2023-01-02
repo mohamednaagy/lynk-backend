@@ -18,11 +18,9 @@ class GetOrdersStatsAction implements GetOrdersStats
     }
 
     /**
-     * @param  \App\Models\Company  $company
-     * @param  \App\Models\User  $user
-     * @return mixed
+     * @return array
      */
-    public function handle()
+    public function handle(): array
     {
         return [
             'total_orders' => $this->baseQuery()->count(),
@@ -30,6 +28,7 @@ class GetOrdersStatsAction implements GetOrdersStats
             'total_active_orders' => $this->baseQuery()->active()->count(),
             'total_require_action_orders' => $this->baseQuery()->requireAction()->count(),
             'total_completed_orders' => $this->baseQuery()->completed()->count(),
+            'total_rejected_orders' => $this->baseQuery()->rejected()->count(),
         ];
     }
 

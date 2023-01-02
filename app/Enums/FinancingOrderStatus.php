@@ -103,7 +103,6 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         self::PendingApproval,
         self::CommodityPurchased,
         self::MurabahaSaleCompleted,
-        self::Rejected,
     ];
 
     public static array $allowedToUpdateStatuses = [
