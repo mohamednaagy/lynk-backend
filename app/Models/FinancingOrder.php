@@ -209,6 +209,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return $query->whereStatus(FinancingOrderStatus::Completed);
     }
 
+    public function scopeRejected($query)
+    {
+        return $query->whereStatus(FinancingOrderStatus::Rejected);
+    }
+
     public function scopeByCreator($query, Model $model)
     {
         $query->whereHasMorph(

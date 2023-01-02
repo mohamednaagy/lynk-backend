@@ -39,6 +39,7 @@ class GetOrdersStatsTest extends TestCase
         // create order with different status
         FinancingOrder::factory(5)->create(['company_id' => self::$company->id, 'status' => FinancingOrderStatus::Completed]);
         FinancingOrder::factory(5)->create(['company_id' => self::$company->id, 'status' => FinancingOrderStatus::Cancelled]);
+        FinancingOrder::factory(5)->create(['company_id' => self::$company->id, 'status' => FinancingOrderStatus::Rejected]);
         FinancingOrder::factory(5)->create(['company_id' => self::$company->id, 'status' => FinancingOrderStatus::Approved]);
         FinancingOrder::factory(5)->create(['company_id' => self::$company->id, 'status' => FinancingOrderStatus::PendingApproval]);
 
@@ -57,29 +58,33 @@ class GetOrdersStatsTest extends TestCase
         ]);
     }
 
-      public function test_get_order_stats_successfully()
-      {
-          $this->actingAs(self::$userLenderAdmin)
-              ->getJson('/api/v1/lender/orders/stats', ['X-Company' => self::$company->id])
-              ->assertStatus(200)->assertJsonFragment([
-                  'total_orders' => 27,
-                  'total_cancelled_orders' => 7,
-                  'total_active_orders' => 15,
-                  'total_require_action_orders' => 5,
-                  'total_completed_orders' => 5,
-              ]);
-      }
+    public function test_get_order_stats_successfully()
+    {
+        $this->actingAs(self::$userLenderAdmin)
+            ->getJson('/api/v1/lender/orders/stats', ['X-Company' => self::$company->id])
+            ->assertStatus(200)
+            ->assertJsonFragment([
+                'total_orders' => 32,
+                'total_cancelled_orders' => 7,
+                'total_active_orders' => 15,
+                'total_require_action_orders' => 10,
+                'total_completed_orders' => 5,
+                'total_rejected_orders' => 5,
+            ]);
+    }
 
     public function test_orders_stats_by_creator()
     {
         $this->actingAs(self::$userLenderOrderCreator)
             ->getJson('/api/v1/lender/orders/stats', ['X-Company' => self::$company->id])
-            ->assertStatus(200)->assertJsonFragment([
+            ->assertStatus(200)
+            ->assertJsonFragment([
                 'total_orders' => 7,
                 'total_active_orders' => 5,
                 'total_require_action_orders' => 0,
                 'total_cancelled_orders' => 2,
                 'total_completed_orders' => 0,
+                'total_rejected_orders' => 0,
             ]);
     }
 }
