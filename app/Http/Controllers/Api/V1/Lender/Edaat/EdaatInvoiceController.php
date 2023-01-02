@@ -20,7 +20,7 @@ class EdaatInvoiceController extends Controller
         Request $request,
         GetEdaatInvoicesInterface $getEdaatInvoices
     ): JsonResponse {
-        $edaatInvoices = $getEdaatInvoices->handle(['oldest' => InvoiceSortByCreatedAtScope::class])
+        $edaatInvoices = $getEdaatInvoices->handle(['sort_by_created_at' => InvoiceSortByCreatedAtScope::class])
             ->with('creator')
             ->paginate();
 
