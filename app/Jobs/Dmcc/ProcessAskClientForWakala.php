@@ -15,7 +15,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 
-class ProcessClientWakalaCompletedOrder implements ShouldQueue
+class ProcessAskClientForWakala implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
