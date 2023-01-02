@@ -181,7 +181,6 @@ class FinancingOrderStatusUnitTest extends TestCase
             FinancingOrderStatus::PendingApproval,
             FinancingOrderStatus::CommodityPurchased,
             FinancingOrderStatus::MurabahaSaleCompleted,
-            FinancingOrderStatus::Rejected,
         ]);
     }
 

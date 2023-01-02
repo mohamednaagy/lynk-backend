@@ -67,7 +67,7 @@ class GetOrdersStatsTest extends TestCase
                 'total_orders' => 32,
                 'total_cancelled_orders' => 7,
                 'total_active_orders' => 15,
-                'total_require_action_orders' => 10,
+                'total_require_action_orders' => 5,
                 'total_completed_orders' => 5,
                 'total_rejected_orders' => 5,
             ]);
