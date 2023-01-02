@@ -17,6 +17,8 @@ class CompleteRegisterInvitation extends Mailable implements ShouldQueue
 
     public $user;
 
+    public $inviter;
+
     public $url;
 
     /**
@@ -27,6 +29,7 @@ class CompleteRegisterInvitation extends Mailable implements ShouldQueue
     public function __construct(User $user, string $externalUrl)
     {
         $this->user = $user;
+        $this->inviter = auth()->user();
         $this->url = URL::signedExternalRoute($externalUrl, 'api.v1.lender.complete-register', ['user' => $user->id]);
     }
 

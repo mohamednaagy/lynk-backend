@@ -2,7 +2,7 @@
 {{ __('Dear :name', ['name' => $user->first_name]) }},<br>
 
 {{__('emails/invitation-complete-register.complete_invitation_email_message',
-['name' => $user->full_name, 'app_name' => config('app.name') ])}}
+['name' => $inviter->full_name, 'app_name' => config('app.name') ])}}
 
 <x-mail::button :url="$url">
     {{ __('emails/invitation-complete-register.complete_registration') }}
