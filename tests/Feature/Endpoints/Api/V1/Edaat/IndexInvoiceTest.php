@@ -65,6 +65,7 @@ class IndexInvoiceTest extends TestCase
                         'company_name',
                         'company_number',
                         'status',
+                        'created_at',
                     ])->respond()->getData(true)
             );
     }
