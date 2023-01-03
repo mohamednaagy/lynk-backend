@@ -14,10 +14,10 @@ class OrderCreationFeeType extends GeneratorBase
 {
     protected function generateMessage(Transaction $transaction, $locale): array|string|Translator|Application|null
     {
-        $items = Arr::only($transaction->meta, ['type', 'order_number']);
+        $items = Arr::only($transaction->meta, ['type', 'financing_order_id']);
 
         return __('transaction-description.order_creation_fee', [
-            'order_number' => $items['order_number'] ?? '',
+            'order_number' => $items['financing_order_id'] ?? '',
         ], $locale);
     }
 
