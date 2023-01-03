@@ -100,7 +100,7 @@ class IndexInvoiceTest extends TestCase
         );
     }
 
-    public function test_auth_user_can_index_edaat_invoices_as_not_sorting_failed()
+    public function test_auth_user_can_index_edaat_invoices_but_not_as_latest_sorting_as_response()
     {
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
