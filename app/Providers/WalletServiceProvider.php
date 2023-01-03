@@ -8,10 +8,13 @@ use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use App\Support\Wallets\Contracts\WalletServiceInterface;
 use App\Support\Wallets\TransactionService;
 use App\Support\Wallets\WalletService;
+use App\Traits\TestWalletDatabases;
 use Illuminate\Support\ServiceProvider;
 
 class WalletServiceProvider extends ServiceProvider
 {
+    use TestWalletDatabases;
+
     /**
      * Register services.
      *
@@ -42,5 +45,8 @@ class WalletServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        if ($this->app->runningInConsole()) {
+            $this->bootTestWalletDatabase();
+        }
     }
 }

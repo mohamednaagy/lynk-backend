@@ -13,7 +13,6 @@
         "ext-pdo": "*",
         "bensampo/laravel-enum": "^5.3",
         "brainmaestro/composer-git-hooks": "v3.0.0-alpha.1",
-        "brianium/paratest": "^6.8",
         "brick/math": "^0.10.2",
         "cknow/laravel-money": "^7.0",
         "codedredd/laravel-soap": "^3.0",
@@ -43,6 +42,7 @@
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.12",
+        "brianium/paratest": "^6.8",
         "fakerphp/faker": "^1.9.1",
         "laravel-lang/attributes": "^2.0",
         "laravel-lang/lang": "^12.0",
