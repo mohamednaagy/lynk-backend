@@ -14,7 +14,7 @@ class VatPercentageFeeType extends GeneratorBase
 {
     protected function generateMessage(Transaction $transaction, $locale): array|string|Translator|Application|null
     {
-        $items = Arr::only($transaction->meta, ['transaction_id', 'vat_rate']);
+        $items = Arr::only($transaction->meta, ['transaction_id', 'financing_order_id', 'vat_rate']);
 
         return __('transaction-description.vat_percentage', [
             'order_id' => $items['financing_order_id'] ?? '',
