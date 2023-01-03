@@ -61,7 +61,7 @@ class IndexInvoiceTest extends TestCase
             ->getJson('api/v1/lender/edaat-invoices')
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(EdaatInvoice::query()->paginate(), new EdaatInvoiceTransformer())
+                fractal(EdaatInvoice::query()->latest()->paginate(), new EdaatInvoiceTransformer())
                     ->parseIncludes([
                         'id',
                         'invoice_number',
@@ -100,7 +100,7 @@ class IndexInvoiceTest extends TestCase
         );
     }
 
-    public function test_auth_user_can_index_edaat_invoices_but_not_as_latest_sorting_as_response()
+    public function test_auth_user_can_index_edaat_invoices_without_oldest_query_params_will_sort_by_latest()
     {
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
@@ -109,6 +109,31 @@ class IndexInvoiceTest extends TestCase
 
         $this->assertNotEquals(
             fractal(EdaatInvoice::query()->oldest()->paginate(), new EdaatInvoiceTransformer())
+                ->parseIncludes([
+                    'id',
+                    'invoice_number',
+                    'amount',
+                    'amount_formatted',
+                    'company_name',
+                    'company_number',
+                    'status',
+                    'created_at',
+                ])
+                ->respond()
+                ->getData(true),
+            $response->json()
+        );
+    }
+
+    public function test_auth_user_can_index_edaat_invoices_as_latest_sorting_succeed()
+    {
+        $response = $this->actingAs(self::$userLender)
+            ->withHeader('X-Company', self::$company->getOriginal('id'))
+            ->getJson('api/v1/lender/edaat-invoices?oldest=0')
+            ->assertStatus(Response::HTTP_OK);
+
+        $this->assertEquals(
+            fractal(EdaatInvoice::query()->latest()->paginate(), new EdaatInvoiceTransformer())
                 ->parseIncludes([
                     'id',
                     'invoice_number',
