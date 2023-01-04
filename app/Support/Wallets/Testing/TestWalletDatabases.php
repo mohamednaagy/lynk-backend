@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Traits;
+namespace App\Support\Wallets\Testing;
 
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\ParallelTesting;
 use Illuminate\Support\Facades\Schema;
 
@@ -50,11 +49,6 @@ trait TestWalletDatabases
                 $this->whenNotUsingInMemoryDatabase(function ($database) use ($uses) {
                     [$testDatabase, $created] = $this->ensureTestDatabaseExists($database);
 
-                    Log::info('database', [
-                        $database,
-                        $testDatabase,
-                        $created,
-                    ]);
                     $this->switchToDatabase($testDatabase);
 
                     if (isset($uses[Testing\DatabaseTransactions::class])) {

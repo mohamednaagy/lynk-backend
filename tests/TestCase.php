@@ -22,7 +22,7 @@ abstract class TestCase extends BaseTestCase
 
     public User $user;
 
-    protected array $connectionsToTransact = ['mysql', 'wallet'];
+    protected array $connectionsToTransact = [null, 'wallet'];
 
     protected function setUp(): void
     {
