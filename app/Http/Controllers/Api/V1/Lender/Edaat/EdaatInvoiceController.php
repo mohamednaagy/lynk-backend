@@ -8,6 +8,7 @@ use App\Actions\Contracts\Wallets\CalculateOrdersCost;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Wallets\CalculateOrdersRequest;
 use App\Models\Company;
+use App\Support\QueryScoper\Scopes\Edaat\InvoiceSortByCreatedAtScope;
 use App\Transformers\EdaatInvoiceTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class EdaatInvoiceController extends Controller
         Request $request,
         GetEdaatInvoicesInterface $getEdaatInvoices
     ): JsonResponse {
-        $edaatInvoices = $getEdaatInvoices->handle()
+        $edaatInvoices = $getEdaatInvoices->handle(['sort_by_created_at' => InvoiceSortByCreatedAtScope::class])
             ->with('creator')
             ->paginate();
 
@@ -32,6 +33,7 @@ class EdaatInvoiceController extends Controller
                 'company_name',
                 'company_number',
                 'status',
+                'created_at',
             ])
             ->respond();
     }
