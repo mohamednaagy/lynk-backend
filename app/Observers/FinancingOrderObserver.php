@@ -5,8 +5,10 @@ namespace App\Observers;
 use App\Enums\ClientMessage;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\WebhookType;
 use App\Models\FinancingOrder;
 use App\Support\Sms\Sms;
+use App\Support\Webhooks\Facades\WebhookEvent;
 
 class FinancingOrderObserver
 {
@@ -26,13 +28,15 @@ class FinancingOrderObserver
         $locale = app()->getLocale();
 
         match ($financingOrder->status->value) {
-            FinancingOrderStatus::CommoditySoldToCustomer => Sms::driver('msegat')->send(
-                __(ClientMessage::CommoditySoldToCustomer, [
-                    'product' => $product,
-                    'quantity' => $quantity,
-                    'sellingPrice' => $sellingPrice,
-                    'url' => $url,
-                ], $locale), $phoneNumber),
+            FinancingOrderStatus::CommoditySoldToCustomer => $this->applyCommoditySoldToCustomerActions(
+                $url,
+                $locale,
+                $product,
+                $quantity,
+                $phoneNumber,
+                $sellingPrice,
+                $financingOrder
+            ),
             FinancingOrderStatus::MurabahaSaleCompleted => Sms::driver('msegat')->send(
                 __(ClientMessage::MurabahaSaleCompleted, [
                     'product' => $product,
@@ -41,5 +45,34 @@ class FinancingOrderObserver
                 ], $locale), $phoneNumber),
             default => new \ErrorException('Error found'),
         };
+    }
+
+    private function applyCommoditySoldToCustomerActions(
+        $url,
+        $locale,
+        $product,
+        $quantity,
+        $phoneNumber,
+        $sellingPrice,
+        $financingOrder
+    ): void {
+        WebhookEvent::fire(
+            $financingOrder->company,
+            WebhookType::OrderUpdates, [
+                'order_id' => $financingOrder->id,
+                'order_status' => [
+                    'value' => $financingOrder->status->value,
+                    'label' => $financingOrder->status->description,
+                ],
+                'certificate_url' => $url,
+            ]);
+
+        Sms::driver('msegat')->send(
+            __(ClientMessage::CommoditySoldToCustomer, [
+                'product' => $product,
+                'quantity' => $quantity,
+                'sellingPrice' => $sellingPrice,
+                'url' => $url,
+            ], $locale), $phoneNumber);
     }
 }
