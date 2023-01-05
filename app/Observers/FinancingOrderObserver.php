@@ -5,8 +5,10 @@ namespace App\Observers;
 use App\Enums\ClientMessage;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\WebhookType;
 use App\Models\FinancingOrder;
 use App\Support\Sms\Sms;
+use App\Support\Webhooks\Facades\WebhookEvent;
 
 class FinancingOrderObserver
 {
@@ -39,7 +41,15 @@ class FinancingOrderObserver
                     'quantity' => $quantity,
                     'amount' => $sellingPrice,
                 ], $locale), $phoneNumber),
-            default => new \ErrorException('Error found'),
+            FinancingOrderStatus::CommodityPurchased => WebhookEvent::fire($financingOrder->company, WebhookType::OrderUpdates, [
+                'order_id' => $financingOrder->id,
+                'order_status' => [
+                    'value' => $financingOrder->status->value,
+                    'description' => $financingOrder->status->description,
+                ],
+                'commodity_description' => $product,
+                'quantity' => $quantity,
+            ]),
         };
     }
 }
