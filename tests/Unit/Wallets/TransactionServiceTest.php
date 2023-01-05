@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Wallet;
+namespace Tests\Unit\Wallets;
 
 use App\Models\Company;
 use App\Models\Transaction;

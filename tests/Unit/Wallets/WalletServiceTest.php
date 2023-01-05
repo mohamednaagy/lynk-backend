@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Wallet;
+namespace Tests\Unit\Wallets;
 
 use App\Enums\WalletType;
 use App\Models\Company;
