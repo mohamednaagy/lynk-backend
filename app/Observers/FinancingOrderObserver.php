@@ -45,7 +45,7 @@ class FinancingOrderObserver
                 'order_id' => $financingOrder->id,
                 'order_status' => [
                     'value' => $financingOrder->status->value,
-                    'description' => $financingOrder->status->description,
+                    'label' => $financingOrder->status->description,
                 ],
                 'commodity_description' => $product,
                 'quantity' => $quantity,
