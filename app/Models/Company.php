@@ -44,6 +44,7 @@ class Company extends BaseTenant
             'created_at',
             'updated_at',
             'order_cost_currency',
+            'type',
         ];
     }
 
