@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Companies;
+namespace App\Http\Controllers\Api\V1\Admin\Lenders;
 
 use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Enums\Action;
@@ -11,7 +11,7 @@ use App\Http\Requests\V1\Admin\Companies\UpdateCompanyStatusRequest;
 use App\Models\Company;
 use Illuminate\Http\JsonResponse;
 
-class UpdateCompanyStatus extends Controller
+class UpdateLenderStatus extends Controller
 {
     public function __construct()
     {
@@ -24,17 +24,17 @@ class UpdateCompanyStatus extends Controller
     /**
      * Summary of __invoke
      *
-     * @param  UpdateCompanyStatusRequest  $updateCompanyStatusRequest
-     * @param  Company  $company
+     * @param  UpdateCompanyStatusRequest  $request
+     * @param  Company  $lender
      * @param  UpdateCompany  $updateCompany
      * @return JsonResponse
      */
     public function __invoke(
         UpdateCompanyStatusRequest $request,
-        Company $company,
+        Company $lender,
         UpdateCompany $updateCompany
     ): JsonResponse {
-        $updateCompany->handle($company, $request->validated());
+        $updateCompany->handle($lender, $request->validated());
 
         return $this->successResponse([]);
     }

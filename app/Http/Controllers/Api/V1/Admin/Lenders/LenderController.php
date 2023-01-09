@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Companies;
+namespace App\Http\Controllers\Api\V1\Admin\Lenders;
 
 use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\Companies\GetPaginatedCompanies;
@@ -8,6 +8,7 @@ use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CompanyType;
 use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
@@ -19,7 +20,7 @@ use Cknow\Money\Money;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
-class CompanyController extends Controller
+class LenderController extends Controller
 {
     public function __construct()
     {
@@ -56,7 +57,7 @@ class CompanyController extends Controller
     public function index(
         GetPaginatedCompanies $getPaginatedCompanies
     ): JsonResponse {
-        return fractal($getPaginatedCompanies->handle(), new CompanyTransformer())
+        return fractal($getPaginatedCompanies->handle(CompanyType::Lender), new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',
@@ -103,12 +104,12 @@ class CompanyController extends Controller
     }
 
     /**
-     * @param  Company  $company
+     * @param  Company  $lender
      * @return JsonResponse
      */
-    public function show(Company $company): JsonResponse
+    public function show(Company $lender): JsonResponse
     {
-        return fractal($company, new CompanyTransformer())
+        return fractal($lender, new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',
@@ -125,16 +126,16 @@ class CompanyController extends Controller
     /**
      * @param  UpdateCompanyRequest  $updateCompanyRequest
      * @param  UpdateCompany  $updateCompany
-     * @param  Company  $company
+     * @param  Company  $lender
      * @return JsonResponse
      */
     public function update(
         UpdateCompanyRequest $updateCompanyRequest,
         UpdateCompany $updateCompany,
-        Company $company
+        Company $lender
     ): JsonResponse {
-        return DB::transaction(function () use ($updateCompanyRequest, $updateCompany, $company) {
-            $updateCompany->handle($company, $updateCompanyRequest->validated());
+        return DB::transaction(function () use ($updateCompanyRequest, $updateCompany, $lender) {
+            $updateCompany->handle($lender, $updateCompanyRequest->validated());
 
             return $this->successResponse();
         });
@@ -143,16 +144,16 @@ class CompanyController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  Company  $company
+     * @param  Company  $lender
      * @return JsonResponse
      *
      * @throws \Throwable
      */
-    public function destroy(Company $company): JsonResponse
+    public function destroy(Company $lender): JsonResponse
     {
-        DB::transaction(function () use ($company) {
-            $company->update(['unique_name' => null]);
-            $company->delete();
+        DB::transaction(function () use ($lender) {
+            $lender->update(['unique_name' => null]);
+            $lender->delete();
         });
 
         return $this->successResponse();

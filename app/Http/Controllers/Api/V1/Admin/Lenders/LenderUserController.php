@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Companies;
+namespace App\Http\Controllers\Api\V1\Admin\Lenders;
 
 use App\Actions\Contracts\Companies\GetPaginatedCompanyUsers;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
@@ -23,7 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
-class CompanyUserController extends Controller
+class LenderUserController extends Controller
 {
     public function __construct()
     {
@@ -50,10 +50,10 @@ class CompanyUserController extends Controller
 
     public function index(
         GetCompanyUsersRequest $request,
-        Company $company,
+        Company $lender,
         GetPaginatedCompanyUsers $getPaginatedCompanyUsers
     ): JsonResponse {
-        return fractal($getPaginatedCompanyUsers->handle($company), new UserTransformer(Area::Lender))
+        return fractal($getPaginatedCompanyUsers->handle($lender), new UserTransformer(Area::Lender))
             ->parseIncludes([
                 'id',
                 'first_name',
@@ -71,13 +71,13 @@ class CompanyUserController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  Request  $request
-     * @param  Company  $company
+     * @param  Company  $lender
      * @param  User  $user
      * @return JsonResponse
      *
      * @throws AuthorizationException
      */
-    public function show(Request $request, Company $company, User $user): JsonResponse
+    public function show(Request $request, Company $lender, User $user): JsonResponse
     {
         if (! $user->hasAnyRole([
             Role::LenderAdmin,
@@ -105,20 +105,20 @@ class CompanyUserController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  StoreUserRequest  $storeUserRequest
-     * @param  Company  $company
+     * @param  Company  $lender
      * @param  CreateLenderUserWithRoleAndPermission  $createUserWithRoleAndPermission
      * @return JsonResponse
      */
     public function store(
         StoreUserRequest $storeUserRequest,
-        Company $company,
+        Company $lender,
         CreateLenderUserWithRoleAndPermission $createUserWithRoleAndPermission
     ): JsonResponse {
-        return DB::transaction(function () use ($company, $storeUserRequest, $createUserWithRoleAndPermission) {
+        return DB::transaction(function () use ($lender, $storeUserRequest, $createUserWithRoleAndPermission) {
             $user = $createUserWithRoleAndPermission->handle(
                 $storeUserRequest->validated() +
                 [
-                    'company_id' => $company->id,
+                    'company_id' => $lender->id,
                 ]
             );
 
@@ -143,14 +143,14 @@ class CompanyUserController extends Controller
      * Update the specified resource in storage.
      *
      * @param  UpdateUserRequest  $updateUserRequest
-     * @param  Company  $company
+     * @param  Company  $lender
      * @param  User  $user
      * @param  UpdateLenderUserWithRoleAndPermission  $updateUserWithRoleAndPermission
      * @return JsonResponse
      */
     public function update(
         UpdateUserRequest $updateUserRequest,
-        Company $company,
+        Company $lender,
         User $user,
         UpdateLenderUserWithRoleAndPermission $updateUserWithRoleAndPermission,
     ): JsonResponse {
