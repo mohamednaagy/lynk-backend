@@ -7,6 +7,7 @@ use App\Enums\Area;
 use App\Settings\Classes\Areas\CustomerSettings;
 use App\Settings\Classes\Areas\LenderSettings;
 use App\Settings\Classes\Areas\SuperAdminSettings;
+use App\Settings\Classes\Areas\TraderSettings;
 use App\Settings\Classes\GeneralSettings;
 use Spatie\LaravelSettings\Settings;
 
@@ -23,6 +24,7 @@ class GetSettingsClassInstanceAction implements GetSettingsClassInstance
             Area::SuperAdmin => app(SuperAdminSettings::class),
             Area::Customer => app(CustomerSettings::class),
             Area::Lender => app(LenderSettings::class),
+            Area::Trader => app(TraderSettings::class),
         };
     }
 }
