@@ -68,6 +68,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         ],
         self::ClientWakalaCompleted => [
             self::WaitingClientWakala,
+            self::CommoditySoldToCustomer,
         ],
         self::WaitingPurchasingCommodity => [
             self::Approved,
