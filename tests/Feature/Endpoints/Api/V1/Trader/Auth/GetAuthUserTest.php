@@ -54,7 +54,7 @@ class GetAuthUserTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_trader_can_fetch_his_details(): void
+    public function test_that_trader_user_can_fetch_his_details(): void
     {
         $data = $this->actingAs(self::$userTrader)
             ->withHeader('X-Company', self::$company->id)
