@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\jobs;
+namespace Tests\Unit\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
