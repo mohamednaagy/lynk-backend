@@ -12,7 +12,7 @@ use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
 use Illuminate\Http\JsonResponse;
 
-class FinancingOrderController extends Controller
+class LenderOrderController extends Controller
 {
     public function __construct()
     {

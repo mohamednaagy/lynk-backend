@@ -11,8 +11,8 @@ use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
-use App\Http\Controllers\Api\V1\Admin\FinancingOrders\FinancingOrderController;
-use App\Http\Controllers\Api\V1\Admin\FinancingOrders\FinancingOrderTransactionController;
+use App\Http\Controllers\Api\V1\Admin\FinancingOrders\LenderOrderController;
+use App\Http\Controllers\Api\V1\Admin\FinancingOrders\LenderTransactionController;
 use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
 use App\Http\Controllers\Api\V1\Admin\Lenders\ChargeLenderBalanceManually;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderBalance;
@@ -74,9 +74,9 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::prefix('lenders')->group(function () {
             Route::put('/{lender}/status', UpdateLenderStatus::class);
             Route::get('/{lender}/balance ', GetLenderBalance::class);
-            Route::get('/{lender}/orders/{order}', [FinancingOrderController::class, 'show']);
-            Route::get('{lender}/orders', [FinancingOrderController::class, 'index']);
-            Route::get('/{lender}/transactions ', [FinancingOrderTransactionController::class, 'index']);
+            Route::get('/{lender}/orders/{order}', [LenderOrderController::class, 'show']);
+            Route::get('{lender}/orders', [LenderOrderController::class, 'index']);
+            Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);
         });

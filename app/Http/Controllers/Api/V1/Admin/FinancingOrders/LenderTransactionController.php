@@ -11,7 +11,7 @@ use App\Models\Company;
 use App\Transformers\TransactionTransformer;
 use Illuminate\Http\JsonResponse;
 
-class FinancingOrderTransactionController extends Controller
+class LenderTransactionController extends Controller
 {
     public function __construct()
     {
