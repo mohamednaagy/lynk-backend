@@ -46,9 +46,10 @@ class StoreCompanyRequest extends FormRequest
                 Rule::unique(Company::class, 'company_cr'),
             ],
             'driver' => [
-                'required',
+                'nullable',
                 'string',
                 Rule::unique(Company::class, 'driver'),
+                Rule::in(['dmcc', 'fake']),
             ],
         ];
     }

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Trader\Companies;
+namespace App\Http\Controllers\Api\V1\Admin\Trader;
 
 use App\Actions\Contracts\Companies\CreateCompany;
+use App\Actions\Contracts\Companies\GetPaginatedCompanies;
 use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Actions\Contracts\Wallets\CreateWallet;
@@ -25,6 +26,11 @@ class TraderCompanyController extends Controller
     {
         $this->middleware(
             'permission:'.
+                perm(Area::Trader, [Subject::TraderCompanies, Action::Index, Action::Manage])
+        )->only('index');
+
+        $this->middleware(
+            'permission:'.
                 perm(Area::Trader, [Subject::TraderCompanies, Action::Create, Action::Manage])
         )->only('store');
 
@@ -39,19 +45,33 @@ class TraderCompanyController extends Controller
         )->only('update');
     }
 
+    public function index(GetPaginatedCompanies $getPaginatedCompanies)
+    {
+        $getPaginatedCompanies->setType(CompanyType::Trader);
+
+        return fractal($getPaginatedCompanies->handle(), new CompanyTransformer())
+            ->parseIncludes([
+                'id',
+                'name',
+                'unique_name',
+                'orders_count',
+            ])
+            ->respond();
+    }
+
     public function store(
         StoreCompanyRequest $request,
         GetSettingsClassInstance $getSettingsClassInstance,
         CreateCompany $createCompany,
         CreateWallet $createWallet
     ) {
-        return DB::transaction(
+        return DB::multipleTransaction(
             function () use ($request, $getSettingsClassInstance, $createCompany, $createWallet) {
-                $handler = $getSettingsClassInstance->handle(Area::Trader);
+                $traderSetting = $getSettingsClassInstance->handle(Area::Trader);
 
                 $data = array_merge($request->validated(), [
-                    'status' => $handler->default_company_status_created_by_operation,
-                    'order_cost' => $handler->default_order_cost,
+                    'status' => $traderSetting->default_company_status_created_by_operation,
+                    'order_cost' => $traderSetting->default_order_cost,
                     'type' => CompanyType::Trader,
                 ]);
 

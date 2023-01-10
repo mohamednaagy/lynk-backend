@@ -1,21 +1,20 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Trader\Companies;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Trader\Companies;
 
+use App\Enums\Area;
 use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
-use Tests\Traits\InteractsWithTrader;
+use Tests\Traits\InteractsWithCompany;
 
 class TraderCompanyControllerStoreTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithLender;
-    use InteractsWithTrader;
+    use InteractsWithCompany;
 
     private static User $trader;
 
@@ -28,7 +27,7 @@ class TraderCompanyControllerStoreTest extends TestCase
     {
         parent::setUp();
 
-        self::$trader = $this->createTraderAdmin();
+        self::$trader = $this->createTraderUser();
 
         self::$companyDetails = [
             'name' => 'testCompany',
@@ -43,7 +42,7 @@ class TraderCompanyControllerStoreTest extends TestCase
      */
     public function test_trader_company_controller_store_un_auth_user_cant_store_company(): void
     {
-        $this->postJson('api/v1/trader/companies', self::$companyDetails)
+        $this->postJson('api/v1/admin/traders/companies', self::$companyDetails)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -52,16 +51,16 @@ class TraderCompanyControllerStoreTest extends TestCase
 
     public function test_trader_company_controller_store_other_roles_can_not_access()
     {
-        $this->assertLenderUserCannotAccess(function ($user, $role) {
+        $this->asserStatusForAllRoleExceptGivingAreaRoles(403, Area::Trader, function ($user, $role) {
             return $this->actingAs($user)
-                ->postJson('api/v1/trader/companies', self::$companyDetails);
+                ->postJson('api/v1/admin/traders/companies', self::$companyDetails);
         });
     }
 
     public function test_trader_company_controller_store_without_name_unsuccessful()
     {
         $this->actingAs(self::$trader)
-            ->postJson('api/v1/trader/companies', [
+            ->postJson('api/v1/admin/traders/companies', [
                 'unique_name' => 'companyUniqueName',
                 'company_cr' => '1234567891',
                 'driver' => 'dmcc',
@@ -72,7 +71,7 @@ class TraderCompanyControllerStoreTest extends TestCase
     public function test_trader_company_controller_store_without_unique_name_unsuccessful()
     {
         $this->actingAs(self::$trader)
-            ->postJson('api/v1/trader/companies', [
+            ->postJson('api/v1/admin/traders/companies', [
                 'name' => 'name',
                 'company_cr' => '1234567891',
                 'driver' => 'dmcc',
@@ -83,7 +82,7 @@ class TraderCompanyControllerStoreTest extends TestCase
     public function test_trader_company_controller_store_without_company_cr_unsuccessful()
     {
         $this->actingAs(self::$trader)
-            ->postJson('api/v1/trader/companies', [
+            ->postJson('api/v1/admin/traders/companies', [
                 'name' => 'testCompany',
                 'unique_name' => 'companyUniqueName',
                 'driver' => 'dmcc',
@@ -91,13 +90,14 @@ class TraderCompanyControllerStoreTest extends TestCase
             ->assertJsonValidationErrorFor('company_cr');
     }
 
-    public function test_trader_company_controller_store_without_driver_unsuccessful()
+    public function test_trader_company_controller_driver_should_be_in_dmcc_fake_unsuccessful()
     {
         $this->actingAs(self::$trader)
-            ->postJson('api/v1/trader/companies', [
+            ->postJson('api/v1/admin/traders/companies', [
                 'name' => 'testCompany',
                 'unique_name' => 'companyUniqueName',
                 'company_cr' => '1234567891',
+                'driver' => 'random',
             ])
             ->assertJsonValidationErrorFor('driver');
     }
@@ -105,14 +105,14 @@ class TraderCompanyControllerStoreTest extends TestCase
     public function test_trader_company_controller_store_successful()
     {
         $this->actingAs(self::$trader)
-            ->postJson('api/v1/trader/companies', self::$companyDetails)
+            ->postJson('api/v1/admin/traders/companies', self::$companyDetails)
             ->assertStatus(Response::HTTP_OK);
     }
 
     public function test_trader_company_controller_store_wallet_created_successful()
     {
         $this->actingAs(self::$trader)
-            ->postJson('api/v1/trader/companies', self::$companyDetails)
+            ->postJson('api/v1/admin/traders/companies', self::$companyDetails)
             ->assertStatus(Response::HTTP_OK);
 
         $company = Company::query()

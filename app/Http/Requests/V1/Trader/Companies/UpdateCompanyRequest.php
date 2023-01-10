@@ -48,10 +48,11 @@ class UpdateCompanyRequest extends FormRequest
                     ->ignore($this->route('company')),
             ],
             'driver' => [
-                'required',
+                'nullable',
                 'string',
                 Rule::unique(Company::class, 'driver')
                     ->ignore($this->route('company')),
+                Rule::in(['dmcc', 'fake']),
             ],
         ];
     }

@@ -1,9 +1,5 @@
 <?php
 
-use App\Enums\Role;
-use App\Http\Controllers\Api\V1\Trader\Companies\TraderCompanyController;
-use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -16,7 +12,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1/trader')->name('api.v1.')->group(function () {
-    Route::middleware(['auth:sanctum', 'role:'.Role::TraderAdmin])->group(function () {
-        Route::apiResource('companies', TraderCompanyController::class)->only(['store', 'show', 'update']);
-    });
 });
