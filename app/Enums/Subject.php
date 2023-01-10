@@ -49,4 +49,6 @@ final class Subject extends Enum
     const ProjectSettings = 'projectSettings';
 
     const TraderUsers = 'traderUsers';
+
+    const TraderCompanies = 'traderCompanies';
 }
