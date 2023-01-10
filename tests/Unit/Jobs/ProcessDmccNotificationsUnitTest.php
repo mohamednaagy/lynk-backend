@@ -72,7 +72,7 @@ class ProcessDmccNotificationsUnitTest extends TestCase
         Bus::assertDispatched(ProcessDmccMpoSaleCompleteNotification::class);
     }
 
-    public function test_process_dmcc_mpo_sale_complete_notification_dispatched_with_second_notification()
+    public function test_process_dmcc_mpo_sale_complete_notification_dispatched_when_payment_is_settleted()
     {
         Bus::fake();
         Http::fake(function () {
@@ -90,7 +90,7 @@ class ProcessDmccNotificationsUnitTest extends TestCase
         Bus::assertDispatched(ProcessDmccMpoSaleCompleteNotification::class);
     }
 
-    public function test_process_dmcc_cancel_notification_dispatched_with_second_notification()
+    public function test_process_dmcc_cancel_notification_dispatched()
     {
         Bus::fake();
         Http::fake(function () {
