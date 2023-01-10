@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\V1\Lender\Auth\Register;
+use App\Http\Controllers\Api\V1\Traders\ListOrders;
+use App\Http\Controllers\Api\V1\Traders\ShowOrder;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,4 +16,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1/trader')->name('api.v1.')->group(function () {
+    Route::get('/{trader}/trader', ListOrders::class);
+    Route::get('/{order}/order', ShowOrder::class);
 });
