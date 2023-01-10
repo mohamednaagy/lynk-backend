@@ -6,10 +6,9 @@ use App\Enums\TransactionReason;
 use App\Models\Company;
 use App\Models\Transaction;
 use App\Models\Wallet;
-use App\Support\Generator\ReferenceNumber\ReferenceNumberGenerator;
+use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use App\Support\Wallets\Contracts\TransactionTypeHandlerInterface;
 use App\Support\Wallets\Transactions\TransactionTypeHandlers\ManualDepositType;
-use App\Support\Wallets\TransactionService;
 use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,8 +20,6 @@ class ManualDepositTypeTest extends TestCase
     use RefreshDatabase, InteractsWithLender;
 
     private static TransactionTypeHandlerInterface $transactionTypeHandler;
-
-    private static TransactionService $transactionService;
 
     private static Transaction $depositTransaction;
 
@@ -38,9 +35,8 @@ class ManualDepositTypeTest extends TestCase
         parent::setUp();
 
         self::$transactionTypeHandler = new ManualDepositType();
-        self::$transactionService = new TransactionService(new ReferenceNumberGenerator);
         [self::$company, self::$wallet] = $this->createCompany(2000);
-        self::$depositTransaction = self::$transactionService->deposit(self::$wallet, Money::parseByDecimal(-100, 'SAR'), 1);
+        self::$depositTransaction = app()->make(TransactionServiceInterface::class)->deposit(self::$wallet, Money::parseByDecimal(-100, 'SAR'), 1);
     }
 
     public function test_manual_deposit_handler_implements_transaction_type_handler_interface_instance()
@@ -48,10 +44,15 @@ class ManualDepositTypeTest extends TestCase
         $this->assertInstanceOf(TransactionTypeHandlerInterface::class, self::$transactionTypeHandler);
     }
 
-    public function test_manual_deposit_generate_message_method_with_locale_return_string()
+    public function test_manual_deposit_generate_message_method_with_all_available_locales_return_string()
     {
-        $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, 'ar');
-        $this->assertIsString($transactionDescription);
+        foreach (config('app.locales') as $locale) {
+            $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, $locale);
+            $this->assertEquals(
+                __('transaction-description.manual_deposit', [], $locale),
+                $transactionDescription
+            );
+        }
     }
 
     public function test_manual_deposit_process_method_return_transaction_model_instance()

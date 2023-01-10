@@ -6,7 +6,7 @@ use App\Models\Company;
 use App\Models\Transaction;
 use App\Models\Transfer;
 use App\Models\Wallet;
-use App\Support\Generator\ReferenceNumber\ReferenceNumberGenerator;
+use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use App\Support\Wallets\TransactionService;
 use Cknow\Money\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -33,7 +33,7 @@ class TransactionServiceTest extends TestCase
     {
         parent::setUp();
 
-        self::$transactionService = new TransactionService(new ReferenceNumberGenerator);
+        self::$transactionService = app()->make(TransactionServiceInterface::class);
         [self::$company, self::$wallet] = $this->createCompany(2000);
         [self::$secondCompany, self::$secondWallet] = $this->createCompany(2000, ['company_cr' => '12345678911']);
     }

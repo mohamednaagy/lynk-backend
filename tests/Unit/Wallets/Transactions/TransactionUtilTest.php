@@ -6,13 +6,13 @@ use App\Enums\TransactionReason;
 use App\Models\Company;
 use App\Models\Transaction;
 use App\Models\Wallet;
-use App\Support\Generator\ReferenceNumber\ReferenceNumberGenerator;
+use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use App\Support\Wallets\Contracts\TransactionTypeHandlerInterface;
 use App\Support\Wallets\Contracts\TransactionUtilInterface;
-use App\Support\Wallets\TransactionService;
 use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Arr;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
@@ -21,8 +21,6 @@ class TransactionUtilTest extends TestCase
     use RefreshDatabase, InteractsWithLender;
 
     private static TransactionUtilInterface $transactionUtil;
-
-    private static TransactionService $transactionService;
 
     private static Transaction $depositTransaction;
 
@@ -38,9 +36,8 @@ class TransactionUtilTest extends TestCase
         parent::setUp();
 
         self::$transactionUtil = app(TransactionUtilInterface::class);
-        self::$transactionService = new TransactionService(new ReferenceNumberGenerator);
         [self::$company, self::$wallet] = $this->createCompany(2000);
-        self::$depositTransaction = self::$transactionService->deposit(self::$wallet, Money::parseByDecimal(-100, 'SAR'), 1);
+        self::$depositTransaction = app()->make(TransactionServiceInterface::class)->deposit(self::$wallet, Money::parseByDecimal(-100, 'SAR'), 1);
     }
 
     public function test_transaction_util_resolve_handler_method_return_transaction_type_handlers_instance()
@@ -49,16 +46,30 @@ class TransactionUtilTest extends TestCase
         $this->assertInstanceOf(TransactionTypeHandlerInterface::class, $transactionTypeHandler);
     }
 
-    public function test_transaction_util_get_description_method_with_locale_return_string()
+    public function test_transaction_util_get_description_method_with_all_available_locales_return_string()
     {
-        $transactionDescription = self::$transactionUtil->getDescription(self::$depositTransaction, 'ar');
-        $this->assertIsString($transactionDescription);
+        foreach (config('app.locales') as $locale) {
+            $transactionDescription = self::$transactionUtil->getDescription(self::$depositTransaction, $locale);
+            $items = Arr::only(self::$depositTransaction->meta, ['type', 'order_number']);
+            $this->assertEquals(
+                __('transaction-description.order_creation_fee', [
+                    'order_number' => $items['order_number'] ?? '',
+                ], $locale),
+                $transactionDescription
+            );
+        }
     }
 
     public function test_transaction_util_get_description_method_without_locale_return_string()
     {
         $transactionDescription = self::$transactionUtil->getDescription(self::$depositTransaction);
-        $this->assertIsString($transactionDescription);
+        $items = Arr::only(self::$depositTransaction->meta, ['type', 'order_number']);
+        $this->assertEquals(
+            __('transaction-description.order_creation_fee', [
+                'order_number' => $items['order_number'] ?? '',
+            ], config('app.locale')),
+            $transactionDescription
+        );
     }
 
     public function test_transaction_util_process_method_return_transaction_model_instance()
