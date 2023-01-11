@@ -2,13 +2,12 @@
 
 namespace App\Observers;
 
+use App\Actions\Contracts\Orders\CommodityPurchasedOrderStatus;
 use App\Enums\ClientMessage;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
-use App\Enums\WebhookType;
 use App\Models\FinancingOrder;
 use App\Support\Sms\Sms;
-use App\Support\Webhooks\Facades\WebhookEvent;
 
 class FinancingOrderObserver
 {
@@ -17,6 +16,8 @@ class FinancingOrderObserver
      *
      * @param  FinancingOrder  $financingOrder
      * @return void
+     *
+     * @throws \Exception
      */
     public function updated(FinancingOrder $financingOrder): void
     {
@@ -41,15 +42,8 @@ class FinancingOrderObserver
                     'quantity' => $quantity,
                     'amount' => $sellingPrice,
                 ], $locale), $phoneNumber),
-            FinancingOrderStatus::CommodityPurchased => WebhookEvent::fire($financingOrder->company, WebhookType::OrderUpdates, [
-                'order_id' => $financingOrder->id,
-                'order_status' => [
-                    'value' => $financingOrder->status->value,
-                    'label' => $financingOrder->status->description,
-                ],
-                'commodity_description' => $product,
-                'quantity' => $quantity,
-            ]),
+            FinancingOrderStatus::CommodityPurchased => app(CommodityPurchasedOrderStatus::class)->handle($financingOrder, $product, $quantity),
+            default => null
         };
     }
 }

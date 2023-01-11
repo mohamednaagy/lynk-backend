@@ -49,9 +49,14 @@ class FinancingOrderObserver extends TestCase
         ]);
     }
 
-    public function test_financing_order_observer_success()
+    public function test_financing_order_observer_commodity_purchased_status()
     {
         Bus::fake();
+
+        self::$order->update(['amount' => 250]);
+
+        Bus::assertNotDispatched(CallWebhookJob::class);
+
         self::$order->update(['status' => FinancingOrderStatus::CommodityPurchased]);
 
         Bus::assertDispatched(CallWebhookJob::class);
