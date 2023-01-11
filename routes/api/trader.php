@@ -1,8 +1,8 @@
 <?php
 
 use App\Enums\Role;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Trader\OrderController;
+use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
 /*
@@ -19,8 +19,8 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 Route::prefix('v1/trader')->name('api.v1.')->group(function () {
     Route::middleware([
         'auth:sanctum',
-        'role:' . implode('|', [
-            Role::TraderAdmin
+        'role:'.implode('|', [
+            Role::TraderAdmin,
         ]),
         InitializeTenancyByRequestData::class,
     ])->group(function () {

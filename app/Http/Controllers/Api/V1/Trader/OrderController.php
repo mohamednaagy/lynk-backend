@@ -26,10 +26,9 @@ class OrderController extends Controller
     }
 
     public function index(
-        Request            $request,
+        Request $request,
         GetPaginatedFinancingOrder $getPaginatedFinancingOrder
-    ): JsonResponse
-    {
+    ): JsonResponse {
         return fractal($getPaginatedFinancingOrder->setTrader($request->get('trader'))->handle(), new FinancingOrderTransformer())
             ->parseIncludes([
                 'id',
@@ -42,9 +41,8 @@ class OrderController extends Controller
 
     public function show(
         GetOrder $getOrder,
-        int      $order
-    ): JsonResponse
-    {
+        int $order
+    ): JsonResponse {
         return fractal($getOrder->handle($order), new FinancingOrderTransformer())
             ->parseIncludes([
                 'id',
