@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Lender\Auth;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CompanyType;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\ResendInvitationRequest;
@@ -25,7 +26,7 @@ class ResendInvitation extends Controller
     {
         if (is_null($user->password)) {
             $invitationUrl = $request->validated('redirect_url');
-            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl));
+            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Lender));
         }
 
         return $this->successResponse();

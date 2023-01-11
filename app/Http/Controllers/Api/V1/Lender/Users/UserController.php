@@ -7,6 +7,7 @@ use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CompanyType;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
@@ -82,7 +83,7 @@ class UserController extends Controller
             $user = $createLenderWithRoleAndPermission->handle($storeUserRequest->validated());
 
             $invitationUrl = $storeUserRequest->validated('redirect_url');
-            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl));
+            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Lender));
 
             $user->load('roles', 'permissions');
 
