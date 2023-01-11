@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Actions\Traders;
+namespace App\Actions\Orders;
 
-use App\Actions\Contracts\Traders\GetOrder;
+use App\Actions\Contracts\Orders\GetOrder;
 use App\Models\FinancingOrder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;

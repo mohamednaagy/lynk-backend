@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Trader;
 
-use App\Actions\Traders\GetOrderAction;
+use App\Actions\Orders\GetOrderAction;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;

@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\Api\V1\Traders\ListOrders;
-use App\Http\Controllers\Api\V1\Traders\ShowOrder;
+use App\Enums\Role;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\Trader\OrderController;
+use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +17,13 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1/trader')->name('api.v1.')->group(function () {
-    Route::get('/{trader}/trader', ListOrders::class);
-    Route::get('/{order}/order', ShowOrder::class);
+    Route::middleware([
+        'auth:sanctum',
+        'role:' . implode('|', [
+            Role::TraderAdmin
+        ]),
+        InitializeTenancyByRequestData::class,
+    ])->group(function () {
+        Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
+    });
 });

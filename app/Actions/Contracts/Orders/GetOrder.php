@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Contracts\Traders;
+namespace App\Actions\Contracts\Orders;
 
 interface GetOrder
 {
