@@ -9,13 +9,15 @@ use App\Enums\WebhookType;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
+use App\Support\Sms\Events\SmsSent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Event;
 use Spatie\WebhookServer\CallWebhookJob;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class FinancingOrderObserver extends TestCase
+class FinancingOrderObserverTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -38,7 +40,7 @@ class FinancingOrderObserver extends TestCase
         ]);
         self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::ContractSigned,
+            'status' => FinancingOrderStatus::Approved,
         ]);
         self::$order->traderOrders()->create([
             'provider' => config('trader.default'),
@@ -47,6 +49,36 @@ class FinancingOrderObserver extends TestCase
             'product' => 'product test',
             'quantity' => 500,
         ]);
+    }
+
+    public function test_financing_order_observer_commodity_soled_to_customer_status()
+    {
+        Event::fake([
+            SmsSent::class,
+        ]);
+
+        self::$order->update(['amount' => 250]);
+
+        Event::assertNotDispatched(SmsSent::class);
+
+        self::$order->update(['status' => FinancingOrderStatus::CommoditySoldToCustomer]);
+
+        Event::assertDispatched(SmsSent::class);
+    }
+
+    public function test_financing_order_observer_murabaha_sale_completed_status()
+    {
+        Event::fake([
+            SmsSent::class,
+        ]);
+
+        self::$order->update(['amount' => 250]);
+
+        Event::assertNotDispatched(SmsSent::class);
+
+        self::$order->update(['status' => FinancingOrderStatus::MurabahaSaleCompleted]);
+
+        Event::assertDispatched(SmsSent::class);
     }
 
     public function test_financing_order_observer_commodity_purchased_status()
