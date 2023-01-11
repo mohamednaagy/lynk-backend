@@ -78,8 +78,9 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
             filled($this->trader) && tenant()->type->is(CompanyType::Trader),
             function ($query) {
                 $query->withoutGlobalScope(TenantScope::class)
-                    ->withWhereHas('activeTraderOrder')
-                    ->where('provider', Str::lower($this->trader));
+                    ->withWhereHas('activeTraderOrder', function ($query) {
+                        $query->where('provider', Str::lower($this->trader));
+                    });
             }
         );
     }
