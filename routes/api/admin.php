@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\LenderSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
+use App\Http\Controllers\Api\V1\Admin\Traders\UpdateTraderStatus;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
 
@@ -79,6 +80,10 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/{company}/transactions ', [FinancingOrderTransactionController::class, 'index']);
             Route::post('/{company}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{company}/settings ', GetCompanySetting::class);
+
+            Route::prefix('traders')->group(function () {
+                Route::put('/{company}/status', UpdateTraderStatus::class);
+            });
         });
 
         Route::apiResource('companies', CompanyController::class);
