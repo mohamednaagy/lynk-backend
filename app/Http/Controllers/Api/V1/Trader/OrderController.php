@@ -10,7 +10,6 @@ use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Transformers\FinancingOrderTransformer;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
@@ -26,10 +25,9 @@ class OrderController extends Controller
     }
 
     public function index(
-        Request $request,
         GetPaginatedFinancingOrder $getPaginatedFinancingOrder
     ): JsonResponse {
-        return fractal($getPaginatedFinancingOrder->setTrader($request->get('trader'))->handle(), new FinancingOrderTransformer())
+        return fractal($getPaginatedFinancingOrder->setCompany(tenant())->handle(), new FinancingOrderTransformer())
             ->parseIncludes([
                 'id',
                 'amount',
@@ -43,13 +41,17 @@ class OrderController extends Controller
         GetOrder $getOrder,
         int $order
     ): JsonResponse {
-        return fractal($getOrder->handle($order), new FinancingOrderTransformer())
+        return fractal($getOrder->setCompany(tenant())->handle($order), new FinancingOrderTransformer())
             ->parseIncludes([
                 'id',
                 'amount',
                 'selling_price',
                 'status',
-                'active_trader',
+                'active_trader.id',
+                'active_trader.reference',
+                'active_trader.provider',
+                'active_trader.status',
+                'trader_order_history',
             ])
             ->respond();
     }

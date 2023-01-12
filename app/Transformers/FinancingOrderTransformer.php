@@ -6,6 +6,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\Item;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -32,6 +33,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'created_at',
         'history',
         'active_trader',
+        'trader_order_history',
     ];
 
     public function transform(FinancingOrder $financingOrder)
@@ -142,8 +144,17 @@ class FinancingOrderTransformer extends TransformerAbstract
         ]), new TraderHistoryTransformer($financingOrder, $financingOrder->traderOrders->last()->traderHistories ?? collect()));
     }
 
-    public function includeActiveTrader(FinancingOrder $financingOrder): Primitive
+    public function includeActiveTrader(FinancingOrder $financingOrder): Primitive|Item
     {
-        return $this->primitive($financingOrder->activeTraderOrder);
+        if (blank($financingOrder->activeTraderOrder->first())) {
+            return $this->primitive(null);
+        }
+
+        return $this->item($financingOrder->activeTraderOrder->first(), new TraderOrderTransformer());
+    }
+
+    public function includeTraderOrderHistory(FinancingOrder $financingOrder): Primitive
+    {
+        return $this->primitive(optional($financingOrder->activeTraderOrder->first())->traderHistories);
     }
 }

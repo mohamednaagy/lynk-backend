@@ -3,6 +3,7 @@
 namespace Tests\Feature\Endpoints\Api\V1\Trader;
 
 use App\Actions\Orders\GetOrderAction;
+use App\Enums\CompanyType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
@@ -14,7 +15,6 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
@@ -24,11 +24,17 @@ class ShowOrderTest extends TestCase
 
     private static Company $company;
 
-    private static User $userLenderAdmin;
+    private static Company $companyTwo;
+
+    private static User $userTraderAdmin;
 
     private static Wallet $wallet;
 
+    private static Wallet $walletTwo;
+
     private static Builder|Model $order;
+
+    private static Builder|Model $orderTwo;
 
     private static Builder|Model $traderOrder;
 
@@ -43,9 +49,11 @@ class ShowOrderTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$order = $this->createOrder(self::$company->id, self::$userLenderAdmin->id);
+        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910', 'type' => CompanyType::Trader]);
+        [self::$companyTwo, self::$walletTwo] = $this->createCompany('2000', ['company_cr' => '12345678911', 'type' => CompanyType::Trader]);
+        self::$userTraderAdmin = $this->createLenderUser(self::$company->id, Role::TraderAdmin, 'traderAdmin@bim.com');
+        self::$order = $this->createOrder(self::$company->id, self::$userTraderAdmin->id);
+        self::$orderTwo = $this->createOrder(self::$companyTwo->id, self::$userTraderAdmin->id);
         self::$traderOrder = self::$order->traderOrders()->create([
             'provider' => 'fake',
             'status' => TraderOrderStatus::InProgress,
@@ -59,22 +67,48 @@ class ShowOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_can_show_order(): void
+    public function test_unauth_user_cannot_access(): void
     {
         $this->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/trader/'.self::$order->id.'/order')
-            ->assertStatus(Response::HTTP_OK)
+            ->getJson('api/v1/trader/orders/'.self::$order->id)
+            ->assertUnauthorized();
+    }
+
+    /**
+     * @return void
+     */
+    public function test_auth_user_with_proper_permission_can_access(): void
+    {
+        $this->actingAs(self::$userTraderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->getJson('api/v1/trader/orders/'.self::$order->id)
+            ->assertOk()
             ->assertExactJson(
-                fractal((new GetOrderAction())->handle(self::$order->id), new FinancingOrderTransformer())
+                fractal((new GetOrderAction())->setCompany(tenant())->handle(self::$order->id), new FinancingOrderTransformer())
                     ->parseIncludes([
                         'id',
                         'amount',
                         'selling_price',
                         'status',
-                        'active_trader',
+                        'active_trader.id',
+                        'active_trader.reference',
+                        'active_trader.provider',
+                        'active_trader.status',
+                        'trader_order_history',
                     ])
                     ->respond()
                     ->getData(true)
-            );
+            )->assertJsonCount(1);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_can_see_only_current_trader_company_orders(): void
+    {
+        $this->actingAs(self::$userTraderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->getJson('api/v1/trader/orders/'.self::$orderTwo->id)
+            ->assertNotFound();
     }
 }

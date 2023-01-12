@@ -11,5 +11,10 @@ class TraderAdmin
         Subject::All => [
             Action::Manage,
         ],
+        Subject::FinancingOrders => [
+            Action::Index,
+            Action::Show,
+            Action::Manage,
+        ],
     ];
 }
