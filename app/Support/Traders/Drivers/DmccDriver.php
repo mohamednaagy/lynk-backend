@@ -208,7 +208,7 @@ class DmccDriver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function respondPtpService(string $ttiId): void
+    public function respondPtpService(string $ttiId): object
     {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('respondPTPService'))
@@ -230,6 +230,8 @@ class DmccDriver implements TraderInterface
                 'responseBody' => $response->body(),
             ]));
         }
+
+        return $response->object();
     }
 
     /**
