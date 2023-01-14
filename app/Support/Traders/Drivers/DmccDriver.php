@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use CodeDredd\Soap\Client\Response;
 use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -237,27 +238,40 @@ class DmccDriver implements TraderInterface
     /**
      * @param $traderOrder
      * @return void
+     *
+     * @throws TraderException
      */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
-        $this->createOrderDocumentAsPdf(
-            'selling-commodity-to-customer',
-            [
-                'ttiId' => $traderOrder->reference,
-                'companyName' => $traderOrder->order->company->name,
-                'orderNumber' => $traderOrder->financing_order_id,
-                'amount' => $traderOrder->amount,
-                'hsCodeDescription' => $traderOrder->product,
-                'quantity' => $traderOrder->quantity,
-                'warehouse' => $traderOrder->warehouse,
-                'owner' => $traderOrder->owner,
-                'date' => Carbon::now()->toDateString(),
-                'time' => Carbon::now()->toTimeString(),
-            ],
-            $traderOrder,
-            FinancingOrderMediaCollection::SellingCommodityToCustomer,
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument
-        );
+        try {
+            $this->createOrderDocumentAsPdf(
+                'selling-commodity-to-customer',
+                [
+                    'ttiId' => $traderOrder->reference,
+                    'companyName' => $traderOrder->order->company->name,
+                    'orderNumber' => $traderOrder->financing_order_id,
+                    'amount' => $traderOrder->amount,
+                    'hsCodeDescription' => $traderOrder->product,
+                    'quantity' => $traderOrder->quantity,
+                    'warehouse' => $traderOrder->warehouse,
+                    'owner' => $traderOrder->owner,
+                    'date' => Carbon::now()->toDateString(),
+                    'time' => Carbon::now()->toTimeString(),
+                ],
+                $traderOrder,
+                FinancingOrderMediaCollection::SellingCommodityToCustomer,
+                FinancingOrderHistory::CreateSellingCommodityToCustomerDocument
+            );
+        } catch (Exception $exception) {
+            throw new TraderException(collect([
+                'driver' => 'dmcc',
+                'step' => 'createSellingCommodityToCustomerDocument',
+                'requestBody' => [
+                    'traderOrder' => $traderOrder,
+                ],
+                'responseBody' => $exception->getMessage(),
+            ]));
+        }
     }
 
     /**
@@ -291,27 +305,40 @@ class DmccDriver implements TraderInterface
     /**
      * @param $traderOrder
      * @return void
+     *
+     * @throws TraderException
      */
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
-        $this->createOrderDocumentAsPdf(
-            'transfer-ownership-to-lender',
-            [
-                'ttiId' => $traderOrder->reference,
-                'companyName' => $traderOrder->order->company->name,
-                'orderNumber' => $traderOrder->financing_order_id,
-                'amount' => $traderOrder->amount,
-                'hsCodeDescription' => $traderOrder->product,
-                'quantity' => $traderOrder->quantity,
-                'warehouse' => $traderOrder->warehouse,
-                'owner' => $traderOrder->owner,
-                'date' => Carbon::now()->toDateString(),
-                'time' => Carbon::now()->toTimeString(),
-            ],
-            $traderOrder,
-            FinancingOrderMediaCollection::TransferOwnershipToLender,
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
-        );
+        try {
+            $this->createOrderDocumentAsPdf(
+                'transfer-ownership-to-lender',
+                [
+                    'ttiId' => $traderOrder->reference,
+                    'companyName' => $traderOrder->order->company->name,
+                    'orderNumber' => $traderOrder->financing_order_id,
+                    'amount' => $traderOrder->amount,
+                    'hsCodeDescription' => $traderOrder->product,
+                    'quantity' => $traderOrder->quantity,
+                    'warehouse' => $traderOrder->warehouse,
+                    'owner' => $traderOrder->owner,
+                    'date' => Carbon::now()->toDateString(),
+                    'time' => Carbon::now()->toTimeString(),
+                ],
+                $traderOrder,
+                FinancingOrderMediaCollection::TransferOwnershipToLender,
+                FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
+            );
+        } catch (Exception $exception) {
+            throw new TraderException(collect([
+                'driver' => 'dmcc',
+                'step' => 'createTransferOwnershipToLenderDocument',
+                'requestBody' => [
+                    'traderOrder' => $traderOrder,
+                ],
+                'responseBody' => $exception->getMessage(),
+            ]));
+        }
     }
 
     /**

@@ -13,7 +13,10 @@ use App\Models\TraderOrder;
 use App\Models\User;
 use App\Support\Traders\Drivers\DmccDriver;
 use CodeDredd\Soap\Facades\Soap;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
@@ -29,7 +32,7 @@ class DmccDriverTest extends TestCase
 
     protected static FinancingOrder $order;
 
-    protected static TraderOrder $traderOrder;
+    protected static Model|TraderOrder $traderOrder;
 
     protected function setUp(): void
     {
@@ -40,10 +43,16 @@ class DmccDriverTest extends TestCase
         self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
             'status' => FinancingOrderStatus::Approved,
         ]);
-        self::$traderOrder = self::$order->traderOrders()->create([
+        self::$traderOrder = TraderOrder::query()->create([
+            'financing_order_id' => self::$order->id,
             'reference' => 1,
             'provider' => 'dmcc',
             'status' => TraderOrderStatus::InProgress,
+            'amount' => 1,
+            'product' => 'product',
+            'quantity' => 1,
+            'warehouse' => 'warehouse',
+            'owner' => 'owner',
         ]);
     }
 
@@ -286,6 +295,76 @@ class DmccDriverTest extends TestCase
 
         (new DmccDriver())->respondPtpService(self::$order);
 
+        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_create_selling_commodity_to_customer_document_success(): void
+    {
+        Storage::fake();
+        UploadedFile::fake();
+
+        (new DmccDriver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
+
+        $this->assertFileExists(storage_path('app/1/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
+    }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_create_selling_commodity_to_customer_document_fail(): void
+    {
+        Storage::fake();
+        UploadedFile::fake();
+
+        $this->expectException(TraderException::class);
+
+        $activityLogCount = Activity::query()->count();
+
+        (new DmccDriver())->createSellingCommodityToCustomerDocument(new TraderOrder());
+
+        $this->assertFileDoesNotExist(storage_path('app/1/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
+        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_create_transfer_ownership_to_lender_document_success(): void
+    {
+        Storage::fake();
+        UploadedFile::fake();
+
+        (new DmccDriver())->createTransferOwnershipToLenderDocument(self::$traderOrder);
+
+        $this->assertFileExists(storage_path('app/1/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
+    }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_create_transfer_ownership_to_lender_document_fail(): void
+    {
+        Storage::fake();
+        UploadedFile::fake();
+
+        $this->expectException(TraderException::class);
+
+        $activityLogCount = Activity::query()->count();
+
+        (new DmccDriver())->createTransferOwnershipToLenderDocument(new TraderOrder());
+
+        $this->assertFileDoesNotExist(storage_path('app/1/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 }
