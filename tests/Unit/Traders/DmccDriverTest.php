@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Support\Traders\Drivers\DmccDriver;
 use CodeDredd\Soap\Facades\Soap;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use RuntimeException;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
@@ -81,6 +82,119 @@ class DmccDriverTest extends TestCase
 
         $this->assertDatabaseCount((new TraderOrder())->getTable(), 0);
         $this->assertDatabaseCount((new TraderHistory())->getTable(), 0);
+        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_accept_agreement_fail(): void
+    {
+        $this->expectException(RuntimeException::class);
+
+        $activityLogCount = Activity::query()->count();
+
+        Soap::fake(function () {
+            return Soap::response([
+                'ttiId' => '',
+                'errorCode' => '',
+                'errorMessage' => 'error',
+            ], 200);
+        });
+
+        (new DmccDriver())->acceptAgreement();
+
+        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_fetch_notifications_success(): void
+    {
+        Soap::fake(function () {
+            return Soap::response([
+                'NotificationAllDetailsResponse' => [
+                    [
+                        'notificationAllDetailsResponse' => [
+                            'notificationDetails',
+                        ],
+                    ],
+                ],
+            ], 200);
+        });
+
+        $response = (new DmccDriver())->fetchNotifications('ACTIONABLE');
+
+        $this->assertIsArray($response);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_fetch_notifications_fail(): void
+    {
+        $this->expectException(TraderException::class);
+
+        $activityLogCount = Activity::query()->count();
+
+        Soap::fake(function () {
+            return Soap::response([
+                'NotificationAllDetailsResponse' => [],
+            ], 500);
+        });
+
+        (new DmccDriver())->fetchNotifications('ACTIONABLE');
+
+        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_get_tti_id_success(): void
+    {
+        Soap::fake(function () {
+            return Soap::response([
+                'ttiId' => '1',
+                'errorCode' => '',
+                'errorMessage' => '',
+            ], 200);
+        });
+
+        $response = (new DmccDriver())->getTtiId(self::$order);
+
+        $this->assertIsString($response);
+        $this->assertEquals(1, $response);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_get_tti_id_fail(): void
+    {
+        $this->expectException(TraderException::class);
+
+        $activityLogCount = Activity::query()->count();
+
+        Soap::fake(function () {
+            return Soap::response([
+                'ttiId' => '',
+                'errorCode' => '',
+                'errorMessage' => 'error',
+            ], 200);
+        });
+
+        (new DmccDriver())->getTtiId(self::$order);
+
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 }

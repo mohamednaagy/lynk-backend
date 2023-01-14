@@ -73,7 +73,7 @@ class DmccDriver implements TraderInterface
                 'notificationType' => $type,
             ]);
 
-        if (! $response->successful()) {
+        if (! $response->successful() || blank($response->object()->NotificationAllDetailsResponse)) {
             throw new TraderException(collect([
                 'driver' => 'dmcc',
                 'step' => 'fetchNotifications',
