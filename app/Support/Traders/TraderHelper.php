@@ -5,6 +5,7 @@ namespace App\Support\Traders;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Database\Eloquent\Model;
 
 trait TraderHelper
@@ -30,5 +31,34 @@ trait TraderHelper
         $traderOrder->traderHistories()->create([
             'action' => $action,
         ]);
+    }
+
+    public function createOrderDocumentAsPdf(string $view, array $data, TraderOrder $traderOrder, $mediaCollection, $action): void
+    {
+        $html = view($view, $data)->render();
+
+        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($mediaCollection, $traderOrder) {
+            $this->attachDocumentToOrder(
+                $traderOrder,
+                $fileResource,
+                $mediaCollection
+            );
+        });
+
+        $this->createTraderOrderHistory($traderOrder, $action);
+    }
+
+    public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
+    {
+        $fileName = $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
+        if (! is_null($type)) {
+            $traderOrder->order->addMediaFromBase64(
+                $document
+            )->usingFileName($fileName)->toMediaCollection($collectionName);
+        } else {
+            $traderOrder->order->addMediaFromStream(
+                $document
+            )->usingFileName($fileName)->toMediaCollection($collectionName);
+        }
     }
 }

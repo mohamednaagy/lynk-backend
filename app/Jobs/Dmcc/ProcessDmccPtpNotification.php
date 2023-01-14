@@ -64,6 +64,8 @@ class ProcessDmccPtpNotification implements ShouldQueue
 
             $trader->respondPtpService($this->ttiId);
 
+            $trader->getInventoryBasket($traderOrder);
+
             $trader->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::RespondPtp

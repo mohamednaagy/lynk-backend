@@ -6,7 +6,6 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
-use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\TraderHelper;
 use Carbon\Carbon;
@@ -17,11 +16,17 @@ class FakeDriver implements TraderInterface
 {
     use TraderHelper;
 
+    /**
+     * @return bool
+     */
     public function acceptAgreement(): bool
     {
         return true;
     }
 
+    /**
+     * @throws TraderException
+     */
     public function getTti(FinancingOrder $financingOrder): string
     {
         $ttiId = $this->getTtiId($financingOrder);
@@ -31,6 +36,9 @@ class FakeDriver implements TraderInterface
         return $ttiId;
     }
 
+    /**
+     * @throws TraderException
+     */
     public function fetchNotifications(string $type): ?array
     {
         $response = Http::get($this->buildUrl('notifications?type='.$type));
@@ -133,9 +141,10 @@ class FakeDriver implements TraderInterface
     }
 
     /**
-     * @throws TraderException
+     * @param  FinancingOrder  $financingOrder
+     * @return bool
      */
-    public function cancelOrder(FinancingOrder $financingOrder): mixed
+    public function cancelOrder(FinancingOrder $financingOrder): bool
     {
         return true;
     }
@@ -165,30 +174,30 @@ class FakeDriver implements TraderInterface
         }
     }
 
+    /**
+     * @param $traderOrder
+     * @return void
+     */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
-        $html = view('selling-commodity-to-customer', [
-            'ttiId' => $traderOrder->reference,
-            'companyName' => $traderOrder->order->company->name,
-            'orderNumber' => $traderOrder->financing_order_id,
-            'amount' => $traderOrder->order->amount->formatByDecimal(),
-            'hsCodeDescription' => 'product description',
-            'quantity' => 100,
-            'warehouse' => 'warehouse',
-            'owner' => 'owner',
-            'date' => Carbon::now()->toDateString(),
-            'time' => Carbon::now()->toTimeString(),
-        ])->render();
-
-        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                $fileResource,
-                FinancingOrderMediaCollection::SellingCommodityToCustomer
-            );
-        });
-
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
+        $this->createOrderDocumentAsPdf(
+            'selling-commodity-to-customer',
+            [
+                'ttiId' => $traderOrder->reference,
+                'companyName' => $traderOrder->order->company->name,
+                'orderNumber' => $traderOrder->financing_order_id,
+                'amount' => $traderOrder->order->amount->formatByDecimal(),
+                'hsCodeDescription' => 'product description',
+                'quantity' => 100,
+                'warehouse' => 'warehouse',
+                'owner' => 'owner',
+                'date' => Carbon::now()->toDateString(),
+                'time' => Carbon::now()->toTimeString(),
+            ],
+            $traderOrder,
+            FinancingOrderMediaCollection::SellingCommodityToCustomer,
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument
+        );
     }
 
     /**
@@ -217,45 +226,29 @@ class FakeDriver implements TraderInterface
         return $response->json('data.fileContent');
     }
 
-    public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
-    {
-        $fileName = $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
-        if (! is_null($type)) {
-            $traderOrder->order->addMediaFromBase64(
-                $document
-            )->usingFileName($fileName)->toMediaCollection($collectionName);
-        } else {
-            $traderOrder->order->addMediaFromStream(
-                $document
-            )->usingFileName($fileName)->toMediaCollection($collectionName);
-        }
-    }
-
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
-        $html = view('transfer-ownership-to-lender', [
-            'ttiId' => $traderOrder->reference,
-            'companyName' => $traderOrder->order->company->name,
-            'orderNumber' => $traderOrder->financing_order_id,
-            'amount' => $traderOrder->order->amount->formatByDecimal(),
-            'hsCodeDescription' => 'product description',
-            'quantity' => 100,
-            'warehouse' => 'warehouse',
-            'owner' => 'owner',
-            'date' => Carbon::now()->toDateString(),
-            'time' => Carbon::now()->toTimeString(),
-        ])->render();
-
-        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                $fileResource,
-                FinancingOrderMediaCollection::TransferOwnershipToLender
-            );
-        });
+        $this->createOrderDocumentAsPdf(
+            'transfer-ownership-to-lender',
+            [
+                'ttiId' => $traderOrder->reference,
+                'companyName' => $traderOrder->order->company->name,
+                'orderNumber' => $traderOrder->financing_order_id,
+                'amount' => $traderOrder->order->amount->formatByDecimal(),
+                'hsCodeDescription' => 'product description',
+                'quantity' => 100,
+                'warehouse' => 'warehouse',
+                'owner' => 'owner',
+                'date' => Carbon::now()->toDateString(),
+                'time' => Carbon::now()->toTimeString(),
+            ],
+            $traderOrder,
+            FinancingOrderMediaCollection::TransferOwnershipToLender,
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
+        );
     }
 
-    public function uploadTTIDocumentAndGetVersionNumber(string $ttiId): mixed
+    public function uploadTTIDocumentAndGetVersionNumber(string $ttiId): string
     {
         return '001';
     }

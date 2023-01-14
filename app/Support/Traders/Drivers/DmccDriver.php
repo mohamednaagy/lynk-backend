@@ -7,7 +7,6 @@ use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
-use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\TraderHelper;
 use Carbon\Carbon;
@@ -48,6 +47,9 @@ class DmccDriver implements TraderInterface
         return $this->isSuccess($response);
     }
 
+    /**
+     * @throws TraderException
+     */
     public function getTti(FinancingOrder $financingOrder): string
     {
         $ttiId = $this->getTtiId($financingOrder);
@@ -149,7 +151,7 @@ class DmccDriver implements TraderInterface
 
         Log::debug('getTTiId', [$response]);
 
-        if (! isset($response->ttiId)) {
+        if (blank($response->ttiId)) {
             throw new TraderException(collect([
                 'driver' => 'dmcc',
                 'step' => 'getTtiId',
@@ -163,7 +165,7 @@ class DmccDriver implements TraderInterface
                     'registeredMember' => config('trader.providers.dmcc.tti.registered_member'),
                     'client' => null,
                 ],
-                'responseBody' => $response->body(),
+                'responseBody' => $response,
                 'financingOrderId' => $financingOrder->id,
             ]));
         }
@@ -174,7 +176,7 @@ class DmccDriver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function cancelOrder(FinancingOrder $financingOrder): mixed
+    public function cancelOrder(FinancingOrder $financingOrder): object
     {
         $traderOrder = $financingOrder->activeTraderOrder()->first();
         $response = $this->soap
@@ -231,34 +233,29 @@ class DmccDriver implements TraderInterface
     }
 
     /**
-     * @throws TraderException
+     * @param $traderOrder
+     * @return void
      */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
-        $response = $this->getInventoryBasket($traderOrder->reference);
-
-        $html = view('selling-commodity-to-customer', [
-            'ttiId' => $traderOrder->reference,
-            'companyName' => $traderOrder->order->company->name,
-            'orderNumber' => $traderOrder->financing_order_id,
-            'amount' => $response->inventoryDetails[0]->totalValue.' '.$response->inventoryDetails[0]->currency,
-            'hsCodeDescription' => $response->inventoryDetails[0]->hsCodeDescription,
-            'quantity' => $response->inventoryDetails[0]->quantity,
-            'warehouse' => $response->inventoryDetails[0]->warehouseOrVaultId,
-            'owner' => $response->inventoryDetails[0]->owner,
-            'date' => Carbon::now()->toDateString(),
-            'time' => Carbon::now()->toTimeString(),
-        ])->render();
-
-        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                $fileResource,
-                FinancingOrderMediaCollection::SellingCommodityToCustomer
-            );
-        });
-
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
+        $this->createOrderDocumentAsPdf(
+            'selling-commodity-to-customer',
+            [
+                'ttiId' => $traderOrder->reference,
+                'companyName' => $traderOrder->order->company->name,
+                'orderNumber' => $traderOrder->financing_order_id,
+                'amount' => $traderOrder->amount,
+                'hsCodeDescription' => $traderOrder->product,
+                'quantity' => $traderOrder->quantity,
+                'warehouse' => $traderOrder->warehouse,
+                'owner' => $traderOrder->owner,
+                'date' => Carbon::now()->toDateString(),
+                'time' => Carbon::now()->toTimeString(),
+            ],
+            $traderOrder,
+            FinancingOrderMediaCollection::SellingCommodityToCustomer,
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument
+        );
     }
 
     /**
@@ -289,58 +286,41 @@ class DmccDriver implements TraderInterface
         return $response->object()->getdocument[0]->getDocumentByTypeResponse[0]->document;
     }
 
-    public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
-    {
-        $fileName = $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
-        if (! is_null($type)) {
-            $traderOrder->order->addMediaFromBase64(
-                $document
-            )->usingFileName($fileName)->toMediaCollection($collectionName);
-        } else {
-            $traderOrder->order->addMediaFromStream(
-                $document
-            )->usingFileName($fileName)->toMediaCollection($collectionName);
-        }
-    }
-
     /**
-     * @throws TraderException
+     * @param $traderOrder
+     * @return void
      */
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
-        $response = $this->getInventoryBasket($traderOrder->reference);
-
-        $html = view('transfer-ownership-to-lender', [
-            'ttiId' => $traderOrder->reference,
-            'companyName' => $traderOrder->order->company->name,
-            'orderNumber' => $traderOrder->financing_order_id,
-            'amount' => $response->inventoryDetails[0]->totalValue.' '.$response->inventoryDetails[0]->currency,
-            'hsCodeDescription' => $response->inventoryDetails[0]->hsCodeDescription,
-            'quantity' => $response->inventoryDetails[0]->quantity,
-            'warehouse' => $response->inventoryDetails[0]->warehouseOrVaultId,
-            'owner' => $response->inventoryDetails[0]->owner,
-            'date' => Carbon::now()->toDateString(),
-            'time' => Carbon::now()->toTimeString(),
-        ])->render();
-
-        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                $fileResource,
-                FinancingOrderMediaCollection::TransferOwnershipToLender
-            );
-        });
+        $this->createOrderDocumentAsPdf(
+            'transfer-ownership-to-lender',
+            [
+                'ttiId' => $traderOrder->reference,
+                'companyName' => $traderOrder->order->company->name,
+                'orderNumber' => $traderOrder->financing_order_id,
+                'amount' => $traderOrder->amount,
+                'hsCodeDescription' => $traderOrder->product,
+                'quantity' => $traderOrder->quantity,
+                'warehouse' => $traderOrder->warehouse,
+                'owner' => $traderOrder->owner,
+                'date' => Carbon::now()->toDateString(),
+                'time' => Carbon::now()->toTimeString(),
+            ],
+            $traderOrder,
+            FinancingOrderMediaCollection::TransferOwnershipToLender,
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
+        );
     }
 
     /**
      * @throws TraderException
      */
-    private function getInventoryBasket(string $ttiId): object
+    public function getInventoryBasket(TraderOrder $traderOrder): object
     {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('getInventoryBasket'))
             ->call('getInventoryBasket', [
-                'ttiId' => $ttiId,
+                'ttiId' => $traderOrder->reference,
             ]);
 
         if ($response->object()->errorCode != '') {
@@ -348,7 +328,7 @@ class DmccDriver implements TraderInterface
                 'driver' => 'dmcc',
                 'step' => 'getInventoryBasket',
                 'requestBody' => [
-                    'ttiId' => $ttiId,
+                    'ttiId' => $traderOrder->reference,
                 ],
                 'responseBody' => $response->body(),
             ]));
@@ -356,7 +336,6 @@ class DmccDriver implements TraderInterface
 
         $response = $response->object();
 
-        $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
         $traderOrder->update([
             'product' => $response->inventoryDetails[0]->hsCodeDescription,
             'quantity' => $response->inventoryDetails[0]->quantity,
