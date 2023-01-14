@@ -367,4 +367,106 @@ class DmccDriverTest extends TestCase
         $this->assertFileDoesNotExist(storage_path('app/1/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_get_document_by_type_and_transaction_success(): void
+    {
+        Soap::fake(function () {
+            return Soap::response([
+                'getdocument' => [
+                    [
+                        'getDocumentByTypeResponse' => [
+                            [
+                                'document' => 'document',
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200);
+        });
+
+        $response = (new DmccDriver())->getDocumentByTypeAndTransaction(1, 'documentType');
+
+        $this->assertEquals('document', $response);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_get_document_by_type_and_transaction_fail(): void
+    {
+        $this->expectException(TraderException::class);
+
+        $activityLogCount = Activity::query()->count();
+
+        Soap::fake(function () {
+            return Soap::response([
+                'getdocument' => [
+                    [
+                        'getDocumentByTypeResponse' => [],
+                    ],
+                ],
+            ], 200);
+        });
+
+        (new DmccDriver())->getDocumentByTypeAndTransaction(1, 'documentType');
+
+        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_get_inventory_basket_success(): void
+    {
+        Soap::fake(function () {
+            return Soap::response([
+                'inventoryDetails' => [
+                    [
+                        'hsCodeDescription' => 'hsCodeDescription',
+                        'quantity' => 100,
+                        'totalValue' => 100,
+                        'currency' => 'SAR',
+                        'warehouseOrVaultId' => 'warehouseOrVaultId',
+                        'owner' => 'owner',
+                    ],
+                ],
+                'errorCode' => '',
+            ], 200);
+        });
+
+        $response = (new DmccDriver())->getInventoryBasket(self::$traderOrder);
+
+        $this->assertEquals('', $response->errorCode);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_get_inventory_basket_fail(): void
+    {
+        $this->expectException(TraderException::class);
+
+        $activityLogCount = Activity::query()->count();
+
+        Soap::fake(function () {
+            return Soap::response([
+                'errorCode' => 'error',
+            ], 200);
+        });
+
+        (new DmccDriver())->getInventoryBasket(self::$traderOrder);
+
+        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+    }
 }
