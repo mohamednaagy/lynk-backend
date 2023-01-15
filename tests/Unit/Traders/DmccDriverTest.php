@@ -509,4 +509,46 @@ class DmccDriverTest extends TestCase
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_issue_murabaha_purchase_offer_success(): void
+    {
+        $activityLogCount = Activity::query()->count();
+
+        Soap::fake(function () {
+            return Soap::response([
+                'successCode' => '0000',
+            ], 200);
+        });
+
+        (new DmccDriver())->issueMurabahaPurchaseOffer(1, 1);
+
+        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_issue_murabaha_purchase_offer_fail(): void
+    {
+        $this->expectException(TraderException::class);
+
+        $activityLogCount = Activity::query()->count();
+
+        Soap::fake(function () {
+            return Soap::response([
+                'successCode' => '',
+            ], 200);
+        });
+
+        (new DmccDriver())->issueMurabahaPurchaseOffer(1, 1);
+
+        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+    }
 }
