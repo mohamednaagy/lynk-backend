@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TraderOrderStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +27,10 @@ class TraderOrder extends Model
             'reference',
         ];
     }
+
+    protected $casts = [
+        'status' => TraderOrderStatus::class,
+    ];
 
     public function order(): BelongsTo
     {
