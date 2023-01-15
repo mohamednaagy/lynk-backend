@@ -363,6 +363,11 @@ class DmccDriver implements TraderInterface
             'amount' => $response->inventoryDetails[0]->totalValue.' '.$response->inventoryDetails[0]->currency,
             'warehouse' => $response->inventoryDetails[0]->warehouseOrVaultId,
             'owner' => $response->inventoryDetails[0]->owner,
+            'previousOwner' => $response->inventoryDetails[0]->previousOwner,
+            'newOwner' => $response->inventoryDetails[0]->newOwner,
+            'dateTimeOfPurchasingCommodity' => $response->inventoryDetails[0]->dateTimeOfPurchasingCommodity,
+            'warehouseOrVaultEmirates' => $response->inventoryDetails[0]->warehouseOrVaultEmirates,
+            'warehouseOrVaultCountry' => $response->inventoryDetails[0]->warehouseOrVaultCountry,
         ]);
 
         return $response;
