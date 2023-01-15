@@ -6,6 +6,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\TraderHelper;
 use Carbon\Carbon;
@@ -152,7 +153,7 @@ class FakeDriver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function respondPtpService(string $ttiId): void
+    public function respondPtpService(string $ttiId)
     {
         $response = Http::post($this->buildUrl('respondPTPService'), [
             'ttiId' => $ttiId,
@@ -172,6 +173,8 @@ class FakeDriver implements TraderInterface
                 'responseBody' => $response->body(),
             ]));
         }
+
+        return $response->object();
     }
 
     /**
@@ -246,6 +249,24 @@ class FakeDriver implements TraderInterface
             FinancingOrderMediaCollection::TransferOwnershipToLender,
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
         );
+    }
+
+    /**
+     * @throws TraderException
+     */
+    public function getInventoryBasket(TraderOrder $traderOrder): object
+    {
+        $data = [
+            'product' => '',
+            'quantity' => 1000,
+            'amount' => '1000 SAR',
+            'warehouse' => 'warehouse',
+            'owner' => 'owner',
+        ];
+
+        $traderOrder->update($data);
+
+        return (object) $data;
     }
 
     public function uploadTTIDocumentAndGetVersionNumber(string $ttiId): string
