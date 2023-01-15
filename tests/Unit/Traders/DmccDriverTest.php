@@ -469,4 +469,44 @@ class DmccDriverTest extends TestCase
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_upload_tti_document_and_get_version_number_success(): void
+    {
+        Soap::fake(function () {
+            return Soap::response([
+                'versionNo' => 1,
+            ], 200);
+        });
+
+        $response = (new DmccDriver())->uploadTTIDocumentAndGetVersionNumber('1');
+
+        $this->assertEquals(1, $response);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function test_upload_tti_document_and_get_version_number_fail(): void
+    {
+        $this->expectException(TraderException::class);
+
+        $activityLogCount = Activity::query()->count();
+
+        Soap::fake(function () {
+            return Soap::response([
+                'errorCode' => 'error',
+            ], 200);
+        });
+
+        (new DmccDriver())->uploadTTIDocumentAndGetVersionNumber('1');
+
+        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+    }
 }
