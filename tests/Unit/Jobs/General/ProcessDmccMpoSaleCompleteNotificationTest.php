@@ -107,6 +107,6 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
         $traderOrderHistory = $traderOrder->traderHistories()->first();
 
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
-        $this->assertEquals($traderOrderHistory->action, FinancingOrderHistory::MurabahaSaleCompleted);
+        $this->assertEquals(FinancingOrderHistory::MurabahaSaleCompleted, $traderOrderHistory->action);
     }
 }
