@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Lenders;
 
-use App\Actions\Contracts\Companies\GetPaginatedCompanyUsers;
+use App\Actions\Contracts\Companies\GetPaginatedLenderUsers;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Enums\Action;
@@ -51,9 +51,9 @@ class LenderUserController extends Controller
     public function index(
         GetCompanyUsersRequest $request,
         Company $lender,
-        GetPaginatedCompanyUsers $getPaginatedCompanyUsers
+        GetPaginatedLenderUsers $getPaginatedLenderUsers
     ): JsonResponse {
-        return fractal($getPaginatedCompanyUsers->handle($lender), new UserTransformer(Area::Lender))
+        return fractal($getPaginatedLenderUsers->handle($lender), new UserTransformer(Area::Lender))
             ->parseIncludes([
                 'id',
                 'first_name',
@@ -104,25 +104,25 @@ class LenderUserController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  StoreUserRequest  $storeUserRequest
+     * @param  StoreUserRequest  $request
      * @param  Company  $lender
      * @param  CreateLenderUserWithRoleAndPermission  $createUserWithRoleAndPermission
      * @return JsonResponse
      */
     public function store(
-        StoreUserRequest $storeUserRequest,
+        StoreUserRequest $request,
         Company $lender,
         CreateLenderUserWithRoleAndPermission $createUserWithRoleAndPermission
     ): JsonResponse {
-        return DB::transaction(function () use ($lender, $storeUserRequest, $createUserWithRoleAndPermission) {
+        return DB::transaction(function () use ($lender, $request, $createUserWithRoleAndPermission) {
             $user = $createUserWithRoleAndPermission->handle(
-                $storeUserRequest->validated() +
+                $request->validated() +
                 [
                     'company_id' => $lender->id,
                 ]
             );
 
-            $invitationUrl = $storeUserRequest->validated('redirect_url');
+            $invitationUrl = $request->validated('redirect_url');
 
             Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
@@ -142,20 +142,20 @@ class LenderUserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  UpdateUserRequest  $updateUserRequest
+     * @param  UpdateUserRequest  $request
      * @param  Company  $lender
      * @param  User  $user
      * @param  UpdateLenderUserWithRoleAndPermission  $updateUserWithRoleAndPermission
      * @return JsonResponse
      */
     public function update(
-        UpdateUserRequest $updateUserRequest,
+        UpdateUserRequest $request,
         Company $lender,
         User $user,
         UpdateLenderUserWithRoleAndPermission $updateUserWithRoleAndPermission,
     ): JsonResponse {
-        return DB::transaction((function () use ($updateUserRequest, $user, $updateUserWithRoleAndPermission) {
-            $updateUserWithRoleAndPermission->handle($updateUserRequest->validated(), $user);
+        return DB::transaction((function () use ($request, $user, $updateUserWithRoleAndPermission) {
+            $updateUserWithRoleAndPermission->handle($request->validated(), $user);
 
             return $this->successResponse();
         }));

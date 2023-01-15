@@ -70,18 +70,18 @@ class LenderController extends Controller
     }
 
     /**
-     * @param  StoreCompanyRequest  $createCompanyRequest
+     * @param  StoreCompanyRequest  $request
      * @param  CreateCompany  $createCompany
      * @param  GetSettingsClassInstance  $getSettingsClassInstance
      * @return JsonResponse
      */
     public function store(
-        StoreCompanyRequest $createCompanyRequest,
+        StoreCompanyRequest $request,
         CreateCompany $createCompany,
         GetSettingsClassInstance $getSettingsClassInstance
     ): JsonResponse {
-        return DB::transaction(function () use ($createCompanyRequest, $getSettingsClassInstance, $createCompany) {
-            $data = $createCompanyRequest->validated();
+        return DB::transaction(function () use ($request, $getSettingsClassInstance, $createCompany) {
+            $data = $request->validated();
             $data['status'] = $getSettingsClassInstance->handle(Area::Lender)->default_company_status_created_by_operation;
 
             $company = $createCompany->handle($data);
@@ -124,18 +124,18 @@ class LenderController extends Controller
     }
 
     /**
-     * @param  UpdateCompanyRequest  $updateCompanyRequest
+     * @param  UpdateCompanyRequest  $request
      * @param  UpdateCompany  $updateCompany
      * @param  Company  $lender
      * @return JsonResponse
      */
     public function update(
-        UpdateCompanyRequest $updateCompanyRequest,
+        UpdateCompanyRequest $request,
         UpdateCompany $updateCompany,
         Company $lender
     ): JsonResponse {
-        return DB::transaction(function () use ($updateCompanyRequest, $updateCompany, $lender) {
-            $updateCompany->handle($lender, $updateCompanyRequest->validated());
+        return DB::transaction(function () use ($request, $updateCompany, $lender) {
+            $updateCompany->handle($lender, $request->validated());
 
             return $this->successResponse();
         });
