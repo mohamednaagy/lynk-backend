@@ -3,6 +3,7 @@
 namespace Tests\Unit\Traders;
 
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
@@ -311,6 +312,7 @@ class DmccDriverTest extends TestCase
         (new DmccDriver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
 
         $this->assertFileExists(storage_path('app/1/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
+        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
     }
 
     /**
