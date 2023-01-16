@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Jobs;
+namespace Tests\Unit\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
@@ -87,13 +87,13 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
         });
     }
 
-    public function test_process_dmcc_mpo_notification_when_dmcc_trader_order_success()
+    public function test_process_dmcc_mpo_notification_with_dmcc_as_trader_will_success()
     {
         (new ProcessDmccMpoNotification(self::$notification))->handle();
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
     }
 
-    public function test_process_dmcc_mpo_notification_when_fake_trader_order_success()
+    public function test_process_dmcc_mpo_notification_with_fake_as_trader_order_will_success()
     {
         self::$traderOrder->update([
             'provider' => 'fake',
@@ -102,7 +102,7 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
     }
 
-    public function test_process_dmcc_mpo_notification_when_else_trader_order_fail()
+    public function test_process_dmcc_mpo_notification_with_not_supported_trader_will_fail()
     {
         self::$traderOrder->update([
             'provider' => 'else',
@@ -111,7 +111,7 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::ClientWakalaCompleted));
     }
 
-    public function test_process_dmcc_mpo_notification_when_order__status_not_client_wakala_complete_fail()
+    public function test_process_dmcc_mpo_notification_when_order_status_not_client_wakala_complete_fail()
     {
         self::$order->update([
             'status' => FinancingOrderStatus::MurabhaOfferIssued,
@@ -159,9 +159,16 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
             'collection_name' => FinancingOrderMediaCollection::MurabahaPurchaseOrder,
         ]);
 
+        $this->assertFileExists(storage_path('app/1/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
+        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::MurabahaPurchaseOrder));
+
         $this->assertDatabaseHas((new Media())->getTable(), [
             'model_id' => self::$order->id,
+            'model_type' => FinancingOrder::class,
             'collection_name' => FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
         ]);
+
+        $this->assertFileExists(storage_path('app/2/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
+        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo));
     }
 }
