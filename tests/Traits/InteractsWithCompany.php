@@ -131,6 +131,28 @@ trait InteractsWithCompany
     }
 
     /**
+     * Summary of createUser
+     *
+     * @param  string  $email
+     * @param  array  $data
+     * @return mixed
+     */
+    public function createUser(
+        $role = Role::Admin,
+        array $data = []
+    ): mixed {
+        $user = User::factory()->create(
+            array_merge([
+                'password' => bcrypt('12345678'),
+            ], $data)
+        );
+
+        Grantify::assignRoleToModel($user, $role);
+
+        return $user;
+    }
+
+    /**
      * @param  int  $companyId
      * @param  int  $userId
      * @param  array  $data
@@ -192,6 +214,13 @@ trait InteractsWithCompany
         $areaRoles = Area::roles($area);
         foreach ($areaRoles as $role) {
             if (! is_array($role)) {
+                if ($area == Area::SuperAdmin) {
+                    $user = $this->createUser($role);
+                    $request($user, $role)->assertStatus($status);
+
+                    continue;
+                }
+
                 [$company] = $this->createCompanyByArea(
                     $area,
                     2000
