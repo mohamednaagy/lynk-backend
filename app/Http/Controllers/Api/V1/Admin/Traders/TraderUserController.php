@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Traders;
 
-use App\Actions\Contracts\Users\GetPaginatedUsers;
+use App\Actions\Contracts\Traders\GetPaginatedTraderUsers;
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\CompanyType;
-use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Transformers\UserTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class TraderController extends Controller
+class TraderUserController extends Controller
 {
     public function __construct()
     {
@@ -26,16 +24,12 @@ class TraderController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param  GetPaginatedUsers  $getPaginatedUsers
+     * @param  GetPaginatedTraderUsers  $getPaginatedUsers
      * @return JsonResponse
      */
-    public function index(GetPaginatedUsers $getPaginatedUsers): JsonResponse
+    public function index(GetPaginatedTraderUsers $getPaginatedUsers): JsonResponse
     {
-        return fractal(
-            $getPaginatedUsers->handle(CompanyType::Trader, [
-                Role::TraderAdmin,
-            ]),
-            new UserTransformer(Area::Trader)
+        return fractal($getPaginatedUsers->handle(), new UserTransformer(Area::Trader)
         )->parseIncludes([
             'id',
             'first_name',

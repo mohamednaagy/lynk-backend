@@ -27,7 +27,7 @@ use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\LenderSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
-use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
+use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
 
@@ -85,9 +85,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('companies', CompanyController::class);
         Route::apiResource('companies.users', CompanyUserController::class);
 
-        Route::prefix('traders')->group(function () {
-            Route::apiResource('/', TraderController::class);
-        });
+        Route::apiResource('traders.users', TraderUserController::class);
 
         Route::get('edaat-invoices', GetEdaatInvoices::class);
         Route::post('edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
