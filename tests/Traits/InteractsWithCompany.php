@@ -96,7 +96,7 @@ trait InteractsWithCompany
     public function createCompanyByArea($area, $walletInitialAmount = 2000, $data = [])
     {
         if (! in_array($area, array_values(Area::asArray()))) {
-            throw new Exception('Area Not Exists');
+            throw new Exception(__('error.area_not_exists'));
         }
 
         $type = ($area == Area::Trader)
