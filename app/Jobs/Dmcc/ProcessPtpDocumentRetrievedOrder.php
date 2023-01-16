@@ -38,7 +38,7 @@ class ProcessPtpDocumentRetrievedOrder implements ShouldQueue
     public function handle(): void
     {
         DB::transaction(function () {
-            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder->id);
+            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             $lastTraderOrder = $financingOrder->activeTraderOrder()
                 ->whereIn('provider', ['dmcc', 'fake'])->first();
 

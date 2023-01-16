@@ -59,12 +59,12 @@ class ProcessPtpDocumentRetrievedOrderTest extends TestCase
     /**
      * @throws Throwable
      */
-    public function test_process_cannot_proceed_with_invalid_trader_order_provider_failed()
+    public function test_job_cannot_proceed_with_invalid_trader_order_provider()
     {
         //change the trader order provider with invalid one
-        self::$financingOrder->traderOrders()->first()->update(['provider' => 'invalid']);
+        self::$traderOrder->update(['provider' => 'invalid']);
 
-        $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder);
+        $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder->id);
         $process->handle();
 
         $this->assertFalse(
@@ -75,12 +75,12 @@ class ProcessPtpDocumentRetrievedOrderTest extends TestCase
     /**
      * @throws Throwable
      */
-    public function test_process_cannot_proceed_when_order_status_not_PtpDocumentRetrieved_failed()
+    public function test_job_cannot_proceed_when_order_status_not_ptp_document_retrieved()
     {
         //change the order status with invalid one
         self::$financingOrder->update(['status' => FinancingOrderStatus::PendingApproval]);
 
-        $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder);
+        $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder->id);
         $process->handle();
 
         $this->assertFalse(
@@ -91,21 +91,17 @@ class ProcessPtpDocumentRetrievedOrderTest extends TestCase
     /**
      * @throws Throwable
      */
-    public function test_process_creates_ownership_document_succeed()
+    public function test_job_creates_ownership_document_succeed()
     {
         Storage::fake();
         UploadedFile::fake();
 
-        $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder);
+        $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder->id);
         $process->handle();
 
         $this->assertDatabaseHas((new Media())->getTable(), [
             'model_id' => self::$financingOrder->id,
-            'collection_name' => FinancingOrderMediaCollection::TransferOwnershipToLender,
-        ]);
-
-        $this->assertDatabaseHas((new Media())->getTable(), [
-            'model_id' => self::$financingOrder->id,
+            'model_type' => FinancingOrder::class,
             'collection_name' => FinancingOrderMediaCollection::TransferOwnershipToLender,
         ]);
     }
@@ -113,9 +109,9 @@ class ProcessPtpDocumentRetrievedOrderTest extends TestCase
     /**
      * @throws Throwable
      */
-    public function test_process_creates_trader_order_history_with_correct_status_succeed()
+    public function test_job_creates_trader_order_history_with_correct_status_succeed()
     {
-        $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder);
+        $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder->id);
         $process->handle();
 
         $this->assertEquals(
@@ -127,9 +123,9 @@ class ProcessPtpDocumentRetrievedOrderTest extends TestCase
     /**
      * @throws Throwable
      */
-    public function test_process_changes_order_status_to_CommodityPurchased_succeed()
+    public function test_job_changes_order_status_to_CommodityPurchased_succeed()
     {
-        $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder);
+        $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder->id);
         $process->handle();
 
         $this->assertTrue(
