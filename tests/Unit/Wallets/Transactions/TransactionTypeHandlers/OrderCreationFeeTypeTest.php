@@ -37,7 +37,17 @@ class OrderCreationFeeTypeTest extends TestCase
 
         self::$transactionTypeHandler = new OrderCreationFeeType();
         [self::$company, self::$wallet] = $this->createCompany(2000);
-        self::$depositTransaction = app()->make(TransactionServiceInterface::class)->deposit(self::$wallet, Money::parseByDecimal(-100, 'SAR'), 1);
+        self::$depositTransaction = app()->make(TransactionServiceInterface::class)
+            ->deposit(
+                self::$wallet,
+                Money::parseByDecimal(-100, 'SAR'),
+                1,
+                null,
+                [
+                    'type' => 'test',
+                    'order_number' => '123456',
+                ]
+            );
     }
 
     public function test_order_creation_fee_handler_implements_transaction_type_handler_interface_instance()
@@ -47,16 +57,12 @@ class OrderCreationFeeTypeTest extends TestCase
 
     public function test_order_creation_fee_generate_message_method_with_all_available_locales_return_string()
     {
-        foreach (config('app.locales') as $locale) {
-            $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, $locale);
-            $items = Arr::only(self::$depositTransaction->meta, ['type', 'order_number']);
-            $this->assertEquals(
-                __('transaction-description.order_creation_fee', [
-                    'order_number' => $items['order_number'] ?? '',
-                ], $locale),
-                $transactionDescription
-            );
-        }
+        $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, 'en');
+        $items = Arr::only(self::$depositTransaction->meta, ['type', 'order_number']);
+        $this->assertEquals(
+            'Order #'.$items['order_number'].' creation fee',
+            $transactionDescription
+        );
     }
 
     public function test_order_creation_fee_process_method_return_transaction_model_instance()

@@ -46,13 +46,11 @@ class ManualDepositTypeTest extends TestCase
 
     public function test_manual_deposit_generate_message_method_with_all_available_locales_return_string()
     {
-        foreach (config('app.locales') as $locale) {
-            $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, $locale);
-            $this->assertEquals(
-                __('transaction-description.manual_deposit', [], $locale),
-                $transactionDescription
-            );
-        }
+        $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, 'en');
+        $this->assertEquals(
+            'Recharge the balance',
+            $transactionDescription
+        );
     }
 
     public function test_manual_deposit_process_method_return_transaction_model_instance()

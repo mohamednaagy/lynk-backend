@@ -37,7 +37,17 @@ class TransactionUtilTest extends TestCase
 
         self::$transactionUtil = app(TransactionUtilInterface::class);
         [self::$company, self::$wallet] = $this->createCompany(2000);
-        self::$depositTransaction = app()->make(TransactionServiceInterface::class)->deposit(self::$wallet, Money::parseByDecimal(-100, 'SAR'), 1);
+        self::$depositTransaction = app()->make(TransactionServiceInterface::class)
+            ->deposit(
+                self::$wallet,
+                Money::parseByDecimal(-100, 'SAR'),
+                1,
+                null,
+                [
+                    'type' => 'test',
+                    'order_number' => '123456',
+                ]
+            );
     }
 
     public function test_transaction_util_resolve_handler_method_return_transaction_type_handlers_instance()

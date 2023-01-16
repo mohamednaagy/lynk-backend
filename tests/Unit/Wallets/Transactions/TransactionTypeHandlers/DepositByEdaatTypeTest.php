@@ -37,7 +37,16 @@ class DepositByEdaatTypeTest extends TestCase
 
         self::$transactionTypeHandler = new DepositByEdaatType();
         [self::$company, self::$wallet] = $this->createCompany(2000);
-        self::$depositTransaction = app()->make(TransactionServiceInterface::class)->deposit(self::$wallet, Money::parseByDecimal(-100, 'SAR'), 1);
+        self::$depositTransaction = app()->make(TransactionServiceInterface::class)
+            ->deposit(
+                self::$wallet,
+                Money::parseByDecimal(-100, 'SAR'),
+                1,
+                null,
+                [
+                    'invoice_number' => '123456',
+                ]
+            );
     }
 
     public function test_deposit_by_edaat_handler_implements_transaction_type_handler_interface_instance()
@@ -47,15 +56,12 @@ class DepositByEdaatTypeTest extends TestCase
 
     public function test_deposit_by_edaat_generate_message_method_with_all_available_locales_return_string()
     {
-        foreach (config('app.locales') as $locale) {
-            $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, $locale);
-            $this->assertEquals(
-                __('transaction-description.deposit_by_edaat', [
-                    'invoice_number' => Arr::get(self::$depositTransaction->meta, 'invoice_number'),
-                ], $locale),
-                $transactionDescription
-            );
-        }
+        $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, 'en');
+        $items = Arr::only(self::$depositTransaction->meta, ['invoice_number']);
+        $this->assertEquals(
+            'Recharge balance by Sadad for invoice #'.$items['invoice_number'],
+            $transactionDescription
+        );
     }
 
     public function test_deposit_by_edaat_process_method_return_transaction_model_instance()

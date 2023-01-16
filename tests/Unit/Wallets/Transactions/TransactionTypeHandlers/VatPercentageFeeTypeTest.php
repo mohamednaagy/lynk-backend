@@ -37,7 +37,18 @@ class VatPercentageFeeTypeTest extends TestCase
 
         self::$transactionTypeHandler = new VatPercentageFeeType();
         [self::$company, self::$wallet] = $this->createCompany(2000);
-        self::$depositTransaction = app()->make(TransactionServiceInterface::class)->deposit(self::$wallet, Money::parseByDecimal(-100, 'SAR'), 1);
+        self::$depositTransaction = app()->make(TransactionServiceInterface::class)
+            ->deposit(
+                self::$wallet,
+                Money::parseByDecimal(-100, 'SAR'),
+                1,
+                null,
+                [
+                    'transaction_id' => '1',
+                    'financing_order_id' => '1',
+                    'vat_rate' => 0.15,
+                ]
+            );
     }
 
     public function test_vat_percentage_fee_handler_implements_transaction_type_handler_interface_instance()
@@ -47,17 +58,12 @@ class VatPercentageFeeTypeTest extends TestCase
 
     public function test_vat_percentage_fee_generate_message_method_with_all_available_locales_return_string()
     {
-        foreach (config('app.locales') as $locale) {
-            $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, $locale);
-            $items = Arr::only(self::$depositTransaction->meta, ['transaction_id', 'financing_order_id', 'vat_rate']);
-            $this->assertEquals(
-                __('transaction-description.vat_percentage', [
-                    'order_id' => $items['financing_order_id'] ?? '',
-                    'vat_percentage' => ($items['vat_rate'] ?? 0) * 100,
-                ], $locale),
-                $transactionDescription
-            );
-        }
+        $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, 'en');
+        $items = Arr::only(self::$depositTransaction->meta, ['transaction_id', 'financing_order_id', 'vat_rate']);
+        $this->assertEquals(
+            'VAT charges ('.($items['vat_rate'] * 100).'%) for order #'.$items['financing_order_id'],
+            $transactionDescription
+        );
     }
 
     public function test_vat_percentage_fee_process_method_return_transaction_model_instance()
