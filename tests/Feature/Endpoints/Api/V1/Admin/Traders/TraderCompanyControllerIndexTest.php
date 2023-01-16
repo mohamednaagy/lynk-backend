@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Trader\Compaines;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Traders;
 
 use App\Enums\Area;
 use App\Enums\CompanyType;
@@ -53,7 +53,7 @@ class TraderCompanyControllerIndexTest extends TestCase
      */
     public function test_trader_company_controller_index_un_auth_user_cant_index_compaines(): void
     {
-        $this->getJson('api/v1/admin/traders/companies')
+        $this->getJson('api/v1/admin/traders')
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
                 'message' => 'Unauthenticated.',
@@ -68,10 +68,10 @@ class TraderCompanyControllerIndexTest extends TestCase
     public function test_trader_company_controller_index()
     {
         $this->actingAs(self::$trader)
-            ->getJson('api/v1/admin/traders/companies')
+            ->getJson('api/v1/admin/traders')
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(Company::trader()->withCount('orders')->paginate(), new CompanyTransformer())
+                fractal(Company::where('type', CompanyType::Trader)->withCount('orders')->paginate(), new CompanyTransformer())
                     ->parseIncludes([
                         'id',
                         'name',
@@ -87,7 +87,7 @@ class TraderCompanyControllerIndexTest extends TestCase
     {
         $this->asserStatusForAllRoleExceptGivingAreaRoles(403, Area::Trader, function ($user, $role) {
             return $this->actingAs($user)
-                ->getJson('api/v1/admin/traders/companies');
+                ->getJson('api/v1/admin/traders');
         });
     }
 }

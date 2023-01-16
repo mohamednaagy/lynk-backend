@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Trader;
+namespace App\Http\Controllers\Api\V1\Admin\Traders;
 
 use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\Companies\GetPaginatedCompanies;

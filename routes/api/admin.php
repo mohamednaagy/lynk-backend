@@ -9,7 +9,6 @@ use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Companies\ChargeLenderBalanceManually;
-use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyUserController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyBalance;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
@@ -27,7 +26,7 @@ use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\LenderSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
-use App\Http\Controllers\Api\V1\Admin\Trader\TraderCompanyController;
+use App\Http\Controllers\Api\V1\Admin\Traders\TraderCompanyController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
 
@@ -98,7 +97,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.sign-up');
 
-    Route::prefix('traders')->middleware(['auth:sanctum', 'role:'.Role::TraderAdmin])->group(function () {
-        Route::apiResource('companies', TraderCompanyController::class)->only(['index', 'store', 'show', 'update']);
-    });
+    Route::apiResource('traders', TraderCompanyController::class)
+        ->only(['index', 'store', 'show', 'update'])
+        ->middleware(['auth:sanctum', 'role:'.Role::TraderAdmin]);
 });

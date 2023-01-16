@@ -3,6 +3,7 @@
 namespace Tests\Traits;
 
 use App\Enums\Area;
+use App\Enums\CompanyType;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\WalletType;
@@ -11,6 +12,7 @@ use App\Models\EdaatInvoice;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
+use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -59,9 +61,6 @@ trait InteractsWithCompany
             'email' => 'test@uselynk.test',
             'password' => 'Qwer@1234',
             'source' => 'Postman',
-            'company_name' => 'companyName',
-            'company_unique_name' => 'lynk05',
-            'company_cr' => '12345678910',
         ], $data));
     }
 
@@ -94,6 +93,19 @@ trait InteractsWithCompany
         ];
     }
 
+    public function createCompanyByArea($area, $walletInitialAmount = 2000, $data = [])
+    {
+        if (! in_array($area, array_values(Area::asArray()))) {
+            throw new Exception('Area Not Exists');
+        }
+
+        $type = ($area == Area::Trader)
+            ? CompanyType::Trader
+            : CompanyType::Lender;
+
+        return $this->createCompany($walletInitialAmount, array_merge(['type' => $type], $data));
+    }
+
     /**
      * @param  int  $companyId
      * @param  string  $role
@@ -107,15 +119,15 @@ trait InteractsWithCompany
         string $email = 'lender@bim.com',
         array $data = []
     ): mixed {
-        $userLender = User::factory()->create(array_merge([
+        $lenderUser = User::factory()->create(array_merge([
             'email' => $email,
             'password' => bcrypt('12345678'),
             'company_id' => $companyId,
         ], $data));
 
-        Grantify::assignRoleToModel($userLender, $role);
+        Grantify::assignRoleToModel($lenderUser, $role);
 
-        return $userLender;
+        return $lenderUser;
     }
 
     /**
@@ -130,7 +142,7 @@ trait InteractsWithCompany
             'company_id' => $companyId,
             'approved_at' => Carbon::now(),
             'creator_id' => $userId,
-            'creator_type' => User::class,
+            'creator_type' => (new User)->getMorphClass(),
             'national_id' => '2553451234',
             'phone_number' => '+966500112233',
             'amount' => 200,
@@ -155,12 +167,7 @@ trait InteractsWithCompany
     {
         $roles = Area::roles(Area::Lender);
 
-        [$company] = $this->createCompany(
-            2000,
-            [
-                'company_cr' => (string) Str::uuid(),
-            ]
-        );
+        [$company] = $this->createCompanyByArea(Area::Lender);
 
         foreach ($roles as $role) {
             $user = $this->createLenderUser($company->id, $role, (string) Str::uuid().'@test.test');
@@ -172,19 +179,32 @@ trait InteractsWithCompany
 
     public function asserStatusForAllRoleExceptGivingAreaRoles($status, string $exceptedArea, $request)
     {
-        $roles = [];
         $areas = Area::asArray();
         foreach ($areas as $area) {
             if ($area != $exceptedArea) {
-                $areaRoles = Area::roles($area);
-                foreach ($areaRoles as $key => $role) {
-                    if (! is_array($role)) {
-                        array_push($roles, $role);
-                    }
-                }
+                $this->assertResponsStatusCodeForGivenAreaRoles($status, $area, $request);
             }
         }
+    }
 
+    public function assertResponsStatusCodeForGivenAreaRoles($status, string $area, $request)
+    {
+        $areaRoles = Area::roles($area);
+        foreach ($areaRoles as $role) {
+            if (! is_array($role)) {
+                [$company] = $this->createCompanyByArea(
+                    $area,
+                    2000
+                );
+
+                $user = $this->createLenderUser($company->id, $role, (string) Str::uuid().'@test.test');
+                $request($user, $role)->assertStatus($status);
+            }
+        }
+    }
+
+    public function assertResponseStatusCodeToSpecificRoles(int $status, array $roles, $request)
+    {
         [$company] = $this->createCompany(
             2000,
             [
@@ -196,26 +216,5 @@ trait InteractsWithCompany
             $user = $this->createLenderUser($company->id, $role, (string) Str::uuid().'@test.test');
             $request($user, $role)->assertStatus($status);
         }
-
-        return $request;
-    }
-
-    public function assertStatusToSpecificRoles(int $status, array $roles, Company $company = null, $request)
-    {
-        if (is_null($company)) {
-            [$company] = $this->createCompany(
-                2000,
-                [
-                    'company_cr' => (string) Str::uuid(),
-                ]
-            );
-        }
-
-        foreach ($roles as $role) {
-            $user = $this->createLenderUser($company->id, $role, (string) Str::uuid().'@test.test');
-            $request($user, $role)->assertStatus($status);
-        }
-
-        return $request;
     }
 }

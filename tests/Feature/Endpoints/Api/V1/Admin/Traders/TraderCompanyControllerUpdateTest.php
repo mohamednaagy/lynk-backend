@@ -1,22 +1,28 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Trader\Companies;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Traders;
 
 use App\Enums\Area;
+use App\Enums\CompanyType;
 use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\User;
+use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 
-class TraderCompanyControllerStoreTest extends TestCase
+class TraderCompanyControllerUpdateTest extends TestCase
 {
     use RefreshDatabase;
     use InteractsWithCompany;
 
     private static User $trader;
+
+    private static Company $company;
+
+    private static Wallet $wallet;
 
     private static array $companyDetails;
 
@@ -35,32 +41,36 @@ class TraderCompanyControllerStoreTest extends TestCase
             'company_cr' => '1234567891',
             'driver' => 'dmcc',
         ];
+
+        [self::$company, self::$wallet] = $this->createCompany(2000, [
+            'type' => CompanyType::Trader,
+        ]);
     }
 
     /**
      * @return void
      */
-    public function test_trader_company_controller_store_un_auth_user_cant_store_company(): void
+    public function test_trader_company_controller_update_un_auth_user_cant_store_company(): void
     {
-        $this->postJson('api/v1/admin/traders/companies', self::$companyDetails)
+        $this->putJson('api/v1/admin/traders/'.self::$company->id, self::$companyDetails)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
             ]);
     }
 
-    public function test_trader_company_controller_store_other_roles_can_not_access()
+    public function test_trader_company_controller_update_other_roles_can_not_access()
     {
         $this->asserStatusForAllRoleExceptGivingAreaRoles(403, Area::Trader, function ($user, $role) {
             return $this->actingAs($user)
-                ->postJson('api/v1/admin/traders/companies', self::$companyDetails);
+                ->putJson('api/v1/admin/traders/'.self::$company->id, self::$companyDetails);
         });
     }
 
-    public function test_trader_company_controller_store_without_name_unsuccessful()
+    public function test_trader_company_controller_update_without_name_unsuccessful()
     {
         $this->actingAs(self::$trader)
-            ->postJson('api/v1/admin/traders/companies', [
+            ->putJson('api/v1/admin/traders/'.self::$company->id, [
                 'unique_name' => 'companyUniqueName',
                 'company_cr' => '1234567891',
                 'driver' => 'dmcc',
@@ -68,10 +78,10 @@ class TraderCompanyControllerStoreTest extends TestCase
             ->assertJsonValidationErrorFor('name');
     }
 
-    public function test_trader_company_controller_store_without_unique_name_unsuccessful()
+    public function test_trader_company_controller_update_without_unique_name_unsuccessful()
     {
         $this->actingAs(self::$trader)
-            ->postJson('api/v1/admin/traders/companies', [
+            ->putJson('api/v1/admin/traders/'.self::$company->id, [
                 'name' => 'name',
                 'company_cr' => '1234567891',
                 'driver' => 'dmcc',
@@ -79,10 +89,10 @@ class TraderCompanyControllerStoreTest extends TestCase
             ->assertJsonValidationErrorFor('unique_name');
     }
 
-    public function test_trader_company_controller_store_without_company_cr_unsuccessful()
+    public function test_trader_company_controller_update_without_company_cr_unsuccessful()
     {
         $this->actingAs(self::$trader)
-            ->postJson('api/v1/admin/traders/companies', [
+            ->putJson('api/v1/admin/traders/'.self::$company->id, [
                 'name' => 'testCompany',
                 'unique_name' => 'companyUniqueName',
                 'driver' => 'dmcc',
@@ -90,10 +100,10 @@ class TraderCompanyControllerStoreTest extends TestCase
             ->assertJsonValidationErrorFor('company_cr');
     }
 
-    public function test_trader_company_controller_driver_should_be_in_dmcc_fake_unsuccessful()
+    public function test_trader_company_controller_update_driver_should_be_in_fake_dmcc_unsuccessful()
     {
         $this->actingAs(self::$trader)
-            ->postJson('api/v1/admin/traders/companies', [
+            ->putJson('api/v1/admin/traders/'.self::$company->id, [
                 'name' => 'testCompany',
                 'unique_name' => 'companyUniqueName',
                 'company_cr' => '1234567891',
@@ -102,23 +112,20 @@ class TraderCompanyControllerStoreTest extends TestCase
             ->assertJsonValidationErrorFor('driver');
     }
 
-    public function test_trader_company_controller_store_successful()
+    public function test_trader_company_controller_update_successful()
     {
         $this->actingAs(self::$trader)
-            ->postJson('api/v1/admin/traders/companies', self::$companyDetails)
+            ->putJson('api/v1/admin/traders/'.self::$company->id, self::$companyDetails)
             ->assertStatus(Response::HTTP_OK);
     }
 
-    public function test_trader_company_controller_store_wallet_created_successful()
+    public function test_trader_company_controller_update_wallet_checked_successful()
     {
         $this->actingAs(self::$trader)
-            ->postJson('api/v1/admin/traders/companies', self::$companyDetails)
+            ->putJson('api/v1/admin/traders/'.self::$company->id, self::$companyDetails)
             ->assertStatus(Response::HTTP_OK);
 
-        $company = Company::query()
-            ->where('unique_name', self::$companyDetails['unique_name'])
-            ->first();
-        $hasWallet = $company->getWallets(WalletType::CompanyWallet)->count() > 0;
+        $hasWallet = self::$company->getWallets(WalletType::CompanyWallet)->count() > 0;
         $this->assertTrue($hasWallet);
     }
 }
