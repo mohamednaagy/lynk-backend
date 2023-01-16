@@ -2,20 +2,16 @@
 
 namespace App\Actions\Orders;
 
-use App\Actions\Contracts\Orders\CommoditySoldToCustomerOrderStatus;
+use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
 use App\Enums\ClientMessage;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\Sms\Sms;
 
-class CommoditySoldToCustomerOrderStatusAction implements CommoditySoldToCustomerOrderStatus
+class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenStatusIsCommoditySoldToCustomer
 {
     public function handle(FinancingOrder $financingOrder, string $product, string $quantity): void
     {
-        if (! $financingOrder->wasChanged(['status'])) {
-            return;
-        }
-
         $sellingPrice = $financingOrder->selling_price ?? '';
         $url = $financingOrder->getMedia(FinancingOrderMediaCollection::SellingCommodityToCustomer)->first() ?? '';
         $phoneNumber = ltrim($financingOrder->getPhoneNumber()->formatE164(), '+');

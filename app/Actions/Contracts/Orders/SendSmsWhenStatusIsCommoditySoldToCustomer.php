@@ -4,7 +4,7 @@ namespace App\Actions\Contracts\Orders;
 
 use App\Models\FinancingOrder;
 
-interface MurabahaSaleCompletedOrderStatus
+interface SendSmsWhenStatusIsCommoditySoldToCustomer
 {
     public function handle(FinancingOrder $financingOrder, string $product, string $quantity): void;
 }
