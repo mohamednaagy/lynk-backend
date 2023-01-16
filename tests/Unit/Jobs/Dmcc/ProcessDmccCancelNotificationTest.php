@@ -11,7 +11,6 @@ use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
-use App\Support\Traders\Facades\Trader;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -47,10 +46,7 @@ class ProcessDmccCancelNotificationTest extends TestCase
             ]
         );
 
-        $trader = Trader::driver('fake');
-
-        $notifications = collect($trader->fetchNotifications('FYI'));
-        self::$notification = $notifications->first() ?? (object) [
+        self::$notification = (object) [
             'notificationHeaderAndEntity' => (object) [
                 'notificationEntityDetails' => (object) [
                     'notificationEntity' => [
@@ -61,10 +57,11 @@ class ProcessDmccCancelNotificationTest extends TestCase
                 ],
             ],
         ];
-        $ttiId = self::$notification->
-        notificationHeaderAndEntity->
-        notificationEntityDetails->
-        notificationEntity[0]->entityValue;
+        $ttiId = self::$notification
+            ->notificationHeaderAndEntity
+            ->notificationEntityDetails
+            ->notificationEntity[0]
+            ->entityValue;
 
         // create trader order
         self::$traderOrder = self::$financingOrder->traderOrders()->create([
@@ -77,7 +74,7 @@ class ProcessDmccCancelNotificationTest extends TestCase
     /**
      * @throws Throwable
      */
-    public function test_process_cannot_proceed_with_invalid_trader_order_provider_failed()
+    public function test_process_cannot_proceed_with_invalid_trader_order_provider()
     {
         //change the trader order provider with invalid one
         self::$financingOrder->traderOrders()->first()->update(['provider' => 'invalid']);
@@ -85,16 +82,15 @@ class ProcessDmccCancelNotificationTest extends TestCase
         $process = new ProcessDmccCancelNotification(self::$notification);
         $process->handle();
 
-        $this->assertNotEquals(
-            FinancingOrderStatus::Cancelled,
-            self::$financingOrder->fresh()->status->value
+        $this->assertFalse(
+            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Cancelled)
         );
     }
 
     /**
      * @throws Throwable
      */
-    public function test_process_cannot_proceed_when_order_status_not_PendingCancellation_failed()
+    public function test_process_cannot_proceed_when_order_status_not_pending_cancellation()
     {
         //change the order status with invalid one
         self::$financingOrder->update(['status' => FinancingOrderStatus::PendingApproval]);
@@ -102,16 +98,15 @@ class ProcessDmccCancelNotificationTest extends TestCase
         $process = new ProcessDmccCancelNotification(self::$notification);
         $process->handle();
 
-        $this->assertNotEquals(
-            FinancingOrderStatus::Cancelled,
-            self::$financingOrder->fresh()->status->value
+        $this->assertFalse(
+            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Cancelled)
         );
     }
 
     /**
      * @throws Throwable
      */
-    public function test_process_creates_trader_order_history_with_OrderCancelled_status_succeed()
+    public function test_process_creates_trader_order_history_with_order_cancelled_status_succeed()
     {
         $process = new ProcessDmccCancelNotification(self::$notification);
         $process->handle();
@@ -125,21 +120,20 @@ class ProcessDmccCancelNotificationTest extends TestCase
     /**
      * @throws Throwable
      */
-    public function test_process_changes_order_status_to_Cancelled_succeed()
+    public function test_process_changes_order_status_to_cancelled_succeed()
     {
         $process = new ProcessDmccCancelNotification(self::$notification);
         $process->handle();
 
-        $this->assertEquals(
-            FinancingOrderStatus::Cancelled,
-            self::$financingOrder->fresh()->status->value
+        $this->assertTrue(
+            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Cancelled)
         );
     }
 
     /**
      * @throws Throwable
      */
-    public function test_process_changes_trader_order_status_to_Cancelled_succeed()
+    public function test_process_changes_trader_order_status_to_cancelled_succeed()
     {
         $process = new ProcessDmccCancelNotification(self::$notification);
         $process->handle();
@@ -147,6 +141,19 @@ class ProcessDmccCancelNotificationTest extends TestCase
         $this->assertEquals(
             TraderOrderStatus::Cancelled,
             self::$financingOrder->traderOrders()->first()->status
+        );
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function test_process_passes_with_valid_provider_as_fake_succeed()
+    {
+        $process = new ProcessDmccCancelNotification(self::$notification);
+        $process->handle();
+
+        $this->assertTrue(
+            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Cancelled)
         );
     }
 }
