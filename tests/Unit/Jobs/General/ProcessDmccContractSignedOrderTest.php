@@ -99,7 +99,7 @@ class ProcessDmccContractSignedOrderTest extends TestCase
         $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);
         $processOrder->handle();
         self::$order = self::$order->fresh();
-        $this->assertEquals(self::$order->media[0]['file_name'], 'fake-123.pdf');
+        $this->assertFileExists(self::$order->media->first()->getPath());
         $this->assertNotNull(self::$order->traderOrders()->first());
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::CommoditySoldToCustomer));
     }
