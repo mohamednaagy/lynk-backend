@@ -199,17 +199,17 @@ trait InteractsWithCompany
         return $request;
     }
 
-    public function asserStatusForAllRoleExceptGivingAreaRoles($status, string $exceptedArea, $request)
+    public function assertStatusCodeForAllRolesExceptForArea($status, string $exceptedArea, $request)
     {
         $areas = Area::asArray();
         foreach ($areas as $area) {
             if ($area != $exceptedArea) {
-                $this->assertResponsStatusCodeForGivenAreaRoles($status, $area, $request);
+                $this->assertStatusCodeForAreaRoles($status, $area, $request);
             }
         }
     }
 
-    public function assertResponsStatusCodeForGivenAreaRoles($status, string $area, $request)
+    public function assertStatusCodeForAreaRoles($status, string $area, $request)
     {
         $areaRoles = Area::roles($area);
         foreach ($areaRoles as $role) {
@@ -232,7 +232,7 @@ trait InteractsWithCompany
         }
     }
 
-    public function assertResponseStatusCodeToSpecificRoles(int $status, array $roles, $request)
+    public function assertStatusCodeToSpecificRoles(int $status, array $roles, $request)
     {
         [$company] = $this->createCompany(
             2000,

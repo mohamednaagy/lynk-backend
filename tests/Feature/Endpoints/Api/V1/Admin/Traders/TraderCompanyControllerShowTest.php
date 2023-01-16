@@ -56,7 +56,7 @@ class TraderCompanyControllerShowTest extends TestCase
 
     public function test_trader_company_controller_show_other_roles_can_not_access()
     {
-        $this->asserStatusForAllRoleExceptGivingAreaRoles(403, Area::Trader, function ($user, $role) {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, Area::Trader, function ($user, $role) {
             return $this->actingAs($user)
                 ->getJson('api/v1/admin/traders/'.self::$company->id);
         });
