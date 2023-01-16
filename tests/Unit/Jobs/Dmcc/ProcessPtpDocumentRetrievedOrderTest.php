@@ -4,15 +4,19 @@ namespace Tests\Unit\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\Dmcc\ProcessPtpDocumentRetrievedOrder;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\Media;
 use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 use Throwable;
@@ -63,9 +67,8 @@ class ProcessPtpDocumentRetrievedOrderTest extends TestCase
         $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder);
         $process->handle();
 
-        $this->assertNotEquals(
-            FinancingOrderStatus::CommodityPurchased,
-            self::$financingOrder->fresh()->status->value
+        $this->assertFalse(
+            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::CommodityPurchased)
         );
     }
 
@@ -80,23 +83,31 @@ class ProcessPtpDocumentRetrievedOrderTest extends TestCase
         $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder);
         $process->handle();
 
-        $this->assertNotEquals(
-            FinancingOrderStatus::CommodityPurchased,
-            self::$financingOrder->fresh()->status
+        $this->assertFalse(
+            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::CommodityPurchased)
         );
     }
 
     /**
      * @throws Throwable
      */
-    public function test_process_fake_not_create_ownership_document_failed()
+    public function test_process_creates_ownership_document_succeed()
     {
+        Storage::fake();
+        UploadedFile::fake();
+
         $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder);
         $process->handle();
 
-        $this->assertNull(
-            self::$financingOrder->fresh()->getFirstMedia()
-        );
+        $this->assertDatabaseHas((new Media())->getTable(), [
+            'model_id' => self::$financingOrder->id,
+            'collection_name' => FinancingOrderMediaCollection::TransferOwnershipToLender,
+        ]);
+
+        $this->assertDatabaseHas((new Media())->getTable(), [
+            'model_id' => self::$financingOrder->id,
+            'collection_name' => FinancingOrderMediaCollection::TransferOwnershipToLender,
+        ]);
     }
 
     /**
@@ -121,9 +132,8 @@ class ProcessPtpDocumentRetrievedOrderTest extends TestCase
         $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder);
         $process->handle();
 
-        $this->assertEquals(
-            FinancingOrderStatus::CommodityPurchased,
-            self::$financingOrder->fresh()->status->value
+        $this->assertTrue(
+            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::CommodityPurchased)
         );
     }
 }
