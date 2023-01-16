@@ -10,12 +10,12 @@ use App\Transformers\CompanyTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithApplication;
 
 class TraderCompanyControllerIndexTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithCompany;
+    use InteractsWithApplication;
 
     private static Company $company;
 
@@ -45,7 +45,7 @@ class TraderCompanyControllerIndexTest extends TestCase
                 'type' => CompanyType::Trader,
             ]
         );
-        self::$trader = $this->createTraderUser();
+        self::$trader = $this->createTraderUser(self::$company->id);
     }
 
     /**
@@ -85,7 +85,7 @@ class TraderCompanyControllerIndexTest extends TestCase
 
     public function test_trader_company_controller_index_other_roles_can_not_access()
     {
-        $this->assertStatusCodeForAllRolesExceptForArea(403, Area::Trader, function ($user, $role) {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::Trader, Area::Customer], function ($user, $role) {
             return $this->actingAs($user)
                 ->getJson('api/v1/admin/traders');
         });

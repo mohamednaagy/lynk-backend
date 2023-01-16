@@ -9,14 +9,16 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithApplication;
 
 class TraderCompanyControllerStoreTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithCompany;
+    use InteractsWithApplication;
 
     private static User $trader;
+
+    private static company $company;
 
     private static array $companyDetails;
 
@@ -27,14 +29,16 @@ class TraderCompanyControllerStoreTest extends TestCase
     {
         parent::setUp();
 
-        self::$trader = $this->createTraderUser();
-
         self::$companyDetails = [
             'name' => 'testCompany',
             'unique_name' => 'companyUniqueName',
             'company_cr' => '1234567891',
             'driver' => 'dmcc',
         ];
+
+        [self::$company] = $this->createTraderCompany();
+
+        self::$trader = $this->createTraderUser(self::$company->id);
     }
 
     /**
@@ -51,7 +55,7 @@ class TraderCompanyControllerStoreTest extends TestCase
 
     public function test_trader_company_controller_store_other_roles_can_not_access()
     {
-        $this->assertStatusCodeForAllRolesExceptForArea(403, Area::Trader, function ($user, $role) {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::Trader, Area::Customer], function ($user, $role) {
             return $this->actingAs($user)
                 ->postJson('api/v1/admin/traders', self::$companyDetails);
         });

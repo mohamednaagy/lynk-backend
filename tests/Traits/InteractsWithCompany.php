@@ -5,47 +5,21 @@ namespace Tests\Traits;
 use App\Enums\Area;
 use App\Enums\CompanyType;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\Role;
 use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\EdaatInvoice;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
-use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
-use Modules\Grantify\Facades\Grantify;
+use RuntimeException;
 
 trait InteractsWithCompany
 {
-    /**
-     * Summary of createTraderAdmin
-     *
-     * @param  string  $email
-     * @param  array  $data
-     * @return mixed
-     */
-    public function createTraderUser(
-        $role = Role::TraderAdmin,
-        string $email = 'traderAdmin@bim.com',
-        array $data = []
-    ): mixed {
-        $admin = User::factory()->create(
-            array_merge([
-                'email' => $email,
-                'password' => bcrypt('12345678'),
-            ], $data)
-        );
-
-        Grantify::assignRoleToModel($admin, $role);
-
-        return $admin;
-    }
-
     /**
      * @param  array  $data
      * @return Company
@@ -93,63 +67,26 @@ trait InteractsWithCompany
         ];
     }
 
+    public function createLenderCompany($walletInitialAmount = 2000, $data = [])
+    {
+        return $this->createCompany($walletInitialAmount, array_merge(['type' => CompanyType::Lender], $data));
+    }
+
+    public function createTraderCompany($walletInitialAmount = 2000, $data = [])
+    {
+        return $this->createCompany($walletInitialAmount, array_merge(['type' => CompanyType::Lender], $data));
+    }
+
     public function createCompanyByArea($area, $walletInitialAmount = 2000, $data = [])
     {
-        if (! in_array($area, array_values(Area::asArray()))) {
-            throw new Exception(__('error.area_not_exists'));
+        $areaKey = Area::getKey($area);
+        $methodName = 'create'.ucfirst($areaKey).'Company';
+
+        if (! method_exists($this, $methodName)) {
+            throw new RuntimeException("Method doesn't exist: $methodName");
         }
 
-        $type = ($area == Area::Trader)
-            ? CompanyType::Trader
-            : CompanyType::Lender;
-
-        return $this->createCompany($walletInitialAmount, array_merge(['type' => $type], $data));
-    }
-
-    /**
-     * @param  int  $companyId
-     * @param  string  $role
-     * @param  string  $email
-     * @param  array  $data
-     * @return Collection|Model|mixed
-     */
-    public function createLenderUser(
-        int $companyId,
-        string $role,
-        string $email = 'lender@bim.com',
-        array $data = []
-    ): mixed {
-        $lenderUser = User::factory()->create(array_merge([
-            'email' => $email,
-            'password' => bcrypt('12345678'),
-            'company_id' => $companyId,
-        ], $data));
-
-        Grantify::assignRoleToModel($lenderUser, $role);
-
-        return $lenderUser;
-    }
-
-    /**
-     * Summary of createUser
-     *
-     * @param  string  $email
-     * @param  array  $data
-     * @return mixed
-     */
-    public function createUser(
-        $role = Role::Admin,
-        array $data = []
-    ): mixed {
-        $user = User::factory()->create(
-            array_merge([
-                'password' => bcrypt('12345678'),
-            ], $data)
-        );
-
-        Grantify::assignRoleToModel($user, $role);
-
-        return $user;
+        return $this->{$methodName}($walletInitialAmount, $data);
     }
 
     /**
@@ -183,67 +120,5 @@ trait InteractsWithCompany
             'amount' => 1,
             'status' => 1,
         ], $data));
-    }
-
-    public function assertLenderUserCannotAccess($request)
-    {
-        $roles = Area::roles(Area::Lender);
-
-        [$company] = $this->createCompanyByArea(Area::Lender);
-
-        foreach ($roles as $role) {
-            $user = $this->createLenderUser($company->id, $role, (string) Str::uuid().'@test.test');
-            $request($user, $role)->assertStatus(403);
-        }
-
-        return $request;
-    }
-
-    public function assertStatusCodeForAllRolesExceptForArea($status, string $exceptedArea, $request)
-    {
-        $areas = Area::asArray();
-        foreach ($areas as $area) {
-            if ($area != $exceptedArea) {
-                $this->assertStatusCodeForAreaRoles($status, $area, $request);
-            }
-        }
-    }
-
-    public function assertStatusCodeForAreaRoles($status, string $area, $request)
-    {
-        $areaRoles = Area::roles($area);
-        foreach ($areaRoles as $role) {
-            if (! is_array($role)) {
-                if ($area == Area::SuperAdmin) {
-                    $user = $this->createUser($role);
-                    $request($user, $role)->assertStatus($status);
-
-                    continue;
-                }
-
-                [$company] = $this->createCompanyByArea(
-                    $area,
-                    2000
-                );
-
-                $user = $this->createLenderUser($company->id, $role, (string) Str::uuid().'@test.test');
-                $request($user, $role)->assertStatus($status);
-            }
-        }
-    }
-
-    public function assertStatusCodeToSpecificRoles(int $status, array $roles, $request)
-    {
-        [$company] = $this->createCompany(
-            2000,
-            [
-                'company_cr' => (string) Str::uuid(),
-            ]
-        );
-
-        foreach ($roles as $role) {
-            $user = $this->createLenderUser($company->id, $role, (string) Str::uuid().'@test.test');
-            $request($user, $role)->assertStatus($status);
-        }
     }
 }

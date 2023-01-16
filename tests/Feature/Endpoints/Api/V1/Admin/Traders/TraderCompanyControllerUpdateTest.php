@@ -11,12 +11,12 @@ use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithApplication;
 
 class TraderCompanyControllerUpdateTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithCompany;
+    use InteractsWithApplication;
 
     private static User $trader;
 
@@ -33,8 +33,6 @@ class TraderCompanyControllerUpdateTest extends TestCase
     {
         parent::setUp();
 
-        self::$trader = $this->createTraderUser();
-
         self::$companyDetails = [
             'name' => 'testCompany',
             'unique_name' => 'companyUniqueName',
@@ -45,6 +43,8 @@ class TraderCompanyControllerUpdateTest extends TestCase
         [self::$company, self::$wallet] = $this->createCompany(2000, [
             'type' => CompanyType::Trader,
         ]);
+
+        self::$trader = $this->createTraderUser(self::$company->id);
     }
 
     /**
@@ -61,7 +61,7 @@ class TraderCompanyControllerUpdateTest extends TestCase
 
     public function test_trader_company_controller_update_other_roles_can_not_access()
     {
-        $this->assertStatusCodeForAllRolesExceptForArea(403, Area::Trader, function ($user, $role) {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::Trader, Area::Customer], function ($user, $role) {
             return $this->actingAs($user)
                 ->putJson('api/v1/admin/traders/'.self::$company->id, self::$companyDetails);
         });
