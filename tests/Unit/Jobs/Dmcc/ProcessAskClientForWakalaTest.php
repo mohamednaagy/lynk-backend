@@ -24,6 +24,8 @@ class ProcessAskClientForWakalaTest extends TestCase
 
     protected static FinancingOrder $order;
 
+    protected static FinancingOrder $commoditySoldToCustomerOrder;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -32,7 +34,22 @@ class ProcessAskClientForWakalaTest extends TestCase
         self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
             'status' => FinancingOrderStatus::Approved,
+
         ]);
+
+        self::$commoditySoldToCustomerOrder = $this->createOrder(self::$company->id, self::$lender->id, [
+            'status' => FinancingOrderStatus::CommoditySoldToCustomer,
+        ]);
+    }
+
+    public function test_process_ask_client_for_wakala_proccessed_if_order_status_commodity_sold_to_customer()
+    {
+        $processOrder = new ProcessAskClientForWakala(self::$commoditySoldToCustomerOrder->id);
+
+        $processOrder->handle();
+        self::$commoditySoldToCustomerOrder = self::$commoditySoldToCustomerOrder->fresh();
+
+        $this->assertTrue(self::$commoditySoldToCustomerOrder->status->is(FinancingOrderStatus::WaitingClientWakala));
     }
 
     public function test_process_ask_client_for_wakala_status_moved_to_waiting_client_wakala_successfully()
