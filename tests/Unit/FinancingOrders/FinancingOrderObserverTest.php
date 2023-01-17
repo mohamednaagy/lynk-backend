@@ -51,7 +51,7 @@ class FinancingOrderObserverTest extends TestCase
         ]);
     }
 
-    public function test_financing_order_observer_commodity_soled_to_customer_status()
+    public function test_financing_order_observer_when_status_changes_to_commodity_sold_to_customer()
     {
         Event::fake([
             SmsSent::class,
@@ -66,7 +66,7 @@ class FinancingOrderObserverTest extends TestCase
         Event::assertDispatched(SmsSent::class);
     }
 
-    public function test_financing_order_observer_murabaha_sale_completed_status()
+    public function test_financing_order_observer_when_status_changes_to_murabaha_sale_completed()
     {
         Event::fake([
             SmsSent::class,
@@ -81,7 +81,7 @@ class FinancingOrderObserverTest extends TestCase
         Event::assertDispatched(SmsSent::class);
     }
 
-    public function test_financing_order_observer_commodity_purchased_status()
+    public function test_financing_order_observer_when_status_changes_to_commodity_purchased()
     {
         Bus::fake();
 
