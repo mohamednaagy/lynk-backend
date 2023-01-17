@@ -40,7 +40,7 @@ class ProcessDmccRespondedToPtpOrderTest extends TestCase
         ]);
     }
 
-    public function test_process_dmcc_responded_to_ptp_order_with_dmcc_driver()
+    public function test_process_dmcc_responded_to_ptp_order_with_dmcc_driver_success()
     {
         Storage::fake();
         Soap::fake(function () {
@@ -84,7 +84,7 @@ class ProcessDmccRespondedToPtpOrderTest extends TestCase
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::PtpDocumentRetrieved));
     }
 
-    public function test_process_dmcc_responded_to_ptp_order_with_fake_driver()
+    public function test_process_dmcc_responded_to_ptp_order_with_fake_driver_sucess()
     {
         Storage::fake();
         Http::fake(function () {
@@ -120,5 +120,32 @@ class ProcessDmccRespondedToPtpOrderTest extends TestCase
         $this->assertEquals(FinancingOrderHistory::AttachTtiHoldingCertificateDocument, $fourthTraderHistory->action);
 
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::PtpDocumentRetrieved));
+    }
+
+    public function test_process_dmcc_responded_to_ptp_order_with_not_valid_statuses_fail()
+    {
+        Storage::fake();
+        Http::fake(function () {
+            return Http::response([
+                'data' => [
+                    'fileContent' => 'document',
+                ],
+            ], 200);
+        });
+
+        /** @var TraderOrder $traderOrder */
+        $traderOrder = self::$order->traderOrders()->create([
+            'provider' => 'fake',
+            'reference' => '1',
+            'status' => TraderOrderStatus::InProgress,
+        ]);
+
+        collect(FinancingOrderStatus::asArray())
+            ->except([FinancingOrderStatus::RespondedToPtp])
+            ->each(function ($status) {
+                self::$order->update(['status' => $status]);
+                (new ProcessDmccRespondedToPtpOrder(self::$order->id))->handle();
+                $this->assertTrue(self::$order->status->is($status));
+            });
     }
 }
