@@ -12,18 +12,17 @@ use App\Models\FinancingOrder;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\User;
-use App\Support\Traders\Drivers\DmccDriver;
-use CodeDredd\Soap\Facades\Soap;
+use App\Support\Traders\Drivers\FakeDriver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use RuntimeException;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class DmccDriverTest extends TestCase
+class FakeDriverTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -67,15 +66,13 @@ class DmccDriverTest extends TestCase
         $traderOrderCount = TraderOrder::query()->count();
         $traderOrderHistoryCount = TraderHistory::query()->count();
 
-        Soap::fake(function () {
-            return Soap::response([
-                'ttiId' => '1',
-                'errorCode' => '',
-                'errorMessage' => '',
+        Http::fake(function () {
+            return Http::response([
+                'data' => ['ttiId' => '1'],
             ], 200);
         });
 
-        (new DmccDriver())->getTti(self::$order);
+        (new FakeDriver())->getTti(self::$order);
 
         $this->assertDatabaseCount((new TraderOrder())->getTable(), $traderOrderCount + 1);
         $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderOrderHistoryCount + 1);
@@ -91,15 +88,13 @@ class DmccDriverTest extends TestCase
         $this->expectException(TraderException::class);
 
         $activityLogCount = Activity::query()->count();
-        Soap::fake(function () {
-            return Soap::response([
-                'ttiId' => '',
-                'errorCode' => '',
-                'errorMessage' => 'error',
-            ], 200);
+        Http::fake(function () {
+            return Http::response([
+                'data' => [],
+            ], 422);
         });
 
-        (new DmccDriver())->getTti(self::$order);
+        (new FakeDriver())->getTti(self::$order);
 
         $this->assertDatabaseCount((new TraderOrder())->getTable(), 0);
         $this->assertDatabaseCount((new TraderHistory())->getTable(), 0);
@@ -109,23 +104,9 @@ class DmccDriverTest extends TestCase
     /**
      * @return void
      */
-    public function test_accept_agreement_fail(): void
+    public function test_accept_agreement_success(): void
     {
-        $this->expectException(RuntimeException::class);
-
-        $activityLogCount = Activity::query()->count();
-
-        Soap::fake(function () {
-            return Soap::response([
-                'ttiId' => '',
-                'errorCode' => '',
-                'errorMessage' => 'error',
-            ], 200);
-        });
-
-        (new DmccDriver())->acceptAgreement();
-
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertTrue((new FakeDriver())->acceptAgreement());
     }
 
     /**
@@ -135,19 +116,17 @@ class DmccDriverTest extends TestCase
      */
     public function test_fetch_notifications_success(): void
     {
-        Soap::fake(function () {
-            return Soap::response([
-                'NotificationAllDetailsResponse' => [
-                    [
-                        'notificationAllDetailsResponse' => [
-                            'notificationDetails',
-                        ],
-                    ],
+        Http::fake(function () {
+            return Http::response([
+                [
+                    'id' => '123',
+                    'notification' => '',
+                    'ttiId' => '1',
                 ],
             ], 200);
         });
 
-        $response = (new DmccDriver())->fetchNotifications('ACTIONABLE');
+        $response = (new FakeDriver())->fetchNotifications('ACTIONABLE');
 
         $this->assertIsArray($response);
     }
@@ -163,13 +142,11 @@ class DmccDriverTest extends TestCase
 
         $activityLogCount = Activity::query()->count();
 
-        Soap::fake(function () {
-            return Soap::response([
-                'NotificationAllDetailsResponse' => [],
-            ], 500);
+        Http::fake(function () {
+            return Http::response([], 500);
         });
 
-        (new DmccDriver())->fetchNotifications('ACTIONABLE');
+        (new FakeDriver())->fetchNotifications('ACTIONABLE');
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
@@ -181,15 +158,13 @@ class DmccDriverTest extends TestCase
      */
     public function test_get_tti_id_success(): void
     {
-        Soap::fake(function () {
-            return Soap::response([
-                'ttiId' => '1',
-                'errorCode' => '',
-                'errorMessage' => '',
+        Http::fake(function () {
+            return Http::response([
+                'data' => ['ttiId' => '1'],
             ], 200);
         });
 
-        $response = (new DmccDriver())->getTtiId(self::$order);
+        $response = (new FakeDriver())->getTtiId(self::$order);
 
         $this->assertIsString($response);
         $this->assertEquals(1, $response);
@@ -206,15 +181,13 @@ class DmccDriverTest extends TestCase
 
         $activityLogCount = Activity::query()->count();
 
-        Soap::fake(function () {
-            return Soap::response([
-                'ttiId' => '',
-                'errorCode' => '',
-                'errorMessage' => 'error',
-            ], 200);
+        Http::fake(function () {
+            return Http::response([
+                'data' => [],
+            ], 422);
         });
 
-        (new DmccDriver())->getTtiId(self::$order);
+        (new FakeDriver())->getTtiId(self::$order);
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
@@ -226,37 +199,9 @@ class DmccDriverTest extends TestCase
      */
     public function test_cancel_order_success(): void
     {
-        Soap::fake(function () {
-            return Soap::response([
-                'successCode' => '0000',
-            ], 200);
-        });
+        $response = (new FakeDriver())->cancelOrder(self::$order);
 
-        $response = (new DmccDriver())->cancelOrder(self::$order);
-
-        $this->assertEquals('0000', $response->successCode);
-    }
-
-    /**
-     * @return void
-     *
-     * @throws TraderException
-     */
-    public function test_cancel_order_fail(): void
-    {
-        $this->expectException(TraderException::class);
-
-        $activityLogCount = Activity::query()->count();
-
-        Soap::fake(function () {
-            return Soap::response([
-                'successCode' => '',
-            ], 200);
-        });
-
-        (new DmccDriver())->cancelOrder(self::$order);
-
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertTrue($response);
     }
 
     /**
@@ -266,15 +211,15 @@ class DmccDriverTest extends TestCase
      */
     public function test_respond_ptp_service_success(): void
     {
-        Soap::fake(function () {
-            return Soap::response([
-                'successCode' => '0000',
+        Http::fake(function () {
+            return Http::response([
+                'data' => [],
             ], 200);
         });
 
-        $response = (new DmccDriver())->respondPtpService(self::$order);
+        $response = (new FakeDriver())->respondPtpService(self::$order);
 
-        $this->assertEquals('0000', $response->successCode);
+        $this->assertEquals((object) ['data' => []], $response);
     }
 
     /**
@@ -288,13 +233,13 @@ class DmccDriverTest extends TestCase
 
         $activityLogCount = Activity::query()->count();
 
-        Soap::fake(function () {
-            return Soap::response([
-                'successCode' => '',
-            ], 200);
+        Http::fake(function () {
+            return Http::response([
+                'data' => [],
+            ], 422);
         });
 
-        (new DmccDriver())->respondPtpService(self::$order);
+        (new FakeDriver())->respondPtpService(self::$order);
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
@@ -309,7 +254,7 @@ class DmccDriverTest extends TestCase
         Storage::fake();
         UploadedFile::fake();
 
-        (new DmccDriver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
+        (new FakeDriver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
 
         $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
     }
@@ -328,7 +273,7 @@ class DmccDriverTest extends TestCase
 
         $activityLogCount = Activity::query()->count();
 
-        (new DmccDriver())->createSellingCommodityToCustomerDocument(new TraderOrder());
+        (new FakeDriver())->createSellingCommodityToCustomerDocument(new TraderOrder());
 
         $this->assertNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
@@ -344,7 +289,7 @@ class DmccDriverTest extends TestCase
         Storage::fake();
         UploadedFile::fake();
 
-        (new DmccDriver())->createTransferOwnershipToLenderDocument(self::$traderOrder);
+        (new FakeDriver())->createTransferOwnershipToLenderDocument(self::$traderOrder);
 
         $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::TransferOwnershipToLender));
     }
@@ -363,7 +308,7 @@ class DmccDriverTest extends TestCase
 
         $activityLogCount = Activity::query()->count();
 
-        (new DmccDriver())->createTransferOwnershipToLenderDocument(new TraderOrder());
+        (new FakeDriver())->createTransferOwnershipToLenderDocument(new TraderOrder());
 
         $this->assertNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::TransferOwnershipToLender));
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
@@ -376,21 +321,15 @@ class DmccDriverTest extends TestCase
      */
     public function test_get_document_by_type_and_transaction_success(): void
     {
-        Soap::fake(function () {
-            return Soap::response([
-                'getdocument' => [
-                    [
-                        'getDocumentByTypeResponse' => [
-                            [
-                                'document' => 'document',
-                            ],
-                        ],
-                    ],
+        Http::fake(function () {
+            return Http::response([
+                'data' => [
+                    'fileContent' => 'document',
                 ],
             ], 200);
         });
 
-        $response = (new DmccDriver())->getDocumentByTypeAndTransaction(1, 'documentType');
+        $response = (new FakeDriver())->getDocumentByTypeAndTransaction(1, 'documentType');
 
         $this->assertEquals('document', $response);
     }
@@ -406,17 +345,11 @@ class DmccDriverTest extends TestCase
 
         $activityLogCount = Activity::query()->count();
 
-        Soap::fake(function () {
-            return Soap::response([
-                'getdocument' => [
-                    [
-                        'getDocumentByTypeResponse' => [],
-                    ],
-                ],
-            ], 200);
+        Http::fake(function () {
+            return Http::response([], 500);
         });
 
-        (new DmccDriver())->getDocumentByTypeAndTransaction(1, 'documentType');
+        (new FakeDriver())->getDocumentByTypeAndTransaction(1, 'documentType');
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
@@ -428,47 +361,15 @@ class DmccDriverTest extends TestCase
      */
     public function test_get_inventory_basket_success(): void
     {
-        Soap::fake(function () {
-            return Soap::response([
-                'inventoryDetails' => [
-                    [
-                        'hsCodeDescription' => 'hsCodeDescription',
-                        'quantity' => 100,
-                        'totalValue' => 100,
-                        'currency' => 'SAR',
-                        'warehouseOrVaultId' => 'warehouseOrVaultId',
-                        'owner' => 'owner',
-                    ],
-                ],
-                'errorCode' => '',
-            ], 200);
-        });
+        $response = (new FakeDriver())->getInventoryBasket(self::$traderOrder);
 
-        $response = (new DmccDriver())->getInventoryBasket(self::$traderOrder);
-
-        $this->assertEquals('', $response->errorCode);
-    }
-
-    /**
-     * @return void
-     *
-     * @throws TraderException
-     */
-    public function test_get_inventory_basket_fail(): void
-    {
-        $this->expectException(TraderException::class);
-
-        $activityLogCount = Activity::query()->count();
-
-        Soap::fake(function () {
-            return Soap::response([
-                'errorCode' => 'error',
-            ], 200);
-        });
-
-        (new DmccDriver())->getInventoryBasket(self::$traderOrder);
-
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertEquals((object) [
+            'product' => '',
+            'quantity' => 1000,
+            'amount' => '1000 SAR',
+            'warehouse' => 'warehouse',
+            'owner' => 'owner',
+        ], $response);
     }
 
     /**
@@ -478,37 +379,9 @@ class DmccDriverTest extends TestCase
      */
     public function test_upload_tti_document_and_get_version_number_success(): void
     {
-        Soap::fake(function () {
-            return Soap::response([
-                'versionNo' => 1,
-            ], 200);
-        });
+        $response = (new FakeDriver())->uploadTTIDocumentAndGetVersionNumber('1');
 
-        $response = (new DmccDriver())->uploadTTIDocumentAndGetVersionNumber('1');
-
-        $this->assertEquals(1, $response);
-    }
-
-    /**
-     * @return void
-     *
-     * @throws TraderException
-     */
-    public function test_upload_tti_document_and_get_version_number_fail(): void
-    {
-        $this->expectException(TraderException::class);
-
-        $activityLogCount = Activity::query()->count();
-
-        Soap::fake(function () {
-            return Soap::response([
-                'errorCode' => 'error',
-            ], 200);
-        });
-
-        (new DmccDriver())->uploadTTIDocumentAndGetVersionNumber('1');
-
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertEquals('001', $response);
     }
 
     /**
@@ -520,13 +393,11 @@ class DmccDriverTest extends TestCase
     {
         $activityLogCount = Activity::query()->count();
 
-        Soap::fake(function () {
-            return Soap::response([
-                'successCode' => '0000',
-            ], 200);
+        Http::fake(function () {
+            return Http::response([], 200);
         });
 
-        (new DmccDriver())->issueMurabahaPurchaseOffer(1, 1);
+        (new FakeDriver())->issueMurabahaPurchaseOffer(1, 1);
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount);
     }
@@ -542,13 +413,11 @@ class DmccDriverTest extends TestCase
 
         $activityLogCount = Activity::query()->count();
 
-        Soap::fake(function () {
-            return Soap::response([
-                'successCode' => '',
-            ], 200);
+        Http::fake(function () {
+            return Http::response([], 422);
         });
 
-        (new DmccDriver())->issueMurabahaPurchaseOffer(1, 1);
+        (new FakeDriver())->issueMurabahaPurchaseOffer(1, 1);
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
