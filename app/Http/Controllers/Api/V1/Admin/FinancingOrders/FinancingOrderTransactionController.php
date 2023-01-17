@@ -9,9 +9,8 @@ use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Transformers\TransactionTransformer;
-use Illuminate\Http\JsonResponse;
 
-class LenderTransactionController extends Controller
+class FinancingOrderTransactionController extends Controller
 {
     public function __construct()
     {
@@ -21,14 +20,10 @@ class LenderTransactionController extends Controller
         )->only('index');
     }
 
-    /**
-     * @param  Company  $lender
-     * @return JsonResponse
-     */
-    public function index(Company $lender): JsonResponse
+    public function index(Company $company)
     {
         return fractal(
-            $lender->transactions(WalletType::CompanyWallet)->paginate(),
+            $company->transactions(WalletType::CompanyWallet)->paginate(),
             new TransactionTransformer()
         )
             ->parseIncludes([

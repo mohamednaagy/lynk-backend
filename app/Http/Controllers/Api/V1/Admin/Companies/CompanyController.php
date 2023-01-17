@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders;
+namespace App\Http\Controllers\Api\V1\Admin\Companies;
 
 use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\Companies\GetPaginatedCompanies;
@@ -8,7 +8,6 @@ use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\CompanyType;
 use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
@@ -20,7 +19,7 @@ use Cknow\Money\Money;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
-class LenderController extends Controller
+class CompanyController extends Controller
 {
     public function __construct()
     {
@@ -57,7 +56,7 @@ class LenderController extends Controller
     public function index(
         GetPaginatedCompanies $getPaginatedCompanies
     ): JsonResponse {
-        return fractal($getPaginatedCompanies->handle(CompanyType::Lender), new CompanyTransformer())
+        return fractal($getPaginatedCompanies->handle(), new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',
@@ -70,18 +69,18 @@ class LenderController extends Controller
     }
 
     /**
-     * @param  StoreCompanyRequest  $request
+     * @param  StoreCompanyRequest  $createCompanyRequest
      * @param  CreateCompany  $createCompany
      * @param  GetSettingsClassInstance  $getSettingsClassInstance
      * @return JsonResponse
      */
     public function store(
-        StoreCompanyRequest $request,
+        StoreCompanyRequest $createCompanyRequest,
         CreateCompany $createCompany,
         GetSettingsClassInstance $getSettingsClassInstance
     ): JsonResponse {
-        return DB::transaction(function () use ($request, $getSettingsClassInstance, $createCompany) {
-            $data = $request->validated();
+        return DB::transaction(function () use ($createCompanyRequest, $getSettingsClassInstance, $createCompany) {
+            $data = $createCompanyRequest->validated();
             $data['status'] = $getSettingsClassInstance->handle(Area::Lender)->default_company_status_created_by_operation;
 
             $company = $createCompany->handle($data);
@@ -104,12 +103,12 @@ class LenderController extends Controller
     }
 
     /**
-     * @param  Company  $lender
+     * @param  Company  $company
      * @return JsonResponse
      */
-    public function show(Company $lender): JsonResponse
+    public function show(Company $company): JsonResponse
     {
-        return fractal($lender, new CompanyTransformer())
+        return fractal($company, new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',
@@ -124,18 +123,18 @@ class LenderController extends Controller
     }
 
     /**
-     * @param  UpdateCompanyRequest  $request
+     * @param  UpdateCompanyRequest  $updateCompanyRequest
      * @param  UpdateCompany  $updateCompany
-     * @param  Company  $lender
+     * @param  Company  $company
      * @return JsonResponse
      */
     public function update(
-        UpdateCompanyRequest $request,
+        UpdateCompanyRequest $updateCompanyRequest,
         UpdateCompany $updateCompany,
-        Company $lender
+        Company $company
     ): JsonResponse {
-        return DB::transaction(function () use ($request, $updateCompany, $lender) {
-            $updateCompany->handle($lender, $request->validated());
+        return DB::transaction(function () use ($updateCompanyRequest, $updateCompany, $company) {
+            $updateCompany->handle($company, $updateCompanyRequest->validated());
 
             return $this->successResponse();
         });
@@ -144,16 +143,16 @@ class LenderController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  Company  $lender
+     * @param  Company  $company
      * @return JsonResponse
      *
      * @throws \Throwable
      */
-    public function destroy(Company $lender): JsonResponse
+    public function destroy(Company $company): JsonResponse
     {
-        DB::transaction(function () use ($lender) {
-            $lender->update(['unique_name' => null]);
-            $lender->delete();
+        DB::transaction(function () use ($company) {
+            $company->update(['unique_name' => null]);
+            $company->delete();
         });
 
         return $this->successResponse();

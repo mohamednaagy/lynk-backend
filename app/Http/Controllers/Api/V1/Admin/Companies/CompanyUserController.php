@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders;
+namespace App\Http\Controllers\Api\V1\Admin\Companies;
 
-use App\Actions\Contracts\Companies\GetPaginatedLenderUsers;
+use App\Actions\Contracts\Companies\GetPaginatedCompanyUsers;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Enums\Action;
@@ -23,7 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
-class LenderUserController extends Controller
+class CompanyUserController extends Controller
 {
     public function __construct()
     {
@@ -50,10 +50,10 @@ class LenderUserController extends Controller
 
     public function index(
         GetCompanyUsersRequest $request,
-        Company $lender,
-        GetPaginatedLenderUsers $getPaginatedLenderUsers
+        Company $company,
+        GetPaginatedCompanyUsers $getPaginatedCompanyUsers
     ): JsonResponse {
-        return fractal($getPaginatedLenderUsers->handle($lender), new UserTransformer(Area::Lender))
+        return fractal($getPaginatedCompanyUsers->handle($company), new UserTransformer(Area::Lender))
             ->parseIncludes([
                 'id',
                 'first_name',
@@ -71,13 +71,13 @@ class LenderUserController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  Request  $request
-     * @param  Company  $lender
+     * @param  Company  $company
      * @param  User  $user
      * @return JsonResponse
      *
      * @throws AuthorizationException
      */
-    public function show(Request $request, Company $lender, User $user): JsonResponse
+    public function show(Request $request, Company $company, User $user): JsonResponse
     {
         if (! $user->hasAnyRole([
             Role::LenderAdmin,
@@ -104,25 +104,25 @@ class LenderUserController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  StoreUserRequest  $request
-     * @param  Company  $lender
+     * @param  StoreUserRequest  $storeUserRequest
+     * @param  Company  $company
      * @param  CreateLenderUserWithRoleAndPermission  $createUserWithRoleAndPermission
      * @return JsonResponse
      */
     public function store(
-        StoreUserRequest $request,
-        Company $lender,
+        StoreUserRequest $storeUserRequest,
+        Company $company,
         CreateLenderUserWithRoleAndPermission $createUserWithRoleAndPermission
     ): JsonResponse {
-        return DB::transaction(function () use ($lender, $request, $createUserWithRoleAndPermission) {
+        return DB::transaction(function () use ($company, $storeUserRequest, $createUserWithRoleAndPermission) {
             $user = $createUserWithRoleAndPermission->handle(
-                $request->validated() +
+                $storeUserRequest->validated() +
                 [
-                    'company_id' => $lender->id,
+                    'company_id' => $company->id,
                 ]
             );
 
-            $invitationUrl = $request->validated('redirect_url');
+            $invitationUrl = $storeUserRequest->validated('redirect_url');
 
             Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl));
 
@@ -142,20 +142,20 @@ class LenderUserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  UpdateUserRequest  $request
-     * @param  Company  $lender
+     * @param  UpdateUserRequest  $updateUserRequest
+     * @param  Company  $company
      * @param  User  $user
      * @param  UpdateLenderUserWithRoleAndPermission  $updateUserWithRoleAndPermission
      * @return JsonResponse
      */
     public function update(
-        UpdateUserRequest $request,
-        Company $lender,
+        UpdateUserRequest $updateUserRequest,
+        Company $company,
         User $user,
         UpdateLenderUserWithRoleAndPermission $updateUserWithRoleAndPermission,
     ): JsonResponse {
-        return DB::transaction((function () use ($request, $user, $updateUserWithRoleAndPermission) {
-            $updateUserWithRoleAndPermission->handle($request->validated(), $user);
+        return DB::transaction((function () use ($updateUserRequest, $user, $updateUserWithRoleAndPermission) {
+            $updateUserWithRoleAndPermission->handle($updateUserRequest->validated(), $user);
 
             return $this->successResponse();
         }));

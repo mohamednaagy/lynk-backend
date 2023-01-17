@@ -5,11 +5,11 @@ namespace App\Actions\Contracts\Companies;
 use App\Models\Company;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-interface GetPaginatedLenderUsers
+interface GetPaginatedCompanyUsers
 {
     /**
-     * @param  Company  $lender
+     * @param  Company  $company
      * @return LengthAwarePaginator
      */
-    public function handle(Company $lender): LengthAwarePaginator;
+    public function handle(Company $company): LengthAwarePaginator;
 }
