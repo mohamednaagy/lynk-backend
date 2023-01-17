@@ -164,7 +164,7 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
 
         $this->assertDatabaseHas((new Media())->getTable(), [
             'model_id' => self::$order->id,
-            'model_type' => FinancingOrder::class,
+            'model_type' => (new FinancingOrder)->getMorphClass(),
             'collection_name' => FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
         ]);
 
