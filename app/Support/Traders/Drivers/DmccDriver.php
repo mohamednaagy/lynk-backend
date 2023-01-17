@@ -8,7 +8,7 @@ use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Contracts\TraderInterface;
-use App\Support\Traders\TraderHelper;
+use App\Support\Traders\TraderHelperTrait;
 use Carbon\Carbon;
 use CodeDredd\Soap\Client\Response;
 use CodeDredd\Soap\Facades\Soap;
@@ -20,7 +20,7 @@ use RuntimeException;
 
 class DmccDriver implements TraderInterface
 {
-    use TraderHelper;
+    use TraderHelperTrait;
 
     private SoapClient $soap;
 
@@ -244,7 +244,7 @@ class DmccDriver implements TraderInterface
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
         try {
-            $this->createOrderDocumentAsPdf(
+            $this->storeOrderDocumentAsPdf(
                 'selling-commodity-to-customer',
                 [
                     'ttiId' => $traderOrder->reference,
@@ -311,7 +311,7 @@ class DmccDriver implements TraderInterface
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
         try {
-            $this->createOrderDocumentAsPdf(
+            $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
                     'ttiId' => $traderOrder->reference,

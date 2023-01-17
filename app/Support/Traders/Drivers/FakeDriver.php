@@ -8,14 +8,15 @@ use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Contracts\TraderInterface;
-use App\Support\Traders\TraderHelper;
+use App\Support\Traders\TraderHelperTrait;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 class FakeDriver implements TraderInterface
 {
-    use TraderHelper;
+    use TraderHelperTrait;
 
     /**
      * @return bool
@@ -180,27 +181,40 @@ class FakeDriver implements TraderInterface
     /**
      * @param $traderOrder
      * @return void
+     *
+     * @throws TraderException
      */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
-        $this->createOrderDocumentAsPdf(
-            'selling-commodity-to-customer',
-            [
-                'ttiId' => $traderOrder->reference,
-                'companyName' => $traderOrder->order->company->name,
-                'orderNumber' => $traderOrder->financing_order_id,
-                'amount' => $traderOrder->order->amount->formatByDecimal(),
-                'hsCodeDescription' => 'product description',
-                'quantity' => 100,
-                'warehouse' => 'warehouse',
-                'owner' => 'owner',
-                'date' => Carbon::now()->toDateString(),
-                'time' => Carbon::now()->toTimeString(),
-            ],
-            $traderOrder,
-            FinancingOrderMediaCollection::SellingCommodityToCustomer,
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument
-        );
+        try {
+            $this->storeOrderDocumentAsPdf(
+                'selling-commodity-to-customer',
+                [
+                    'ttiId' => $traderOrder->reference,
+                    'companyName' => $traderOrder->order->company->name,
+                    'orderNumber' => $traderOrder->financing_order_id,
+                    'amount' => $traderOrder->order->amount->formatByDecimal(),
+                    'hsCodeDescription' => 'product description',
+                    'quantity' => 100,
+                    'warehouse' => 'warehouse',
+                    'owner' => 'owner',
+                    'date' => Carbon::now()->toDateString(),
+                    'time' => Carbon::now()->toTimeString(),
+                ],
+                $traderOrder,
+                FinancingOrderMediaCollection::SellingCommodityToCustomer,
+                FinancingOrderHistory::CreateSellingCommodityToCustomerDocument
+            );
+        } catch (Exception $exception) {
+            throw new TraderException(collect([
+                'driver' => 'fake',
+                'step' => 'createSellingCommodityToCustomerDocument',
+                'requestBody' => [
+                    'traderOrder' => $traderOrder,
+                ],
+                'responseBody' => $exception->getMessage(),
+            ]));
+        }
     }
 
     /**
@@ -229,26 +243,40 @@ class FakeDriver implements TraderInterface
         return $response->json('data.fileContent');
     }
 
+    /**
+     * @throws TraderException
+     */
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
-        $this->createOrderDocumentAsPdf(
-            'transfer-ownership-to-lender',
-            [
-                'ttiId' => $traderOrder->reference,
-                'companyName' => $traderOrder->order->company->name,
-                'orderNumber' => $traderOrder->financing_order_id,
-                'amount' => $traderOrder->order->amount->formatByDecimal(),
-                'hsCodeDescription' => 'product description',
-                'quantity' => 100,
-                'warehouse' => 'warehouse',
-                'owner' => 'owner',
-                'date' => Carbon::now()->toDateString(),
-                'time' => Carbon::now()->toTimeString(),
-            ],
-            $traderOrder,
-            FinancingOrderMediaCollection::TransferOwnershipToLender,
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
-        );
+        try {
+            $this->storeOrderDocumentAsPdf(
+                'transfer-ownership-to-lender',
+                [
+                    'ttiId' => $traderOrder->reference,
+                    'companyName' => $traderOrder->order->company->name,
+                    'orderNumber' => $traderOrder->financing_order_id,
+                    'amount' => $traderOrder->order->amount->formatByDecimal(),
+                    'hsCodeDescription' => 'product description',
+                    'quantity' => 100,
+                    'warehouse' => 'warehouse',
+                    'owner' => 'owner',
+                    'date' => Carbon::now()->toDateString(),
+                    'time' => Carbon::now()->toTimeString(),
+                ],
+                $traderOrder,
+                FinancingOrderMediaCollection::TransferOwnershipToLender,
+                FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
+            );
+        } catch (Exception $exception) {
+            throw new TraderException(collect([
+                'driver' => 'fake',
+                'step' => 'createTransferOwnershipToLenderDocument',
+                'requestBody' => [
+                    'traderOrder' => $traderOrder,
+                ],
+                'responseBody' => $exception->getMessage(),
+            ]));
+        }
     }
 
     /**

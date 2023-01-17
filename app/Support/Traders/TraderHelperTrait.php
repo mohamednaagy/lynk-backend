@@ -8,7 +8,7 @@ use App\Models\TraderOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Database\Eloquent\Model;
 
-trait TraderHelper
+trait TraderHelperTrait
 {
     public function createTraderOrder(FinancingOrder $financingOrder, string $ttiId, string $provider): Model|TraderOrder
     {
@@ -33,7 +33,7 @@ trait TraderHelper
         ]);
     }
 
-    public function createOrderDocumentAsPdf(string $view, array $data, TraderOrder $traderOrder, $mediaCollection, $action): void
+    public function storeOrderDocumentAsPdf(string $view, array $data, TraderOrder $traderOrder, $mediaCollection, $action): void
     {
         $html = view($view, $data)->render();
 

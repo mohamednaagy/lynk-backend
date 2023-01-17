@@ -3,6 +3,7 @@
 namespace Tests\Unit\Traders;
 
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
@@ -85,7 +86,7 @@ class DmccDriverTest extends TestCase
      *
      * @throws TraderException
      */
-    public function test_get_tti_fail(): void
+    public function test_process_order_with_empty_string_fails(): void
     {
         $this->expectException(TraderException::class);
 
@@ -310,7 +311,7 @@ class DmccDriverTest extends TestCase
 
         (new DmccDriver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
 
-        $this->assertFileExists(storage_path('app/1/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
+        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
     }
 
     /**
@@ -329,7 +330,7 @@ class DmccDriverTest extends TestCase
 
         (new DmccDriver())->createSellingCommodityToCustomerDocument(new TraderOrder());
 
-        $this->assertFileDoesNotExist(storage_path('app/1/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
+        $this->assertNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 
@@ -345,7 +346,7 @@ class DmccDriverTest extends TestCase
 
         (new DmccDriver())->createTransferOwnershipToLenderDocument(self::$traderOrder);
 
-        $this->assertFileExists(storage_path('app/1/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
+        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::TransferOwnershipToLender));
     }
 
     /**
@@ -364,7 +365,7 @@ class DmccDriverTest extends TestCase
 
         (new DmccDriver())->createTransferOwnershipToLenderDocument(new TraderOrder());
 
-        $this->assertFileDoesNotExist(storage_path('app/1/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
+        $this->assertNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::TransferOwnershipToLender));
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 
