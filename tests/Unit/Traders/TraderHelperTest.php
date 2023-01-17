@@ -37,9 +37,10 @@ class TraderHelperTest extends TestCase
 
     public function test_trader_helper_create_trader_order()
     {
+        $count = self::$financingOrder->traderOrders()->count();
         self::$traderHelper->createTraderOrder(self::$financingOrder, '123', 'dmcc');
 
-        self::assertEquals(1, self::$financingOrder->traderOrders()->count());
+        self::assertEquals($count + 1, self::$financingOrder->traderOrders()->count());
     }
 
     public function test_trader_helper_update_order_status()
@@ -52,8 +53,10 @@ class TraderHelperTest extends TestCase
     public function test_trader_helper_create_trader_order_history()
     {
         $traderOrder = self::$traderHelper->createTraderOrder(self::$financingOrder, '123', 'dmcc');
+        $count = $traderOrder->traderHistories()->count();
+
         self::$traderHelper->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
-        $this->assertEquals(1, $traderOrder->traderHistories()->count());
+        $this->assertEquals($count + 1, $traderOrder->traderHistories()->count());
     }
 }
