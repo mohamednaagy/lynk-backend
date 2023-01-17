@@ -12,13 +12,12 @@ use App\Support\Wallets\Contracts\TransactionUtilInterface;
 use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Arr;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
 
 class TransactionUtilTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithCompany;
 
     private static TransactionUtilInterface $transactionUtil;
 
@@ -27,6 +26,11 @@ class TransactionUtilTest extends TestCase
     private static Company $company;
 
     private static Wallet $wallet;
+
+    private static array $messages = [
+        'ar' => 'رسوم إنشاء طلب #123456',
+        'en' => 'Order #123456 creation fee',
+    ];
 
     /**
      * @throws BindingResolutionException
@@ -58,28 +62,16 @@ class TransactionUtilTest extends TestCase
 
     public function test_transaction_util_get_description_method_with_all_available_locales_return_string()
     {
-        foreach (config('app.locales') as $locale) {
+        foreach (self::$messages as $locale => $message) {
             $transactionDescription = self::$transactionUtil->getDescription(self::$depositTransaction, $locale);
-            $items = Arr::only(self::$depositTransaction->meta, ['type', 'order_number']);
-            $this->assertEquals(
-                __('transaction-description.order_creation_fee', [
-                    'order_number' => $items['order_number'] ?? '',
-                ], $locale),
-                $transactionDescription
-            );
+            $this->assertEquals($message, $transactionDescription);
         }
     }
 
     public function test_transaction_util_get_description_method_without_locale_return_string()
     {
         $transactionDescription = self::$transactionUtil->getDescription(self::$depositTransaction);
-        $items = Arr::only(self::$depositTransaction->meta, ['type', 'order_number']);
-        $this->assertEquals(
-            __('transaction-description.order_creation_fee', [
-                'order_number' => $items['order_number'] ?? '',
-            ], config('app.locale')),
-            $transactionDescription
-        );
+        $this->assertEquals(self::$messages[config('app.locale')], $transactionDescription);
     }
 
     public function test_transaction_util_process_method_return_transaction_model_instance()

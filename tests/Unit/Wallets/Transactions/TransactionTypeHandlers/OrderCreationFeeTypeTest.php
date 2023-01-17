@@ -12,13 +12,12 @@ use App\Support\Wallets\Transactions\TransactionTypeHandlers\OrderCreationFeeTyp
 use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Arr;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
 
 class OrderCreationFeeTypeTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithCompany;
 
     private static TransactionTypeHandlerInterface $transactionTypeHandler;
 
@@ -27,6 +26,11 @@ class OrderCreationFeeTypeTest extends TestCase
     private static Company $company;
 
     private static Wallet $wallet;
+
+    private static array $messages = [
+        'ar' => 'رسوم إنشاء طلب #123456',
+        'en' => 'Order #123456 creation fee',
+    ];
 
     /**
      * @throws BindingResolutionException
@@ -57,12 +61,10 @@ class OrderCreationFeeTypeTest extends TestCase
 
     public function test_order_creation_fee_generate_message_method_with_all_available_locales_return_string()
     {
-        $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, 'en');
-        $items = Arr::only(self::$depositTransaction->meta, ['type', 'order_number']);
-        $this->assertEquals(
-            'Order #'.$items['order_number'].' creation fee',
-            $transactionDescription
-        );
+        foreach (self::$messages as $locale => $message) {
+            $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, $locale);
+            $this->assertEquals($message, $transactionDescription);
+        }
     }
 
     public function test_order_creation_fee_process_method_return_transaction_model_instance()

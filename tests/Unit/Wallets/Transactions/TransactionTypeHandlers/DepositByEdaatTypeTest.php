@@ -12,13 +12,12 @@ use App\Support\Wallets\Transactions\TransactionTypeHandlers\DepositByEdaatType;
 use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Arr;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
 
 class DepositByEdaatTypeTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithCompany;
 
     private static TransactionTypeHandlerInterface $transactionTypeHandler;
 
@@ -27,6 +26,11 @@ class DepositByEdaatTypeTest extends TestCase
     private static Company $company;
 
     private static Wallet $wallet;
+
+    private static array $messages = [
+        'ar' => 'شحن رصيد بواسطة سداد لفاتورة رقم 123456',
+        'en' => 'Recharge balance by Sadad for invoice #123456',
+    ];
 
     /**
      * @throws BindingResolutionException
@@ -56,12 +60,10 @@ class DepositByEdaatTypeTest extends TestCase
 
     public function test_deposit_by_edaat_generate_message_method_with_all_available_locales_return_string()
     {
-        $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, 'en');
-        $items = Arr::only(self::$depositTransaction->meta, ['invoice_number']);
-        $this->assertEquals(
-            'Recharge balance by Sadad for invoice #'.$items['invoice_number'],
-            $transactionDescription
-        );
+        foreach (self::$messages as $locale => $message) {
+            $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, $locale);
+            $this->assertEquals($message, $transactionDescription);
+        }
     }
 
     public function test_deposit_by_edaat_process_method_return_transaction_model_instance()

@@ -12,13 +12,12 @@ use App\Support\Wallets\Transactions\TransactionTypeHandlers\VatPercentageFeeTyp
 use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Arr;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
 
 class VatPercentageFeeTypeTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithCompany;
 
     private static TransactionTypeHandlerInterface $transactionTypeHandler;
 
@@ -27,6 +26,11 @@ class VatPercentageFeeTypeTest extends TestCase
     private static Company $company;
 
     private static Wallet $wallet;
+
+    private static array $messages = [
+        'ar' => 'ضريبة القيمة المضافة (15%) للطلب #1',
+        'en' => 'VAT charges (15%) for order #1',
+    ];
 
     /**
      * @throws BindingResolutionException
@@ -58,12 +62,10 @@ class VatPercentageFeeTypeTest extends TestCase
 
     public function test_vat_percentage_fee_generate_message_method_with_all_available_locales_return_string()
     {
-        $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, 'en');
-        $items = Arr::only(self::$depositTransaction->meta, ['transaction_id', 'financing_order_id', 'vat_rate']);
-        $this->assertEquals(
-            'VAT charges ('.($items['vat_rate'] * 100).'%) for order #'.$items['financing_order_id'],
-            $transactionDescription
-        );
+        foreach (self::$messages as $locale => $message) {
+            $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, $locale);
+            $this->assertEquals($message, $transactionDescription);
+        }
     }
 
     public function test_vat_percentage_fee_process_method_return_transaction_model_instance()

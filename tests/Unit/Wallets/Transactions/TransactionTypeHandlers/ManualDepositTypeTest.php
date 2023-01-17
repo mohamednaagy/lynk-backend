@@ -13,11 +13,11 @@ use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
 
 class ManualDepositTypeTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithCompany;
 
     private static TransactionTypeHandlerInterface $transactionTypeHandler;
 
@@ -26,6 +26,11 @@ class ManualDepositTypeTest extends TestCase
     private static Company $company;
 
     private static Wallet $wallet;
+
+    private static array $messages = [
+        'ar' => 'شحن رصيد',
+        'en' => 'Recharge the balance',
+    ];
 
     /**
      * @throws BindingResolutionException
@@ -46,11 +51,10 @@ class ManualDepositTypeTest extends TestCase
 
     public function test_manual_deposit_generate_message_method_with_all_available_locales_return_string()
     {
-        $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, 'en');
-        $this->assertEquals(
-            'Recharge the balance',
-            $transactionDescription
-        );
+        foreach (self::$messages as $locale => $message) {
+            $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, $locale);
+            $this->assertEquals($message, $transactionDescription);
+        }
     }
 
     public function test_manual_deposit_process_method_return_transaction_model_instance()

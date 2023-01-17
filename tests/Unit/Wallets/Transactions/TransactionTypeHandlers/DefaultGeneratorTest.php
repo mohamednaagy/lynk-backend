@@ -13,11 +13,11 @@ use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
 
 class DefaultGeneratorTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithCompany;
 
     private static TransactionTypeHandlerInterface $transactionTypeHandler;
 
@@ -26,6 +26,11 @@ class DefaultGeneratorTest extends TestCase
     private static Company $company;
 
     private static Wallet $wallet;
+
+    private static array $messages = [
+        'ar' => '',
+        'en' => '',
+    ];
 
     /**
      * @throws BindingResolutionException
@@ -46,9 +51,9 @@ class DefaultGeneratorTest extends TestCase
 
     public function test_default_generator_generate_message_method_with_all_available_locales_return_string()
     {
-        foreach (config('app.locales') as $locale) {
+        foreach (self::$messages as $locale => $message) {
             $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, $locale);
-            $this->assertEquals('', $transactionDescription);
+            $this->assertEquals($message, $transactionDescription);
         }
     }
 
