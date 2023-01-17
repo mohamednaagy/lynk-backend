@@ -3,6 +3,7 @@
 namespace Tests\Unit\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\Dmcc\ProcessDmccContractSignedOrder;
@@ -10,6 +11,8 @@ use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
@@ -36,8 +39,23 @@ class ProcessDmccContractSignedOrderTest extends TestCase
     /**
      * @throws \Throwable
      */
-    public function test_jobe_process_if_the_active_trader_order_has_dmcc_as_provider()
+    public function test_job_process_if_the_active_trader_order_has_dmcc_as_provider()
     {
+        Http::fake(function () {
+            return Http::response([
+                'inventoryDetails' => [
+                    [
+                        'hsCodeDescription' => 'hsCodeDescription',
+                        'quantity' => 100,
+                        'totalValue' => 100,
+                        'currency' => 'SAR',
+                        'warehouseOrVaultId' => 'warehouseOrVaultId',
+                        'owner' => 'owner',
+                    ],
+                ],
+                'errorCode' => '',
+            ], 200);
+        });
         self::$order->traderOrders()->create([
             'provider' => 'dmcc',
             'reference' => 123,
@@ -46,15 +64,16 @@ class ProcessDmccContractSignedOrderTest extends TestCase
         $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);
         $processOrder->handle();
         self::$order = self::$order->fresh();
-        $this->assertNotNull(self::$order->traderOrders()->first());
+        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::Approved));
     }
 
     /**
      * @throws \Throwable
      */
-    public function test_jobe_process_if_the_active_trader_order_has_fake_as_provider()
+    public function test_job_process_if_the_active_trader_order_has_fake_as_provider()
     {
+        Storage::fake();
         self::$order->traderOrders()->create([
             'provider' => 'fake',
             'reference' => 123,
@@ -63,15 +82,16 @@ class ProcessDmccContractSignedOrderTest extends TestCase
         $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);
         $processOrder->handle();
         self::$order = self::$order->fresh();
-        $this->assertNotNull(self::$order->traderOrders()->first());
+        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::Approved));
     }
 
     /**
      * @throws \Throwable
      */
-    public function test_jobe_process_if_the_current_order_status_is_contracrSigned()
+    public function test_jobe_process_if_the_current_order_status_is_contracr_signed_and_trader_order_has_fake_as_provider()
     {
+        Storage::fake();
         self::$order->traderOrders()->create([
             'provider' => 'fake',
             'reference' => 123,
@@ -81,34 +101,105 @@ class ProcessDmccContractSignedOrderTest extends TestCase
         $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);
         $processOrder->handle();
         self::$order = self::$order->fresh();
-        $this->assertNotNull(self::$order->traderOrders()->first());
+        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::CommoditySoldToCustomer));
     }
 
     /**
      * @throws \Throwable
      */
-    public function test_that_a_selling_commodity_to_customer_document_is_created()
+    public function test_jobe_process_if_the_current_order_status_is_contracr_signed_and_trader_order_has_dmcc_as_provider()
     {
+        Http::fake(function () {
+            return Http::response([
+                'inventoryDetails' => [
+                    [
+                        'hsCodeDescription' => 'hsCodeDescription',
+                        'quantity' => 100,
+                        'totalValue' => 100,
+                        'currency' => 'SAR',
+                        'warehouseOrVaultId' => 'warehouseOrVaultId',
+                        'owner' => 'owner',
+                    ],
+                ],
+                'errorCode' => '',
+            ], 200);
+        });
+        self::$order->traderOrders()->create([
+            'provider' => 'dmcc',
+            'reference' => 123,
+            'status' => TraderOrderStatus::InProgress,
+        ]);
+        self::$order->update(['status' => FinancingOrderStatus::ContractSigned]);
+        $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);
+        $processOrder->handle();
+        self::$order = self::$order->fresh();
+        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
+        $this->assertTrue(self::$order->status->is(FinancingOrderStatus::CommoditySoldToCustomer));
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public function test_selling_commodity_to_customer_document_is_created_and_trader_order_has_fake_as_provider()
+    {
+        Storage::fake();
         self::$order->traderOrders()->create([
             'provider' => 'fake',
             'reference' => 123,
             'status' => TraderOrderStatus::InProgress,
         ]);
+
         self::$order->update(['status' => FinancingOrderStatus::ContractSigned]);
         $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);
         $processOrder->handle();
         self::$order = self::$order->fresh();
         $this->assertFileExists(self::$order->media->first()->getPath());
-        $this->assertNotNull(self::$order->traderOrders()->first());
+        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::CommoditySoldToCustomer));
     }
 
     /**
      * @throws \Throwable
      */
-    public function test_that_the_order_status_is_update_to_commoditySoldToCustomer()
+    public function test_selling_commodity_to_customer_document_is_created_and_trader_order_has_dmcc_as_provider()
     {
+        Http::fake(function () {
+            return Http::response([
+                'inventoryDetails' => [
+                    [
+                        'hsCodeDescription' => 'hsCodeDescription',
+                        'quantity' => 100,
+                        'totalValue' => 100,
+                        'currency' => 'SAR',
+                        'warehouseOrVaultId' => 'warehouseOrVaultId',
+                        'owner' => 'owner',
+                    ],
+                ],
+                'errorCode' => '',
+            ], 200);
+        });
+        self::$order->traderOrders()->create([
+            'provider' => 'dmcc',
+            'reference' => 123,
+            'status' => TraderOrderStatus::InProgress,
+        ]);
+        self::$order->update(['status' => FinancingOrderStatus::ContractSigned]);
+        $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);
+        $processOrder->handle();
+        self::$order = self::$order->fresh();
+
+        $this->assertFileExists(self::$order->media->first()->getPath());
+        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
+        $this->assertTrue(self::$order->status->is(FinancingOrderStatus::CommoditySoldToCustomer));
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public function test_the_order_status_is_update_to_commodity_sold_to_customer_and_trader_order_has_fake_as_provider()
+    {
+        Storage::fake();
         self::$order->traderOrders()->create([
             'provider' => 'fake',
             'reference' => 123,
@@ -118,6 +209,40 @@ class ProcessDmccContractSignedOrderTest extends TestCase
         $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);
         $processOrder->handle();
         self::$order = self::$order->fresh();
+        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
+        $this->assertTrue(self::$order->status->is(FinancingOrderStatus::CommoditySoldToCustomer));
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public function test_the_order_status_is_update_to_commodity_sold_to_customer_and_trader_order_has_dmcc_as_provider()
+    {
+        Http::fake(function () {
+            return Http::response([
+                'inventoryDetails' => [
+                    [
+                        'hsCodeDescription' => 'hsCodeDescription',
+                        'quantity' => 100,
+                        'totalValue' => 100,
+                        'currency' => 'SAR',
+                        'warehouseOrVaultId' => 'warehouseOrVaultId',
+                        'owner' => 'owner',
+                    ],
+                ],
+                'errorCode' => '',
+            ], 200);
+        });
+        self::$order->traderOrders()->create([
+            'provider' => 'dmcc',
+            'reference' => 123,
+            'status' => TraderOrderStatus::InProgress,
+        ]);
+        self::$order->update(['status' => FinancingOrderStatus::ContractSigned]);
+        $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);
+        $processOrder->handle();
+        self::$order = self::$order->fresh();
+        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::CommoditySoldToCustomer));
     }
 }
