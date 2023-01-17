@@ -9,12 +9,12 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithApplication;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class TraderCompanyControllerShowTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithApplication;
+    use AssertsAccessByRoleAndArea;
 
     private static User $trader;
 

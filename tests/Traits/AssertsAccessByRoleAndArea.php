@@ -5,7 +5,7 @@ namespace Tests\Traits;
 use App\Enums\Area;
 use RuntimeException;
 
-trait InteractsWithApplication
+trait AssertsAccessByRoleAndArea
 {
     use InteractsWithCompany;
     use InteractsWithUser;
@@ -24,7 +24,7 @@ trait InteractsWithApplication
     {
         $areaKey = Area::getKey($area);
 
-        $methodName = 'assert'.ucfirst($areaKey).'AreaUsersCannotAccess';
+        $methodName = 'assertStatusFor'.ucfirst($areaKey).'AreaUsers';
 
         if (! method_exists($this, $methodName)) {
             throw new RuntimeException("Method doesn't exist: $methodName");
@@ -33,7 +33,7 @@ trait InteractsWithApplication
         $this->{$methodName}($status, $request);
     }
 
-    public function assertSuperAdminAreaUsersCannotAccess($status, $request)
+    public function assertStatusForSuperAdminAreaUsers($status, $request)
     {
         $roles = Area::roles(Area::SuperAdmin);
 
@@ -44,7 +44,7 @@ trait InteractsWithApplication
         }
     }
 
-    public function assertLenderAreaUsersCannotAccess($status, $request)
+    public function assertStatusForLenderAreaUsers($status, $request)
     {
         $roles = Area::roles(Area::Lender);
 
@@ -55,7 +55,7 @@ trait InteractsWithApplication
         }
     }
 
-    public function assertTraderAreaUsersCannotAccess($status, $request)
+    public function assertStatusForTraderAreaUsers($status, $request)
     {
         $roles = Area::roles(Area::Trader);
 
@@ -69,17 +69,24 @@ trait InteractsWithApplication
     public function assertStatusCodeToSpecificRoles(int $status, array $roles, $request)
     {
         foreach ($roles as $role) {
-            if (in_array($role, Area::roles(Area::SuperAdmin))) {
-                $admin = $this->createUser();
-                $this->assignRoleToUser($admin, $role);
-                $request($admin, $role)->assertStatus($status);
+            $area = Area::getAreaByRole($role);
+            switch ($area) {
+                case Area::SuperAdmin:
+                    $admin = $this->createUserByRole($role);
+                    $request($admin, $role)->assertStatus($status);
 
-                continue;
+                    break;
+
+                case Area::Customer:
+                    break;
+
+                default:
+                    [$company] = $this->createCompanyByArea($area);
+                    $user = $this->createUserByRole($role, $company->id);
+                    $request($user, $role)->assertStatus($status);
+
+                    break;
             }
-
-            [$company] = $this->createCompany();
-            $user = $this->createLenderUser($company->id, $role);
-            $request($user, $role)->assertStatus($status);
         }
     }
 }

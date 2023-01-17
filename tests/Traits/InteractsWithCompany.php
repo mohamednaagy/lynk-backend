@@ -27,15 +27,7 @@ trait InteractsWithCompany
     public function createCompanyWithoutWallet(
         array $data = []
     ): Company {
-        return Company::factory()->create(array_merge([
-            'first_name' => 'firstName',
-            'last_name' => 'lastName',
-            'phone_country_code' => 'SA',
-            'phone_number' => '503811000',
-            'email' => 'test@uselynk.test',
-            'password' => 'Qwer@1234',
-            'source' => 'Postman',
-        ], $data));
+        return Company::factory()->create($data);
     }
 
     /**
@@ -74,7 +66,7 @@ trait InteractsWithCompany
 
     public function createTraderCompany($walletInitialAmount = 2000, $data = [])
     {
-        return $this->createCompany($walletInitialAmount, array_merge(['type' => CompanyType::Lender], $data));
+        return $this->createCompany($walletInitialAmount, array_merge(['type' => CompanyType::Trader], $data));
     }
 
     public function createCompanyByArea($area, $walletInitialAmount = 2000, $data = [])

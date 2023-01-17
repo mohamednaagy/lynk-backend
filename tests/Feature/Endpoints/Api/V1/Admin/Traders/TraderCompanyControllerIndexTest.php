@@ -10,12 +10,12 @@ use App\Transformers\CompanyTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithApplication;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class TraderCompanyControllerIndexTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithApplication;
+    use AssertsAccessByRoleAndArea;
 
     private static Company $company;
 

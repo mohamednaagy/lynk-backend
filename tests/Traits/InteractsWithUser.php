@@ -2,9 +2,11 @@
 
 namespace Tests\Traits;
 
+use App\Enums\Area;
 use App\Enums\Role;
 use App\Models\User;
 use Modules\Grantify\Facades\Grantify;
+use RuntimeException;
 
 trait InteractsWithUser
 {
@@ -28,6 +30,26 @@ trait InteractsWithUser
         return $user;
     }
 
+     public function createUserByRole($role, $companyId = null, $data = [])
+     {
+         $areaKey = Area::getAreaByRole($role);
+         $methodName = 'create'.ucfirst($areaKey).'User';
+
+         if (! method_exists($this, $methodName)) {
+             throw new RuntimeException("Method doesn't exist: $methodName");
+         }
+
+         if ($areaKey == Area::SuperAdmin()) {
+             return $this->{$methodName}($role, $data);
+         }
+
+         if (is_null($companyId)) {
+             throw new RuntimeException("CompanyID can't be null");
+         }
+
+         return $this->{$methodName}($role, $companyId, $data);
+     }
+
     /**
      * Summary of createAdmin
      *
@@ -35,31 +57,14 @@ trait InteractsWithUser
      * @param  array  $data
      * @return mixed
      */
-    public function createAdmin(
+    public function createSuperAdminUser(
+        $role = Role::Admin,
         array $data = []
     ): User {
         $admin = $this->createUser($data);
-        $this->assignRoleToUser($admin, Role::Admin);
+        $this->assignRoleToUser($admin, $role);
 
         return $admin;
-    }
-
-    /**
-     * Summary of createManager
-     *
-     * @param  array  $data
-     * @param  string|array  $permissions
-     * @return mixed
-     */
-    public function createManager(
-        array $data = [],
-        string|array $permissions = []
-    ): User {
-        $manager = $this->createUser($data);
-        $this->assignRoleToUser($manager, Role::Manager);
-        $this->assignPermissionToUser($manager, $permissions);
-
-        return $manager;
     }
 
     /**
@@ -74,7 +79,6 @@ trait InteractsWithUser
         array $data = []
     ): User {
         $userLender = $this->createUser(array_merge([
-            'password' => bcrypt('12345678'),
             'company_id' => $companyId,
         ], $data));
 
@@ -95,7 +99,6 @@ trait InteractsWithUser
         array $data = []
     ): User {
         $userLender = $this->createUser(array_merge([
-            'password' => bcrypt('12345678'),
             'company_id' => $companyId,
         ], $data));
 

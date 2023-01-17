@@ -34,4 +34,14 @@ final class Area extends Enum
             ]
         };
     }
+
+    public static function getAreaByRole(string $role)
+    {
+        $areas = static::getValues();
+        foreach ($areas as $area) {
+            if (in_array($role, static::roles($area))) {
+                return $area;
+            }
+        }
+    }
 }
