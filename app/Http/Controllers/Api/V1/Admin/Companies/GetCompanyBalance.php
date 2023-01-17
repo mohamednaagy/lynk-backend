@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders;
+namespace App\Http\Controllers\Api\V1\Admin\Companies;
 
-use App\Actions\Contracts\Lenders\GetLenderBalance as GetLenderBalanceInterface;
+use App\Actions\Contracts\Lenders\GetLenderBalance;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
@@ -10,7 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use Illuminate\Http\JsonResponse;
 
-class GetLenderBalance extends Controller
+class GetCompanyBalance extends Controller
 {
     public function __construct()
     {
@@ -21,13 +21,13 @@ class GetLenderBalance extends Controller
     }
 
     /**
-     * @param  Company  $lender
-     * @param  GetLenderBalanceInterface  $getBalance
-     * @return JsonResponse
+     * @param  Company  $company
+     * @param  GetLenderBalance  $getBalance
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function __invoke(Company $lender, GetLenderBalanceInterface $getBalance): JsonResponse
+    public function __invoke(Company $company, GetLenderBalance $getBalance): JsonResponse
     {
-        $balances = $getBalance->handle($lender);
+        $balances = $getBalance->handle($company);
 
         return $this->successResponse(data: [
             'balance' => number_format($balances['balance']->formatByDecimal(), 2),

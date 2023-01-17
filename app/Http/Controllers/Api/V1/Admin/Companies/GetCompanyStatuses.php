@@ -1,16 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders;
+namespace App\Http\Controllers\Api\V1\Admin\Companies;
 
 use App\Enums\CompanyStatus;
 use App\Http\Controllers\Controller;
 
-class GetLenderStatuses extends Controller
+class GetCompanyStatuses extends Controller
 {
-    /**
-     * @return array
-     */
-    public function __invoke(): array
+    public function __invoke()
     {
         return array_map(function ($value) {
             return [
