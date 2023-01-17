@@ -42,7 +42,7 @@ class ProcessAskClientForWakalaTest extends TestCase
         ]);
     }
 
-    public function test_process_ask_client_for_wakala_proccessed_if_order_status_commodity_sold_to_customer()
+    public function test_process_ask_client_for_wakala_processed_if_order_status_commodity_sold_to_customer()
     {
         $processOrder = new ProcessAskClientForWakala(self::$commoditySoldToCustomerOrder->id);
 

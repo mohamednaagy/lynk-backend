@@ -21,7 +21,9 @@ class AskClientWakalaAction implements AskClientWakala
             ]
         );
 
-        $shortUrl = Bitly::getUrl($url);
+        $shortUrl = app()->isProduction()
+        ? Bitly::getUrl($url)
+        : $url;
 
         try {
             Sms::send(
