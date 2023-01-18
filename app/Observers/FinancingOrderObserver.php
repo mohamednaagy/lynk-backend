@@ -2,13 +2,11 @@
 
 namespace App\Observers;
 
-use App\Enums\ClientMessage;
+use App\Actions\Contracts\Orders\ApplyEventsWhenStatusIsCommoditySoldToCustomer;
+use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommodityPurchased;
+use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
-use App\Enums\WebhookType;
 use App\Models\FinancingOrder;
-use App\Support\Sms\Sms;
-use App\Support\Webhooks\Facades\WebhookEvent;
 
 class FinancingOrderObserver
 {
@@ -17,62 +15,27 @@ class FinancingOrderObserver
      *
      * @param  FinancingOrder  $financingOrder
      * @return void
+     *
+     * @throws \Exception
      */
     public function updated(FinancingOrder $financingOrder): void
     {
+        if (! $financingOrder->wasChanged(['status'])) {
+            return;
+        }
+
         $product = $financingOrder->activeTraderOrder()->first()->product ?? '';
         $quantity = $financingOrder->activeTraderOrder()->first()->quantity ?? '';
-        $sellingPrice = $financingOrder->getOriginal('selling_price') ?? '';
-        $url = $financingOrder->getMedia(FinancingOrderMediaCollection::SellingCommodityToCustomer)->first() ?? '';
-        $phoneNumber = ltrim($financingOrder->getPhoneNumber()->formatE164(), '+');
-        $locale = app()->getLocale();
 
-        match ($financingOrder->status->value) {
-            FinancingOrderStatus::CommoditySoldToCustomer => $this->applyCommoditySoldToCustomerActions(
-                $url,
-                $locale,
-                $product,
-                $quantity,
-                $phoneNumber,
-                $sellingPrice,
-                $financingOrder
-            ),
-            FinancingOrderStatus::MurabahaSaleCompleted => Sms::driver('msegat')->send(
-                __(ClientMessage::MurabahaSaleCompleted, [
-                    'product' => $product,
-                    'quantity' => $quantity,
-                    'amount' => $sellingPrice,
-                ], $locale), $phoneNumber),
-            default => new \ErrorException('Error found'),
+        $actions = match ($financingOrder->status->value) {
+            FinancingOrderStatus::CommoditySoldToCustomer => [ApplyEventsWhenStatusIsCommoditySoldToCustomer::class],
+            FinancingOrderStatus::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
+            FinancingOrderStatus::CommodityPurchased => [FireWebhookWhenStatusIsCommodityPurchased::class],
+            default => []
         };
-    }
 
-    private function applyCommoditySoldToCustomerActions(
-        $url,
-        $locale,
-        $product,
-        $quantity,
-        $phoneNumber,
-        $sellingPrice,
-        $financingOrder
-    ): void {
-        WebhookEvent::fire(
-            $financingOrder->company,
-            WebhookType::OrderUpdates, [
-                'order_id' => $financingOrder->id,
-                'order_status' => [
-                    'value' => $financingOrder->status->value,
-                    'label' => $financingOrder->status->description,
-                ],
-                'certificate_url' => $url,
-            ]);
-
-        Sms::driver('msegat')->send(
-            __(ClientMessage::CommoditySoldToCustomer, [
-                'product' => $product,
-                'quantity' => $quantity,
-                'sellingPrice' => $sellingPrice,
-                'url' => $url,
-            ], $locale), $phoneNumber);
+        foreach ($actions as $action) {
+            app($action)->handle($financingOrder, $product, $quantity);
+        }
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Companies;
+namespace App\Http\Controllers\Api\V1\Admin\Lenders;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
@@ -8,18 +8,18 @@ use App\Transformers\CompanySettingTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class GetCompanySetting extends Controller
+class GetLenderSetting extends Controller
 {
     /**
      * Handle an authentication attempt.
      *
      * @param  Request  $request
-     * @param  Company  $company
+     * @param  Company  $lender
      * @return JsonResponse
      */
-    public function __invoke(Request $request, Company $company): JsonResponse
+    public function __invoke(Request $request, Company $lender): JsonResponse
     {
-        return fractal($company, new CompanySettingTransformer)
+        return fractal($lender, new CompanySettingTransformer)
             ->respond();
     }
 }

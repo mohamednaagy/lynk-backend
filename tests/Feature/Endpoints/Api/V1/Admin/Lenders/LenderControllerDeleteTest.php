@@ -19,7 +19,7 @@ class LenderControllerDeleteTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender, InteractsWithAdmin;
 
-    private static Company $company;
+    private static Company $lender;
 
     private static Wallet $wallet;
 
@@ -36,7 +36,7 @@ class LenderControllerDeleteTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userAdmin = $this->createAdmin('admin@bim.com');
         self::$userManager = $this->createManager(
             'manager@bim.com',
@@ -47,9 +47,9 @@ class LenderControllerDeleteTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_delete_companies(): void
+    public function test_that_un_auth_user_cant_delete_lenders(): void
     {
-        $this->deleteJson('api/v1/admin/companies/'.self::$company->id)
+        $this->deleteJson('api/v1/admin/lenders/'.self::$lender->id)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -59,50 +59,50 @@ class LenderControllerDeleteTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_can_delete_companies(): void
+    public function test_that_auth_admin_user_can_delete_lenders(): void
     {
-        $companiesCount = Company::query()->count();
+        $lendersCount = Company::query()->count();
 
         $this->actingAs(self::$userAdmin)
-            ->deleteJson('api/v1/admin/companies/'.self::$company->id)
+            ->deleteJson('api/v1/admin/lenders/'.self::$lender->id)
             ->assertOk()
             ->assertExactJson([
                 'data' => [],
             ]);
 
-        $newCompaniesCount = Company::query()->count();
+        $newLendersCount = Company::query()->count();
 
-        $this->assertEquals($newCompaniesCount, $companiesCount - 1);
+        $this->assertEquals($newLendersCount, $lendersCount - 1);
     }
 
     /**
      * @return void
      */
-    public function test_that_auth_manager_user_can_delete_companies(): void
+    public function test_that_auth_manager_user_can_delete_lenders(): void
     {
-        $companiesCount = Company::query()->count();
+        $lendersCount = Company::query()->count();
 
         $this->actingAs(self::$userManager)
-            ->deleteJson('api/v1/admin/companies/'.self::$company->id)
+            ->deleteJson('api/v1/admin/lenders/'.self::$lender->id)
             ->assertOk()
             ->assertExactJson([
                 'data' => [],
             ]);
 
-        $newCompaniesCount = Company::query()->count();
+        $newLendersCount = Company::query()->count();
 
-        $this->assertEquals($newCompaniesCount, $companiesCount - 1);
+        $this->assertEquals($newLendersCount, $lendersCount - 1);
     }
 
     /**
      * @return void
      */
-    public function test_that_auth_manager_user_without_permissions_cant_delete_companies(): void
+    public function test_that_auth_manager_user_without_permissions_cant_delete_lenders(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
 
         $this->actingAs(self::$userManager)
-            ->deleteJson('api/v1/admin/companies/'.self::$company->id)
+            ->deleteJson('api/v1/admin/lenders/'.self::$lender->id)
             ->assertForbidden();
     }
 }

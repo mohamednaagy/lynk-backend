@@ -20,7 +20,7 @@ class LenderControllerShowTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender, InteractsWithAdmin;
 
-    private static Company $company;
+    private static Company $lender;
 
     private static Wallet $wallet;
 
@@ -37,7 +37,7 @@ class LenderControllerShowTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userAdmin = $this->createAdmin('admin@bim.com');
         self::$userManager = $this->createManager(
             'manager@bim.com',
@@ -48,9 +48,9 @@ class LenderControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_show_company(): void
+    public function test_that_un_auth_user_cant_show_lender(): void
     {
-        $this->getJson('api/v1/admin/companies/'.self::$company->id)
+        $this->getJson('api/v1/admin/lenders/'.self::$lender->id)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -60,13 +60,13 @@ class LenderControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_can_show_company(): void
+    public function test_that_auth_admin_user_can_show_lender(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->getJson('api/v1/admin/companies/'.self::$company->id)
+            ->getJson('api/v1/admin/lenders/'.self::$lender->id)
             ->assertOk()
             ->assertExactJson(
-                fractal(self::$company, new CompanyTransformer())
+                fractal(self::$lender, new CompanyTransformer())
                     ->parseIncludes([
                         'id',
                         'name',
@@ -85,13 +85,13 @@ class LenderControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_manager_user_can_show_company(): void
+    public function test_that_auth_manager_user_can_show_lender(): void
     {
         $this->actingAs(self::$userManager)
-            ->getJson('api/v1/admin/companies/'.self::$company->id)
+            ->getJson('api/v1/admin/lenders/'.self::$lender->id)
             ->assertOk()
             ->assertExactJson(
-                fractal(self::$company, new CompanyTransformer())
+                fractal(self::$lender, new CompanyTransformer())
                     ->parseIncludes([
                         'id',
                         'name',
@@ -110,12 +110,12 @@ class LenderControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_manager_user_without_permissions_cant_show_company(): void
+    public function test_that_auth_manager_user_without_permissions_cant_show_lender(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
 
         $this->actingAs(self::$userManager)
-            ->getJson('api/v1/admin/companies/'.self::$company->id)
+            ->getJson('api/v1/admin/lenders/'.self::$lender->id)
             ->assertForbidden();
     }
 }

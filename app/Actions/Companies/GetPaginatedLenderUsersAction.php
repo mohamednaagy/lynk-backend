@@ -2,19 +2,19 @@
 
 namespace App\Actions\Companies;
 
-use App\Actions\Contracts\Companies\GetPaginatedCompanyUsers;
+use App\Actions\Contracts\Companies\GetPaginatedLenderUsers;
 use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-class GetPaginatedCompanyUsersAction implements GetPaginatedCompanyUsers
+class GetPaginatedLenderUsersAction implements GetPaginatedLenderUsers
 {
     /**
-     * @param  Company  $company
+     * @param  Company  $lender
      * @return LengthAwarePaginator
      */
-    public function handle(Company $company): LengthAwarePaginator
+    public function handle(Company $lender): LengthAwarePaginator
     {
         return User::query()
             ->whereHas('roles', function ($query) {
@@ -25,7 +25,7 @@ class GetPaginatedCompanyUsersAction implements GetPaginatedCompanyUsers
                     Role::LenderSupervisor,
                 ]);
             })
-            ->where('company_id', $company->id)
+            ->where('company_id', $lender->id)
             ->withCount('orders')
             ->with('permissions', 'roles')
             ->paginate();
