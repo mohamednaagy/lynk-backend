@@ -4,7 +4,6 @@ namespace Tests\Unit\Traders;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
-use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Models\Company;
@@ -21,11 +20,12 @@ use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class DmccDriverTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithCompany, InteractsWithUser;
 
     protected static Company $company;
 
@@ -39,8 +39,8 @@ class DmccDriverTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company] = $this->createCompany();
-        self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$company = $this->createCompanyWithoutWallet();
+        self::$lender = $this->createLenderUser(self::$company->id);
         self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
             'status' => FinancingOrderStatus::Approved,
         ]);
