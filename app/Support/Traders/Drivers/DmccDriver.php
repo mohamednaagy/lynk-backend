@@ -357,17 +357,18 @@ class DmccDriver implements TraderInterface
         $response = $response->object();
 
         $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
+        $details = $response->inventoryDetails[0];
         $traderOrder->update([
-            'product' => $response->inventoryDetails[0]->hsCodeDescription,
-            'quantity' => $response->inventoryDetails[0]->quantity,
-            'amount' => $response->inventoryDetails[0]->totalValue.' '.$response->inventoryDetails[0]->currency,
-            'warehouse' => $response->inventoryDetails[0]->warehouseOrVaultId,
-            'owner' => $response->inventoryDetails[0]->owner,
-            'previousOwner' => $response->inventoryDetails[0]->previousOwner,
-            'newOwner' => $response->inventoryDetails[0]->newOwner,
-            'dateTimeOfPurchasingCommodity' => $response->inventoryDetails[0]->dateTimeOfPurchasingCommodity,
-            'warehouseOrVaultEmirates' => $response->inventoryDetails[0]->warehouseOrVaultEmirates,
-            'warehouseOrVaultCountry' => $response->inventoryDetails[0]->warehouseOrVaultCountry,
+            'product' => $details->hsCodeDescription,
+            'quantity' => $details->quantity,
+            'amount' => $details->totalValue.' '.$details->currency,
+            'warehouse' => $details->warehouseOrVaultId,
+            'owner' => $details->owner,
+            'previousOwner' => $details->previousOwner,
+            'newOwner' => $details->newOwner,
+            'dateTimeOfPurchasingCommodity' => $details->dateTimeOfPurchasingCommodity,
+            'warehouseOrVaultEmirates' => $details->warehouseOrVaultEmirates,
+            'warehouseOrVaultCountry' => $details->warehouseOrVaultCountry,
         ]);
 
         return $response;
