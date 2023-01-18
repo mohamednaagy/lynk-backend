@@ -33,7 +33,7 @@ trait TraderHelperTrait
         ]);
     }
 
-    public function storeOrderDocumentAsPdf(string $view, array $data, TraderOrder $traderOrder, $mediaCollection, $action): void
+    public function storeOrderDocumentAsPdf(string $view, array $data, TraderOrder $traderOrder, $mediaCollection): void
     {
         $html = view($view, $data)->render();
 
@@ -44,8 +44,6 @@ trait TraderHelperTrait
                 $mediaCollection
             );
         });
-
-        $this->createTraderOrderHistory($traderOrder, $action);
     }
 
     public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void

@@ -203,8 +203,9 @@ class FakeDriver implements TraderInterface
                 ],
                 $traderOrder,
                 FinancingOrderMediaCollection::SellingCommodityToCustomer,
-                FinancingOrderHistory::CreateSellingCommodityToCustomerDocument
             );
+
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
         } catch (Exception $exception) {
             throw new TraderException(collect([
                 'driver' => 'fake',
@@ -265,8 +266,9 @@ class FakeDriver implements TraderInterface
                 ],
                 $traderOrder,
                 FinancingOrderMediaCollection::TransferOwnershipToLender,
-                FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
             );
+
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
         } catch (Exception $exception) {
             throw new TraderException(collect([
                 'driver' => 'fake',
