@@ -25,7 +25,7 @@ class LenderControllerStoreTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender, InteractsWithAdmin;
 
-    private static Company $company;
+    private static Company $lender;
 
     private static Wallet $wallet;
 
@@ -33,7 +33,7 @@ class LenderControllerStoreTest extends TestCase
 
     private static User $userManager;
 
-    private static array $companyDetails;
+    private static array $lenderDetails;
 
     /**
      * @return void
@@ -44,13 +44,13 @@ class LenderControllerStoreTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userAdmin = $this->createAdmin('admin@bim.com');
         self::$userManager = $this->createManager(
             'manager@bim.com',
             perm(Area::SuperAdmin, [Subject::Lenders, Action::Create]),
         );
-        self::$companyDetails = [
+        self::$lenderDetails = [
             'name' => 'testCompany',
             'unique_name' => 'companyUniqueName',
             'company_cr' => '1234567891',
@@ -63,9 +63,9 @@ class LenderControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_store_company(): void
+    public function test_that_un_auth_user_cant_store_lender(): void
     {
-        $this->postJson('api/v1/admin/companies', self::$companyDetails)
+        $this->postJson('api/v1/admin/lenders', self::$lenderDetails)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -75,10 +75,10 @@ class LenderControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_can_store_company(): void
+    public function test_that_admin_can_store_lender(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies', self::$companyDetails)
+            ->postJson('api/v1/admin/lenders', self::$lenderDetails)
             ->assertOk()
             ->assertJsonStructure([
                 'data' => [
@@ -93,28 +93,28 @@ class LenderControllerStoreTest extends TestCase
                 ],
             ]);
 
-        $company = Company::query()
+        $lender = Company::query()
             ->where('unique_name', 'companyUniqueName')
             ->first();
 
         $defaultStatus = $this->app->make(GetSettingsClassInstance::class)->handle(Area::Lender)
             ->default_company_status_created_by_operation;
-        $hasWallet = $company->getWallets(WalletType::CompanyWallet)->count() > 0;
-        $hasOrderCost = $company->order_cost->getAmount() > 0;
+        $hasWallet = $lender->getWallets(WalletType::CompanyWallet)->count() > 0;
+        $hasOrderCost = $lender->order_cost->getAmount() > 0;
 
-        $this->assertEquals($defaultStatus, $company->status->value);
+        $this->assertEquals($defaultStatus, $lender->status->value);
         $this->assertTrue($hasWallet);
         $this->assertTrue($hasOrderCost);
-        $this->assertNotNull($company->webhook_secret_key);
+        $this->assertNotNull($lender->webhook_secret_key);
     }
 
     /**
      * @return void
      */
-    public function test_that_manager_can_store_company(): void
+    public function test_that_manager_can_store_lender(): void
     {
         $this->actingAs(self::$userManager)
-            ->postJson('api/v1/admin/companies', self::$companyDetails)
+            ->postJson('api/v1/admin/lenders', self::$lenderDetails)
             ->assertOk()
             ->assertJsonStructure([
                 'data' => [
@@ -129,40 +129,40 @@ class LenderControllerStoreTest extends TestCase
                 ],
             ]);
 
-        $company = Company::query()
+        $lender = Company::query()
             ->where('unique_name', 'companyUniqueName')
             ->first();
 
         $defaultStatus = $this->app->make(GetSettingsClassInstance::class)->handle(Area::Lender)
             ->default_company_status_created_by_operation;
-        $hasWallet = $company->getWallets(WalletType::CompanyWallet)->count() > 0;
-        $hasOrderCost = $company->order_cost->getAmount() > 0;
+        $hasWallet = $lender->getWallets(WalletType::CompanyWallet)->count() > 0;
+        $hasOrderCost = $lender->order_cost->getAmount() > 0;
 
-        $this->assertEquals($defaultStatus, $company->status->value);
+        $this->assertEquals($defaultStatus, $lender->status->value);
         $this->assertTrue($hasWallet);
         $this->assertTrue($hasOrderCost);
-        $this->assertNotNull($company->webhook_secret_key);
+        $this->assertNotNull($lender->webhook_secret_key);
     }
 
     /**
      * @return void
      */
-    public function test_that_manager_without_permissions_cant_store_company(): void
+    public function test_that_manager_without_permissions_cant_store_lender(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
 
         $this->actingAs(self::$userManager)
-            ->postJson('api/v1/admin/companies', self::$companyDetails)
+            ->postJson('api/v1/admin/lenders', self::$lenderDetails)
             ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_that_admin_cant_store_company_without_name(): void
+    public function test_that_admin_cant_store_lender_without_name(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies', Arr::except(self::$companyDetails, 'name'))
+            ->postJson('api/v1/admin/lenders', Arr::except(self::$lenderDetails, 'name'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The name field is required.',
@@ -177,10 +177,10 @@ class LenderControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_cant_store_company_without_company_cr(): void
+    public function test_that_admin_cant_store_lender_without_company_cr(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies', Arr::except(self::$companyDetails, 'company_cr'))
+            ->postJson('api/v1/admin/lenders', Arr::except(self::$lenderDetails, 'company_cr'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The company CR field is required.',
@@ -195,10 +195,10 @@ class LenderControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_cant_store_company_without_does_order_require_approval(): void
+    public function test_that_admin_cant_store_lender_without_does_order_require_approval(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies', Arr::except(self::$companyDetails, 'does_order_require_approval'))
+            ->postJson('api/v1/admin/lenders', Arr::except(self::$lenderDetails, 'does_order_require_approval'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The does order require approval field is required.',
@@ -213,10 +213,10 @@ class LenderControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_cant_store_company_without_order_cost(): void
+    public function test_that_admin_cant_store_lender_without_order_cost(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies', Arr::except(self::$companyDetails, 'order_cost'))
+            ->postJson('api/v1/admin/lenders', Arr::except(self::$lenderDetails, 'order_cost'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The order cost field is required.',
@@ -231,10 +231,10 @@ class LenderControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_cant_store_company_without_unique_name(): void
+    public function test_that_admin_cant_store_lender_without_unique_name(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies', Arr::except(self::$companyDetails, 'unique_name'))
+            ->postJson('api/v1/admin/lenders', Arr::except(self::$lenderDetails, 'unique_name'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The unique name field is required.',
@@ -249,14 +249,14 @@ class LenderControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_cant_store_company_with_exist_unique_name(): void
+    public function test_that_admin_cant_store_lender_with_exist_unique_name(): void
     {
-        Company::query()->create(array_merge(self::$companyDetails, [
+        Company::query()->create(array_merge(self::$lenderDetails, [
             'status' => CompanyStatus::Approved(),
         ]));
 
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies', self::$companyDetails)
+            ->postJson('api/v1/admin/lenders', self::$lenderDetails)
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The unique name has already been taken. (and 1 more error)',
@@ -274,14 +274,14 @@ class LenderControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_can_store_company_with_exist_unique_name_after_delete(): void
+    public function test_that_admin_can_store_lender_with_exist_unique_name_after_delete(): void
     {
-        $company = Company::query()->create(array_merge(self::$companyDetails, [
+        $lender = Company::query()->create(array_merge(self::$lenderDetails, [
             'status' => CompanyStatus::Approved(),
         ]));
 
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies', self::$companyDetails)
+            ->postJson('api/v1/admin/lenders', self::$lenderDetails)
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The unique name has already been taken. (and 1 more error)',
@@ -295,14 +295,14 @@ class LenderControllerStoreTest extends TestCase
                 ],
             ]);
         $this->actingAs(self::$userAdmin)
-            ->deleteJson('api/v1/admin/companies/'.$company->id)
+            ->deleteJson('api/v1/admin/lenders/'.$lender->id)
             ->assertOk()
             ->assertExactJson([
                 'data' => [],
             ]);
 
         $this->actingAs(self::$userAdmin)
-            ->putJson('api/v1/admin/companies/'.self::$company->id, self::$companyDetails)
+            ->putJson('api/v1/admin/lenders/'.self::$lender->id, self::$lenderDetails)
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The company CR has already been taken.',
@@ -313,10 +313,10 @@ class LenderControllerStoreTest extends TestCase
                 ],
             ]);
 
-        $company->forceDelete();
+        $lender->forceDelete();
 
         $this->actingAs(self::$userAdmin)
-            ->postJson('api/v1/admin/companies', self::$companyDetails)
+            ->postJson('api/v1/admin/lenders', self::$lenderDetails)
             ->assertOk()
             ->assertJsonStructure([
                 'data' => [

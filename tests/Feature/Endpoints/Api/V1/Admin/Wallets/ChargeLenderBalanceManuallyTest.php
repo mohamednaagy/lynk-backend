@@ -23,7 +23,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
     use InteractsWithLender;
     use InteractsWithAdmin;
 
-    private static Company $company;
+    private static Company $lender;
 
     private static Wallet $wallet;
 
@@ -52,9 +52,9 @@ class ChargeLenderBalanceManuallyTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userLenderAdmin = $this->createLenderUser(
-            self::$company->id,
+            self::$lender->id,
             Role::LenderAdmin,
             'lenderAdmin@bim.com'
         );
@@ -66,17 +66,17 @@ class ChargeLenderBalanceManuallyTest extends TestCase
 
         self::$admin = $this->createAdmin();
         self::$manager = $this->createManager();
-        self::$lenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'LenderAdmin@bim.com');
-        self::$lenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
-        self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'LenderApiUser@bim.com');
-        self::$lenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'LenderOrderCreator@bim.com');
-        self::$lenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
+        self::$lenderAdmin = $this->createLenderUser(self::$lender->id, Role::LenderAdmin, 'LenderAdmin@bim.com');
+        self::$lenderBilling = $this->createLenderUser(self::$lender->id, Role::LenderBilling, 'LenderBilling@bim.com');
+        self::$lenderApiUser = $this->createLenderUser(self::$lender->id, Role::LenderApiUser, 'LenderApiUser@bim.com');
+        self::$lenderOrderCreator = $this->createLenderUser(self::$lender->id, Role::LenderOrderCreator, 'LenderOrderCreator@bim.com');
+        self::$lenderSupervisor = $this->createLenderUser(self::$lender->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
     }
 
     public function test_charge_lender_balance_manually_controller_validation_rules()
     {
         $this->actingAs(self::$admin)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit')
+            ->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit')
             ->assertStatus(422)
             ->assertJsonFragment([
                 'message' => 'The amount field is required. (and 3 more errors)',
@@ -100,7 +100,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
     public function test_charge_lender_balance_manually_controller_successed()
     {
         $this->actingAs(self::$admin)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
+            ->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit', [
                 'amount' => 10,
                 'description_en' => 'deposit some money',
                 'description_ar' => 'deposit some money',
@@ -116,7 +116,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
     public function test_charge_lender_balance_manually_controller_transaction_description()
     {
         $this->actingAs(self::$admin);
-        $this->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
+        $this->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit', [
             'amount' => 50,
             'description_en' => 'deposit some money',
             'description_ar' => 'deposit some money',
@@ -124,15 +124,15 @@ class ChargeLenderBalanceManuallyTest extends TestCase
                 ->create('attachment.pdf'),
         ]);
 
-        $response = $this->getJson('api/v1/admin/companies/'.self::$company->id.'/transactions');
+        $response = $this->getJson('api/v1/admin/lenders/'.self::$lender->id.'/transactions');
         $this->assertTrue($response->getOriginalContent()->data[1]->description == __('transaction-description.manual_deposit'));
     }
 
     public function test_charge_lender_balance_manually_controller_check_wallet_before_and_after_charge()
     {
-        $balance = self::$company->balance(WalletType::CompanyWallet);
+        $balance = self::$lender->balance(WalletType::CompanyWallet);
         $this->actingAs(self::$admin);
-        $this->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
+        $this->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit', [
             'amount' => 50,
             'description_en' => 'deposit some money',
             'description_ar' => 'deposit some money',
@@ -140,14 +140,14 @@ class ChargeLenderBalanceManuallyTest extends TestCase
                 ->create('attachment.pdf'),
         ]);
 
-        $balanceAfterDeposit = self::$company->balance(WalletType::CompanyWallet);
+        $balanceAfterDeposit = self::$lender->balance(WalletType::CompanyWallet);
         $this->assertTrue($balance->add(Money::parseByDecimal(50, 'SAR'))->equals($balanceAfterDeposit));
     }
 
     public function test_charge_lender_balance_manually_admin_can_access()
     {
         $this->actingAs(self::$admin)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
+            ->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit', [
                 'amount' => 10,
                 'description_en' => 'deposit some money',
                 'description_ar' => 'deposit some money',
@@ -160,7 +160,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
     public function test_charge_lender_balance_manually_manager_can_not_access_with_no_permission()
     {
         $this->actingAs(self::$manager)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
+            ->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit', [
                 'amount' => 10,
                 'description_en' => 'deposit some money',
                 'description_ar' => 'deposit some money',
@@ -173,7 +173,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
     public function test_charge_lender_balance_manually_manager_can_access_when_has_permission()
     {
         $this->actingAs(self::$managerHasPermission)
-            ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit', [
+            ->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit', [
                 'amount' => 10,
                 'description_en' => 'deposit some money',
                 'description_ar' => 'deposit some money',
@@ -187,8 +187,8 @@ class ChargeLenderBalanceManuallyTest extends TestCase
     {
         $this->assertLenderUserCannotAccess(function (User $user, string $role) {
             return  $this->actingAs($user)
-                ->withHeader('X-Company', self::$company->getOriginal('id'))
-                ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit');
+                ->withHeader('X-Company', self::$lender->getOriginal('id'))
+                ->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit');
         });
     }
 }

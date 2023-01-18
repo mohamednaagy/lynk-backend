@@ -8,8 +8,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class GetPaginatedCompaniesAction implements GetPaginatedCompanies
 {
-    public function handle(): LengthAwarePaginator
+    public function handle($companyType = null): LengthAwarePaginator
     {
-        return Company::query()->withCount('orders')->paginate();
+        return Company::query()->when($companyType, function ($query) use ($companyType) {
+            $query->where('type', $companyType);
+        })->withCount('orders')->paginate();
     }
 }
