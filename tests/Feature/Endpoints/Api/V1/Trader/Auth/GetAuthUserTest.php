@@ -4,7 +4,6 @@ namespace Endpoints\Api\V1\Trader\Auth;
 
 use App\Enums\Area;
 use App\Enums\CompanyType;
-use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
@@ -13,11 +12,11 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class GetAuthUserTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     private static Company $company;
 
@@ -35,7 +34,7 @@ class GetAuthUserTest extends TestCase
         parent::setUp();
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910', 'type' => CompanyType::Trader]);
-        self::$userTrader = $this->createLenderUser(self::$company->id, Role::TraderAdmin, 'traderAdmin@bim.com');
+        self::$userTrader = $this->createTraderUser(self::$company->id);
     }
 
     /**
@@ -56,29 +55,30 @@ class GetAuthUserTest extends TestCase
      */
     public function test_that_trader_user_can_fetch_his_details(): void
     {
-        $data = $this->actingAs(self::$userTrader)
-            ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/trader/auth')
-            ->assertStatus(Response::HTTP_OK)
-            ->assertExactJson(
-                fractal(self::$userTrader->load(['roles']), new UserTransformer(Area::Trader))
-                    ->parseIncludes([
-                        'id',
-                        'first_name',
-                        'last_name',
-                        'email',
-                        'is_email_verified',
-                        'role',
-                        'company.id',
-                        'company.name',
-                        'company.public_status_comment',
-                        'company.status',
-                        'permissions',
-                        'locale',
-                        'phone_number',
-                        'phone_country_code',
-                        'formatted_phone_number',
-                    ])->respond()->getData(true)
-            );
+        $this->assertStatusCodeForAreaRoles(Response::HTTP_OK, Area::Trader, function ($user) {
+            return $this->actingAs(self::$userTrader)
+                ->withHeader('X-Company', self::$company->id)
+                ->getJson('api/v1/trader/auth')
+                ->assertExactJson(
+                    fractal(self::$userTrader->load(['roles']), new UserTransformer(Area::Trader))
+                        ->parseIncludes([
+                            'id',
+                            'first_name',
+                            'last_name',
+                            'email',
+                            'is_email_verified',
+                            'role',
+                            'company.id',
+                            'company.name',
+                            'company.public_status_comment',
+                            'company.status',
+                            'permissions',
+                            'locale',
+                            'phone_number',
+                            'phone_country_code',
+                            'formatted_phone_number',
+                        ])->respond()->getData(true)
+                );
+        });
     }
 }
