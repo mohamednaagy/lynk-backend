@@ -4,7 +4,6 @@ namespace Tests\Feature\Endpoints\Api\V1\Trader;
 
 use App\Actions\Orders\GetPaginatedFinancingOrderAction;
 use App\Enums\FinancingOrderHistory;
-use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\User;
@@ -15,11 +14,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class ListOrdersTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithCompany, InteractsWithUser;
 
     private static Company $company;
 
@@ -48,9 +48,9 @@ class ListOrdersTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        [self::$companyTwo, self::$walletTwo] = $this->createCompany('2000', ['company_cr' => '12345678911']);
-        self::$userTraderAdmin = $this->createLenderUser(self::$company->id, Role::TraderAdmin, 'traderAdmin@bim.com');
+        [self::$company, self::$wallet] = $this->createTraderCompany('2000', ['company_cr' => '12345678910']);
+        [self::$companyTwo, self::$walletTwo] = $this->createTraderCompany('2000', ['company_cr' => '12345678911']);
+        self::$userTraderAdmin = $this->createTraderUser(self::$company->id);
         self::$order = $this->createOrder(self::$company->id, self::$userTraderAdmin->id);
         self::$orderTwo = $this->createOrder(self::$companyTwo->id, self::$userTraderAdmin->id);
         self::$traderOrder = self::$order->traderOrders()->create([
