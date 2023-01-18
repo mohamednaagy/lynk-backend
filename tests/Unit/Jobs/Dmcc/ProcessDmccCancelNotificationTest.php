@@ -14,13 +14,12 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithCompany;
-use Tests\Traits\InteractsWithUser;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 use Throwable;
 
 class ProcessDmccCancelNotificationTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     protected static Company $company;
 
@@ -28,7 +27,7 @@ class ProcessDmccCancelNotificationTest extends TestCase
 
     protected static FinancingOrder $financingOrder;
 
-    protected static $notification;
+    protected static mixed $notification;
 
     protected static Model|TraderOrder $traderOrder;
 
@@ -93,15 +92,24 @@ class ProcessDmccCancelNotificationTest extends TestCase
      */
     public function test_process_cannot_proceed_when_order_status_not_pending_cancellation()
     {
-        //change the order status with invalid one
-        self::$financingOrder->update(['status' => FinancingOrderStatus::PendingApproval]);
+        foreach (FinancingOrderStatus::getValues() as $status) {
+            if (
+                $status == FinancingOrderStatus::PendingCancellation ||
+                $status == FinancingOrderStatus::Cancelled
+            ) {
+                continue;
+            }
 
-        $process = new ProcessDmccCancelNotification(self::$notification);
-        $process->handle();
+            //change the order status with invalid one
+            self::$financingOrder->update(['status' => $status]);
 
-        $this->assertFalse(
-            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Cancelled)
-        );
+            $process = new ProcessDmccCancelNotification(self::$notification);
+            $process->handle();
+
+            $this->assertFalse(
+                self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Cancelled)
+            );
+        }
     }
 
     /**
