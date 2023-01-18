@@ -60,7 +60,7 @@ class GetAuthUserTest extends TestCase
                 ->withHeader('X-Company', $user->company_id)
                 ->getJson('api/v1/trader/auth')
                 ->assertExactJson(
-                    fractal(self::$userTrader->load(['roles']), new UserTransformer(Area::Trader))
+                    fractal($user->load(['roles']), new UserTransformer(Area::Trader))
                         ->parseIncludes([
                             'id',
                             'first_name',
