@@ -157,7 +157,7 @@ class DmccDriverTest extends TestCase
      *
      * @throws TraderException
      */
-    public function test_fetch_notifications_fail(): void
+    public function test_fetch_notifications_with_invalid_response_fails(): void
     {
         $this->expectException(TraderException::class);
 
@@ -200,7 +200,7 @@ class DmccDriverTest extends TestCase
      *
      * @throws TraderException
      */
-    public function test_get_tti_id_fail(): void
+    public function test_get_tti_id_with_invalid_response_fails(): void
     {
         $this->expectException(TraderException::class);
 
@@ -282,7 +282,7 @@ class DmccDriverTest extends TestCase
      *
      * @throws TraderException
      */
-    public function test_respond_ptp_service_fail(): void
+    public function test_respond_ptp_service_with_invalid_response_fails(): void
     {
         $this->expectException(TraderException::class);
 
@@ -319,7 +319,7 @@ class DmccDriverTest extends TestCase
      *
      * @throws TraderException
      */
-    public function test_create_selling_commodity_to_customer_document_fail(): void
+    public function test_create_selling_commodity_to_customer_document_with_invalid_trader_order_fails(): void
     {
         Storage::fake();
         UploadedFile::fake();
@@ -354,7 +354,7 @@ class DmccDriverTest extends TestCase
      *
      * @throws TraderException
      */
-    public function test_create_transfer_ownership_to_lender_document_fail(): void
+    public function test_create_transfer_ownership_to_lender_document_with_invalid_trader_order_fails(): void
     {
         Storage::fake();
         UploadedFile::fake();
@@ -400,7 +400,7 @@ class DmccDriverTest extends TestCase
      *
      * @throws TraderException
      */
-    public function test_get_document_by_type_and_transaction_fail(): void
+    public function test_get_document_by_type_and_transaction_with_invalid_response_fails(): void
     {
         $this->expectException(TraderException::class);
 
@@ -536,7 +536,7 @@ class DmccDriverTest extends TestCase
      *
      * @throws TraderException
      */
-    public function test_issue_murabaha_purchase_offer_fail(): void
+    public function test_issue_murabaha_purchase_offer_with_invalid_response_fails(): void
     {
         $this->expectException(TraderException::class);
 
