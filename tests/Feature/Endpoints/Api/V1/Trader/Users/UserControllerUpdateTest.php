@@ -12,11 +12,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UserControllerUpdateTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     private static Company $company;
 
@@ -45,9 +45,9 @@ class UserControllerUpdateTest extends TestCase
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         [self::$otherCompany, self::$otherWallet] = $this->createCompany('2000', ['company_cr' => '12345678911']);
-        self::$userTraderAdmin = $this->createLenderUser(self::$company->id, Role::TraderAdmin, 'firstTraderAdmin@bim.com');
-        self::$otherUserTraderAdminOfSameCompany = $this->createLenderUser(self::$company->id, Role::TraderAdmin, 'secondTraderAdmin@bim.com');
-        self::$otherUserTraderAdmin = $this->createLenderUser(self::$otherCompany->id, Role::TraderAdmin, 'otherTraderAdmin@bim.com');
+        self::$userTraderAdmin = $this->createTraderUser(self::$company->id);
+        self::$otherUserTraderAdminOfSameCompany = $this->createTraderUser(self::$company->id);
+        self::$otherUserTraderAdmin = $this->createTraderUser(self::$otherCompany->id);
         self::$traderDetails = [
             'first_name' => 'trader',
             'last_name' => 'User',

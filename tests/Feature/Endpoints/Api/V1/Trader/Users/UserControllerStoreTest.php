@@ -14,11 +14,11 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UserControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     private static Company $company;
 
@@ -45,8 +45,8 @@ class UserControllerStoreTest extends TestCase
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         [self::$otherCompany, self::$otherWallet] = $this->createCompany('2000', ['company_cr' => '12345678911']);
-        self::$userTraderAdmin = $this->createLenderUser(self::$company->id, Role::TraderAdmin, 'firstTraderAdmin@bim.com');
-        self::$otherUserTraderAdmin = $this->createLenderUser(self::$otherCompany->id, Role::TraderAdmin, 'otherTraderAdmin@bim.com');
+        self::$userTraderAdmin = $this->createTraderUser(self::$company->id);
+        self::$otherUserTraderAdmin = $this->createTraderUser(self::$otherCompany->id);
         self::$traderDetails = [
             'first_name' => 'trader',
             'last_name' => 'User',

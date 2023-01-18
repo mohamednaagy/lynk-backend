@@ -4,7 +4,6 @@ namespace Tests\Feature\Endpoints\Api\V1\Trader\Users;
 
 use App\Enums\Area;
 use App\Enums\CompanyStatus;
-use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
@@ -12,11 +11,11 @@ use App\Transformers\UserTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UserControllerShowTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     private static Company $company;
 
@@ -41,8 +40,8 @@ class UserControllerShowTest extends TestCase
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         [self::$otherCompany, self::$otherWallet] = $this->createCompany('2000', ['company_cr' => '12345678911']);
-        self::$userTraderAdmin = $this->createLenderUser(self::$company->id, Role::TraderAdmin, 'firstTraderAdmin@bim.com');
-        self::$otherUserTraderAdmin = $this->createLenderUser(self::$otherCompany->id, Role::TraderAdmin, 'otherTraderAdmin@bim.com');
+        self::$userTraderAdmin = $this->createTraderUser(self::$company->id);
+        self::$otherUserTraderAdmin = $this->createTraderUser(self::$otherCompany->id);
     }
 
     /**

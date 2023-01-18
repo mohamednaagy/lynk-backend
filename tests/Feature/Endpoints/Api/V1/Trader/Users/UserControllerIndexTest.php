@@ -13,11 +13,11 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UserControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     private static Company $company;
 
@@ -44,8 +44,8 @@ class UserControllerIndexTest extends TestCase
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         [self::$otherCompany, self::$otherWallet] = $this->createCompany('2000', ['company_cr' => '12345678911']);
-        self::$userTraderAdmin = $this->createLenderUser(self::$company->id, Role::TraderAdmin, 'firstTraderAdmin@bim.com');
-        self::$otherUserTraderAdmin = $this->createLenderUser(self::$otherCompany->id, Role::TraderAdmin, 'otherTraderAdmin@bim.com');
+        self::$userTraderAdmin = $this->createTraderUser(self::$company->id);
+        self::$otherUserTraderAdmin = $this->createTraderUser(self::$otherCompany->id);
         self::$traderUsersCollection = self::$company->users()->whereHas('roles', function ($query) {
             return $query->whereIn('name', [
                 Role::TraderAdmin,
