@@ -15,12 +15,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class LenderUserControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender, InteractsWithAdmin;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static Company $company;
 
@@ -42,11 +42,10 @@ class LenderUserControllerIndexTest extends TestCase
         parent::setUp();
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userAdmin = $this->createAdmin('admin@bim.com');
-        self::$userManager = $this->createManager(
-            'manager@bim.com',
-            perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Index]),
-        );
+        self::$userAdmin = $this->createSuperAdminUser();
+        self::$userManager = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Index]));
+
         self::$users = self::$company->users()->whereHas('roles', function ($query) {
             return $query->whereIn('name', [
                 Role::LenderAdmin,

@@ -15,14 +15,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class AdminFinancingOrderControllerShowTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithLender;
-    use InteractsWithAdmin;
+    use AssertsAccessByRoleAndArea;
 
     private static Company $company;
 
@@ -41,21 +39,18 @@ class AdminFinancingOrderControllerShowTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company] = $this->createCompany(
-            '2000',
-            [
-                'company_cr' => '12345678910',
-            ]
-        );
+        [self::$company] = $this->createCompany();
 
-        self::$managerHasPermissionToShowMethod = $this->createManager(
-            'managerHasPermissionToShowMethod@bim.com',
+        self::$managerHasPermissionToShowMethod = $this->createSuperAdminUser(Role::Manager);
+
+        $this->assignPermissionToUser(
+            self::$managerHasPermissionToShowMethod,
             perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show])
         );
 
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager('Manager@bim.com');
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$admin = $this->createSuperAdminUser();
+        self::$manager = $this->createSuperAdminUser(Role::Manager);
 
         FinancingOrder::factory(5)->create([
             'company_id' => self::$company->id,
@@ -137,7 +132,7 @@ class AdminFinancingOrderControllerShowTest extends TestCase
 
     public function test_admin_financing_order_controller_show_other_roles_can_not_access()
     {
-        $this->assertLenderUserCannotAccess(function ($user, $role) {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin, Area::Customer], function ($user, $role) {
             $order = FinancingOrder::where('company_id', self::$company->id)
                 ->first();
 

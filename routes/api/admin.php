@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Companies\ChargeLenderBalanceManually;
+use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
 use App\Http\Controllers\Api\V1\Admin\Companies\CompanyUserController;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyBalance;
 use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;

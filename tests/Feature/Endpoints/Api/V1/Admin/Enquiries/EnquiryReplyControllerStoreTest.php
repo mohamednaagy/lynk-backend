@@ -5,6 +5,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Enquiries;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\EnquiryStatus;
+use App\Enums\Role;
 use App\Enums\Subject;
 use App\Mail\ReplyToVisitorEnquiry;
 use App\Models\Enquiry;
@@ -15,12 +16,12 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
 use Tests\Traits\InteractsWithEnquiry;
+use Tests\Traits\InteractsWithUser;
 
 class EnquiryReplyControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin, InteractsWithEnquiry;
+    use RefreshDatabase, InteractsWithUser, InteractsWithEnquiry;
 
     const BaseUrl = 'api/v1/admin/enquiries/';
 
@@ -48,12 +49,11 @@ class EnquiryReplyControllerStoreTest extends TestCase
     {
         parent::setUp();
 
-        self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager();
-        self::$managerHasPermission = $this->createManager(
-            'managerHasPermission@bim.com',
-            perm(Area::SuperAdmin, [Subject::EnquiryReplies, Action::Create])
-        );
+        self::$admin = $this->createSuperAdminUser();
+        self::$manager = $this->createSuperAdminUser(Role::Manager);
+        self::$managerHasPermission = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(self::$managerHasPermission, perm(Area::SuperAdmin, [Subject::EnquiryReplies, Action::Create]));
+
         self::$visitorEnquiry = $this->createEnquiry();
         self::$enquiryReplyUrl = self::BaseUrl.self::$visitorEnquiry->id.'/replies';
     }

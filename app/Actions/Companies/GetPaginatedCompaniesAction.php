@@ -8,7 +8,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class GetPaginatedCompaniesAction implements GetPaginatedCompanies
 {
-    public string $type;
+    public $type = null;
 
     public function handle(): LengthAwarePaginator
     {
