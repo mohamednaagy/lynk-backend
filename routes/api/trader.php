@@ -3,6 +3,7 @@
 use App\Enums\Role;
 use App\Http\Controllers\Api\V1\Trader\Auth\UpdateMyProfile;
 use Illuminate\Support\Facades\Route;
+use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1/trader')->name('api.v1.')->group(function () {
-    Route::middleware(['auth:sanctum', 'role:'.Role::TraderAdmin])->group(
+    Route::middleware(['auth:sanctum', 'role:'.Role::TraderAdmin, InitializeTenancyByRequestData::class])->group(
         function () {
             Route::put('auth/profile', UpdateMyProfile::class);
         }

@@ -32,7 +32,11 @@ class UpdateMyProfileRequest extends FormRequest
                 'required',
                 'email',
                 Rule::unique(User::class, 'email')
-                    ->ignore($this->user()->getAuthIdentifier(), 'id'),
+                    ->ignore($this->user()->getAuthIdentifier(), 'id')
+                    ->where(
+                        'company_id',
+                        $this->user()->company_id
+                    ),
             ],
             'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
