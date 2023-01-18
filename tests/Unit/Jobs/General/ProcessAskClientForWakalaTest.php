@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Unit\Jobs\Dmcc;
+namespace Tests\Unit\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
-use App\Jobs\Dmcc\ProcessAskClientForWakala;
+use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
@@ -33,8 +33,7 @@ class ProcessAskClientForWakalaTest extends TestCase
         [self::$company] = $this->createCompany();
         self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::Approved,
-
+            'status' => FinancingOrderStatus::CommoditySoldToCustomer,
         ]);
 
         self::$commoditySoldToCustomerOrder = $this->createOrder(self::$company->id, self::$lender->id, [
@@ -60,6 +59,25 @@ class ProcessAskClientForWakalaTest extends TestCase
         self::$order = self::$order->fresh();
 
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::WaitingClientWakala));
+    }
+
+    public function test_process_ask_client_for_wakala_will_not_processed_if_order_status_not_commodity_sold_to_customer()
+    {
+        $orderStatuses = FinancingOrderStatus::getValues();
+        foreach ($orderStatuses as $orderStatus) {
+            if ($orderStatus == FinancingOrderStatus::CommoditySoldToCustomer) {
+                continue;
+            }
+
+            $order = $this->createOrder(self::$company->id, self::$lender->id, [
+                'status' => $orderStatus,
+            ]);
+            $processOrder = new ProcessAskClientForWakala($order->id);
+            $processOrder->handle();
+            $order->refresh();
+
+            $this->assertTrue($order->status->is($orderStatus));
+        }
     }
 
     public function test_process_ask_client_for_wakala_sms_sent_successfully()

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\Dmcc;
+namespace App\Jobs\General;
 
 use App\Actions\Contracts\Clients\AskClientWakala;
 use App\Enums\FinancingOrderStatus;
@@ -42,6 +42,10 @@ class ProcessAskClientForWakala implements ShouldQueue
     {
         /** @var FinancingOrder $financingOrder */
         $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
+
+        if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::WaitingClientWakala)) {
+            return;
+        }
 
         app()->make(AskClientWakala::class)->handle(
             $financingOrder,
