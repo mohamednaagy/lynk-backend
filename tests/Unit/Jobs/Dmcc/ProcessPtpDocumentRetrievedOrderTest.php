@@ -18,12 +18,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 use Throwable;
 
 class ProcessPtpDocumentRetrievedOrderTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     protected static Company $company;
 
@@ -38,7 +38,7 @@ class ProcessPtpDocumentRetrievedOrderTest extends TestCase
         parent::setUp();
 
         [self::$company] = $this->createCompany('2000', ['company_cr' => '1234567891']);
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, ['email' => 'lenderAdmin@bim.com']);
         self::$financingOrder = $this->createOrder(
             self::$company->id,
             self::$userLender->id,
@@ -77,15 +77,24 @@ class ProcessPtpDocumentRetrievedOrderTest extends TestCase
      */
     public function test_job_cannot_proceed_when_order_status_not_ptp_document_retrieved()
     {
-        //change the order status with invalid one
-        self::$financingOrder->update(['status' => FinancingOrderStatus::PendingApproval]);
+        foreach (FinancingOrderStatus::getValues() as $status) {
+            if (
+                $status == FinancingOrderStatus::PtpDocumentRetrieved ||
+                $status == FinancingOrderStatus::CommodityPurchased
+            ) {
+                continue;
+            }
 
-        $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder->id);
-        $process->handle();
+            //change the order status with invalid one
+            self::$financingOrder->update(['status' => FinancingOrderStatus::PendingApproval]);
 
-        $this->assertFalse(
-            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::CommodityPurchased)
-        );
+            $process = new ProcessPtpDocumentRetrievedOrder(self::$financingOrder->id);
+            $process->handle();
+
+            $this->assertFalse(
+                self::$financingOrder->fresh()->status->is(FinancingOrderStatus::CommodityPurchased)
+            );
+        }
     }
 
     /**
@@ -101,7 +110,7 @@ class ProcessPtpDocumentRetrievedOrderTest extends TestCase
 
         $this->assertDatabaseHas((new Media())->getTable(), [
             'model_id' => self::$financingOrder->id,
-            'model_type' => FinancingOrder::class,
+            'model_type' => (new FinancingOrder())->getMorphClass(),
             'collection_name' => FinancingOrderMediaCollection::TransferOwnershipToLender,
         ]);
     }
