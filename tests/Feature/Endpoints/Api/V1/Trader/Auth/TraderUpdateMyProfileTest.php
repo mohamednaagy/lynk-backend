@@ -7,12 +7,11 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
-use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class TraderUpdateMyProfileTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin, InteractsWithCompany;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     private static User $trader;
 
@@ -23,7 +22,8 @@ class TraderUpdateMyProfileTest extends TestCase
     {
         parent::setUp();
 
-        self::$trader = $this->createTraderUser();
+        [$company] = $this->createTraderCompany();
+        self::$trader = $this->createTraderUser($company->id);
     }
 
     /**
@@ -105,7 +105,7 @@ class TraderUpdateMyProfileTest extends TestCase
 
     public function test_update_my_profile_other_roles_can_not_access()
     {
-        $this->asserStatusForAllRoleExceptGivingAreaRoles(403, Area::Trader, function ($user, $role) {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::Trader, Area::Customer], function ($user, $role) {
             return $this->actingAs($user)
                 ->putJson('api/v1/trader/auth/profile', [
                     'email' => 'test@bim.com',
