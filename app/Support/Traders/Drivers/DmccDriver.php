@@ -354,10 +354,9 @@ class DmccDriver implements TraderInterface
             ]));
         }
 
-        $response = $response->object();
+        $details = $response->object()->inventoryDetails[0];
 
         $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
-        $details = $response->inventoryDetails[0];
         $traderOrder->update([
             'product' => $details->hsCodeDescription,
             'quantity' => $details->quantity,
