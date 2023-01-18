@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Trader;
+namespace App\Http\Controllers\Api\V1\Trader\FinancingOrders;
 
 use App\Actions\Contracts\Orders\GetOrder;
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;

@@ -1,9 +1,8 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Trader;
+namespace Tests\Feature\Endpoints\Api\V1\Trader\FinancingOrders;
 
-use App\Actions\Orders\GetOrderAction;
-use App\Enums\CompanyType;
+use App\Actions\Orders\GetPaginatedFinancingOrderAction;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
@@ -15,12 +14,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
 
-class ShowOrderTest extends TestCase
+class OrderControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser;
+    use RefreshDatabase, InteractsWithCompany, InteractsWithUser, AssertsAccessByRoleAndArea;
 
     private static Company $company;
 
@@ -49,8 +49,8 @@ class ShowOrderTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createTraderCompany('2000', ['company_cr' => '12345678910', 'type' => CompanyType::Trader]);
-        [self::$companyTwo, self::$walletTwo] = $this->createTraderCompany('2000', ['company_cr' => '12345678911', 'type' => CompanyType::Trader]);
+        [self::$company, self::$wallet] = $this->createTraderCompany('2000', ['company_cr' => '12345678910']);
+        [self::$companyTwo, self::$walletTwo] = $this->createTraderCompany('2000', ['company_cr' => '12345678911']);
         self::$userTraderAdmin = $this->createTraderUser(self::$company->id);
         self::$order = $this->createOrder(self::$company->id, self::$userTraderAdmin->id);
         self::$orderTwo = $this->createOrder(self::$companyTwo->id, self::$userTraderAdmin->id);
@@ -70,7 +70,7 @@ class ShowOrderTest extends TestCase
     public function test_unauth_user_cannot_access(): void
     {
         $this->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/trader/orders/'.self::$order->id)
+            ->getJson('api/v1/trader/orders')
             ->assertUnauthorized();
     }
 
@@ -81,24 +81,19 @@ class ShowOrderTest extends TestCase
     {
         $this->actingAs(self::$userTraderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/trader/orders/'.self::$order->id)
+            ->getJson('api/v1/trader/orders')
             ->assertOk()
             ->assertExactJson(
-                fractal((new GetOrderAction())->setCompany(tenant())->handle(self::$order->id), new FinancingOrderTransformer())
+                fractal((new GetPaginatedFinancingOrderAction())->setCompany(tenant())->handle(), new FinancingOrderTransformer())
                     ->parseIncludes([
                         'id',
                         'amount',
                         'selling_price',
                         'status',
-                        'active_trader.id',
-                        'active_trader.reference',
-                        'active_trader.provider',
-                        'active_trader.status',
-                        'trader_order_history',
                     ])
                     ->respond()
                     ->getData(true)
-            )->assertJsonCount(1);
+            );
     }
 
     /**
@@ -108,7 +103,18 @@ class ShowOrderTest extends TestCase
     {
         $this->actingAs(self::$userTraderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/trader/orders/'.self::$orderTwo->id)
-            ->assertNotFound();
+            ->getJson('api/v1/trader/orders')
+            ->assertOk()
+            ->assertExactJson(
+                fractal((new GetPaginatedFinancingOrderAction())->setCompany(tenant())->handle(), new FinancingOrderTransformer())
+                    ->parseIncludes([
+                        'id',
+                        'amount',
+                        'selling_price',
+                        'status',
+                    ])
+                    ->respond()
+                    ->getData(true)
+            );
     }
 }

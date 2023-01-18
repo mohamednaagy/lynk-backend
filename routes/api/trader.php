@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\Role;
-use App\Http\Controllers\Api\V1\Trader\OrderController;
+use App\Http\Controllers\Api\V1\Trader\FinancingOrders\OrderController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
