@@ -94,7 +94,7 @@ class TraderCompanyControllerStoreTest extends TestCase
             ->assertJsonValidationErrorFor('company_cr');
     }
 
-    public function test_trader_company_controller_driver_should_be_in_dmcc_fake_unsuccessful()
+    public function test_trader_company_controller_driver_with_invalid_driver_unsuccessful()
     {
         $this->actingAs(self::$trader)
             ->postJson('api/v1/admin/traders', [
