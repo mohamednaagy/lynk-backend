@@ -14,12 +14,13 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 use Throwable;
 
 class ProcessDmccCancelNotificationTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithCompany, InteractsWithUser;
 
     protected static Company $company;
 
@@ -36,7 +37,7 @@ class ProcessDmccCancelNotificationTest extends TestCase
         parent::setUp();
 
         [self::$company] = $this->createCompany('2000', ['company_cr' => '1234567891']);
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, ['email' => 'lenderAdmin@bim.com']);
         self::$financingOrder = $this->createOrder(
             self::$company->id,
             self::$userLender->id,
@@ -149,6 +150,21 @@ class ProcessDmccCancelNotificationTest extends TestCase
      */
     public function test_process_passes_with_valid_provider_as_fake_succeed()
     {
+        $process = new ProcessDmccCancelNotification(self::$notification);
+        $process->handle();
+
+        $this->assertTrue(
+            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Cancelled)
+        );
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function test_process_passes_with_valid_provider_as_dmcc_succeed()
+    {
+        self::$financingOrder->traderOrders()->first()->update(['provider' => 'dmcc']);
+
         $process = new ProcessDmccCancelNotification(self::$notification);
         $process->handle();
 
