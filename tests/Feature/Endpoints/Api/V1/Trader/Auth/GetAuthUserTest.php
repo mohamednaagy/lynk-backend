@@ -87,13 +87,13 @@ class GetAuthUserTest extends TestCase
      */
     public function test_that_other_user_cant_fetch_his_details(): void
     {
-        $this->assertStatusCodeForAreaRoles(Response::HTTP_FORBIDDENo, Area::Lender, function ($user) {
+        $this->assertStatusCodeForAreaRoles(Response::HTTP_FORBIDDEN, Area::Lender, function ($user) {
             return $this->actingAs($user)
                 ->withHeader('X-Company', $user->company_id)
                 ->getJson('api/v1/trader/auth');
         });
 
-        $this->assertStatusCodeForAreaRoles(Response::HTTP_FORBIDDENo, Area::SuperAdmin, function ($user) {
+        $this->assertStatusCodeForAreaRoles(Response::HTTP_FORBIDDEN, Area::SuperAdmin, function ($user) {
             return $this->actingAs($user)
                 ->withHeader('X-Company', $user->company_id)
                 ->getJson('api/v1/trader/auth');
