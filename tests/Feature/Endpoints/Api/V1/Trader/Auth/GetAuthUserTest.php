@@ -56,7 +56,7 @@ class GetAuthUserTest extends TestCase
     public function test_that_trader_user_can_fetch_his_details(): void
     {
         $this->assertStatusCodeForAreaRoles(Response::HTTP_OK, Area::Trader, function ($user) {
-            return $this->actingAs(self::$userTrader)
+            return $this->actingAs($user)
                 ->withHeader('X-Company', self::$company->id)
                 ->getJson('api/v1/trader/auth')
                 ->assertExactJson(
