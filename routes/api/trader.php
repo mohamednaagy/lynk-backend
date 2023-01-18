@@ -1,8 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\V1\Lender\Auth\Register;
-use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes

@@ -14,12 +14,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
 use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class LenderUserControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender, InteractsWithAdmin;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static Company $lender;
 
@@ -41,11 +41,10 @@ class LenderUserControllerStoreTest extends TestCase
         parent::setUp();
 
         [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userAdmin = $this->createAdmin('admin@bim.com');
-        self::$userManager = $this->createManager(
-            'manager@bim.com',
-            perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Create]),
-        );
+        self::$userAdmin = $this->createSuperAdminUser();
+        self::$userManager = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Create]));
+
         self::$userDetails = [
             'first_name' => 'first_name',
             'last_name' => 'last_name',

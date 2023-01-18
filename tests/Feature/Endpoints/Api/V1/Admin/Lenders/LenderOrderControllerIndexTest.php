@@ -16,14 +16,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class LenderOrderControllerIndexTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithLender;
-    use InteractsWithAdmin;
+    use AssertsAccessByRoleAndArea;
 
     private static Company $lender;
 
@@ -46,28 +44,20 @@ class LenderOrderControllerIndexTest extends TestCase
     {
         parent::setUp();
 
-        [self::$lender] = $this->createCompany(
-            '2000',
-            [
-                'company_cr' => '12345678910',
-            ]
-        );
+        [self::$lender] = $this->createCompany();
 
-        [self::$secondLender] = $this->createCompany(
-            '2000',
-            [
-                'company_cr' => '12345676666',
-            ]
-        );
+        [self::$secondLender] = $this->createCompany();
 
-        self::$managerHasPermissionToIndexMethod = $this->createManager(
-            'ManagerHasPermission@bim.com',
+        self::$managerHasPermissionToIndexMethod = $this->createSuperAdminUser();
+
+        $this->assignPermissionToUser(
+            self::$managerHasPermissionToIndexMethod,
             perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Index])
         );
 
-        self::$userLender = $this->createLenderUser(self::$lender->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager('Manager@bim.com');
+        self::$userLender = $this->createLenderUser(self::$lender->id, Role::LenderAdmin);
+        self::$admin = $this->createSuperAdminUser();
+        self::$manager = $this->createSuperAdminUser(Role::Manager);
 
         FinancingOrder::factory(5)->create([
             'company_id' => self::$lender->id,
@@ -142,7 +132,7 @@ class LenderOrderControllerIndexTest extends TestCase
 
     public function test_admin_financing_order_controller_index_other_roles_can_not_access()
     {
-        $this->assertLenderUserCannotAccess(function ($user, $role) {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
                 ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/orders');
         });

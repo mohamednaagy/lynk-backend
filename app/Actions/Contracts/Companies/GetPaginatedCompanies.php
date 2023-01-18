@@ -6,5 +6,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface GetPaginatedCompanies
 {
-    public function handle($companyType = null): LengthAwarePaginator;
+    public function handle(): LengthAwarePaginator;
+
+    public function setType(string $type);
 }

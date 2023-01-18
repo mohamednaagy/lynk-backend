@@ -6,6 +6,7 @@ use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\CompanyStatus;
+use App\Enums\Role;
 use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Models\Company;
@@ -18,12 +19,12 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class LenderControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender, InteractsWithAdmin;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static Company $lender;
 
@@ -45,11 +46,10 @@ class LenderControllerStoreTest extends TestCase
         parent::setUp();
 
         [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userAdmin = $this->createAdmin('admin@bim.com');
-        self::$userManager = $this->createManager(
-            'manager@bim.com',
-            perm(Area::SuperAdmin, [Subject::Lenders, Action::Create]),
-        );
+        self::$userAdmin = $this->createSuperAdminUser();
+        self::$userManager = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::Lenders, Action::Create]));
+
         self::$lenderDetails = [
             'name' => 'testCompany',
             'unique_name' => 'companyUniqueName',

@@ -6,15 +6,12 @@ use BenSampo\Enum\Enum;
 
 /**
  * @method static static Admin()
- * @method static static Customer()
  */
 final class Role extends Enum
 {
     const Admin = 'Admin';
 
     const Manager = 'Manager';
-
-    const Customer = 'Customer';
 
     const LenderAdmin = 'LenderAdmin';
 
