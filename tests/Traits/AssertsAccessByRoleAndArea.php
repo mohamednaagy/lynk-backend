@@ -38,8 +38,8 @@ trait AssertsAccessByRoleAndArea
         $roles = Area::roles(Area::SuperAdmin);
 
         foreach ($roles as $role) {
-            $user = $this->createUser();
-            $this->assignRoleToUser($user, $role);
+            $user = $this->createSuperAdminUser($role);
+            dump($user->id);
             $request($user, $role)->assertStatus($status);
         }
     }

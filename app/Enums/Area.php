@@ -15,8 +15,6 @@ final class Area extends Enum
 {
     const SuperAdmin = 'SuperAdmin';
 
-    const Customer = 'Customer';
-
     const Lender = 'Lender';
 
     const Trader = 'Trader';
