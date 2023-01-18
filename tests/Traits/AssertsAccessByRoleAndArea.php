@@ -77,9 +77,6 @@ trait AssertsAccessByRoleAndArea
 
                     break;
 
-                case Area::Customer:
-                    break;
-
                 default:
                     [$company] = $this->createCompanyByArea($area);
                     $user = $this->createUserByRole($role, $company->id);

@@ -19,11 +19,12 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class MakeOrderProceedTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     const BaseUrl = 'api/v1/lender/orders/';
 
@@ -45,7 +46,7 @@ class MakeOrderProceedTest extends TestCase
         Artisan::call('module:seed');
 
         [self::$company] = $this->createCompany('2000', ['company_cr' => '1234567891']);
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$financingOrder = $this->createOrder(
             self::$company->id,
             self::$userLender->id,

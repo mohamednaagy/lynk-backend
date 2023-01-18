@@ -11,11 +11,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Grantify\Facades\Grantify;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
+use Tests\Traits\InteractsWithUser;
 
 class AdminControllerDestroyTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin;
+    use RefreshDatabase, InteractsWithUser;
 
     private static User $superAdminUser;
 
@@ -28,17 +28,15 @@ class AdminControllerDestroyTest extends TestCase
     {
         parent::setUp();
 
-        self::$superAdminUser = $this->createAdmin();
+        self::$superAdminUser = $this->createSuperAdminUser();
+        self::$managerAdminUser = $this->createSuperAdminUser(Role::Manager);
 
-        self::$managerAdminUser = $this->createManager(
-            'manager@bim.com',
-            perm(Area::SuperAdmin, [Subject::Admins, Action::Delete])
-        );
+        $this->assignPermissionToUser(self::$managerAdminUser, perm(Area::SuperAdmin, [Subject::Admins, Action::Delete]));
     }
 
     public function test_un_auth_cant_index_admins()
     {
-        $newSuperAdminUser = $this->createAdmin('newadmin@bim.com');
+        $newSuperAdminUser = $this->createSuperAdminUser();
 
         $this->deleteJson('api/v1/admin/admins/'.$newSuperAdminUser->id)
             ->assertUnauthorized()
@@ -49,7 +47,7 @@ class AdminControllerDestroyTest extends TestCase
 
     public function test_admin_controller_delete_with_super_admin_success()
     {
-        $newSuperAdminUser = $this->createAdmin('newadmin@bim.com');
+        $newSuperAdminUser = $this->createSuperAdminUser();
 
         $this->actingAs(self::$superAdminUser)
             ->deleteJson('api/v1/admin/admins/'.$newSuperAdminUser->id)
@@ -69,7 +67,7 @@ class AdminControllerDestroyTest extends TestCase
 
     public function test_admin_controller_delete_with_manager_no_permissions_unsuccessful()
     {
-        $newManagerUser = $this->createManager('newamanager@bim.com');
+        $newManagerUser = $this->createSuperAdminUser(Role::Manager);
         Grantify::syncPermissionToModel(self::$managerAdminUser, []);
 
         $this->actingAs(self::$managerAdminUser)

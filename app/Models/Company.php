@@ -47,6 +47,7 @@ class Company extends BaseTenant
             'updated_at',
             'order_cost_currency',
             'type',
+            'driver',
         ];
     }
 
@@ -63,5 +64,10 @@ class Company extends BaseTenant
     public function webhooks(): HasMany
     {
         return $this->hasMany(Webhook::class);
+    }
+
+    public function scopeTraderType($query, string $type)
+    {
+        return $query->where('type', $type);
     }
 }

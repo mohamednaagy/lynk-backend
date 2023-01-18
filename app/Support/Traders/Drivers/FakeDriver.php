@@ -10,21 +10,12 @@ use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\TraderHelper;
 use Carbon\Carbon;
-use CodeDredd\Soap\Facades\Soap;
-use CodeDredd\Soap\SoapClient;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 class FakeDriver implements TraderInterface
 {
     use TraderHelper;
-
-    private SoapClient $soap;
-
-    public function __construct()
-    {
-        $this->soap = Soap::buildClient('dmcc');
-    }
 
     public function acceptAgreement(): bool
     {
