@@ -3,6 +3,7 @@
 namespace Tests\Feature\Endpoints\Api\V1\Trader\FinancingOrders;
 
 use App\Actions\Orders\GetPaginatedFinancingOrderAction;
+use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
@@ -13,6 +14,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 use Tests\Traits\InteractsWithCompany;
@@ -116,5 +118,17 @@ class OrderControllerIndexTest extends TestCase
                     ->respond()
                     ->getData(true)
             );
+    }
+
+    public function test_trader_roles_only_can_access()
+    {
+        $this->assertStatusCodeForAllRolesExceptForArea(
+            Response::HTTP_FORBIDDEN,
+            [Area::Trader],
+            function ($user, $role) {
+                return $this->actingAs($user)
+                    ->withHeader('X-Company', self::$company->id)
+                    ->getJson('api/v1/trader/orders');
+            });
     }
 }
