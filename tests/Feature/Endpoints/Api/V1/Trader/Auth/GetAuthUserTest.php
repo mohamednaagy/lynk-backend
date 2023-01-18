@@ -57,7 +57,7 @@ class GetAuthUserTest extends TestCase
     {
         $this->assertStatusCodeForAreaRoles(Response::HTTP_OK, Area::Trader, function ($user) {
             return $this->actingAs($user)
-                ->withHeader('X-Company', self::$company->id)
+                ->withHeader('X-Company', $user->company_id)
                 ->getJson('api/v1/trader/auth')
                 ->assertExactJson(
                     fractal(self::$userTrader->load(['roles']), new UserTransformer(Area::Trader))
