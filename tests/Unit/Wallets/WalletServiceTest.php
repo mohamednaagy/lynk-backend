@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Wallet;
+namespace Tests\Unit\Wallets;
 
 use App\Enums\WalletType;
 use App\Models\Company;
@@ -13,11 +13,10 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
-use Tests\Traits\InteractsWithUser;
 
 class WalletServiceTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use RefreshDatabase, InteractsWithCompany;
 
     private static WalletService $walletService;
 
