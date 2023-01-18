@@ -13,35 +13,35 @@ use App\Enums\CompanyType;
 use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Trader\Companies\StoreCompanyRequest;
-use App\Http\Requests\V1\Trader\Companies\UpdateCompanyRequest;
+use App\Http\Requests\V1\Admin\Traders\StoreTraderRequest;
+use App\Http\Requests\V1\Admin\Traders\UpdateTraderRequest;
 use App\Models\Company;
 use App\Support\Money\Money;
 use App\Transformers\CompanyTransformer;
 use Illuminate\Support\Facades\DB;
 
-class TraderCompanyController extends Controller
+class TraderController extends Controller
 {
     public function __construct()
     {
         $this->middleware(
             'permission:'.
-                perm(Area::Trader, [Subject::TraderCompanies, Action::Index, Action::Manage])
+                perm(Area::Trader, [Subject::Traders, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-                perm(Area::Trader, [Subject::TraderCompanies, Action::Create, Action::Manage])
+                perm(Area::Trader, [Subject::Traders, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-                perm(Area::Trader, [Subject::TraderCompanies, Action::Show, Action::Manage])
+                perm(Area::Trader, [Subject::Traders, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-                perm(Area::Trader, [Subject::TraderCompanies, Action::Edit, Action::Manage])
+                perm(Area::Trader, [Subject::Traders, Action::Edit, Action::Manage])
         )->only('update');
     }
 
@@ -60,7 +60,7 @@ class TraderCompanyController extends Controller
     }
 
     public function store(
-        StoreCompanyRequest $request,
+        StoreTraderRequest $request,
         GetSettingsClassInstance $getSettingsClassInstance,
         CreateCompany $createCompany,
         CreateWallet $createWallet
@@ -91,9 +91,9 @@ class TraderCompanyController extends Controller
         );
     }
 
-    public function show(Company $company)
+    public function show(Company $trader)
     {
-        return fractal($company, new CompanyTransformer())
+        return fractal($trader, new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',
@@ -104,11 +104,11 @@ class TraderCompanyController extends Controller
     }
 
     public function update(
-        UpdateCompanyRequest $request,
-        Company $company,
+        UpdateTraderRequest $request,
+        Company $trader,
         UpdateCompany $updateCompany
     ) {
-        $updateCompany->handle($company, $request->validated());
+        $updateCompany->handle($trader, $request->validated());
 
         return $this->successResponse([]);
     }

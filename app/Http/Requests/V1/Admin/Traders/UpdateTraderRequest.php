@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\V1\Trader\Companies;
+namespace App\Http\Requests\V1\Admin\Traders;
 
 use App\Models\Company;
 use App\Rules\CompanyUniqueNameRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreCompanyRequest extends FormRequest
+class UpdateTraderRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -37,18 +37,21 @@ class StoreCompanyRequest extends FormRequest
                 'string',
                 'min:3',
                 new CompanyUniqueNameRule,
-                Rule::unique(Company::class, 'unique_name'),
+                Rule::unique(Company::class, 'unique_name')
+                    ->ignore($this->route('trader')),
             ],
             'company_cr' => [
                 'required',
                 'string',
                 'size:10',
-                Rule::unique(Company::class, 'company_cr'),
+                Rule::unique(Company::class, 'company_cr')
+                    ->ignore($this->route('trader')),
             ],
             'driver' => [
                 'nullable',
                 'string',
-                Rule::unique(Company::class, 'driver'),
+                Rule::unique(Company::class, 'driver')
+                    ->ignore($this->route('trader')),
                 Rule::in(['dmcc', 'fake']),
             ],
         ];

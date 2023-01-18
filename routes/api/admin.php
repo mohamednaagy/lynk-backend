@@ -27,7 +27,7 @@ use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\LenderSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
-use App\Http\Controllers\Api\V1\Admin\Traders\TraderCompanyController;
+use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
 
@@ -98,7 +98,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.sign-up');
 
-    Route::apiResource('traders', TraderCompanyController::class)
+    Route::apiResource('traders', TraderController::class)
         ->only(['index', 'store', 'show', 'update'])
         ->middleware(['auth:sanctum', 'role:'.Role::TraderAdmin]);
 });
