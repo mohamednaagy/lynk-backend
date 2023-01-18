@@ -241,7 +241,7 @@ class AdminGetEdaatInvoicesControllerTest extends TestCase
 
     public function test_admin_get_edaat_invoices_controller_lender_roles_can_not_access()
     {
-        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin, Area::Customer], function ($user, $role) {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
                 ->getJson('api/v1/admin/edaat-invoices');
         });

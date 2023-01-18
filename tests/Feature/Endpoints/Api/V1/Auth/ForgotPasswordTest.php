@@ -55,7 +55,7 @@ class ForgotPasswordTest extends TestCase
     {
         Notification::fake();
 
-        Grantify::assignRoleToModel(self::$generalUser, Role::Customer);
+        Grantify::assignRoleToModel(self::$generalUser, Role::LenderAdmin);
 
         $response = $this->postJson(self::$sendResetPasswordUrl, [
             'email' => self::$generalUser->email,

@@ -9,13 +9,10 @@ use Modules\Grantify\Support\Areas\Trader;
 
 /**
  * @method static static SuperAdmin()
- * @method static static Customer()
  */
 final class Area extends Enum
 {
     const SuperAdmin = 'SuperAdmin';
-
-    const Customer = 'Customer';
 
     const Lender = 'Lender';
 

@@ -129,7 +129,7 @@ class AdminFinancingOrderControllerIndexTest extends TestCase
 
     public function test_admin_financing_order_controller_index_other_roles_can_not_access()
     {
-        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin, Area::Customer], function ($user, $role) {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
                 ->getJson('api/v1/admin/companies/'.self::$company->id.'/orders');
         });

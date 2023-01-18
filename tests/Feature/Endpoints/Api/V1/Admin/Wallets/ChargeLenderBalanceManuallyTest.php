@@ -176,7 +176,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
 
     public function test_that_order_show_cannot_be_accessed_by_lender_users()
     {
-        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin, Area::Customer], function (User $user, string $role) {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function (User $user, string $role) {
             return  $this->actingAs($user)
                 ->withHeader('X-Company', self::$company->getOriginal('id'))
                 ->postJson('api/v1/admin/companies/'.self::$company->id.'/wallet/manual-deposit');

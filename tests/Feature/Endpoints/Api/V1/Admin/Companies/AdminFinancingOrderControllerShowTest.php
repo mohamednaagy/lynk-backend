@@ -121,7 +121,7 @@ class AdminFinancingOrderControllerShowTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_admin_financing_order_controller_show_manager_can_access_when_has_permisson()
+    public function test_admin_financing_order_controller_show_manager_can_access_when_has_permission()
     {
         $order = FinancingOrder::where('company_id', self::$company->id)->first();
 
@@ -132,7 +132,7 @@ class AdminFinancingOrderControllerShowTest extends TestCase
 
     public function test_admin_financing_order_controller_show_other_roles_can_not_access()
     {
-        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin, Area::Customer], function ($user, $role) {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             $order = FinancingOrder::where('company_id', self::$company->id)
                 ->first();
 
