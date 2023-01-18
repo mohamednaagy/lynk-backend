@@ -14,13 +14,13 @@ use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithSettings;
+use Tests\Traits\InteractsWithUser;
 
 class ProjectSettingsIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin, InteractsWithSettings, InteractsWithLender;
+    use RefreshDatabase, InteractsWithCompany, InteractsWithSettings, InteractsWithUser;
 
     const BaseUrl = 'api/v1/admin/settings/project';
 
@@ -43,14 +43,12 @@ class ProjectSettingsIndexTest extends TestCase
     {
         parent::setUp();
 
-        self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager();
-        self::$managerHasPermission = $this->createManager(
-            'managerHasPermission@bim.com',
-            perm(Area::SuperAdmin, [Subject::ProjectSettings, Action::Index])
-        );
+        self::$admin = $this->createSuperAdminUser();
+        self::$manager = $this->createSuperAdminUser(Role::Manager);
+        self::$managerHasPermission = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(self::$managerHasPermission, perm(Area::SuperAdmin, [Subject::ProjectSettings, Action::Index]));
         [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$projectSettings = $this->app->make(GetProjectSettings::class)->handle();
     }
 
