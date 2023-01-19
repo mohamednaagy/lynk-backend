@@ -37,7 +37,7 @@ class ProcessPtpDocumentRetrievedOrderTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company] = $this->createCompany('2000', ['company_cr' => '1234567891']);
+        [self::$company] = $this->createLenderCompany('2000', ['company_cr' => '1234567891']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, ['email' => 'lenderAdmin@bim.com']);
         self::$financingOrder = $this->createOrder(
             self::$company->id,
