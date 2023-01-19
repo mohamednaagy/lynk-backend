@@ -235,19 +235,18 @@ class DmccDriver implements TraderInterface
      */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
-        $response = $this->getInventoryBasket($traderOrder->reference);
-
+        $dateTime = Carbon::createFromFormat('d/m/Y H:i A', $traderOrder->dateTimeOfPurchasingCommodity);
         $html = view('selling-commodity-to-customer', [
             'ttiId' => $traderOrder->reference,
             'companyName' => $traderOrder->order->company->name,
             'orderNumber' => $traderOrder->financing_order_id,
-            'amount' => $response->inventoryDetails[0]->totalValue.' '.$response->inventoryDetails[0]->currency,
-            'hsCodeDescription' => $response->inventoryDetails[0]->hsCodeDescription,
-            'quantity' => $response->inventoryDetails[0]->quantity,
-            'warehouse' => $response->inventoryDetails[0]->warehouseOrVaultId,
-            'owner' => $response->inventoryDetails[0]->owner,
-            'date' => Carbon::now()->toDateString(),
-            'time' => Carbon::now()->toTimeString(),
+            'amount' => $traderOrder->totalValue.' '.$traderOrder->currency,
+            'hsCodeDescription' => $traderOrder->hsCodeDescription,
+            'quantity' => $traderOrder->quantity,
+            'warehouse' => $traderOrder->warehouseOrVaultId,
+            'owner' => $traderOrder->owner,
+            'date' => $dateTime->toDateString(),
+            'time' => $dateTime->toTimeString(),
         ])->render();
 
         PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
@@ -308,19 +307,18 @@ class DmccDriver implements TraderInterface
      */
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
-        $response = $this->getInventoryBasket($traderOrder->reference);
-
+        $dateTime = Carbon::createFromFormat('d/m/Y H:i A', $traderOrder->dateTimeOfPurchasingCommodity);
         $html = view('transfer-ownership-to-lender', [
             'ttiId' => $traderOrder->reference,
             'companyName' => $traderOrder->order->company->name,
             'orderNumber' => $traderOrder->financing_order_id,
-            'amount' => $response->inventoryDetails[0]->totalValue.' '.$response->inventoryDetails[0]->currency,
-            'hsCodeDescription' => $response->inventoryDetails[0]->hsCodeDescription,
-            'quantity' => $response->inventoryDetails[0]->quantity,
-            'warehouse' => $response->inventoryDetails[0]->warehouseOrVaultId,
-            'owner' => $response->inventoryDetails[0]->owner,
-            'date' => Carbon::now()->toDateString(),
-            'time' => Carbon::now()->toTimeString(),
+            'amount' => $traderOrder->totalValue.' '.$traderOrder->currency,
+            'hsCodeDescription' => $traderOrder->hsCodeDescription,
+            'quantity' => $traderOrder->quantity,
+            'warehouse' => $traderOrder->warehouseOrVaultId,
+            'owner' => $traderOrder->owner,
+            'date' => $dateTime->toDateString(),
+            'time' => $dateTime->toTimeString(),
         ])->render();
 
         PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
