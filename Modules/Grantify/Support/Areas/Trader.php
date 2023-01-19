@@ -25,5 +25,9 @@ class Trader
             Action::Create,
             Action::Edit,
         ],
+        Subject::TraderStatus => [
+            Action::Manage,
+            Action::Edit,
+        ],
     ];
 }
