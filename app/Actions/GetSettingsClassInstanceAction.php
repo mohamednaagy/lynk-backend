@@ -4,7 +4,6 @@ namespace App\Actions;
 
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Area;
-use App\Settings\Classes\Areas\CustomerSettings;
 use App\Settings\Classes\Areas\LenderSettings;
 use App\Settings\Classes\Areas\SuperAdminSettings;
 use App\Settings\Classes\Areas\TraderSettings;
@@ -22,7 +21,6 @@ class GetSettingsClassInstanceAction implements GetSettingsClassInstance
         return match ($key) {
             'General' => app(GeneralSettings::class),
             Area::SuperAdmin => app(SuperAdminSettings::class),
-            Area::Customer => app(CustomerSettings::class),
             Area::Lender => app(LenderSettings::class),
             Area::Trader => app(TraderSettings::class),
         };

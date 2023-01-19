@@ -10,12 +10,14 @@ use App\Models\Company;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class WebhookControllerStoreTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithLender;
+    use InteractsWithUser;
+    use InteractsWithCompany;
 
     private static Company $company;
 
@@ -59,18 +61,17 @@ class WebhookControllerStoreTest extends TestCase
         self::$lenerAdminNotVerified = $this->createLenderUser(
             self::$company->id,
             Role::LenderAdmin,
-            'lenderAdmin2@bim.com',
             [
                 'email_verified_at' => null,
             ]
         );
 
-        self::$userLenderAdminBelongToCompanyNotActivated = $this->createLenderUser(self::$companyNotActivated->id, Role::LenderAdmin, 'lenderAdmin1@bim.com');
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$lenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
-        self::$lenderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'LenderOrderCreator@bim.com');
-        self::$lenderSuperVisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
-        self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'LenderSupervisor@bim.com');
+        self::$userLenderAdminBelongToCompanyNotActivated = $this->createLenderUser(self::$companyNotActivated->id, Role::LenderAdmin);
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$lenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
+        self::$lenderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
+        self::$lenderSuperVisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor);
+        self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser);
     }
 
     public function test_webhook_controller_store_success()
