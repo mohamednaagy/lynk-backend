@@ -3,6 +3,7 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
+use App\Enums\CompanyType;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderAmountScope;
@@ -24,7 +25,7 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
         return $this->baseQuery()->toScopes($this->scopes())->paginate($perPage);
     }
 
-    private function scopes()
+    private function scopes(): array
     {
         return [
             'need_action' => new OrderNeedActionScope(),
@@ -35,14 +36,14 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
         ];
     }
 
-    public function setCreator(Model $creator)
+    public function setCreator(Model $creator): static
     {
         $this->creator = $creator;
 
         return $this;
     }
 
-    public function setCompany(Company $company)
+    public function setCompany(Company $company): static
     {
         $this->company = $company;
 
@@ -55,6 +56,12 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
             $this->creator,
             function ($query) {
                 $query->byCreator($this->creator);
+            }
+        )->when(
+            $this->company?->type->is(CompanyType::Trader),
+            function ($query) {
+                $query->withWhereHas('activeTraderOrder')
+                    ->where('company_id', $this->company->id);
             }
         )->when(
             $this->company,

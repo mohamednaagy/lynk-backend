@@ -13,11 +13,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class IsEmailVerifiedUnitTest extends TestCase
 {
-    use RefreshDatabase , InteractsWithLender;
+    use RefreshDatabase , InteractsWithUser, InteractsWithCompany;
 
     private static Company $company;
 

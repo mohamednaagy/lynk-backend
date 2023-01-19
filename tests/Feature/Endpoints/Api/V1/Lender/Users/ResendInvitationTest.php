@@ -11,12 +11,12 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class ResendInvitationTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithLender;
+    use AssertsAccessByRoleAndArea;
 
     private static Company $company;
 
@@ -48,21 +48,19 @@ class ResendInvitationTest extends TestCase
             ]
         );
 
-        self::$lenerAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'LenderAdmin@bim.com');
-        self::$lenderAdminNotJoined = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'LenderAdmin1@bim.com', ['password' => null]);
-        self::$lenerAdminBelonsToCompanyNotActive = $this->createLenderUser(self::$companyNotActive->id, Role::LenderAdmin, 'LenderAdmin2@bim.com');
+        self::$lenerAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$lenderAdminNotJoined = $this->createLenderUser(self::$company->id, Role::LenderAdmin, ['password' => null]);
+        self::$lenerAdminBelonsToCompanyNotActive = $this->createLenderUser(self::$companyNotActive->id, Role::LenderAdmin);
 
         self::$lenerAdminNotVerified = $this->createLenderUser(
             self::$company->id,
             Role::LenderAdmin,
-            'LenderAdmin@bim.com',
             ['email_verified_at' => null]
         );
 
         self::$lenderBelongsToCompanyNotActive = $this->createLenderUser(
             self::$companyNotActive->id,
-            Role::LenderAdmin,
-            'user@bim.com'
+            Role::LenderAdmin
         );
     }
 
@@ -116,7 +114,7 @@ class ResendInvitationTest extends TestCase
     {
         $roles = [Role::LenderBilling, Role::LenderApiUser, Role::LenderOrderCreator, Role::LenderSupervisor];
 
-        $this->assertStatusToSpecificRoles(403, $roles, self::$company, function (User $user, string $role) {
+        $this->assertStatusCodeToSpecificRoles(403, $roles, function (User $user, string $role) {
             return  $this->actingAs($user)
                 ->withHeader('X-Company', self::$company->getOriginal('id'))
                 ->postJson(

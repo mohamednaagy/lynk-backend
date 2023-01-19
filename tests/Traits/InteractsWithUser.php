@@ -39,7 +39,7 @@ trait InteractsWithUser
              throw new RuntimeException("Method doesn't exist: $methodName");
          }
 
-         if ($areaKey == Area::SuperAdmin()) {
+         if ($areaKey == Area::SuperAdmin) {
              return $this->{$methodName}($role, $data);
          }
 
@@ -47,7 +47,7 @@ trait InteractsWithUser
              throw new RuntimeException("CompanyID can't be null");
          }
 
-         return $this->{$methodName}($role, $companyId, $data);
+         return $this->{$methodName}($companyId, $role, $data);
      }
 
     /**

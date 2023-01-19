@@ -5,6 +5,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Enquiries;
 use App\Actions\Contracts\Enquiries\GetPaginatedEnquiries;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\Enquiry;
 use App\Models\User;
@@ -12,12 +13,12 @@ use App\Transformers\EnquiryTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
 use Tests\Traits\InteractsWithEnquiry;
+use Tests\Traits\InteractsWithUser;
 
 class EnquiryControllerShowTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin, InteractsWithEnquiry;
+    use RefreshDatabase, InteractsWithUser, InteractsWithEnquiry;
 
     const BaseUrl = 'api/v1/admin/enquiries';
 
@@ -38,12 +39,11 @@ class EnquiryControllerShowTest extends TestCase
     {
         parent::setUp();
 
-        self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager();
-        self::$managerHasPermission = $this->createManager(
-            'managerHasPermission@bim.com',
-            perm(Area::SuperAdmin, [Subject::Enquiries, Action::Show])
-        );
+        self::$admin = $this->createSuperAdminUser();
+        self::$manager = $this->createSuperAdminUser(Role::Manager);
+        self::$managerHasPermission = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(self::$managerHasPermission, perm(Area::SuperAdmin, [Subject::Enquiries, Action::Show]));
+
         self::$visitorEnquiry = $this->createEnquiry();
         self::$paginatedEnquiries = $this->app->make(GetPaginatedEnquiries::class);
     }
