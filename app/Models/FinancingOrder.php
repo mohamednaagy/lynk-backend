@@ -23,6 +23,10 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 /**
  * @property mixed $status
  * @property mixed $traderOrders
+ * @property mixed $currency
+ * @property mixed $amount
+ * @property mixed $selling_price
+ * @property mixed $id
  */
 class FinancingOrder extends Model implements HasMedia, Otpifiable
 {
