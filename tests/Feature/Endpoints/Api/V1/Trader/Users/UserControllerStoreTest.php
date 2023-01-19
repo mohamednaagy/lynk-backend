@@ -2,13 +2,13 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Trader\Users;
 
+use App\Enums\Area;
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Mail\CompleteRegisterInvitation;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Mail;
@@ -36,15 +36,13 @@ class UserControllerStoreTest extends TestCase
 
     /**
      * @return void
-     *
-     * @throws BindingResolutionException
      */
     public function setUp(): void
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        [self::$otherCompany, self::$otherWallet] = $this->createCompany('2000', ['company_cr' => '12345678911']);
+        [self::$company, self::$wallet] = $this->createTraderCompany('2000', ['company_cr' => '12345678910']);
+        [self::$otherCompany, self::$otherWallet] = $this->createTraderCompany('2000', ['company_cr' => '12345678911']);
         self::$userTraderAdmin = $this->createTraderUser(self::$company->id);
         self::$otherUserTraderAdmin = $this->createTraderUser(self::$otherCompany->id);
         self::$traderDetails = [
@@ -70,6 +68,28 @@ class UserControllerStoreTest extends TestCase
             ->assertExactJson([
                 'message' => 'Unauthenticated.',
             ]);
+        Mail::assertNothingSent();
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_other_area_roles_of_not_trader_area_cant_store_trader_user_case(): void
+    {
+        Mail::fake();
+        $this->assertStatusCodeForAllRolesExceptForArea(
+            Response::HTTP_FORBIDDEN,
+            [
+                Area::Trader,
+                Area::Customer,
+            ],
+            function ($user, $role) {
+                return $this->actingAs($user)
+                    ->withHeader('X-Company', self::$company->id)
+                    ->postJson('api/v1/trader/users', self::$traderDetails);
+            }
+        );
+
         Mail::assertNothingSent();
     }
 
@@ -251,52 +271,28 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_trader_admin_user_cant_index_trader_users_case_company_pending(): void
+    public function test_that_trader_admin_user_cant_store_trader_user_case_when_company_not_approved(): void
     {
-        self::$company->update([
-            'status' => CompanyStatus::Pending,
-        ]);
+        foreach (CompanyStatus::getValues() as $status) {
+            if ($status == CompanyStatus::Approved) {
+                continue;
+            }
 
-        $this->actingAs(self::$userTraderAdmin)
-            ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/trader/users', self::$traderDetails)
-            ->assertForbidden();
-    }
+            self::$company->update([
+                'status' => $status,
+            ]);
 
-    /**
-     * @return void
-     */
-    public function test_that_trader_admin_user_cant_index_trader_users_case_company_under_review(): void
-    {
-        self::$company->update([
-            'status' => CompanyStatus::UnderReview,
-        ]);
-
-        $this->actingAs(self::$userTraderAdmin)
-            ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/trader/users', self::$traderDetails)
-            ->assertForbidden();
-    }
-
-    /**
-     * @return void
-     */
-    public function test_that_trader_admin_user_cant_index_trader_users_case_company_rejected(): void
-    {
-        self::$company->update([
-            'status' => CompanyStatus::Rejected,
-        ]);
-
-        $this->actingAs(self::$userTraderAdmin)
-            ->withHeader('X-Company', self::$company->id)
-            ->postJson('api/v1/trader/users', self::$traderDetails)
-            ->assertForbidden();
+            $this->actingAs(self::$userTraderAdmin)
+                ->withHeader('X-Company', self::$company->id)
+                ->postJson('api/v1/trader/users', self::$traderDetails)
+                ->assertForbidden();
+        }
     }
 
 //    /**
 //     * @return void
 //     */
-//    public function test_that_trader_admin_user_cant_index_trader_users_case_email_not_verified(): void
+//    public function test_that_trader_admin_user_cant_store_trader_user_case_email_not_verified(): void
 //    {
 //        self::$userTraderAdmin->update([
 //            'email_verified_at' => null,

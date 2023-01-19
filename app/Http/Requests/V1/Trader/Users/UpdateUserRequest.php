@@ -5,7 +5,6 @@ namespace App\Http\Requests\V1\Trader\Users;
 use App\Enums\Area;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
@@ -40,9 +39,7 @@ class UpdateUserRequest extends FormRequest
             'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],
             'role' => [
                 'required',
-                Rule::in(
-                    Arr::except(Area::roles(Area::Trader), [])
-                ),
+                Rule::in(Area::roles(Area::Trader)),
             ],
         ];
     }
