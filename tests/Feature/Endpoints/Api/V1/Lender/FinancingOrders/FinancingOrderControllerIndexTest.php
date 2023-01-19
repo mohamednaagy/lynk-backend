@@ -51,8 +51,8 @@ class FinancingOrderControllerIndexTest extends TestCase
     {
         parent::setUp();
 
-        [self::$firstCompany, self::$firstWallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        [self::$secondCompany, self::$secondWallet] = $this->createCompany('3000', ['company_cr' => '12345678911']);
+        [self::$firstCompany, self::$firstWallet] = $this->createLenderCompany('2000', ['company_cr' => '12345678910']);
+        [self::$secondCompany, self::$secondWallet] = $this->createLenderCompany('3000', ['company_cr' => '12345678911']);
         self::$userLenderAdmin = $this->createLenderUser(self::$firstCompany->id, Role::LenderAdmin);
         self::$userLenderSupervisor = $this->createLenderUser(self::$firstCompany->id, Role::LenderSupervisor);
         self::$userLenderBilling = $this->createLenderUser(self::$firstCompany->id, Role::LenderBilling);

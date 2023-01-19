@@ -58,7 +58,7 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
                 $query->byCreator($this->creator);
             }
         )->when(
-            $this->company->type->is(CompanyType::Trader),
+            $this->company?->type->is(CompanyType::Trader),
             function ($query) {
                 $query->withWhereHas('activeTraderOrder')
                     ->where('company_id', $this->company->id);
