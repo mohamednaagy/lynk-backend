@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Http\Controllers\Api\V1\Trader\Auth\GetAuthUser;
+use App\Http\Controllers\Api\V1\Trader\FinancingOrders\OrderController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
@@ -25,5 +26,6 @@ Route::prefix('v1/trader')->name('api.v1.')->group(function () {
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
+        Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
     });
 });
