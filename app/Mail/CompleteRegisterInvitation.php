@@ -37,7 +37,6 @@ class CompleteRegisterInvitation extends Mailable implements ShouldQueue
         $this->user = $user;
         $this->inviter = auth()->user();
         $this->url = URL::signedExternalRoute($externalUrl, $this->completeRegisterUrls[$companyType], ['user' => $user->id]);
-        dd($this->url);
     }
 
     /**

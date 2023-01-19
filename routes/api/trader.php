@@ -2,6 +2,7 @@
 
 use App\Enums\Area;
 use App\Enums\Role;
+use App\Http\Controllers\Api\V1\Trader\Auth\CompleteRegister;
 use App\Http\Controllers\Api\V1\Trader\Auth\ResendInvitation;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
@@ -26,10 +27,11 @@ Route::prefix('v1/trader')->name('api.v1.')->group(function () {
         InitializeTenancyByRequestData::class,
     ])->group(
         function () {
-//            Route::middleware('verified.email:'.Area::Trader)->group(function () {
-            Route::middleware('checkCompanyStatus')->group(function () {
-                Route::post('users/{user}/resend-invitation', ResendInvitation::class);
+            Route::middleware('verified.email:'.Area::Trader)->group(function () {
+                Route::middleware('checkCompanyStatus')->group(function () {
+                    Route::post('users/{user}/resend-invitation', ResendInvitation::class);
+                });
             });
-//            });
         });
+    Route::post('{user}/complete-register', CompleteRegister::class)->name('trader.complete-register');
 });
