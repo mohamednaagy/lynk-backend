@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
-class TraderController extends Controller
+class TraderUserController extends Controller
 {
     public function __construct()
     {
