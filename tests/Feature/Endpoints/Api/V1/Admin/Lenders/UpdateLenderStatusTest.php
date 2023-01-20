@@ -15,14 +15,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
 use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class UpdateLenderStatusTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender, InteractsWithAdmin;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
-    private static Company $company;
+    private static Company $lender;
 
     private static Wallet $wallet;
 
@@ -32,7 +32,7 @@ class UpdateLenderStatusTest extends TestCase
 
     private static User $userLenderAdmin;
 
-    private static array $companyStatusDetails;
+    private static array $lenderStatusDetails;
 
     /**
      * @return void
@@ -43,14 +43,13 @@ class UpdateLenderStatusTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userAdmin = $this->createAdmin('admin@bim.com');
-        self::$userManager = $this->createManager(
-            'manager@bim.com',
-            perm(Area::SuperAdmin, [Subject::Lenders, Action::Edit]),
-        );
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$companyStatusDetails = [
+        [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        self::$userAdmin = $this->createSuperAdminUser();
+        self::$userManager = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::Lenders, Action::Edit]));
+
+        self::$userLenderAdmin = $this->createLenderUser(self::$lender->id, Role::LenderAdmin);
+        self::$lenderStatusDetails = [
             'status' => CompanyStatus::Approved(),
             'public_status_comment' => 'Approved public',
             'internal_status_comment' => 'Approved internal',
@@ -60,9 +59,9 @@ class UpdateLenderStatusTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_update_company_status(): void
+    public function test_that_un_auth_user_cant_update_lender_status(): void
     {
-        $this->putJson('api/v1/admin/companies/'.self::$company->id.'/status', self::$companyStatusDetails)
+        $this->putJson('api/v1/admin/lenders/'.self::$lender->id.'/status', self::$lenderStatusDetails)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -72,10 +71,10 @@ class UpdateLenderStatusTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_can_update_company_status(): void
+    public function test_that_admin_can_update_lender_status(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->putJson('api/v1/admin/companies/'.self::$company->id.'/status', self::$companyStatusDetails)
+            ->putJson('api/v1/admin/lenders/'.self::$lender->id.'/status', self::$lenderStatusDetails)
             ->assertOk()
             ->assertExactJson([
                 'data' => [],
@@ -85,10 +84,10 @@ class UpdateLenderStatusTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_manager_can_update_company_status(): void
+    public function test_that_manager_can_update_lender_status(): void
     {
         $this->actingAs(self::$userManager)
-            ->putJson('api/v1/admin/companies/'.self::$company->id.'/status', self::$companyStatusDetails)
+            ->putJson('api/v1/admin/lenders/'.self::$lender->id.'/status', self::$lenderStatusDetails)
             ->assertOk()
             ->assertExactJson([
                 'data' => [],
@@ -98,29 +97,29 @@ class UpdateLenderStatusTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_manager_without_permissions_cant_update_company_status(): void
+    public function test_that_manager_without_permissions_cant_update_lender_status(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
 
         $this->actingAs(self::$userManager)
-            ->putJson('api/v1/admin/companies/'.self::$company->id.'/status', self::$companyStatusDetails)
+            ->putJson('api/v1/admin/lenders/'.self::$lender->id.'/status', self::$lenderStatusDetails)
             ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_that_admin_can_update_company_status_and_see_updates_in_get_auth(): void
+    public function test_that_admin_can_update_lender_status_and_see_updates_in_get_auth(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->putJson('api/v1/admin/companies/'.self::$company->id.'/status', self::$companyStatusDetails)
+            ->putJson('api/v1/admin/lenders/'.self::$lender->id.'/status', self::$lenderStatusDetails)
             ->assertOk()
             ->assertExactJson([
                 'data' => [],
             ]);
 
         $this->actingAs(self::$userLenderAdmin)
-            ->withHeader('X-Company', self::$company->id)
+            ->withHeader('X-Company', self::$lender->id)
             ->getJson('api/v1/lender/auth')
             ->assertOk()
             ->assertSee([
@@ -131,10 +130,10 @@ class UpdateLenderStatusTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_cant_update_company_status_without_status(): void
+    public function test_that_admin_cant_update_lender_status_without_status(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->putJson('api/v1/admin/companies/'.self::$company->id.'/status', Arr::except(self::$companyStatusDetails, 'status'))
+            ->putJson('api/v1/admin/lenders/'.self::$lender->id.'/status', Arr::except(self::$lenderStatusDetails, 'status'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The status field is required.',
@@ -149,10 +148,10 @@ class UpdateLenderStatusTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_cant_update_company_status_without_public_status_comment(): void
+    public function test_that_admin_cant_update_lender_status_without_public_status_comment(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->putJson('api/v1/admin/companies/'.self::$company->id.'/status', Arr::except(self::$companyStatusDetails, 'public_status_comment'))
+            ->putJson('api/v1/admin/lenders/'.self::$lender->id.'/status', Arr::except(self::$lenderStatusDetails, 'public_status_comment'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The public status comment field is required.',
@@ -167,10 +166,10 @@ class UpdateLenderStatusTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_cant_update_company_status_without_internal_status_comment(): void
+    public function test_that_admin_cant_update_lender_status_without_internal_status_comment(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->putJson('api/v1/admin/companies/'.self::$company->id.'/status', Arr::except(self::$companyStatusDetails, 'internal_status_comment'))
+            ->putJson('api/v1/admin/lenders/'.self::$lender->id.'/status', Arr::except(self::$lenderStatusDetails, 'internal_status_comment'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The internal status comment field is required.',

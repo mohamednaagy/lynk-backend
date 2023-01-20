@@ -41,6 +41,10 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware('api')
                 ->prefix('api')
+                ->group(base_path('routes/api/trader.php'));
+
+            Route::middleware('api')
+                ->prefix('api')
                 ->group(base_path('routes/api/admin.php'));
 
             Route::middleware('api')
@@ -62,6 +66,12 @@ class RouteServiceProvider extends ServiceProvider
         Route::bind('trader', function ($id) {
             return Company::query()->where('id', $id)
                 ->where('type', CompanyType::Trader)
+                ->firstOrFail();
+        });
+
+        Route::bind('lender', function ($id) {
+            return Company::where('id', $id)
+                ->where('type', CompanyType::Lender)
                 ->firstOrFail();
         });
     }

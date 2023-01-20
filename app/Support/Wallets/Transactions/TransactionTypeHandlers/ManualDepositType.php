@@ -11,7 +11,7 @@ class ManualDepositType implements TransactionTypeHandlerInterface
 {
     public function generateMessage(Transaction $transaction, $locale): string
     {
-        return __('transaction-description.manual_deposit');
+        return __('transaction-description.manual_deposit', [], $locale);
     }
 
     public function process(Wallet $wallet, Money $amount, int $reason, array $meta): Transaction

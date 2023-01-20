@@ -7,6 +7,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessDmccRespondedToPtpOrder implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
     protected mixed $financingOrder;
 
@@ -35,6 +36,8 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     *
+     * @throws \Throwable
      */
     public function handle(): void
     {
@@ -64,7 +67,7 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
                 FinancingOrderHistory::GetPtpDocument
             );
 
-            $trader->attachDocumentToOrder(
+            $this->attachDocumentToOrder(
                 $lastTraderOrder,
                 $ptpDocument,
                 FinancingOrderMediaCollection::PromiseToPurchase,
@@ -86,7 +89,7 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
                 FinancingOrderHistory::GetTtiHoldingCertificateDocument
             );
 
-            $trader->attachDocumentToOrder(
+            $this->attachDocumentToOrder(
                 $lastTraderOrder,
                 $ttiDocument,
                 FinancingOrderMediaCollection::TtiHoldingCertificate,
