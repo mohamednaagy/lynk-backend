@@ -16,7 +16,7 @@ class TraderCompanyControllerShowTest extends TestCase
     use RefreshDatabase;
     use AssertsAccessByRoleAndArea;
 
-    private static User $trader;
+    private static User $superAdmin;
 
     private static Company $company;
 
@@ -31,7 +31,7 @@ class TraderCompanyControllerShowTest extends TestCase
             'type' => CompanyType::Trader,
         ]);
 
-        self::$trader = $this->createTraderUser(self::$company->id);
+        self::$superAdmin = $this->createSuperAdminUser();
     }
 
     /**
@@ -48,7 +48,7 @@ class TraderCompanyControllerShowTest extends TestCase
 
     public function test_trader_company_controller_show_successful()
     {
-        $this->actingAs(self::$trader)
+        $this->actingAs(self::$superAdmin)
             ->getJson('api/v1/admin/traders/'.self::$company->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertOk();
@@ -56,7 +56,7 @@ class TraderCompanyControllerShowTest extends TestCase
 
     public function test_trader_company_controller_show_other_roles_can_not_access()
     {
-        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::Trader], function ($user, $role) {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
                 ->getJson('api/v1/admin/traders/'.self::$company->id);
         });

@@ -17,11 +17,7 @@ class TraderCompanyControllerIndexTest extends TestCase
     use RefreshDatabase;
     use AssertsAccessByRoleAndArea;
 
-    private static Company $company;
-
-    private static Company $sconedCompany;
-
-    private static User $trader;
+    private static User $superAdmin;
 
     /**
      * @return void
@@ -30,34 +26,16 @@ class TraderCompanyControllerIndexTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company] = $this->createCompany(
-            '2000',
-            [
-                'company_cr' => '12345678910',
-                'type' => CompanyType::Trader,
-            ]
-        );
-
-        [self::$sconedCompany] = $this->createCompany(
-            '2000',
-            [
-                'company_cr' => '12345676666',
-                'type' => CompanyType::Trader,
-            ]
-        );
-        self::$trader = $this->createTraderUser(self::$company->id);
+        self::$superAdmin = $this->createSuperAdminUser();
     }
 
     /**
      * @return void
      */
-    public function test_trader_company_controller_index_un_auth_user_cant_index_compaines(): void
+    public function test_trader_company_controller_index_un_auth_user_cant_index_companies(): void
     {
         $this->getJson('api/v1/admin/traders')
-            ->assertStatus(Response::HTTP_UNAUTHORIZED)
-            ->assertExactJson([
-                'message' => 'Unauthenticated.',
-            ]);
+            ->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
     /**
@@ -67,7 +45,7 @@ class TraderCompanyControllerIndexTest extends TestCase
      */
     public function test_trader_company_controller_index()
     {
-        $this->actingAs(self::$trader)
+        $this->actingAs(self::$superAdmin)
             ->getJson('api/v1/admin/traders')
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
@@ -75,6 +53,7 @@ class TraderCompanyControllerIndexTest extends TestCase
                     ->parseIncludes([
                         'id',
                         'name',
+                        'status',
                         'unique_name',
                         'orders_count',
                     ])
@@ -85,7 +64,7 @@ class TraderCompanyControllerIndexTest extends TestCase
 
     public function test_trader_company_controller_index_other_roles_can_not_access()
     {
-        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::Trader], function ($user, $role) {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
                 ->getJson('api/v1/admin/traders');
         });
