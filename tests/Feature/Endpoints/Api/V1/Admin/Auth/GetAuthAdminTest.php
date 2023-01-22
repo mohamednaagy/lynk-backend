@@ -11,12 +11,12 @@ use App\Transformers\UserTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class GetAuthAdminTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static User $userAdmin;
 
@@ -43,15 +43,15 @@ class GetAuthAdminTest extends TestCase
     {
         parent::setUp();
 
-        self::$userAdmin = $this->createAdmin();
-        self::$userManager = $this->createManager();
+        self::$userAdmin = $this->createSuperAdminUser();
+        self::$userManager = $this->createSuperAdminUser(Role::Manager);
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'LenderApiUser@bim.com');
-        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'LenderOrderCreator@bim.com');
-        self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
-        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser);
+        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
+        self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor);
+        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
     }
 
     /**

@@ -7,20 +7,20 @@ use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
-use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
-use App\Support\Traders\TraderHelper;
+use App\Support\Traders\TraderHelperTrait;
 use Carbon\Carbon;
 use CodeDredd\Soap\Client\Response;
 use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
 
 class DmccDriver implements TraderInterface
 {
-    use TraderHelper;
+    use TraderHelperTrait;
 
     private SoapClient $soap;
 
@@ -48,6 +48,9 @@ class DmccDriver implements TraderInterface
         return $this->isSuccess($response);
     }
 
+    /**
+     * @throws TraderException
+     */
     public function getTti(FinancingOrder $financingOrder): string
     {
         $ttiId = $this->getTtiId($financingOrder);
@@ -71,7 +74,7 @@ class DmccDriver implements TraderInterface
                 'notificationType' => $type,
             ]);
 
-        if (! $response->successful()) {
+        if (! $response->successful() || blank($response->object()->NotificationAllDetailsResponse)) {
             throw new TraderException(collect([
                 'driver' => 'dmcc',
                 'step' => 'fetchNotifications',
@@ -149,7 +152,7 @@ class DmccDriver implements TraderInterface
 
         Log::debug('getTTiId', [$response]);
 
-        if (! isset($response->ttiId)) {
+        if (blank($response->ttiId)) {
             throw new TraderException(collect([
                 'driver' => 'dmcc',
                 'step' => 'getTtiId',
@@ -163,7 +166,7 @@ class DmccDriver implements TraderInterface
                     'registeredMember' => config('trader.providers.dmcc.tti.registered_member'),
                     'client' => null,
                 ],
-                'responseBody' => $response->body(),
+                'responseBody' => $response,
                 'financingOrderId' => $financingOrder->id,
             ]));
         }
@@ -174,7 +177,7 @@ class DmccDriver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function cancelOrder(FinancingOrder $financingOrder): mixed
+    public function cancelOrder(FinancingOrder $financingOrder): object
     {
         $traderOrder = $financingOrder->activeTraderOrder()->first();
         $response = $this->soap
@@ -206,7 +209,7 @@ class DmccDriver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function respondPtpService(string $ttiId): void
+    public function respondPtpService(string $ttiId): object
     {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('respondPTPService'))
@@ -228,37 +231,48 @@ class DmccDriver implements TraderInterface
                 'responseBody' => $response->body(),
             ]));
         }
+
+        return $response->object();
     }
 
     /**
+     * @param $traderOrder
+     * @return void
+     *
      * @throws TraderException
      */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
-        $response = $this->getInventoryBasket($traderOrder->reference);
-
-        $html = view('selling-commodity-to-customer', [
-            'ttiId' => $traderOrder->reference,
-            'companyName' => $traderOrder->order->company->name,
-            'orderNumber' => $traderOrder->financing_order_id,
-            'amount' => $response->inventoryDetails[0]->totalValue.' '.$response->inventoryDetails[0]->currency,
-            'hsCodeDescription' => $response->inventoryDetails[0]->hsCodeDescription,
-            'quantity' => $response->inventoryDetails[0]->quantity,
-            'warehouse' => $response->inventoryDetails[0]->warehouseOrVaultId,
-            'owner' => $response->inventoryDetails[0]->owner,
-            'date' => Carbon::now()->toDateString(),
-            'time' => Carbon::now()->toTimeString(),
-        ])->render();
-
-        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
-            $this->attachDocumentToOrder(
+        try {
+            $this->storeOrderDocumentAsPdf(
+                'selling-commodity-to-customer',
+                [
+                    'ttiId' => $traderOrder->reference,
+                    'companyName' => $traderOrder->order->company->name,
+                    'orderNumber' => $traderOrder->financing_order_id,
+                    'amount' => $traderOrder->amount,
+                    'hsCodeDescription' => $traderOrder->product,
+                    'quantity' => $traderOrder->quantity,
+                    'warehouse' => $traderOrder->warehouse,
+                    'owner' => $traderOrder->owner,
+                    'date' => Carbon::now()->toDateString(),
+                    'time' => Carbon::now()->toTimeString(),
+                ],
                 $traderOrder,
-                $fileResource,
-                FinancingOrderMediaCollection::SellingCommodityToCustomer
+                FinancingOrderMediaCollection::SellingCommodityToCustomer,
             );
-        });
 
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
+        } catch (Exception $exception) {
+            throw new TraderException(collect([
+                'driver' => 'dmcc',
+                'step' => 'createSellingCommodityToCustomerDocument',
+                'requestBody' => [
+                    'traderOrder' => $traderOrder,
+                ],
+                'responseBody' => $exception->getMessage(),
+            ]));
+        }
     }
 
     /**
@@ -289,58 +303,55 @@ class DmccDriver implements TraderInterface
         return $response->object()->getdocument[0]->getDocumentByTypeResponse[0]->document;
     }
 
-    public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
+    /**
+     * @param $traderOrder
+     * @return void
+     *
+     * @throws TraderException
+     */
+    public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
-        $fileName = $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
-        if (! is_null($type)) {
-            $traderOrder->order->addMediaFromBase64(
-                $document
-            )->usingFileName($fileName)->toMediaCollection($collectionName);
-        } else {
-            $traderOrder->order->addMediaFromStream(
-                $document
-            )->usingFileName($fileName)->toMediaCollection($collectionName);
+        try {
+            $this->storeOrderDocumentAsPdf(
+                'transfer-ownership-to-lender',
+                [
+                    'ttiId' => $traderOrder->reference,
+                    'companyName' => $traderOrder->order->company->name,
+                    'orderNumber' => $traderOrder->financing_order_id,
+                    'amount' => $traderOrder->amount,
+                    'hsCodeDescription' => $traderOrder->product,
+                    'quantity' => $traderOrder->quantity,
+                    'warehouse' => $traderOrder->warehouse,
+                    'owner' => $traderOrder->owner,
+                    'date' => Carbon::now()->toDateString(),
+                    'time' => Carbon::now()->toTimeString(),
+                ],
+                $traderOrder,
+                FinancingOrderMediaCollection::TransferOwnershipToLender,
+            );
+
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+        } catch (Exception $exception) {
+            throw new TraderException(collect([
+                'driver' => 'dmcc',
+                'step' => 'createTransferOwnershipToLenderDocument',
+                'requestBody' => [
+                    'traderOrder' => $traderOrder,
+                ],
+                'responseBody' => $exception->getMessage(),
+            ]));
         }
     }
 
     /**
      * @throws TraderException
      */
-    public function createTransferOwnershipToLenderDocument($traderOrder): void
-    {
-        $response = $this->getInventoryBasket($traderOrder->reference);
-
-        $html = view('transfer-ownership-to-lender', [
-            'ttiId' => $traderOrder->reference,
-            'companyName' => $traderOrder->order->company->name,
-            'orderNumber' => $traderOrder->financing_order_id,
-            'amount' => $response->inventoryDetails[0]->totalValue.' '.$response->inventoryDetails[0]->currency,
-            'hsCodeDescription' => $response->inventoryDetails[0]->hsCodeDescription,
-            'quantity' => $response->inventoryDetails[0]->quantity,
-            'warehouse' => $response->inventoryDetails[0]->warehouseOrVaultId,
-            'owner' => $response->inventoryDetails[0]->owner,
-            'date' => Carbon::now()->toDateString(),
-            'time' => Carbon::now()->toTimeString(),
-        ])->render();
-
-        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                $fileResource,
-                FinancingOrderMediaCollection::TransferOwnershipToLender
-            );
-        });
-    }
-
-    /**
-     * @throws TraderException
-     */
-    private function getInventoryBasket(string $ttiId): object
+    public function getInventoryBasket(TraderOrder $traderOrder): object
     {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('getInventoryBasket'))
             ->call('getInventoryBasket', [
-                'ttiId' => $ttiId,
+                'ttiId' => $traderOrder->reference,
             ]);
 
         if ($response->object()->errorCode != '') {
@@ -348,7 +359,7 @@ class DmccDriver implements TraderInterface
                 'driver' => 'dmcc',
                 'step' => 'getInventoryBasket',
                 'requestBody' => [
-                    'ttiId' => $ttiId,
+                    'ttiId' => $traderOrder->reference,
                 ],
                 'responseBody' => $response->body(),
             ]));
@@ -356,7 +367,6 @@ class DmccDriver implements TraderInterface
 
         $response = $response->object();
 
-        $traderOrder = TraderOrder::query()->where('reference', $ttiId)->first();
         $traderOrder->update([
             'product' => $response->inventoryDetails[0]->hsCodeDescription,
             'quantity' => $response->inventoryDetails[0]->quantity,
@@ -391,7 +401,7 @@ class DmccDriver implements TraderInterface
                     'ttiDocument' => 'JVBERi0xLjMNCiXi48/TDQoNCjEgMCBvYmoNCjw8DQovVHlwZSAvQ2F0YWxvZw0KL091dGxpbmVzIDIgMCBSDQovUGFnZXMgMyAwIFINCj4+DQplbmRvYmoNCg0KMiAwIG9iag0KPDwNCi9UeXBlIC9PdXRsaW5lcw0KL0NvdW50IDANCj4+DQplbmRvYmoNCg0KMyAwIG9iag0KPDwNCi9UeXBlIC9QYWdlcw0KL0NvdW50IDINCi9LaWRzIFsgNCAwIFIgNiAwIFIgXSANCj4+DQplbmRvYmoNCg0KNCAwIG9iag0KPDwNCi9UeXBlIC9QYWdlDQovUGFyZW50IDMgMCBSDQovUmVzb3VyY2VzIDw8DQovRm9udCA8PA0KL0YxIDkgMCBSIA0KPj4NCi9Qcm9jU2V0IDggMCBSDQo+Pg0KL01lZGlhQm94IFswIDAgNjEyLjAwMDAgNzkyLjAwMDBdDQovQ29udGVudHMgNSAwIFINCj4+DQplbmRvYmoNCg0KNSAwIG9iag0KPDwgL0xlbmd0aCAxMDc0ID4+DQpzdHJlYW0NCjIgSg0KQlQNCjAgMCAwIHJnDQovRjEgMDAyNyBUZg0KNTcuMzc1MCA3MjIuMjgwMCBUZA0KKCBBIFNpbXBsZSBQREYgRmlsZSApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY4OC42MDgwIFRkDQooIFRoaXMgaXMgYSBzbWFsbCBkZW1vbnN0cmF0aW9uIC5wZGYgZmlsZSAtICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNjY0LjcwNDAgVGQNCigganVzdCBmb3IgdXNlIGluIHRoZSBWaXJ0dWFsIE1lY2hhbmljcyB0dXRvcmlhbHMuIE1vcmUgdGV4dC4gQW5kIG1vcmUgKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA2NTIuNzUyMCBUZA0KKCB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDYyOC44NDgwIFRkDQooIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNjE2Ljg5NjAgVGQNCiggdGV4dC4gQW5kIG1vcmUgdGV4dC4gQm9yaW5nLCB6enp6ei4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNjA0Ljk0NDAgVGQNCiggbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDU5Mi45OTIwIFRkDQooIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNTY5LjA4ODAgVGQNCiggQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA1NTcuMTM2MCBUZA0KKCB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBFdmVuIG1vcmUuIENvbnRpbnVlZCBvbiBwYWdlIDIgLi4uKSBUag0KRVQNCmVuZHN0cmVhbQ0KZW5kb2JqDQoNCjYgMCBvYmoNCjw8DQovVHlwZSAvUGFnZQ0KL1BhcmVudCAzIDAgUg0KL1Jlc291cmNlcyA8PA0KL0ZvbnQgPDwNCi9GMSA5IDAgUiANCj4+DQovUHJvY1NldCA4IDAgUg0KPj4NCi9NZWRpYUJveCBbMCAwIDYxMi4wMDAwIDc5Mi4wMDAwXQ0KL0NvbnRlbnRzIDcgMCBSDQo+Pg0KZW5kb2JqDQoNCjcgMCBvYmoNCjw8IC9MZW5ndGggNjc2ID4+DQpzdHJlYW0NCjIgSg0KQlQNCjAgMCAwIHJnDQovRjEgMDAyNyBUZg0KNTcuMzc1MCA3MjIuMjgwMCBUZA0KKCBTaW1wbGUgUERGIEZpbGUgMiApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY4OC42MDgwIFRkDQooIC4uLmNvbnRpbnVlZCBmcm9tIHBhZ2UgMS4gWWV0IG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA2NzYuNjU2MCBUZA0KKCBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY2NC43MDQwIFRkDQooIHRleHQuIE9oLCBob3cgYm9yaW5nIHR5cGluZyB0aGlzIHN0dWZmLiBCdXQgbm90IGFzIGJvcmluZyBhcyB3YXRjaGluZyApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY1Mi43NTIwIFRkDQooIHBhaW50IGRyeS4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA2NDAuODAwMCBUZA0KKCBCb3JpbmcuICBNb3JlLCBhIGxpdHRsZSBtb3JlIHRleHQuIFRoZSBlbmQsIGFuZCBqdXN0IGFzIHdlbGwuICkgVGoNCkVUDQplbmRzdHJlYW0NCmVuZG9iag0KDQo4IDAgb2JqDQpbL1BERiAvVGV4dF0NCmVuZG9iag0KDQo5IDAgb2JqDQo8PA0KL1R5cGUgL0ZvbnQNCi9TdWJ0eXBlIC9UeXBlMQ0KL05hbWUgL0YxDQovQmFzZUZvbnQgL0hlbHZldGljYQ0KL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcNCj4+DQplbmRvYmoNCg0KMTAgMCBvYmoNCjw8DQovQ3JlYXRvciAoUmF2ZSBcKGh0dHA6Ly93d3cubmV2cm9uYS5jb20vcmF2ZVwpKQ0KL1Byb2R1Y2VyIChOZXZyb25hIERlc2lnbnMpDQovQ3JlYXRpb25EYXRlIChEOjIwMDYwMzAxMDcyODI2KQ0KPj4NCmVuZG9iag0KDQp4cmVmDQowIDExDQowMDAwMDAwMDAwIDY1NTM1IGYNCjAwMDAwMDAwMTkgMDAwMDAgbg0KMDAwMDAwMDA5MyAwMDAwMCBuDQowMDAwMDAwMTQ3IDAwMDAwIG4NCjAwMDAwMDAyMjIgMDAwMDAgbg0KMDAwMDAwMDM5MCAwMDAwMCBuDQowMDAwMDAxNTIyIDAwMDAwIG4NCjAwMDAwMDE2OTAgMDAwMDAgbg0KMDAwMDAwMjQyMyAwMDAwMCBuDQowMDAwMDAyNDU2IDAwMDAwIG4NCjAwMDAwMDI1NzQgMDAwMDAgbg0KDQp0cmFpbGVyDQo8PA0KL1NpemUgMTENCi9Sb290IDEgMCBSDQovSW5mbyAxMCAwIFINCj4+DQoNCnN0YXJ0eHJlZg0KMjcxNA0KJSVFT0YNCg==',
                     'title' => $ttiId.Str::random(5),
                 ],
-                'responseBody' => $response->body(),
+                'responseBody' => $response,
             ]));
         }
 

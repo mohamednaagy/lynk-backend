@@ -13,6 +13,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_body(): void
@@ -39,6 +40,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_password_and_source(): void
@@ -61,6 +63,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_source_and_email(): void
@@ -83,6 +86,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_email_and_password(): void
@@ -105,6 +109,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_email(): void
@@ -127,6 +132,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_password(): void
@@ -149,6 +155,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_source(): void
@@ -171,6 +178,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_not_exist_user(): void
@@ -192,6 +200,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_success_for_exist_user(): void

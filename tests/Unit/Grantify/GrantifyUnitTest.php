@@ -24,9 +24,9 @@ class GrantifyUnitTest extends TestCase
     public function test_assign_role_to_user()
     {
         $assignRoleToUser = new AssignRoleToUserAction();
-        $assignRoleToUser->handle($this->user, Role::Customer);
+        $assignRoleToUser->handle($this->user, Role::Admin);
 
-        $this->assertTrue($this->user->hasRole(Role::Customer));
+        $this->assertTrue($this->user->hasRole(Role::Admin));
     }
 
     public function test_assign_Wrong_role_to_user()
@@ -34,7 +34,7 @@ class GrantifyUnitTest extends TestCase
         $assignRoleToUser = new AssignRoleToUserAction();
         $assignRoleToUser->handle($this->user, Role::Admin);
 
-        $this->assertFalse($this->user->hasRole(Role::Customer));
+        $this->assertFalse($this->user->hasRole(Role::LenderSupervisor));
     }
 
     public function test_assign_invalid_role_to_user()
@@ -84,9 +84,9 @@ class GrantifyUnitTest extends TestCase
         $assignRoleToUser->handle($this->user, Role::Admin);
 
         $syncRoleToUserAction = new SyncRoleToUserAction();
-        $syncRoleToUserAction->handle($this->user, [Role::Admin, Role::Customer]);
+        $syncRoleToUserAction->handle($this->user, [Role::Admin]);
 
-        $this->assertTrue($this->user->hasExactRoles([Role::Customer, Role::Admin]));
+        $this->assertTrue($this->user->hasExactRoles([Role::Admin]));
     }
 
     public function test_sync_invalid_role_to_user()
@@ -94,7 +94,7 @@ class GrantifyUnitTest extends TestCase
         $this->expectException(RoleDoesNotExist::class);
 
         $assignRoleToUser = new AssignRoleToUserAction();
-        $assignRoleToUser->handle($this->user, Role::Customer);
+        $assignRoleToUser->handle($this->user, Role::Admin);
 
         $syncRoleToUserAction = new SyncRoleToUserAction();
         $syncRoleToUserAction->handle($this->user, 'testRole');
