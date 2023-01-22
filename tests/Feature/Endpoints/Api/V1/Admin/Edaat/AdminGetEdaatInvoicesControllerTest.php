@@ -17,14 +17,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class AdminGetEdaatInvoicesControllerTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithLender;
-    use InteractsWithAdmin;
+    use AssertsAccessByRoleAndArea;
 
     private static Company $company;
 
@@ -63,15 +61,13 @@ class AdminGetEdaatInvoicesControllerTest extends TestCase
                 'company_cr' => '12345678999',
             ]
         );
-        self::$managerHasPermission = $this->createManager(
-            'managerHasPermission@bim.com',
-            perm(Area::SuperAdmin, [Subject::LenderEdaatInvoices, Action::Index])
-        );
+        self::$managerHasPermission = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(self::$managerHasPermission, perm(Area::SuperAdmin, [Subject::LenderEdaatInvoices, Action::Index]));
 
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$userLenderForSecondCompany = $this->createLenderUser(self::$secondCompany->id, Role::LenderAdmin, 'lenderAdmin2@bim.com');
-        self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager();
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$userLenderForSecondCompany = $this->createLenderUser(self::$secondCompany->id, Role::LenderAdmin);
+        self::$admin = $this->createSuperAdminUser();
+        self::$manager = $this->createSuperAdminUser(Role::Manager);
         $this->createEdaatInvoice(self::$company->id, self::$userLender->id);
         $this->createEdaatInvoice(self::$secondCompany->id, self::$userLenderForSecondCompany->id);
     }
@@ -245,7 +241,7 @@ class AdminGetEdaatInvoicesControllerTest extends TestCase
 
     public function test_admin_get_edaat_invoices_controller_lender_roles_can_not_access()
     {
-        $this->assertLenderUserCannotAccess(function ($user, $role) {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
                 ->getJson('api/v1/admin/edaat-invoices');
         });

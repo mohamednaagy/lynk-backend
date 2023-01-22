@@ -13,13 +13,15 @@ use App\Settings\Classes\ProjectSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithSettings;
+use Tests\Traits\InteractsWithUser;
 
 class CreateOrderWithoutVerificationControllerTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithLender;
+    use InteractsWithUser;
+    use InteractsWithCompany;
     use InteractsWithSettings;
 
     private static Company $company;
@@ -62,16 +64,15 @@ class CreateOrderWithoutVerificationControllerTest extends TestCase
         [self::$companyWithEmptyWallet, self::$emptyWallet] = $this->createCompany('0', ['company_cr' => '12345678911']);
 
         self::$projectSettings = $this->app->make(ProjectSettings::class);
-        self::$userLenderAdminBelongsToCompanyHasEmptyWallet = $this->createLenderUser(self::$companyWithEmptyWallet->id, Role::LenderAdmin, 'lenderAdmin2@bim.com');
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'LenderAdmin@bim.com');
-        self::$LenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'LenderApiUser@bim.com');
-        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'LenderOrderCreator@bim.com');
-        self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'LenderSupervisor@bim.com');
-        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
+        self::$userLenderAdminBelongsToCompanyHasEmptyWallet = $this->createLenderUser(self::$companyWithEmptyWallet->id, Role::LenderAdmin);
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$LenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser);
+        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
+        self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor);
+        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
         self::$userLenderAdminWithoutEmailVerification = $this->createLenderUser(
             self::$company->id,
             Role::LenderAdmin,
-            'userLenderAdminWithoutEmailVerification@bim.com',
             [
                 'email_verified_at' => null,
             ]

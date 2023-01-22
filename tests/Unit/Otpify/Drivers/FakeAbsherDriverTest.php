@@ -13,11 +13,13 @@ use Modules\Otpify\Exceptions\OtpCodeIncorrectException;
 use Modules\Otpify\Facades\Otpify;
 use Modules\Otpify\Models\OtpifyCode;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class FakeAbsherDriverTest extends TestCase
 {
-    use InteractsWithLender;
+    use InteractsWithUser;
+    use InteractsWithCompany;
     use RefreshDatabase;
 
     protected static FinancingOrder $financingOrder;
@@ -28,8 +30,8 @@ class FakeAbsherDriverTest extends TestCase
 
         config()->set('otpify.default', 'fake_absher');
 
-        $company = $this->createCompany('2000', ['company_cr' => '12345678910'])[0];
-        $lender = $this->createLenderUser($company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        [$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        $lender = $this->createLenderUser($company->id, Role::LenderAdmin);
 
         self::$financingOrder = $this->createOrder($company->id, $lender->id);
     }
@@ -41,11 +43,11 @@ class FakeAbsherDriverTest extends TestCase
         $this->assertInstanceOf(OtpifyCode::class, $otp);
     }
 
-        public function test_fake_absher_driver_verify_method_successed_if_code_is_correct()
-        {
-            $otp = Otpify::send(new Request(), self::$financingOrder);
-            $this->assertTrue(Otpify::verify(new Request(), $otp->id, '2023'));
-        }
+    public function test_fake_absher_driver_verify_method_successed_if_code_is_correct()
+    {
+        $otp = Otpify::send(new Request(), self::$financingOrder);
+        $this->assertTrue(Otpify::verify(new Request(), $otp->id, '2023'));
+    }
 
     public function test_fake_absher_driver_verify_method_fails_if_code_is_not_correct()
     {

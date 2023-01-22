@@ -45,10 +45,6 @@ class UpdateSettingsRequest extends FormRequest
                 'otp_driver' => ['required', 'string', Rule::in(Otpify::getOtpifyDrivers())],
                 'otp_enabled' => ['required', 'boolean'],
             ],
-            Area::Customer => [
-                'otp_driver' => ['required', 'string', Rule::in(Otpify::getOtpifyDrivers())],
-                'otp_enabled' => ['required', 'boolean'],
-            ],
             default => []
         };
     }

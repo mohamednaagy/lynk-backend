@@ -1,8 +1,8 @@
 <?php
 
-use App\Settings\Classes\Areas\CustomerSettings;
 use App\Settings\Classes\Areas\LenderSettings;
 use App\Settings\Classes\Areas\SuperAdminSettings;
+use App\Settings\Classes\Areas\TraderSettings;
 use App\Settings\Classes\GeneralSettings;
 
 return [
@@ -14,8 +14,8 @@ return [
     'settings' => [
         GeneralSettings::class,
         SuperAdminSettings::class,
-        CustomerSettings::class,
         LenderSettings::class,
+        TraderSettings::class,
     ],
 
     /*

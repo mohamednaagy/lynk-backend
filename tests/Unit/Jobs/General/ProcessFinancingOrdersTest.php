@@ -4,10 +4,10 @@ namespace Tests\Unit\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
-use App\Jobs\Dmcc\ProcessAskClientForWakala;
 use App\Jobs\Dmcc\ProcessDmccContractSignedOrder;
 use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
 use App\Jobs\Dmcc\ProcessPtpDocumentRetrievedOrder;
+use App\Jobs\General\ProcessAskClientForWakala;
 use App\Jobs\General\ProcessFinancingOrders;
 use App\Jobs\General\ProcessInProgressOrder;
 use App\Models\Company;
