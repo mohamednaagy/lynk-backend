@@ -15,12 +15,11 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Event;
 use Spatie\WebhookServer\CallWebhookJob;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithCompany;
-use Tests\Traits\InteractsWithUser;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class FinancingOrderObserverTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     protected static Company $company;
 
@@ -32,7 +31,7 @@ class FinancingOrderObserverTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company] = $this->createCompany(2000, [
+        [self::$company] = $this->createLenderCompany(2000, [
             'webhook_secret_key' => '123456',
         ]);
         self::$company->webhooks()->create([

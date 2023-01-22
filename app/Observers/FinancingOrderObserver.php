@@ -2,8 +2,9 @@
 
 namespace App\Observers;
 
-use App\Actions\Contracts\Orders\ApplyEventsWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommodityPurchased;
+use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommoditySoldToCustomer;
+use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
@@ -28,7 +29,10 @@ class FinancingOrderObserver
         $quantity = $financingOrder->activeTraderOrder()->first()->quantity ?? '';
 
         $actions = match ($financingOrder->status->value) {
-            FinancingOrderStatus::CommoditySoldToCustomer => [ApplyEventsWhenStatusIsCommoditySoldToCustomer::class],
+            FinancingOrderStatus::CommoditySoldToCustomer => [
+                SendSmsWhenStatusIsCommoditySoldToCustomer::class,
+                FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
+            ],
             FinancingOrderStatus::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
             FinancingOrderStatus::CommodityPurchased => [FireWebhookWhenStatusIsCommodityPurchased::class],
             default => []
