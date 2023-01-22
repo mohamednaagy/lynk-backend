@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\V1\Trader\Users;
+namespace App\Http\Requests\V1\Admin\Traders\Users;
 
 use App\Enums\Area;
 use App\Models\User;

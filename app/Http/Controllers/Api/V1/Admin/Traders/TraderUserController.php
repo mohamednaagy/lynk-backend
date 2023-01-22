@@ -6,16 +6,14 @@ use App\Actions\Contracts\Traders\CreateTraderUserWithRoleAndPermission;
 use App\Actions\Contracts\Traders\UpdateTraderUserWithRoleAndPermission;
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Trader\Users\StoreUserRequest;
-use App\Http\Requests\V1\Trader\Users\UpdateUserRequest;
+use App\Http\Requests\V1\Admin\Traders\Users\StoreUserRequest;
+use App\Http\Requests\V1\Admin\Traders\Users\UpdateUserRequest;
 use App\Models\Company;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -25,17 +23,17 @@ class TraderUserController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Trader, [Subject::TraderUsers, Action::Show, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Trader, [Subject::TraderUsers, Action::Create, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Trader, [Subject::TraderUsers, Action::Edit, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Edit, Action::Manage])
         )->only('update');
     }
 
@@ -82,9 +80,7 @@ class TraderUserController extends Controller
      */
     public function show(Company $trader, User $user): JsonResponse
     {
-        if (! $user->hasRole(Role::TraderAdmin)) {
-            throw new ModelNotFoundException();
-        }
+        $this->checkTraderAreaRoles($user);
 
         $user->load('roles', 'permissions');
 
@@ -117,9 +113,7 @@ class TraderUserController extends Controller
         UpdateTraderUserWithRoleAndPermission $updateTraderUserWithRoleAndPermission,
     ): JsonResponse {
         return DB::transaction((function () use ($updateUserRequest, $user, $updateTraderUserWithRoleAndPermission) {
-            if (! $user->hasRole(Role::TraderAdmin) || $user->id == auth()->id()) {
-                throw new AuthorizationException();
-            }
+            $this->checkTraderAreaRoles($user);
 
             $updateTraderUserWithRoleAndPermission->handle($updateUserRequest->validated(), $user);
 
@@ -136,5 +130,14 @@ class TraderUserController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function checkTraderAreaRoles(User $user)
+    {
+        foreach (Area::roles(Area::Trader) as $role) {
+            if (! $user->hasRole($role)) {
+                throw new AuthorizationException();
+            }
+        }
     }
 }

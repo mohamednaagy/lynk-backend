@@ -95,7 +95,7 @@ class UserControllerUpdateTest extends TestCase
     /**
      * @return void
      */
-    public function test_user_roles_can_update_trader_user(): void
+    public function test_super_admin_roles_can_update_trader_user(): void
     {
         $this->assertStatusCodeForAreaRoles(200, Area::Lender, function ($user, $role) {
             return $this->actingAs(self::$userAdmin)
@@ -104,6 +104,14 @@ class UserControllerUpdateTest extends TestCase
                 ->assertExactJson([
                     'data' => [],
                 ]);
+        });
+    }
+
+    public function test_only_super_admin_roles_can_update_trader_users(): void
+    {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
+            return $this->actingAs($user)
+                ->putJson(self::$endPoint, self::$userData);
         });
     }
 }

@@ -78,7 +78,7 @@ class UserControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_user_roles_can_show_trader_user(): void
+    public function test_super_admin_roles_can_show_trader_user(): void
     {
         $this->assertStatusCodeForAreaRoles(200, Area::Trader, function ($user, $role) {
             return $this->actingAs(self::$userAdmin)
@@ -97,6 +97,14 @@ class UserControllerShowTest extends TestCase
                         ])->respond()
                         ->getData(true)
                 );
+        });
+    }
+
+    public function test_only_super_admin_roles_can_show_trader_users(): void
+    {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
+            return $this->actingAs($user)
+                ->getJson(self::$endPoint);
         });
     }
 }
