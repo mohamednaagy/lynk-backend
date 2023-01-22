@@ -152,7 +152,7 @@ class DmccDriver implements TraderInterface
 
         Log::debug('getTTiId', [$response]);
 
-        if (blank($response->ttiId)) {
+        if (! isset($response->ttiId) || blank($response->ttiId)) {
             throw new TraderException(collect([
                 'driver' => 'dmcc',
                 'step' => 'getTtiId',
