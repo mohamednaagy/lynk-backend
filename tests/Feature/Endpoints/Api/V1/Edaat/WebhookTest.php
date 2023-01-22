@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
+use Cknow\Money\Money;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,14 +37,24 @@ class WebhookTest extends TestCase
         parent::setUp();
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
-        self::$edaatInvoice = $this->createEdaatInvoice(self::$company->id, self::$userLender->id);
+
+        self::$edaatInvoice = $this->createEdaatInvoice(
+            self::$company->id,
+            self::$userLender->id,
+            [
+                'invoice_number' => '90510539184806',
+                'amount' => Money::parseByDecimal(3000, Money::getDefaultCurrency()),
+            ]
+        );
     }
 
     public function test_edaat_invoices_webhook_with_paid_invoice_success()
     {
         $transactionsCount = DB::connection(Config::get('wallet.database.connection'))
             ->table('transactions')->count();
+
         $this->withHeader('X-Company', self::$company->id)
             ->postJson('api/edaat/webhook/payment', [
                 [
@@ -57,12 +68,12 @@ class WebhookTest extends TestCase
                 ],
             ])->assertOk();
 
-        $transactions = DB::connection(Config::get('wallet.database.connection'))
+        $transaction = DB::connection(Config::get('wallet.database.connection'))
             ->table('transactions')
             ->where('meta->invoice_number', self::$edaatInvoice->invoice_number)
             ->first();
 
-        $this->assertEquals(self::$edaatInvoice->amount->getAmount(), $transactions->amount);
+        $this->assertEquals(self::$edaatInvoice->amount->getAmount(), $transaction->amount);
         $this->assertDatabaseCount(Transaction::class, $transactionsCount + 1);
     }
 
