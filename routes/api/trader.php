@@ -25,6 +25,7 @@ Route::prefix('v1/trader')->name('api.v1.')->group(function () {
         'role:'.implode('|', [
             Role::TraderAdmin,
         ]),
+        InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::put('auth/profile', UpdateMyProfile::class);
