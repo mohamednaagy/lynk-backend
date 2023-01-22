@@ -152,7 +152,7 @@ class DmccDriver implements TraderInterface
 
         Log::debug('getTTiId', [$response]);
 
-        if (blank($response->ttiId)) {
+        if (! isset($response->ttiId) || blank($response->ttiId)) {
             throw new TraderException(collect([
                 'driver' => 'dmcc',
                 'step' => 'getTtiId',
@@ -244,6 +244,8 @@ class DmccDriver implements TraderInterface
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
         try {
+            $dateTime = Carbon::createFromFormat('d/m/Y H:i A', $traderOrder->dateTimeOfPurchasingCommodity);
+
             $this->storeOrderDocumentAsPdf(
                 'selling-commodity-to-customer',
                 [
@@ -255,8 +257,8 @@ class DmccDriver implements TraderInterface
                     'quantity' => $traderOrder->quantity,
                     'warehouse' => $traderOrder->warehouse,
                     'owner' => $traderOrder->owner,
-                    'date' => Carbon::now()->toDateString(),
-                    'time' => Carbon::now()->toTimeString(),
+                    'date' => $dateTime->toDateString(),
+                    'time' => $dateTime->toTimeString(),
                 ],
                 $traderOrder,
                 FinancingOrderMediaCollection::SellingCommodityToCustomer,
@@ -312,6 +314,8 @@ class DmccDriver implements TraderInterface
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
         try {
+            $dateTime = Carbon::createFromFormat('d/m/Y H:i A', $traderOrder->dateTimeOfPurchasingCommodity);
+
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
@@ -323,8 +327,8 @@ class DmccDriver implements TraderInterface
                     'quantity' => $traderOrder->quantity,
                     'warehouse' => $traderOrder->warehouse,
                     'owner' => $traderOrder->owner,
-                    'date' => Carbon::now()->toDateString(),
-                    'time' => Carbon::now()->toTimeString(),
+                    'date' => $dateTime->toDateString(),
+                    'time' => $dateTime->toTimeString(),
                 ],
                 $traderOrder,
                 FinancingOrderMediaCollection::TransferOwnershipToLender,
@@ -365,17 +369,22 @@ class DmccDriver implements TraderInterface
             ]));
         }
 
-        $response = $response->object();
+        $details = $response->object()->inventoryDetails[0];
 
         $traderOrder->update([
-            'product' => $response->inventoryDetails[0]->hsCodeDescription,
-            'quantity' => $response->inventoryDetails[0]->quantity,
-            'amount' => $response->inventoryDetails[0]->totalValue.' '.$response->inventoryDetails[0]->currency,
-            'warehouse' => $response->inventoryDetails[0]->warehouseOrVaultId,
-            'owner' => $response->inventoryDetails[0]->owner,
+            'product' => $details->hsCodeDescription,
+            'quantity' => $details->quantity,
+            'amount' => $details->totalValue.' '.$details->currency,
+            'warehouse' => $details->warehouseOrVaultId,
+            'owner' => $details->owner,
+            'previousOwner' => $details->previousOwner,
+            'newOwner' => $details->newOwner,
+            'dateTimeOfPurchasingCommodity' => $details->dateTimeOfPurchasingCommodity,
+            'warehouseOrVaultEmirates' => $details->warehouseOrVaultEmirates,
+            'warehouseOrVaultCountry' => $details->warehouseOrVaultCountry,
         ]);
 
-        return $response;
+        return $response->object();
     }
 
     /**

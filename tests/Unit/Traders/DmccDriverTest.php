@@ -12,6 +12,7 @@ use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\User;
 use App\Support\Traders\Drivers\DmccDriver;
+use Carbon\Carbon;
 use CodeDredd\Soap\Facades\Soap;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -54,6 +55,7 @@ class DmccDriverTest extends TestCase
             'quantity' => 1,
             'warehouse' => 'warehouse',
             'owner' => 'owner',
+            'dateTimeOfPurchasingCommodity' => Carbon::now()->format('d/m/Y H:i A'),
         ]);
     }
 
@@ -438,6 +440,11 @@ class DmccDriverTest extends TestCase
                         'currency' => 'SAR',
                         'warehouseOrVaultId' => 'warehouseOrVaultId',
                         'owner' => 'owner',
+                        'previousOwner' => 'previousOwner',
+                        'newOwner' => 'newOwner',
+                        'dateTimeOfPurchasingCommodity' => Carbon::now()->format('d/m/Y H:i A'),
+                        'warehouseOrVaultEmirates' => 'warehouseOrVaultEmirates',
+                        'warehouseOrVaultCountry' => 'warehouseOrVaultCountry',
                     ],
                 ],
                 'errorCode' => '',
