@@ -384,7 +384,7 @@ class DmccDriver implements TraderInterface
             'warehouseOrVaultCountry' => $details->warehouseOrVaultCountry,
         ]);
 
-        return $response;
+        return $response->object();
     }
 
     /**
