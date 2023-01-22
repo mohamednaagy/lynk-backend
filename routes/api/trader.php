@@ -1,6 +1,9 @@
 <?php
 
 use App\Enums\Role;
+use App\Http\Controllers\Api\V1\Trader\Auth\GetAuthUser;
+use App\Http\Controllers\Api\V1\Trader\Auth\UpdateMyProfile;
+use App\Http\Controllers\Api\V1\Trader\FinancingOrders\OrderController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
@@ -17,13 +20,16 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
 Route::prefix('v1/trader')->name('api.v1.')->group(function () {
     Route::middleware([
+        InitializeTenancyByRequestData::class,
         'auth:sanctum',
         'role:'.implode('|', [
             Role::TraderAdmin,
         ]),
         InitializeTenancyByRequestData::class,
-    ])->group(
-        function () {
-            // end-points
-        });
+    ])->group(function () {
+        Route::get('auth', GetAuthUser::class);
+        Route::put('auth/profile', UpdateMyProfile::class);
+
+        Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
+    });
 });

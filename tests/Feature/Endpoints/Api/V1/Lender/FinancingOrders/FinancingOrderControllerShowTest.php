@@ -12,11 +12,12 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class FinancingOrderControllerShowTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static Company $firstCompany;
 
@@ -51,10 +52,10 @@ class FinancingOrderControllerShowTest extends TestCase
 
         [self::$firstCompany, self::$firstWallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         [self::$secondCompany, self::$secondWallet] = $this->createCompany('3000', ['company_cr' => '12345678911']);
-        self::$userLenderAdmin = $this->createLenderUser(self::$firstCompany->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$userLenderSupervisor = $this->createLenderUser(self::$firstCompany->id, Role::LenderSupervisor, 'lenderSupervisor@bim.com');
-        self::$userLenderBilling = $this->createLenderUser(self::$firstCompany->id, Role::LenderBilling, 'lenderBilling@bim.com');
-        self::$userLenderOrderCreator = $this->createLenderUser(self::$firstCompany->id, Role::LenderOrderCreator, 'lenderOrderCreator@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$firstCompany->id, Role::LenderAdmin);
+        self::$userLenderSupervisor = $this->createLenderUser(self::$firstCompany->id, Role::LenderSupervisor);
+        self::$userLenderBilling = $this->createLenderUser(self::$firstCompany->id, Role::LenderBilling);
+        self::$userLenderOrderCreator = $this->createLenderUser(self::$firstCompany->id, Role::LenderOrderCreator);
         self::$firstOrderInSameCompany = $this->createOrder(self::$firstCompany->id, self::$userLenderAdmin->id);
         self::$secondOrderInSameCompany = $this->createOrder(self::$firstCompany->id, self::$userLenderAdmin->id);
         self::$thirdOrderInSameCompany = $this->createOrder(self::$firstCompany->id, self::$userLenderOrderCreator->id);

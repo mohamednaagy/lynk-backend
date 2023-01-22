@@ -12,11 +12,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Grantify\Facades\Grantify;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
+use Tests\Traits\InteractsWithUser;
 
 class AdminControllerUpdateTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin;
+    use RefreshDatabase, InteractsWithUser;
 
     private static User $superAdminUser;
 
@@ -29,17 +29,14 @@ class AdminControllerUpdateTest extends TestCase
     {
         parent::setUp();
 
-        self::$superAdminUser = $this->createAdmin();
-
-        self::$managerAdminUser = $this->createManager(
-            'manager@bim.com',
-            perm(Area::SuperAdmin, [Subject::Admins, Action::Edit]),
-        );
+        self::$superAdminUser = $this->createSuperAdminUser(Role::Admin, ['email' => 'admin@bim.com']);
+        self::$managerAdminUser = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(self::$managerAdminUser, perm(Area::SuperAdmin, [Subject::Admins, Action::Edit]));
     }
 
     public function test_un_auth_cant_update_admin()
     {
-        $newSuperAdminUser = $this->createAdmin('newadmin@bim.com');
+        $newSuperAdminUser = $this->createSuperAdminUser();
 
         $this->putJson('api/v1/admin/admins/'.$newSuperAdminUser->id, [
             'first_name' => 'admin',
@@ -54,7 +51,7 @@ class AdminControllerUpdateTest extends TestCase
 
     public function test_admin_controller_update_with_super_admin_success()
     {
-        $newSuperAdminUser = $this->createAdmin('newadmin@bim.com');
+        $newSuperAdminUser = $this->createSuperAdminUser();
 
         $this->actingAs(self::$superAdminUser)
             ->putJson('api/v1/admin/admins/'.$newSuperAdminUser->id, [
@@ -84,7 +81,7 @@ class AdminControllerUpdateTest extends TestCase
 
     public function test_admin_controller_update_with_manager_success()
     {
-        $newManagerUser = $this->createManager('newmanager@bim.com');
+        $newManagerUser = $this->createSuperAdminUser(Role::Manager);
 
         $this->actingAs(self::$managerAdminUser)
             ->putJson('api/v1/admin/admins/'.$newManagerUser->id, [
@@ -114,7 +111,7 @@ class AdminControllerUpdateTest extends TestCase
 
     public function test_admin_controller_update_with_manager_no_permissions_unsuccessful()
     {
-        $newManagerUser = $this->createManager('newmanager@bim.com');
+        $newManagerUser = $this->createSuperAdminUser(Role::Manager);
 
         Grantify::syncPermissionToModel(self::$managerAdminUser, []);
 
@@ -131,7 +128,7 @@ class AdminControllerUpdateTest extends TestCase
 
     public function test_admin_controller_update_without_first_name_and_last_name_unsuccessful()
     {
-        $newSuperAdminUser = $this->createAdmin('newadmin@bim.com');
+        $newSuperAdminUser = $this->createSuperAdminUser();
 
         $this->actingAs(self::$superAdminUser)
             ->putJson('api/v1/admin/admins/'.$newSuperAdminUser->id, [
@@ -145,7 +142,7 @@ class AdminControllerUpdateTest extends TestCase
 
     public function test_admin_controller_update_with_email_already_exists_unsuccessful()
     {
-        $newSuperAdminUser = $this->createAdmin('newadmin@bim.com');
+        $newSuperAdminUser = $this->createSuperAdminUser();
 
         $this->actingAs(self::$superAdminUser)
             ->putJson('api/v1/admin/admins/'.$newSuperAdminUser->id, [
@@ -160,7 +157,7 @@ class AdminControllerUpdateTest extends TestCase
 
     public function test_admin_controller_update_without_email_unsuccessful()
     {
-        $newSuperAdminUser = $this->createAdmin('newadmin@bim.com');
+        $newSuperAdminUser = $this->createSuperAdminUser();
 
         $this->actingAs(self::$superAdminUser)
             ->putJson('api/v1/admin/admins/'.$newSuperAdminUser->id, [

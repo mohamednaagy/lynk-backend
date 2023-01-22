@@ -6,31 +6,29 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
-use App\Support\PdfGenerator\PdfGenerator;
+use App\Models\TraderOrder;
 use App\Support\Traders\Contracts\TraderInterface;
-use App\Support\Traders\TraderHelper;
+use App\Support\Traders\TraderHelperTrait;
 use Carbon\Carbon;
-use CodeDredd\Soap\Facades\Soap;
-use CodeDredd\Soap\SoapClient;
+use Exception;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 class FakeDriver implements TraderInterface
 {
-    use TraderHelper;
+    use TraderHelperTrait;
 
-    private SoapClient $soap;
-
-    public function __construct()
-    {
-        $this->soap = Soap::buildClient('dmcc');
-    }
-
+    /**
+     * @return bool
+     */
     public function acceptAgreement(): bool
     {
         return true;
     }
 
+    /**
+     * @throws TraderException
+     */
     public function getTti(FinancingOrder $financingOrder): string
     {
         $ttiId = $this->getTtiId($financingOrder);
@@ -40,6 +38,9 @@ class FakeDriver implements TraderInterface
         return $ttiId;
     }
 
+    /**
+     * @throws TraderException
+     */
     public function fetchNotifications(string $type): ?array
     {
         $response = Http::get($this->buildUrl('notifications?type='.$type));
@@ -142,9 +143,10 @@ class FakeDriver implements TraderInterface
     }
 
     /**
-     * @throws TraderException
+     * @param  FinancingOrder  $financingOrder
+     * @return bool
      */
-    public function cancelOrder(FinancingOrder $financingOrder): mixed
+    public function cancelOrder(FinancingOrder $financingOrder): bool
     {
         return true;
     }
@@ -152,7 +154,7 @@ class FakeDriver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function respondPtpService(string $ttiId): void
+    public function respondPtpService(string $ttiId)
     {
         $response = Http::post($this->buildUrl('respondPTPService'), [
             'ttiId' => $ttiId,
@@ -172,32 +174,48 @@ class FakeDriver implements TraderInterface
                 'responseBody' => $response->body(),
             ]));
         }
+
+        return $response->object();
     }
 
+    /**
+     * @param $traderOrder
+     * @return void
+     *
+     * @throws TraderException
+     */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
-        $html = view('selling-commodity-to-customer', [
-            'ttiId' => $traderOrder->reference,
-            'companyName' => $traderOrder->order->company->name,
-            'orderNumber' => $traderOrder->financing_order_id,
-            'amount' => $traderOrder->order->amount->formatByDecimal(),
-            'hsCodeDescription' => 'product description',
-            'quantity' => 100,
-            'warehouse' => 'warehouse',
-            'owner' => 'owner',
-            'date' => Carbon::now()->toDateString(),
-            'time' => Carbon::now()->toTimeString(),
-        ])->render();
-
-        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
-            $this->attachDocumentToOrder(
+        try {
+            $this->storeOrderDocumentAsPdf(
+                'selling-commodity-to-customer',
+                [
+                    'ttiId' => $traderOrder->reference,
+                    'companyName' => $traderOrder->order->company->name,
+                    'orderNumber' => $traderOrder->financing_order_id,
+                    'amount' => $traderOrder->order->amount->formatByDecimal(),
+                    'hsCodeDescription' => 'product description',
+                    'quantity' => 100,
+                    'warehouse' => 'warehouse',
+                    'owner' => 'owner',
+                    'date' => Carbon::now()->toDateString(),
+                    'time' => Carbon::now()->toTimeString(),
+                ],
                 $traderOrder,
-                $fileResource,
-                FinancingOrderMediaCollection::SellingCommodityToCustomer
+                FinancingOrderMediaCollection::SellingCommodityToCustomer,
             );
-        });
 
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
+        } catch (Exception $exception) {
+            throw new TraderException(collect([
+                'driver' => 'fake',
+                'step' => 'createSellingCommodityToCustomerDocument',
+                'requestBody' => [
+                    'traderOrder' => $traderOrder,
+                ],
+                'responseBody' => $exception->getMessage(),
+            ]));
+        }
     }
 
     /**
@@ -226,45 +244,62 @@ class FakeDriver implements TraderInterface
         return $response->json('data.fileContent');
     }
 
-    public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
+    /**
+     * @throws TraderException
+     */
+    public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
-        $fileName = $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
-        if (! is_null($type)) {
-            $traderOrder->order->addMediaFromBase64(
-                $document
-            )->usingFileName($fileName)->toMediaCollection($collectionName);
-        } else {
-            $traderOrder->order->addMediaFromStream(
-                $document
-            )->usingFileName($fileName)->toMediaCollection($collectionName);
+        try {
+            $this->storeOrderDocumentAsPdf(
+                'transfer-ownership-to-lender',
+                [
+                    'ttiId' => $traderOrder->reference,
+                    'companyName' => $traderOrder->order->company->name,
+                    'orderNumber' => $traderOrder->financing_order_id,
+                    'amount' => $traderOrder->order->amount->formatByDecimal(),
+                    'hsCodeDescription' => 'product description',
+                    'quantity' => 100,
+                    'warehouse' => 'warehouse',
+                    'owner' => 'owner',
+                    'date' => Carbon::now()->toDateString(),
+                    'time' => Carbon::now()->toTimeString(),
+                ],
+                $traderOrder,
+                FinancingOrderMediaCollection::TransferOwnershipToLender,
+            );
+
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+        } catch (Exception $exception) {
+            throw new TraderException(collect([
+                'driver' => 'fake',
+                'step' => 'createTransferOwnershipToLenderDocument',
+                'requestBody' => [
+                    'traderOrder' => $traderOrder,
+                ],
+                'responseBody' => $exception->getMessage(),
+            ]));
         }
     }
 
-    public function createTransferOwnershipToLenderDocument($traderOrder): void
+    /**
+     * @throws TraderException
+     */
+    public function getInventoryBasket(TraderOrder $traderOrder): object
     {
-        $html = view('transfer-ownership-to-lender', [
-            'ttiId' => $traderOrder->reference,
-            'companyName' => $traderOrder->order->company->name,
-            'orderNumber' => $traderOrder->financing_order_id,
-            'amount' => $traderOrder->order->amount->formatByDecimal(),
-            'hsCodeDescription' => 'product description',
-            'quantity' => 100,
+        $data = [
+            'product' => '',
+            'quantity' => 1000,
+            'amount' => '1000 SAR',
             'warehouse' => 'warehouse',
             'owner' => 'owner',
-            'date' => Carbon::now()->toDateString(),
-            'time' => Carbon::now()->toTimeString(),
-        ])->render();
+        ];
 
-        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($traderOrder) {
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                $fileResource,
-                FinancingOrderMediaCollection::TransferOwnershipToLender
-            );
-        });
+        $traderOrder->update($data);
+
+        return (object) $data;
     }
 
-    public function uploadTTIDocumentAndGetVersionNumber(string $ttiId): mixed
+    public function uploadTTIDocumentAndGetVersionNumber(string $ttiId): string
     {
         return '001';
     }
