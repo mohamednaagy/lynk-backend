@@ -16,7 +16,7 @@ class TraderCompanyControllerStoreTest extends TestCase
     use RefreshDatabase;
     use AssertsAccessByRoleAndArea;
 
-    private static User $trader;
+    private static User $superAdmin;
 
     private static company $company;
 
@@ -38,7 +38,7 @@ class TraderCompanyControllerStoreTest extends TestCase
 
         [self::$company] = $this->createTraderCompany();
 
-        self::$trader = $this->createTraderUser(self::$company->id);
+        self::$superAdmin = $this->createSuperAdminUser();
     }
 
     /**
@@ -55,7 +55,7 @@ class TraderCompanyControllerStoreTest extends TestCase
 
     public function test_trader_company_controller_store_other_roles_can_not_access()
     {
-        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::Trader], function ($user, $role) {
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
                 ->postJson('api/v1/admin/traders', self::$companyDetails);
         });
@@ -63,7 +63,7 @@ class TraderCompanyControllerStoreTest extends TestCase
 
     public function test_trader_company_controller_store_without_name_unsuccessful()
     {
-        $this->actingAs(self::$trader)
+        $this->actingAs(self::$superAdmin)
             ->postJson('api/v1/admin/traders', [
                 'unique_name' => 'companyUniqueName',
                 'company_cr' => '1234567891',
@@ -74,7 +74,7 @@ class TraderCompanyControllerStoreTest extends TestCase
 
     public function test_trader_company_controller_store_without_unique_name_unsuccessful()
     {
-        $this->actingAs(self::$trader)
+        $this->actingAs(self::$superAdmin)
             ->postJson('api/v1/admin/traders', [
                 'name' => 'name',
                 'company_cr' => '1234567891',
@@ -85,7 +85,7 @@ class TraderCompanyControllerStoreTest extends TestCase
 
     public function test_trader_company_controller_store_without_company_cr_unsuccessful()
     {
-        $this->actingAs(self::$trader)
+        $this->actingAs(self::$superAdmin)
             ->postJson('api/v1/admin/traders', [
                 'name' => 'testCompany',
                 'unique_name' => 'companyUniqueName',
@@ -96,7 +96,7 @@ class TraderCompanyControllerStoreTest extends TestCase
 
     public function test_trader_company_controller_driver_with_invalid_driver_unsuccessful()
     {
-        $this->actingAs(self::$trader)
+        $this->actingAs(self::$superAdmin)
             ->postJson('api/v1/admin/traders', [
                 'name' => 'testCompany',
                 'unique_name' => 'companyUniqueName',
@@ -108,14 +108,14 @@ class TraderCompanyControllerStoreTest extends TestCase
 
     public function test_trader_company_controller_store_successful()
     {
-        $this->actingAs(self::$trader)
+        $this->actingAs(self::$superAdmin)
             ->postJson('api/v1/admin/traders', self::$companyDetails)
             ->assertStatus(Response::HTTP_OK);
     }
 
     public function test_trader_company_controller_store_wallet_created_successful()
     {
-        $this->actingAs(self::$trader)
+        $this->actingAs(self::$superAdmin)
             ->postJson('api/v1/admin/traders', self::$companyDetails)
             ->assertStatus(Response::HTTP_OK);
 

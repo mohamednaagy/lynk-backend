@@ -26,22 +26,22 @@ class TraderController extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::Trader, [Subject::Traders, Action::Index, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::Traders, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-                perm(Area::Trader, [Subject::Traders, Action::Create, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::Traders, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-                perm(Area::Trader, [Subject::Traders, Action::Show, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::Traders, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-                perm(Area::Trader, [Subject::Traders, Action::Edit, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::Traders, Action::Edit, Action::Manage])
         )->only('update');
     }
 
@@ -53,6 +53,7 @@ class TraderController extends Controller
             ->parseIncludes([
                 'id',
                 'name',
+                'status',
                 'unique_name',
                 'orders_count',
             ])

@@ -94,11 +94,10 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::get('media/{media}/download', DownloadMedia::class);
 
         Route::post('/upload-image', [UploadImage::class, 'store']);
+
+        Route::apiResource('traders', TraderController::class)
+            ->only(['index', 'store', 'show', 'update']);
     });
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.sign-up');
-
-    Route::apiResource('traders', TraderController::class)
-        ->only(['index', 'store', 'show', 'update'])
-        ->middleware(['auth:sanctum', 'role:'.Role::TraderAdmin]);
 });
