@@ -17,7 +17,7 @@ class TraderUserController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Trader, [Subject::TraderUsers, Action::Index, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Index, Action::Manage])
         )->only('index');
     }
 

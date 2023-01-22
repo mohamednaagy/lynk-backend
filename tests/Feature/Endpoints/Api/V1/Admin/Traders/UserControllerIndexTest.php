@@ -13,12 +13,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
-use Tests\Traits\InteractsWithCompany;
-use Tests\Traits\InteractsWithUser;
 
 class UserControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser, AssertsAccessByRoleAndArea;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     private static User $userAdmin;
 
@@ -88,24 +86,11 @@ class UserControllerIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_user_roles_can_index_trader_users(): void
+    public function test_only_super_admin_roles_can_index_trader_users(): void
     {
-        $this->assertStatusCodeForAreaRoles(200, Area::SuperAdmin, function ($user, $role) {
-            return $this->actingAs(self::$userAdmin)
-                ->getJson('api/v1/admin/traders/'.self::$company->id.'/users')->assertExactJson(
-                    fractal(self::$traderUsersCollection, new UserTransformer(Area::Trader))
-                        ->parseIncludes([
-                            'id',
-                            'first_name',
-                            'last_name',
-                            'email',
-                            'phone_number',
-                            'phone_country_code',
-                            'formatted_phone_number',
-                            'role',
-                        ])->respond()
-                        ->getData(true)
-                );
+        $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
+            return $this->actingAs($user)
+                ->getJson('api/v1/admin/traders/'.self::$company->id.'/users');
         });
     }
 }
