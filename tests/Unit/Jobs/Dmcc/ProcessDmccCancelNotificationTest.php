@@ -149,7 +149,7 @@ class ProcessDmccCancelNotificationTest extends TestCase
 
         $this->assertEquals(
             TraderOrderStatus::Cancelled,
-            self::$financingOrder->traderOrders()->first()->status
+            self::$financingOrder->traderOrders()->first()->status->value
         );
     }
 
