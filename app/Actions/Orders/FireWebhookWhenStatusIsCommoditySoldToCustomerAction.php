@@ -12,7 +12,10 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
 {
     public function handle(FinancingOrder $financingOrder, string $product, string $quantity): void
     {
-        $url = $financingOrder->getMedia(FinancingOrderMediaCollection::SellingCommodityToCustomer)->first() ?? '';
+        $sellingCommodityToCustomerMedia = $financingOrder
+            ->getMedia(FinancingOrderMediaCollection::SellingCommodityToCustomer)
+            ->first();
+        $url = $sellingCommodityToCustomerMedia !== null ? $sellingCommodityToCustomerMedia->getFullUrl() : '';
 
         WebhookEvent::fire(
             $financingOrder->company,

@@ -59,12 +59,13 @@ class FinancingOrderObserverTest extends TestCase
             SmsSent::class,
         ]);
 
+        self::$order->update(['amount' => 250]);
+
         Bus::assertNotDispatched(CallWebhookJob::class);
 
         Event::assertNotDispatched(SmsSent::class);
 
         self::$order->update([
-            'amount' => 250,
             'status' => FinancingOrderStatus::CommoditySoldToCustomer,
         ]);
 
