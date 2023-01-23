@@ -83,6 +83,11 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/{lender}/settings ', GetLenderSetting::class);
         });
 
+        Route::prefix('traders')->group(function () {
+            Route::get('/{lender}/orders/{order}', [LenderOrderController::class, 'show']);
+            Route::get('{lender}/orders', [LenderOrderController::class, 'index']);
+        });
+
         Route::apiResource('lenders', LenderController::class);
         Route::apiResource('lenders.users', LenderUserController::class);
 
