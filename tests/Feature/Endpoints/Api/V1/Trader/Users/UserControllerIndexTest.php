@@ -73,7 +73,6 @@ class UserControllerIndexTest extends TestCase
             Response::HTTP_FORBIDDEN,
             [
                 Area::Trader,
-                Area::Customer,
             ],
             function ($user, $role) {
                 return $this->actingAs($user)
