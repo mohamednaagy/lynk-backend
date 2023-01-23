@@ -10,6 +10,7 @@ use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use CodeDredd\Soap\Facades\Soap;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -53,14 +54,38 @@ class ProcessDmccPtpNotificationTest extends TestCase
             ],
         ];
 
-        $ttiId = self::$notification->notificationHeaderAndEntity->notificationEntityDetails->
-        notificationEntity[0]->entityValue;
+        $ttiId = self::$notification->notificationHeaderAndEntity
+            ->notificationEntityDetails
+            ->notificationEntity[0]
+            ->entityValue;
 
         self::$traderOrder = self::$financingOrder->traderOrders()->create([
             'provider' => 'fake',
             'reference' => $ttiId,
             'status' => TraderOrderStatus::InProgress,
         ]);
+
+        Soap::fake(function () {
+            return Soap::response([
+                'successCode' => '0000',
+                'errorCode' => '',
+                'inventoryDetails' => [
+                    [
+                        'hsCodeDescription' => 'hsCodeDescription',
+                        'quantity' => 'quantity',
+                        'totalValue' => 'totalValue',
+                        'currency' => 'currency',
+                        'warehouseOrVaultId' => 'warehouseOrVaultId',
+                        'owner' => 'owner',
+                        'previousOwner' => 'previousOwner',
+                        'newOwner' => 'newOwner',
+                        'dateTimeOfPurchasingCommodity' => 'dateTimeOfPurchasingCommodity',
+                        'warehouseOrVaultEmirates' => 'warehouseOrVaultEmirates',
+                        'warehouseOrVaultCountry' => 'warehouseOrVaultCountry',
+                    ],
+                ],
+            ], 200);
+        });
     }
 
     public function test_job_not_processed_if_active_trader_order_has_invalid_provider()
@@ -75,9 +100,10 @@ class ProcessDmccPtpNotificationTest extends TestCase
         );
     }
 
-    public function test_job_processed_if_active_trader_order_has_valid_provider()
+    public function test_job_will_processed_if_active_trader_order_has_fake_provider()
     {
         Http::fake();
+
         $process = new ProcessDmccPtpNotification(self::$notification);
         $process->handle();
 
@@ -86,9 +112,24 @@ class ProcessDmccPtpNotificationTest extends TestCase
         );
     }
 
-    public function test_job_not_processed_if_current_financing_order_is_unsuitable_status()
+    public function test_job_processed_if_active_trader_order_has_dmcc_provider()
     {
-        self::$financingOrder->update(['status' => FinancingOrderStatus::Cancelled]);
+        self::$traderOrder->update(['provider' => 'dmcc']);
+
+        $process = new ProcessDmccPtpNotification(self::$notification);
+        $process->handle();
+
+        $this->assertTrue(
+            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::RespondedToPtp)
+        );
+    }
+
+    /**
+     * @dataProvider unsuitableOrderStatusDataProvider
+     */
+    public function test_job_not_processed_if_current_financing_order_is_unsuitable_status($unsuitableOrderStatusData)
+    {
+        self::$financingOrder->update(['status' => $unsuitableOrderStatusData]);
 
         $process = new ProcessDmccPtpNotification(self::$notification);
         $process->handle();
@@ -98,21 +139,16 @@ class ProcessDmccPtpNotificationTest extends TestCase
         );
     }
 
-    public function test_job_not_processed_if_not_responded_to_ptp()
+    public function unsuitableOrderStatusDataProvider()
     {
-        Http::fake();
-        config()->set('trader.providers.fake.url', 'invalidRespondPTPServiceUrl');
-        self::$traderOrder->update(['provider' => 'deafProviderCannotRespond']);
-
-        $process = new ProcessDmccPtpNotification(self::$notification);
-        $process->handle();
-
-        $this->assertFalse(
-            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::RespondedToPtp)
-        );
+        return collect(FinancingOrderStatus::getValues())->reject(function ($item) {
+            return $item == FinancingOrderStatus::WaitingPurchasingCommodity || $item == FinancingOrderStatus::RespondedToPtp;
+        })->map(function ($item) {
+            return [$item];
+        })->toArray();
     }
 
-    public function test_job_not_trader_order_history_is_created_with_RespondPtp_status()
+    public function test_job_trader_order_history_is_created_with_respond_ptp_status()
     {
         Http::fake();
         $process = new ProcessDmccPtpNotification(self::$notification);
@@ -125,7 +161,7 @@ class ProcessDmccPtpNotificationTest extends TestCase
             ]);
     }
 
-    public function test_job_processed_and_order_status_updated_to_RespondedToPtp_status()
+    public function test_job_processed_and_order_status_updated_to_responded_to_ptp_status()
     {
         Http::fake();
         $process = new ProcessDmccPtpNotification(self::$notification);
