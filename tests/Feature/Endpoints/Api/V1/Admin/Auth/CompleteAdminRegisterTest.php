@@ -2,17 +2,18 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Auth;
 
+use App\Enums\Role;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ValidateSignature;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
+use Tests\Traits\InteractsWithUser;
 
 class CompleteAdminRegisterTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin;
+    use RefreshDatabase, InteractsWithUser;
 
     private static User $adminUser;
 
@@ -23,7 +24,7 @@ class CompleteAdminRegisterTest extends TestCase
     {
         parent::setUp();
 
-        self::$adminUser = $this->createAdmin('admin@bim.com', [
+        self::$adminUser = $this->createSuperAdminUser(Role::Admin, [
             'password' => null,
             'email_verified_at' => null,
         ]);

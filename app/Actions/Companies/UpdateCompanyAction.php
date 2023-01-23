@@ -33,6 +33,7 @@ class UpdateCompanyAction implements UpdateCompany
                     'webhook_secret_key',
                     'public_status_comment',
                     'internal_status_comment',
+                    'driver',
                 ]
             )
         );

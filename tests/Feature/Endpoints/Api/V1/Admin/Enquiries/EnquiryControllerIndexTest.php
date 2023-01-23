@@ -16,13 +16,13 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
+use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithEnquiry;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithUser;
 
 class EnquiryControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin, InteractsWithLender, InteractsWithEnquiry;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany, InteractsWithEnquiry;
 
     const BaseUrl = 'api/v1/admin/enquiries';
 
@@ -51,14 +51,13 @@ class EnquiryControllerIndexTest extends TestCase
     {
         parent::setUp();
 
-        self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager();
-        self::$managerHasPermission = $this->createManager(
-            'managerHasPermission@bim.com',
-            perm(Area::SuperAdmin, [Subject::Enquiries, Action::Index])
-        );
+        self::$admin = $this->createSuperAdminUser();
+        self::$manager = $this->createSuperAdminUser(Role::Manager);
+        self::$managerHasPermission = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(self::$managerHasPermission, perm(Area::SuperAdmin, [Subject::Enquiries, Action::Index]));
+
         [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$lenderEnquiry = $this->createEnquiry(self::$userLenderAdmin);
         self::$visitorEnquiry = $this->createEnquiry(enquiryStatus: 2);
         self::$paginatedEnquiries = $this->app->make(GetPaginatedEnquiries::class);

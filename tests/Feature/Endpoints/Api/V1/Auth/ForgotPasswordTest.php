@@ -13,11 +13,12 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class ForgotPasswordTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static Company $company;
 
@@ -54,7 +55,7 @@ class ForgotPasswordTest extends TestCase
     {
         Notification::fake();
 
-        Grantify::assignRoleToModel(self::$generalUser, Role::Customer);
+        Grantify::assignRoleToModel(self::$generalUser, Role::LenderAdmin);
 
         $response = $this->postJson(self::$sendResetPasswordUrl, [
             'email' => self::$generalUser->email,

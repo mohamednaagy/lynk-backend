@@ -8,25 +8,27 @@ use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
-use App\Http\Controllers\Api\V1\Admin\Companies\ChargeLenderBalanceManually;
-use App\Http\Controllers\Api\V1\Admin\Companies\CompanyController;
-use App\Http\Controllers\Api\V1\Admin\Companies\CompanyUserController;
-use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyBalance;
-use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanySetting;
-use App\Http\Controllers\Api\V1\Admin\Companies\GetCompanyStatuses;
-use App\Http\Controllers\Api\V1\Admin\Companies\UpdateCompanyStatus;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
-use App\Http\Controllers\Api\V1\Admin\FinancingOrders\FinancingOrderController;
-use App\Http\Controllers\Api\V1\Admin\FinancingOrders\FinancingOrderTransactionController;
+use App\Http\Controllers\Api\V1\Admin\FinancingOrders\LenderOrderController;
+use App\Http\Controllers\Api\V1\Admin\FinancingOrders\LenderTransactionController;
 use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
+use App\Http\Controllers\Api\V1\Admin\Lenders\ChargeLenderBalanceManually;
+use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderBalance;
+use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderSetting;
+use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderStatuses;
+use App\Http\Controllers\Api\V1\Admin\Lenders\LenderController;
+use App\Http\Controllers\Api\V1\Admin\Lenders\LenderUserController;
+use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\LenderSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
+use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
+use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
 
@@ -69,20 +71,22 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::put('wakala-templates/{type}', [WakalaTemplateController::class, 'update'])
             ->where('type', 'client|company');
 
-        Route::get('companies/statuses', GetCompanyStatuses::class);
+        Route::get('lenders/statuses', GetLenderStatuses::class);
 
-        Route::prefix('companies')->group(function () {
-            Route::put('/{company}/status', UpdateCompanyStatus::class);
-            Route::get('/{company}/balance ', GetCompanyBalance::class);
-            Route::get('/{company}/orders/{order}', [FinancingOrderController::class, 'show']);
-            Route::get('{company}/orders', [FinancingOrderController::class, 'index']);
-            Route::get('/{company}/transactions ', [FinancingOrderTransactionController::class, 'index']);
-            Route::post('/{company}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
-            Route::get('/{company}/settings ', GetCompanySetting::class);
+        Route::prefix('lenders')->group(function () {
+            Route::put('/{lender}/status', UpdateLenderStatus::class);
+            Route::get('/{lender}/balance ', GetLenderBalance::class);
+            Route::get('/{lender}/orders/{order}', [LenderOrderController::class, 'show']);
+            Route::get('{lender}/orders', [LenderOrderController::class, 'index']);
+            Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
+            Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
+            Route::get('/{lender}/settings ', GetLenderSetting::class);
         });
 
-        Route::apiResource('companies', CompanyController::class);
-        Route::apiResource('companies.users', CompanyUserController::class);
+        Route::apiResource('lenders', LenderController::class);
+        Route::apiResource('lenders.users', LenderUserController::class);
+
+        Route::apiResource('traders.users', TraderUserController::class);
 
         Route::get('edaat-invoices', GetEdaatInvoices::class);
         Route::post('edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
@@ -93,6 +97,9 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::get('media/{media}/download', DownloadMedia::class);
 
         Route::post('/upload-image', [UploadImage::class, 'store']);
+
+        Route::apiResource('traders', TraderController::class)
+            ->only(['index', 'store', 'show', 'update']);
     });
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.sign-up');
