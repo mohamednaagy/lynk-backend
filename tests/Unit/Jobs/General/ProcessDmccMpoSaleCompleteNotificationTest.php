@@ -34,7 +34,7 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company] = $this->createCompany();
+        self::$company = $this->createCompanyWithoutWallet();
         self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
             'status' => FinancingOrderStatus::MurabhaOfferIssued,
@@ -108,5 +108,31 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
 
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
         $this->assertEquals(FinancingOrderHistory::MurabahaSaleCompleted, $traderOrderHistory->action);
+    }
+
+    public function test_process_dmcc_mpo_sale_complete_notification_with_invalid_status()
+    {
+        $ttiId = 1;
+
+        $notification = (object) [
+            'notificationHeaderAndEntity' => (object) [
+                'notificationEntityDetails' => (object) [
+                    'notificationEntity' => [(object) ['entityValue' => $ttiId]],
+                ],
+            ],
+        ];
+
+        collect(FinancingOrderStatus::asSelectArray())
+            ->except([FinancingOrderStatus::MurabhaOfferIssued])
+            ->keys()
+            ->each(function ($status) use ($notification) {
+                self::$order->update(['status' => $status]);
+
+                (new ProcessDmccMpoSaleCompleteNotification($notification))->handle();
+
+                self::$order = self::$order->fresh();
+
+                $this->assertTrue(self::$order->status->is($status));
+            });
     }
 }
