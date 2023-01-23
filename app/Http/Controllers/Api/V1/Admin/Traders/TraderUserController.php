@@ -23,17 +23,17 @@ class TraderUserController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Show, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Create, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Edit, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Edit, Action::Manage])
         )->only('update');
     }
 
@@ -53,9 +53,9 @@ class TraderUserController extends Controller
         return DB::transaction(function () use ($trader, $storeUserRequest, $createTraderUserWithRoleAndPermission) {
             $user = $createTraderUserWithRoleAndPermission->handle(
                 $storeUserRequest->validated() +
-                [
-                    'company_id' => $trader->id,
-                ]
+                    [
+                        'company_id' => $trader->id,
+                    ]
             );
 
             return fractal($user, new UserTransformer())
@@ -80,7 +80,7 @@ class TraderUserController extends Controller
      */
     public function show(Company $trader, User $user): JsonResponse
     {
-        $this->checkTraderAreaRoles($user);
+        $this->checkIfUserDoesNotHaveTraderAreaRole($user);
 
         $user->load('roles', 'permissions');
 
@@ -113,7 +113,7 @@ class TraderUserController extends Controller
         UpdateTraderUserWithRoleAndPermission $updateTraderUserWithRoleAndPermission,
     ): JsonResponse {
         return DB::transaction((function () use ($updateUserRequest, $user, $updateTraderUserWithRoleAndPermission) {
-            $this->checkTraderAreaRoles($user);
+            $this->checkIfUserDoesNotHaveTraderAreaRole($user);
 
             $updateTraderUserWithRoleAndPermission->handle($updateUserRequest->validated(), $user);
 
@@ -132,12 +132,10 @@ class TraderUserController extends Controller
         //
     }
 
-    public function checkTraderAreaRoles(User $user)
+    public function checkIfUserDoesNotHaveTraderAreaRole(User $user)
     {
-        foreach (Area::roles(Area::Trader) as $role) {
-            if (! $user->hasRole($role)) {
-                throw new AuthorizationException();
-            }
+        if (! $user->hasRole(Area::roles(Area::Trader))) {
+            throw new AuthorizationException();
         }
     }
 }
