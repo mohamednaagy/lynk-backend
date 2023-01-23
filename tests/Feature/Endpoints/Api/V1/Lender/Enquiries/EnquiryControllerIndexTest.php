@@ -10,12 +10,12 @@ use App\Models\User;
 use App\Transformers\EnquiryTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class EnquiryControllerIndexTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithLender;
+    use AssertsAccessByRoleAndArea;
 
     private static Company $company;
 
@@ -43,7 +43,7 @@ class EnquiryControllerIndexTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company] = $this->createCompany('2000');
+        [self::$company] = $this->createCompany();
         [self::$companyUnderReview] = $this->createCompany(
             '2000',
             [
@@ -63,17 +63,16 @@ class EnquiryControllerIndexTest extends TestCase
         self::$userWithoutEmailVerification = $this->createLenderUser(
             self::$company->id,
             Role::LenderAdmin,
-            'LenderAdmin2@bim.com',
             [
                 'email_verified_at' => null,
             ]
         );
 
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'LenderAdmin@bim.com');
-        self::$userBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'LenderBilling@bim.com');
-        self::$userHasNoEnuiry = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'userHasNoEnuiry@bim.com');
-        self::$userLenderAdminBelongsToCompanyUnderReview = $this->createLenderUser(self::$companyUnderReview->id, Role::LenderAdmin, 'LenderAdmin3@bim.com');
-        self::$userLenderAdminBelongsToPendingCompany = $this->createLenderUser(self::$companyUnderReview->id, Role::LenderAdmin, 'LenderAdmin4@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$userBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
+        self::$userHasNoEnuiry = $this->createLenderUser(self::$company->id, Role::LenderBilling);
+        self::$userLenderAdminBelongsToCompanyUnderReview = $this->createLenderUser(self::$companyUnderReview->id, Role::LenderAdmin);
+        self::$userLenderAdminBelongsToPendingCompany = $this->createLenderUser(self::$companyUnderReview->id, Role::LenderAdmin);
 
         self::$enquiry = Enquiry::factory()->create(['user_id' => self::$userLenderAdmin->id]);
         self::$anotherEnquiry = Enquiry::factory()->create(['user_id' => self::$userWithoutEmailVerification->id]);
@@ -125,7 +124,7 @@ class EnquiryControllerIndexTest extends TestCase
     {
         $rolesHasAccess = [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator];
 
-        $this->assertStatusToSpecificRoles(200, $rolesHasAccess, null, function ($user, $role) {
+        $this->assertStatusCodeToSpecificRoles(200, $rolesHasAccess, function ($user, $role) {
             return $this->actingAs($user)
                 ->withHeader('X-Company', $user->company_id)
                 ->getJson('api/v1/lender/enquiries');
@@ -136,7 +135,7 @@ class EnquiryControllerIndexTest extends TestCase
     {
         $rolesHasNoPermission = [Role::LenderApiUser];
 
-        $this->assertStatusToSpecificRoles(403, $rolesHasNoPermission, null, function ($user, $role) {
+        $this->assertStatusCodeToSpecificRoles(403, $rolesHasNoPermission, function ($user, $role) {
             return $this->actingAs($user)
                 ->withHeader('X-Company', $user->company_id)
                 ->getJson('api/v1/lender/enquiries');

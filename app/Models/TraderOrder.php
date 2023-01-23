@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Stancl\VirtualColumn\VirtualColumn;
 
+/**
+ * @property mixed $reference
+ */
 class TraderOrder extends Model
 {
     use HasFactory, VirtualColumn;

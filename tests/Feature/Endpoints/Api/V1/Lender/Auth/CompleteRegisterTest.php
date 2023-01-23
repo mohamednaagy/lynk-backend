@@ -9,11 +9,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ValidateSignature;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class CompleteRegisterTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static Company $company;
 
@@ -27,7 +28,8 @@ class CompleteRegisterTest extends TestCase
         parent::setUp();
 
         [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com', [
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, [
+            'email' => 'lenderAdmin@bim.com',
             'password' => null,
             'email_verified_at' => null,
         ]);
