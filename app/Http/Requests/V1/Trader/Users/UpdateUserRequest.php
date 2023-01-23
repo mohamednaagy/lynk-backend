@@ -1,12 +1,10 @@
 <?php
 
-namespace App\Http\Requests\V1\Lender\Users;
+namespace App\Http\Requests\V1\Trader\Users;
 
 use App\Enums\Area;
-use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
@@ -16,7 +14,7 @@ class UpdateUserRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -26,7 +24,7 @@ class UpdateUserRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
         return  [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
@@ -41,9 +39,7 @@ class UpdateUserRequest extends FormRequest
             'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],
             'role' => [
                 'required',
-                Rule::in(
-                    Arr::except(Area::roles(Area::Lender), [Role::LenderApiUser])
-                ),
+                Rule::in(Area::roles(Area::Trader)),
             ],
         ];
     }
