@@ -5,6 +5,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin;
 use App\Actions\Contracts\GetPaginatedUsersByRole;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\User;
 use App\Transformers\UserTransformer;
@@ -12,11 +13,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Grantify\Facades\Grantify;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
+use Tests\Traits\InteractsWithUser;
 
 class AdminControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin;
+    use RefreshDatabase, InteractsWithUser;
 
     private static User $superAdminUser;
 
@@ -29,12 +30,9 @@ class AdminControllerIndexTest extends TestCase
     {
         parent::setUp();
 
-        self::$superAdminUser = $this->createAdmin();
-
-        self::$managerAdminUser = $this->createManager(
-            'manager@bim.com',
-            perm(Area::SuperAdmin, [Subject::Admins, Action::Index]),
-        );
+        self::$superAdminUser = $this->createSuperAdminUser();
+        self::$managerAdminUser = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(self::$managerAdminUser, perm(Area::SuperAdmin, [Subject::Admins, Action::Index]));
     }
 
     public function test_un_auth_cant_index_admins()

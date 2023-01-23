@@ -8,12 +8,12 @@ use App\Models\Company;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class EnquiryControllerStoreTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithLender;
+    use AssertsAccessByRoleAndArea;
 
     private static Company $company;
 
@@ -50,13 +50,12 @@ class EnquiryControllerStoreTest extends TestCase
             ]
         );
 
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'LenderAdmin@bim.com');
-        self::$userLenderAdminBelongsToCompanyUnderReview = $this->createLenderUser(self::$companyUnderReview->id, Role::LenderAdmin, 'LenderAdmin3@bim.com');
-        self::$userLenderAdminBelongsToPendingCompany = $this->createLenderUser(self::$companyUnderReview->id, Role::LenderAdmin, 'LenderAdmin4@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$userLenderAdminBelongsToCompanyUnderReview = $this->createLenderUser(self::$companyUnderReview->id, Role::LenderAdmin);
+        self::$userLenderAdminBelongsToPendingCompany = $this->createLenderUser(self::$companyUnderReview->id, Role::LenderAdmin);
         self::$userWithoutEmailVerification = $this->createLenderUser(
             self::$company->id,
             Role::LenderAdmin,
-            'LenderAdmin2@bim.com',
             [
                 'email_verified_at' => null,
             ]
@@ -151,7 +150,7 @@ class EnquiryControllerStoreTest extends TestCase
     {
         $rolesHasAccess = [Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator];
 
-        $this->assertStatusToSpecificRoles(200, $rolesHasAccess, self::$company, function ($user, $role) {
+        $this->assertStatusCodeToSpecificRoles(200, $rolesHasAccess, function ($user, $role) {
             return $this->actingAs($user)
                 ->withHeader('X-Company', self::$company->id)
                 ->postJson(
@@ -168,7 +167,7 @@ class EnquiryControllerStoreTest extends TestCase
     {
         $rolesHasNoPermission = [Role::LenderApiUser];
 
-        $this->assertStatusToSpecificRoles(403, $rolesHasNoPermission, self::$company, function ($user, $role) {
+        $this->assertStatusCodeToSpecificRoles(403, $rolesHasNoPermission, function ($user, $role) {
             return $this->actingAs($user)
                 ->withHeader('X-Company', self::$company->id)
                 ->postJson(

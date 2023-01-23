@@ -14,11 +14,13 @@ use Modules\Otpify\Exceptions\OtpCodeNotFoundException;
 use Modules\Otpify\Facades\Otpify;
 use Modules\Otpify\Models\OtpifyCode;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class AbsherDriverTest extends TestCase
 {
-    use InteractsWithLender;
+    use InteractsWithUser;
+    use InteractsWithCompany;
     use RefreshDatabase;
 
     protected static FinancingOrder $financingOrder;
@@ -28,8 +30,8 @@ class AbsherDriverTest extends TestCase
         parent::setUp();
 
         config()->set('otpify.default', 'absher');
-        $company = $this->createCompany('2000', ['company_cr' => '12345678910'])[0];
-        $lender = $this->createLenderUser($company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        [$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        $lender = $this->createLenderUser($company->id, Role::LenderAdmin);
 
         self::$financingOrder = $this->createOrder($company->id, $lender->id);
     }
