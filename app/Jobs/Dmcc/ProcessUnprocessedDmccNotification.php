@@ -12,6 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 
 class ProcessUnprocessedDmccNotification implements ShouldQueue
 {
@@ -48,26 +49,30 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
             return;
         }
 
-        $traderOrder = TraderOrder::query()->where('reference', $this->ttiId)->first();
+        DB::transaction(function () use ($driver) {
+            $traderOrder = TraderOrder::query()
+                ->where('status', TraderOrderStatus::InProgress)
+                ->where('reference', $this->ttiId)
+                ->lockForUpdate()
+                ->first();
 
-        if (! $traderOrder) {
-            return;
-        }
+            if (! $traderOrder) {
+                return;
+            }
 
-        $financingOrder = $traderOrder->order;
+            $financingOrder = $traderOrder->order;
 
-        if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::Completed)) {
-            return;
-        }
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::Completed)) {
+                return;
+            }
 
-        $trader = Trader::driver($driver);
-        $trader->processNotification($this->notificationId);
+            $trader = Trader::driver($driver);
+            $trader->processNotification($this->notificationId);
 
-        $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::Completed);
-
-        $traderOrder->update([
-            'status' => TraderOrderStatus::Completed,
-        ]);
+            $traderOrder->update([
+                'status' => TraderOrderStatus::Completed,
+            ]);
+        });
     }
 
     /**

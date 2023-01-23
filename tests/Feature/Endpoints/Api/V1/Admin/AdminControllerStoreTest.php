@@ -14,11 +14,11 @@ use Illuminate\Support\Facades\Mail;
 use Modules\Grantify\Facades\Grantify;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
+use Tests\Traits\InteractsWithUser;
 
 class AdminControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin;
+    use RefreshDatabase, InteractsWithUser;
 
     private static User $superAdminUser;
 
@@ -31,12 +31,9 @@ class AdminControllerStoreTest extends TestCase
     {
         parent::setUp();
 
-        self::$superAdminUser = $this->createAdmin();
-
-        self::$managerAdminUser = $this->createManager(
-            'manager@bim.com',
-            perm(Area::SuperAdmin, [Subject::Admins, Action::Create]),
-        );
+        self::$superAdminUser = $this->createSuperAdminUser(Role::Admin, ['email' => 'admin@bim.com']);
+        self::$managerAdminUser = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(self::$managerAdminUser, perm(Area::SuperAdmin, [Subject::Admins, Action::Create]));
     }
 
     public function test_un_auth_cant_create_admin()

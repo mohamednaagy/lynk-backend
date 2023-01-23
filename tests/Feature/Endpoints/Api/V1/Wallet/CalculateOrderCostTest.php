@@ -11,12 +11,13 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithSettings;
+use Tests\Traits\InteractsWithUser;
 
 class CalculateOrderCostTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender, InteractsWithSettings;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany, InteractsWithSettings;
 
     protected static Company $company;
 
