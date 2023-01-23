@@ -25,26 +25,22 @@ class UserController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Trader, [Subject::TraderUsers, Action::Index, Action::Manage]).'|'.
-            perm(Area::Trader, [Subject::All, Action::Manage])
+            perm(Area::Trader, [Subject::TraderUsers, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Trader, [Subject::TraderUsers, Action::Create, Action::Manage]).'|'.
-            perm(Area::Trader, [Subject::All, Action::Manage])
+            perm(Area::Trader, [Subject::TraderUsers, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Trader, [Subject::TraderUsers, Action::Show, Action::Manage]).'|'.
-            perm(Area::Trader, [Subject::All, Action::Manage])
+            perm(Area::Trader, [Subject::TraderUsers, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Trader, [Subject::TraderUsers, Action::Edit, Action::Manage]).'|'.
-            perm(Area::Trader, [Subject::All, Action::Manage])
+            perm(Area::Trader, [Subject::TraderUsers, Action::Edit, Action::Manage])
         )->only('update');
     }
 

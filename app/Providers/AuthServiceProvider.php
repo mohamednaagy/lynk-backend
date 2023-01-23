@@ -50,7 +50,7 @@ class AuthServiceProvider extends ServiceProvider
             // For example: /api/v1/lender => Role::LenderAdmin
 
             /** @var \App\Models\User $user */
-            return $user->hasRole([Role::Admin, Role::LenderAdmin]) ? true : null;
+            return $user->hasRole([Role::Admin, Role::LenderAdmin, Role::TraderAdmin]) ? true : null;
         });
     }
 }
