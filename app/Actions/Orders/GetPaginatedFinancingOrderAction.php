@@ -60,7 +60,7 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
         )->when(
             $this->company?->type->is(CompanyType::Trader),
             function ($query) {
-                $query->withWhereHas('traderOrder')
+                $query->withWhereHas('traderOrders')
                     ->where('company_id', $this->company->id);
             }
         )->when(
