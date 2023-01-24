@@ -10,6 +10,7 @@ use App\Jobs\Dmcc\ProcessDmccContractSignedOrder;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
+use CodeDredd\Soap\Facades\Soap;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -38,20 +39,26 @@ class ProcessDmccContractSignedOrderTest extends TestCase
             'status' => FinancingOrderStatus::ContractSigned,
         ]);
 
-        Http::fake(function () {
-            return Http::response([
-                'inventoryDetails' => [
-                    [
-                        'hsCodeDescription' => 'hsCodeDescription',
-                        'quantity' => 100,
-                        'totalValue' => 100,
-                        'currency' => 'SAR',
-                        'warehouseOrVaultId' => 'warehouseOrVaultId',
-                        'owner' => 'owner',
-                    ],
+        $inventoryDetails = [
+            'inventoryDetails' => [
+                [
+                    'hsCodeDescription' => 'hsCodeDescription',
+                    'quantity' => 100,
+                    'totalValue' => 100,
+                    'currency' => 'SAR',
+                    'warehouseOrVaultId' => 'warehouseOrVaultId',
+                    'owner' => 'owner',
                 ],
-                'errorCode' => '',
-            ], 200);
+            ],
+            'errorCode' => '',
+        ];
+
+        Http::fake(function () use ($inventoryDetails) {
+            return Http::response($inventoryDetails, 200);
+        });
+
+        Soap::fake(function () use ($inventoryDetails) {
+            return Soap::response($inventoryDetails, 200);
         });
     }
 
@@ -94,6 +101,16 @@ class ProcessDmccContractSignedOrderTest extends TestCase
             'provider' => 'dmcc',
             'reference' => 123,
             'status' => TraderOrderStatus::InProgress,
+            'product' => 'Product',
+            'quantity' => 2,
+            'amount' => '1000 SAR',
+            'warehouse' => 'Warehouse ID',
+            'owner' => 'Owner 1',
+            'previousOwner' => 'Owner 0',
+            'newOwner' => 'Owner 1',
+            'dateTimeOfPurchasingCommodity' => now()->format('d/m/Y H:i A'),
+            'warehouseOrVaultEmirates' => 'Vaault',
+            'warehouseOrVaultCountry' => 'Saudi Arabia',
         ]);
 
         $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);
