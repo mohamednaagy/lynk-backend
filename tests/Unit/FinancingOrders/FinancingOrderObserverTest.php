@@ -1,6 +1,6 @@
 <?php
 
-namespace FinancingOrders;
+namespace Tests\Unit\FinancingOrders;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
@@ -15,11 +15,11 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Event;
 use Spatie\WebhookServer\CallWebhookJob;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class FinancingOrderObserverTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     protected static Company $company;
 
@@ -31,7 +31,7 @@ class FinancingOrderObserverTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company] = $this->createCompany(2000, [
+        [self::$company] = $this->createLenderCompany(2000, [
             'webhook_secret_key' => '123456',
         ]);
         self::$company->webhooks()->create([
@@ -53,15 +53,23 @@ class FinancingOrderObserverTest extends TestCase
 
     public function test_financing_order_observer_when_status_changes_to_commodity_sold_to_customer()
     {
+        Bus::fake();
+
         Event::fake([
             SmsSent::class,
         ]);
 
         self::$order->update(['amount' => 250]);
 
+        Bus::assertNotDispatched(CallWebhookJob::class);
+
         Event::assertNotDispatched(SmsSent::class);
 
-        self::$order->update(['status' => FinancingOrderStatus::CommoditySoldToCustomer]);
+        self::$order->update([
+            'status' => FinancingOrderStatus::CommoditySoldToCustomer,
+        ]);
+
+        Bus::assertDispatched(CallWebhookJob::class);
 
         Event::assertDispatched(SmsSent::class);
     }
