@@ -53,12 +53,12 @@ trait InteractsWithUser
     /**
      * Summary of createAdmin
      *
-     * @param  string  $email
+     * @param  Role|string  $role
      * @param  array  $data
      * @return mixed
      */
     public function createSuperAdminUser(
-        $role = Role::Admin,
+        Role|string $role = Role::Admin,
         array $data = []
     ): User {
         $admin = $this->createUser($data);
@@ -78,13 +78,13 @@ trait InteractsWithUser
         string $role = Role::LenderAdmin,
         array $data = []
     ): User {
-        $userLender = $this->createUser(array_merge([
+        $user = $this->createUser(array_merge([
             'company_id' => $companyId,
         ], $data));
 
-        $this->assignRoleToUser($userLender, $role);
+        $this->assignRoleToUser($user, $role);
 
-        return $userLender;
+        return $user;
     }
 
     /**
@@ -98,12 +98,12 @@ trait InteractsWithUser
         string $role = Role::TraderAdmin,
         array $data = []
     ): User {
-        $userLender = $this->createUser(array_merge([
+        $user = $this->createUser(array_merge([
             'company_id' => $companyId,
         ], $data));
 
-        $this->assignRoleToUser($userLender, $role);
+        $this->assignRoleToUser($user, $role);
 
-        return $userLender;
+        return $user;
     }
 }
