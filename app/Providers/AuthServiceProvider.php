@@ -50,7 +50,7 @@ class AuthServiceProvider extends ServiceProvider
                 RouteArea::Admin => $user->hasRole([Role::Admin]),
                 RouteArea::Lender => $user->hasRole([Role::LenderAdmin]),
                 RouteArea::Trader => $user->hasRole([Role::TraderAdmin]),
-                default => $user->hasRole([Role::Admin, Role::LenderAdmin, Role::TraderAdmin])
+                default => null
             };
         });
     }
