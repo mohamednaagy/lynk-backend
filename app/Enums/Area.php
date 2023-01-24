@@ -16,8 +16,6 @@ final class Area extends Enum
 {
     const SuperAdmin = 'SuperAdmin';
 
-    const Customer = 'Customer';
-
     const Lender = 'Lender';
 
     const Trader = 'Trader';
@@ -25,7 +23,6 @@ final class Area extends Enum
     public static function roles(string $area = null): array
     {
         return match ($area) {
-            self::Customer => Customer::$roles,
             self::SuperAdmin => SuperAdmin::$roles,
             self::Lender => Lender::$roles,
             self::Trader => Trader::$roles,

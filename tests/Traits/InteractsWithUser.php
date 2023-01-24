@@ -106,20 +106,4 @@ trait InteractsWithUser
 
         return $userLender;
     }
-
-    /**
-     * @param  string  $role
-     * @param  array  $data
-     * @return User
-     */
-    public function createCustomerUser(
-        string $role = Role::Customer,
-        array $data = []
-    ): User {
-        $userCustomer = $this->createUser($data);
-
-        $this->assignRoleToUser($userCustomer, $role);
-
-        return $userCustomer;
-    }
 }
