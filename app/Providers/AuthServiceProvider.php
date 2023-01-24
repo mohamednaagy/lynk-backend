@@ -46,7 +46,7 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::before(function ($user, $ability) {
-            return match ($this->getArea()) {
+            return match ($this->getAreaFromRequestPath()) {
                 RouteArea::Admin => $user->hasRole([Role::Admin]) ? true : null,
                 RouteArea::Lender => $user->hasRole([Role::LenderAdmin]) ? true : null,
                 RouteArea::Trader => $user->hasRole([Role::TraderAdmin]) ? true : null,
@@ -55,10 +55,10 @@ class AuthServiceProvider extends ServiceProvider
         });
     }
 
-    private function getArea()
+    private function getAreaFromRequestPath()
     {
-        $url = array_values(explode('/', $this->app->request->server->get('REQUEST_URI')));
-        $area = isset($url[3]) ? $url[3] : null;
+        $path = explode('/', $this->app->request->path());
+        $area = isset($path[2]) ? $path[2] : null;
         if (in_array($area, RouteArea::getValues())) {
             return $area;
         }
