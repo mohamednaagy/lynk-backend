@@ -66,6 +66,16 @@ trait AssertsAccessByRoleAndArea
         }
     }
 
+    public function assertStatusForCustomerAreaUsers($status, $request)
+    {
+        $roles = Area::roles(Area::Customer);
+
+        foreach ($roles as $role) {
+            $user = $this->createCustomerUser();
+            $request($user, $role)->assertStatus($status);
+        }
+    }
+
     public function assertStatusCodeToSpecificRoles(int $status, array $roles, $request)
     {
         foreach ($roles as $role) {

@@ -22,7 +22,7 @@ class CompleteRegisterInvitation extends Mailable implements ShouldQueue
 
     public $url;
 
-    public array $completeRegisterUrls = [
+    public array $registerRouteNamesByCompanyType = [
         CompanyType::Lender => 'api.v1.lender.complete-register',
         CompanyType::Trader => 'api.v1.trader.complete-register',
     ];
@@ -36,7 +36,7 @@ class CompleteRegisterInvitation extends Mailable implements ShouldQueue
     {
         $this->user = $user;
         $this->inviter = auth()->user();
-        $this->url = URL::signedExternalRoute($externalUrl, $this->completeRegisterUrls[$companyType], ['user' => $user->id]);
+        $this->url = URL::signedExternalRoute($externalUrl, $this->registerRouteNamesByCompanyType[$companyType], ['user' => $user->id]);
     }
 
     /**

@@ -2,15 +2,16 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Trader\Users;
 
+use App\Enums\Area;
 use App\Enums\CompanyStatus;
 use App\Enums\ErrorCode;
-use App\Enums\Role;
 use App\Mail\CompleteRegisterInvitation;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
@@ -93,22 +94,22 @@ class ResendInvitationTest extends TestCase
             ]);
     }
 
-//    public function test_resend_invitation_can_not_access_without_verify_email()
-//    {
-//        $this->withHeader('X-Company', self::$trader->id)
-//            ->actingAs(self::$traderAdminNotVerified)
-//            ->postJson(
-//                'api/v1/trader/users/'.self::$traderAdminNotJoined->id.'/resend-invitation',
-//                [
-//                    'redirect_url' => self::$redirectUrl,
-//                ]
-//            )
-//            ->assertStatus(403)
-//            ->assertJsonFragment([
-//                'message' => __('error.must_verify_email'),
-//                'code' => ErrorCode::EMAIL_NOT_VERIFIED,
-//            ]);
-//    }
+    public function test_resend_invitation_can_not_access_without_verify_email()
+    {
+        $this->withHeader('X-Company', self::$trader->id)
+            ->actingAs(self::$traderAdminNotVerified)
+            ->postJson(
+                'api/v1/trader/users/'.self::$traderAdminNotJoined->id.'/resend-invitation',
+                [
+                    'redirect_url' => self::$redirectUrl,
+                ]
+            )
+            ->assertStatus(403)
+            ->assertJsonFragment([
+                'message' => __('error.must_verify_email'),
+                'code' => ErrorCode::EMAIL_NOT_VERIFIED,
+            ]);
+    }
 
     public function test_resend_invitation_trader_admin_can_access()
     {
@@ -123,21 +124,25 @@ class ResendInvitationTest extends TestCase
             ->assertStatus(200);
     }
 
-//    public function test_resend_invitation_only_trader_admin_can_access()
-//    {
-//        $roles = [Role::LenderBilling, Role::LenderApiUser, Role::LenderOrderCreator, Role::LenderSupervisor];
-//
-//        $this->assertStatusCodeToSpecificRoles(403, $roles, function (User $user, string $role) {
-//            return  $this->actingAs($user)
-//                ->withHeader('X-Company', self::$trader->getOriginal('id'))
-//                ->postJson(
-//                    'api/v1/trader/users/'.self::$traderAdminNotJoined->id.'/resend-invitation',
-//                    [
-//                        'redirect_url' => self::$redirectUrl,
-//                    ]
-//                );
-//        });
-//    }
+    public function test_other_area_roles_of_not_trader_area_cant_access_resend_invitation()
+    {
+        $this->assertStatusCodeForAllRolesExceptForArea(
+            Response::HTTP_FORBIDDEN,
+            [
+                Area::Trader,
+            ],
+            function ($user, $role) {
+                return $this->actingAs($user)
+                    ->withHeader('X-Company', self::$trader->getOriginal('id'))
+                    ->postJson(
+                        'api/v1/trader/users/'.self::$traderAdminNotJoined->id.'/resend-invitation',
+                        [
+                            'redirect_url' => self::$redirectUrl,
+                        ]
+                    );
+            }
+        );
+    }
 
     public function test_resend_invitation_email_is_sent()
     {

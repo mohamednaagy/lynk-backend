@@ -17,10 +17,10 @@ class ResendInvitation extends Controller
 {
     public function __construct()
     {
-//        $this->middleware(
-//            'permission:'.
-//            perm(Area::Trader, [Subject::TraderUsers, Action::Create, Action::Manage])
-//        );
+        $this->middleware(
+            'permission:'.
+            perm(Area::Trader, [Subject::TraderUsers, Action::Create, Action::Manage])
+        );
     }
 
     public function __invoke(ResendInvitationRequest $request, User $user): JsonResponse
