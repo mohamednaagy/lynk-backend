@@ -126,8 +126,9 @@ class TraderUpdateMyProfileTest extends TestCase
         });
     }
 
-    public function test_update_my_profile_updated_successfuly(): void
+    public function test_update_my_profile_updated_successfully(): void
     {
+        $oldPassword = self::$trader->password;
         $this->actingAs(self::$trader)
             ->withHeader('X-Company', self::$company->id)
             ->putJson('api/v1/trader/auth/profile', [
@@ -136,6 +137,8 @@ class TraderUpdateMyProfileTest extends TestCase
                 'last_name' => 'test name',
                 'phone_number' => self::$trader->mobileDialingPhoneNumber,
                 'phone_country_code' => self::$trader->phoneNumberCountryCode,
+                'password' => 'random password',
+                'password_confirmation' => 'random password',
             ])
             ->assertStatus(Response::HTTP_OK);
 
@@ -144,5 +147,6 @@ class TraderUpdateMyProfileTest extends TestCase
         $this->assertTrue(self::$trader->email == 'test@bim.com');
         $this->assertTrue(self::$trader->first_name == 'test name');
         $this->assertTrue(self::$trader->last_name == 'test name');
+        $this->assertTrue(self::$trader->password != $oldPassword);
     }
 }
