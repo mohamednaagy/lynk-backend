@@ -30,35 +30,35 @@ trait InteractsWithUser
         return $user;
     }
 
-     public function createUserByRole($role, $companyId = null, $data = [])
-     {
-         $areaKey = Area::getAreaByRole($role);
-         $methodName = 'create'.ucfirst($areaKey).'User';
+    public function createUserByRole($role, $companyId = null, $data = [])
+    {
+        $areaKey = Area::getAreaByRole($role);
+        $methodName = 'create'.ucfirst($areaKey).'User';
 
-         if (! method_exists($this, $methodName)) {
-             throw new RuntimeException("Method doesn't exist: $methodName");
-         }
+        if (! method_exists($this, $methodName)) {
+            throw new RuntimeException("Method doesn't exist: $methodName");
+        }
 
-         if ($areaKey == Area::SuperAdmin) {
-             return $this->{$methodName}($role, $data);
-         }
+        if ($areaKey == Area::SuperAdmin) {
+            return $this->{$methodName}($role, $data);
+        }
 
-         if (is_null($companyId)) {
-             throw new RuntimeException("CompanyID can't be null");
-         }
+        if (is_null($companyId)) {
+            throw new RuntimeException("CompanyID can't be null");
+        }
 
-         return $this->{$methodName}($companyId, $role, $data);
-     }
+        return $this->{$methodName}($companyId, $role, $data);
+    }
 
     /**
      * Summary of createAdmin
      *
-     * @param  string  $email
+     * @param  Role|string  $role
      * @param  array  $data
      * @return mixed
      */
     public function createSuperAdminUser(
-        $role = Role::Admin,
+        Role|string $role = Role::Admin,
         array $data = []
     ): User {
         $admin = $this->createUser($data);
@@ -78,13 +78,13 @@ trait InteractsWithUser
         string $role = Role::LenderAdmin,
         array $data = []
     ): User {
-        $userLender = $this->createUser(array_merge([
+        $user = $this->createUser(array_merge([
             'company_id' => $companyId,
         ], $data));
 
-        $this->assignRoleToUser($userLender, $role);
+        $this->assignRoleToUser($user, $role);
 
-        return $userLender;
+        return $user;
     }
 
     /**
@@ -98,12 +98,12 @@ trait InteractsWithUser
         string $role = Role::TraderAdmin,
         array $data = []
     ): User {
-        $userLender = $this->createUser(array_merge([
+        $user = $this->createUser(array_merge([
             'company_id' => $companyId,
         ], $data));
 
-        $this->assignRoleToUser($userLender, $role);
+        $this->assignRoleToUser($user, $role);
 
-        return $userLender;
+        return $user;
     }
 }
