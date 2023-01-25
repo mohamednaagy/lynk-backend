@@ -41,8 +41,7 @@ class GetOrderAction implements GetOrder
                     ->withWhereHas('traderOrders', function ($query) {
                         $query->with('traderHistories')
                             ->where('provider', $this->company->driver);
-                    })
-                    ->where('company_id', $this->company->id);
+                    });
             }
         );
     }
