@@ -38,7 +38,10 @@ class GetOrderAction implements GetOrder
             filled($this->company) && $this->company->type->is(CompanyType::Trader),
             function ($query) {
                 $query->withoutGlobalScope(TenantScope::class)
-                    ->with('activeTraderOrder.traderHistories')
+                    ->withWhereHas('traderOrders', function ($query) {
+                        $query->with('traderHistories')
+                            ->where('provider', $this->company->driver);
+                    })
                     ->where('company_id', $this->company->id);
             }
         );
