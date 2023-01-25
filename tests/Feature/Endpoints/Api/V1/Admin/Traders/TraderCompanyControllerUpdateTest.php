@@ -3,7 +3,6 @@
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Traders;
 
 use App\Enums\Area;
-use App\Enums\CompanyType;
 use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\User;
@@ -40,9 +39,7 @@ class TraderCompanyControllerUpdateTest extends TestCase
             'driver' => 'dmcc',
         ];
 
-        [self::$company, self::$wallet] = $this->createCompany(2000, [
-            'type' => CompanyType::Trader,
-        ]);
+        [self::$company, self::$wallet] = $this->createTraderCompany(2000);
 
         self::$superAdmin = $this->createSuperAdminUser();
     }

@@ -38,7 +38,7 @@ class UserControllerIndexTest extends TestCase
         parent::setUp();
 
         self::$userAdmin = $this->createSuperAdminUser();
-        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        [self::$company, self::$wallet] = $this->createTraderCompany('2000');
         self::$userTraderAdmin = $this->createTraderUser(self::$company->id);
         self::$traderUsersCollection = self::$company->users()->whereHas('roles', function ($query) {
             return $query->whereIn('name', [

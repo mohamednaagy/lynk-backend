@@ -3,7 +3,6 @@
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Traders;
 
 use App\Enums\Area;
-use App\Enums\CompanyType;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -27,9 +26,7 @@ class TraderCompanyControllerShowTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company] = $this->createCompany(2000, [
-            'type' => CompanyType::Trader,
-        ]);
+        [self::$company] = $this->createTraderCompany(2000);
 
         self::$superAdmin = $this->createSuperAdminUser();
     }
