@@ -10,8 +10,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TraderOrderController extends Controller
 {
@@ -57,12 +57,12 @@ class TraderOrderController extends Controller
     {
         $order->load('creator');
 
-        $orderDetails = $order->newQuery()->withWhereHas('traderOrder', function ($query) use ($trader) {
+        $orderDetails = $order->newQuery()->withWhereHas('traderOrders', function ($query) use ($trader) {
             $query->where('provider', $trader->driver);
-        })->where('company_id', $trader->id);
+        })->where('company_id', $trader->id)->first();
 
         if (blank($orderDetails)) {
-            throw new NotFoundHttpException();
+            throw new ModelNotFoundException();
         }
 
         return fractal($order, new FinancingOrderTransformer($trader))
