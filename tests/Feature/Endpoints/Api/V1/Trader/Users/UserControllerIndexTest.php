@@ -102,6 +102,8 @@ class UserControllerIndexTest extends TestCase
                         'phone_country_code',
                         'formatted_phone_number',
                         'role',
+                        'is_active',
+                        'is_invitation_accepted',
                     ])->respond()
                     ->getData(true)
             );

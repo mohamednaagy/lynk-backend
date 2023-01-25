@@ -53,6 +53,7 @@ class UserControllerStoreTest extends TestCase
             'email' => 'traderUserEmail@bim.com',
             'redirect_url' => 'https://bimventures.com/:user',
             'role' => Role::TraderAdmin,
+            'is_active' => 1,
         ];
     }
 
@@ -112,6 +113,8 @@ class UserControllerStoreTest extends TestCase
                     'phone_country_code',
                     'formatted_phone_number',
                     'role',
+                    'is_active',
+                    'is_invitation_accepted',
                 ],
             ]);
         Mail::assertQueued(CompleteRegisterInvitation::class);

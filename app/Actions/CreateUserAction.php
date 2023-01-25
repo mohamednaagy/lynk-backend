@@ -43,6 +43,7 @@ class CreateUserAction implements CreateUser
                     'password',
                     'company_id',
                     'locale',
+                    'is_active',
                 ]
             )
         );
