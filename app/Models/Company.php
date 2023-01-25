@@ -48,6 +48,7 @@ class Company extends BaseTenant
             'order_cost_currency',
             'type',
             'driver',
+            'deleted_at',
         ];
     }
 
