@@ -65,6 +65,13 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
         'phone_number' => E164PhoneNumberCast::class,
     ];
 
+    protected function password(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => $value ? bcrypt($value) : null,
+        );
+    }
+
     protected function fullName(): Attribute
     {
         return Attribute::make(

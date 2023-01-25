@@ -6,7 +6,6 @@ use App\Actions\Contracts\CreateUser;
 use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Hash;
 
 class CreateUserAction implements CreateUser
 {
@@ -16,9 +15,7 @@ class CreateUserAction implements CreateUser
      */
     public function handle(array $data): User
     {
-        if (array_key_exists('password', $data) && $data['password'] !== null) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
+        if (! array_key_exists('password', $data)) {
             $data['password'] = null;
         }
 
