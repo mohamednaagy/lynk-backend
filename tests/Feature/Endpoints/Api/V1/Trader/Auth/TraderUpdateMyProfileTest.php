@@ -14,7 +14,7 @@ class TraderUpdateMyProfileTest extends TestCase
 {
     use RefreshDatabase, AssertsAccessByRoleAndArea;
 
-    private static User $trader;
+    private static User $traderUser;
 
     private static Company $company;
 
@@ -26,7 +26,7 @@ class TraderUpdateMyProfileTest extends TestCase
         parent::setUp();
 
         [self::$company] = $this->createTraderCompany();
-        self::$trader = $this->createTraderUser(self::$company->id);
+        self::$traderUser = $this->createTraderUser(self::$company->id);
     }
 
     /**
@@ -43,13 +43,13 @@ class TraderUpdateMyProfileTest extends TestCase
 
     public function test_update_my_profile_cant_update_without_first_name(): void
     {
-        $this->actingAs(self::$trader)
+        $this->actingAs(self::$traderUser)
             ->withHeader('X-Company', self::$company->id)
             ->putJson('api/v1/trader/auth/profile', [
                 'email' => 'test@bim.com',
                 'last_name' => 'test name',
-                'phone_number' => self::$trader->mobileDialingPhoneNumber,
-                'phone_country_code' => self::$trader->phoneNumberCountryCode,
+                'phone_number' => self::$traderUser->mobileDialingPhoneNumber,
+                'phone_country_code' => self::$traderUser->phoneNumberCountryCode,
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonValidationErrorFor('first_name');
@@ -57,13 +57,13 @@ class TraderUpdateMyProfileTest extends TestCase
 
     public function test_update_my_profile_cant_update_without_last_name(): void
     {
-        $this->actingAs(self::$trader)
+        $this->actingAs(self::$traderUser)
             ->withHeader('X-Company', self::$company->id)
             ->putJson('api/v1/trader/auth/profile', [
                 'email' => 'test@bim.com',
                 'first_name' => 'test name',
-                'phone_number' => self::$trader->mobileDialingPhoneNumber,
-                'phone_country_code' => self::$trader->phoneNumberCountryCode,
+                'phone_number' => self::$traderUser->mobileDialingPhoneNumber,
+                'phone_country_code' => self::$traderUser->phoneNumberCountryCode,
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonValidationErrorFor('last_name');
@@ -71,13 +71,13 @@ class TraderUpdateMyProfileTest extends TestCase
 
     public function test_update_my_profile_cant_update_without_email(): void
     {
-        $this->actingAs(self::$trader)
+        $this->actingAs(self::$traderUser)
             ->withHeader('X-Company', self::$company->id)
             ->putJson('api/v1/trader/auth/profile', [
                 'first_name' => 'test name',
                 'last_name' => 'test name',
-                'phone_number' => self::$trader->mobileDialingPhoneNumber,
-                'phone_country_code' => self::$trader->phoneNumberCountryCode,
+                'phone_number' => self::$traderUser->mobileDialingPhoneNumber,
+                'phone_country_code' => self::$traderUser->phoneNumberCountryCode,
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonValidationErrorFor('email');
@@ -85,13 +85,13 @@ class TraderUpdateMyProfileTest extends TestCase
 
     public function test_update_my_profile_cant_update_without_phone_number(): void
     {
-        $this->actingAs(self::$trader)
+        $this->actingAs(self::$traderUser)
             ->withHeader('X-Company', self::$company->id)
             ->putJson('api/v1/trader/auth/profile', [
                 'email' => 'test@bim.com',
                 'first_name' => 'test name',
                 'last_name' => 'test name',
-                'phone_country_code' => self::$trader->phoneNumberCountryCode,
+                'phone_country_code' => self::$traderUser->phoneNumberCountryCode,
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonValidationErrorFor('phone_number');
@@ -99,13 +99,13 @@ class TraderUpdateMyProfileTest extends TestCase
 
     public function test_update_my_profile_cant_update_without_phone_country_code(): void
     {
-        $this->actingAs(self::$trader)
+        $this->actingAs(self::$traderUser)
             ->withHeader('X-Company', self::$company->id)
             ->putJson('api/v1/trader/auth/profile', [
                 'email' => 'test@bim.com',
                 'first_name' => 'test name',
                 'last_name' => 'test name',
-                'phone_number' => self::$trader->mobileDialingPhoneNumber,
+                'phone_number' => self::$traderUser->mobileDialingPhoneNumber,
             ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonValidationErrorFor('phone_country_code');
@@ -120,33 +120,33 @@ class TraderUpdateMyProfileTest extends TestCase
                     'email' => 'test@bim.com',
                     'first_name' => 'test name',
                     'last_name' => 'test name',
-                    'phone_number' => self::$trader->mobileDialingPhoneNumber,
-                    'phone_country_code' => self::$trader->phoneNumberCountryCode,
+                    'phone_number' => self::$traderUser->mobileDialingPhoneNumber,
+                    'phone_country_code' => self::$traderUser->phoneNumberCountryCode,
                 ]);
         });
     }
 
     public function test_update_my_profile_updated_successfully(): void
     {
-        $oldPassword = self::$trader->password;
-        $this->actingAs(self::$trader)
+        $oldPassword = self::$traderUser->password;
+        $this->actingAs(self::$traderUser)
             ->withHeader('X-Company', self::$company->id)
             ->putJson('api/v1/trader/auth/profile', [
                 'email' => 'test@bim.com',
                 'first_name' => 'test name',
                 'last_name' => 'test name',
-                'phone_number' => self::$trader->mobileDialingPhoneNumber,
-                'phone_country_code' => self::$trader->phoneNumberCountryCode,
+                'phone_number' => self::$traderUser->mobileDialingPhoneNumber,
+                'phone_country_code' => self::$traderUser->phoneNumberCountryCode,
                 'password' => 'random password',
                 'password_confirmation' => 'random password',
             ])
             ->assertStatus(Response::HTTP_OK);
 
-        self::$trader->fresh();
+        self::$traderUser->fresh();
 
-        $this->assertTrue(self::$trader->email == 'test@bim.com');
-        $this->assertTrue(self::$trader->first_name == 'test name');
-        $this->assertTrue(self::$trader->last_name == 'test name');
-        $this->assertTrue(self::$trader->password != $oldPassword);
+        $this->assertTrue(self::$traderUser->email == 'test@bim.com');
+        $this->assertTrue(self::$traderUser->first_name == 'test name');
+        $this->assertTrue(self::$traderUser->last_name == 'test name');
+        $this->assertTrue(self::$traderUser->password != $oldPassword);
     }
 }
