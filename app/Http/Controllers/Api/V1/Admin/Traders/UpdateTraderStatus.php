@@ -7,7 +7,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Admin\Companies\UpdateCompanyStatusRequest;
+use App\Http\Requests\V1\Admin\Traders\UpdateTraderStatusRequest;
 use App\Models\Company;
 use Illuminate\Http\JsonResponse;
 
@@ -24,13 +24,13 @@ class UpdateTraderStatus extends Controller
     /**
      * Summary of __invoke
      *
-     * @param  UpdateCompanyStatusRequest  $request
+     * @param  UpdateTraderStatusRequest  $request
      * @param  Company  $trader
      * @param  UpdateCompany  $updateCompany
      * @return JsonResponse
      */
     public function __invoke(
-        UpdateCompanyStatusRequest $request,
+        UpdateTraderStatusRequest $request,
         Company $trader,
         UpdateCompany $updateCompany
     ): JsonResponse {

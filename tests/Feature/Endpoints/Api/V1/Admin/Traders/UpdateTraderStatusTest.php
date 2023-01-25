@@ -16,12 +16,13 @@ use Illuminate\Support\Arr;
 use Modules\Grantify\Facades\Grantify;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
 
 class UpdateTraderStatusTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany, AssertsAccessByRoleAndArea;
 
     private static Company $company;
 
@@ -68,6 +69,21 @@ class UpdateTraderStatusTest extends TestCase
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
             ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_user_cant_update_company_status_with_invalid_roles_will_fail(): void
+    {
+        $this->assertStatusCodeForAllRolesExceptForArea(401, [Area::SuperAdmin], function () {
+            return $this->putJson(
+                'api/v1/admin/traders/'.self::$company->id.'/status',
+                self::$companyStatusDetails
+            )->assertExactJson([
+                'message' => __('Unauthenticated.'),
+            ]);
+        });
     }
 
     /**
