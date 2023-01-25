@@ -41,7 +41,7 @@ class UpdateUserRequest extends FormRequest
                 'required',
                 Rule::in(Area::roles(Area::Trader)),
             ],
-            'is_active' => ['nullable', 'boolean'],
+            'is_active' => ['required', 'boolean'],
         ];
     }
 }
