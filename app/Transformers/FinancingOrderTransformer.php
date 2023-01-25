@@ -4,6 +4,7 @@ namespace App\Transformers;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Models\Company;
 use App\Models\FinancingOrder;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
@@ -12,12 +13,20 @@ use League\Fractal\TransformerAbstract;
 
 class FinancingOrderTransformer extends TransformerAbstract
 {
+    protected ?Company $company;
+
+    public function __construct(Company $company = null)
+    {
+        $this->company = $company;
+    }
+
     protected array $defaultIncludes = [];
 
     protected array $availableIncludes = [
         'id',
         'status',
         'company_id',
+        'company_name',
         'reference_number',
         'national_id',
         'amount',
@@ -67,6 +76,11 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeCompanyId(FinancingOrder $financingOrder)
     {
         return $this->primitive($financingOrder->company_id);
+    }
+
+    public function includeCompanyName(FinancingOrder $financingOrder): Primitive
+    {
+        return $this->primitive($this->company->name);
     }
 
     public function includeReferenceNumber(FinancingOrder $financingOrder)

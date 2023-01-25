@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\LenderOrderController;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\LenderTransactionController;
+use App\Http\Controllers\Api\V1\Admin\FinancingOrders\TraderOrderController;
 use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
 use App\Http\Controllers\Api\V1\Admin\Lenders\ChargeLenderBalanceManually;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderBalance;
@@ -81,6 +82,11 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);
+        });
+
+        Route::prefix('traders')->group(function () {
+            Route::get('/{trader}/orders/{order}', [TraderOrderController::class, 'show']);
+            Route::get('{trader}/orders', [TraderOrderController::class, 'index']);
         });
 
         Route::apiResource('lenders', LenderController::class);
