@@ -38,8 +38,8 @@ class CreateTraderUserWithRoleAndPermissionAction implements CreateTraderUserWit
                 'last_name',
                 'email',
                 'phone_country_code',
-                'company_id',
                 'phone_number',
+                'company_id',
                 'password',
             ]
         ));
