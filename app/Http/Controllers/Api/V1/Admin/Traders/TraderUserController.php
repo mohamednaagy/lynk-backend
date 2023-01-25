@@ -63,6 +63,8 @@ class TraderUserController extends Controller
             'phone_country_code',
             'formatted_phone_number',
             'role',
+            'is_active',
+            'is_invitation_accepted',
         ])->respond();
     }
 
@@ -96,6 +98,8 @@ class TraderUserController extends Controller
                     'phone_number',
                     'phone_country_code',
                     'formatted_phone_number',
+                    'is_active',
+                    'is_invitation_accepted',
                 ])->respond();
         });
     }
@@ -123,6 +127,8 @@ class TraderUserController extends Controller
                 'phone_country_code',
                 'formatted_phone_number',
                 'role',
+                'is_active',
+                'is_invitation_accepted',
             ])->respond();
     }
 
