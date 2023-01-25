@@ -26,28 +26,18 @@ class UpdateTraderStatus extends Controller
      * Summary of __invoke
      *
      * @param  UpdateCompanyStatusRequest  $request
-     * @param  Company  $company
+     * @param  Company  $trader
      * @param  UpdateCompany  $updateCompany
      * @return JsonResponse
      */
     public function __invoke(
         UpdateCompanyStatusRequest $request,
-        Company $company,
+        Company $trader,
         UpdateCompany $updateCompany
     ): JsonResponse {
-        abort_if($company->type !== CompanyType::Trader, 404);
+        abort_if($trader->type->isNot(CompanyType::Trader), 404);
 
-        $updateCompany->handle($company, $request->validated());
-
-        if ($company->wasChanged('status')) {
-            activity()
-                ->withProperties([
-                    'company_id' => $company->id,
-                    'old_status' => $company->getOriginal('status'),
-                    'new_Status' => $company->getAttribute('status'),
-                ])
-                ->log('Company status changed');
-        }
+        $updateCompany->handle($trader, $request->validated());
 
         return $this->successResponse();
     }

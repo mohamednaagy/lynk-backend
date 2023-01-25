@@ -102,7 +102,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('traders', TraderController::class)
             ->only(['index', 'store', 'show', 'update']);
         Route::prefix('traders')->group(function () {
-            Route::put('/{company}/status', UpdateTraderStatus::class);
+            Route::put('/{trader}/status', UpdateTraderStatus::class);
         });
     });
 
