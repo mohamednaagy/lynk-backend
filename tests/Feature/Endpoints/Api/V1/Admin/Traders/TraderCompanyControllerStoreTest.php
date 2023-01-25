@@ -32,7 +32,6 @@ class TraderCompanyControllerStoreTest extends TestCase
         self::$companyDetails = [
             'name' => 'testCompany',
             'unique_name' => 'companyUniqueName',
-            'company_cr' => '1234567891',
             'driver' => 'dmcc',
         ];
 
@@ -66,7 +65,6 @@ class TraderCompanyControllerStoreTest extends TestCase
         $this->actingAs(self::$superAdmin)
             ->postJson('api/v1/admin/traders', [
                 'unique_name' => 'companyUniqueName',
-                'company_cr' => '1234567891',
                 'driver' => 'dmcc',
             ])
             ->assertJsonValidationErrorFor('name');
@@ -77,21 +75,9 @@ class TraderCompanyControllerStoreTest extends TestCase
         $this->actingAs(self::$superAdmin)
             ->postJson('api/v1/admin/traders', [
                 'name' => 'name',
-                'company_cr' => '1234567891',
                 'driver' => 'dmcc',
             ])
             ->assertJsonValidationErrorFor('unique_name');
-    }
-
-    public function test_trader_company_controller_store_without_company_cr_unsuccessful()
-    {
-        $this->actingAs(self::$superAdmin)
-            ->postJson('api/v1/admin/traders', [
-                'name' => 'testCompany',
-                'unique_name' => 'companyUniqueName',
-                'driver' => 'dmcc',
-            ])
-            ->assertJsonValidationErrorFor('company_cr');
     }
 
     public function test_trader_company_controller_driver_with_invalid_driver_unsuccessful()
@@ -100,7 +86,6 @@ class TraderCompanyControllerStoreTest extends TestCase
             ->postJson('api/v1/admin/traders', [
                 'name' => 'testCompany',
                 'unique_name' => 'companyUniqueName',
-                'company_cr' => '1234567891',
                 'driver' => 'random',
             ])
             ->assertJsonValidationErrorFor('driver');

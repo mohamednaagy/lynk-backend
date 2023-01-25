@@ -40,13 +40,6 @@ class UpdateTraderRequest extends FormRequest
                 Rule::unique(Company::class, 'unique_name')
                     ->ignore($this->route('trader')),
             ],
-            'company_cr' => [
-                'required',
-                'string',
-                'size:10',
-                Rule::unique(Company::class, 'company_cr')
-                    ->ignore($this->route('trader')),
-            ],
             'driver' => [
                 'nullable',
                 'string',
