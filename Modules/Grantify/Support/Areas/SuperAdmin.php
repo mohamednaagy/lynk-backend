@@ -90,5 +90,9 @@ class SuperAdmin
             Action::Show,
             Action::Manage,
         ],
+        Subject::TraderUserInvitation => [
+            Action::Send,
+            Action::Manage,
+        ],
     ];
 }

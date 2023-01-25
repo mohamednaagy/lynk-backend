@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Traders;
+namespace Endpoints\Api\V1\Admin\Traders\Users;
 
 use App\Enums\Area;
 use App\Enums\Role;
