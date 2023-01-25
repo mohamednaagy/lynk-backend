@@ -54,6 +54,7 @@ class UserControllerUpdateTest extends TestCase
             'email' => 'traderUserEmail@bim.com',
             'redirect_url' => 'https://bimventures.com/:user',
             'role' => Role::TraderAdmin,
+            'is_active' => 1,
         ];
     }
 
@@ -260,6 +261,28 @@ class UserControllerUpdateTest extends TestCase
                 'errors' => [
                     'role' => [
                         'The role field is required.',
+                    ],
+                ],
+            ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_admin_user_cant_update_trader_user_without_is_active(): void
+    {
+        $this->actingAs(self::$userTraderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->putJson(
+                'api/v1/trader/users/'.self::$otherUserTraderAdminOfSameCompany->id,
+                Arr::except(self::$traderDetails, ['is_active'])
+            )
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The is active field is required.',
+                'errors' => [
+                    'is_active' => [
+                        'The is active field is required.',
                     ],
                 ],
             ]);

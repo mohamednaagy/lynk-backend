@@ -93,6 +93,8 @@ class UserControllerShowTest extends TestCase
                         'phone_number',
                         'phone_country_code',
                         'formatted_phone_number',
+                        'is_active',
+                        'is_invitation_accepted',
                     ])->respond()
                     ->getData(true)
             );

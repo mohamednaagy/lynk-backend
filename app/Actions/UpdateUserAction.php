@@ -41,6 +41,7 @@ class UpdateUserAction implements UpdateUser
                     'password',
                     'company_id',
                     'locale',
+                    'is_active',
                 ]
             )
         );

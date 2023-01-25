@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Traders;
+namespace Endpoints\Api\V1\Admin\Traders\Users;
 
 use App\Enums\Area;
 use App\Enums\Role;
@@ -78,6 +78,8 @@ class UserControllerIndexTest extends TestCase
                         'phone_country_code',
                         'formatted_phone_number',
                         'role',
+                        'is_active',
+                        'is_invitation_accepted',
                     ])->respond()
                     ->getData(true)
             );

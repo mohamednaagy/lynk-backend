@@ -47,9 +47,9 @@ class AuthServiceProvider extends ServiceProvider
 
         Gate::before(function ($user, $ability) {
             return match ($this->getAreaFromRequestPath()) {
-                RouteArea::Admin => $user->hasRole([Role::Admin]),
-                RouteArea::Lender => $user->hasRole([Role::LenderAdmin]),
-                RouteArea::Trader => $user->hasRole([Role::TraderAdmin]),
+                RouteArea::Admin => $user->hasRole([Role::Admin]) ?: null,
+                RouteArea::Lender => $user->hasRole([Role::LenderAdmin]) ?: null,
+                RouteArea::Trader => $user->hasRole([Role::TraderAdmin]) ?: null,
                 default => null
             };
         });

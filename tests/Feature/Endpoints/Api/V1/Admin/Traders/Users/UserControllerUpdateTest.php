@@ -47,6 +47,7 @@ class UserControllerUpdateTest extends TestCase
             'email' => 'traderUser@bim.com',
             'redirect_url' => 'http://Lynk.com',
             'role' => Role::TraderAdmin,
+            'is_active' => 1,
         ];
 
         self::$endPoint = 'api/v1/admin/traders/'.self::$company->id.'/users/'.self::$userTraderAdmin->id;

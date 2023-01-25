@@ -47,6 +47,7 @@ class UserControllerStoreTest extends TestCase
             'email' => 'traderUser@bim.com',
             'redirect_url' => 'http://Lynk.com',
             'role' => Role::TraderAdmin,
+            'is_active' => 1,
         ];
 
         self::$endPoint = 'api/v1/admin/traders/'.self::$company->id.'/users';
@@ -78,6 +79,8 @@ class UserControllerStoreTest extends TestCase
                     'phone_number',
                     'phone_country_code',
                     'formatted_phone_number',
+                    'is_active',
+                    'is_invitation_accepted',
                 ],
             ]);
     }
@@ -126,6 +129,8 @@ class UserControllerStoreTest extends TestCase
                         'phone_number',
                         'phone_country_code',
                         'formatted_phone_number',
+                        'is_active',
+                        'is_invitation_accepted',
                     ],
                 ]);
         });
