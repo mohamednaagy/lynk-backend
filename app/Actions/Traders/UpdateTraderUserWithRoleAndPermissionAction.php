@@ -43,6 +43,7 @@ class UpdateTraderUserWithRoleAndPermissionAction implements UpdateTraderUserWit
                     'email',
                     'phone_number',
                     'phone_country_code',
+                    'is_active',
                 ]
             )
         );
