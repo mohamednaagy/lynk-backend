@@ -53,18 +53,38 @@ trait InteractsWithUser
     /**
      * Summary of createAdmin
      *
-     * @param  string  $email
+     * @param  string  $role
      * @param  array  $data
      * @return mixed
      */
     public function createSuperAdminUser(
-        $role = Role::Admin,
+        string $role = Role::Admin,
         array $data = []
     ): User {
         $admin = $this->createUser($data);
         $this->assignRoleToUser($admin, $role);
 
         return $admin;
+    }
+
+    /**
+     * Summary of createAdminUser
+     *
+     * @param  string|array  $permissions
+     * @param  array  $data
+     * @return mixed
+     */
+    public function createAdminUser(
+        string|array $permissions = [],
+        array $data = []
+    ): mixed {
+        $manager = $this->createUser($data);
+
+        $this->assignRoleToUser($manager, Role::Manager);
+
+        $this->assignPermissionToUser($manager, $permissions);
+
+        return $manager;
     }
 
     /**

@@ -114,14 +114,6 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
-
-        'update-trader-status' => [
-
-            'driver' => 'single',
-            'path' => storage_path('logs/updateTraderStatus.log'),
-            'level' => 'info',
-
-        ],
     ],
 
 ];

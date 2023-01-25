@@ -5,12 +5,12 @@ namespace App\Http\Controllers\Api\V1\Admin\Traders;
 use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CompanyType;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\UpdateCompanyStatusRequest;
 use App\Models\Company;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
 
 class UpdateTraderStatus extends Controller
 {
@@ -25,7 +25,7 @@ class UpdateTraderStatus extends Controller
     /**
      * Summary of __invoke
      *
-     * @param  UpdateCompanyStatusRequest  $updateCompanyStatusRequest
+     * @param  UpdateCompanyStatusRequest  $request
      * @param  Company  $company
      * @param  UpdateCompany  $updateCompany
      * @return JsonResponse
@@ -35,10 +35,20 @@ class UpdateTraderStatus extends Controller
         Company $company,
         UpdateCompany $updateCompany
     ): JsonResponse {
+        abort_if($company->type !== CompanyType::Trader, 404);
+
         $updateCompany->handle($company, $request->validated());
 
-        Log::channel('update-trader-status')->info('Admin updated Trader Company status successfully');
+        if ($company->wasChanged('status')) {
+            activity()
+                ->withProperties([
+                    'company_id' => $company->id,
+                    'old_status' => $company->getOriginal('status'),
+                    'new_Status' => $company->getAttribute('status'),
+                ])
+                ->log('Company status changed');
+        }
 
-        return $this->successResponse([]);
+        return $this->successResponse();
     }
 }
