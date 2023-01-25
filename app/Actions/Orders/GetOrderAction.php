@@ -39,10 +39,10 @@ class GetOrderAction implements GetOrder
             function ($query) {
                 $query->withoutGlobalScope(TenantScope::class)
                     ->withWhereHas('traderOrders', function ($query) {
-                        $query->withWhereHas('traderOrders', function ($query) {
-                            $query->with('traderHistories');
-                        })->where('provider', $this->company->driver);
-                    })->where('company_id', $this->company->id);
+                        $query->with('traderHistories')
+                            ->where('provider', $this->company->driver);
+                    })
+                    ->where('company_id', $this->company->id);
             }
         );
     }
