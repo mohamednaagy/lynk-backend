@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Enums\TraderOrderStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Stancl\VirtualColumn\VirtualColumn;
 
+/**
+ * @property mixed $reference
+ */
 class TraderOrder extends Model
 {
     use HasFactory, VirtualColumn;
@@ -26,6 +30,10 @@ class TraderOrder extends Model
             'reference',
         ];
     }
+
+    protected $casts = [
+        'status' => TraderOrderStatus::class,
+    ];
 
     public function order(): BelongsTo
     {

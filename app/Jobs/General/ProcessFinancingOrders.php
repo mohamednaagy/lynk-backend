@@ -3,7 +3,6 @@
 namespace App\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
-use App\Jobs\Dmcc\ProcessAskClientForWakala;
 use App\Jobs\Dmcc\ProcessDmccContractSignedOrder;
 use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
 use App\Jobs\Dmcc\ProcessPtpDocumentRetrievedOrder;

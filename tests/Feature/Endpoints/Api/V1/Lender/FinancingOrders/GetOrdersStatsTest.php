@@ -10,12 +10,14 @@ use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class GetOrdersStatsTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithLender;
+    use InteractsWithUser;
+    use InteractsWithCompany;
 
     private static Company $company;
 
@@ -33,8 +35,8 @@ class GetOrdersStatsTest extends TestCase
         parent::setUp();
 
         [self::$company, self::$wallet] = $this->createCompany('2000');
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'lenderOrderCreator@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
 
         // create order with different status
         FinancingOrder::factory(5)->create(['company_id' => self::$company->id, 'status' => FinancingOrderStatus::Completed]);

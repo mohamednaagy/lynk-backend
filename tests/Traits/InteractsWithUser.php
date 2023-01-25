@@ -53,38 +53,18 @@ trait InteractsWithUser
     /**
      * Summary of createAdmin
      *
-     * @param  string  $role
+     * @param  Role|string  $role
      * @param  array  $data
      * @return mixed
      */
     public function createSuperAdminUser(
-        string $role = Role::Admin,
+        Role|string $role = Role::Admin,
         array $data = []
     ): User {
         $admin = $this->createUser($data);
         $this->assignRoleToUser($admin, $role);
 
         return $admin;
-    }
-
-    /**
-     * Summary of createAdminUser
-     *
-     * @param  string|array  $permissions
-     * @param  array  $data
-     * @return mixed
-     */
-    public function createAdminUser(
-        string|array $permissions = [],
-        array $data = []
-    ): mixed {
-        $manager = $this->createUser($data);
-
-        $this->assignRoleToUser($manager, Role::Manager);
-
-        $this->assignPermissionToUser($manager, $permissions);
-
-        return $manager;
     }
 
     /**
@@ -98,13 +78,13 @@ trait InteractsWithUser
         string $role = Role::LenderAdmin,
         array $data = []
     ): User {
-        $userLender = $this->createUser(array_merge([
+        $user = $this->createUser(array_merge([
             'company_id' => $companyId,
         ], $data));
 
-        $this->assignRoleToUser($userLender, $role);
+        $this->assignRoleToUser($user, $role);
 
-        return $userLender;
+        return $user;
     }
 
     /**
@@ -118,12 +98,12 @@ trait InteractsWithUser
         string $role = Role::TraderAdmin,
         array $data = []
     ): User {
-        $userLender = $this->createUser(array_merge([
+        $user = $this->createUser(array_merge([
             'company_id' => $companyId,
         ], $data));
 
-        $this->assignRoleToUser($userLender, $role);
+        $this->assignRoleToUser($user, $role);
 
-        return $userLender;
+        return $user;
     }
 }

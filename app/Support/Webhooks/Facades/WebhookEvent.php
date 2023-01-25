@@ -2,8 +2,13 @@
 
 namespace App\Support\Webhooks\Facades;
 
+use App\Models\Company;
 use Illuminate\Support\Facades\Facade;
+use RuntimeException;
 
+/**
+ * @method static void fire(Company $company, string $webhookType, array $payload)
+ */
 class WebhookEvent extends Facade
 {
     /**

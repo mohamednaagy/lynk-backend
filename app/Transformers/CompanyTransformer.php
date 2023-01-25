@@ -20,6 +20,7 @@ class CompanyTransformer extends TransformerAbstract
         'order_cost',
         'webhook_secret_key',
         'public_status_comment',
+        'driver',
     ];
 
     public function transform(Company $company): array
@@ -85,5 +86,10 @@ class CompanyTransformer extends TransformerAbstract
     public function includePublicStatusComment(Company $company): Primitive
     {
         return $this->primitive($company->public_status_comment);
+    }
+
+    public function includeDriver(Company $company): Primitive
+    {
+        return $this->primitive($company->driver);
     }
 }

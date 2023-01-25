@@ -13,12 +13,14 @@ use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class RejectOrderControllerTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithLender;
+    use InteractsWithUser;
+    use InteractsWithCompany;
 
     private static Company $company;
 
@@ -68,15 +70,14 @@ class RejectOrderControllerTest extends TestCase
             ]
         );
 
-        self::$notApprovedCompanyLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'notApprovedCompanyLenderAdmin@bim.com');
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$userLendersupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'supervisor@bim.com');
-        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'userLenderBilling@bim.com');
-        self::$userLenderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'LenderOrderCreator@bim.com');
+        self::$notApprovedCompanyLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$userLendersupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor);
+        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
+        self::$userLenderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
         self::$userLenderAdminWithoutEmailVerification = $this->createLenderUser(
             self::$company->id,
             Role::LenderAdmin,
-            'userLenderAdminWithoutEmailVerification@bim.com',
             ['email_verified_at' => null]
         );
         self::$statusReason = Str::random(80);

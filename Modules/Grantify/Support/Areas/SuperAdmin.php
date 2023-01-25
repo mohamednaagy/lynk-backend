@@ -83,6 +83,13 @@ class SuperAdmin
         Subject::LenderTransactions => [
             Action::Index,
         ],
+        Subject::Traders => [
+            Action::Index,
+            Action::Create,
+            Action::Edit,
+            Action::Show,
+            Action::Manage,
+        ],
         Subject::TraderStatus => [
             Action::Manage,
             Action::Edit,

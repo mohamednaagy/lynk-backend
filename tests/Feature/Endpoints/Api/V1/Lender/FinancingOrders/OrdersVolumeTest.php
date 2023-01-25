@@ -11,12 +11,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class OrdersVolumeTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithLender;
+    use InteractsWithUser;
+    use InteractsWithCompany;
 
     private static Company $company;
 
@@ -62,7 +64,7 @@ class OrdersVolumeTest extends TestCase
         self::$ordersCountForFirstCompany = 5;
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
 
         FinancingOrder::factory(self::$ordersCountForFirstCompany)->create([
             'company_id' => self::$company->id,
@@ -81,7 +83,7 @@ class OrdersVolumeTest extends TestCase
         // the second company to simplify weeks response
 
         [self::$secondCompany, self::$secondWallet] = $this->createCompany('2000', ['company_cr' => '12345678810']);
-        self::$secondUserLenderAdmin = $this->createLenderUser(self::$secondCompany->id, Role::LenderAdmin, 'secondLenderAdmin@bim.com');
+        self::$secondUserLenderAdmin = $this->createLenderUser(self::$secondCompany->id, Role::LenderAdmin);
 
         self::$firstDateForSecondCompany = date('2022-08-01');
         self::$secondDateForSecondCompany = date('2022-10-01');
