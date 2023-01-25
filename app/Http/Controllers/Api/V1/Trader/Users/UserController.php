@@ -62,6 +62,8 @@ class UserController extends Controller
                 'phone_country_code',
                 'formatted_phone_number',
                 'role',
+                'is_active',
+                'is_invitation_accepted',
             ])->respond();
     }
 
