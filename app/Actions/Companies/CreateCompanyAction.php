@@ -3,7 +3,6 @@
 namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\CreateCompany;
-use App\Actions\Contracts\Companies\GenerateCompanyCr;
 use App\Actions\Contracts\Webhooks\GenerateWebhookSecretKey;
 use App\Models\Company;
 use Illuminate\Support\Arr;
@@ -11,8 +10,7 @@ use Illuminate\Support\Arr;
 class CreateCompanyAction implements CreateCompany
 {
     public function __construct(
-        protected GenerateWebhookSecretKey $generateWebhookSecretKey,
-        protected GenerateCompanyCr $generateCompanyCr
+        protected GenerateWebhookSecretKey $generateWebhookSecretKey
     ) {
     }
 
@@ -24,10 +22,6 @@ class CreateCompanyAction implements CreateCompany
     {
         if (empty($data['webhook_secret_key'])) {
             $data['webhook_secret_key'] = $this->generateWebhookSecretKey->handle();
-        }
-
-        if (empty($data['company_cr'])) {
-            $data['company_cr'] = $this->generateCompanyCr->handle();
         }
 
         return Company::create(
