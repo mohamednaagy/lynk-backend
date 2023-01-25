@@ -11,6 +11,7 @@ use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TraderOrderController extends Controller
 {
@@ -55,6 +56,14 @@ class TraderOrderController extends Controller
     public function show(Company $trader, FinancingOrder $order): JsonResponse
     {
         $order->load('creator');
+
+        $orderDetails = $order->newQuery()->withWhereHas('traderOrder', function ($query) use ($trader) {
+            $query->where('provider', $trader->driver);
+        })->where('company_id', $trader->id);
+
+        if (blank($orderDetails)) {
+            throw new NotFoundHttpException();
+        }
 
         return fractal($order, new FinancingOrderTransformer($trader))
             ->parseIncludes([
