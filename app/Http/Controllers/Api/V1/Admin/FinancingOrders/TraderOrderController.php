@@ -59,7 +59,7 @@ class TraderOrderController extends Controller
 
         $orderDetails = $order->newQuery()->withWhereHas('traderOrders', function ($query) use ($trader) {
             $query->where('provider', $trader->driver);
-        })->where('company_id', $trader->id)->first();
+        })->first();
 
         if (blank($orderDetails)) {
             throw new ModelNotFoundException();

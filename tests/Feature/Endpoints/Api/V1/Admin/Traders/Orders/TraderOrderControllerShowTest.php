@@ -2,9 +2,7 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Traders\Orders;
 
-use App\Actions\Orders\GetOrderAction;
 use App\Enums\Area;
-use App\Enums\CompanyType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
@@ -25,15 +23,17 @@ class TraderOrderControllerShowTest extends TestCase
 {
     use RefreshDatabase, InteractsWithCompany, InteractsWithUser, AssertsAccessByRoleAndArea;
 
-    private static Company $company;
+    private static Company $traderCompany;
+
+    private static Company $lenderCompany;
 
     private static User $userAdmin;
 
-    private static Wallet $wallet;
+    private static Wallet $traderWallet;
+
+    private static Wallet $lenderWallet;
 
     private static Builder|Model $order;
-
-    private static Builder|Model $orderTwo;
 
     private static Builder|Model $traderOrder;
 
@@ -50,9 +50,10 @@ class TraderOrderControllerShowTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createTraderCompany('2000', ['company_cr' => '12345678910', 'type' => CompanyType::Trader]);
+        [self::$traderCompany, self::$traderWallet] = $this->createTraderCompany('2000', ['company_cr' => '12345678910', 'driver' => 'fake']);
+        [self::$lenderCompany, self::$lenderWallet] = $this->createLenderCompany('2000', ['company_cr' => '12345678911']);
         self::$userAdmin = $this->createSuperAdminUser();
-        self::$order = $this->createOrder(self::$company->id, self::$userAdmin->id);
+        self::$order = $this->createOrder(self::$lenderCompany->id, self::$userAdmin->id);
         self::$traderOrder = self::$order->traderOrders()->create([
             'provider' => 'fake',
             'status' => TraderOrderStatus::InProgress,
@@ -62,7 +63,7 @@ class TraderOrderControllerShowTest extends TestCase
             'action' => FinancingOrderHistory::GetTtiId,
         ]);
 
-        self::$baseURL = 'api/v1/admin/traders/'.self::$company->id.'/orders/'.self::$order->id;
+        self::$baseURL = 'api/v1/admin/traders/'.self::$traderCompany->id.'/orders/'.self::$order->id;
     }
 
     /**
@@ -70,7 +71,7 @@ class TraderOrderControllerShowTest extends TestCase
      */
     public function test_unauth_user_cannot_access(): void
     {
-        $this->withHeader('X-Company', self::$company->id)
+        $this->withHeader('X-Company', self::$traderCompany->id)
             ->getJson(self::$baseURL)
             ->assertUnauthorized();
     }
@@ -81,11 +82,11 @@ class TraderOrderControllerShowTest extends TestCase
     public function test_auth_user_with_proper_permission_can_access(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->withHeader('X-Company', self::$company->id)
+            ->withHeader('X-Company', self::$traderCompany->id)
             ->getJson(self::$baseURL)
             ->assertOk()
             ->assertExactJson(
-                fractal((new GetOrderAction())->setCompany(self::$company)->handle(self::$order->id), new FinancingOrderTransformer(self::$company))
+                fractal(self::$order, new FinancingOrderTransformer(self::$traderCompany))
                     ->parseIncludes([
                         'id',
                         'company_id',
@@ -97,7 +98,7 @@ class TraderOrderControllerShowTest extends TestCase
                     ])
                     ->respond()
                     ->getData(true)
-            )->assertJsonCount(1);
+            );
     }
 
     public function test_trader_roles_only_can_access()
@@ -107,7 +108,7 @@ class TraderOrderControllerShowTest extends TestCase
             [Area::SuperAdmin],
             function ($user, $role) {
                 return $this->actingAs($user)
-                    ->withHeader('X-Company', self::$company->id)
+                    ->withHeader('X-Company', self::$traderCompany->id)
                     ->getJson(self::$baseURL);
             });
     }

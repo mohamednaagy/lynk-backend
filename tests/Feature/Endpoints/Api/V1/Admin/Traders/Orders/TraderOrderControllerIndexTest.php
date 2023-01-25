@@ -24,11 +24,15 @@ class TraderOrderControllerIndexTest extends TestCase
 {
     use RefreshDatabase, InteractsWithCompany, InteractsWithUser, AssertsAccessByRoleAndArea;
 
-    private static Company $company;
+    private static Company $traderCompany;
+
+    private static Company $lenderCompany;
 
     private static User $userAdmin;
 
-    private static Wallet $wallet;
+    private static Wallet $traderWallet;
+
+    private static Wallet $lenderWallet;
 
     private static Builder|Model $order;
 
@@ -47,9 +51,10 @@ class TraderOrderControllerIndexTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createTraderCompany('2000', ['company_cr' => '12345678910']);
+        [self::$traderCompany, self::$traderWallet] = $this->createTraderCompany('2000', ['company_cr' => '12345678910', 'driver' => 'fake']);
+        [self::$lenderCompany, self::$lenderWallet] = $this->createLenderCompany('2000', ['company_cr' => '12345678911']);
         self::$userAdmin = $this->createSuperAdminUser();
-        self::$order = $this->createOrder(self::$company->id, self::$userAdmin->id);
+        self::$order = $this->createOrder(self::$lenderCompany->id, self::$userAdmin->id);
         self::$traderOrder = self::$order->traderOrders()->create([
             'provider' => 'fake',
             'status' => TraderOrderStatus::InProgress,
@@ -59,7 +64,7 @@ class TraderOrderControllerIndexTest extends TestCase
             'action' => FinancingOrderHistory::GetTtiId,
         ]);
 
-        self::$baseURL = 'api/v1/admin/traders/'.self::$company->id.'/orders';
+        self::$baseURL = 'api/v1/admin/traders/'.self::$traderCompany->id.'/orders';
     }
 
     /**
@@ -67,7 +72,7 @@ class TraderOrderControllerIndexTest extends TestCase
      */
     public function test_unauth_user_cannot_access(): void
     {
-        $this->withHeader('X-Company', self::$company->id)
+        $this->withHeader('X-Company', self::$traderCompany->id)
             ->getJson(self::$baseURL)
             ->assertUnauthorized();
     }
@@ -77,12 +82,14 @@ class TraderOrderControllerIndexTest extends TestCase
      */
     public function test_auth_user_with_proper_permission_can_access(): void
     {
+        $data = (new GetPaginatedFinancingOrderAction())->setCompany(self::$traderCompany)->handle();
+
         $this->actingAs(self::$userAdmin)
-            ->withHeader('X-Company', self::$company->id)
+            ->withHeader('X-Company', self::$traderCompany->id)
             ->getJson(self::$baseURL)
             ->assertOk()
             ->assertExactJson(
-                fractal((new GetPaginatedFinancingOrderAction())->setCompany(self::$company)->handle(), new FinancingOrderTransformer(self::$company))
+                fractal($data, new FinancingOrderTransformer(self::$traderCompany))
                     ->parseIncludes([
                         'id',
                         'company_id',
@@ -95,6 +102,8 @@ class TraderOrderControllerIndexTest extends TestCase
                     ->respond()
                     ->getData(true)
             );
+
+        $this->assertEquals(1, $data->count());
     }
 
     /**
@@ -103,11 +112,11 @@ class TraderOrderControllerIndexTest extends TestCase
     public function test_can_see_only_current_trader_company_orders(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->withHeader('X-Company', self::$company->id)
+            ->withHeader('X-Company', self::$traderCompany->id)
             ->getJson(self::$baseURL)
             ->assertOk()
             ->assertExactJson(
-                fractal((new GetPaginatedFinancingOrderAction())->setCompany(self::$company)->handle(), new FinancingOrderTransformer(self::$company))
+                fractal((new GetPaginatedFinancingOrderAction())->setCompany(self::$traderCompany)->handle(), new FinancingOrderTransformer(self::$traderCompany))
                     ->parseIncludes([
                         'id',
                         'company_id',
@@ -129,7 +138,7 @@ class TraderOrderControllerIndexTest extends TestCase
             [Area::SuperAdmin],
             function ($user, $role) {
                 return $this->actingAs($user)
-                    ->withHeader('X-Company', self::$company->id)
+                    ->withHeader('X-Company', self::$traderCompany->id)
                     ->getJson(self::$baseURL);
             });
     }
