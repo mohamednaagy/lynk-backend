@@ -60,7 +60,7 @@ class LenderOrderController extends Controller
      */
     public function show(Company $lender, FinancingOrder $order): JsonResponse
     {
-        $order->load('creator');
+        $order->load('creator', 'traderOrders');
 
         return fractal($order, new FinancingOrderTransformer())
             ->parseIncludes([
@@ -78,12 +78,12 @@ class LenderOrderController extends Controller
                 'is_updatable',
                 'creator',
                 'approver',
-                'traders.id',
-                'traders.reference',
-                'traders.provider',
-                'traders.cancelable',
-                'traders.history',
-                'traders.status',
+                'trader_orders.id',
+                'trader_orders.reference',
+                'trader_orders.provider',
+                'trader_orders.cancelable',
+                'trader_orders.history',
+                'trader_orders.status',
                 'history',
                 'creator',
                 'created_at',
