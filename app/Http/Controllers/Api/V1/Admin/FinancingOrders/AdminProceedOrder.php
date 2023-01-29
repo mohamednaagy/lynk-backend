@@ -54,7 +54,8 @@ class AdminProceedOrder extends Controller
     public function handleClientWakalaAccepted(FinancingOrder $order)
     {
         if (
-            $order->status->cantMoveTo(FinancingOrderStatus::ClientWakalaCompleted)
+            $order->is_verification_required
+            || $order->status->cantMoveTo(FinancingOrderStatus::ClientWakalaCompleted)
         ) {
             return $this->errorResponse(
                 __('error.order_status_doesnt_follow_sequence'),

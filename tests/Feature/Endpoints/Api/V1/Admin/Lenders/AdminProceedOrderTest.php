@@ -7,6 +7,7 @@ use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -41,12 +42,12 @@ class AdminProceedOrderTest extends TestCase
 
         [self::$company] = $this->createCompany('2000');
         self::$userLender = $this->createLenderUser(self::$company->id);
-        self::$admin = $this->createSuperAdminUser();
+        self::$admin = $this->createSuperAdminUser(Role::Admin, ['email_verified_at' => now()]);
         self::$financingOrder = $this->createOrder(
             self::$company->id,
             self::$userLender->id,
             [
-                'is_verification_required' => true,
+                'is_verification_required' => false,
                 'status' => FinancingOrderStatus::PendingApproval,
             ]
         );
@@ -145,6 +146,22 @@ class AdminProceedOrderTest extends TestCase
     /**
      * @return void
      */
+    public function test_admin_cannot_make_order_proceed_on_client_wakala_accepted_when_order_verification_is_required(): void
+    {
+        self::$financingOrder->is_verification_required = true;
+        self::$financingOrder->status = FinancingOrderStatus::WaitingClientWakala;
+        self::$financingOrder->save();
+
+        $this->actingAs(self::$admin)
+            ->postJson(self::$orderProceedUrl, [
+                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+            ])
+            ->assertStatus(Response::HTTP_BAD_REQUEST);
+    }
+
+    /**
+     * @return void
+     */
     public function test_admin_proceed_order_on_contract_signed_successfully(): void
     {
         self::$financingOrder->status = FinancingOrderStatus::CommodityPurchased;
@@ -155,8 +172,8 @@ class AdminProceedOrderTest extends TestCase
                 'case' => FinancingOrderProceedCase::ContractSigned,
             ])
             ->assertStatus(200)->assertJsonStructure([
-               'data',
-           ]);
+                'data',
+            ]);
 
         $this->assertEquals(
             FinancingOrder::find(self::$financingOrder->getOriginal('id'))->status->value,
