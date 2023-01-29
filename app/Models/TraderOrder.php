@@ -11,6 +11,7 @@ use Stancl\VirtualColumn\VirtualColumn;
 
 /**
  * @property mixed $reference
+ * @property mixed $traderHistories
  */
 class TraderOrder extends Model
 {

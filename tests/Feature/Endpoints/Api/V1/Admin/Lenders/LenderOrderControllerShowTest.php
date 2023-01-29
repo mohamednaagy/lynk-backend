@@ -11,6 +11,7 @@ use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Transformers\FinancingOrderTransformer;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
@@ -34,6 +35,8 @@ class LenderOrderControllerShowTest extends TestCase
 
     /**
      * @return void
+     *
+     * @throws BindingResolutionException
      */
     public function setUp(): void
     {
@@ -89,6 +92,12 @@ class LenderOrderControllerShowTest extends TestCase
                         'is_updatable',
                         'creator',
                         'approver',
+                        'traders.id',
+                        'traders.reference',
+                        'traders.provider',
+                        'traders.cancelable',
+                        'traders.history',
+                        'traders.status',
                         'history',
                         'creator',
                         'created_at',
