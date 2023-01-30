@@ -31,6 +31,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'national_id',
         'amount',
         'selling_price',
+        'is_verification_required',
         'is_updatable',
         'is_approved',
         'status_reason',
@@ -129,6 +130,11 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeIsUpdatable(FinancingOrder $financingOrder)
     {
         return $this->primitive($financingOrder->status->is(FinancingOrderStatus::PendingApproval));
+    }
+
+    public function includeIsVerificationRequired(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->is_verification_required);
     }
 
     public function includeIsApproved(FinancingOrder $financingOrder)
