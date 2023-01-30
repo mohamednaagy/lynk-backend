@@ -374,7 +374,8 @@ class DmccDriver implements TraderInterface
         $traderOrder->update([
             'product' => $details->hsCodeDescription,
             'quantity' => $details->quantity,
-            'amount' => $details->totalValue.' '.$details->currency,
+            'amount' => $details->totalValue,
+            'currency' => $details->currency,
             'warehouse' => $details->warehouseOrVaultId,
             'owner' => $details->owner,
             'previousOwner' => $details->previousOwner,
@@ -382,6 +383,17 @@ class DmccDriver implements TraderInterface
             'dateTimeOfPurchasingCommodity' => $details->dateTimeOfPurchasingCommodity,
             'warehouseOrVaultEmirates' => $details->warehouseOrVaultEmirates,
             'warehouseOrVaultCountry' => $details->warehouseOrVaultCountry,
+            'inventoryRecordId' => $details->inventoryRecordId,
+            'warrantPercentage' => $details->warrantPercentage,
+            'warehouseOrVaultOperatorId' => $details->warehouseOrVaultOperatorId,
+            'warrantNo' => $details->warrantNo,
+            'hsCode' => $details->hsCode,
+            'uom' => $details->uom,
+            'exchangeRate' => $response->object()->exchangeRate,
+            'ptpDocument' => $response->object()->ptpDocument,
+            'originalHoldingCertificate' => $response->object()->ptpDocument,
+            'autoGenerateFinancingInstitutionCertificate' => false,
+            'financingInstitutionCertificate' => $response->object()->ptpDocument,
         ]);
 
         return $response->object();
