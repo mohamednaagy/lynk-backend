@@ -4,6 +4,7 @@ namespace App\Enums;
 
 use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
+use Illuminate\Support\Collection;
 
 final class FinancingOrderHistory extends Enum implements LocalizedEnum
 {
@@ -51,4 +52,17 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
         self::AttachWarrantAmendmentExceptWarrantNoDocument,
         self::OrderCancelled,
     ];
+
+    public static function isTraderOrderCancellable(FinancingOrderHistory|Collection|array $actions): bool
+    {
+        if ($actions instanceof FinancingOrderHistory) {
+            $actions = (array) $actions->value;
+        }
+
+        if ($actions instanceof Collection) {
+            $actions = $actions->toArray();
+        }
+
+        return ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $actions));
+    }
 }

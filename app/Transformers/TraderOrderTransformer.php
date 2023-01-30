@@ -5,7 +5,6 @@ namespace App\Transformers;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
-use Illuminate\Support\Arr;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
@@ -52,9 +51,13 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeIsCancellable(TraderOrder $traderOrder): Primitive
     {
+        if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+            return $this->primitive(false);
+        }
+
         $traderHistoryActions = $traderOrder->traderHistories->pluck('action');
 
-        return $this->primitive(! Arr::hasAny(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions));
+        return $this->primitive(FinancingOrderHistory::isTraderOrderCancellable($traderHistoryActions));
     }
 
     public function includeHistory(TraderOrder $traderOrder): Collection

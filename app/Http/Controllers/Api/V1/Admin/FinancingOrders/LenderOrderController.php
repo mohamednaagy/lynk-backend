@@ -65,6 +65,7 @@ class LenderOrderController extends Controller
             'traderOrders' => function ($query) {
                 $query->latest('id');
             },
+            'traderOrders.traderHistories',
         ]);
 
         return fractal($order, new FinancingOrderTransformer())
