@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders;
+namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -9,6 +9,7 @@ use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 
 class GetMurabahaPurchaseOffer extends Controller
@@ -17,17 +18,20 @@ class GetMurabahaPurchaseOffer extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::Lenders, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show, Action::Manage])
         );
     }
 
     public function __invoke(
         Company $lender,
-        FinancingOrder $order
+        FinancingOrder $order,
+        TraderOrder $trader_order
     ): JsonResponse {
         $url = $this->fileUrl($order->getMedia(FinancingOrderMediaCollection::MurabahaPurchaseOrder)->first());
 
-        return $this->successResponse([$url]);
+        return $this->successResponse([
+            'murabaha_purchase_offer' => $url,
+        ]);
     }
 
     public function fileUrl($media): ?string

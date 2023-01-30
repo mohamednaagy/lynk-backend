@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders;
+namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -11,6 +11,7 @@ use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Http\JsonResponse;
@@ -24,17 +25,16 @@ class UpdateMurabahaPurchaseOffer extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::Lenders, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show, Action::Manage])
         );
     }
 
     public function __invoke(
         Request $request,
         Company $lender,
-        FinancingOrder $order
+        FinancingOrder $order,
+        TraderOrder $traderOrder
     ): JsonResponse {
-        $traderOrder = $order->activeTraderOrder->firstOrFail();
-
         $this->attachDocumentToOrder(
             $traderOrder,
             base64_encode(file_get_contents($request->file('document'))),
@@ -42,7 +42,7 @@ class UpdateMurabahaPurchaseOffer extends Controller
             'base64'
         );
 
-        if ($order->status->is(FinancingOrderStatus::MurabhaOfferIssued)) {
+        if ($order->status->canMoveTo(FinancingOrderStatus::MurabahaSaleCompleted)) {
             $trader = Trader::driver($traderOrder->provider);
 
             $trader->updateOrderStatus($order, FinancingOrderStatus::MurabahaSaleCompleted);

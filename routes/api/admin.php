@@ -21,8 +21,8 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderSetting;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderStatuses;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderUserController;
-use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\GetMurabahaPurchaseOffer;
-use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateMurabahaPurchaseOffer;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabahaPurchaseOffer;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
@@ -85,8 +85,10 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);
             Route::prefix('/{lender}/orders/{order}')->group(function () {
-                Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
-                Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
+                Route::prefix('/trader-order/{trader_order}')->group(function () {
+                    Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
+                    Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
+                });
             });
         });
 
