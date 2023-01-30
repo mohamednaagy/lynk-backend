@@ -7,9 +7,9 @@ use Tests\TestCase;
 
 class FinancingOrderHistoryUnitTest extends TestCase
 {
-    public function test_not_cancelable_actions()
+    public function test_not_cancellable_actions()
     {
-        $this->assertSame(FinancingOrderHistory::$notCancelableActions, [
+        $this->assertSame(FinancingOrderHistory::$notCancellableActions, [
             FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
             FinancingOrderHistory::AttachMpoDocument,
             FinancingOrderHistory::IssueMurabahaOffer,

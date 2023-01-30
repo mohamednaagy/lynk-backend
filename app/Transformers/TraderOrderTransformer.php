@@ -21,7 +21,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'provider',
         'data',
         'status',
-        'cancelable',
+        'is_cancellable',
         'history',
     ];
 
@@ -50,11 +50,11 @@ class TraderOrderTransformer extends TransformerAbstract
         return $this->primitive($traderOrder->provider);
     }
 
-    public function includeCancelable(TraderOrder $traderOrder): Primitive
+    public function includeIsCancellable(TraderOrder $traderOrder): Primitive
     {
         $traderHistoryActions = $traderOrder->traderHistories->pluck('action');
 
-        return $this->primitive(! Arr::hasAny(FinancingOrderHistory::$notCancelableActions, $traderHistoryActions));
+        return $this->primitive(! Arr::hasAny(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions));
     }
 
     public function includeHistory(TraderOrder $traderOrder): Collection

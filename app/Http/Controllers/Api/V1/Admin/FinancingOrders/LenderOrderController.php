@@ -18,13 +18,13 @@ class LenderOrderController extends Controller
     {
         $this->middleware(
             'permission:'.
-                  perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Manage, Action::Index])
+            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Manage, Action::Index])
         )
             ->only('index');
 
         $this->middleware(
             'permission:'.
-                          perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Manage, Action::Show])
+            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Manage, Action::Show])
         )
             ->only('show');
     }
@@ -60,7 +60,12 @@ class LenderOrderController extends Controller
      */
     public function show(Company $lender, FinancingOrder $order): JsonResponse
     {
-        $order->load('creator', 'traderOrders');
+        $order->load([
+            'creator',
+            'traderOrders' => function ($query) {
+                $query->latest('id');
+            },
+        ]);
 
         return fractal($order, new FinancingOrderTransformer())
             ->parseIncludes([
@@ -81,10 +86,9 @@ class LenderOrderController extends Controller
                 'trader_orders.id',
                 'trader_orders.reference',
                 'trader_orders.provider',
-                'trader_orders.cancelable',
+                'trader_orders.is_cancellable',
                 'trader_orders.history',
                 'trader_orders.status',
-                'history',
                 'creator',
                 'created_at',
             ])

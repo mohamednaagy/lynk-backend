@@ -72,6 +72,12 @@ class LenderOrderControllerShowTest extends TestCase
     public function test_admin_financing_order_controller_show_order_successed()
     {
         $order = FinancingOrder::where('company_id', self::$lender->id)->first();
+        $order->load([
+            'creator',
+            'traderOrders' => function ($query) {
+                $query->latest('id');
+            },
+        ]);
         $this->actingAs(self::$admin)
             ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/orders/'.$order->id)
             ->assertStatus(Response::HTTP_OK)
@@ -95,10 +101,9 @@ class LenderOrderControllerShowTest extends TestCase
                         'trader_orders.id',
                         'trader_orders.reference',
                         'trader_orders.provider',
-                        'trader_orders.cancelable',
+                        'trader_orders.is_cancellable',
                         'trader_orders.history',
                         'trader_orders.status',
-                        'history',
                         'creator',
                         'created_at',
                     ])
