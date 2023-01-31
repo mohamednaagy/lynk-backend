@@ -23,6 +23,8 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderStatuses;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderUserController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetPurchasingCommodity;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\GetMurabahaPurchaseOffer;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\UpdateMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodity;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
@@ -90,6 +92,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                     Route::post('/proceed', MakeOrderProceed::class);
                     Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
                     Route::get('/purchasing-commodity', GetPurchasingCommodity::class);
+                    Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
+                    Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
                 });
             });
         });
