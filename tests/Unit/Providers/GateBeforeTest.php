@@ -20,10 +20,6 @@ class GateBeforeTest extends TestCase
 
     private static User $userLenderOrderCreator;
 
-    private static User $anotherUserLenderOrderCreator;
-
-    private static User $userLenderBilling;
-
     private static User $superAdmin;
 
     private static User $traderAdmin;
@@ -40,8 +36,6 @@ class GateBeforeTest extends TestCase
         self::$superAdmin = $this->createSuperAdminUser();
         self::$traderAdmin = $this->createTraderUser(self::$company->id);
         self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
-        self::$anotherUserLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
-        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
         self::$order = $this->createOrder(self::$company->id, self::$userLenderOrderCreator->id);
         $this->withoutMiddleware([\Spatie\Permission\Middlewares\RoleMiddleware::class]);
     }
