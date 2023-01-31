@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -44,5 +45,16 @@ class TraderOrder extends Model
     public function traderHistories(): HasMany
     {
         return $this->hasMany(TraderHistory::class, 'trader_order_id', 'id');
+    }
+
+    public function isCancellable(): bool
+    {
+        if ($this->status->isNot(TraderOrderStatus::InProgress)) {
+            return false;
+        }
+
+        $traderHistoryActions = $this->traderHistories->pluck('action')->toArray();
+
+        return ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions));
     }
 }

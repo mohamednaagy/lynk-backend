@@ -1,6 +1,6 @@
 <?php
 
-namespace Enums;
+namespace Tests\Unit\Enums;
 
 use App\Enums\FinancingOrderHistory;
 use Tests\TestCase;
@@ -19,14 +19,5 @@ class FinancingOrderHistoryUnitTest extends TestCase
             FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
             FinancingOrderHistory::OrderCancelled,
         ]);
-    }
-
-    public function test_is_trader_order_cancellable()
-    {
-        $cancellable = collect(FinancingOrderHistory::asSelectArray())
-            ->except(FinancingOrderHistory::$notCancellableActions)
-            ->keys();
-        $this->assertFalse(FinancingOrderHistory::isTraderOrderCancellable(FinancingOrderHistory::$notCancellableActions));
-        $this->assertTrue(FinancingOrderHistory::isTraderOrderCancellable($cancellable));
     }
 }

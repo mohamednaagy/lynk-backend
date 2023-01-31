@@ -51,13 +51,7 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeIsCancellable(TraderOrder $traderOrder): Primitive
     {
-        if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
-            return $this->primitive(false);
-        }
-
-        $traderHistoryActions = $traderOrder->traderHistories->pluck('action');
-
-        return $this->primitive(FinancingOrderHistory::isTraderOrderCancellable($traderHistoryActions));
+        return $this->primitive($traderOrder->isCancellable());
     }
 
     public function includeHistory(TraderOrder $traderOrder): Collection
