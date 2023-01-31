@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Enums\Area;
 use App\Enums\ErrorCode;
@@ -19,7 +19,7 @@ use Illuminate\Http\Response;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
-class AdminProceedOrderTest extends TestCase
+class MakeOrderProceedTest extends TestCase
 {
     use RefreshDatabase, AssertsAccessByRoleAndArea;
 
@@ -30,6 +30,8 @@ class AdminProceedOrderTest extends TestCase
     private static User $admin;
 
     private static Builder|Model $financingOrder;
+
+    private static Builder|Model $traderOrder;
 
     private static string $orderProceedUrl;
 
@@ -52,8 +54,7 @@ class AdminProceedOrderTest extends TestCase
             ]
         );
 
-        // create trader order
-        self::$financingOrder->traderOrders()->create([
+        self::$traderOrder = self::$financingOrder->traderOrders()->create([
             'provider' => 'dmcc',
             'reference' => '123456789',
             'status' => TraderOrderStatus::InProgress,
@@ -61,7 +62,8 @@ class AdminProceedOrderTest extends TestCase
 
         self::$orderProceedUrl = 'api/v1/admin/lenders/'
             .self::$company->id.
-            '/orders/'.self::$financingOrder->id.'/proceed-order';
+            '/orders/'.self::$financingOrder->id
+            .'/trader-orders/'.self::$traderOrder->id.'/proceed';
     }
 
     /**
@@ -130,17 +132,51 @@ class AdminProceedOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_admin_proceed_order_dosent_proceed_when_order_status_doesnt_follow_sequence(): void
+    public function test_admin_proceed_order_contract_signed_case_dosent_proceed_when_order_status_doesnt_follow_sequence(): void
     {
-        $response = $this->actingAs(self::$admin)
-            ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSigned,
-            ]);
+        $statuses = FinancingOrderStatus::getValues();
+        foreach ($statuses as $status) {
+            self::$financingOrder->status = $status;
+            self::$financingOrder->save();
+            self::$financingOrder->refresh();
 
-        $response->assertStatus(400)->assertExactJson([
-            'message' => __('error.order_status_doesnt_follow_sequence'),
-            'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
-        ]);
+            if (self::$financingOrder->status->cantMoveTo(FinancingOrderStatus::ContractSigned)) {
+                $response = $this->actingAs(self::$admin)
+                    ->postJson(self::$orderProceedUrl, [
+                        'case' => FinancingOrderProceedCase::ContractSigned,
+                    ]);
+
+                $response->assertStatus(400)->assertExactJson([
+                    'message' => __('error.order_status_doesnt_follow_sequence'),
+                    'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * @return void
+     */
+    public function test_admin_proceed_order_client_wakala_accepted_case_dosent_proceed_when_order_status_doesnt_follow_sequence(): void
+    {
+        $statuses = FinancingOrderStatus::getValues();
+        foreach ($statuses as $status) {
+            self::$financingOrder->status = $status;
+            self::$financingOrder->save();
+            self::$financingOrder->refresh();
+
+            if (self::$financingOrder->status->cantMoveTo(FinancingOrderStatus::ClientWakalaCompleted)) {
+                $response = $this->actingAs(self::$admin)
+                    ->postJson(self::$orderProceedUrl, [
+                        'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                    ]);
+
+                $response->assertStatus(400)->assertExactJson([
+                    'message' => __('error.order_status_doesnt_follow_sequence'),
+                    'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
+                ]);
+            }
+        }
     }
 
     /**

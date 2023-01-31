@@ -9,6 +9,7 @@ use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 
 class MakeOrderProceedAction implements MakeOrderProceed
 {
@@ -16,21 +17,21 @@ class MakeOrderProceedAction implements MakeOrderProceed
      * @param  mixed  $order
      * @return mixed
      */
-    public function handle(int $order, string $case)
+    public function handle(TraderOrder $traderOrder, string $case)
     {
-        $order = FinancingOrder::query()
-            ->lockForUpdate()
-            ->findOrFail($order);
-
         return match ($case) {
-            FinancingOrderProceedCase::ClientWakalaAccepted => $this->handleClientWakalaAccepted($order),
-            FinancingOrderProceedCase::ContractSigned => $this->handleContractSigned($order),
+            FinancingOrderProceedCase::ClientWakalaAccepted => $this->handleClientWakalaAccepted($traderOrder),
+            FinancingOrderProceedCase::ContractSigned => $this->handleContractSigned($traderOrder),
             default => []
         };
     }
 
-    protected function handleClientWakalaAccepted(FinancingOrder $order)
+    protected function handleClientWakalaAccepted(TraderOrder $traderOrder)
     {
+        $order = FinancingOrder::query()
+            ->lockForUpdate()
+            ->findOrFail($traderOrder->financing_order_id);
+
         if (
             $order->is_verification_required
             || $order->status->cantMoveTo(FinancingOrderStatus::ClientWakalaCompleted)
@@ -49,8 +50,12 @@ class MakeOrderProceedAction implements MakeOrderProceed
         ];
     }
 
-    protected function handleContractSigned(FinancingOrder $order)
+    protected function handleContractSigned(TraderOrder $traderOrder)
     {
+        $order = FinancingOrder::query()
+            ->lockForUpdate()
+            ->findOrFail($traderOrder->financing_order_id);
+
         if ($order->status->cantMoveTo(FinancingOrderStatus::ContractSigned)) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }

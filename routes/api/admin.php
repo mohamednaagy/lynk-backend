@@ -11,9 +11,9 @@ use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
-use App\Http\Controllers\Api\V1\Admin\FinancingOrders\AdminProceedOrder;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\LenderOrderController;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\LenderTransactionController;
+use App\Http\Controllers\Api\V1\Admin\FinancingOrders\MakeOrderProceed;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\TraderOrderController;
 use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
 use App\Http\Controllers\Api\V1\Admin\Lenders\ChargeLenderBalanceManually;
@@ -83,7 +83,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);
-            Route::post('{lender}/orders/{order}/proceed-order', AdminProceedOrder::class);
+            Route::post('{lender}/orders/{order}/trader-orders/{traderOrder}/proceed', MakeOrderProceed::class);
         });
 
         Route::prefix('traders')->group(function () {

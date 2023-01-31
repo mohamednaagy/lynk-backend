@@ -39,10 +39,16 @@ class MakeOrderProceed extends Controller
         ProceedOrderInterface $makeOrderProceed,
         int $order
     ): JsonResponse {
-        $this->authorize('view', FinancingOrder::findOrFail($order));
-
         return DB::transaction(function () use ($request, $order, $makeOrderProceed) {
-            return $this->successResponse($makeOrderProceed->handle($order, $request->validated('case')));
+            $order = FinancingOrder::findOrFail($order);
+
+            $this->authorize('view', $order);
+
+            $traderOrder = $order->activeTraderOrder()->first();
+
+            $makeOrderProceedResponse = $makeOrderProceed->handle($traderOrder, $request->validated('case'));
+
+            return $this->successResponse($makeOrderProceedResponse);
         });
     }
 }
