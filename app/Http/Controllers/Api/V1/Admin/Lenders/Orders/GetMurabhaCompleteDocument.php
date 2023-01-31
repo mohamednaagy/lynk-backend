@@ -30,20 +30,11 @@ class GetMurabhaCompleteDocument extends Controller
      */
     public function __invoke(Company $lender, FinancingOrder $order): JsonResponse
     {
-        $url = $this->fileUrl(
+        $url = get_file_url(
             $order->getMedia(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
                 ->first()
         );
 
-        return $this->successResponse([$url]);
-    }
-
-    public function fileUrl($media): ?string
-    {
-        if ($media) {
-            return route('api.v1.media.download', ['media' => $media->uuid]);
-        }
-
-        return null;
+        return $this->successResponse(['url' => $url]);
     }
 }

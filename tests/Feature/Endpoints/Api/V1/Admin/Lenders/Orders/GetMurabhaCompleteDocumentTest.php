@@ -36,7 +36,7 @@ class GetMurabhaCompleteDocumentTest extends TestCase
 
     private static TraderOrder $traderOrder;
 
-    private static string $orderProceedUrl;
+    private static string $getMurabhaCompleteDocumentUrl;
 
     /**
      * @return void
@@ -58,7 +58,7 @@ class GetMurabhaCompleteDocumentTest extends TestCase
                 'status' => FinancingOrderStatus::CommodityPurchased,
             ]
         );
-        self::$orderProceedUrl = self::BaseUrl.
+        self::$getMurabhaCompleteDocumentUrl = self::BaseUrl.
             self::$lender->getOriginal('id').
             '/orders/'.
             self::$financingOrder->getOriginal('id').
@@ -77,7 +77,7 @@ class GetMurabhaCompleteDocumentTest extends TestCase
      */
     public function test_that_unauth_user_cant_get_murabha_complete_document(): void
     {
-        $this->getJson(self::$orderProceedUrl)
+        $this->getJson(self::$getMurabhaCompleteDocumentUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
                 'message' => 'Unauthenticated.',
@@ -96,7 +96,7 @@ class GetMurabhaCompleteDocumentTest extends TestCase
             ],
             function ($user, $role) {
                 return $this->actingAs($user)
-                    ->getJson(self::$orderProceedUrl);
+                    ->getJson(self::$getMurabhaCompleteDocumentUrl);
             }
         );
     }
@@ -116,7 +116,11 @@ class GetMurabhaCompleteDocumentTest extends TestCase
         )->toMediaCollection(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo);
 
         $this->actingAs(self::$superAdminUser)
-            ->getJson(self::$orderProceedUrl)
-            ->assertJsonStructure(['data']);
+            ->getJson(self::$getMurabhaCompleteDocumentUrl)
+            ->assertJsonStructure([
+                'data' => [
+                    'url',
+                ],
+            ]);
     }
 }
