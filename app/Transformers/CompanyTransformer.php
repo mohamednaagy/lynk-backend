@@ -21,13 +21,12 @@ class CompanyTransformer extends TransformerAbstract
         'webhook_secret_key',
         'public_status_comment',
         'driver',
+        'total_cost',
     ];
 
     public function transform(Company $company): array
     {
-        return [
-
-        ];
+        return [];
     }
 
     public function includeId(Company $company): Primitive
@@ -91,5 +90,13 @@ class CompanyTransformer extends TransformerAbstract
     public function includeDriver(Company $company): Primitive
     {
         return $this->primitive($company->driver);
+    }
+
+    public function includeTotalCost(Company $company): Primitive
+    {
+        $orderCost = $company->order_cost;
+        $total = $orderCost->multiply($company->orders_count);
+
+        return $this->primitive($total);
     }
 }

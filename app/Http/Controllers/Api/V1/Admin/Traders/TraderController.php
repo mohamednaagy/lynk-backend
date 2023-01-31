@@ -94,12 +94,14 @@ class TraderController extends Controller
 
     public function show(Company $trader)
     {
-        return fractal($trader, new CompanyTransformer())
+        return fractal($trader->loadCount('orders'), new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',
                 'unique_name',
                 'driver',
+                'orders_count',
+                'total_cost',
             ])
             ->respond();
     }
