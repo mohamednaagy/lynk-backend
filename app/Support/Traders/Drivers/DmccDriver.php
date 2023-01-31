@@ -374,14 +374,22 @@ class DmccDriver implements TraderInterface
         $traderOrder->update([
             'product' => $details->hsCodeDescription,
             'quantity' => $details->quantity,
-            'amount' => $details->totalValue.' '.$details->currency,
+            'amount' => $details->totalValue,
+            'currency' => $details->currency,
             'warehouse' => $details->warehouseOrVaultId,
             'owner' => $details->owner,
-            'previousOwner' => $details->previousOwner,
-            'newOwner' => $details->newOwner,
-            'dateTimeOfPurchasingCommodity' => $details->dateTimeOfPurchasingCommodity,
-            'warehouseOrVaultEmirates' => $details->warehouseOrVaultEmirates,
-            'warehouseOrVaultCountry' => $details->warehouseOrVaultCountry,
+            'previous_owner' => $details->previousOwner,
+            'new_owner' => $details->newOwner,
+            'date_time_of_purchasing_commodity' => $details->dateTimeOfPurchasingCommodity,
+            'warehouse_or_vault_emirates' => $details->warehouseOrVaultEmirates,
+            'warehouse_or_vault_country' => $details->warehouseOrVaultCountry,
+            'inventory_record_id' => $details->inventoryRecordId,
+            'warrant_percentage' => $details->warrantPercentage,
+            'warehouse_or_vault_operator_id' => $details->warehouseOrVaultOperatorId,
+            'warrant_no' => $details->warrantNo,
+            'hs_code' => $details->hsCode,
+            'uom' => $details->uom,
+            'exchange_rate' => $response->object()->exchangeRate,
         ]);
 
         return $response->object();
