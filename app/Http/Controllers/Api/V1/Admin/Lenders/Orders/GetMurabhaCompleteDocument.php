@@ -9,6 +9,7 @@ use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 
 class GetMurabhaCompleteDocument extends Controller
@@ -26,15 +27,17 @@ class GetMurabhaCompleteDocument extends Controller
      *
      * @param  Company  $lender
      * @param  FinancingOrder  $order
+     * @param  TraderOrder  $traderOrder
      * @return JsonResponse
      */
-    public function __invoke(Company $lender, FinancingOrder $order): JsonResponse
-    {
-        $url = get_file_url(
-            $order->getMedia(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
-                ->first()
-        );
+    public function __invoke(
+        Company $lender,
+        FinancingOrder $order,
+        TraderOrder $traderOrder
+    ): JsonResponse {
+        $media = $traderOrder->getMedia(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
+            ->first();
 
-        return $this->successResponse(['url' => $url]);
+        return $this->successResponse(['url' => $media->fileDownloadableUrl ?? null]);
     }
 }

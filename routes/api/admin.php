@@ -84,7 +84,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);
 
-            Route::prefix('/{lender}/orders/{order}')->group(function () {
+            Route::prefix('/{lender}/orders/{order}/trader-orders/{traderOrder}')->group(function () {
                 Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
             });
         });

@@ -58,11 +58,6 @@ class GetMurabhaCompleteDocumentTest extends TestCase
                 'status' => FinancingOrderStatus::CommodityPurchased,
             ]
         );
-        self::$getMurabhaCompleteDocumentUrl = self::BaseUrl.
-            self::$lender->getOriginal('id').
-            '/orders/'.
-            self::$financingOrder->getOriginal('id').
-            '/murabha-complete';
 
         // create trader order
         self::$traderOrder = self::$financingOrder->traderOrders()->create([
@@ -70,6 +65,14 @@ class GetMurabhaCompleteDocumentTest extends TestCase
             'reference' => '123456789',
             'status' => TraderOrderStatus::InProgress,
         ]);
+
+        self::$getMurabhaCompleteDocumentUrl = self::BaseUrl.
+            self::$lender->getOriginal('id').
+            '/orders/'.
+            self::$financingOrder->getOriginal('id').
+            '/trader-orders/'.
+            self::$traderOrder->getOriginal('id').
+            '/murabha-complete';
     }
 
     /**
@@ -110,7 +113,7 @@ class GetMurabhaCompleteDocumentTest extends TestCase
     public function test_get_murabha_complete_document_succeed(): void
     {
         $fileName = self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf';
-        self::$financingOrder->addMedia(
+        self::$traderOrder->addMedia(
             UploadedFile::fake()
                 ->image($fileName)
         )->toMediaCollection(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo);
