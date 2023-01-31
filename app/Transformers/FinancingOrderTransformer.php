@@ -42,6 +42,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'created_at',
         'history',
         'active_trader',
+        'trader_orders',
         'trader_order_history',
     ];
 
@@ -156,6 +157,11 @@ class FinancingOrderTransformer extends TransformerAbstract
             FinancingOrderHistory::IssueMurabahaOffer,
             FinancingOrderHistory::MurabahaSaleCompleted,
         ]), new TraderHistoryTransformer($financingOrder, $financingOrder->traderOrders->last()->traderHistories ?? collect()));
+    }
+
+    public function includeTraderOrders(FinancingOrder $financingOrder): Collection
+    {
+        return $this->collection($financingOrder->traderOrders, new TraderOrderTransformer());
     }
 
     public function includeActiveTrader(FinancingOrder $financingOrder): Primitive|Item
