@@ -25,8 +25,6 @@ class UpdateTraderOrderAction implements UpdateTraderOrder
                     'date_time_of_purchasing_commodity',
                     'warehouse_or_vault_emirates',
                     'warehouse_or_vault_country',
-                    'inventory_record_id',
-                    'warrant_percentage',
                     'warehouse_or_vault_operator_id',
                     'warrant_no',
                     'hs_code',

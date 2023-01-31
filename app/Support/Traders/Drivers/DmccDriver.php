@@ -390,7 +390,6 @@ class DmccDriver implements TraderInterface
             'hs_code' => $details->hsCode,
             'uom' => $details->uom,
             'exchange_rate' => $response->object()->exchangeRate,
-            'auto_generate_financing_institution_certificate' => false,
         ]);
 
         return $response->object();

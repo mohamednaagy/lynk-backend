@@ -24,8 +24,17 @@ class UpdatePurchasingCommodityRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'ptp_document' => ['required', 'file', 'mimes:pdf'],
+            'original_holding_certificate' => ['required', 'file', 'mimes:pdf'],
+            'financing_institution_certificate' => [
+                'exclude_if:auto_generate_financing_institution_certificate,true',
+                'required',
+                'file',
+                'mimes:pdf',
+            ],
             'product' => ['required', 'string'],
-            'amount' => ['required', 'string'],
+            'quantity' => ['required', 'numeric'],
+            'amount' => ['required', 'numeric'],
             'currency' => ['required', 'string'],
             'warehouse' => ['required', 'string'],
             'owner' => ['required', 'string'],
@@ -34,8 +43,6 @@ class UpdatePurchasingCommodityRequest extends FormRequest
             'date_time_of_purchasing_commodity' => ['required', 'string', 'date_format:Y-m-d H:i'],
             'warehouse_or_vault_emirates' => ['required', 'string'],
             'warehouse_or_vault_country' => ['required', 'string'],
-            'inventory_record_id' => ['required', 'integer'],
-            'warrant_percentage' => ['required', 'string'],
             'warehouse_or_vault_operator_id' => ['required', 'string'],
             'warrant_no' => ['required', 'string'],
             'hs_code' => ['required', 'string'],
