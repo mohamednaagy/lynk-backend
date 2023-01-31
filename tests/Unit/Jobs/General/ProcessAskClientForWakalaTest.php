@@ -89,7 +89,7 @@ class ProcessAskClientForWakalaTest extends TestCase
         $processOrder->handle();
         self::$commoditySoldToCustomerOrder = self::$commoditySoldToCustomerOrder->fresh();
 
-        $this->assertTrue(self::$commoditySoldToCustomerOrder->status->is(FinancingOrderStatus::CommoditySoldToCustomer));
+        $this->assertTrue(self::$commoditySoldToCustomerOrder->status->is(FinancingOrderStatus::WaitingClientWakala));
     }
 
     public function test_process_ask_client_for_wakala_sms_sent_successfully()

@@ -47,14 +47,12 @@ class ProcessAskClientForWakala implements ShouldQueue
             return;
         }
 
-        if (! $financingOrder->is_verification_required) {
-            return;
+        if ($financingOrder->is_verification_required) {
+            app()->make(AskClientWakala::class)->handle(
+                $financingOrder,
+                Str::replace('{order_id}', $financingOrder->id, Config::get('frontend.client_wakala_url'))
+            );
         }
-
-        app()->make(AskClientWakala::class)->handle(
-            $financingOrder,
-            Str::replace('{order_id}', $financingOrder->id, Config::get('frontend.client_wakala_url'))
-        );
 
         $financingOrder->update([
             'status' => FinancingOrderStatus::WaitingClientWakala,
