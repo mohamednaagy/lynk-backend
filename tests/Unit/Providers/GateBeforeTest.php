@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Providers;
 
+use App\Enums\Area;
 use App\Enums\Role;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -9,12 +10,11 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithCompany;
-use Tests\Traits\InteractsWithUser;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class GateBeforeTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     private static User $userLenderAdmin;
 
@@ -22,11 +22,9 @@ class GateBeforeTest extends TestCase
 
     private static User $anotherUserLenderOrderCreator;
 
-    private static User $userLenderApiUser;
+    private static User $userLenderBilling;
 
     private static User $superAdmin;
-
-    private static User $userLenderSupervisor;
 
     private static User $traderAdmin;
 
@@ -41,83 +39,80 @@ class GateBeforeTest extends TestCase
         [self::$company] = $this->createLenderCompany();
         self::$superAdmin = $this->createSuperAdminUser();
         self::$traderAdmin = $this->createTraderUser(self::$company->id);
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
-        self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor);
         self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
-        self::$userLenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser);
         self::$anotherUserLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
+        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
         self::$order = $this->createOrder(self::$company->id, self::$userLenderOrderCreator->id);
         $this->withoutMiddleware([\Spatie\Permission\Middlewares\RoleMiddleware::class]);
     }
 
     public function test_gate_before_order_in_lender_area_only_lender_admin_can_access()
     {
-        $this->actingAs(self::$userLenderApiUser)
-            ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/orders')
-            ->assertStatus(Response::HTTP_OK);
+        $rolesHasAccess = [
+            Role::LenderSupervisor,
+            Role::LenderAdmin,
+            Role::LenderApiUser,
+        ];
 
-        $this->actingAs(self::$userLenderAdmin)
-            ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/orders/'.self::$order->id)
-            ->assertStatus(Response::HTTP_OK);
+        $rolesDoesNotHasAccess = [
+            Role::LenderBilling,
+            Role::LenderOrderCreator,
+        ];
 
-        $this->actingAs(self::$userLenderSupervisor)
-            ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/orders/'.self::$order->id)
-            ->assertStatus(Response::HTTP_OK);
-
+        // user lender with order creator role
+        // only can access when he was the creator or the order
         $this->actingAs(self::$userLenderOrderCreator)
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/orders/'.self::$order->id)
             ->assertStatus(Response::HTTP_OK);
 
-        $this->actingAs(self::$anotherUserLenderOrderCreator)
-            ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/orders/'.self::$order->id)
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+        $this->assertStatusCodeToSpecificRoles(Response::HTTP_OK, $rolesHasAccess, function ($user, $role) {
+            return $this->actingAs($user)
+                ->withHeader('X-Company', self::$company->id)
+                ->getJson('api/v1/lender/orders/'.self::$order->id);
+        });
 
-        $this->actingAs(self::$superAdmin)
-            ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/orders/'.self::$order->id)
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+        $this->assertStatusCodeToSpecificRoles(Response::HTTP_FORBIDDEN, $rolesDoesNotHasAccess, function ($user, $role) {
+            return $this->actingAs($user)
+                ->withHeader('X-Company', self::$company->id)
+                ->getJson('api/v1/lender/orders/'.self::$order->id);
+        });
 
-        $this->actingAs(self::$traderAdmin)
-            ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/orders/'.self::$order->id)
-            ->assertStatus(Response::HTTP_FORBIDDEN);
+        $this->assertStatusCodeForAllRolesExceptForArea(Response::HTTP_FORBIDDEN, [Area::Lender], function ($user, $role) {
+            return $this->actingAs($user)
+                ->withHeader('X-Company', self::$company->id)
+                ->getJson('api/v1/lender/orders/'.self::$order->id);
+        });
     }
 
     public function test_gate_before_users_in_trader_area_only_trader_admin_can_access()
     {
-        $this->actingAs(self::$superAdmin)
-            ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/trader/users')
-            ->assertStatus(Response::HTTP_FORBIDDEN);
-
-        $this->actingAs(self::$userLenderAdmin)
-            ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/trader/users')
-            ->assertStatus(Response::HTTP_FORBIDDEN);
-
         $this->actingAs(self::$traderAdmin)
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/trader/users')
             ->assertStatus(Response::HTTP_OK);
+
+        $this->assertStatusCodeForAllRolesExceptForArea(Response::HTTP_FORBIDDEN, [Area::Trader], function ($user, $role) {
+            return $this->actingAs($user)
+                ->withHeader('X-Company', self::$company->id)
+                ->getJson('api/v1/trader/users');
+        });
     }
 
     public function test_gate_before_lenders_in_admin_area_only_super_admin_can_access()
     {
-        $this->actingAs(self::$userLenderAdmin)
-            ->getJson('api/v1/admin/lenders')
-            ->assertStatus(Response::HTTP_FORBIDDEN);
-
-        $this->actingAs(self::$traderAdmin)
-            ->getJson('api/v1/admin/lenders')
-            ->assertStatus(Response::HTTP_FORBIDDEN);
-
         $this->actingAs(self::$superAdmin)
             ->getJson('api/v1/admin/lenders')
             ->assertStatus(Response::HTTP_OK);
+
+        $this->assertStatusCodeForAllRolesExceptForArea(Response::HTTP_FORBIDDEN, [Area::SuperAdmin], function ($user, $role) {
+            return $this->actingAs($user)
+                ->getJson('api/v1/admin/lenders');
+        });
+
+        $this->assertStatusCodeToSpecificRoles(Response::HTTP_FORBIDDEN, [Role::Manager], function ($user, $role) {
+            return $this->actingAs($user)
+                ->getJson('api/v1/admin/lenders');
+        });
     }
 }
