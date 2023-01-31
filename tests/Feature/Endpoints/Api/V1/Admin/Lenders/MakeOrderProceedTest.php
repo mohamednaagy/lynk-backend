@@ -2,12 +2,14 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
+use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\Role;
+use App\Enums\Subject;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -29,6 +31,10 @@ class MakeOrderProceedTest extends TestCase
 
     private static User $admin;
 
+    private static User $adminManagerWithoutPermissions;
+
+    private static User $adminManagerWithPermissions;
+
     private static Builder|Model $financingOrder;
 
     private static Builder|Model $traderOrder;
@@ -44,7 +50,17 @@ class MakeOrderProceedTest extends TestCase
 
         [self::$company] = $this->createCompany('2000');
         self::$userLender = $this->createLenderUser(self::$company->id);
+
         self::$admin = $this->createSuperAdminUser(Role::Admin, ['email_verified_at' => now()]);
+
+        self::$adminManagerWithoutPermissions = $this->createSuperAdminUser(Role::Manager, ['email_verified_at' => now()]);
+
+        self::$adminManagerWithPermissions = $this->createSuperAdminUser(Role::Manager, ['email_verified_at' => now()]);
+        $this->assignPermissionToUser(
+            self::$adminManagerWithPermissions,
+            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit])
+        );
+
         self::$financingOrder = $this->createOrder(
             self::$company->id,
             self::$userLender->id,
@@ -91,12 +107,24 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
+    public function test_admin_proceed_order_manager_can_access_without_permissions(): void
+    {
+        $this->actingAs(self::$adminManagerWithoutPermissions)
+            ->postJson(self::$orderProceedUrl)
+            ->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @return void
+     */
     public function test_admin_proceed_order_on_empty_case(): void
     {
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
                 'case' => '',
-            ])->assertStatus(422)->assertExactJson(
+            ])
+            ->assertStatus(422)
+            ->assertExactJson(
                 [
                     'message' => 'The case field is required.',
                     'errors' => [
@@ -113,11 +141,12 @@ class MakeOrderProceedTest extends TestCase
      */
     public function test_admin_proceed_order_on_invalid_case(): void
     {
-        $response = $this->actingAs(self::$admin)
+        $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
                 'case' => 'TEST_PROCEED_CASE',
             ])
-            ->assertStatus(422)->assertExactJson(
+            ->assertStatus(422)
+            ->assertExactJson(
                 [
                     'message' => 'The value you have entered is invalid.',
                     'errors' => [
@@ -198,6 +227,21 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
+    public function test_admin_proceed_order_manager_can_access_with_permissions(): void
+    {
+        self::$financingOrder->status = FinancingOrderStatus::CommodityPurchased;
+        self::$financingOrder->save();
+
+        $this->actingAs(self::$adminManagerWithPermissions)
+            ->postJson(self::$orderProceedUrl, [
+                'case' => FinancingOrderProceedCase::ContractSigned,
+            ])
+            ->assertStatus(200);
+    }
+
+    /**
+     * @return void
+     */
     public function test_admin_proceed_order_on_contract_signed_successfully(): void
     {
         self::$financingOrder->status = FinancingOrderStatus::CommodityPurchased;
@@ -207,7 +251,8 @@ class MakeOrderProceedTest extends TestCase
             ->postJson(self::$orderProceedUrl, [
                 'case' => FinancingOrderProceedCase::ContractSigned,
             ])
-            ->assertStatus(200)->assertJsonStructure([
+            ->assertStatus(200)
+            ->assertJsonStructure([
                 'data',
             ]);
 

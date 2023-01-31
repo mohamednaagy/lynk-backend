@@ -7,7 +7,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Admin\Companies\Lenders\Orders\AdminProceedOrderRequest;
+use App\Http\Requests\V1\Admin\Companies\Lenders\Orders\MakeOrderProceedRequest;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
@@ -30,14 +30,14 @@ class MakeOrderProceed extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function __invoke(
-        AdminProceedOrderRequest $request,
+        MakeOrderProceedRequest $request,
         MakeOrderProceedInterface $makeOrderProceed,
         Company $lender,
         int $order,
         int $traderOrder,
     ): JsonResponse {
         return DB::transaction(function () use ($request, $traderOrder, $makeOrderProceed) {
-            $traderOrder = TraderOrder::findOrFail($traderOrder);
+            $traderOrder = TraderOrder::lockForUpdate()->findOrFail($traderOrder);
 
             $makeOrderProceedResponse = $makeOrderProceed->handle($traderOrder, $request->validated('case'));
 

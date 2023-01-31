@@ -44,7 +44,7 @@ class MakeOrderProceed extends Controller
 
             $this->authorize('view', $order);
 
-            $traderOrder = $order->activeTraderOrder()->first();
+            $traderOrder = $order->activeTraderOrder()->lockForUpdate()->first();
 
             $makeOrderProceedResponse = $makeOrderProceed->handle($traderOrder, $request->validated('case'));
 

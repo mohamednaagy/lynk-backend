@@ -6,7 +6,7 @@ use App\Enums\FinancingOrderProceedCase;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AdminProceedOrderRequest extends FormRequest
+class MakeOrderProceedRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
