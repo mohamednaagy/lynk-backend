@@ -102,6 +102,7 @@ class OrderController extends Controller
                 'phone_country_code',
                 'phone_number',
                 'phone_number_formatted',
+                'is_verification_required',
                 'is_updatable',
                 'is_approved',
                 'status_reason',
@@ -115,12 +116,12 @@ class OrderController extends Controller
      * Handle the incoming request.
      *
      * @param  StoreOrderRequest  $request
+     * @param  CanCreateOrder  $canCreateOrder
      * @param  CreateFinancingOrder  $createFinancingOrder
      * @param  DeductOrderCreationFee  $deductOrderCreationFee
-     * @param  CanCreateOrder  $canCreateOrder
+     * @param  DeductVatPercentage  $deductVatPercentage
+     * @param  GenerateZatcaInvoice  $generateFatoura
      * @return JsonResponse
-     *
-     * @throws \Throwable
      */
     public function store(
         StoreOrderRequest $request,
@@ -158,7 +159,6 @@ class OrderController extends Controller
                             'creator_id' => $user->id,
                             'creator_type' => $user->getMorphClass(),
                             'approved_at' => $status === FinancingOrderStatus::Approved ? now() : null,
-                            'is_verification_required' => true,
                         ]
                     )
                 );
