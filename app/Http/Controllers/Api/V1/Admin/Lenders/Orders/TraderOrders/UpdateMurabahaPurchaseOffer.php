@@ -9,13 +9,14 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Admin\Lender\Orders\MurabahaPurchase\UpdateDocumentRequest;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UpdateMurabahaPurchaseOffer extends Controller
 {
@@ -30,49 +31,31 @@ class UpdateMurabahaPurchaseOffer extends Controller
     }
 
     public function __invoke(
-        Request $request,
+        UpdateDocumentRequest $request,
         Company $lender,
         FinancingOrder $order,
         TraderOrder $traderOrder
     ): JsonResponse {
-        $this->attachDocumentToOrder(
-            $traderOrder,
-            base64_encode(file_get_contents($request->file('document'))),
-            FinancingOrderMediaCollection::MurabahaPurchaseOrder,
-            'base64'
-        );
+        if ($request->has('document')) {
+            $this->attachDocumentToOrder(
+                $traderOrder,
+                base64_encode(file_get_contents($request->file('document'))),
+                FinancingOrderMediaCollection::MurabahaPurchaseOrder,
+                'base64'
+            );
+        }
 
         if ($order->status->canMoveTo(FinancingOrderStatus::MurabahaSaleCompleted)) {
             $trader = Trader::driver($traderOrder->provider);
 
-            $trader->updateOrderStatus($order, FinancingOrderStatus::MurabahaSaleCompleted);
+            DB::transaction(function () use ($trader, $order, $traderOrder) {
+                $trader->updateOrderStatus($order, FinancingOrderStatus::MurabahaSaleCompleted);
 
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::MurabahaSaleCompleted
-            );
-
-            $warrantDocument = $trader->getDocumentByTypeAndTransaction(
-                $traderOrder->reference,
-                'Warrant Amendment Except Warrant No'
-            );
-
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument
-            );
-
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                $warrantDocument,
-                FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-                'base64'
-            );
-
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument
-            );
+                $trader->createTraderOrderHistory(
+                    $traderOrder,
+                    FinancingOrderHistory::MurabahaSaleCompleted
+                );
+            });
         }
 
         return $this->successResponse();

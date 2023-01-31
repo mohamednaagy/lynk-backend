@@ -85,7 +85,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);
             Route::prefix('/{lender}/orders/{order}')->group(function () {
-                Route::prefix('/trader-order/{trader_order}')->group(function () {
+                Route::prefix('/trader-orders/{trader_order}')->group(function () {
                     Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
                     Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
                 });
