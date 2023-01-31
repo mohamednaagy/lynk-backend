@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders;
 
+use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
@@ -12,14 +13,14 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithCompany;
-use Tests\Traits\InteractsWithUser;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class GetMurabahaPurchaseOfferTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     private static Company $company;
 
@@ -68,7 +69,7 @@ class GetMurabahaPurchaseOfferTest extends TestCase
             'order_column' => '1',
         ]);
 
-        self::$apiUrl = 'api/v1/admin/lenders/'.self::$company->id.'/orders/'.self::$order->id.'/trader-order/'.self::$traderOrder->id.'/murabaha-purchase-offer';
+        self::$apiUrl = 'api/v1/admin/lenders/'.self::$company->id.'/orders/'.self::$order->id.'/trader-orders/'.self::$traderOrder->id.'/murabaha-purchase-offer';
     }
 
     /**
@@ -95,5 +96,23 @@ class GetMurabahaPurchaseOfferTest extends TestCase
                     'murabaha_purchase_offer',
                 ],
             ]);
+    }
+
+    public function test_auth_user_can_update_process_murabaha_purchase_offer(): void
+    {
+        $this->actingAs(self::$superAdminUser)
+            ->postJson(self::$apiUrl)
+            ->assertOk()
+            ->assertJsonStructure([
+                'data' => [],
+            ]);
+    }
+
+    public function test_other_users_areas_can_not_update_process_murabaha_purchase_offer()
+    {
+        $this->assertStatusCodeForAllRolesExceptForArea(Response::HTTP_FORBIDDEN, [Area::SuperAdmin], function ($user, $role) {
+            return $this->actingAs($user)
+                ->getJson(self::$apiUrl);
+        });
     }
 }
