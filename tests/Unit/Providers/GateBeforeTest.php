@@ -54,7 +54,7 @@ class GateBeforeTest extends TestCase
         ];
 
         // user lender with order creator role
-        // only can access when he was the creator or the order
+        // only can access when he the creator of the order
         $this->actingAs(self::$userLenderOrderCreator)
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/orders/'.self::$order->id)
