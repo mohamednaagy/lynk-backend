@@ -95,9 +95,12 @@ class TraderController extends Controller
     public function show(Company $trader)
     {
         $trader->loadSum([
-            'orders' => function ($query) {
-                $query->whereHas('traderOrders', function ($query) {
-                    $query->inProgressOrCompletedTraderOrder();
+            'orders' => function ($query) use ($trader) {
+                $query->whereHas('traderOrders', function ($query) use ($trader) {
+                    $query->inProgressOrCompletedTraderOrder()
+                        ->whereHas('order', function ($query) use ($trader) {
+                            $query->where('company_id', $trader->id);
+                        });
                 });
             },
         ], 'amount')
