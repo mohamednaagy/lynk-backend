@@ -21,7 +21,7 @@ class CompanyTransformer extends TransformerAbstract
         'webhook_secret_key',
         'public_status_comment',
         'driver',
-        'total_cost',
+        'orders_sum_amount',
     ];
 
     public function transform(Company $company): array
@@ -92,11 +92,8 @@ class CompanyTransformer extends TransformerAbstract
         return $this->primitive($company->driver);
     }
 
-    public function includeTotalCost(Company $company): Primitive
+    public function includeOrdersSumAmount(Company $company): Primitive
     {
-        $orderCost = $company->order_cost;
-        $total = $orderCost->multiply($company->orders_count);
-
-        return $this->primitive($total);
+        return $this->primitive($company->orders_sum_amount);
     }
 }

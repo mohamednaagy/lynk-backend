@@ -94,14 +94,32 @@ class TraderController extends Controller
 
     public function show(Company $trader)
     {
-        return fractal($trader->loadCount('orders'), new CompanyTransformer())
+        $trader->loadSum([
+            'orders' => function ($query) {
+                $query->whereHas('traderOrders', function ($query) {
+                    $query->inProgressOrCompletedTraderOrder();
+                });
+            },
+        ], 'amount')
+            ->loadCount([
+                'orders' => function ($query) use ($trader) {
+                    return $query->whereHas(
+                        'traderOrders.order',
+                        function ($query) use ($trader) {
+                            $query->where('company_id', $trader->id);
+                        }
+                    );
+                },
+            ]);
+
+        return fractal($trader, new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',
                 'unique_name',
                 'driver',
                 'orders_count',
-                'total_cost',
+                'orders_sum_amount',
             ])
             ->respond();
     }
