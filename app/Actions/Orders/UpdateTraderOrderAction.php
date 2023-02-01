@@ -24,7 +24,6 @@ class UpdateTraderOrderAction implements UpdateTraderOrder
                     'date_time_of_purchasing_commodity',
                     'warehouse_or_vault_emirates',
                     'warehouse_or_vault_country',
-                    'warehouse_or_vault_operator_id',
                     'uom',
                     'exchange_rate',
                     'auto_generate_financing_institution_certificate',

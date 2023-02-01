@@ -294,11 +294,10 @@ class FakeDriver implements TraderInterface
             'warehouse' => 'Warehouse',
             'owner' => 'Owner 1',
             'previous_owner' => 'Owner 0',
-            'date_time_of_purchasing_commodity' => now()->toDateTimeString(),
+            'date_time_of_purchasing_commodity' => now()->format('Y-m-d H:i:s'),
             'warehouse_or_vault_emirates' => 'Emirates',
             'warehouse_or_vault_country' => 'Saudi Arabia',
             'inventory_record_id' => '1000',
-            'warehouse_or_vault_operator_id' => '80',
             'uom' => 'Kilo',
             'exchange_rate' => '3.75',
         ];

@@ -90,7 +90,6 @@ class TraderOrderTransformer extends TransformerAbstract
             'previous_owner' => $traderOrder->previous_owner,
             'warehouse_or_vault_country' => $traderOrder->warehouse_or_vault_country,
             'warehouse_or_vault_emirates' => $traderOrder->warehouse_or_vault_emirates,
-            'warehouse_or_vault_operator_id' => $traderOrder->warehouse_or_vault_operator_id,
             'date_time_of_purchasing_commodity' => $traderOrder->date_time_of_purchasing_commodity,
             'original_holding_certificate' => $this->fileUrl($traderOrder->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)),
             'auto_generate_financing_institution_certificate' => $traderOrder->auto_generate_financing_institution_certificate,
