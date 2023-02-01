@@ -31,9 +31,10 @@ trait RequestHasMobileVerification
         $validator->after(
             function ($validator) {
                 if (
-                    $this->validated('national_id')
+                    $this->validated($this->nationalId)
                     && $this->validated($this->phoneNumber)
                     && $this->validated($this->phoneCountryCode)
+                    && $this->input('is_verification_required')
                 ) {
                     $this->checkMobileVerification($validator);
                 }

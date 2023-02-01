@@ -11,6 +11,7 @@ use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Transformers\FinancingOrderTransformer;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
@@ -34,6 +35,8 @@ class LenderOrderControllerShowTest extends TestCase
 
     /**
      * @return void
+     *
+     * @throws BindingResolutionException
      */
     public function setUp(): void
     {
@@ -69,6 +72,12 @@ class LenderOrderControllerShowTest extends TestCase
     public function test_admin_financing_order_controller_show_order_successed()
     {
         $order = FinancingOrder::where('company_id', self::$lender->id)->first();
+        $order->load([
+            'creator',
+            'traderOrders' => function ($query) {
+                $query->latest('id');
+            },
+        ]);
         $this->actingAs(self::$admin)
             ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/orders/'.$order->id)
             ->assertStatus(Response::HTTP_OK)
@@ -89,7 +98,12 @@ class LenderOrderControllerShowTest extends TestCase
                         'is_updatable',
                         'creator',
                         'approver',
-                        'history',
+                        'trader_orders.id',
+                        'trader_orders.reference',
+                        'trader_orders.provider',
+                        'trader_orders.is_cancellable',
+                        'trader_orders.history',
+                        'trader_orders.status',
                         'creator',
                         'created_at',
                     ])

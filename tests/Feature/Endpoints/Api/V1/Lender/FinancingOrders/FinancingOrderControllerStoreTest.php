@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response;
@@ -33,6 +34,8 @@ class FinancingOrderControllerStoreTest extends TestCase
 
     /**
      * @return void
+     *
+     * @throws BindingResolutionException
      */
     public function setUp(): void
     {
@@ -49,6 +52,7 @@ class FinancingOrderControllerStoreTest extends TestCase
             'selling_price' => '220',
             'phone_country_code' => 'SA',
             'phone_number' => '500112233',
+            'is_verification_required' => true,
         ];
     }
 
@@ -156,6 +160,24 @@ class FinancingOrderControllerStoreTest extends TestCase
                 'errors' => [
                     'phone_number' => [
                         'The phone number field is required.',
+                    ],
+                ],
+            ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_auth_user_without_is_verification_required_cant_create_order(): void
+    {
+        $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
+            ->postJson('api/v1/lender/orders', Arr::except(self::$orderDetails, ['is_verification_required']))
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertExactJson([
+                'message' => 'The is verification required field is required.',
+                'errors' => [
+                    'is_verification_required' => [
+                        'The is verification required field is required.',
                     ],
                 ],
             ]);

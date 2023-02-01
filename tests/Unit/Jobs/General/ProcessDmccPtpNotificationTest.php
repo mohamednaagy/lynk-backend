@@ -69,6 +69,7 @@ class ProcessDmccPtpNotificationTest extends TestCase
             return Soap::response([
                 'successCode' => '0000',
                 'errorCode' => '',
+                'exchangeRate' => 'exchangeRate',
                 'inventoryDetails' => [
                     [
                         'hsCodeDescription' => 'hsCodeDescription',
@@ -79,6 +80,12 @@ class ProcessDmccPtpNotificationTest extends TestCase
                         'owner' => 'owner',
                         'previousOwner' => 'previousOwner',
                         'newOwner' => 'newOwner',
+                        'inventoryRecordId' => '12',
+                        'warrantPercentage' => 'warrantPercentage',
+                        'warehouseOrVaultOperatorId' => 'warehouseOrVaultOperatorId',
+                        'warrantNo' => 'warrantNo',
+                        'uom' => 'uom',
+                        'hsCode' => 'hsCode',
                         'dateTimeOfPurchasingCommodity' => 'dateTimeOfPurchasingCommodity',
                         'warehouseOrVaultEmirates' => 'warehouseOrVaultEmirates',
                         'warehouseOrVaultCountry' => 'warehouseOrVaultCountry',

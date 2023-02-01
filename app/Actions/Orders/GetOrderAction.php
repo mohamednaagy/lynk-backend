@@ -15,9 +15,11 @@ class GetOrderAction implements GetOrder
 {
     protected ?Company $company = null;
 
+    private ?array $relations = [];
+
     public function handle(int $order): Model|Collection|Builder|array|null
     {
-        return $this->baseQuery()->toScopes($this->scopes())->findOrFail($order);
+        return $this->baseQuery()->with($this->relations)->toScopes($this->scopes())->findOrFail($order);
     }
 
     private function scopes(): array
@@ -28,6 +30,13 @@ class GetOrderAction implements GetOrder
     public function setCompany(Company $company): static
     {
         $this->company = $company;
+
+        return $this;
+    }
+
+    public function setRelations(array $relations): static
+    {
+        $this->relations = $relations;
 
         return $this;
     }
