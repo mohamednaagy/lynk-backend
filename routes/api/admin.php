@@ -22,6 +22,10 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderSetting;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderStatuses;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderUserController;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetPurchasingCommodity;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\GetMurabahaPurchaseOffer;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\UpdateMurabahaPurchaseOffer;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodity;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
@@ -83,7 +87,15 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);
-            Route::post('{lender}/orders/{order}/trader-orders/{traderOrder}/proceed', MakeOrderProceed::class);
+            Route::prefix('/{lender}/orders/{order}')->group(function () {
+                Route::prefix('/trader-orders/{trader_order}')->group(function () {
+                    Route::post('/proceed', MakeOrderProceed::class);
+                    Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
+                    Route::get('/purchasing-commodity', GetPurchasingCommodity::class);
+                    Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
+                    Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
+                });
+            });
         });
 
         Route::prefix('traders')->group(function () {

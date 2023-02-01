@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Enums\FinancingOrderHistory;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use League\Fractal\Resource\Collection;
@@ -18,7 +19,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'financing_order_id',
         'reference',
         'provider',
-        'data',
+        'purchasing_commodity_information',
         'status',
         'is_cancellable',
         'history',
@@ -72,5 +73,39 @@ class TraderOrderTransformer extends TransformerAbstract
             'description' => TraderOrderStatus::fromValue($traderOrder->status)->description,
             'value' => TraderOrderStatus::fromValue($traderOrder->status)->value,
         ]);
+    }
+
+    public function includePurchasingCommodityInformation(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive([
+            'uom' => $traderOrder->uom,
+            'owner' => $traderOrder->owner,
+            'amount' => $traderOrder->amount,
+            'product' => $traderOrder->product,
+            'currency' => $traderOrder->currency,
+            'new_owner' => $traderOrder->new_owner,
+            'quantity' => $traderOrder->quantity,
+            'warehouse' => $traderOrder->warehouse,
+            'warrant_no' => $traderOrder->warrant_no,
+            'ptp_document' => $this->fileUrl($traderOrder->order->getMedia(FinancingOrderMediaCollection::PromiseToPurchase)->first()),
+            'exchange_rate' => $traderOrder->exchange_rate,
+            'previous_owner' => $traderOrder->previous_owner,
+            'warehouse_or_vault_country' => $traderOrder->warehouse_or_vault_country,
+            'warehouse_or_vault_emirates' => $traderOrder->warehouse_or_vault_emirates,
+            'warehouse_or_vault_operator_id' => $traderOrder->warehouse_or_vault_operator_id,
+            'date_time_of_purchasing_commodity' => $traderOrder->date_time_of_purchasing_commodity,
+            'original_holding_certificate' => $this->fileUrl($traderOrder->order->getMedia(FinancingOrderMediaCollection::TtiHoldingCertificate)->first()),
+            'auto_generate_financing_institution_certificate' => $traderOrder->auto_generate_financing_institution_certificate,
+            'financing_institution_certificate' => $this->fileUrl($traderOrder->order->getMedia(FinancingOrderMediaCollection::TransferOwnershipToLender)->first()),
+        ]);
+    }
+
+    private function fileUrl($media): ?string
+    {
+        if ($media) {
+            return route('api.v1.media.download', ['media' => $media->uuid]);
+        }
+
+        return null;
     }
 }

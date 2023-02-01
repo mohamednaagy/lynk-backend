@@ -99,28 +99,6 @@ class ProcessDmccMpoNotification implements ShouldQueue
                 $traderOrder,
                 FinancingOrderHistory::AttachMpoDocument
             );
-
-            $warrantDocument = $trader->getDocumentByTypeAndTransaction(
-                $this->ttiId,
-                'Warrant Amendment Except Warrant No'
-            );
-
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument
-            );
-
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                $warrantDocument,
-                TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-                'base64'
-            );
-
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument
-            );
         });
     }
 

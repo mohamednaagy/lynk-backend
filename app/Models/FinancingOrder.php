@@ -65,6 +65,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'approved_at' => 'datetime',
         'client_wakala_accepted_at' => 'datetime',
         'data' => 'array',
+        'is_verification_required' => 'boolean',
         'customer_details' => 'array',
         'phone_number' => E164PhoneNumberCast::class,
         'amount' => MoneyStringCast::class.':currency',

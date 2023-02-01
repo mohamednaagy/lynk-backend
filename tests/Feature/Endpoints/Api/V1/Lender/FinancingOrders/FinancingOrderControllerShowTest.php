@@ -98,6 +98,7 @@ class FinancingOrderControllerShowTest extends TestCase
                         'phone_number_formatted',
                         'is_approved',
                         'is_updatable',
+                        'is_verification_required',
                         'status_reason',
                         'creator',
                         'approver',
@@ -130,6 +131,7 @@ class FinancingOrderControllerShowTest extends TestCase
                         'phone_number',
                         'phone_number_formatted',
                         'is_approved',
+                        'is_verification_required',
                         'is_updatable',
                         'status_reason',
                         'creator',
@@ -190,6 +192,7 @@ class FinancingOrderControllerShowTest extends TestCase
                         'creator',
                         'approver',
                         'history',
+                        'is_verification_required',
                     ])
                     ->respond()
                     ->getData(true)
