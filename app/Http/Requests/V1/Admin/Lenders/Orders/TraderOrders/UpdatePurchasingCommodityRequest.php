@@ -43,7 +43,7 @@ class UpdatePurchasingCommodityRequest extends FormRequest
             'warehouse_or_vault_emirates' => ['required', 'string'],
             'warehouse_or_vault_country' => ['required', 'string'],
             'uom' => ['required', 'string'],
-            'exchange_rate' => ['required', 'string'],
+            'exchange_rate' => ['required', 'numeric'],
             'auto_generate_financing_institution_certificate' => ['required', 'boolean'],
         ];
     }

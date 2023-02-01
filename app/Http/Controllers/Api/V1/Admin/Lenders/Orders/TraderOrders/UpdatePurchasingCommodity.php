@@ -9,7 +9,6 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Subject;
-use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodityRequest;
 use App\Models\Company;
@@ -42,10 +41,6 @@ class UpdatePurchasingCommodity extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($order, $traderOrder, $request, $updateTraderOrder) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
-
-            if ($order->status->cantMoveTo(FinancingOrderStatus::CommodityPurchased)) {
-                throw new OrderStatusDoesNotFollowSequenceException();
-            }
 
             $trader = Trader::driver($traderOrder->provider);
 
