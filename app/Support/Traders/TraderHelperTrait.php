@@ -50,11 +50,11 @@ trait TraderHelperTrait
     {
         $fileName = $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
         if (! is_null($type)) {
-            $traderOrder->order->addMediaFromBase64(
+            $traderOrder->addMediaFromBase64(
                 $document
             )->usingFileName($fileName)->toMediaCollection($collectionName);
         } else {
-            $traderOrder->order->addMediaFromStream(
+            $traderOrder->addMediaFromStream(
                 $document
             )->usingFileName($fileName)->toMediaCollection($collectionName);
         }

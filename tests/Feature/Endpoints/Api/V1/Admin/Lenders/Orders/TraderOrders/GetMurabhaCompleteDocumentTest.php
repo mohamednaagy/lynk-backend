@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders;
+namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders;
 
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\TraderOrder;
@@ -116,7 +116,7 @@ class GetMurabhaCompleteDocumentTest extends TestCase
         self::$traderOrder->addMedia(
             UploadedFile::fake()
                 ->image($fileName)
-        )->toMediaCollection(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo);
+        )->toMediaCollection(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo);
 
         $this->actingAs(self::$superAdminUser)
             ->getJson(self::$getMurabhaCompleteDocumentUrl)

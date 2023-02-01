@@ -3,7 +3,7 @@
 namespace App\Support\Traders\Drivers;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -202,7 +202,7 @@ class FakeDriver implements TraderInterface
                     'time' => Carbon::now()->toTimeString(),
                 ],
                 $traderOrder,
-                FinancingOrderMediaCollection::SellingCommodityToCustomer,
+                TraderOrderMediaCollection::SellingCommodityToCustomer,
             );
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
@@ -265,7 +265,7 @@ class FakeDriver implements TraderInterface
                     'time' => Carbon::now()->toTimeString(),
                 ],
                 $traderOrder,
-                FinancingOrderMediaCollection::TransferOwnershipToLender,
+                TraderOrderMediaCollection::TransferOwnershipToLender,
             );
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
@@ -287,11 +287,24 @@ class FakeDriver implements TraderInterface
     public function getInventoryBasket(TraderOrder $traderOrder): object
     {
         $data = [
-            'product' => '',
-            'quantity' => 1000,
-            'amount' => '1000 SAR',
-            'warehouse' => 'warehouse',
-            'owner' => 'owner',
+            'product' => 'Yogurt',
+            'quantity' => '10',
+            'amount' => '1000',
+            'currency' => 'SAR',
+            'warehouse' => 'Warehouse',
+            'owner' => 'Owner 1',
+            'previous_owner' => 'Owner 0',
+            'new_owner' => 'Owner 1',
+            'date_time_of_purchasing_commodity' => now()->toDateTimeString(),
+            'warehouse_or_vault_emirates' => 'Emirates',
+            'warehouse_or_vault_country' => 'Saudi Arabia',
+            'inventory_record_id' => '1000',
+            'warrant_percentage' => '100',
+            'warehouse_or_vault_operator_id' => '80',
+            'warrant_no' => '658',
+            'hs_code' => '#234',
+            'uom' => 'Kilo',
+            'exchange_rate' => '3.75',
         ];
 
         $traderOrder->update($data);

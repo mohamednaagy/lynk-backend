@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders;
+namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument;
 
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
@@ -35,7 +35,7 @@ class GetMurabhaCompleteDocument extends Controller
         FinancingOrder $order,
         TraderOrder $traderOrder
     ): JsonResponse {
-        $media = $traderOrder->getMedia(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
+        $media = $traderOrder->getMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
             ->first();
 
         return $this->successResponse(['url' => $media->fileDownloadableUrl ?? null]);

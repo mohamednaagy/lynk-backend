@@ -34,6 +34,7 @@ class StoreOrderRequest extends FormRequest
             'phone_number' => ['required', 'string', 'phone:phone_country_code,mobile'],
             'amount' => ['required', 'numeric', 'gt:0'],
             'selling_price' => ['required', 'numeric', 'gte:amount'],
+            'is_verification_required' => ['required', 'boolean'],
         ];
     }
 }

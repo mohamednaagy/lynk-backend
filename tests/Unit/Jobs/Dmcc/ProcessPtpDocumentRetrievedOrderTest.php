@@ -4,7 +4,7 @@ namespace Tests\Unit\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\Dmcc\ProcessPtpDocumentRetrievedOrder;
@@ -109,9 +109,9 @@ class ProcessPtpDocumentRetrievedOrderTest extends TestCase
         $process->handle();
 
         $this->assertDatabaseHas((new Media())->getTable(), [
-            'model_id' => self::$financingOrder->id,
-            'model_type' => (new FinancingOrder())->getMorphClass(),
-            'collection_name' => FinancingOrderMediaCollection::TransferOwnershipToLender,
+            'model_id' => self::$traderOrder->id,
+            'model_type' => (new TraderOrder)->getMorphClass(),
+            'collection_name' => TraderOrderMediaCollection::TransferOwnershipToLender,
         ]);
     }
 

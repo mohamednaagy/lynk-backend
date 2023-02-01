@@ -4,6 +4,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Client;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
+use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
@@ -39,6 +40,11 @@ class AcceptClientWakalaTest extends TestCase
 
         self::$order = $this->createOrder(self::$company->id, self::$userLender->id, [
             'national_id' => '2553451234',
+        ]);
+        self::$order->traderOrders()->create([
+            'provider' => 'dmcc',
+            'status' => TraderOrderStatus::InProgress,
+            'reference' => 123,
         ]);
     }
 

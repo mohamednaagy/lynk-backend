@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Stancl\VirtualColumn\VirtualColumn;
 
+/**
+ * @property mixed $traderOrder
+ */
 class TraderHistory extends Model
 {
     use HasFactory, VirtualColumn;
