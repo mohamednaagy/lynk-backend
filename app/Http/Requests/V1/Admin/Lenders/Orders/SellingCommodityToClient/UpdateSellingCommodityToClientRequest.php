@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\V1\Admin\Lenders\Orders\SellingCommodity;
+namespace App\Http\Requests\V1\Admin\Lenders\Orders\SellingCommodityToLender;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateDocumentRequest extends FormRequest
+class UpdateSellingCommodityToClientRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +24,8 @@ class UpdateDocumentRequest extends FormRequest
     public function rules()
     {
         return [
-            'document' => ['required', 'file'],
+            'document' => ['exclude_if:automatically_generate_file,true', 'required', 'file', 'mimes:pdf'],
+            'automatically_generate_file' => ['required', 'boolean'],
         ];
     }
 }
