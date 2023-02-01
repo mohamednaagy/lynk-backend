@@ -4,14 +4,15 @@ namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders;
 
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 
-class GetSellingCommodity extends Controller
+class GetSellingCommodityCertificateToClient extends Controller
 {
     public function __construct()
     {
@@ -26,19 +27,12 @@ class GetSellingCommodity extends Controller
      * @param  FinancingOrder  $order
      * @return JsonResponse
      */
-    public function __invoke(Company $lender, FinancingOrder $order): JsonResponse
+    public function __invoke(Company $lender, int $order, TraderOrder $traderOrder): JsonResponse
     {
-        $url = $this->fileUrl($order->getMedia(FinancingOrderMediaCollection::SellingCommodityToCustomer)->first());
+        $media = $traderOrder->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer);
 
-        return $this->successResponse([$url]);
-    }
-
-    public function fileUrl($media)
-    {
-        if ($media) {
-            return route('api.v1.media.download', ['media' => $media->uuid]);
-        }
-
-        return null;
+        return $this->successResponse([
+            'url' => $media?->fileDownloadableUrl,
+        ]);
     }
 }
