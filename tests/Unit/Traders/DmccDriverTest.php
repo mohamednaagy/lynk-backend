@@ -442,11 +442,18 @@ class DmccDriverTest extends TestCase
                         'owner' => 'owner',
                         'previousOwner' => 'previousOwner',
                         'newOwner' => 'newOwner',
+                        'inventoryRecordId' => 'inventoryRecordId',
+                        'warrantPercentage' => 'warrantPercentage',
+                        'warehouseOrVaultOperatorId' => 'warehouseOrVaultOperatorId',
+                        'warrantNo' => 'warrantNo',
+                        'uom' => 'uom',
+                        'hsCode' => 'hsCode',
                         'dateTimeOfPurchasingCommodity' => Carbon::now()->format('d/m/Y H:i A'),
                         'warehouseOrVaultEmirates' => 'warehouseOrVaultEmirates',
                         'warehouseOrVaultCountry' => 'warehouseOrVaultCountry',
                     ],
                 ],
+                'exchangeRate' => 'exchangeRate',
                 'errorCode' => '',
             ], 200);
         });

@@ -130,7 +130,7 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
 
         (new ProcessDmccMpoNotification(self::$notification))->handle();
 
-        $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderHistories + 5);
+        $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderHistories + 3);
         $this->assertDatabaseHas((new TraderHistory())->getTable(), [
             'trader_order_id' => self::$traderOrder->id,
             'action' => FinancingOrderHistory::IssueMurabahaOffer,
@@ -143,16 +143,8 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
             'trader_order_id' => self::$traderOrder->id,
             'action' => FinancingOrderHistory::AttachMpoDocument,
         ]);
-        $this->assertDatabaseHas((new TraderHistory())->getTable(), [
-            'trader_order_id' => self::$traderOrder->id,
-            'action' => FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
-        ]);
-        $this->assertDatabaseHas((new TraderHistory())->getTable(), [
-            'trader_order_id' => self::$traderOrder->id,
-            'action' => FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
-        ]);
 
-        $this->assertDatabaseCount((new Media())->getTable(), $media + 2);
+        $this->assertDatabaseCount((new Media())->getTable(), $media + 1);
 
         $this->assertDatabaseHas((new Media())->getTable(), [
             'model_id' => self::$traderOrder->id,
@@ -160,16 +152,6 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
             'collection_name' => TraderOrderMediaCollection::MurabahaPurchaseOrder,
         ]);
 
-        $this->assertFileExists(storage_path('app/1/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
         $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::MurabahaPurchaseOrder));
-
-        $this->assertDatabaseHas((new Media())->getTable(), [
-            'model_id' => self::$traderOrder->id,
-            'model_type' => (new TraderOrder)->getMorphClass(),
-            'collection_name' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-        ]);
-
-        $this->assertFileExists(storage_path('app/2/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
-        $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo));
     }
 }

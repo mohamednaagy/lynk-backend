@@ -364,11 +364,24 @@ class FakeDriverTest extends TestCase
         $response = (new FakeDriver())->getInventoryBasket(self::$traderOrder);
 
         $this->assertEquals((object) [
-            'product' => '',
-            'quantity' => 1000,
-            'amount' => '1000 SAR',
-            'warehouse' => 'warehouse',
-            'owner' => 'owner',
+            'product' => 'Yogurt',
+            'quantity' => '10',
+            'amount' => '1000',
+            'currency' => 'SAR',
+            'warehouse' => 'Warehouse',
+            'owner' => 'Owner 1',
+            'previous_owner' => 'Owner 0',
+            'new_owner' => 'Owner 1',
+            'date_time_of_purchasing_commodity' => now()->toDateTimeString(),
+            'warehouse_or_vault_emirates' => 'Emirates',
+            'warehouse_or_vault_country' => 'Saudi Arabia',
+            'inventory_record_id' => '1000',
+            'warrant_percentage' => '100',
+            'warehouse_or_vault_operator_id' => '80',
+            'warrant_no' => '658',
+            'hs_code' => '#234',
+            'uom' => 'Kilo',
+            'exchange_rate' => '3.75',
         ], $response);
     }
 
