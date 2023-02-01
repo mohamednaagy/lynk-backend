@@ -153,8 +153,14 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive($financingOrder->created_at->format('Y-m-d h:mA'));
     }
 
-    public function includeHistory(FinancingOrder $financingOrder): Collection
+    public function includeHistory(FinancingOrder $financingOrder): Primitive|Collection
     {
+        $activeTraderOrder = $financingOrder->activeTraderOrder()->first();
+
+        if (! $activeTraderOrder) {
+            return $this->primitive(null);
+        }
+
         return $this->collection(collect([
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
             FinancingOrderHistory::ContractSigned,
@@ -162,7 +168,7 @@ class FinancingOrderTransformer extends TransformerAbstract
             'client_wakala',
             FinancingOrderHistory::IssueMurabahaOffer,
             FinancingOrderHistory::MurabahaSaleCompleted,
-        ]), new TraderHistoryTransformer($financingOrder, $financingOrder->traderOrders->last()->traderHistories ?? collect()));
+        ]), new TraderHistoryTransformer($financingOrder->activeTraderOrder()->first()));
     }
 
     public function includeTraderOrders(FinancingOrder $financingOrder): Collection

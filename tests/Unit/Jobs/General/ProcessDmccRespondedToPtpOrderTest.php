@@ -4,7 +4,7 @@ namespace Jobs\General;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
@@ -68,8 +68,8 @@ class ProcessDmccRespondedToPtpOrderTest extends TestCase
 
         self::$order = self::$order->fresh();
 
-        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::PromiseToPurchase));
-        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::TtiHoldingCertificate));
+        $this->assertNotNull($traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::PromiseToPurchase));
+        $this->assertNotNull($traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TtiHoldingCertificate));
 
         $firstTraderHistory = $traderOrder->traderHistories()->first();
         $secondTraderHistory = $traderOrder->traderHistories()->skip(1)->first();
@@ -106,8 +106,8 @@ class ProcessDmccRespondedToPtpOrderTest extends TestCase
 
         self::$order = self::$order->fresh();
 
-        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::PromiseToPurchase));
-        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::TtiHoldingCertificate));
+        $this->assertNotNull($traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::PromiseToPurchase));
+        $this->assertNotNull($traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TtiHoldingCertificate));
 
         $firstTraderHistory = $traderOrder->traderHistories()->first();
         $secondTraderHistory = $traderOrder->traderHistories()->skip(1)->first();

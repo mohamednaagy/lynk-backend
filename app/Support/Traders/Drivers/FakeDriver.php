@@ -3,7 +3,7 @@
 namespace App\Support\Traders\Drivers;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -202,7 +202,7 @@ class FakeDriver implements TraderInterface
                     'time' => Carbon::now()->toTimeString(),
                 ],
                 $traderOrder,
-                FinancingOrderMediaCollection::SellingCommodityToCustomer,
+                TraderOrderMediaCollection::SellingCommodityToCustomer,
             );
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
@@ -265,7 +265,7 @@ class FakeDriver implements TraderInterface
                     'time' => Carbon::now()->toTimeString(),
                 ],
                 $traderOrder,
-                FinancingOrderMediaCollection::TransferOwnershipToLender,
+                TraderOrderMediaCollection::TransferOwnershipToLender,
             );
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);

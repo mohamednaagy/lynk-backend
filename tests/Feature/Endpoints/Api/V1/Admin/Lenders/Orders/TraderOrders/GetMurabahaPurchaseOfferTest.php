@@ -4,16 +4,17 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders;
 
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
-use App\Models\FinancingOrder;
 use App\Models\Media;
+use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
@@ -42,7 +43,7 @@ class GetMurabahaPurchaseOfferTest extends TestCase
         [self::$company] = $this->createLenderCompany('2000', ['company_cr' => '12345678911']);
         self::$superAdminUser = $this->createSuperAdminUser();
         self::$order = $this->createOrder(self::$company->id, self::$superAdminUser->id, [
-            'status' => FinancingOrderStatus::MurabhaOfferIssued,
+            'status' => FinancingOrderStatus::ClientWakalaCompleted,
         ]);
 
         self::$traderOrder = self::$order->traderOrders()->create([
@@ -52,10 +53,10 @@ class GetMurabahaPurchaseOfferTest extends TestCase
         ]);
 
         Media::query()->create([
-            'model_type' => FinancingOrder::class,
-            'model_id' => self::$order->id,
+            'model_type' => TraderOrder::class,
+            'model_id' => self::$traderOrder->id,
             'uuid' => Str::uuid(),
-            'collection_name' => FinancingOrderMediaCollection::MurabahaPurchaseOrder,
+            'collection_name' => TraderOrderMediaCollection::MurabahaPurchaseOrder,
             'name' => 'media-libraryHdFscO',
             'file_name' => 'dmcc-6404.pdf',
             'mime_type' => 'application/pdf',
@@ -101,7 +102,9 @@ class GetMurabahaPurchaseOfferTest extends TestCase
     public function test_auth_user_can_update_process_murabaha_purchase_offer(): void
     {
         $this->actingAs(self::$superAdminUser)
-            ->postJson(self::$apiUrl)
+            ->postJson(self::$apiUrl, [
+                'document' => UploadedFile::fake()->create('test.pdf'),
+            ])
             ->assertOk()
             ->assertJsonStructure([
                 'data' => [],

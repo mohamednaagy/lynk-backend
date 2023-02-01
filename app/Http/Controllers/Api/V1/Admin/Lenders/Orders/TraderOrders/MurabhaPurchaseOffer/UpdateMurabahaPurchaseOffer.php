@@ -6,7 +6,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Subject;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Http\Controllers\Controller;
@@ -61,7 +61,7 @@ class UpdateMurabahaPurchaseOffer extends Controller
             $this->attachDocumentToOrder(
                 $traderOrder,
                 base64_encode(file_get_contents($request->file('document'))),
-                FinancingOrderMediaCollection::MurabahaPurchaseOrder,
+                TraderOrderMediaCollection::MurabahaPurchaseOrder,
                 'base64'
             );
 

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaP
 
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
@@ -25,9 +25,9 @@ class GetMurabahaPurchaseOffer extends Controller
     public function __invoke(
         Company $lender,
         FinancingOrder $order,
-        TraderOrder $trader_order
+        TraderOrder $traderOrder
     ): JsonResponse {
-        $url = $this->fileUrl($order->getMedia(FinancingOrderMediaCollection::MurabahaPurchaseOrder)->first());
+        $url = $this->fileUrl($traderOrder->getFirstMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder));
 
         return $this->successResponse([
             'murabaha_purchase_offer' => $url,

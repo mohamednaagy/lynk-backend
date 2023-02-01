@@ -4,6 +4,7 @@ namespace App\Support\Authorizations\Media\Utilities;
 
 use App\Enums\Area;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 
 class GetCollectionsByArea
 {
@@ -11,7 +12,8 @@ class GetCollectionsByArea
     {
         return match ($area) {
             Area::Lender, Area::SuperAdmin => array_merge(
-                FinancingOrderMediaCollection::getValues()
+                FinancingOrderMediaCollection::getValues(),
+                TraderOrderMediaCollection::getValues()
             ),
             default => []
         };

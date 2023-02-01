@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
@@ -13,7 +14,7 @@ use Tests\Traits\InteractsWithUser;
 
 class GateBeforeTest extends TestCase
 {
-    use InteractsWithUser, InteractsWithCompany;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static User $userLenderAdmin;
 
