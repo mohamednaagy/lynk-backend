@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\LenderController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderUserController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetPurchasingCommodity;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument\GetMurabhaCompleteDocument;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument\UpdateMurabhaCompleteDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\GetMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\UpdateMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodity;
@@ -96,6 +97,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                     Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
                     Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
                     Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
+                    Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
                 });
             });
         });
