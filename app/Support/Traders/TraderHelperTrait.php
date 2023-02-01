@@ -28,9 +28,14 @@ trait TraderHelperTrait
 
     public function createTraderOrderHistory(TraderOrder $traderOrder, int $action): void
     {
-        $traderOrder->traderHistories()->create([
-            'action' => $action,
-        ]);
+        $traderOrder->traderHistories()->updateOrCreate(
+            [
+                'action' => $action,
+            ],
+            [
+                'updated_at' => now(),
+            ]
+        );
     }
 
     public function storeOrderDocumentAsPdf(string $view, array $data, TraderOrder $traderOrder, $mediaCollection): void
