@@ -39,7 +39,7 @@ class UpdatePurchasingCommodityRequest extends FormRequest
             'warehouse' => ['required', 'string'],
             'owner' => ['required', 'string'],
             'previous_owner' => ['required', 'string'],
-            'date_time_of_purchasing_commodity' => ['required', 'string', 'date_format:Y-m-d H:i'],
+            'date_time_of_purchasing_commodity' => ['required', 'string', 'date_format:Y-m-d H:i:s'],
             'warehouse_or_vault_emirates' => ['required', 'string'],
             'warehouse_or_vault_country' => ['required', 'string'],
             'uom' => ['required', 'string'],
