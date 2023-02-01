@@ -23,6 +23,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'status',
         'is_cancellable',
         'history',
+        'created_at',
     ];
 
     public function transform(TraderOrder $traderOrder)
@@ -98,6 +99,11 @@ class TraderOrderTransformer extends TransformerAbstract
             'auto_generate_financing_institution_certificate' => $traderOrder->auto_generate_financing_institution_certificate,
             'financing_institution_certificate' => $this->fileUrl($traderOrder->order->getMedia(FinancingOrderMediaCollection::TransferOwnershipToLender)->first()),
         ]);
+    }
+
+    public function includeCreatedAt(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->created_at?->toDateTimeString());
     }
 
     private function fileUrl($media): ?string
