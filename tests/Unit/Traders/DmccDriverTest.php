@@ -3,7 +3,7 @@
 namespace Tests\Unit\Traders;
 
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Models\Company;
@@ -313,7 +313,7 @@ class DmccDriverTest extends TestCase
 
         (new DmccDriver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
 
-        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
+        $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
     }
 
     /**
@@ -332,7 +332,7 @@ class DmccDriverTest extends TestCase
 
         (new DmccDriver())->createSellingCommodityToCustomerDocument(new TraderOrder());
 
-        $this->assertNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
+        $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 
@@ -348,7 +348,7 @@ class DmccDriverTest extends TestCase
 
         (new DmccDriver())->createTransferOwnershipToLenderDocument(self::$traderOrder);
 
-        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::TransferOwnershipToLender));
+        $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender));
     }
 
     /**
@@ -367,7 +367,7 @@ class DmccDriverTest extends TestCase
 
         (new DmccDriver())->createTransferOwnershipToLenderDocument(new TraderOrder());
 
-        $this->assertNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::TransferOwnershipToLender));
+        $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender));
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 

@@ -3,12 +3,12 @@
 namespace Tests\Unit\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
-use App\Enums\Role;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\Dmcc\ProcessDmccContractSignedOrder;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Models\User;
 use CodeDredd\Soap\Facades\Soap;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -33,7 +33,7 @@ class ProcessDmccContractSignedOrderTest extends TestCase
         parent::setUp();
         [self::$company] = $this->createLenderCompany();
 
-        self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$lender = $this->createLenderUser(self::$company->id);
 
         self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
             'status' => FinancingOrderStatus::ContractSigned,
@@ -97,7 +97,8 @@ class ProcessDmccContractSignedOrderTest extends TestCase
     {
         Storage::fake();
 
-        self::$order->traderOrders()->create([
+        /** @var TraderOrder $traderOrder */
+        $traderOrder = self::$order->traderOrders()->create([
             'provider' => 'dmcc',
             'reference' => 123,
             'status' => TraderOrderStatus::InProgress,
@@ -117,7 +118,7 @@ class ProcessDmccContractSignedOrderTest extends TestCase
         $processOrder->handle();
         self::$order = self::$order->fresh();
 
-        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
+        $this->assertNotNull($traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
 
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::CommoditySoldToCustomer));
     }
@@ -129,7 +130,8 @@ class ProcessDmccContractSignedOrderTest extends TestCase
     {
         Storage::fake();
 
-        self::$order->traderOrders()->create([
+        /** @var TraderOrder $traderOrder */
+        $traderOrder = self::$order->traderOrders()->create([
             'provider' => 'fake',
             'reference' => 123,
             'status' => TraderOrderStatus::InProgress,
@@ -140,6 +142,6 @@ class ProcessDmccContractSignedOrderTest extends TestCase
         self::$order = self::$order->fresh();
 
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::CommoditySoldToCustomer));
-        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
+        $this->assertNotNull($traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
     }
 }

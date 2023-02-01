@@ -4,7 +4,7 @@ namespace Tests\Unit\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\Dmcc\ProcessDmccMpoNotification;
@@ -83,7 +83,7 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
                         ],
                     ],
                 ],
-            ], 200);
+            ]);
         });
     }
 
@@ -155,20 +155,21 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
         $this->assertDatabaseCount((new Media())->getTable(), $media + 2);
 
         $this->assertDatabaseHas((new Media())->getTable(), [
-            'model_id' => self::$order->id,
-            'collection_name' => FinancingOrderMediaCollection::MurabahaPurchaseOrder,
+            'model_id' => self::$traderOrder->id,
+            'model_type' => (new TraderOrder)->getMorphClass(),
+            'collection_name' => TraderOrderMediaCollection::MurabahaPurchaseOrder,
         ]);
 
         $this->assertFileExists(storage_path('app/1/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
-        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::MurabahaPurchaseOrder));
+        $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::MurabahaPurchaseOrder));
 
         $this->assertDatabaseHas((new Media())->getTable(), [
-            'model_id' => self::$order->id,
-            'model_type' => (new FinancingOrder)->getMorphClass(),
-            'collection_name' => FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
+            'model_id' => self::$traderOrder->id,
+            'model_type' => (new TraderOrder)->getMorphClass(),
+            'collection_name' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
         ]);
 
         $this->assertFileExists(storage_path('app/2/'.self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf'));
-        $this->assertNotNull(self::$order->getFirstMediaUrl(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo));
+        $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo));
     }
 }

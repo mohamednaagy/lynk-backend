@@ -63,7 +63,7 @@ class TraderOrderTransformer extends TransformerAbstract
             'client_wakala',
             FinancingOrderHistory::IssueMurabahaOffer,
             FinancingOrderHistory::MurabahaSaleCompleted,
-        ]), new TraderHistoryTransformer($traderOrder->order, $traderOrder->traderHistories ?? collect()));
+        ]), new TraderHistoryTransformer($traderOrder));
     }
 
     public function includeStatus(TraderOrder $traderOrder): Primitive

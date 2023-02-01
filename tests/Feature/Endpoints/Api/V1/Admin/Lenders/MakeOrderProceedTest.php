@@ -7,13 +7,15 @@ use App\Enums\Area;
 use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Models\User;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,14 +37,16 @@ class MakeOrderProceedTest extends TestCase
 
     private static User $adminManagerWithPermissions;
 
-    private static Builder|Model $financingOrder;
+    private static Builder|Model|FinancingOrder $financingOrder;
 
-    private static Builder|Model $traderOrder;
+    private static Builder|Model|TraderOrder $traderOrder;
 
     private static string $orderProceedUrl;
 
     /**
      * @return void
+     *
+     * @throws BindingResolutionException
      */
     public function setUp(): void
     {
@@ -165,8 +169,9 @@ class MakeOrderProceedTest extends TestCase
     {
         $statuses = FinancingOrderStatus::getValues();
         foreach ($statuses as $status) {
-            self::$financingOrder->status = $status;
-            self::$financingOrder->save();
+            self::$financingOrder->update([
+                'status' => $status,
+            ]);
             self::$financingOrder->refresh();
 
             if (self::$financingOrder->status->cantMoveTo(FinancingOrderStatus::ContractSigned)) {
@@ -190,8 +195,9 @@ class MakeOrderProceedTest extends TestCase
     {
         $statuses = FinancingOrderStatus::getValues();
         foreach ($statuses as $status) {
-            self::$financingOrder->status = $status;
-            self::$financingOrder->save();
+            self::$financingOrder->update([
+                'status' => $status,
+            ]);
             self::$financingOrder->refresh();
 
             if (self::$financingOrder->status->cantMoveTo(FinancingOrderStatus::ClientWakalaCompleted)) {
@@ -213,9 +219,10 @@ class MakeOrderProceedTest extends TestCase
      */
     public function test_admin_cannot_make_order_proceed_on_client_wakala_accepted_when_order_verification_is_required(): void
     {
-        self::$financingOrder->is_verification_required = true;
-        self::$financingOrder->status = FinancingOrderStatus::WaitingClientWakala;
-        self::$financingOrder->save();
+        self::$financingOrder->update([
+            'is_verification_required' => true,
+            'status' => FinancingOrderStatus::WaitingClientWakala,
+        ]);
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
@@ -229,8 +236,9 @@ class MakeOrderProceedTest extends TestCase
      */
     public function test_admin_proceed_order_manager_can_access_with_permissions(): void
     {
-        self::$financingOrder->status = FinancingOrderStatus::CommodityPurchased;
-        self::$financingOrder->save();
+        self::$financingOrder->update([
+            'status' => FinancingOrderStatus::CommodityPurchased,
+        ]);
 
         $this->actingAs(self::$adminManagerWithPermissions)
             ->postJson(self::$orderProceedUrl, [
@@ -244,8 +252,9 @@ class MakeOrderProceedTest extends TestCase
      */
     public function test_admin_proceed_order_on_contract_signed_successfully(): void
     {
-        self::$financingOrder->status = FinancingOrderStatus::CommodityPurchased;
-        self::$financingOrder->save();
+        self::$financingOrder->update([
+            'status' => FinancingOrderStatus::CommodityPurchased,
+        ]);
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
@@ -257,7 +266,7 @@ class MakeOrderProceedTest extends TestCase
             ]);
 
         $this->assertEquals(
-            FinancingOrder::find(self::$financingOrder->getOriginal('id'))->status->value,
+            FinancingOrder::find(self::$financingOrder->id)->status->value,
             FinancingOrderStatus::ContractSigned
         );
     }
@@ -267,8 +276,9 @@ class MakeOrderProceedTest extends TestCase
      */
     public function test_admin_proceed_order_on_client_wakala_accepted_successfully(): void
     {
-        self::$financingOrder->status = FinancingOrderStatus::WaitingClientWakala;
-        self::$financingOrder->save();
+        self::$financingOrder->update([
+            'status' => FinancingOrderStatus::WaitingClientWakala,
+        ]);
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
@@ -279,10 +289,10 @@ class MakeOrderProceedTest extends TestCase
             ]);
 
         $this->assertEquals(
-            FinancingOrder::find(self::$financingOrder->getOriginal('id'))->status->value,
+            FinancingOrder::find(self::$financingOrder->id)->status->value,
             FinancingOrderStatus::ClientWakalaCompleted
         );
 
-        $this->assertTrue(self::$financingOrder->hasMedia(FinancingOrderMediaCollection::ClientWakala));
+        $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::ClientWakala));
     }
 }

@@ -3,21 +3,21 @@
 namespace App\Transformers;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
-use App\Models\FinancingOrder;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Models\TraderOrder;
 use Illuminate\Support\Collection;
 use League\Fractal\TransformerAbstract;
 
 class TraderHistoryTransformer extends TransformerAbstract
 {
-    protected FinancingOrder $financingOrder;
+    protected TraderOrder $traderOrder;
 
     protected Collection $traderHistories;
 
-    public function __construct(FinancingOrder $financingOrder, Collection $traderHistories)
+    public function __construct(?TraderOrder $traderOrder)
     {
-        $this->financingOrder = $financingOrder;
-        $this->traderHistories = $traderHistories;
+        $this->traderOrder = $traderOrder;
+        $this->traderHistories = $traderOrder->traderHistories ?? collect();
     }
 
     protected array $defaultIncludes = [];
@@ -32,23 +32,23 @@ class TraderHistoryTransformer extends TransformerAbstract
         $getMurabahaPurchaseOfferDocument = $this->traderHistories->where('action', FinancingOrderHistory::GetMurabahaPurchaseOfferDocument)->first();
         $getWarrantAmendmentExceptWarrantNoDocument = $this->traderHistories->where('action', FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)->first();
 
-        $data = match ($traderHistoryKey) {
+        return match ($traderHistoryKey) {
             'client_wakala' => [
                 'step' => 'client_wakala',
-                'is_complete' => (bool) $this->financingOrder->client_wakala_accepted_at,
-                'completed_at' => optional($this->financingOrder->client_wakala_accepted_at)->format('Y-m-d h:i:s A'),
-                'document' => $this->fileUrl($this->financingOrder->getMedia(FinancingOrderMediaCollection::ClientWakala)->first()),
+                'is_complete' => (bool) $this->traderOrder->order->client_wakala_accepted_at,
+                'completed_at' => optional($this->traderOrder->order->client_wakala_accepted_at)->format('Y-m-d h:i:s A'),
+                'document' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::ClientWakala)),
             ],
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => [
                 'step' => 'commodity_purchased',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
                 'cert_document' => [
-                    'url' => $this->fileUrl($this->financingOrder->getMedia(FinancingOrderMediaCollection::TtiHoldingCertificate)->first()),
+                    'url' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)),
                     'date' => optional($getPtpDocument)->created_at?->format('Y-m-d h:i:s A'),
                 ],
                 'ownership_document' => [
-                    'url' => $this->fileUrl($this->financingOrder->getMedia(FinancingOrderMediaCollection::TransferOwnershipToLender)->first()),
+                    'url' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::TransferOwnershipToLender)),
                     'date' => optional($transferOwnershipToLender)->created_at?->format('Y-m-d h:i:s A'),
                 ],
             ],
@@ -61,18 +61,18 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'step' => 'selling_commodity_to_customer',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'document' => $this->fileUrl($this->financingOrder->getMedia(FinancingOrderMediaCollection::SellingCommodityToCustomer)->first()),
+                'document' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer)),
             ],
             FinancingOrderHistory::IssueMurabahaOffer => [
                 'step' => 'selling_commodity_to_open_market',
                 'is_complete' => (bool) $this->traderHistories->where('action', FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)->first(),
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
                 'mpo_document' => [
-                    'url' => $this->fileUrl($this->financingOrder->getMedia(FinancingOrderMediaCollection::MurabahaPurchaseOrder)->first()),
+                    'url' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder)),
                     'date' => optional($getMurabahaPurchaseOfferDocument)->created_at?->format('Y-m-d h:i:s A'),
                 ],
                 'warranty_document' => [
-                    'url' => $this->fileUrl($this->financingOrder->getMedia(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo)->first()),
+                    'url' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo)),
                     'date' => optional($getWarrantAmendmentExceptWarrantNoDocument)->created_at?->format('Y-m-d h:i:s A'),
                 ],
             ],
@@ -83,11 +83,9 @@ class TraderHistoryTransformer extends TransformerAbstract
             ],
             default => null,
         };
-
-        return $data;
     }
 
-    public function fileUrl($media)
+    public function fileUrl($media): ?string
     {
         if ($media) {
             return route('api.v1.media.download', ['media' => $media->uuid]);
