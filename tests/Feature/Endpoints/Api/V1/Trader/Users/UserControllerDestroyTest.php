@@ -99,6 +99,17 @@ class UserControllerDestroyTest extends TestCase
     /**
      * @return void
      */
+    public function test_trader_admin_user_cant_delete_trader_user_in_other_company_unsuccessful(): void
+    {
+        $this->actingAs(self::$userTraderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->deleteJson('api/v1/trader/users/'.self::$otherUserTraderAdmin->id)
+            ->assertNotFound();
+    }
+
+    /**
+     * @return void
+     */
     public function test_trader_admin_user_cant_delete_trader_user_case_when_company_not_approved_unsuccessful(): void
     {
         foreach (CompanyStatus::getValues() as $status) {
