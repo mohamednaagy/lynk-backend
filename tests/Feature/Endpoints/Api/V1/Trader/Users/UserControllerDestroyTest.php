@@ -26,6 +26,8 @@ class UserControllerDestroyTest extends TestCase
 
     private static User $userTraderAdmin;
 
+    private static User $otherUserTraderAdminOfSameCompany;
+
     private static User $otherUserTraderAdmin;
 
     private static String $endPoint;
@@ -40,8 +42,9 @@ class UserControllerDestroyTest extends TestCase
         [self::$company, self::$wallet] = $this->createTraderCompany('2000', ['company_cr' => '12345678910']);
         [self::$otherCompany, self::$otherWallet] = $this->createTraderCompany('2000', ['company_cr' => '12345678911']);
         self::$userTraderAdmin = $this->createTraderUser(self::$company->id);
+        self::$otherUserTraderAdminOfSameCompany = $this->createTraderUser(self::$company->id);
         self::$otherUserTraderAdmin = $this->createTraderUser(self::$otherCompany->id);
-        self::$endPoint = 'api/v1/trader/users/'.self::$userTraderAdmin->id;
+        self::$endPoint = 'api/v1/trader/users/'.self::$otherUserTraderAdminOfSameCompany->id;
     }
 
     /**
