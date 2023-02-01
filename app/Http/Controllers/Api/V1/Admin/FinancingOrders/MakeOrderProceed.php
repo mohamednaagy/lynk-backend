@@ -39,7 +39,11 @@ class MakeOrderProceed extends Controller
         return DB::transaction(function () use ($request, $traderOrder, $makeOrderProceed) {
             $traderOrder = TraderOrder::lockForUpdate()->findOrFail($traderOrder);
 
-            $makeOrderProceedResponse = $makeOrderProceed->handle($traderOrder, $request->validated('case'));
+            $makeOrderProceedResponse = $makeOrderProceed->handle(
+                $traderOrder,
+                $request->validated('case'),
+                true
+            );
 
             return $this->successResponse($makeOrderProceedResponse);
         });

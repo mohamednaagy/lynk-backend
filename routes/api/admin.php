@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaComplet
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\GetMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\UpdateMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodity;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateSellingCommodityToClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
@@ -89,6 +90,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);
+
             Route::prefix('/{lender}/orders/{order}')->group(function () {
                 Route::prefix('/trader-orders/{trader_order}')->group(function () {
                     Route::post('/proceed', MakeOrderProceed::class);
@@ -98,6 +100,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                     Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
                     Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
                     Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
+                    Route::post('/selling-commodity-to-client', UpdateSellingCommodityToClient::class);
                 });
             });
         });

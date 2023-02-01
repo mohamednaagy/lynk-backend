@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\V1\Admin\Lender\Orders\MurabahaPurchaseOffer;
+namespace App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateDocumentRequest extends FormRequest
+class UpdateMurabahaPurchaseOfferRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

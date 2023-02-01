@@ -377,7 +377,6 @@ class FakeDriverTest extends TestCase
             'warehouse_or_vault_country' => 'Saudi Arabia',
             'inventory_record_id' => '1000',
             'warrant_percentage' => '100',
-            'warehouse_or_vault_operator_id' => '80',
             'warrant_no' => '658',
             'hs_code' => '#234',
             'uom' => 'Kilo',
