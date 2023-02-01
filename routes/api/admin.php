@@ -22,12 +22,14 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderSetting;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderStatuses;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderUserController;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\GetSellingCommodityCertificateToClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetPurchasingCommodity;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument\GetMurabhaCompleteDocument;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument\UpdateMurabhaCompleteDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\GetMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\UpdateMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodity;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateSellingCommodityCertificateToClient;
-use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\GetSellingCommodityCertificateToClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
@@ -52,18 +54,18 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
-    Route::middleware(['auth:sanctum', 'role:' . implode('|', [Role::Admin, Role::Manager])])->group(function () {
+    Route::middleware(['auth:sanctum', 'role:'.implode('|', [Role::Admin, Role::Manager])])->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::put('auth/profile', UpdateMyProfile::class);
 
         Route::apiResource('admins', AdminController::class);
 
         Route::get('/roles', GetAllRoles::class)->middleware(
-            'permission:' . perm(Area::SuperAdmin, [Subject::Roles, Action::Index])
+            'permission:'.perm(Area::SuperAdmin, [Subject::Roles, Action::Index])
         );
 
         Route::get('/permissions', GetAllPermissions::class)->middleware(
-            'permission:' . perm(Area::SuperAdmin, [Subject::Permissions, Action::Index])
+            'permission:'.perm(Area::SuperAdmin, [Subject::Permissions, Action::Index])
         );
 
         Route::prefix('settings')->group(function () {
@@ -99,6 +101,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                     Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
                     Route::get('/selling-commodity-to-client', GetSellingCommodityCertificateToClient::class);
                     Route::post('/selling-commodity-to-client', UpdateSellingCommodityCertificateToClient::class);
+                    Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
+                    Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
                 });
             });
         });
