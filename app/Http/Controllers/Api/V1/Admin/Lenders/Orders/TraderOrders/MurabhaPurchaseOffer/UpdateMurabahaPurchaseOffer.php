@@ -9,7 +9,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Admin\Lender\Orders\MurabahaPurchaseOffer\UpdateDocumentRequest;
+use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabahaPurchaseOfferRequest;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -31,7 +31,7 @@ class UpdateMurabahaPurchaseOffer extends Controller
     }
 
     public function __invoke(
-        UpdateDocumentRequest $request,
+        UpdateMurabahaPurchaseOfferRequest $request,
         Company $lender,
         int $order,
         TraderOrder $traderOrder

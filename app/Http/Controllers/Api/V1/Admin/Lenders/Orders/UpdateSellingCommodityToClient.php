@@ -6,7 +6,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Admin\Lenders\Orders\SellingCommodityToLender\UpdateSellingCommodityToClientRequest;
+use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdateSellingCommodityToClientRequest;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
