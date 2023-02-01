@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Stancl\VirtualColumn\VirtualColumn;
 
+/**
+ * @property mixed $traderOrder
+ */
 class TraderHistory extends Model
 {
     use HasFactory, VirtualColumn;
@@ -14,6 +17,7 @@ class TraderHistory extends Model
     protected $fillable = [
         'trader_order_id',
         'action',
+        'updated_at',
     ];
 
     public static function getCustomColumns(): array

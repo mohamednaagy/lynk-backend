@@ -60,7 +60,9 @@ class ProcessInProgressOrderTest extends TestCase
         });
 
         foreach ($notValidStatuses as $notValidStatus) {
-            self::$order->update(['status' => $notValidStatus]);
+            FinancingOrder::withoutEvents(function () use ($notValidStatus) {
+                self::$order->update(['status' => $notValidStatus]);
+            });
             $processOrder = new ProcessInProgressOrder(self::$order->id);
             $processOrder->handle();
             self::$order = self::$order->fresh();

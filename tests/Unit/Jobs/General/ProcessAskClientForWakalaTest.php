@@ -81,6 +81,17 @@ class ProcessAskClientForWakalaTest extends TestCase
         }
     }
 
+    public function test_process_ask_client_for_wakala_will_not_processed_if_order_is_verification_required_false()
+    {
+        self::$commoditySoldToCustomerOrder->update(['is_verification_required' => false]);
+        $processOrder = new ProcessAskClientForWakala(self::$commoditySoldToCustomerOrder->id);
+
+        $processOrder->handle();
+        self::$commoditySoldToCustomerOrder = self::$commoditySoldToCustomerOrder->fresh();
+
+        $this->assertTrue(self::$commoditySoldToCustomerOrder->status->is(FinancingOrderStatus::WaitingClientWakala));
+    }
+
     public function test_process_ask_client_for_wakala_sms_sent_successfully()
     {
         Event::fake([

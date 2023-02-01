@@ -2,8 +2,11 @@
 
 namespace App\Transformers;
 
+use App\Enums\FinancingOrderHistory;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
+use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -16,8 +19,10 @@ class TraderOrderTransformer extends TransformerAbstract
         'financing_order_id',
         'reference',
         'provider',
-        'data',
+        'purchasing_commodity_information',
         'status',
+        'is_cancellable',
+        'history',
     ];
 
     public function transform(TraderOrder $traderOrder)
@@ -45,11 +50,59 @@ class TraderOrderTransformer extends TransformerAbstract
         return $this->primitive($traderOrder->provider);
     }
 
+    public function includeIsCancellable(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->isCancellable());
+    }
+
+    public function includeHistory(TraderOrder $traderOrder): Collection
+    {
+        return $this->collection(collect([
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
+            FinancingOrderHistory::ContractSigned,
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+            'client_wakala',
+            FinancingOrderHistory::IssueMurabahaOffer,
+            FinancingOrderHistory::MurabahaSaleCompleted,
+        ]), new TraderHistoryTransformer($traderOrder));
+    }
+
     public function includeStatus(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive([
             'description' => TraderOrderStatus::fromValue($traderOrder->status)->description,
             'value' => TraderOrderStatus::fromValue($traderOrder->status)->value,
         ]);
+    }
+
+    public function includePurchasingCommodityInformation(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive([
+            'uom' => $traderOrder->uom,
+            'owner' => $traderOrder->owner,
+            'amount' => $traderOrder->amount,
+            'product' => $traderOrder->product,
+            'currency' => $traderOrder->currency,
+            'quantity' => $traderOrder->quantity,
+            'warehouse' => $traderOrder->warehouse,
+            'ptp_document' => $this->fileUrl($traderOrder->getFirstMedia(TraderOrderMediaCollection::PromiseToPurchase)),
+            'exchange_rate' => $traderOrder->exchange_rate,
+            'previous_owner' => $traderOrder->previous_owner,
+            'warehouse_or_vault_country' => $traderOrder->warehouse_or_vault_country,
+            'warehouse_or_vault_emirates' => $traderOrder->warehouse_or_vault_emirates,
+            'date_time_of_purchasing_commodity' => $traderOrder->date_time_of_purchasing_commodity,
+            'original_holding_certificate' => $this->fileUrl($traderOrder->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)),
+            'auto_generate_financing_institution_certificate' => $traderOrder->auto_generate_financing_institution_certificate,
+            'financing_institution_certificate' => $this->fileUrl($traderOrder->getFirstMedia(TraderOrderMediaCollection::TransferOwnershipToLender)),
+        ]);
+    }
+
+    private function fileUrl($media): ?string
+    {
+        if ($media) {
+            return route('api.v1.media.download', ['media' => $media->uuid]);
+        }
+
+        return null;
     }
 }
