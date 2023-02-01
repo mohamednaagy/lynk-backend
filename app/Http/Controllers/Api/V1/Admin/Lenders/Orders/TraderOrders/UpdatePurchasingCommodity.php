@@ -7,7 +7,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Subject;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Http\Controllers\Controller;
@@ -64,7 +64,7 @@ class UpdatePurchasingCommodity extends Controller
             $this->attachDocumentToOrder(
                 $traderOrder,
                 base64_encode(file_get_contents($request->file('ptp_document'))),
-                FinancingOrderMediaCollection::PromiseToPurchase,
+                TraderOrderMediaCollection::PromiseToPurchase,
                 'base64'
             );
 
@@ -81,7 +81,7 @@ class UpdatePurchasingCommodity extends Controller
             $this->attachDocumentToOrder(
                 $traderOrder,
                 base64_encode(file_get_contents($request->file('original_holding_certificate'))),
-                FinancingOrderMediaCollection::TtiHoldingCertificate,
+                TraderOrderMediaCollection::TtiHoldingCertificate,
                 'base64'
             );
 
@@ -96,7 +96,7 @@ class UpdatePurchasingCommodity extends Controller
                 $this->attachDocumentToOrder(
                     $traderOrder,
                     base64_encode(file_get_contents($request->file('financing_institution_certificate'))),
-                    FinancingOrderMediaCollection::TransferOwnershipToLender,
+                    TraderOrderMediaCollection::TransferOwnershipToLender,
                     'base64'
                 );
 

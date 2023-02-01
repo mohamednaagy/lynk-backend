@@ -4,7 +4,7 @@ namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -86,7 +86,7 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
             $this->attachDocumentToOrder(
                 $traderOrder,
                 $warrantDocument,
-                FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
+                TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
                 'base64'
             );
 
