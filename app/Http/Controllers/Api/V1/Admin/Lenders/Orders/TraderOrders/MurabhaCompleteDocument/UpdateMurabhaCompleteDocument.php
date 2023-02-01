@@ -7,7 +7,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument\UpdateDocumentRequest;
+use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabhaCompleteDocumentRequest;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
@@ -19,7 +19,7 @@ class UpdateMurabhaCompleteDocument extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit, Action::Manage])
         );
     }
 
@@ -33,7 +33,7 @@ class UpdateMurabhaCompleteDocument extends Controller
      * @return JsonResponse
      */
     public function __invoke(
-        UpdateDocumentRequest $request,
+        UpdateMurabhaCompleteDocumentRequest $request,
         Company $lender,
         int $order,
         TraderOrder $traderOrder

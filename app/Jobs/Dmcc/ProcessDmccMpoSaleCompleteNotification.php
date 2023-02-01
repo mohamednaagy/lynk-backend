@@ -66,13 +66,6 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
 
             $trader = Trader::driver($traderOrder->provider);
 
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabahaSaleCompleted);
-
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::MurabahaSaleCompleted
-            );
-
             $warrantDocument = $trader->getDocumentByTypeAndTransaction(
                 $this->ttiId,
                 'Warrant Amendment Except Warrant No'
@@ -94,6 +87,13 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
                 $traderOrder,
                 FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument
             );
+
+            $trader->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::MurabahaSaleCompleted
+            );
+
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabahaSaleCompleted);
         });
     }
 

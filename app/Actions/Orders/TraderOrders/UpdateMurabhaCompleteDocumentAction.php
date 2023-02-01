@@ -29,18 +29,7 @@ class UpdateMurabhaCompleteDocumentAction implements UpdateMurabhaCompleteDocume
     {
         $order = FinancingOrder::lockForUpdate()->findOrFail($order);
 
-        if ($order->status->cantMoveTo(FinancingOrderStatus::MurabahaSaleCompleted)) {
-            throw new OrderStatusDoesNotFollowSequenceException();
-        }
-
         $trader = Trader::driver($traderOrder->provider);
-
-        $trader->updateOrderStatus($order, FinancingOrderStatus::MurabahaSaleCompleted);
-
-        $trader->createTraderOrderHistory(
-            $traderOrder,
-            FinancingOrderHistory::MurabahaSaleCompleted
-        );
 
         $trader->createTraderOrderHistory(
             $traderOrder,
@@ -58,5 +47,12 @@ class UpdateMurabhaCompleteDocumentAction implements UpdateMurabhaCompleteDocume
             $traderOrder,
             FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument
         );
+
+        $trader->createTraderOrderHistory(
+            $traderOrder,
+            FinancingOrderHistory::MurabahaSaleCompleted
+        );
+
+        $trader->updateOrderStatus($order, FinancingOrderStatus::MurabahaSaleCompleted);
     }
 }

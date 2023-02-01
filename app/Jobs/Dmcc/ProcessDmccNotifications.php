@@ -54,7 +54,6 @@ class ProcessDmccNotifications implements ShouldQueue
         )->each(function ($notification) {
             if (
                 in_array($notification->notificationHeaderAndEntity->notification, [
-                    'Murabaha Sale Completed',
                     'Tradeflow Transaction (Islamic) - Payment Settlement Required',
                 ])
             ) {
