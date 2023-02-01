@@ -26,7 +26,8 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetPurchasingC
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\GetMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\UpdateMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodity;
-use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateSellingCommodityToClient;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateSellingCommodityCertificateToClient;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\GetSellingCommodityCertificateToClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
@@ -51,18 +52,18 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
-    Route::middleware(['auth:sanctum', 'role:'.implode('|', [Role::Admin, Role::Manager])])->group(function () {
+    Route::middleware(['auth:sanctum', 'role:' . implode('|', [Role::Admin, Role::Manager])])->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::put('auth/profile', UpdateMyProfile::class);
 
         Route::apiResource('admins', AdminController::class);
 
         Route::get('/roles', GetAllRoles::class)->middleware(
-            'permission:'.perm(Area::SuperAdmin, [Subject::Roles, Action::Index])
+            'permission:' . perm(Area::SuperAdmin, [Subject::Roles, Action::Index])
         );
 
         Route::get('/permissions', GetAllPermissions::class)->middleware(
-            'permission:'.perm(Area::SuperAdmin, [Subject::Permissions, Action::Index])
+            'permission:' . perm(Area::SuperAdmin, [Subject::Permissions, Action::Index])
         );
 
         Route::prefix('settings')->group(function () {
@@ -96,7 +97,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                     Route::get('/purchasing-commodity', GetPurchasingCommodity::class);
                     Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
                     Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
-                    Route::post('/selling-commodity-to-client', UpdateSellingCommodityToClient::class);
+                    Route::get('/selling-commodity-to-client', GetSellingCommodityCertificateToClient::class);
+                    Route::post('/selling-commodity-to-client', UpdateSellingCommodityCertificateToClient::class);
                 });
             });
         });
