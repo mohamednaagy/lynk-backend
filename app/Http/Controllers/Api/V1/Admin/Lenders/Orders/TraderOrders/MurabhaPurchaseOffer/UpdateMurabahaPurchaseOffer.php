@@ -8,7 +8,6 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Subject;
-use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lender\Orders\MurabahaPurchaseOffer\UpdateDocumentRequest;
 use App\Models\Company;
@@ -39,10 +38,6 @@ class UpdateMurabahaPurchaseOffer extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($request, $order, $traderOrder) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
-
-            if ($order->status->cantMoveTo(FinancingOrderStatus::MurabhaOfferIssued)) {
-                throw new OrderStatusDoesNotFollowSequenceException();
-            }
 
             $trader = Trader::driver($traderOrder->provider);
 
