@@ -84,7 +84,7 @@ class UserControllerDestroyTest extends TestCase
      */
     public function test_trader_admin_user_can_delete_trader_user_successful(): void
     {
-        $traderUserCount = User::query()->count();
+        $traderUserCount = self::$company->users()->count();
 
         $this->actingAs(self::$userTraderAdmin)
             ->withHeader('X-Company', self::$company->id)
@@ -94,7 +94,7 @@ class UserControllerDestroyTest extends TestCase
                 'data' => [],
             ]);
 
-        $newTraderUserCount = User::query()->count();
+        $newTraderUserCount = self::$company->users()->count();
 
         $this->assertEquals($newTraderUserCount, $traderUserCount - 1);
     }
