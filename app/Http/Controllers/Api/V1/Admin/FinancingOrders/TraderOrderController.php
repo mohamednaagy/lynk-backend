@@ -65,6 +65,13 @@ class TraderOrderController extends Controller
             throw new ModelNotFoundException();
         }
 
+        $order->load([
+            'traderOrders' => function ($query) use ($trader) {
+                $query->where('provider', $trader->driver)->latest('id');
+            },
+            'traderOrders.traderHistories',
+        ]);
+
         return fractal($order, new FinancingOrderTransformer($trader))
             ->parseIncludes([
                 'id',
@@ -74,6 +81,13 @@ class TraderOrderController extends Controller
                 'amount',
                 'selling_price',
                 'created_at',
+                'trader_orders.id',
+                'trader_orders.reference',
+                'trader_orders.provider',
+                'trader_orders.is_cancellable',
+                'trader_orders.history',
+                'trader_orders.status',
+                'trader_orders.created_at',
             ])
             ->respond();
     }
