@@ -10,6 +10,7 @@ use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Transformers\FinancingOrderTransformer;
 use Illuminate\Http\JsonResponse;
+use Stancl\Tenancy\Database\TenantScope;
 
 class OrderController extends Controller
 {
@@ -50,6 +51,9 @@ class OrderController extends Controller
                 $query->where('provider', tenant()->driver)->latest('id');
             },
             'traderOrders.traderHistories',
+            'traderOrders.order' => function ($query) {
+                return $query->withoutGlobalScope(TenantScope::class);
+            },
         ]);
 
         return fractal($order, new FinancingOrderTransformer())
