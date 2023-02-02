@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +18,7 @@ use Stancl\VirtualColumn\VirtualColumn;
  * @property mixed $reference
  * @property mixed $order
  * @property mixed $traderHistories
+ * @property Carbon $created_at
  */
 class TraderOrder extends Model implements HasMedia
 {

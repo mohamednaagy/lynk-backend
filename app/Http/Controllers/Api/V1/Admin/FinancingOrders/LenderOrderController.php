@@ -90,6 +90,7 @@ class LenderOrderController extends Controller
                 'trader_orders.is_cancellable',
                 'trader_orders.history',
                 'trader_orders.status',
+                'trader_orders.created_at',
                 'creator',
                 'created_at',
             ])
