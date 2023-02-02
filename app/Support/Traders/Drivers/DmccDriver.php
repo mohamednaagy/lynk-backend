@@ -244,7 +244,7 @@ class DmccDriver implements TraderInterface
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
         try {
-            $dateTime = Carbon::createFromFormat('d/m/Y H:i A', $traderOrder->dateTimeOfPurchasingCommodity);
+            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $traderOrder->date_time_of_purchasing_commodity);
 
             $this->storeOrderDocumentAsPdf(
                 'selling-commodity-to-customer',
@@ -379,15 +379,15 @@ class DmccDriver implements TraderInterface
             'warehouse' => $details->warehouseOrVaultId,
             'owner' => $details->owner,
             'previous_owner' => $details->previousOwner,
-            'new_owner' => $details->newOwner,
-            'date_time_of_purchasing_commodity' => $details->dateTimeOfPurchasingCommodity,
+            'date_time_of_purchasing_commodity' => Carbon::createFromFormat(
+                'd/m/Y H:i A',
+                $details->dateTimeOfPurchasingCommodity
+            )
+                ->format('Y-m-d H:i:s'),
             'warehouse_or_vault_emirates' => $details->warehouseOrVaultEmirates,
             'warehouse_or_vault_country' => $details->warehouseOrVaultCountry,
             'inventory_record_id' => $details->inventoryRecordId,
             'warrant_percentage' => $details->warrantPercentage,
-            'warehouse_or_vault_operator_id' => $details->warehouseOrVaultOperatorId,
-            'warrant_no' => $details->warrantNo,
-            'hs_code' => $details->hsCode,
             'uom' => $details->uom,
             'exchange_rate' => $response->object()->exchangeRate,
         ]);

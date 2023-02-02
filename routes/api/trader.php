@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\V1\Trader\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Trader\FinancingOrders\OrderController;
 use App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders\MurabhaPurchaseOffer\GetMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders\MurabhaPurchaseOffer\UpdateMurabahaPurchaseOffer;
+use App\Http\Controllers\Api\V1\Trader\TraderOrders\GetPurchasingCommodity;
+use App\Http\Controllers\Api\V1\Trader\TraderOrders\UpdatePurchasingCommodity;
 use App\Http\Controllers\Api\V1\Trader\Users\UserController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
@@ -34,6 +36,16 @@ Route::prefix('v1/trader')->name('api.v1.')->group(function () {
 
         Route::middleware('checkCompanyStatus')->group(function () {
             Route::put('auth/profile', UpdateMyProfile::class);
+
+            Route::prefix('orders/{order}/')->group(function () {
+                Route::prefix('trader_orders/{trader_order}')->group(function () {
+                    Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
+                    Route::get('/purchasing-commodity', GetPurchasingCommodity::class);
+                });
+            });
+
+//            Route::post('orders/{order}/trader_orders/{trader_order}/purchasing-commodity', UpdatePurchasingCommodity::class);
+//            Route::get('/trader_orders/{trader_order}/purchasing-commodity', GetPurchasingCommodity::class);
 
             Route::apiResource('users', UserController::class);
             Route::apiResource('orders', OrderController::class)->only(['index', 'show']);

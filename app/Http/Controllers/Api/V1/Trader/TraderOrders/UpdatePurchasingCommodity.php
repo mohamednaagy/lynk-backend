@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders;
+namespace App\Http\Controllers\Api\V1\Trader\TraderOrders;
 
+use App\Actions\Contracts\Orders\GetOrder;
 use App\Actions\Contracts\Orders\UpdateTraderOrder;
 use App\Enums\Action;
 use App\Enums\Area;
@@ -9,10 +10,9 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Subject;
+use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodityRequest;
-use App\Models\Company;
-use App\Models\FinancingOrder;
+use App\Http\Requests\V1\Trader\Orders\UpdatePurchasingCommodityRequest;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TraderHelperTrait;
@@ -28,19 +28,23 @@ class UpdatePurchasingCommodity extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show, Action::Manage])
+                perm(Area::Trader, [Subject::FinancingOrders, Action::Show, Action::Manage])
         );
     }
 
     public function __invoke(
         UpdatePurchasingCommodityRequest $request,
         UpdateTraderOrder $updateTraderOrder,
-        Company $lender,
+        GetOrder $getOrder,
         int $order,
         TraderOrder $traderOrder
     ): JsonResponse {
-        return DB::transaction(function () use ($order, $traderOrder, $request, $updateTraderOrder) {
-            $order = FinancingOrder::lockForUpdate()->findOrFail($order);
+        return DB::transaction(function () use ($getOrder, $order, $traderOrder, $request, $updateTraderOrder) {
+            $order = $getOrder->setCompany(tenant())->handle($order);
+
+            if ($order->status->cantMoveTo(FinancingOrderStatus::CommodityPurchased)) {
+                throw new OrderStatusDoesNotFollowSequenceException();
+            }
 
             $trader = Trader::driver($traderOrder->provider);
 
