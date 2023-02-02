@@ -4,6 +4,8 @@ use App\Enums\Role;
 use App\Http\Controllers\Api\V1\Trader\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Trader\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Trader\FinancingOrders\OrderController;
+use App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders\MurabhaPurchaseOffer\GetMurabahaPurchaseOffer;
+use App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders\MurabhaPurchaseOffer\UpdateMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Trader\Users\UserController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
@@ -35,6 +37,12 @@ Route::prefix('v1/trader')->name('api.v1.')->group(function () {
 
             Route::apiResource('users', UserController::class);
             Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
+            Route::prefix('orders/{order}')->group(function () {
+                Route::prefix('trader-orders/{trader_order}')->group(function () {
+                    Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
+                    Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
+                });
+            });
         });
     });
 });
