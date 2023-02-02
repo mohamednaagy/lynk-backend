@@ -26,11 +26,13 @@ class UpdateMurabhaCompleteDocument extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  UpdateDocumentRequest  $request
+     * @param  UpdateMurabhaCompleteDocumentRequest  $request
      * @param  Company  $lender
      * @param  int  $order
      * @param  TraderOrder  $traderOrder
      * @return JsonResponse
+     *
+     * @throws \Throwable
      */
     public function __invoke(
         UpdateMurabhaCompleteDocumentRequest $request,
