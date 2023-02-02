@@ -12,7 +12,7 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Subject;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Trader\Orders\UpdatePurchasingCommodityRequest;
+use App\Http\Requests\V1\Trader\Orders\TraderOrders\UpdatePurchasingCommodityRequest;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TraderHelperTrait;
