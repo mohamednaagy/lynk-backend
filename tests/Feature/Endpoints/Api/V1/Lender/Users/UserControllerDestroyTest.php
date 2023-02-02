@@ -2,19 +2,17 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Lender\Users;
 
-use App\Enums\Area;
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
-use App\Transformers\UserTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
 
-class UserControllerShowTest extends TestCase
+class UserControllerDestroyTest extends TestCase
 {
     use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
@@ -58,10 +56,10 @@ class UserControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_un_auth_user_cant_show_lender_user_unsuccessful(): void
+    public function test_un_auth_user_cant_delete_lender_user_unsuccessful(): void
     {
         $this->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/users/'.self::$userLenderAdmin->id)
+            ->deleteJson('api/v1/lender/users/'.self::$userLenderAdmin->id)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -71,98 +69,87 @@ class UserControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_lender_admin_user_can_show_lender_user_successful(): void
+    public function test_lender_admin_user_can_delete_lender_user_successful(): void
     {
+        $lenderUserCount = self::$company->users()->count();
+
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/users/'.self::$userLenderAdmin->id)
+            ->deleteJson(
+                'api/v1/lender/users/'.
+                    self::$company->users()
+                        ->latest('created_at')->first()->id
+            )
             ->assertOk()
-            ->assertExactJson(
-                fractal(self::$userLenderAdmin, new UserTransformer(Area::Lender))
-                    ->parseIncludes([
-                        'id',
-                        'first_name',
-                        'last_name',
-                        'email',
-                        'role',
-                        'phone_number',
-                        'phone_country_code',
-                        'formatted_phone_number',
-                    ])->respond()
-                    ->getData(true)
-            );
+            ->assertExactJson([
+                'data' => [],
+            ]);
+
+        $newLenderUserCount = self::$company->users()->count();
+
+        $this->assertEquals($newLenderUserCount, $lenderUserCount - 1);
     }
 
     /**
      * @return void
      */
-    public function test_lender_supervisor_user_cant_show_lender_user_unsuccessful(): void
+    public function test_lender_supervisor_user_cant_delete_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderSupervisor)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/users/'.self::$userLenderAdmin->id)
+            ->deleteJson('api/v1/lender/users/'.self::$company->users()
+                ->latest('created_at')->first()->id)
             ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_lender_billing_user_cant_show_lender_user_unsuccessful(): void
+    public function test_lender_billing_user_cant_delete_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderBilling)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/users/'.self::$userLenderAdmin->id)
+            ->deleteJson('api/v1/lender/users/'.self::$userLenderAdmin->id)
             ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_lender_api_user_cant_show_lender_user_unsuccessful(): void
+    public function test_lender_api_user_cant_delete_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderApi)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/users/'.self::$userLenderAdmin->id)
+            ->deleteJson('api/v1/lender/users/'.self::$userLenderAdmin->id)
             ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_lender_order_creator_user_cant_show_lender_user_unsuccessful(): void
+    public function test_lender_order_creator_user_cant_delete_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/users/'.self::$userLenderAdmin->id)
+            ->deleteJson('api/v1/lender/users/'.self::$userLenderAdmin->id)
             ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_lender_admin_user_cant_show_lender_user_in_other_company_unsuccessful(): void
+    public function test_lender_admin_user_cant_delete_lender_user_in_other_company_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/users/'.self::$otherUserLenderAdmin->id)
+            ->deleteJson('api/v1/lender/users/'.self::$otherUserLenderAdmin->id)
             ->assertNotFound();
     }
 
     /**
      * @return void
      */
-    public function test_lender_admin_user_cant_show_api_user_in_same_company_unsuccessful(): void
-    {
-        $this->actingAs(self::$userLenderAdmin)
-            ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/users/'.self::$userLenderApi->id)
-            ->assertNotFound();
-    }
-
-    /**
-     * @return void
-     */
-    public function test_lender_admin_user_cant_show_lender_users_case_company_pending_unsuccessful(): void
+    public function test_lender_lender_admin_user_cant_delete_lender_users_case_company_pending_unsuccessful(): void
     {
         self::$company->update([
             'status' => CompanyStatus::Pending,
@@ -170,14 +157,14 @@ class UserControllerShowTest extends TestCase
 
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/users/'.self::$userLenderSupervisor->id)
+            ->deleteJson('api/v1/lender/users/'.self::$userLenderSupervisor->id)
             ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_lender_admin_user_cant_show_lender_users_case_company_under_review_unsuccessful(): void
+    public function test_lender_lender_admin_user_cant_delete_lender_users_case_company_under_review_unsuccessful(): void
     {
         self::$company->update([
             'status' => CompanyStatus::UnderReview,
@@ -185,14 +172,14 @@ class UserControllerShowTest extends TestCase
 
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/users/'.self::$userLenderSupervisor->id)
+            ->deleteJson('api/v1/lender/users/'.self::$userLenderSupervisor->id)
             ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_lender_admin_user_cant_show_lender_users_case_company_rejected_unsuccessful(): void
+    public function test_lender_lender_admin_user_cant_delete_lender_users_case_company_rejected_unsuccessful(): void
     {
         self::$company->update([
             'status' => CompanyStatus::Rejected,
@@ -200,14 +187,14 @@ class UserControllerShowTest extends TestCase
 
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/users/'.self::$userLenderSupervisor->id)
+            ->deleteJson('api/v1/lender/users/'.self::$userLenderSupervisor->id)
             ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_lender_admin_user_cant_show_lender_users_case_email_not_verified_unsuccessful(): void
+    public function test_lender_lender_admin_user_cant_delete_lender_users_case_email_not_verified_unsuccessful(): void
     {
         self::$userLenderAdmin->update([
             'email_verified_at' => null,
@@ -215,7 +202,7 @@ class UserControllerShowTest extends TestCase
 
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/users/'.self::$userLenderSupervisor->id)
+            ->deleteJson('api/v1/lender/users/'.self::$userLenderSupervisor->id)
             ->assertForbidden();
     }
 }
