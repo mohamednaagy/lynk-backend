@@ -168,7 +168,7 @@ class FinancingOrderTransformer extends TransformerAbstract
             'client_wakala',
             FinancingOrderHistory::IssueMurabahaOffer,
             FinancingOrderHistory::MurabahaSaleCompleted,
-        ]), new TraderHistoryTransformer($financingOrder->activeTraderOrder()->first()));
+        ]), new TraderHistoryTransformer($activeTraderOrder));
     }
 
     public function includeTraderOrders(FinancingOrder $financingOrder): Collection
