@@ -42,6 +42,11 @@ class UserController extends Controller
             'permission:'.
             perm(Area::Trader, [Subject::TraderUsers, Action::Edit, Action::Manage])
         )->only('update');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::Trader, [Subject::TraderUsers, Action::Edit, Action::Manage])
+        )->only('destroy');
     }
 
     /**
