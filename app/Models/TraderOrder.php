@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
+use UnexpectedValueException;
 
 /**
  * @property mixed $reference
@@ -92,5 +93,16 @@ class TraderOrder extends Model implements HasMedia
         $traderHistoryActions = $this->traderHistories->pluck('action')->toArray();
 
         return ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions));
+    }
+
+    public function checkOrderStepComplete(int $status): bool
+    {
+        if (! array_key_exists($status, FinancingOrderHistory::$orderHistoryLastActionMap)) {
+            throw new UnexpectedValueException('no mapping for this status');
+        }
+
+        return (bool) $this->traderHistories
+            ->where('action', FinancingOrderHistory::$orderHistoryLastActionMap[$status])
+            ->first();
     }
 }
