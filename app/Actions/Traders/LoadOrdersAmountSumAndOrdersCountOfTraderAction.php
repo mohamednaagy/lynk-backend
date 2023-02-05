@@ -13,10 +13,19 @@ class LoadOrdersAmountSumAndOrdersCountOfTraderAction implements LoadOrdersAmoun
      */
     public function handle(Company $trader)
     {
-        return $trader->loadCount(
-            [
-                'traderOrders.order',
-            ]
-        );
+        return Company::query()
+            ->with([
+                'traderOrders' => function ($query) {
+                    $query->notCancelled()
+                        ->select('id', 'financing_order_id', 'provider', 'status')
+                        ->withSum('order', 'amount');
+                },
+            ])
+            ->join('trader_orders', 'companies.driver', '=', 'trader_orders.provider')
+            ->select('companies.*')
+            ->selectRaw('COUNT(DISTINCT trader_orders.financing_order_id) as order_count')
+            ->where('companies.id', $trader->id)
+            ->groupBy('companies.id')
+            ->first();
     }
 }

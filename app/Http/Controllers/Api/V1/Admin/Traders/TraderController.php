@@ -97,7 +97,7 @@ class TraderController extends Controller
         Company $trader,
         LoadOrdersAmountSumAndOrdersCountOfTrader $loadOrdersAmountSumAndOrdersCountOfTrader
     ) {
-        $loadOrdersAmountSumAndOrdersCountOfTrader->handle($trader);
+        $trader = $loadOrdersAmountSumAndOrdersCountOfTrader->handle($trader);
 
         return fractal($trader, new CompanyTransformer())
             ->parseIncludes([

@@ -94,6 +94,6 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeOrdersSumAmount(Company $company): Primitive
     {
-        return $this->primitive($company->orders_sum_amount);
+        return $this->primitive($company->traderOrders->sum('order_sum_amount'));
     }
 }
