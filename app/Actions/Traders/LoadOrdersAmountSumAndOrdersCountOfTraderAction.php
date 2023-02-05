@@ -21,7 +21,7 @@ class LoadOrdersAmountSumAndOrdersCountOfTraderAction implements LoadOrdersAmoun
                         ->withSum('order', 'amount');
                 },
             ])
-            ->join('trader_orders', 'companies.driver', '=', 'trader_orders.provider')
+            ->leftJoin('trader_orders', 'companies.driver', '=', 'trader_orders.provider')
             ->select('companies.*')
             ->selectRaw('COUNT(DISTINCT trader_orders.financing_order_id) as orders_count')
             ->where('companies.id', $trader->id)
