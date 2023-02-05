@@ -62,6 +62,11 @@ class Company extends BaseTenant
         return $this->hasMany(FinancingOrder::class);
     }
 
+    public function traderOrders(): HasMany
+    {
+        return $this->hasMany(TraderOrder::class, 'provider', 'driver');
+    }
+
     public function webhooks(): HasMany
     {
         return $this->hasMany(Webhook::class);
