@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Actions\Orders\TraderOrders;
+
+use App\Actions\Contracts\Orders\TraderOrders\ProceedMurabhaCompleteDocument;
+use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
+use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
+use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\TraderHelperTrait;
+use Illuminate\Http\Request;
+
+class ProceedMurabhaCompleteDocumentAction implements ProceedMurabhaCompleteDocument
+{
+    use TraderHelperTrait;
+
+    /**
+     * @param  Request  $request
+     * @param  int  $order
+     * @param  TraderOrder  $traderOrder
+     * @return void
+     *
+     * @throws OrderStatusDoesNotFollowSequenceException
+     */
+    public function handle(Request $request, int $order, TraderOrder $traderOrder): void
+    {
+        $order = FinancingOrder::lockForUpdate()->findOrFail($order);
+
+        $trader = Trader::driver($traderOrder->provider);
+
+        $trader->createTraderOrderHistory(
+            $traderOrder,
+            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument
+        );
+
+        $this->attachDocumentToOrder(
+            $traderOrder,
+            base64_encode(file_get_contents($request->file('document'))),
+            TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
+            'base64'
+        );
+
+        $trader->createTraderOrderHistory(
+            $traderOrder,
+            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument
+        );
+
+        $trader->createTraderOrderHistory(
+            $traderOrder,
+            FinancingOrderHistory::MurabahaSaleCompleted
+        );
+
+        $trader->updateOrderStatus($order, FinancingOrderStatus::MurabahaSaleCompleted);
+    }
+}

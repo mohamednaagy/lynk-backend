@@ -7,5 +7,5 @@ use Illuminate\Http\Request;
 
 interface UpdateMurabhaCompleteDocument
 {
-    public function handle(Request $request, int $order, TraderOrder $traderOrder): void;
+    public function handle(Request $request, TraderOrder $traderOrder): void;
 }
