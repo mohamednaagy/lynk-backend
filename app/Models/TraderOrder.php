@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use Carbon\Carbon;
@@ -14,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
+use UnexpectedValueException;
 
 /**
  * @property mixed $reference
@@ -95,9 +95,14 @@ class TraderOrder extends Model implements HasMedia
         return ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions));
     }
 
-    //checkLastActionExists :)
-    public function stillAlive(int|FinancingOrderStatus $status): bool
+    public function checkOrderStepComplete(int $status): bool
     {
-        return (bool) $this->traderHistories->where('action', FinancingOrderHistory::$stepsSlayer[$status])->first();
+        if (! array_key_exists($status, FinancingOrderHistory::$orderHistoryLastActionMap)) {
+            throw new UnexpectedValueException('no mapping for this status');
+        }
+
+        return (bool) $this->traderHistories
+            ->where('action', FinancingOrderHistory::$orderHistoryLastActionMap[$status])
+            ->first();
     }
 }
