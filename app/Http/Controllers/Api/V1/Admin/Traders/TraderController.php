@@ -6,7 +6,7 @@ use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\Companies\GetPaginatedCompanies;
 use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Actions\Contracts\GetSettingsClassInstance;
-use App\Actions\Contracts\Traders\ShowTrader;
+use App\Actions\Contracts\Traders\LoadOrdersAmountSumAndOrdersCountOfTrader;
 use App\Actions\Contracts\Wallets\CreateWallet;
 use App\Enums\Action;
 use App\Enums\Area;
@@ -93,11 +93,13 @@ class TraderController extends Controller
         );
     }
 
-    public function show(Company $trader, ShowTrader $showTrader)
-    {
-        $loadRelationsForTrader = $showTrader->handle($trader);
+    public function show(
+        Company $trader,
+        LoadOrdersAmountSumAndOrdersCountOfTrader $loadOrdersAmountSumAndOrdersCountOfTrader
+    ) {
+        $loadOrdersAmountSumAndOrdersCountOfTrader->handle($trader);
 
-        return fractal($loadRelationsForTrader, new CompanyTransformer())
+        return fractal($trader, new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',
