@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use Carbon\Carbon;
@@ -92,5 +93,11 @@ class TraderOrder extends Model implements HasMedia
         $traderHistoryActions = $this->traderHistories->pluck('action')->toArray();
 
         return ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions));
+    }
+
+    //checkLastActionExists :)
+    public function stillAlive(int|FinancingOrderStatus $status): bool
+    {
+        return (bool) $this->traderHistories->where('action', FinancingOrderHistory::$stepsSlayer[$status])->first();
     }
 }

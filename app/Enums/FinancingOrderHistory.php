@@ -51,4 +51,10 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
         self::AttachWarrantAmendmentExceptWarrantNoDocument,
         self::OrderCancelled,
     ];
+
+    public static array $stepsSlayer = [
+        FinancingOrderStatus::CommodityPurchased => self::GetMurabahaPurchaseOfferDocument,
+        FinancingOrderStatus::MurabhaOfferIssued => self::AttachMpoDocument,
+        FinancingOrderStatus::CommoditySoldToCustomer => self::CreateSellingCommodityToCustomerDocument,
+    ];
 }
