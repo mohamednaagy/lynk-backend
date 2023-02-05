@@ -47,57 +47,7 @@ class UpdatePurchasingCommodity extends Controller
             $data = $updateTraderOrder->handle($traderOrder, $request->validated());
 
             if (! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::CommodityPurchased)) {
-                $trader->createTraderOrderHistory(
-                    $traderOrder,
-                    FinancingOrderHistory::RespondPtp
-                );
-
-                $trader->createTraderOrderHistory(
-                    $traderOrder,
-                    FinancingOrderHistory::GetPtpDocument
-                );
-
-                $this->attachDocumentToOrder(
-                    $traderOrder,
-                    base64_encode(file_get_contents($request->file('ptp_document'))),
-                    TraderOrderMediaCollection::PromiseToPurchase,
-                    'base64'
-                );
-
-                $trader->createTraderOrderHistory(
-                    $traderOrder,
-                    FinancingOrderHistory::AttachPtpDocumentToOrder
-                );
-
-                $trader->createTraderOrderHistory(
-                    $traderOrder,
-                    FinancingOrderHistory::GetTtiHoldingCertificateDocument
-                );
-
-                $this->attachDocumentToOrder(
-                    $traderOrder,
-                    base64_encode(file_get_contents($request->file('original_holding_certificate'))),
-                    TraderOrderMediaCollection::TtiHoldingCertificate,
-                    'base64'
-                );
-
-                $trader->createTraderOrderHistory(
-                    $traderOrder,
-                    FinancingOrderHistory::AttachTtiHoldingCertificateDocument
-                );
-
-                if ($request->auto_generate_financing_institution_certificate) {
-                    $trader->createTransferOwnershipToLenderDocument($traderOrder);
-                } else {
-                    $this->attachDocumentToOrder(
-                        $traderOrder,
-                        base64_encode(file_get_contents($request->file('financing_institution_certificate'))),
-                        TraderOrderMediaCollection::TransferOwnershipToLender,
-                        'base64'
-                    );
-
-                    $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
-                }
+                $this->createStepHistory($trader, $traderOrder, $request);
 
                 $trader->updateOrderStatus($order, FinancingOrderStatus::CommodityPurchased);
             }
@@ -108,5 +58,60 @@ class UpdatePurchasingCommodity extends Controller
                 )
                 ->respond();
         });
+    }
+
+    protected function createStepHistory($trader, TraderOrder $traderOrder, $request)
+    {
+        $trader->createTraderOrderHistory(
+            $traderOrder,
+            FinancingOrderHistory::RespondPtp
+        );
+
+        $trader->createTraderOrderHistory(
+            $traderOrder,
+            FinancingOrderHistory::GetPtpDocument
+        );
+
+        $this->attachDocumentToOrder(
+            $traderOrder,
+            base64_encode(file_get_contents($request->file('ptp_document'))),
+            TraderOrderMediaCollection::PromiseToPurchase,
+            'base64'
+        );
+
+        $trader->createTraderOrderHistory(
+            $traderOrder,
+            FinancingOrderHistory::AttachPtpDocumentToOrder
+        );
+
+        $trader->createTraderOrderHistory(
+            $traderOrder,
+            FinancingOrderHistory::GetTtiHoldingCertificateDocument
+        );
+
+        $this->attachDocumentToOrder(
+            $traderOrder,
+            base64_encode(file_get_contents($request->file('original_holding_certificate'))),
+            TraderOrderMediaCollection::TtiHoldingCertificate,
+            'base64'
+        );
+
+        $trader->createTraderOrderHistory(
+            $traderOrder,
+            FinancingOrderHistory::AttachTtiHoldingCertificateDocument
+        );
+
+        if ($request->auto_generate_financing_institution_certificate) {
+            $trader->createTransferOwnershipToLenderDocument($traderOrder);
+        } else {
+            $this->attachDocumentToOrder(
+                $traderOrder,
+                base64_encode(file_get_contents($request->file('financing_institution_certificate'))),
+                TraderOrderMediaCollection::TransferOwnershipToLender,
+                'base64'
+            );
+
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+        }
     }
 }
