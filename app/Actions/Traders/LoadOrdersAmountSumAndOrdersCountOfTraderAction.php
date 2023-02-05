@@ -23,7 +23,7 @@ class LoadOrdersAmountSumAndOrdersCountOfTraderAction implements LoadOrdersAmoun
             ])
             ->join('trader_orders', 'companies.driver', '=', 'trader_orders.provider')
             ->select('companies.*')
-            ->selectRaw('COUNT(DISTINCT trader_orders.financing_order_id) as order_count')
+            ->selectRaw('COUNT(DISTINCT trader_orders.financing_order_id) as orders_count')
             ->where('companies.id', $trader->id)
             ->groupBy('companies.id')
             ->first();

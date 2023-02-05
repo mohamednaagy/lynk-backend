@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Traders;
 
-use App\Actions\Contracts\Traders\ShowTrader;
+use App\Actions\Contracts\Traders\LoadOrdersAmountSumAndOrdersCountOfTrader;
 use App\Enums\Area;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
@@ -35,7 +35,7 @@ class TraderCompanyControllerShowTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company] = $this->createTraderCompany(2000);
+        [self::$company] = $this->createTraderCompany(2000, ['driver' => 'fake']);
 
         self::$superAdmin = $this->createSuperAdminUser();
 
@@ -78,7 +78,7 @@ class TraderCompanyControllerShowTest extends TestCase
 
     public function test_trader_company_controller_show_succeed()
     {
-        $loadRelationsForTrader = app(ShowTrader::class)->handle(self::$company);
+        $loadRelationsForTrader = app(LoadOrdersAmountSumAndOrdersCountOfTrader::class)->handle(self::$company);
 
         $this->actingAs(self::$superAdmin)
             ->getJson('api/v1/admin/traders/'.self::$company->id)
