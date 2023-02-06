@@ -1,22 +1,21 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders;
+namespace Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders;
 
+use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
-use App\Models\Media;
-use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Str;
+use Illuminate\Http\Response;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
-class GetMurabahaPurchaseOfferTest extends TestCase
+class UpdateMurabahaPurchaseOfferTest extends TestCase
 {
     use RefreshDatabase, AssertsAccessByRoleAndArea;
 
@@ -49,24 +48,6 @@ class GetMurabahaPurchaseOfferTest extends TestCase
             'reference' => 123,
         ]);
 
-        Media::query()->create([
-            'model_type' => TraderOrder::class,
-            'model_id' => self::$traderOrder->id,
-            'uuid' => Str::uuid(),
-            'collection_name' => TraderOrderMediaCollection::MurabahaPurchaseOrder,
-            'name' => 'media-libraryHdFscO',
-            'file_name' => 'dmcc-6404.pdf',
-            'mime_type' => 'application/pdf',
-            'disk' => 'local',
-            'conversions_disk' => 'local',
-            'size' => '3028',
-            'manipulations' => [],
-            'custom_properties' => [],
-            'generated_conversions' => [],
-            'responsive_images' => [],
-            'order_column' => '1',
-        ]);
-
         self::$apiUrl = 'api/v1/trader/orders/'.self::$order->id.'/trader-orders/'.self::$traderOrder->id.'/murabaha-purchase-offer';
     }
 
@@ -76,23 +57,43 @@ class GetMurabahaPurchaseOfferTest extends TestCase
     public function test_unauth_user_cannot_access(): void
     {
         $this->withHeader('X-Company', self::$company->id)
-            ->getJson(self::$apiUrl)
+            ->postJson(self::$apiUrl)
             ->assertUnauthorized();
     }
 
-    /**
-     * @return void
-     */
-    public function test_auth_user_can_get_murabaha_purchase_offer(): void
+    public function test_auth_user_can_update_process_murabaha_purchase_offer(): void
     {
         $this->actingAs(self::$traderAdminUser)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson(self::$apiUrl)
+            ->postJson(self::$apiUrl, [
+                'document' => UploadedFile::fake()->create('test.pdf'),
+            ])
             ->assertOk()
             ->assertJsonStructure([
-                'data' => [
-                    'murabaha_purchase_offer',
-                ],
+                'data' => [],
             ]);
+
+        self::$order->update(['status' => FinancingOrderStatus::MurabahaSaleCompleted]);
+
+        $this->actingAs(self::$traderAdminUser)
+            ->withHeader('X-Company', self::$company->id)
+            ->postJson(self::$apiUrl, [
+                'document' => UploadedFile::fake()->create('test.pdf'),
+            ])
+            ->assertOk()
+            ->assertJsonStructure([
+                'data' => [],
+            ]);
+
+        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
+    }
+
+    public function test_other_users_areas_can_not_update_process_murabaha_purchase_offer()
+    {
+        $this->assertStatusCodeForAllRolesExceptForArea(Response::HTTP_FORBIDDEN, [Area::Trader], function ($user, $role) {
+            return $this->actingAs($user)
+                ->withHeader('X-Company', self::$company->id)
+                ->postJson(self::$apiUrl);
+        });
     }
 }

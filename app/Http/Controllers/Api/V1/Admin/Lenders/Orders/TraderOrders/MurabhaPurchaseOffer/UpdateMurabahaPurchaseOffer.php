@@ -26,7 +26,7 @@ class UpdateMurabahaPurchaseOffer extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit, Action::Manage])
         );
     }
 
@@ -46,7 +46,9 @@ class UpdateMurabahaPurchaseOffer extends Controller
                 FinancingOrderHistory::IssueMurabahaOffer
             );
 
-            $trader->updateOrderStatus($order, FinancingOrderStatus::MurabhaOfferIssued);
+            if (! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::MurabhaOfferIssued)) {
+                $trader->updateOrderStatus($order, FinancingOrderStatus::MurabhaOfferIssued);
+            }
 
             $trader->createTraderOrderHistory(
                 $traderOrder,
