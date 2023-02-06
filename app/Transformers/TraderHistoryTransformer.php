@@ -65,21 +65,21 @@ class TraderHistoryTransformer extends TransformerAbstract
             ],
             FinancingOrderHistory::IssueMurabahaOffer => [
                 'step' => 'selling_commodity_to_open_market',
-                'is_complete' => (bool) $this->traderHistories->where('action', FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)->first(),
+                'is_complete' => (bool) $this->traderHistories->where('action', FinancingOrderHistory::AttachMpoDocument)->first(),
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
                 'mpo_document' => [
                     'url' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder)),
                     'date' => optional($getMurabahaPurchaseOfferDocument)->created_at?->format('Y-m-d h:i:s A'),
-                ],
-                'warranty_document' => [
-                    'url' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo)),
-                    'date' => optional($getWarrantAmendmentExceptWarrantNoDocument)->created_at?->format('Y-m-d h:i:s A'),
                 ],
             ],
             FinancingOrderHistory::MurabahaSaleCompleted => [
                 'step' => 'murabha_sale_completed',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
+                'warranty_document' => [
+                    'url' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo)),
+                    'date' => optional($getWarrantAmendmentExceptWarrantNoDocument)->created_at?->format('Y-m-d h:i:s A'),
+                ],
             ],
             default => null,
         };

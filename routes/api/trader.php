@@ -46,9 +46,6 @@ Route::prefix('v1/trader')->name('api.v1.')->group(function () {
                 });
             });
 
-//            Route::post('orders/{order}/trader_orders/{trader_order}/purchasing-commodity', UpdatePurchasingCommodity::class);
-//            Route::get('/trader_orders/{trader_order}/purchasing-commodity', GetPurchasingCommodity::class);
-
             Route::apiResource('users', UserController::class);
             Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
         });
