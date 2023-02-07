@@ -7,6 +7,7 @@ use App\Actions\Contracts\Traders\GetPaginatedTraderUsers;
 use App\Actions\Contracts\Traders\UpdateTraderUserWithRoleAndPermission;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CompanyType;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Trader\Users\StoreUserRequest;
@@ -82,7 +83,8 @@ class UserController extends Controller
             $user = $createTraderUserWithRoleAndPermission->handle($request->validated());
 
             $invitationUrl = $request->validated('redirect_url');
-            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl));
+
+            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Trader));
 
             $user->load('roles', 'permissions');
 

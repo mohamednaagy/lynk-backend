@@ -1,15 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Lender\Auth;
+namespace App\Http\Controllers\Api\V1\Trader\Auth;
 
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\CompanyType;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Lender\Auth\ResendInvitationRequest;
+use App\Http\Requests\V1\Trader\Auth\ResendInvitationRequest;
 use App\Mail\CompleteRegisterInvitation;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Mail;
 
 class ResendInvitation extends Controller
@@ -18,15 +19,15 @@ class ResendInvitation extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderUsers, Action::Create, Action::Manage])
+            perm(Area::Trader, [Subject::TraderUsers, Action::Create, Action::Manage])
         );
     }
 
-    public function __invoke(ResendInvitationRequest $request, User $user)
+    public function __invoke(ResendInvitationRequest $request, User $user): JsonResponse
     {
         if (is_null($user->password)) {
             $invitationUrl = $request->validated('redirect_url');
-            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Lender));
+            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Trader));
         }
 
         return $this->successResponse();
