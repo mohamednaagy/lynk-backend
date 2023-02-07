@@ -1,7 +1,9 @@
 <?php
 
 use App\Enums\Role;
+use App\Http\Controllers\Api\V1\Trader\Auth\CompleteRegister;
 use App\Http\Controllers\Api\V1\Trader\Auth\GetAuthUser;
+use App\Http\Controllers\Api\V1\Trader\Auth\ResendInvitation;
 use App\Http\Controllers\Api\V1\Trader\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Trader\FinancingOrders\OrderController;
 use App\Http\Controllers\Api\V1\Trader\TraderOrders\GetPurchasingCommodity;
@@ -28,7 +30,6 @@ Route::prefix('v1/trader')->name('api.v1.')->group(function () {
         'role:'.implode('|', [
             Role::TraderAdmin,
         ]),
-        InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
 
@@ -42,8 +43,11 @@ Route::prefix('v1/trader')->name('api.v1.')->group(function () {
                 });
             });
 
+            Route::post('users/{user}/resend-invitation', ResendInvitation::class);
             Route::apiResource('users', UserController::class);
             Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
         });
     });
+
+    Route::post('{user}/complete-register', CompleteRegister::class)->name('trader.complete-register');
 });
