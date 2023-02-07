@@ -13,7 +13,7 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
     public function handle(FinancingOrder $financingOrder, string $product, string $quantity): void
     {
         $phoneNumber = ltrim($financingOrder->getPhoneNumber()->formatE164(), '+');
-        $message = $this->smsMessageDependsOnOrderVerification($financingOrder, $product, $quantity);
+        $message = $this->resolveSmsMessage($financingOrder, $product, $quantity);
 
         Sms::send(
             $message,
@@ -21,10 +21,14 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
         );
     }
 
-    private function smsMessageDependsOnOrderVerification(FinancingOrder $financingOrder, $product, $quantity)
+    private function resolveSmsMessage(FinancingOrder $financingOrder, $product, $quantity)
     {
-        $sellingPrice = optional($financingOrder->selling_price)->getAmount() ?? '';
-        $url = Config::get('app.url');
+        $uom = $financingOrder->activeTraderOrder()
+            ->first()->uom ?? '';
+        $sellingPrice = optional($financingOrder->selling_price)->formatByDecimal() ?? '';
+        $query = ['o' => $financingOrder->id];
+        $host = ' https://'.get_host_from_url(Config::get('app.frontend_url.client'));
+        $url = $host.'/?'.http_build_query($query);
         $locale = app()->getLocale();
 
         if ($financingOrder->is_verification_required) {
@@ -33,8 +37,9 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
                 'orderId' => $financingOrder->id,
                 'companyName' => $financingOrder->company->name,
                 'quantity' => $quantity,
+                'uom' => $uom,
                 'sellingPrice' => $sellingPrice,
-                'url' => $url.'/'.$financingOrder->id,
+                'url' => $url,
             ], $locale);
         }
 
@@ -43,6 +48,7 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
             'orderId' => $financingOrder->id,
             'companyName' => $financingOrder->company->name,
             'quantity' => $quantity,
+            'uom' => $uom,
             'sellingPrice' => $sellingPrice,
         ], $locale);
     }
