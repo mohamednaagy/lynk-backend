@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
-class ResendInvitationTest extends TestCase
+class ResendInvitationToUserTest extends TestCase
 {
     use RefreshDatabase, AssertsAccessByRoleAndArea;
 

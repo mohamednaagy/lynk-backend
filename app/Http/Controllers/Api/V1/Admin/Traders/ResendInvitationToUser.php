@@ -14,7 +14,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Mail;
 
-class ResendInvitation extends Controller
+class ResendInvitationToUser extends Controller
 {
     public function __construct()
     {
