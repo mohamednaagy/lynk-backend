@@ -31,6 +31,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'national_id',
         'amount',
         'selling_price',
+        'is_verification_required',
         'is_updatable',
         'is_approved',
         'status_reason',
@@ -42,6 +43,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'created_at',
         'history',
         'active_trader',
+        'trader_orders',
         'trader_order_history',
     ];
 
@@ -131,6 +133,11 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive($financingOrder->status->is(FinancingOrderStatus::PendingApproval));
     }
 
+    public function includeIsVerificationRequired(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->is_verification_required);
+    }
+
     public function includeIsApproved(FinancingOrder $financingOrder)
     {
         return $this->primitive($financingOrder->approved_at !== null);
@@ -146,8 +153,14 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive($financingOrder->created_at->format('Y-m-d h:mA'));
     }
 
-    public function includeHistory(FinancingOrder $financingOrder): Collection
+    public function includeHistory(FinancingOrder $financingOrder): Primitive|Collection
     {
+        $activeTraderOrder = $financingOrder->activeTraderOrder()->first();
+
+        if (! $activeTraderOrder) {
+            return $this->primitive(null);
+        }
+
         return $this->collection(collect([
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
             FinancingOrderHistory::ContractSigned,
@@ -155,7 +168,12 @@ class FinancingOrderTransformer extends TransformerAbstract
             'client_wakala',
             FinancingOrderHistory::IssueMurabahaOffer,
             FinancingOrderHistory::MurabahaSaleCompleted,
-        ]), new TraderHistoryTransformer($financingOrder, $financingOrder->traderOrders->last()->traderHistories ?? collect()));
+        ]), new TraderHistoryTransformer($activeTraderOrder));
+    }
+
+    public function includeTraderOrders(FinancingOrder $financingOrder): Collection
+    {
+        return $this->collection($financingOrder->traderOrders, new TraderOrderTransformer());
     }
 
     public function includeActiveTrader(FinancingOrder $financingOrder): Primitive|Item

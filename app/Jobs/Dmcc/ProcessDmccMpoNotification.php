@@ -4,7 +4,7 @@ namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -91,35 +91,13 @@ class ProcessDmccMpoNotification implements ShouldQueue
             $this->attachDocumentToOrder(
                 $traderOrder,
                 $mpoDocument,
-                FinancingOrderMediaCollection::MurabahaPurchaseOrder,
+                TraderOrderMediaCollection::MurabahaPurchaseOrder,
                 'base64'
             );
 
             $trader->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::AttachMpoDocument
-            );
-
-            $warrantDocument = $trader->getDocumentByTypeAndTransaction(
-                $this->ttiId,
-                'Warrant Amendment Except Warrant No'
-            );
-
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument
-            );
-
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                $warrantDocument,
-                FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-                'base64'
-            );
-
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument
             );
         });
     }

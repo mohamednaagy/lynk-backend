@@ -3,7 +3,7 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommoditySoldToCustomer;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\WebhookType;
 use App\Models\FinancingOrder;
 use App\Support\Webhooks\Facades\WebhookEvent;
@@ -12,9 +12,9 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
 {
     public function handle(FinancingOrder $financingOrder, string $product, string $quantity): void
     {
-        $sellingCommodityToCustomerMedia = $financingOrder
-            ->getMedia(FinancingOrderMediaCollection::SellingCommodityToCustomer)
-            ->last();
+        $sellingCommodityToCustomerMedia = $financingOrder->activeTraderOrder()
+            ->first()
+            ->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer);
 
         $url = $sellingCommodityToCustomerMedia ? $sellingCommodityToCustomerMedia->getFullUrl() : '';
 

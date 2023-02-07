@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\LenderOrderController;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\LenderTransactionController;
+use App\Http\Controllers\Api\V1\Admin\FinancingOrders\MakeOrderProceed;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\TraderOrderController;
 use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
 use App\Http\Controllers\Api\V1\Admin\Lenders\ChargeLenderBalanceManually;
@@ -21,6 +22,14 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderSetting;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderStatuses;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderUserController;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\GetSellingCommodityCertificateToClient;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetPurchasingCommodity;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument\GetMurabhaCompleteDocument;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument\UpdateMurabhaCompleteDocument;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\GetMurabahaPurchaseOffer;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\UpdateMurabahaPurchaseOffer;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodity;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateSellingCommodityCertificateToClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
@@ -28,6 +37,7 @@ use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\LenderSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
+use App\Http\Controllers\Api\V1\Admin\Traders\ResendInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
@@ -82,6 +92,20 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);
+
+            Route::prefix('/{lender}/orders/{order}')->group(function () {
+                Route::prefix('/trader-orders/{trader_order}')->group(function () {
+                    Route::post('/proceed', MakeOrderProceed::class);
+                    Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
+                    Route::get('/purchasing-commodity', GetPurchasingCommodity::class);
+                    Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
+                    Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
+                    Route::get('/selling-commodity-to-client', GetSellingCommodityCertificateToClient::class);
+                    Route::post('/selling-commodity-to-client', UpdateSellingCommodityCertificateToClient::class);
+                    Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
+                    Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
+                });
+            });
         });
 
         Route::prefix('traders')->group(function () {
@@ -92,7 +116,14 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('lenders', LenderController::class);
         Route::apiResource('lenders.users', LenderUserController::class);
 
+        Route::prefix('traders')->group(function () {
+            Route::post('{trader}/users/{user}/resend-invitation', ResendInvitationToUser::class);
+        });
+
         Route::apiResource('traders.users', TraderUserController::class);
+
+        Route::apiResource('traders', TraderController::class)
+            ->only(['index', 'store', 'show', 'update']);
 
         Route::get('edaat-invoices', GetEdaatInvoices::class);
         Route::post('edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
@@ -103,9 +134,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::get('media/{media}/download', DownloadMedia::class);
 
         Route::post('/upload-image', [UploadImage::class, 'store']);
-
-        Route::apiResource('traders', TraderController::class)
-            ->only(['index', 'store', 'show', 'update']);
     });
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.sign-up');

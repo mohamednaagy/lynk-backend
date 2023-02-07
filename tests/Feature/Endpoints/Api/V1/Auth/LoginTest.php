@@ -206,18 +206,17 @@ class LoginTest extends TestCase
     public function test_login_success_for_exist_user(): void
     {
         $email = 'a@a.aa';
-        $passwordPlainText = '12345678';
-        $passwordEncrypted = bcrypt('12345678');
+        $password = '12345678';
         $source = 'admin';
 
         User::factory()->create([
             'email' => $email,
-            'password' => $passwordEncrypted,
+            'password' => $password,
         ]);
 
         $response = $this->postJson('api/v1/auth/login', [
             'email' => $email,
-            'password' => $passwordPlainText,
+            'password' => $password,
             'source' => $source,
         ]);
 
@@ -235,23 +234,22 @@ class LoginTest extends TestCase
     public function testTwoUsersWithSameEmailAndDifferentCompanyNotPassed()
     {
         $email = 'a@a.aa';
-        $passwordPlainText = '12345678';
-        $passwordEncrypted = bcrypt('12345678');
+        $password = '12345678';
         $source = 'admin';
 
         $campanies = Company::factory(2)->create();
 
-        $campanies->each(function ($company) use ($email, $passwordEncrypted) {
+        $campanies->each(function ($company) use ($email, $password) {
             User::factory()->create([
                 'email' => $email,
-                'password' => $passwordEncrypted,
+                'password' => $password,
                 'company_id' => $company->id,
             ]);
         });
 
         $response = $this->postJson('api/v1/auth/login', [
             'email' => $email,
-            'password' => $passwordPlainText,
+            'password' => $password,
             'source' => $source,
         ]);
 
@@ -268,23 +266,22 @@ class LoginTest extends TestCase
     public function testTwoUsersWithSameEmailAndDifferentCompanyPassedByUniqueName()
     {
         $email = 'a@a.aa';
-        $passwordPlainText = '12345678';
-        $passwordEncrypted = bcrypt('12345678');
+        $password = '12345678';
         $source = 'admin';
 
         $campanies = Company::factory(2)->create();
 
-        $campanies->each(function ($company) use ($email, $passwordEncrypted) {
+        $campanies->each(function ($company) use ($email, $password) {
             User::factory()->create([
                 'email' => $email,
-                'password' => $passwordEncrypted,
+                'password' => $password,
                 'company_id' => $company->id,
             ]);
         });
 
         $response = $this->postJson('api/v1/auth/login', [
             'email' => $email,
-            'password' => $passwordPlainText,
+            'password' => $password,
             'source' => $source,
             'unique_name' => $campanies->first()->unique_name,
         ]);

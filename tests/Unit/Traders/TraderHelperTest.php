@@ -4,7 +4,7 @@ namespace Tests\Unit\Traders;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
@@ -79,10 +79,10 @@ class TraderHelperTest extends TestCase
                 'time' => now()->toTimeString(),
             ],
             $traderOrder,
-            FinancingOrderMediaCollection::SellingCommodityToCustomer,
+            TraderOrderMediaCollection::SellingCommodityToCustomer,
         );
 
-        $this->assertNotNull(self::$financingOrder->getFirstMediaUrl(FinancingOrderMediaCollection::SellingCommodityToCustomer));
+        $this->assertNotNull(self::$financingOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
     }
 
     public function test_trader_helper_attach_document_to_order()
@@ -92,10 +92,10 @@ class TraderHelperTest extends TestCase
         self::$traderHelperTrait->attachDocumentToOrder(
             $traderOrder,
             base64_encode('document'),
-            FinancingOrderMediaCollection::PromiseToPurchase,
+            TraderOrderMediaCollection::PromiseToPurchase,
             'base64'
         );
 
-        $this->assertNotNull(self::$financingOrder->getFirstMediaUrl(FinancingOrderMediaCollection::PromiseToPurchase));
+        $this->assertNotNull(self::$financingOrder->getFirstMediaUrl(TraderOrderMediaCollection::PromiseToPurchase));
     }
 }
