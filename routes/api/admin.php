@@ -11,10 +11,9 @@ use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
-use App\Http\Controllers\Api\V1\Admin\FinancingOrders\LenderOrderController;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\LenderTransactionController;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\MakeOrderProceed;
-use App\Http\Controllers\Api\V1\Admin\FinancingOrders\TraderOrderController;
+use App\Http\Controllers\Api\V1\Admin\FinancingOrders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
 use App\Http\Controllers\Api\V1\Admin\Lenders\ChargeLenderBalanceManually;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderBalance;
@@ -86,31 +85,26 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::prefix('lenders')->group(function () {
             Route::put('/{lender}/status', UpdateLenderStatus::class);
             Route::get('/{lender}/balance ', GetLenderBalance::class);
-            Route::get('/{lender}/orders/{order}', [LenderOrderController::class, 'show']);
-            Route::get('{lender}/orders', [LenderOrderController::class, 'index']);
             Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);
+        });
 
-            Route::prefix('/{lender}/orders/{order}')->group(function () {
-                Route::prefix('/trader-orders/{trader_order}')->group(function () {
-                    Route::post('/proceed', MakeOrderProceed::class);
-                    Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
-                    Route::get('/purchasing-commodity', GetPurchasingCommodity::class);
-                    Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
-                    Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
-                    Route::get('/selling-commodity-to-client', GetSellingCommodityCertificateToClient::class);
-                    Route::post('/selling-commodity-to-client', UpdateSellingCommodityCertificateToClient::class);
-                    Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
-                    Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
-                });
+        Route::prefix('/orders/{order}')->group(function () {
+            Route::prefix('/trader-orders/{trader_order}')->group(function () {
+                Route::post('/proceed', MakeOrderProceed::class);
+                Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
+                Route::get('/purchasing-commodity', GetPurchasingCommodity::class);
+                Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
+                Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
+                Route::get('/selling-commodity-to-client', GetSellingCommodityCertificateToClient::class);
+                Route::post('/selling-commodity-to-client', UpdateSellingCommodityCertificateToClient::class);
+                Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
+                Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
             });
         });
 
-        Route::prefix('traders')->group(function () {
-            Route::get('/{trader}/orders/{order}', [TraderOrderController::class, 'show']);
-            Route::get('{trader}/orders', [TraderOrderController::class, 'index']);
-        });
+        Route::apiResource('orders', OrderController::class);
 
         Route::apiResource('lenders', LenderController::class);
         Route::apiResource('lenders.users', LenderUserController::class);
