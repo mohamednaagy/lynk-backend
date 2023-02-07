@@ -37,6 +37,7 @@ use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\LenderSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
+use App\Http\Controllers\Api\V1\Admin\Traders\ResendInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
@@ -115,7 +116,14 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('lenders', LenderController::class);
         Route::apiResource('lenders.users', LenderUserController::class);
 
+        Route::prefix('traders')->group(function () {
+            Route::post('{trader}/users/{user}/resend-invitation', ResendInvitationToUser::class);
+        });
+
         Route::apiResource('traders.users', TraderUserController::class);
+
+        Route::apiResource('traders', TraderController::class)
+            ->only(['index', 'store', 'show', 'update']);
 
         Route::get('edaat-invoices', GetEdaatInvoices::class);
         Route::post('edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);
@@ -126,9 +134,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::get('media/{media}/download', DownloadMedia::class);
 
         Route::post('/upload-image', [UploadImage::class, 'store']);
-
-        Route::apiResource('traders', TraderController::class)
-            ->only(['index', 'store', 'show', 'update']);
     });
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.sign-up');

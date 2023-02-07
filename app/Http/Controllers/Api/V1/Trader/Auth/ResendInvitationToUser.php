@@ -13,13 +13,13 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Mail;
 
-class ResendInvitation extends Controller
+class ResendInvitationToUser extends Controller
 {
     public function __construct()
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Trader, [Subject::TraderUsers, Action::Create, Action::Manage])
+            perm(Area::Trader, [Subject::TraderUserInvitation, Action::Send, Action::Manage])
         );
     }
 
