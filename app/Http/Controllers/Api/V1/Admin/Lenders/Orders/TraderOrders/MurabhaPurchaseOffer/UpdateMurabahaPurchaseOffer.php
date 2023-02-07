@@ -10,7 +10,6 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabahaPurchaseOfferRequest;
-use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -32,37 +31,35 @@ class UpdateMurabahaPurchaseOffer extends Controller
 
     public function __invoke(
         UpdateMurabahaPurchaseOfferRequest $request,
-        Company $lender,
         int $order,
         TraderOrder $traderOrder
     ): JsonResponse {
         return DB::transaction(function () use ($request, $order, $traderOrder) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
-
             $trader = Trader::driver($traderOrder->provider);
 
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::IssueMurabahaOffer
-            );
+            if (! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::MurabhaOfferIssued)) {
+                $trader->updateOrderStatus($order, FinancingOrderStatus::MurabhaOfferIssued);
 
-            $trader->updateOrderStatus($order, FinancingOrderStatus::MurabhaOfferIssued);
-
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::GetMurabahaPurchaseOfferDocument
-            );
+                $trader->createTraderOrderHistory(
+                    $traderOrder,
+                    FinancingOrderHistory::IssueMurabahaOffer
+                );
+                $trader->createTraderOrderHistory(
+                    $traderOrder,
+                    FinancingOrderHistory::GetMurabahaPurchaseOfferDocument
+                );
+                $trader->createTraderOrderHistory(
+                    $traderOrder,
+                    FinancingOrderHistory::AttachMpoDocument
+                );
+            }
 
             $this->attachDocumentToOrder(
                 $traderOrder,
                 base64_encode(file_get_contents($request->file('document'))),
                 TraderOrderMediaCollection::MurabahaPurchaseOrder,
                 'base64'
-            );
-
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::AttachMpoDocument
             );
 
             return $this->successResponse();
