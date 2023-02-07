@@ -74,3 +74,14 @@ if (! function_exists('get_host_from_url')) {
          : $url;
     }
 }
+
+if (! function_exists('get_file_url')) {
+    function get_file_url($media): ?string
+    {
+        if ($media) {
+            return route('api.v1.media.download', ['media' => $media->uuid]);
+        }
+
+        return null;
+    }
+}

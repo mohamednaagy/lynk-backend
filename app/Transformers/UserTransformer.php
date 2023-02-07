@@ -31,6 +31,8 @@ class UserTransformer extends TransformerAbstract
         'phone_country_code',
         'formatted_phone_number',
         'orders_count',
+        'is_active',
+        'is_invitation_accepted',
     ];
 
     public function __construct(string $area = null)
@@ -148,5 +150,15 @@ class UserTransformer extends TransformerAbstract
         }
 
         return $this->primitive((int) $user->orders_count);
+    }
+
+    public function includeIsActive(User $user): Primitive
+    {
+        return $this->primitive($user->is_active);
+    }
+
+    public function includeIsInvitationAccepted(User $user): Primitive
+    {
+        return $this->primitive((bool) $user->password);
     }
 }

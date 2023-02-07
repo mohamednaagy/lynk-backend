@@ -52,7 +52,7 @@ class OrderControllerShowTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createTraderCompany('2000', ['company_cr' => '12345678910', 'type' => CompanyType::Trader]);
+        [self::$company, self::$wallet] = $this->createTraderCompany('2000', ['company_cr' => '12345678910', 'type' => CompanyType::Trader, 'driver' => 'fake']);
         [self::$companyTwo, self::$walletTwo] = $this->createTraderCompany('2000', ['company_cr' => '12345678911', 'type' => CompanyType::Trader]);
         self::$userTraderAdmin = $this->createTraderUser(self::$company->id);
         self::$order = $this->createOrder(self::$company->id, self::$userTraderAdmin->id);

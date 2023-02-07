@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Actions\Contracts\Wallets\DeductVatPercentage;
 use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
@@ -34,7 +33,6 @@ class CreateOrderWithoutVerification extends Controller
      * @param  CreateOrderWithoutVerificationRequest  $request
      * @param  CanCreateOrder  $canCreateOrder
      * @param  CreateFinancingOrder  $createFinancingOrder
-     * @param  GenerateClientWakala  $generateWakala
      * @param  DeductOrderCreationFee  $deductOrderCreationFee
      * @param  DeductVatPercentage  $deductVatPercentage
      * @param  GenerateZatcaInvoice  $generateFatoura
@@ -44,7 +42,6 @@ class CreateOrderWithoutVerification extends Controller
         CreateOrderWithoutVerificationRequest $request,
         CanCreateOrder $canCreateOrder,
         CreateFinancingOrder $createFinancingOrder,
-        GenerateClientWakala $generateWakala,
         DeductOrderCreationFee $deductOrderCreationFee,
         DeductVatPercentage $deductVatPercentage,
         GenerateZatcaInvoice $generateFatoura
@@ -53,7 +50,6 @@ class CreateOrderWithoutVerification extends Controller
             function () use (
                 $request,
                 $createFinancingOrder,
-                $generateWakala,
                 $deductOrderCreationFee,
                 $deductVatPercentage,
                 $canCreateOrder,
@@ -86,8 +82,6 @@ class CreateOrderWithoutVerification extends Controller
                     creationFeeTransaction: $creationFeeTransaction,
                     vatPercentageTransaction: $vatPercentageTransaction
                 );
-
-                $generateWakala->handle($financingOrder);
 
                 return fractal($financingOrder, new FinancingOrderTransformer())
                     ->parseIncludes([

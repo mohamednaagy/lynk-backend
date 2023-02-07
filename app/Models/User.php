@@ -43,6 +43,7 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
         'password',
         'locale',
         'company_id',
+        'is_active',
     ];
 
     /**
@@ -63,7 +64,15 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
     protected $casts = [
         'email_verified_at' => 'datetime',
         'phone_number' => E164PhoneNumberCast::class,
+        'is_active' => 'boolean',
     ];
+
+    protected function password(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => $value ? bcrypt($value) : null,
+        );
+    }
 
     protected function fullName(): Attribute
     {

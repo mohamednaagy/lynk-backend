@@ -13,6 +13,7 @@ use App\Support\QueryScoper\Scopes\FinancingOrders\OrderSortScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderStatusScope;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
+use Stancl\Tenancy\Database\TenantScope;
 
 class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
 {
@@ -52,23 +53,24 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
 
     protected function baseQuery()
     {
-        return FinancingOrder::when(
-            $this->creator,
-            function ($query) {
-                $query->byCreator($this->creator);
-            }
-        )->when(
-            $this->company?->type->is(CompanyType::Trader),
-            function ($query) {
-                $query->withWhereHas('activeTraderOrder')
-                    ->where('company_id', $this->company->id);
-            }
-        )->when(
-            $this->company,
-            function ($query) {
-                $query->with('creator')
-                    ->where('company_id', $this->company->id);
-            }
-        );
+        $baseQuery = FinancingOrder::query();
+
+        if ($this->creator) {
+            $baseQuery->byCreator($this->creator);
+        }
+
+        if ($this->company?->type->is(CompanyType::Trader)) {
+            $baseQuery->withoutGlobalScope(TenantScope::class)
+                ->withWhereHas('traderOrders', function ($query) {
+                    $query->where('provider', $this->company->driver);
+                });
+        }
+
+        if ($this->company?->type->is(CompanyType::Lender)) {
+            $baseQuery->with('creator')
+                ->where('company_id', $this->company->id);
+        }
+
+        return $baseQuery;
     }
 }

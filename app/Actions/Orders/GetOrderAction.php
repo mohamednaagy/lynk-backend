@@ -15,9 +15,11 @@ class GetOrderAction implements GetOrder
 {
     protected ?Company $company = null;
 
+    private ?array $relations = [];
+
     public function handle(int $order): Model|Collection|Builder|array|null
     {
-        return $this->baseQuery()->toScopes($this->scopes())->findOrFail($order);
+        return $this->baseQuery()->with($this->relations)->toScopes($this->scopes())->findOrFail($order);
     }
 
     private function scopes(): array
@@ -32,14 +34,23 @@ class GetOrderAction implements GetOrder
         return $this;
     }
 
+    public function setRelations(array $relations): static
+    {
+        $this->relations = $relations;
+
+        return $this;
+    }
+
     protected function baseQuery()
     {
         return FinancingOrder::when(
             filled($this->company) && $this->company->type->is(CompanyType::Trader),
             function ($query) {
                 $query->withoutGlobalScope(TenantScope::class)
-                    ->with('activeTraderOrder.traderHistories')
-                    ->where('company_id', $this->company->id);
+                    ->withWhereHas('traderOrders', function ($query) {
+                        $query->with('traderHistories')
+                            ->where('provider', $this->company->driver);
+                    });
             }
         );
     }

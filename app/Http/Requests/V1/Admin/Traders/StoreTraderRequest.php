@@ -39,12 +39,6 @@ class StoreTraderRequest extends FormRequest
                 new CompanyUniqueNameRule,
                 Rule::unique(Company::class, 'unique_name'),
             ],
-            'company_cr' => [
-                'required',
-                'string',
-                'size:10',
-                Rule::unique(Company::class, 'company_cr'),
-            ],
             'driver' => [
                 'nullable',
                 'string',

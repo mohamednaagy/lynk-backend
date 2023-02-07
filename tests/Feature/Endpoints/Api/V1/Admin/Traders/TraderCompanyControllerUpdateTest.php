@@ -3,7 +3,6 @@
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Traders;
 
 use App\Enums\Area;
-use App\Enums\CompanyType;
 use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\User;
@@ -36,13 +35,10 @@ class TraderCompanyControllerUpdateTest extends TestCase
         self::$companyDetails = [
             'name' => 'testCompany',
             'unique_name' => 'companyUniqueName',
-            'company_cr' => '1234567891',
             'driver' => 'dmcc',
         ];
 
-        [self::$company, self::$wallet] = $this->createCompany(2000, [
-            'type' => CompanyType::Trader,
-        ]);
+        [self::$company, self::$wallet] = $this->createTraderCompany(2000);
 
         self::$superAdmin = $this->createSuperAdminUser();
     }
@@ -72,7 +68,6 @@ class TraderCompanyControllerUpdateTest extends TestCase
         $this->actingAs(self::$superAdmin)
             ->putJson('api/v1/admin/traders/'.self::$company->id, [
                 'unique_name' => 'companyUniqueName',
-                'company_cr' => '1234567891',
                 'driver' => 'dmcc',
             ])
             ->assertJsonValidationErrorFor('name');
@@ -83,21 +78,9 @@ class TraderCompanyControllerUpdateTest extends TestCase
         $this->actingAs(self::$superAdmin)
             ->putJson('api/v1/admin/traders/'.self::$company->id, [
                 'name' => 'name',
-                'company_cr' => '1234567891',
                 'driver' => 'dmcc',
             ])
             ->assertJsonValidationErrorFor('unique_name');
-    }
-
-    public function test_trader_company_controller_update_without_company_cr_unsuccessful()
-    {
-        $this->actingAs(self::$superAdmin)
-            ->putJson('api/v1/admin/traders/'.self::$company->id, [
-                'name' => 'testCompany',
-                'unique_name' => 'companyUniqueName',
-                'driver' => 'dmcc',
-            ])
-            ->assertJsonValidationErrorFor('company_cr');
     }
 
     public function test_trader_company_controller_update_driver_should_be_in_fake_dmcc_unsuccessful()
@@ -106,7 +89,6 @@ class TraderCompanyControllerUpdateTest extends TestCase
             ->putJson('api/v1/admin/traders/'.self::$company->id, [
                 'name' => 'testCompany',
                 'unique_name' => 'companyUniqueName',
-                'company_cr' => '1234567891',
                 'driver' => 'random',
             ])
             ->assertJsonValidationErrorFor('driver');
