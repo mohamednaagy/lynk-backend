@@ -4,7 +4,7 @@ namespace App\Http\Requests\V1\Trader\Orders\MurabhaCompleteDocument;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateDocumentRequest extends FormRequest
+class UpdateMurabhaCompleteDocumentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
