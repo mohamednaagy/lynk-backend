@@ -7,7 +7,6 @@ use App\Enums\Area;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
@@ -25,13 +24,11 @@ class GetMurabhaCompleteDocument extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  Company  $lender
      * @param  FinancingOrder  $order
      * @param  TraderOrder  $traderOrder
      * @return JsonResponse
      */
     public function __invoke(
-        Company $lender,
         FinancingOrder $order,
         TraderOrder $traderOrder
     ): JsonResponse {
