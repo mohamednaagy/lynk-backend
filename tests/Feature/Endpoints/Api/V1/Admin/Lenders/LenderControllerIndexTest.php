@@ -4,6 +4,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\Company;
 use App\Models\User;
@@ -13,14 +14,13 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class LenderControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender, InteractsWithAdmin;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
-    private static Company $company;
+    private static Company $lender;
 
     private static Wallet $wallet;
 
@@ -37,20 +37,18 @@ class LenderControllerIndexTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userAdmin = $this->createAdmin('admin@bim.com');
-        self::$userManager = $this->createManager(
-            'manager@bim.com',
-            perm(Area::SuperAdmin, [Subject::Lenders, Action::Index]),
-        );
+        [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        self::$userAdmin = $this->createSuperAdminUser();
+        self::$userManager = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::Lenders, Action::Index]));
     }
 
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_index_companies(): void
+    public function test_that_un_auth_user_cant_index_lenders(): void
     {
-        $this->getJson('api/v1/admin/companies')
+        $this->getJson('api/v1/admin/lenders')
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -60,15 +58,15 @@ class LenderControllerIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_can_index_companies(): void
+    public function test_that_auth_admin_user_can_index_lenders(): void
     {
-        $companies = Company::query()->withCount('orders')->paginate();
+        $lenders = Company::query()->withCount('orders')->paginate();
 
         $this->actingAs(self::$userAdmin)
-            ->getJson('api/v1/admin/companies')
+            ->getJson('api/v1/admin/lenders')
             ->assertOk()
             ->assertExactJson(
-                fractal($companies, new CompanyTransformer())
+                fractal($lenders, new CompanyTransformer())
                     ->parseIncludes([
                         'id',
                         'name',
@@ -85,15 +83,15 @@ class LenderControllerIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_manager_user_can_index_companies(): void
+    public function test_that_auth_manager_user_can_index_lenders(): void
     {
-        $companies = Company::query()->withCount('orders')->paginate();
+        $lenders = Company::query()->withCount('orders')->paginate();
 
         $this->actingAs(self::$userManager)
-            ->getJson('api/v1/admin/companies')
+            ->getJson('api/v1/admin/lenders')
             ->assertOk()
             ->assertExactJson(
-                fractal($companies, new CompanyTransformer())
+                fractal($lenders, new CompanyTransformer())
                     ->parseIncludes([
                         'id',
                         'name',
@@ -110,12 +108,12 @@ class LenderControllerIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_manager_user_without_permissions_cant_index_companies(): void
+    public function test_that_auth_manager_user_without_permissions_cant_index_lenders(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
 
         $this->actingAs(self::$userManager)
-            ->getJson('api/v1/admin/companies')
+            ->getJson('api/v1/admin/lenders')
             ->assertForbidden();
     }
 }

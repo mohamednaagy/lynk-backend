@@ -14,11 +14,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class CancelOrderTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     const BaseUrl = 'api/v1/lender/orders/';
 
@@ -38,7 +39,7 @@ class CancelOrderTest extends TestCase
         parent::setUp();
 
         [self::$company] = $this->createCompany('2000', ['company_cr' => '1234567891']);
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$financingOrder = $this->createOrder(
             self::$company->id,
             self::$userLender->id,

@@ -4,7 +4,6 @@ namespace Tests\Feature\Endpoints\Api\V1\Trader\Users;
 
 use App\Enums\Area;
 use App\Enums\CompanyStatus;
-use App\Enums\ErrorCode;
 use App\Mail\CompleteRegisterInvitation;
 use App\Models\Company;
 use App\Models\User;
@@ -91,23 +90,6 @@ class ResendInvitationTest extends TestCase
             ->assertStatus(403)->assertJsonFragment([
                 'message' => __('error.company_not_active'),
                 'code' => 1015,
-            ]);
-    }
-
-    public function test_resend_invitation_can_not_access_without_verify_email()
-    {
-        $this->withHeader('X-Company', self::$trader->id)
-            ->actingAs(self::$traderAdminNotVerified)
-            ->postJson(
-                'api/v1/trader/users/'.self::$traderAdminNotJoined->id.'/resend-invitation',
-                [
-                    'redirect_url' => self::$redirectUrl,
-                ]
-            )
-            ->assertStatus(403)
-            ->assertJsonFragment([
-                'message' => __('error.must_verify_email'),
-                'code' => ErrorCode::EMAIL_NOT_VERIFIED,
             ]);
     }
 

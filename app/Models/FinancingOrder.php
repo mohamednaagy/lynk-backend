@@ -23,6 +23,10 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 /**
  * @property mixed $status
  * @property mixed $traderOrders
+ * @property mixed $currency
+ * @property mixed $amount
+ * @property mixed $selling_price
+ * @property mixed $id
  */
 class FinancingOrder extends Model implements HasMedia, Otpifiable
 {
@@ -61,6 +65,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'approved_at' => 'datetime',
         'client_wakala_accepted_at' => 'datetime',
         'data' => 'array',
+        'is_verification_required' => 'boolean',
         'customer_details' => 'array',
         'phone_number' => E164PhoneNumberCast::class,
         'amount' => MoneyStringCast::class.':currency',
@@ -97,34 +102,10 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function registerMediaCollections(): void
     {
         $this
-            ->addMediaCollection(FinancingOrderMediaCollection::ClientWakala)
-            ->singleFile();
-        $this
-            ->addMediaCollection(FinancingOrderMediaCollection::LenderWakala)
-            ->singleFile();
-        $this
             ->addMediaCollection(FinancingOrderMediaCollection::Contract)
             ->singleFile();
         $this
             ->addMediaCollection(FinancingOrderMediaCollection::PowerOfAttorney)
-            ->singleFile();
-        $this
-            ->addMediaCollection(FinancingOrderMediaCollection::PromiseToPurchase)
-            ->singleFile();
-        $this
-            ->addMediaCollection(FinancingOrderMediaCollection::MurabahaPurchaseOrder)
-            ->singleFile();
-        $this
-            ->addMediaCollection(FinancingOrderMediaCollection::TransferOwnershipToLender)
-            ->singleFile();
-        $this
-            ->addMediaCollection(FinancingOrderMediaCollection::SellingCommodityToCustomer)
-            ->singleFile();
-        $this
-            ->addMediaCollection(FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
-            ->singleFile();
-        $this
-            ->addMediaCollection(FinancingOrderMediaCollection::TtiHoldingCertificate)
             ->singleFile();
     }
 

@@ -37,7 +37,7 @@ trait InteractsWithCompany
      *
      * @throws BindingResolutionException
      */
-    public function createCompany(
+    private function createCompany(
         int $walletInitialAmount = 2000,
         array $data = []
     ): array {

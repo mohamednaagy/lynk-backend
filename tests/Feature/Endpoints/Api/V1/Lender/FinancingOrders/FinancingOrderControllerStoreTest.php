@@ -6,15 +6,17 @@ use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class FinancingOrderControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static Company $company;
 
@@ -32,22 +34,25 @@ class FinancingOrderControllerStoreTest extends TestCase
 
     /**
      * @return void
+     *
+     * @throws BindingResolutionException
      */
     public function setUp(): void
     {
         parent::setUp();
 
         [self::$company, self::$wallet] = $this->createCompany('2000');
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'lenderSupervisor@bim.com');
-        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'lenderBilling@bim.com');
-        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'lenderOrderCreator@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor);
+        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
+        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
         self::$orderDetails = [
             'national_id' => '1001280070',
             'amount' => '200',
             'selling_price' => '220',
             'phone_country_code' => 'SA',
             'phone_number' => '500112233',
+            'is_verification_required' => true,
         ];
     }
 
@@ -155,6 +160,24 @@ class FinancingOrderControllerStoreTest extends TestCase
                 'errors' => [
                     'phone_number' => [
                         'The phone number field is required.',
+                    ],
+                ],
+            ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_auth_user_without_is_verification_required_cant_create_order(): void
+    {
+        $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
+            ->postJson('api/v1/lender/orders', Arr::except(self::$orderDetails, ['is_verification_required']))
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertExactJson([
+                'message' => 'The is verification required field is required.',
+                'errors' => [
+                    'is_verification_required' => [
+                        'The is verification required field is required.',
                     ],
                 ],
             ]);

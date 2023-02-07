@@ -9,12 +9,13 @@ use App\Models\Company;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithSettings;
+use Tests\Traits\InteractsWithUser;
 
 class LenderRegistrationTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender, InteractsWithSettings;
+    use RefreshDatabase, InteractsWithSettings, InteractsWithUser, InteractsWithCompany;
 
     /**
      * A basic feature test example.

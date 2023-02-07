@@ -3,14 +3,12 @@
 namespace App\Enums;
 
 use BenSampo\Enum\Enum;
-use Modules\Grantify\Support\Areas\Customer;
 use Modules\Grantify\Support\Areas\Lender;
 use Modules\Grantify\Support\Areas\SuperAdmin;
 use Modules\Grantify\Support\Areas\Trader;
 
 /**
  * @method static static SuperAdmin()
- * @method static static Customer()
  */
 final class Area extends Enum
 {
@@ -32,5 +30,15 @@ final class Area extends Enum
                 self::Trader => Trader::$roles,
             ]
         };
+    }
+
+    public static function getAreaByRole(string $role)
+    {
+        $areas = static::getValues();
+        foreach ($areas as $area) {
+            if (in_array($role, static::roles($area))) {
+                return $area;
+            }
+        }
     }
 }

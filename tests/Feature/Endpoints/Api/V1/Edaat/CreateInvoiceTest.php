@@ -9,11 +9,12 @@ use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class CreateInvoiceTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static Company $company;
 
@@ -29,7 +30,7 @@ class CreateInvoiceTest extends TestCase
         parent::setUp();
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
     }
 
     public function test_un_auth_user_cant_create_edaat_invoice_with_valid_data()

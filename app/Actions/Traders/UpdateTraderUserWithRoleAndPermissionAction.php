@@ -1,0 +1,61 @@
+<?php
+
+namespace App\Actions\Traders;
+
+use App\Actions\Contracts\SyncPermissionToUser;
+use App\Actions\Contracts\SyncRoleToUser;
+use App\Actions\Contracts\Traders\UpdateTraderUserWithRoleAndPermission;
+use App\Actions\Contracts\UpdateUser;
+use App\Models\User;
+use Illuminate\Support\Arr;
+
+class UpdateTraderUserWithRoleAndPermissionAction implements UpdateTraderUserWithRoleAndPermission
+{
+    /**
+     * @param  UpdateUser  $updateUser
+     * @param  SyncRoleToUser  $syncRoleToUser
+     * @param  SyncPermissionToUser  $syncPermissionToUser
+     */
+    public function __construct(
+        protected UpdateUser $updateUser,
+        protected SyncRoleToUser $syncRoleToUser,
+        protected SyncPermissionToUser $syncPermissionToUser
+    ) {
+    }
+
+    /**
+     * Update user.
+     *
+     * @param  array  $data
+     * @param  User  $user
+     * @return void $user
+     */
+    public function handle(array $data, User $user): void
+    {
+        // Update user
+        $this->updateUser->handle(
+            $user,
+            Arr::only(
+                $data,
+                [
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'phone_number',
+                    'phone_country_code',
+                    'is_active',
+                ]
+            )
+        );
+
+        // sync role
+        if (! empty($data['role'])) {
+            $this->syncRoleToUser->handle($user, $data['role']);
+        }
+
+        // assign permissions
+        if (! empty($data['permissions'])) {
+            $this->syncPermissionToUser->handle($user, $data['permissions']);
+        }
+    }
+}

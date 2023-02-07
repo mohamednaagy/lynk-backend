@@ -13,11 +13,12 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class ForgotPasswordTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static Company $company;
 
@@ -40,7 +41,7 @@ class ForgotPasswordTest extends TestCase
 
         self::$generalUser = User::factory()->create();
         [self::$company] = $this->createCompany();
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$userLender = $this->createLenderUser(self::$company->id);
         self::$sendResetPasswordUrl = 'api/v1/auth/send-reset-password-link';
         self::$resetPasswordUrl = 'api/v1/auth/reset-password';
     }
@@ -54,7 +55,7 @@ class ForgotPasswordTest extends TestCase
     {
         Notification::fake();
 
-        Grantify::assignRoleToModel(self::$generalUser, Role::Customer);
+        Grantify::assignRoleToModel(self::$generalUser, Role::LenderAdmin);
 
         $response = $this->postJson(self::$sendResetPasswordUrl, [
             'email' => self::$generalUser->email,
@@ -173,14 +174,14 @@ class ForgotPasswordTest extends TestCase
 
         $token = Password::createToken(self::$generalUser);
 
-        $response = $this->postJson(self::$resetPasswordUrl, [
+        $this->postJson(self::$resetPasswordUrl, [
             'token' => $token,
             'email' => self::$generalUser->email,
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Password@1234',
+            'password_confirmation' => 'Password@1234',
         ]);
 
-        $this->assertTrue(Hash::check('password', self::$generalUser->fresh()->password));
+        $this->assertTrue(Hash::check('Password@1234', self::$generalUser->fresh()->password));
     }
 
     /**

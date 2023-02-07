@@ -16,13 +16,13 @@ use Illuminate\Support\Arr;
 use Spatie\LaravelSettings\Settings;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithSettings;
+use Tests\Traits\InteractsWithUser;
 
 class ProjectSettingsUpdateTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin, InteractsWithSettings, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithSettings, InteractsWithCompany;
 
     const BaseUrl = 'api/v1/admin/settings/project';
 
@@ -49,14 +49,14 @@ class ProjectSettingsUpdateTest extends TestCase
     {
         parent::setUp();
 
-        self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager();
-        self::$managerHasPermission = $this->createManager(
-            'managerHasPermission@bim.com',
-            perm(Area::SuperAdmin, [Subject::ProjectSettings, Action::Edit])
-        );
+        self::$admin = $this->createSuperAdminUser();
+        self::$manager = $this->createSuperAdminUser(Role::Manager);
+        self::$managerHasPermission = $this->createSuperAdminUser(Role::Manager);
+
+        $this->assignPermissionToUser(self::$managerHasPermission, perm(Area::SuperAdmin, [Subject::ProjectSettings, Action::Edit]));
+
         [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$projectSettings = $this->app->make(GetProjectSettings::class)->handle();
         self::$projectSettingsClass = $this->app->make(ProjectSettings::class);
         self::$projectSettingsData = [

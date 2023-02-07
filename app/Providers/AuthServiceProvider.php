@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Enums\Role;
+use App\Enums\RouteArea;
 use App\Models\Enquiry;
 use App\Models\FinancingOrder;
 use App\Policies\EnquiryPolicy;
@@ -45,12 +46,21 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::before(function ($user, $ability) {
-            // TODO: need to map the role to the request path.
-            // For example: /api/v1/admin => Role::Admin
-            // For example: /api/v1/lender => Role::LenderAdmin
-
-            /** @var \App\Models\User $user */
-            return $user->hasRole([Role::Admin, Role::LenderAdmin, Role::TraderAdmin]) ? true : null;
+            return match ($this->getAreaFromRequestPath()) {
+                RouteArea::Admin => $user->hasRole([Role::Admin]) ?: null,
+                RouteArea::Lender => $user->hasRole([Role::LenderAdmin]) ?: null,
+                RouteArea::Trader => $user->hasRole([Role::TraderAdmin]) ?: null,
+                default => null
+            };
         });
+    }
+
+    private function getAreaFromRequestPath()
+    {
+        $path = explode('/', $this->app->request->path());
+        $area = isset($path[2]) ? $path[2] : null;
+        if (in_array($area, RouteArea::getValues())) {
+            return $area;
+        }
     }
 }

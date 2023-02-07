@@ -4,6 +4,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Client;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
+use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
@@ -15,11 +16,12 @@ use Illuminate\Support\Str;
 use Modules\Otpify\Models\OtpifyCode;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class AcceptClientWakalaTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static Company $company;
 
@@ -34,10 +36,15 @@ class AcceptClientWakalaTest extends TestCase
         parent::setUp();
 
         [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
 
         self::$order = $this->createOrder(self::$company->id, self::$userLender->id, [
             'national_id' => '2553451234',
+        ]);
+        self::$order->traderOrders()->create([
+            'provider' => 'dmcc',
+            'status' => TraderOrderStatus::InProgress,
+            'reference' => 123,
         ]);
     }
 

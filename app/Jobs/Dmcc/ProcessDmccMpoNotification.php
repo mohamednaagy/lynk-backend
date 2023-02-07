@@ -4,11 +4,12 @@ namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessDmccMpoNotification implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
     protected string $ttiId;
 
@@ -87,38 +88,16 @@ class ProcessDmccMpoNotification implements ShouldQueue
                 FinancingOrderHistory::GetMurabahaPurchaseOfferDocument
             );
 
-            $trader->attachDocumentToOrder(
+            $this->attachDocumentToOrder(
                 $traderOrder,
                 $mpoDocument,
-                FinancingOrderMediaCollection::MurabahaPurchaseOrder,
+                TraderOrderMediaCollection::MurabahaPurchaseOrder,
                 'base64'
             );
 
             $trader->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::AttachMpoDocument
-            );
-
-            $warrantDocument = $trader->getDocumentByTypeAndTransaction(
-                $this->ttiId,
-                'Warrant Amendment Except Warrant No'
-            );
-
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument
-            );
-
-            $trader->attachDocumentToOrder(
-                $traderOrder,
-                $warrantDocument,
-                FinancingOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-                'base64'
-            );
-
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument
             );
         });
     }
