@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders\MurabhaPurchaseOffer;
+namespace App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders;
 
 use App\Enums\Action;
 use App\Enums\Area;

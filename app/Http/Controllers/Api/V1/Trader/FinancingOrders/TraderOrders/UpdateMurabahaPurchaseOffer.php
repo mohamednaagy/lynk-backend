@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders\MurabhaPurchaseOffer;
+namespace App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -8,6 +8,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Subject;
+use App\Enums\TraderOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Trader\Orders\TraderOrders\UpdateMurabahaPurchaseOfferRequest;
 use App\Models\Company;
@@ -46,7 +47,10 @@ class UpdateMurabahaPurchaseOffer extends Controller
                 FinancingOrderHistory::IssueMurabahaOffer
             );
 
-            if (! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::MurabhaOfferIssued)) {
+            if (
+                $traderOrder->status->is(TraderOrderStatus::InProgress) &&
+                ! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::MurabhaOfferIssued)
+            ) {
                 $trader->updateOrderStatus($order, FinancingOrderStatus::MurabhaOfferIssued);
             }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument;
+namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateMurabhaCompleteDocument as UpdateMurabhaCompleteDocumentInterface;
 use App\Enums\Action;

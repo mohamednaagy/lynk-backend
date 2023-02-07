@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer;
+namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -12,7 +12,7 @@ use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 
-class GetMurabahaPurchaseOffer extends Controller
+class GetMurabhaCompleteDocument extends Controller
 {
     public function __construct()
     {
@@ -22,24 +22,22 @@ class GetMurabahaPurchaseOffer extends Controller
         );
     }
 
+    /**
+     * Handle the incoming request.
+     *
+     * @param  Company  $lender
+     * @param  FinancingOrder  $order
+     * @param  TraderOrder  $traderOrder
+     * @return JsonResponse
+     */
     public function __invoke(
         Company $lender,
         FinancingOrder $order,
         TraderOrder $traderOrder
     ): JsonResponse {
-        $url = $this->fileUrl($traderOrder->getFirstMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder));
+        $media = $traderOrder->getMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
+            ->first();
 
-        return $this->successResponse([
-            'murabaha_purchase_offer' => $url,
-        ]);
-    }
-
-    public function fileUrl($media): ?string
-    {
-        if ($media) {
-            return route('api.v1.media.download', ['media' => $media->uuid]);
-        }
-
-        return null;
+        return $this->successResponse(['url' => $media->fileDownloadableUrl ?? null]);
     }
 }
