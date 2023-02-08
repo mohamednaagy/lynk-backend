@@ -21,21 +21,20 @@ trait AssertsAccessByRoleAndArea
         }
     }
 
-    public function assertStatusCodeForAllRolesExceptForAreaAndPermissions($status, array $exceptedArea, array $exceptedPermissions, $request)
+    public function assertStatusCodeExceptForPermissions($status, array $exceptedPermissions, $request)
     {
         $areas = Area::asArray();
         foreach ($areas as $area) {
-            if (! in_array($area, $exceptedArea)) {
-                $roles = Area::roles($area);
-                foreach ($roles as $role) {
-                    $permissions = RoleUtil::getPermissionsForRole($role);
-                    foreach ($permissions as $subject => $actions) {
-                        foreach ($actions as $action) {
-                            $permission = perm($area, [$subject, $action]);
-                            if (! in_array($permission, $exceptedPermissions)) {
-                                $this->assertStatusCodeForAreaRolesAndPermissions($status, $area, [$permission], $request);
-                            }
+            $roles = Area::roles($area);
+            foreach ($roles as $role) {
+                $permissions = RoleUtil::getPermissionsForRole($role);
+                foreach ($permissions as $subject => $actions) {
+                    foreach ($actions as $action) {
+                        $permission = perm($area, [$subject, $action]);
+                        if (in_array($permission, $exceptedPermissions)) {
+                            continue;
                         }
+                        $this->assertStatusCodeForAreaRolesAndPermissions($status, $area, [$permission], $request);
                     }
                 }
             }
