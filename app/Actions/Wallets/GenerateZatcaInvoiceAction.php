@@ -12,7 +12,6 @@ use App\Support\ZatcaEInvoice\Order;
 use App\Support\ZatcaEInvoice\PurchaseLine;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Salla\ZATCA\GenerateQrCode;
 use Salla\ZATCA\Tags\InvoiceDate;
 use Salla\ZATCA\Tags\InvoiceTaxAmount;
@@ -68,9 +67,6 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
                 // __IMPROVE__ use snake case to be consistent and remove if not used
                 'vatPercentageTransaction' => $vatPercentageTransaction,
             ])->render();
-
-            file_put_contents('/Users/ahmed/Sites/lynk-backend/storage/test.txt', $html);
-            Log::debug('html', [$html]);
 
             PdfGenerator::outputFromHtml(
                 $html,
