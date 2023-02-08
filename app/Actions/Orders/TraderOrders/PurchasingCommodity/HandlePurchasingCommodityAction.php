@@ -35,21 +35,26 @@ class HandlePurchasingCommodityAction implements HandlePurchasingCommodity
 
         app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
 
-        $this->createStepHistory($request, $trader, $traderOrder);
+        $this->createStepHistories(
+            $request,
+            $trader,
+            $traderOrder,
+            FinancingOrderStatus::CommodityPurchased
+        );
+
+        $this->transferOwnershipToLender($request, $trader, $traderOrder);
 
         if (! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::CommodityPurchased)) {
             $trader->updateOrderStatus($order, FinancingOrderStatus::CommodityPurchased);
         }
     }
 
-    protected function createStepHistory($request, $trader, TraderOrder $traderOrder)
+    protected function transferOwnershipToLender($request, $trader, TraderOrder $traderOrder)
     {
-        $this->createStepHistoryMap($request, $trader, $traderOrder, FinancingOrderStatus::CommodityPurchased);
-
         // this (if) is a special case doesn't exist in history map
         if ($request->auto_generate_financing_institution_certificate) {
             $trader->createTransferOwnershipToLenderDocument($traderOrder);
-        } else {
+        } elseif ($request->has('financing_institution_certificate')) {
             $this->attachDocumentToOrder(
                 $traderOrder,
                 base64_encode(file_get_contents($request->file('financing_institution_certificate'))),

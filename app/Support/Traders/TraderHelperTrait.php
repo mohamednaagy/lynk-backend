@@ -10,10 +10,11 @@ use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 trait TraderHelperTrait
 {
-    public array $stepHistoryMap = [
+    public array $stepToHistoriesMap = [
         FinancingOrderStatus::CommodityPurchased => [
             FinancingOrderHistory::RespondPtp => null,
             FinancingOrderHistory::GetPtpDocument => null,
@@ -29,9 +30,9 @@ trait TraderHelperTrait
         ],
     ];
 
-    public function createStepHistoryMap($request, $trader, TraderOrder $traderOrder, $status)
+    public function createStepHistories(Request $request, $trader, TraderOrder $traderOrder, $status)
     {
-        foreach ($this->stepHistoryMap[$status] as $history => $media) {
+        foreach ($this->stepToHistoriesMap[$status] as $history => $media) {
             if ($media && $request->has($media['file'])) {
                 $this->attachDocumentToOrder(
                     $traderOrder,

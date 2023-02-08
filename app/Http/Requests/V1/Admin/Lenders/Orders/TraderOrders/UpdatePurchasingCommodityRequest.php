@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders;
 
+use App\Enums\FinancingOrderHistory;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdatePurchasingCommodityRequest extends FormRequest
@@ -23,6 +24,14 @@ class UpdatePurchasingCommodityRequest extends FormRequest
      */
     public function rules(): array
     {
+        $traderOrder = $this->route('trader_order');
+
+        $traderOrder->load('traderHistories');
+
+        $isPtpDocumentAttached = $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::AttachPtpDocumentToOrder);
+        $isHoldingCertAttached = $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
+        $isLenderOwnershipDocumentAttached = $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+
         return [
             'product' => ['required', 'string'],
             'quantity' => ['required', 'numeric'],
@@ -37,11 +46,19 @@ class UpdatePurchasingCommodityRequest extends FormRequest
             'uom' => ['required', 'string'],
             'exchange_rate' => ['required', 'numeric'],
             'auto_generate_financing_institution_certificate' => ['required', 'boolean'],
-            'ptp_document' => ['nullable', 'file', 'mimes:pdf'],
-            'original_holding_certificate' => ['nullable', 'file', 'mimes:pdf'],
+            'ptp_document' => [
+                $isPtpDocumentAttached ? 'nullable' : 'required',
+                'file',
+                'mimes:pdf',
+            ],
+            'original_holding_certificate' => [
+                $isHoldingCertAttached ? 'nullable' : 'required',
+                'file',
+                'mimes:pdf',
+            ],
             'financing_institution_certificate' => [
                 'exclude_if:auto_generate_financing_institution_certificate,true',
-                'nullable',
+                $isLenderOwnershipDocumentAttached ? 'nullable' : 'required',
                 'file',
                 'mimes:pdf',
             ],
