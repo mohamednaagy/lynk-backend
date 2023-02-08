@@ -2,8 +2,10 @@
 
 namespace Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders;
 
+use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\Subject;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\User;
@@ -88,12 +90,35 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
     }
 
+    public function test_auth_user_can_update_process_murabaha_purchase_offer_with_trader_not_in_progress(): void
+    {
+        self::$traderOrder->update(['status' => TraderOrderStatus::Completed]);
+        self::$order->update(['status' => FinancingOrderStatus::MurabahaSaleCompleted]);
+
+        $this->actingAs(self::$traderAdminUser)
+            ->withHeader('X-Company', self::$company->id)
+            ->postJson(self::$apiUrl, [
+                'document' => UploadedFile::fake()->create('test.pdf'),
+            ])
+            ->assertOk()
+            ->assertJsonStructure([
+                'data' => [],
+            ]);
+
+        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
+    }
+
     public function test_other_users_areas_can_not_update_process_murabaha_purchase_offer()
     {
-        $this->assertStatusCodeForAllRolesExceptForArea(Response::HTTP_FORBIDDEN, [Area::Trader], function ($user, $role) {
-            return $this->actingAs($user)
-                ->withHeader('X-Company', self::$company->id)
-                ->postJson(self::$apiUrl);
-        });
+        $this->assertStatusCodeForAllRolesExceptForAreaAndPermissions(Response::HTTP_FORBIDDEN, [],
+            [
+                perm(Area::Trader, [Subject::All, Action::Manage]),
+                perm(Area::Trader, [Subject::FinancingOrders, Action::Edit]),
+                perm(Area::Trader, [Subject::FinancingOrders, Action::Manage]),
+            ], function ($user, $role, $permission) {
+                return $this->actingAs($user)
+                    ->withHeader('X-Company', self::$company->id)
+                    ->postJson(self::$apiUrl);
+            });
     }
 }

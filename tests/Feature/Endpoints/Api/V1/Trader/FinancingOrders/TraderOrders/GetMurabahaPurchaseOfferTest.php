@@ -2,8 +2,11 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders;
 
+use App\Enums\Action;
+use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\Subject;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\Media;
@@ -12,6 +15,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
@@ -94,5 +98,22 @@ class GetMurabahaPurchaseOfferTest extends TestCase
                     'murabaha_purchase_offer',
                 ],
             ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_auth_user_cant_get_murabaha_purchase_offer(): void
+    {
+        $this->assertStatusCodeForAllRolesExceptForAreaAndPermissions(Response::HTTP_FORBIDDEN, [],
+            [
+                perm(Area::Trader, [Subject::All, Action::Manage]),
+                perm(Area::Trader, [Subject::FinancingOrders, Action::Edit]),
+                perm(Area::Trader, [Subject::FinancingOrders, Action::Manage]),
+            ], function ($user, $role, $permission) {
+                return $this->actingAs($user)
+                    ->withHeader('X-Company', self::$company->id)
+                    ->getJson(self::$apiUrl);
+            });
     }
 }
