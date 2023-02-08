@@ -26,8 +26,6 @@ class UpdatePurchasingCommodityRequest extends FormRequest
     {
         $traderOrder = $this->route('trader_order');
 
-        $traderOrder->load('traderHistories');
-
         $isPtpDocumentAttached = $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::AttachPtpDocumentToOrder);
         $isHoldingCertAttached = $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
         $isLenderOwnershipDocumentAttached = $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
