@@ -93,8 +93,7 @@ class Order
      */
     public function getTotalWithoutVat(): Money
     {
-        // __IMPROVE__ we shoude use $this->getTotalVat() instead of $this->getTotalDiscount()
-        return $this->getSubtotal()->subtract($this->getTotalDiscount());
+        return $this->getSubtotal()->subtract($this->getTotalVat());
     }
 
     /**

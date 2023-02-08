@@ -27,7 +27,6 @@ return [
     'tax_rates' => 'Tax Rates',
     'invoice_number' => 'Invoice #:number',
     'amount_with_currency' => 'SAR :amount',
-    // __IMPROVE__ change text to be "Creation charge for financing order #:number"
-    'create_order_cost' => 'Fee of financing order #:number',
+    'create_order_cost' => 'Creation charge for financing order #:number',
     'vat' => 'VAT percentage',
 ];

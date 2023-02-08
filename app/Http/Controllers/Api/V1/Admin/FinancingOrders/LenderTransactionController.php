@@ -36,6 +36,7 @@ class LenderTransactionController extends Controller
                 'date',
                 'description',
                 'amount',
+                'receipt',
             ])
             ->respond();
     }

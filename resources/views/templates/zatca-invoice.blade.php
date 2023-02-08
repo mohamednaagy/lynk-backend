@@ -724,7 +724,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             <div>
                 <h2 class="text-2xl font-bold">{{ __('zatca/e-invoice.tax_invoice') }}</h2>
                 <p class="text-lg">
-                    {{ __('zatca/e-invoice.invoice_number', ['number' => $creationFeeTransaction->id]) }}
+                    {{ __('zatca/e-invoice.invoice_number', ['number' => $creation_fee_transaction->id]) }}
                 </p>
             </div>
         </div>

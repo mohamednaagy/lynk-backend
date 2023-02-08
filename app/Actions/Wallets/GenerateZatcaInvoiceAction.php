@@ -4,7 +4,7 @@ namespace App\Actions\Wallets;
 
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
-use App\Enums\MediaCollections\ZatcaInvoiceMediaCollection;
+use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Models\FinancingOrder;
 use App\Models\Transaction;
 use App\Support\PdfGenerator\PdfGenerator;
@@ -12,7 +12,6 @@ use App\Support\ZatcaEInvoice\Order;
 use App\Support\ZatcaEInvoice\PurchaseLine;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Salla\ZATCA\GenerateQrCode;
 use Salla\ZATCA\Tags\InvoiceDate;
 use Salla\ZATCA\Tags\InvoiceTaxAmount;
@@ -24,8 +23,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
 {
     protected string $template = 'templates.zatca-invoice';
 
-    // __IMPROVE__ use TransactionMediaCollection
-    protected string $collectionName = ZatcaInvoiceMediaCollection::Transactions;
+    protected string $collectionName = TransactionMediaCollection::Attachments;
 
     public function __construct(protected GetProjectSettings $getProjectSettings)
     {
@@ -35,7 +33,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
     {
         $seller = $this->getProjectSettings->handle();
 
-        DB::transaction(function () use ($financingOrder, $seller, $creationFeeTransaction, $vatPercentageTransaction) {
+        DB::transaction(function () use ($financingOrder, $seller, $creationFeeTransaction) {
             $displayQRCodeAsBase64 = GenerateQrCode::fromArray([
                 new Seller($seller->getCompanyName(Config::get('app.locale', 'en'))),
                 new TaxNumber($seller->getVatId()),
@@ -57,20 +55,13 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
                             $seller->getVatRateInPercentage()
                         ),
                     ],
-                    // __IMPROVE__ this is creation date of order which is "created_at" of financing order
-                    now('Asia/Riyadh'),
+                    $financingOrder->created_at,
                     $financingOrder
                 ),
                 'qr_code' => $displayQRCodeAsBase64,
                 'buyer' => $financingOrder->company,
-                // __IMPROVE__ use snake case to be consistent
-                'creationFeeTransaction' => $creationFeeTransaction,
-                // __IMPROVE__ use snake case to be consistent and remove if not used
-                'vatPercentageTransaction' => $vatPercentageTransaction,
+                'creation_fee_transaction' => $creationFeeTransaction,
             ])->render();
-
-            file_put_contents('/Users/ahmed/Sites/lynk-backend/storage/test.txt', $html);
-            Log::debug('html', [$html]);
 
             PdfGenerator::outputFromHtml(
                 $html,

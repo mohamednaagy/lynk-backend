@@ -2,6 +2,7 @@
 
 namespace App\Transformers;
 
+use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Models\Transaction;
 use App\Support\Wallets\Contracts\TransactionUtilInterface;
 use Carbon\Carbon;
@@ -15,6 +16,7 @@ class TransactionTransformer extends TransformerAbstract
         'date',
         'description',
         'amount',
+        'receipt',
     ];
 
     public function transform(Transaction $transaction): array
@@ -46,7 +48,8 @@ class TransactionTransformer extends TransformerAbstract
         return $this->primitive($transaction->amount->formatByDecimal());
     }
 
-    // __IMPROVE__ we need to add a property called "receipt" and it will return a link in case
-    // if the transaction is order creation fee or vat fee
-    // the link will download the zatca invoice
+    public function includeReceipt(Transaction $transaction): Primitive
+    {
+        return $this->primitive($transaction->getFirstMedia(TransactionMediaCollection::Attachments));
+    }
 }
