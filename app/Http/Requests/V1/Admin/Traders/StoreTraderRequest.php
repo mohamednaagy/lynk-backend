@@ -45,6 +45,13 @@ class StoreTraderRequest extends FormRequest
                 Rule::unique(Company::class, 'driver'),
                 Rule::in(['dmcc', 'fake']),
             ],
+            'email' => [
+                'required',
+                'email',
+                'string',
+                Rule::unique(Company::class, 'email'),
+                'max:255',
+            ],
         ];
     }
 }
