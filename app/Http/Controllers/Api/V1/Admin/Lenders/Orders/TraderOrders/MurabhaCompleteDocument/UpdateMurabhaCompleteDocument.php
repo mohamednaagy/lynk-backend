@@ -8,8 +8,10 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
+use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabhaCompleteDocumentRequest;
+use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -38,7 +40,17 @@ class UpdateMurabhaCompleteDocument extends Controller
         TraderOrder $traderOrder
     ): JsonResponse {
         return DB::transaction(function () use ($request, $order, $traderOrder) {
-            if ($traderOrder->checkOrderStepComplete(FinancingOrderStatus::MurabahaSaleCompleted)) {
+            $order = FinancingOrder::lockForUpdate()->findOrFail($order);
+            $orderStepComplete = $traderOrder->checkOrderStepComplete(FinancingOrderStatus::MurabahaSaleCompleted);
+
+            if (
+                $order->status->cantMoveTo(FinancingOrderStatus::MurabahaSaleCompleted) &&
+                ! $orderStepComplete
+            ) {
+                throw new OrderStatusDoesNotFollowSequenceException();
+            }
+
+            if ($orderStepComplete) {
                 app(UpdateMurabhaCompleteDocumentInterface::class)->handle($request, $traderOrder);
             } else {
                 app(ProceedMurabhaCompleteDocument::class)->handle($request, $order, $traderOrder);

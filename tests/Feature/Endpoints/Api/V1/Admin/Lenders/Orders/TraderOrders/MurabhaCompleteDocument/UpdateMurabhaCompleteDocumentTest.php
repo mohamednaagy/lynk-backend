@@ -1,10 +1,10 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders;
+namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument;
 
 use App\Enums\Area;
+use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\TraderOrder;
@@ -15,12 +15,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
-use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
-use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
-class GetMurabhaCompleteDocumentTest extends TestCase
+class UpdateMurabhaCompleteDocumentTest extends TestCase
 {
     use RefreshDatabase, AssertsAccessByRoleAndArea;
 
@@ -36,7 +34,9 @@ class GetMurabhaCompleteDocumentTest extends TestCase
 
     private static TraderOrder $traderOrder;
 
-    private static string $getMurabhaCompleteDocumentUrl;
+    private static string $updateMurabhaCompleteDocumentUrl;
+
+    private static array $requestData;
 
     /**
      * @return void
@@ -55,7 +55,7 @@ class GetMurabhaCompleteDocumentTest extends TestCase
             self::$userLender->id,
             [
                 'is_verification_required' => true,
-                'status' => FinancingOrderStatus::CommodityPurchased,
+                'status' => FinancingOrderStatus::MurabhaOfferIssued,
             ]
         );
 
@@ -66,20 +66,25 @@ class GetMurabhaCompleteDocumentTest extends TestCase
             'status' => TraderOrderStatus::InProgress,
         ]);
 
-        self::$getMurabhaCompleteDocumentUrl = self::BaseUrl.
+        self::$updateMurabhaCompleteDocumentUrl = self::BaseUrl.
             '/orders/'.
             self::$financingOrder->getOriginal('id').
             '/trader-orders/'.
             self::$traderOrder->getOriginal('id').
             '/murabha-complete';
+
+        self::$requestData = [
+            'document' => UploadedFile::fake()
+                ->create('attachment.pdf', 10),
+        ];
     }
 
     /**
      * @return void
      */
-    public function test_that_unauth_user_cant_get_murabha_complete_document(): void
+    public function test_that_unauth_user_cant_update_murabha_complete_document(): void
     {
-        $this->getJson(self::$getMurabhaCompleteDocumentUrl)
+        $this->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
                 'message' => 'Unauthenticated.',
@@ -89,7 +94,7 @@ class GetMurabhaCompleteDocumentTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_other_area_roles_of_not_super_admin_area_cant_get_murabha_complete_document(): void
+    public function test_that_other_area_roles_of_not_super_admin_area_cant_update_murabha_complete_document(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
             Response::HTTP_FORBIDDEN,
@@ -98,31 +103,50 @@ class GetMurabhaCompleteDocumentTest extends TestCase
             ],
             function ($user, $role) {
                 return $this->actingAs($user)
-                    ->getJson(self::$getMurabhaCompleteDocumentUrl);
+                    ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData);
             }
         );
     }
 
     /**
      * @return void
-     *
-     * @throws FileDoesNotExist
-     * @throws FileIsTooBig
      */
-    public function test_get_murabha_complete_document_succeed(): void
+    public function test_proceed_murabha_complete_document_succeed(): void
     {
-        $fileName = self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf';
-        self::$traderOrder->addMedia(
-            UploadedFile::fake()
-                ->image($fileName)
-        )->toMediaCollection(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo);
+        $this->actingAs(self::$superAdminUser)
+            ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
+            ->assertJsonStructure(['data']);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_update_murabha_complete_document_not_follow_sequence(): void
+    {
+        self::$financingOrder->update([
+            'status' => FinancingOrderStatus::ContractSigned,
+        ]);
 
         $this->actingAs(self::$superAdminUser)
-            ->getJson(self::$getMurabhaCompleteDocumentUrl)
-            ->assertJsonStructure([
-                'data' => [
-                    'url',
-                ],
+            ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
+            ->assertStatus(400)
+            ->assertExactJson([
+                'message' => __('error.order_status_doesnt_follow_sequence'),
+                'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
             ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_update_murabha_complete_document_succeed(): void
+    {
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderStatus::MurabahaSaleCompleted,
+        ]);
+
+        $this->actingAs(self::$superAdminUser)
+            ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
+            ->assertJsonStructure(['data']);
     }
 }
