@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders;
 
-use App\Enums\FinancingOrderStatus;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdatePurchasingCommodityRequest extends FormRequest
@@ -24,7 +23,7 @@ class UpdatePurchasingCommodityRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
+        return [
             'product' => ['required', 'string'],
             'quantity' => ['required', 'numeric'],
             'amount' => ['required', 'numeric'],
@@ -38,19 +37,14 @@ class UpdatePurchasingCommodityRequest extends FormRequest
             'uom' => ['required', 'string'],
             'exchange_rate' => ['required', 'numeric'],
             'auto_generate_financing_institution_certificate' => ['required', 'boolean'],
-        ];
-
-        if (! $this->trader_order->checkOrderStepComplete(FinancingOrderStatus::CommodityPurchased)) {
-            $rules['ptp_document'] = ['required', 'file', 'mimes:pdf'];
-            $rules['original_holding_certificate'] = ['required', 'file', 'mimes:pdf'];
-            $rules['financing_institution_certificate'] = [
+            'ptp_document' => ['nullable', 'file', 'mimes:pdf'],
+            'original_holding_certificate' => ['nullable', 'file', 'mimes:pdf'],
+            'financing_institution_certificate' => [
                 'exclude_if:auto_generate_financing_institution_certificate,true',
-                'required',
+                'nullable',
                 'file',
                 'mimes:pdf',
-            ];
-        }
-
-        return $rules;
+            ],
+        ];
     }
 }
