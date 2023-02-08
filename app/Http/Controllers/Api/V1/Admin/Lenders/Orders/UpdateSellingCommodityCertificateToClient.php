@@ -17,10 +17,6 @@ use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use Spatie\MediaLibrary\MediaCollections\Exceptions\FileCannotBeAdded;
-use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
-use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
-use Spatie\MediaLibrary\MediaCollections\Exceptions\InvalidBase64Data;
 
 class UpdateSellingCommodityCertificateToClient extends Controller
 {
@@ -37,15 +33,13 @@ class UpdateSellingCommodityCertificateToClient extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  UpdateDocumentRequest  $request
+     * @param  UpdateSellingCommodityToClientRequest  $request
      * @param  Company  $lender
-     * @param  FinancingOrder  $order
+     * @param  int  $order
+     * @param  TraderOrder  $traderOrder
      * @return JsonResponse
      *
-     * @throws FileCannotBeAdded
-     * @throws FileDoesNotExist
-     * @throws FileIsTooBig
-     * @throws InvalidBase64Data
+     * @throws \Throwable
      */
     public function __invoke(
         UpdateSellingCommodityToClientRequest $request,
