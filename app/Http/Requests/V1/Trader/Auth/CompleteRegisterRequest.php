@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Requests\V1\Lender\Auth;
+namespace App\Http\Requests\V1\Trader\Auth;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
@@ -12,7 +13,7 @@ class CompleteRegisterRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -22,7 +23,7 @@ class CompleteRegisterRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
