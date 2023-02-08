@@ -67,6 +67,11 @@ class Company extends BaseTenant
         return $this->hasMany(Webhook::class);
     }
 
+    public function wallets()
+    {
+        return $this->morphMany(Wallet::class, 'holder');
+    }
+
     public function scopeTraderType($query, string $type)
     {
         return $query->where('type', $type);

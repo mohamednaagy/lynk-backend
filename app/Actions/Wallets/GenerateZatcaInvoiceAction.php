@@ -12,6 +12,7 @@ use App\Support\ZatcaEInvoice\Order;
 use App\Support\ZatcaEInvoice\PurchaseLine;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Salla\ZATCA\GenerateQrCode;
 use Salla\ZATCA\Tags\InvoiceDate;
 use Salla\ZATCA\Tags\InvoiceTaxAmount;
@@ -23,6 +24,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
 {
     protected string $template = 'templates.zatca-invoice';
 
+    // __IMPROVE__ use TransactionMediaCollection
     protected string $collectionName = ZatcaInvoiceMediaCollection::Transactions;
 
     public function __construct(protected GetProjectSettings $getProjectSettings)
@@ -55,20 +57,28 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
                             $seller->getVatRateInPercentage()
                         ),
                     ],
+                    // __IMPROVE__ this is creation date of order which is "created_at" of financing order
                     now('Asia/Riyadh'),
                     $financingOrder
                 ),
                 'qr_code' => $displayQRCodeAsBase64,
                 'buyer' => $financingOrder->company,
+                // __IMPROVE__ use snake case to be consistent
                 'creationFeeTransaction' => $creationFeeTransaction,
+                // __IMPROVE__ use snake case to be consistent and remove if not used
                 'vatPercentageTransaction' => $vatPercentageTransaction,
             ])->render();
 
-            PdfGenerator::outputFromHtml($html, function ($fileResource) use ($financingOrder) {
-                return $financingOrder->addMediaFromStream($fileResource)
-                    ->usingFileName("zatca-{$financingOrder->getKey()}".'.pdf')
-                    ->toMediaCollection($this->getCollectionName());
-            }
+            file_put_contents('/Users/ahmed/Sites/lynk-backend/storage/test.txt', $html);
+            Log::debug('html', [$html]);
+
+            PdfGenerator::outputFromHtml(
+                $html,
+                function ($fileResource) use ($financingOrder) {
+                    return $financingOrder->addMediaFromStream($fileResource)
+                        ->usingFileName("zatca-{$financingOrder->getKey()}".'.pdf')
+                        ->toMediaCollection($this->getCollectionName());
+                }
             );
         });
     }

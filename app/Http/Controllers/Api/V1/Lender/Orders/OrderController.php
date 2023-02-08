@@ -174,6 +174,7 @@ class OrderController extends Controller
                     vatPercentageTransaction: $vatPercentageTransaction
                 );
 
+                // __IMPROVE__ this line is duplicate with line 152
                 $user = auth()->user();
 
                 dispatch(new NotifyAdminsAboutOrderCreated($financingOrder, $user));

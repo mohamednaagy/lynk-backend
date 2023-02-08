@@ -45,4 +45,8 @@ class TransactionTransformer extends TransformerAbstract
     {
         return $this->primitive($transaction->amount->formatByDecimal());
     }
+
+    // __IMPROVE__ we need to add a property called "receipt" and it will return a link in case
+    // if the transaction is order creation fee or vat fee
+    // the link will download the zatca invoice
 }

@@ -2,9 +2,9 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Selling to Customer</title>
 
     <style>
@@ -468,53 +468,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-backdrop-sepia: ;
         }
 
-        ::-webkit-backdrop {
-            --tw-border-spacing-x: 0;
-            --tw-border-spacing-y: 0;
-            --tw-translate-x: 0;
-            --tw-translate-y: 0;
-            --tw-rotate: 0;
-            --tw-skew-x: 0;
-            --tw-skew-y: 0;
-            --tw-scale-x: 1;
-            --tw-scale-y: 1;
-            --tw-pan-x: ;
-            --tw-pan-y: ;
-            --tw-pinch-zoom: ;
-            --tw-scroll-snap-strictness: proximity;
-            --tw-ordinal: ;
-            --tw-slashed-zero: ;
-            --tw-numeric-figure: ;
-            --tw-numeric-spacing: ;
-            --tw-numeric-fraction: ;
-            --tw-ring-inset: ;
-            --tw-ring-offset-width: 0px;
-            --tw-ring-offset-color: #fff;
-            --tw-ring-color: rgb(59 130 246 / 0.5);
-            --tw-ring-offset-shadow: 0 0 #0000;
-            --tw-ring-shadow: 0 0 #0000;
-            --tw-shadow: 0 0 #0000;
-            --tw-shadow-colored: 0 0 #0000;
-            --tw-blur: ;
-            --tw-brightness: ;
-            --tw-contrast: ;
-            --tw-grayscale: ;
-            --tw-hue-rotate: ;
-            --tw-invert: ;
-            --tw-saturate: ;
-            --tw-sepia: ;
-            --tw-drop-shadow: ;
-            --tw-backdrop-blur: ;
-            --tw-backdrop-brightness: ;
-            --tw-backdrop-contrast: ;
-            --tw-backdrop-grayscale: ;
-            --tw-backdrop-hue-rotate: ;
-            --tw-backdrop-invert: ;
-            --tw-backdrop-opacity: ;
-            --tw-backdrop-saturate: ;
-            --tw-backdrop-sepia: ;
-        }
-
         ::backdrop {
             --tw-border-spacing-x: 0;
             --tw-border-spacing-y: 0;
@@ -620,12 +573,12 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             width: 25%;
         }
 
-        .w-1\/12 {
-            width: 8.333333%;
-        }
-
         .w-2\/12 {
             width: 16.666667%;
+        }
+
+        .w-1\/12 {
+            width: 8.333333%;
         }
 
         .w-full {
@@ -668,10 +621,33 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             gap: 1rem;
         }
 
-        .space-x-8 > :not([hidden]) ~ :not([hidden]) {
+        .space-x-8> :not([hidden])~ :not([hidden]) {
             --tw-space-x-reverse: 0;
             margin-right: calc(2rem * var(--tw-space-x-reverse));
             margin-left: calc(2rem * calc(1 - var(--tw-space-x-reverse)));
+        }
+
+        .bg-slate-600 {
+            --tw-bg-opacity: 1;
+            background-color: rgb(71 85 105 / var(--tw-bg-opacity));
+        }
+
+        .bg-slate-700 {
+            --tw-bg-opacity: 1;
+            background-color: rgb(51 65 85 / var(--tw-bg-opacity));
+        }
+
+        .bg-slate-800 {
+            --tw-bg-opacity: 1;
+            background-color: rgb(30 41 59 / var(--tw-bg-opacity));
+        }
+
+        .p-2\.5 {
+            padding: 0.625rem;
+        }
+
+        .p-2 {
+            padding: 0.5rem;
         }
 
         .px-2 {
@@ -682,11 +658,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         .py-3 {
             padding-top: 0.75rem;
             padding-bottom: 0.75rem;
-        }
-
-        .px-4 {
-            padding-left: 1rem;
-            padding-right: 1rem;
         }
 
         .text-2xl {
@@ -707,11 +678,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         .text-xs {
             font-size: 0.75rem;
             line-height: 1rem;
-        }
-
-        .text-xl {
-            font-size: 1.25rem;
-            line-height: 1.75rem;
         }
 
         .font-bold {
@@ -742,204 +708,203 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             color: rgb(31 41 55 / var(--tw-text-opacity));
         }
 
-        .filter {
-            filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
-        }
-
-        [dir="rtl"] .rtl\:space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+        [dir="rtl"] .rtl\:space-x-reverse> :not([hidden])~ :not([hidden]) {
             --tw-space-x-reverse: 1;
         }
     </style>
 </head>
 
 <body>
-<div dir="{{ App::getLocale() === 'en' ? 'ltr' : 'rtl' }}">
-    <div class="mb-6 flex items-center justify-between">
-        <div>
-            <img class="mx-auto h-20 w-auto" src="{{ "data:image/png;base64,". base64_encode(file_get_contents(public_path('color-logo.png'))) }}" />
-        </div>
-        <div>
-            <h2 class="text-2xl font-bold">{{ __('zatca/e-invoice.tax_invoice') }}</h2>
-            <p class="text-lg">
-                {{ __('zatca/e-invoice.invoice_number', ['number' => $creationFeeTransaction->reference_number]) }}</p>
-        </div>
-    </div>
-
-    <div class="my-10 flex space-x-8 rtl:space-x-reverse">
-        <div class="w-3/12">
-            <div class="mb-1">
-                <h2 class="text-sm text-gray-600">{{ __('zatca/e-invoice.bill_from') }}</h2>
+    <div dir="{{ App::getLocale() === 'en' ? 'ltr' : 'rtl' }}">
+        <div class="mb-6 flex items-center justify-between">
+            <div>
+                <img class="mx-auto h-20 w-auto"
+                    src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" />
             </div>
-            <h2 class="mb-1 font-semibold">{{ $seller->getCompanyName(Config::get('app.locale', 'en')) }}</h2>
-            <ul class="text-xs text-gray-500">
-                <li>{{ $seller->getCompanyAddress()->getAddressLineOne(Config::get('app.locale', 'en')) }}</li>
-                <li>{{ $seller->getCompanyAddress()->getAddressLineTwo(Config::get('app.locale', 'en')) }}</li>
-                <li>{{ __('zatca/e-invoice.vat_number') }}: {{ $seller->getVatId() }}</li>
-                <li>{{ __('zatca/e-invoice.cr_number') }}: {{ $seller->getCompanyCr() }}</li>
-            </ul>
-        </div>
-
-        <div class="w-3/12">
-            <div class="mb-1">
-                <h2 class="text-sm text-gray-600">{{ __('zatca/e-invoice.bill_to') }}</h2>
-            </div>
-            <h2 class="mb-1 font-semibold">{{ $buyer->name }}</h2>
-            <ul class="text-xs text-gray-500">
-{{--                <li>{{ __('zatca/e-invoice.contact_number') }}: {{ $buyer->mobile_dialing_phone_number }}</li>--}}
-            </ul>
-        </div>
-
-        <div class="flex-1">
-            <div class="mb-1">
-                <h2 class="text-sm text-gray-600">{{ __('zatca/e-invoice.order_details') }}</h2>
-            </div>
-            <div class="grid grid-cols-12 gap-2 text-xs text-gray-500">
-                <div class="col-span-3">{{ __('zatca/e-invoice.issue_date') }}</div>
-                <div class="col-span-9">{{ $order->getInvoiceDate() }}</div>
+            <div>
+                <h2 class="text-2xl font-bold">{{ __('zatca/e-invoice.tax_invoice') }}</h2>
+                <p class="text-lg">
+                    {{ __('zatca/e-invoice.invoice_number', ['number' => $creationFeeTransaction->id]) }}
+                </p>
             </div>
         </div>
-    </div>
 
-    <div class="bg-primary-700 flex px-2 py-3 text-white">
-        <div class="w-3/12">
-            <div>{{ __('zatca/e-invoice.item') }}</div>
-        </div>
-
-        <div class="w-1/12">
-            <div>{{ __('zatca/e-invoice.qty') }}</div>
-        </div>
-
-        <div class="w-2/12">
-            <div>{{ __('zatca/e-invoice.unit_price') }}</div>
-        </div>
-
-        <div class="w-2/12">
-            <div>{{ __('zatca/e-invoice.discount') }}</div>
-        </div>
-
-        <div class="w-2/12">
-            <div>{{ __('zatca/e-invoice.vat_symbol') }}</div>
-        </div>
-
-        <div class="w-2/12">
-            <div>{{ __('zatca/e-invoice.total_price') }}</div>
-        </div>
-    </div>
-
-    @foreach ($order->getItems() as $item)
-        <div class="flex px-2 py-3 text-gray-600">
+        <div class="my-10 flex space-x-8 rtl:space-x-reverse">
             <div class="w-3/12">
-                <div>{{ $item->getName() }}</div>
+                <div class="mb-1">
+                    <h2 class="text-sm text-gray-600">{{ __('zatca/e-invoice.bill_from') }}</h2>
+                </div>
+                <h2 class="mb-1 font-semibold">{{ $seller->getCompanyName(Config::get('app.locale', 'en')) }}</h2>
+                <ul class="text-xs text-gray-500">
+                    <li>{{ $seller->getCompanyAddress()->getAddressLineOne(Config::get('app.locale', 'en')) }}</li>
+                    <li>{{ $seller->getCompanyAddress()->getAddressLineTwo(Config::get('app.locale', 'en')) }}</li>
+                    <li>{{ __('zatca/e-invoice.vat_number') }}: {{ $seller->getVatId() }}</li>
+                    <li>{{ __('zatca/e-invoice.cr_number') }}: {{ $seller->getCompanyCr() }}</li>
+                </ul>
+            </div>
+
+            <div class="w-3/12">
+                <div class="mb-1">
+                    <h2 class="text-sm text-gray-600">{{ __('zatca/e-invoice.bill_to') }}</h2>
+                </div>
+                <h2 class="mb-1 font-semibold">{{ $buyer->name }}</h2>
+                <ul class="text-xs text-gray-500">
+                    {{--                <li>{{ __('zatca/e-invoice.contact_number') }}: {{ $buyer->mobile_dialing_phone_number }}</li> --}}
+                </ul>
+            </div>
+
+            <div class="flex-1">
+                <div class="mb-1">
+                    <h2 class="text-sm text-gray-600">{{ __('zatca/e-invoice.order_details') }}</h2>
+                </div>
+                <div class="grid grid-cols-12 gap-2 text-xs text-gray-500">
+                    <div class="col-span-3">{{ __('zatca/e-invoice.issue_date') }}</div>
+                    <div class="col-span-9">{{ $order->getInvoiceDate() }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-600 flex px-2 py-3 text-white">
+            <div class="w-3/12">
+                <div>{{ __('zatca/e-invoice.item') }}</div>
+            </div>
+
+            <div class="w-2/12">
+                <div>{{ __('zatca/e-invoice.qty') }}</div>
+            </div>
+
+            <div class="w-2/12">
+                <div>{{ __('zatca/e-invoice.unit_price') }}</div>
+            </div>
+
+            <div class="w-2/12">
+                <div>{{ __('zatca/e-invoice.discount') }}</div>
             </div>
 
             <div class="w-1/12">
-                <div>{{ $item->getQuantity() }}</div>
+                <div>{{ __('zatca/e-invoice.vat_symbol') }}</div>
             </div>
 
             <div class="w-2/12">
-                <div>{{ $item->getItemPrice()->formatByDecimal() }}</div>
-            </div>
-
-            <div class="w-2/12">
-                <div>{{ $item->getDiscountPercentage() ?? 0 }}%</div>
-            </div>
-
-            <div class="w-2/12">
-                <div>{{ $item->getVatPercentage() === null ? 'N' : 'V' }}</div>
-            </div>
-
-            <div class="w-2/12">
-                <div>{{ $item->getLineTotalWithoutVat()->formatByDecimal() }}</div>
+                <div>{{ __('zatca/e-invoice.total_price') }}</div>
             </div>
         </div>
-    @endforeach
-    <div class="bg-primary-700 h-px w-full"></div>
 
-    <div class="flex items-center justify-between">
-        <div class="flex">
-            <img class="h-40 w-40" src="{{ $qr_code }}" />
-            <div class="px-4">
-                <h2 class="text-xl font-bold">{{ __('zatca/e-invoice.tax_rates') }}</h2>
-                <ul class="mt-2">
-                    <li>"V"
-                        {{ __('zatca/e-invoice.vat_symbol_v', ['percentage' => collect($order->getItems())->filter(fn($item) => $item->getVatPercentage() !== null)->first()->getVatPercentage()]) }}
-                    </li>
-                    <li>"N" {{ __('zatca/e-invoice.vat_symbol_n') }}</li>
-                </ul>
-            </div>
-        </div>
-        <div class="w-1/2">
-            <div class="grid grid-cols-2 gap-4 py-3">
-                <div>{{ __('zatca/e-invoice.subtotal') }}</div>
-                <div>
-                    {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getSubtotal()->formatByDecimal()]) }}
+        @foreach ($order->getItems() as $item)
+            <div class="flex px-2 py-3 text-gray-600">
+                <div class="w-3/12">
+                    <div>{{ $item->getName() }}</div>
                 </div>
 
-                @if ($order->getTotalDiscount()->getAmount() > 0)
-                    <div>{{ __('zatca/e-invoice.total_discount') }}</div>
+                <div class="w-2/12">
+                    <div>{{ $item->getQuantity() }}</div>
+                </div>
+
+                <div class="w-2/12">
+                    <div>{{ $item->getItemPrice()->formatByDecimal() }}</div>
+                </div>
+
+                <div class="w-2/12">
+                    <div>{{ $item->getDiscountPercentage() ?? 0 }}%</div>
+                </div>
+
+                <div class="w-1/12">
+                    <div>{{ $item->getVatPercentage() === null ? 'N' : 'V' }}</div>
+                </div>
+
+                <div class="w-2/12">
+                    <div>{{ $item->getLineTotalWithoutVat()->formatByDecimal() }}</div>
+                </div>
+            </div>
+        @endforeach
+        <div class="bg-slate-700 h-px w-full"></div>
+
+        <div class="flex items-center justify-between">
+            <div class="flex">
+                <img class="h-40 w-40" src="{{ $qr_code }}" />
+                <div class="p-2.5">
+                    <h2 class="text-lg font-bold">{{ __('zatca/e-invoice.tax_rates') }}</h2>
+                    <ul class="mt-2 text-sm">
+                        <li>"V"
+                            {{ __('zatca/e-invoice.vat_symbol_v', ['percentage' => collect($order->getItems())->filter(fn($item) => $item->getVatPercentage() !== null)->first()->getVatPercentage()]) }}
+                        </li>
+                        <li>"N" {{ __('zatca/e-invoice.vat_symbol_n') }}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="w-1/2">
+                <div class="grid grid-cols-2 gap-4 py-3">
+                    <div>{{ __('zatca/e-invoice.subtotal') }}</div>
                     <div>
-                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalDiscount()->formatByDecimal()]) }}
+                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getSubtotal()->formatByDecimal()]) }}
                     </div>
-                @endif
 
-                <div>{{ __('zatca/e-invoice.total_before_vat') }}</div>
-                <div>
-                    {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalWithoutVat()->formatByDecimal()]) }}
-                </div>
+                    @if ($order->getTotalDiscount()->getAmount() > 0)
+                        <div>{{ __('zatca/e-invoice.total_discount') }}</div>
+                        <div>
+                            {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalDiscount()->formatByDecimal()]) }}
+                        </div>
+                    @endif
 
-                <div>{{ __('zatca/e-invoice.vat_total') }}</div>
-                <div>
-                    {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalVat()->formatByDecimal()]) }}
-                </div>
+                    <div>{{ __('zatca/e-invoice.total_before_vat') }}</div>
+                    <div>
+                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalWithoutVat()->formatByDecimal()]) }}
+                    </div>
 
-                <div>{{ __('zatca/e-invoice.total') }}</div>
-                <div class="font-bold text-gray-800">
-                    {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalAmount()->formatByDecimal()]) }}
+                    <div>{{ __('zatca/e-invoice.vat_total') }}</div>
+                    <div>
+                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalVat()->formatByDecimal()]) }}
+                    </div>
+
+                    <div>{{ __('zatca/e-invoice.total') }}</div>
+                    <div class="font-bold text-gray-800">
+                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalAmount()->formatByDecimal()]) }}
+                    </div>
                 </div>
+                <div class="bg-slate-800 h-px w-full"></div>
             </div>
-            <div class="bg-primary-800 h-px w-full"></div>
         </div>
     </div>
-</div>
 
-<!-- Code injected by live-server -->
-<script>
-    // <![CDATA[  <-- For SVG support
-    if ('WebSocket' in window) {
-        (function () {
-            function refreshCSS() {
-                var sheets = [].slice.call(document.getElementsByTagName("link"));
-                var head = document.getElementsByTagName("head")[0];
-                for (var i = 0; i < sheets.length; ++i) {
-                    var elem = sheets[i];
-                    var parent = elem.parentElement || head;
-                    parent.removeChild(elem);
-                    var rel = elem.rel;
-                    if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
-                        var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
-                        elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+    <!-- Code injected by live-server -->
+    <script>
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function() {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() ==
+                            "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date()
+                                .valueOf());
+                        }
+                        parent.appendChild(elem);
                     }
-                    parent.appendChild(elem);
                 }
-            }
-            var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
-            var address = protocol + window.location.host + window.location.pathname + '/ws';
-            var socket = new WebSocket(address);
-            socket.onmessage = function (msg) {
-                if (msg.data == 'reload') window.location.reload();
-                else if (msg.data == 'refreshcss') refreshCSS();
-            };
-            if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
-                console.log('Live reload enabled.');
-                sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
-            }
-        })();
-    }
-    else {
-        console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
-    }
-    // ]]>
-</script>
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function(msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        } else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+        // ]]>
+    </script>
 </body>
 
 </html>
