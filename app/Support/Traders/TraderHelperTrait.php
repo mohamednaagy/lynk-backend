@@ -28,6 +28,14 @@ trait TraderHelperTrait
                 'file' => 'original_holding_certificate',
             ],
         ],
+        FinancingOrderStatus::MurabahaSaleCompleted => [
+            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
+            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
+                'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
+                'file' => 'document',
+            ],
+            FinancingOrderHistory::MurabahaSaleCompleted => null,
+        ],
     ];
 
     public function createStepHistories(Request $request, $trader, TraderOrder $traderOrder, $status)

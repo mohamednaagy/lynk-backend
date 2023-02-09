@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument;
 
-use App\Actions\Contracts\Orders\TraderOrders\ProceedMurabhaCompleteDocument;
-use App\Actions\Contracts\Orders\TraderOrders\UpdateMurabhaCompleteDocument as UpdateMurabhaCompleteDocumentInterface;
+use App\Actions\Contracts\Orders\TraderOrders\MurabhaCompleteDocument\HandleMurabhaCompleteDocument;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
@@ -50,11 +49,7 @@ class UpdateMurabhaCompleteDocument extends Controller
                 throw new OrderStatusDoesNotFollowSequenceException();
             }
 
-            if ($orderStepComplete) {
-                app(UpdateMurabhaCompleteDocumentInterface::class)->handle($request, $traderOrder);
-            } else {
-                app(ProceedMurabhaCompleteDocument::class)->handle($request, $order, $traderOrder);
-            }
+            app(HandleMurabhaCompleteDocument::class)->handle($request, $order, $traderOrder);
 
             return $this->successResponse();
         });
