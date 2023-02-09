@@ -23,6 +23,17 @@ trait AssertsAccessByRoleAndArea
 
     public function assertStatusCodeExceptForPermissions($status, array $exceptedPermissions, $request)
     {
+        $excludedPermissions = [];
+
+        foreach ($exceptedPermissions as $area => $permission) {
+            if (is_string($permission)) {
+                $exceptedPermissions[] = $permission;
+            }
+            if (is_array($permission)) {
+                $exceptedPermissions = array_merge(perm_arr($area, $permission), $exceptedPermissions);
+            }
+        }
+
         $areas = Area::asArray();
         foreach ($areas as $area) {
             $roles = Area::roles($area);
@@ -31,7 +42,7 @@ trait AssertsAccessByRoleAndArea
                 foreach ($permissions as $subject => $actions) {
                     foreach ($actions as $action) {
                         $permission = perm($area, [$subject, $action]);
-                        if (in_array($permission, $exceptedPermissions)) {
+                        if (in_array($permission, $excludedPermissions)) {
                             continue;
                         }
                         $this->assertStatusCodeForAreaRolesAndPermissions($status, $area, [$permission], $request);
