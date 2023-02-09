@@ -105,11 +105,13 @@ class GetMurabahaPurchaseOfferTest extends TestCase
      */
     public function test_auth_user_cant_get_murabaha_purchase_offer(): void
     {
-        $this->assertStatusCodeForAllRolesExceptForAreaAndPermissions(Response::HTTP_FORBIDDEN, [],
+        $this->assertStatusCodeExceptForPermissions(Response::HTTP_FORBIDDEN,
             [
-                perm(Area::Trader, [Subject::All, Action::Manage]),
-                perm(Area::Trader, [Subject::FinancingOrders, Action::Edit]),
-                perm(Area::Trader, [Subject::FinancingOrders, Action::Manage]),
+                Area::Trader => [
+                    [Subject::All, Action::Manage],
+                    [Subject::FinancingOrders, Action::Edit],
+                    [Subject::FinancingOrders, Action::Manage],
+                ],
             ], function ($user, $role, $permission) {
                 return $this->actingAs($user)
                     ->withHeader('X-Company', self::$company->id)

@@ -110,11 +110,13 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
 
     public function test_other_users_areas_can_not_update_process_murabaha_purchase_offer()
     {
-        $this->assertStatusCodeForAllRolesExceptForAreaAndPermissions(Response::HTTP_FORBIDDEN, [],
+        $this->assertStatusCodeExceptForPermissions(Response::HTTP_FORBIDDEN,
             [
-                perm(Area::Trader, [Subject::All, Action::Manage]),
-                perm(Area::Trader, [Subject::FinancingOrders, Action::Edit]),
-                perm(Area::Trader, [Subject::FinancingOrders, Action::Manage]),
+                Area::Trader => [
+                    [Subject::All, Action::Manage],
+                    [Subject::FinancingOrders, Action::Edit],
+                    [Subject::FinancingOrders, Action::Manage],
+                ],
             ], function ($user, $role, $permission) {
                 return $this->actingAs($user)
                     ->withHeader('X-Company', self::$company->id)
