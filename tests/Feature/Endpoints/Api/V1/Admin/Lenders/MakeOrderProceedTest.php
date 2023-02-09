@@ -278,8 +278,8 @@ class MakeOrderProceedTest extends TestCase
             ]);
 
         $this->assertEquals(
-            FinancingOrder::find(self::$financingOrder->id)->status->value,
-            FinancingOrderStatus::ContractSigned
+            FinancingOrderStatus::ContractSigned,
+            FinancingOrder::find(self::$financingOrder->id)->status->value
         );
     }
 
@@ -301,8 +301,8 @@ class MakeOrderProceedTest extends TestCase
             ]);
 
         $this->assertEquals(
-            FinancingOrder::find(self::$financingOrder->id)->status->value,
-            FinancingOrderStatus::ClientWakalaCompleted
+            FinancingOrderStatus::ClientWakalaCompleted,
+            FinancingOrder::find(self::$financingOrder->id)->status->value
         );
 
         $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::ClientWakala));
