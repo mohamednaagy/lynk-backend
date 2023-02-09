@@ -4,7 +4,6 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -165,25 +164,27 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
-    public function test_admin_proceed_order_contract_signed_case_dosent_proceed_when_order_status_doesnt_follow_sequence(): void
+    public function test_admin_proceed_order_contract_signed_case_proceed_when_order_status__with_trader_order_not_in_progress(): void
     {
         $statuses = FinancingOrderStatus::getValues();
+
+        self::$traderOrder->update(['status' => TraderOrderStatus::Cancelled]);
+
         foreach ($statuses as $status) {
-            self::$financingOrder->update([
-                'status' => $status,
-            ]);
-            self::$financingOrder->refresh();
+            FinancingOrder::withoutEvents(function () use ($status) {
+                self::$financingOrder->update([
+                    'status' => $status,
+                ]);
+            });
 
             if (self::$financingOrder->status->cantMoveTo(FinancingOrderStatus::ContractSigned)) {
-                $response = $this->actingAs(self::$admin)
+                $this->actingAs(self::$admin)
                     ->postJson(self::$orderProceedUrl, [
                         'case' => FinancingOrderProceedCase::ContractSigned,
-                    ]);
+                    ])->assertOk();
 
-                $response->assertStatus(400)->assertExactJson([
-                    'message' => __('error.order_status_doesnt_follow_sequence'),
-                    'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
-                ]);
+                self::$financingOrder = self::$financingOrder->fresh();
+                $this->assertTrue(self::$financingOrder->status->is($status));
             }
         }
     }
@@ -191,25 +192,25 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
-    public function test_admin_proceed_order_client_wakala_accepted_case_dosent_proceed_when_order_status_doesnt_follow_sequence(): void
+    public function test_admin_proceed_order_client_wakala_accepted_case_proceed_when_order_status_with_trader_order_client_wakala_accepted(): void
     {
         $statuses = FinancingOrderStatus::getValues();
+
+        self::$traderOrder->update(['client_wakala_accepted_at' => now()]);
+
         foreach ($statuses as $status) {
             self::$financingOrder->update([
                 'status' => $status,
             ]);
-            self::$financingOrder->refresh();
 
             if (self::$financingOrder->status->cantMoveTo(FinancingOrderStatus::ClientWakalaCompleted)) {
-                $response = $this->actingAs(self::$admin)
+                $this->actingAs(self::$admin)
                     ->postJson(self::$orderProceedUrl, [
                         'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
-                    ]);
+                    ])->assertOk();
 
-                $response->assertStatus(400)->assertExactJson([
-                    'message' => __('error.order_status_doesnt_follow_sequence'),
-                    'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
-                ]);
+                self::$financingOrder = self::$financingOrder->fresh();
+                $this->assertTrue(self::$financingOrder->status->is($status));
             }
         }
     }
@@ -217,18 +218,29 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
-    public function test_admin_cannot_make_order_proceed_on_client_wakala_accepted_when_order_verification_is_required(): void
+    public function test_admin_proceed_order_client_wakala_accepted_case_proceed_when_order_status_with_trader_order_not_in_progress(): void
     {
-        self::$financingOrder->update([
-            'is_verification_required' => true,
-            'status' => FinancingOrderStatus::WaitingClientWakala,
-        ]);
+        $statuses = FinancingOrderStatus::getValues();
 
-        $this->actingAs(self::$admin)
-            ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
-            ])
-            ->assertStatus(Response::HTTP_BAD_REQUEST);
+        self::$traderOrder->update(['status' => TraderOrderStatus::Cancelled]);
+
+        foreach ($statuses as $status) {
+            FinancingOrder::withoutEvents(function () use ($status) {
+                self::$financingOrder->update([
+                    'status' => $status,
+                ]);
+            });
+
+            if (self::$financingOrder->status->cantMoveTo(FinancingOrderStatus::ClientWakalaCompleted)) {
+                $this->actingAs(self::$admin)
+                    ->postJson(self::$orderProceedUrl, [
+                        'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                    ])->assertOk();
+
+                self::$financingOrder = self::$financingOrder->fresh();
+                $this->assertTrue(self::$financingOrder->status->is($status));
+            }
+        }
     }
 
     /**

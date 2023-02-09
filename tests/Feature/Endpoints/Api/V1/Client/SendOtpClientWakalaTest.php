@@ -3,9 +3,12 @@
 namespace Endpoints\Api\V1\Client;
 
 use App\Enums\Role;
+use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
@@ -22,14 +25,22 @@ class SendOtpClientWakalaTest extends TestCase
 
     private static FinancingOrder $order;
 
+    private static TraderOrder|Model $traderOrder;
+
     public function setUp(): void
     {
         parent::setUp();
 
         [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+
         self::$order = $this->createOrder(self::$company->id, self::$userLender->id, [
             'national_id' => '2553451234',
+        ]);
+        self::$traderOrder = self::$order->traderOrders()->create([
+            'provider' => 'dmcc',
+            'status' => TraderOrderStatus::InProgress,
+            'reference' => 123,
         ]);
     }
 
@@ -56,7 +67,7 @@ class SendOtpClientWakalaTest extends TestCase
 
     public function test_send_otp_client_wakala_with_already_verified_order_unsuccessful()
     {
-        self::$order->update(['client_wakala_accepted_at' => now()]);
+        self::$traderOrder->update(['client_wakala_accepted_at' => now()]);
 
         $this->postJson('api/v1/client/wakala/access', [
             'national_id' => '2553451234',

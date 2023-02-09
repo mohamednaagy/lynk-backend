@@ -2,15 +2,14 @@
 
 namespace App\Actions\Contracts\Clients;
 
-use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 interface AcceptClientWakala
 {
     /**
-     * @param  FinancingOrder  $order
-     * @param  string  $token
+     * @param  TraderOrder  $traderOrder
      * @return Media
      */
-    public function handle(FinancingOrder $order): Media;
+    public function handle(TraderOrder $traderOrder): Media;
 }

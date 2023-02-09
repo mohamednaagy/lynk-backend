@@ -22,6 +22,8 @@ class AcceptClientWakala extends Controller
      * @param  AcceptClientWakalaRequest  $request
      * @param  AcceptWakalaInterface  $acceptClientWakala
      * @return JsonResponse
+     *
+     * @throws \Throwable
      */
     public function __invoke(
         AcceptClientWakalaRequest $request,
@@ -42,12 +44,14 @@ class AcceptClientWakala extends Controller
                 throw new AuthorizationException();
             }
 
+            $traderOrder = $order->activeTraderOrder()->first();
+
             $canProceed = $order->getNationalId() === $request->validated('national_id')
-                && $order->client_wakala_accepted_at === null;
+                && $traderOrder->client_wakala_accepted_at === null;
 
             abort_if(! $canProceed, 404);
 
-            $media = $acceptClientWakala->handle($order);
+            $media = $acceptClientWakala->handle($traderOrder);
 
             $order->update([
                 'status' => FinancingOrderStatus::ClientWakalaCompleted,

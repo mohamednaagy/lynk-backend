@@ -19,7 +19,7 @@ class ProceedSellingCommodityAction implements ProceedSellingCommodity
                 'status' => FinancingOrderStatus::CommoditySoldToCustomer,
             ]);
 
-            $traderOrder->traderHistories()->create([
+            $traderOrder->traderHistories()->updateOrCreat([
                 'action' => FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
             ]);
         });

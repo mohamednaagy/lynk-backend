@@ -35,8 +35,8 @@ class TraderHistoryTransformer extends TransformerAbstract
         return match ($traderHistoryKey) {
             'client_wakala' => [
                 'step' => 'client_wakala',
-                'is_complete' => (bool) $this->traderOrder->order->client_wakala_accepted_at,
-                'completed_at' => optional($this->traderOrder->order->client_wakala_accepted_at)->format('Y-m-d h:i:s A'),
+                'is_complete' => (bool) $this->traderOrder->client_wakala_accepted_at,
+                'completed_at' => optional($this->traderOrder->client_wakala_accepted_at)->format('Y-m-d h:i:s A'),
                 'document' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::ClientWakala)),
             ],
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => [

@@ -4,7 +4,7 @@ namespace App\Actions\Clients;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala;
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
-use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AcceptClientWakalaAction implements AcceptClientWakala
@@ -13,12 +13,14 @@ class AcceptClientWakalaAction implements AcceptClientWakala
     {
     }
 
-    public function handle(FinancingOrder $order): Media
+    public function handle(TraderOrder $traderOrder): Media
     {
-        $order->update([
-            'client_wakala_accepted_at' => now(),
-        ]);
+        if ($traderOrder->client_wakala_accepted_at === null) {
+            $traderOrder->update([
+                'client_wakala_accepted_at' => now(),
+            ]);
+        }
 
-        return $this->generateClientWakala->handle($order);
+        return $this->generateClientWakala->handle($traderOrder);
     }
 }

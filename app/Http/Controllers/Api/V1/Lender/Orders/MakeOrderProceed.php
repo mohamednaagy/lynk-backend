@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
-use App\Actions\Contracts\Clients\AcceptClientWakala;
 use App\Actions\Contracts\Orders\MakeOrderProceed as ProceedOrderInterface;
 use App\Enums\Action;
 use App\Enums\Area;
@@ -28,7 +27,7 @@ class MakeOrderProceed extends Controller
      * Handle the incoming request.
      *
      * @param  MakeOrderProceedRequest  $request
-     * @param  AcceptClientWakala  $acceptClientWakala
+     * @param  ProceedOrderInterface  $makeOrderProceed
      * @param  int  $order
      * @return JsonResponse
      *

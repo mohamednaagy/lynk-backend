@@ -37,12 +37,14 @@ class TraderOrder extends Model implements HasMedia
             'provider',
             'status',
             'reference',
+            'client_wakala_accepted_at',
             'updated_at',
             'created_at',
         ];
     }
 
     protected $casts = [
+        'client_wakala_accepted_at' => 'datetime',
         'status' => TraderOrderStatus::class,
     ];
 

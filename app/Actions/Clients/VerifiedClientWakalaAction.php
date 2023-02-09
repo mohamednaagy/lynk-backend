@@ -28,10 +28,10 @@ class VerifiedClientWakalaAction implements VerifiedClientWakala
             now()->addMinutes(10)
         );
 
-        $order->refresh();
+        $traderOrder = $order->activeTraderOrder()->first();
 
         $lenderTemplate = $this->getWakalaTemplate->handle('client')['wakala_template'];
-        $template = $this->getClientWakalaText->handle($order, $lenderTemplate);
+        $template = $this->getClientWakalaText->handle($traderOrder, $lenderTemplate);
 
         return [
             'token' => $token,

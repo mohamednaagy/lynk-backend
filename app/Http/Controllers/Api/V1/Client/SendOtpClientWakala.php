@@ -56,7 +56,9 @@ class SendOtpClientWakala extends Controller
                 );
             }
 
-            if ($order->client_wakala_accepted_at !== null) {
+            $traderOrder = $order->activeTraderOrder()->first();
+
+            if ($traderOrder->client_wakala_accepted_at !== null) {
                 return $this->errorResponse(
                     __('error.client_wakala_already_accepted'),
                     Response::HTTP_BAD_REQUEST,

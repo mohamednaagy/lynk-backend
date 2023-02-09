@@ -31,8 +31,10 @@ class VerifyOtpClientWakala extends Controller
             $order = FinancingOrder::lockForUpdate()
                 ->findOrFail($request->validated('order_id'));
 
+            $traderOrder = $order->activeTraderOrder()->first();
+
             $canProceed = $order->getNationalId() === $request->validated('national_id')
-                && $order->client_wakala_accepted_at === null;
+                && $traderOrder->client_wakala_accepted_at === null;
 
             abort_if(! $canProceed, 404);
 

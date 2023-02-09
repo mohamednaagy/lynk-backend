@@ -7,6 +7,7 @@ use App\Actions\Contracts\Orders\MakeOrderProceed;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -14,8 +15,12 @@ use App\Models\TraderOrder;
 class MakeOrderProceedAction implements MakeOrderProceed
 {
     /**
-     * @param  mixed  $order
+     * @param  TraderOrder  $traderOrder
+     * @param  string  $case
+     * @param  bool  $forceToProceed
      * @return mixed
+     *
+     * @throws OrderStatusDoesNotFollowSequenceException
      */
     public function handle(TraderOrder $traderOrder, string $case, $forceToProceed = false)
     {
@@ -26,6 +31,13 @@ class MakeOrderProceedAction implements MakeOrderProceed
         };
     }
 
+    /**
+     * @param  TraderOrder  $traderOrder
+     * @param  bool  $forceToProceed
+     * @return array
+     *
+     * @throws OrderStatusDoesNotFollowSequenceException
+     */
     protected function handleClientWakalaAccepted(TraderOrder $traderOrder, bool $forceToProceed)
     {
         $order = FinancingOrder::query()
@@ -42,17 +54,29 @@ class MakeOrderProceedAction implements MakeOrderProceed
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
-        $media = app(AcceptClientWakala::class)->handle($order);
+        $isCreate = $traderOrder->status->is(TraderOrderStatus::InProgress) &&
+            $traderOrder->client_wakala_accepted_at === null;
 
-        $order->update([
-            'status' => FinancingOrderStatus::ClientWakalaCompleted,
-        ]);
+        $media = app(AcceptClientWakala::class)->handle($traderOrder);
+
+        if ($isCreate) {
+            $order->update([
+                'status' => FinancingOrderStatus::ClientWakalaCompleted,
+            ]);
+        }
 
         return [
             'wakala_file_url' => route('api.v1.media.download', ['media' => $media->uuid]),
         ];
     }
 
+    /**
+     * @param  TraderOrder  $traderOrder
+     * @param  bool  $forceToProceed
+     * @return array
+     *
+     * @throws OrderStatusDoesNotFollowSequenceException
+     */
     protected function handleContractSigned(TraderOrder $traderOrder, bool $forceToProceed)
     {
         $order = FinancingOrder::query()
@@ -63,13 +87,16 @@ class MakeOrderProceedAction implements MakeOrderProceed
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
-        $order->update([
-            'status' => FinancingOrderStatus::ContractSigned,
-        ]);
+        if (
+            $traderOrder->status->is(TraderOrderStatus::InProgress) &&
+            ! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::ContractSigned)
+        ) {
+            $order->update([
+                'status' => FinancingOrderStatus::ContractSigned,
+            ]);
+        }
 
-        $traderOrder = $order->activeTraderOrder()->first();
-
-        $traderOrder->traderHistories()->create([
+        $traderOrder->traderHistories()->updateOrCreate([
             'action' => FinancingOrderHistory::ContractSigned,
         ]);
 

@@ -26,8 +26,14 @@ class MakeOrderProceed extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param  MakeOrderProceedRequest  $request
+     * @param  MakeOrderProceedInterface  $makeOrderProceed
+     * @param  Company  $lender
+     * @param  int  $order
+     * @param  int  $traderOrder
+     * @return JsonResponse
+     *
+     * @throws \Throwable
      */
     public function __invoke(
         MakeOrderProceedRequest $request,

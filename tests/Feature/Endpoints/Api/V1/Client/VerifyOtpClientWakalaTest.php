@@ -3,9 +3,12 @@
 namespace Endpoints\Api\V1\Client;
 
 use App\Enums\Role;
+use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Otpify\Facades\Otpify;
 use Modules\Otpify\Models\OtpifyCode;
@@ -24,6 +27,8 @@ class VerifyOtpClientWakalaTest extends TestCase
 
     private static FinancingOrder $order;
 
+    private static TraderOrder|Model $traderOrder;
+
     private static FinancingOrder $otherOrder;
 
     private static OtpifyCode $otpifyCode;
@@ -39,6 +44,11 @@ class VerifyOtpClientWakalaTest extends TestCase
 
         self::$order = $this->createOrder(self::$company->id, self::$userLender->id, [
             'national_id' => '2553451234',
+        ]);
+        self::$traderOrder = self::$order->traderOrders()->create([
+            'provider' => 'dmcc',
+            'status' => TraderOrderStatus::InProgress,
+            'reference' => 123,
         ]);
 
         self::$otherOrder = $this->createOrder(self::$company->id, self::$userLender->id, [
@@ -75,7 +85,7 @@ class VerifyOtpClientWakalaTest extends TestCase
 
     public function test_verify_otp_client_wakala_with_already_verified_order_unsuccessful()
     {
-        self::$order->update(['client_wakala_accepted_at' => now()]);
+        self::$traderOrder->update(['client_wakala_accepted_at' => now()]);
 
         $this->postJson('api/v1/client/wakala/verify', [
             'national_id' => self::$order->national_id,
