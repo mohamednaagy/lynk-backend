@@ -11,16 +11,18 @@ use App\Models\Company;
 use App\Models\User;
 use App\Transformers\ProjectSettingsTransformer;
 use Exception;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
+use Tests\Traits\AssertsAccessByRoleAndArea;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithSettings;
 use Tests\Traits\InteractsWithUser;
 
 class ProjectSettingsIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithSettings, InteractsWithUser;
+    use RefreshDatabase, InteractsWithCompany, InteractsWithSettings, InteractsWithUser, AssertsAccessByRoleAndArea;
 
     const BaseUrl = 'api/v1/admin/settings/project';
 
@@ -38,6 +40,8 @@ class ProjectSettingsIndexTest extends TestCase
 
     /**
      * @return void
+     *
+     * @throws BindingResolutionException
      */
     public function setUp(): void
     {
@@ -114,9 +118,18 @@ class ProjectSettingsIndexTest extends TestCase
      */
     public function test_that_auth_user_without_right_permissions_cannot_index_project_settings_failed(): void
     {
-        $this->actingAs(self::$manager)
-            ->getJson(self::BaseUrl)
-            ->assertStatus(Response::HTTP_FORBIDDEN)
-            ->assertJsonPath('message', 'User does not have the right permissions.');
+        $this->assertStatusCodeExceptForPermissions(Response::HTTP_FORBIDDEN, [
+            Area::SuperAdmin => [
+                [Subject::All, Action::Manage],
+                [Subject::ProjectSettings, Action::Index],
+                [Subject::ProjectSettings, Action::Manage],
+                [Subject::FinancingOrders, Action::Create],
+                [Subject::FinancingOrders, Action::Edit],
+                [Subject::FinancingOrders, Action::Manage],
+            ],
+        ], function ($user, $role, $permission) {
+            return $this->actingAs($user)
+                ->getJson(self::BaseUrl);
+        });
     }
 }
