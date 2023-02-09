@@ -1,7 +1,9 @@
 <?php
 
 use App\Enums\Role;
+use App\Http\Controllers\Api\V1\Trader\Auth\CompleteRegister;
 use App\Http\Controllers\Api\V1\Trader\Auth\GetAuthUser;
+use App\Http\Controllers\Api\V1\Trader\Auth\ResendInvitationToUser;
 use App\Http\Controllers\Api\V1\Trader\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Trader\FinancingOrders\OrderController;
 use App\Http\Controllers\Api\V1\Trader\TraderOrders\GetPurchasingCommodity;
@@ -28,7 +30,6 @@ Route::prefix('v1/trader')->name('api.v1.')->group(function () {
         'role:'.implode('|', [
             Role::TraderAdmin,
         ]),
-        InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
 
@@ -36,14 +37,17 @@ Route::prefix('v1/trader')->name('api.v1.')->group(function () {
             Route::put('auth/profile', UpdateMyProfile::class);
 
             Route::prefix('orders/{order}/')->group(function () {
-                Route::prefix('trader_orders/{trader_order}')->group(function () {
+                Route::prefix('trader-orders/{trader_order}')->group(function () {
                     Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
                     Route::get('/purchasing-commodity', GetPurchasingCommodity::class);
                 });
             });
 
+            Route::post('users/{user}/resend-invitation', ResendInvitationToUser::class);
             Route::apiResource('users', UserController::class);
             Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
         });
     });
+
+    Route::post('{user}/sign-up', CompleteRegister::class)->name('trader.complete-register');
 });

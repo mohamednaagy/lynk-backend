@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Actions\Lenders\Auth;
+namespace App\Actions\Traders\Auth;
 
-use App\Actions\Contracts\Lenders\Auth\CompleteUserRegistration;
+use App\Actions\Contracts\Traders\Auth\CompleteUserRegistration;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class CompleteUserRegistrationAction implements CompleteUserRegistration
 {
@@ -12,7 +13,7 @@ class CompleteUserRegistrationAction implements CompleteUserRegistration
         $user->update([
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
-            'password' => $data['password'],
+            'password' => Hash::make($data['password']),
         ]);
 
         $user->markEmailAsVerified();
