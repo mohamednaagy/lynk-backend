@@ -25,12 +25,14 @@ trait AssertsAccessByRoleAndArea
     {
         $excludedPermissions = [];
 
-        foreach ($exceptedPermissions as $area => $permission) {
-            if (is_string($permission)) {
-                $exceptedPermissions[] = $permission;
+        foreach ($exceptedPermissions as $area => $permissions) {
+            if (is_string($permissions)) {
+                $excludedPermissions[] = $permissions;
             }
-            if (is_array($permission)) {
-                $exceptedPermissions = array_merge(perm_arr($area, $permission), $exceptedPermissions);
+            if (is_array($permissions)) {
+                foreach ($permissions as $permission) {
+                    $excludedPermissions[] = perm($area, $permission);
+                }
             }
         }
 
