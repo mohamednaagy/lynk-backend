@@ -25,7 +25,7 @@ class UpdateCompanyAction implements UpdateCompany
                 $data,
                 [
                     'name',
-                    'email',
+                    'notifications_email',
                     'unique_name',
                     'company_cr',
                     'status',

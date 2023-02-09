@@ -64,11 +64,10 @@ class StoreCompanyRequest extends FormRequest
                 'string',
                 'max:1000',
             ],
-            'email' => [
+            'notifications_email' => [
                 'required',
                 'email',
                 'string',
-                Rule::unique(Company::class, 'email'),
                 'max:255',
             ],
         ];

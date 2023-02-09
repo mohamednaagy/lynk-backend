@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('companies', function (Blueprint $table) {
-            $table->string('email')->unique()->after('name')->nullable();
+            $table->string('notifications_email')->after('name')->nullable();
         });
     }
 
@@ -26,8 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('companies', function (Blueprint $table) {
-            $table->dropUnique('companies_email_unique');
-            $table->dropColumn('email');
+            $table->dropColumn('notifications_email');
         });
     }
 };

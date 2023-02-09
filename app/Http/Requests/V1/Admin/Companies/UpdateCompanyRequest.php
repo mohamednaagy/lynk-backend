@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\V1\Admin\Companies;
 
-use App\Models\Company;
 use App\Rules\CompanyUniqueNameRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -64,12 +63,10 @@ class UpdateCompanyRequest extends FormRequest
                 'string',
                 'max:1000',
             ],
-            'email' => [
+            'notifications_email' => [
                 'required',
                 'email',
                 'string',
-                Rule::unique(Company::class, 'email')
-                    ->ignore($this->route('company')),
                 'max:255',
             ],
         ];

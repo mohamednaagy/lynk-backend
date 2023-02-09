@@ -47,12 +47,10 @@ class UpdateTraderRequest extends FormRequest
                     ->ignore($this->route('trader')),
                 Rule::in(['dmcc', 'fake']),
             ],
-            'email' => [
+            'notifications_email' => [
                 'required',
                 'email',
                 'string',
-                Rule::unique(Company::class, 'email')
-                    ->ignore($this->route('trader')),
                 'max:255',
             ],
         ];

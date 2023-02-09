@@ -29,7 +29,7 @@ class CreateCompanyAction implements CreateCompany
                 $data,
                 [
                     'name',
-                    'email',
+                    'notifications_email',
                     'unique_name',
                     'company_cr',
                     'status',
