@@ -123,9 +123,9 @@ class ProjectSettingsIndexTest extends TestCase
                 [Subject::All, Action::Manage],
                 [Subject::ProjectSettings, Action::Index],
                 [Subject::ProjectSettings, Action::Manage],
-                [Subject::FinancingOrders, Action::Create],
-                [Subject::FinancingOrders, Action::Edit],
-                [Subject::FinancingOrders, Action::Manage],
+                [Subject::Lenders, Action::Create],
+                [Subject::Lenders, Action::Edit],
+                [Subject::Lenders, Action::Manage],
             ],
         ], function ($user, $role, $permission) {
             return $this->actingAs($user)
