@@ -53,5 +53,5 @@ Route::prefix('v1/trader')->name('api.v1.')->group(function () {
         });
     });
 
-    Route::post('{user}/complete-register', CompleteRegister::class)->name('trader.complete-register');
+    Route::post('{user}/sign-up', CompleteRegister::class)->name('trader.complete-register');
 });

@@ -91,7 +91,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/{lender}/settings ', GetLenderSetting::class);
         });
 
-        Route::prefix('/orders/{order}')->group(function () {
+        Route::prefix('orders/{order}')->group(function () {
             Route::prefix('/trader-orders/{trader_order}')->group(function () {
                 Route::post('/proceed', MakeOrderProceed::class);
                 Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);

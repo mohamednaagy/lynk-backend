@@ -2,14 +2,52 @@
 
 namespace App\Support\Traders;
 
+use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 trait TraderHelperTrait
 {
+    public array $stepToHistoriesMap = [
+        FinancingOrderStatus::CommodityPurchased => [
+            FinancingOrderHistory::RespondPtp => null,
+            FinancingOrderHistory::GetPtpDocument => null,
+            FinancingOrderHistory::GetTtiHoldingCertificateDocument => null,
+            FinancingOrderHistory::AttachPtpDocumentToOrder => [
+                'collection' => TraderOrderMediaCollection::PromiseToPurchase,
+                'file' => 'ptp_document',
+            ],
+            FinancingOrderHistory::AttachTtiHoldingCertificateDocument => [
+                'collection' => TraderOrderMediaCollection::TtiHoldingCertificate,
+                'file' => 'original_holding_certificate',
+            ],
+        ],
+    ];
+
+    public function createStepHistories(Request $request, $trader, TraderOrder $traderOrder, $status)
+    {
+        foreach ($this->stepToHistoriesMap[$status] as $history => $media) {
+            if ($media && $request->has($media['file'])) {
+                $this->attachDocumentToOrder(
+                    $traderOrder,
+                    base64_encode(file_get_contents($request->file($media['file']))),
+                    $media['collection'],
+                    'base64'
+                );
+            }
+
+            if (! $traderOrder->checkOrderHistoryAction($history)) {
+                $trader->createTraderOrderHistory($traderOrder, $history);
+            }
+        }
+    }
+
     public function createTraderOrder(FinancingOrder $financingOrder, string $ttiId, string $provider): Model|TraderOrder
     {
         return $financingOrder->traderOrders()->create([
