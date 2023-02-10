@@ -105,4 +105,15 @@ class TraderOrder extends Model implements HasMedia
             ->where('action', FinancingOrderHistory::$orderHistoryLastActionMap[$status])
             ->first();
     }
+
+    public function checkOrderHistoryAction($action): bool
+    {
+        if (! in_array($action, FinancingOrderHistory::getValues())) {
+            throw new UnexpectedValueException('invalid Action');
+        }
+
+        return (bool) $this->traderHistories
+            ->where('action', $action)
+            ->first();
+    }
 }

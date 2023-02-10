@@ -37,14 +37,13 @@ abstract class TestCase extends BaseTestCase
     protected function login(string $role = Role::Admin, string $test = null): string
     {
         $email = 'a@a.aa';
-        $passwordPlainText = '12345678';
-        $passwordEncrypted = bcrypt('12345678');
+        $password = '12345678';
         $source = 'admin';
 
         // create user
         $user = User::factory()->create([
             'email' => $email,
-            'password' => $passwordEncrypted,
+            'password' => $password,
         ]);
 
         Grantify::assignRoleToModel($user, $role);
@@ -56,7 +55,7 @@ abstract class TestCase extends BaseTestCase
         // login user
         $loginResponse = $this->postJson('api/v1/auth/login', [
             'email' => $email,
-            'password' => $passwordPlainText,
+            'password' => $password,
             'source' => $source,
         ]);
 
