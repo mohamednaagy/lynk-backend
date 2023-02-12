@@ -40,6 +40,7 @@ use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
 use App\Http\Controllers\Api\V1\Admin\Traders\ResendInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
+use App\Http\Controllers\Api\V1\Admin\Traders\UpdateTraderStatus;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
 
@@ -108,20 +109,17 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             });
         });
 
-        Route::prefix('traders')->group(function () {
-            Route::get('/{trader}/orders/{order}', [TraderOrderController::class, 'show']);
-            Route::get('{trader}/orders', [TraderOrderController::class, 'index']);
-        });
-
         Route::apiResource('lenders', LenderController::class);
         Route::apiResource('lenders.users', LenderUserController::class);
 
         Route::prefix('traders')->group(function () {
+            Route::get('/{trader}/orders/{order}', [TraderOrderController::class, 'show']);
+            Route::get('{trader}/orders', [TraderOrderController::class, 'index']);
             Route::post('{trader}/users/{user}/resend-invitation', ResendInvitationToUser::class);
+            Route::put('/{trader}/status', UpdateTraderStatus::class);
         });
 
         Route::apiResource('traders.users', TraderUserController::class);
-
         Route::apiResource('traders', TraderController::class)
             ->only(['index', 'store', 'show', 'update']);
 

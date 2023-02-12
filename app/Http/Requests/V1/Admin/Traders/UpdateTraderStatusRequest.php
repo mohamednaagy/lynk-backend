@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\V1\Admin\Companies;
+namespace App\Http\Requests\V1\Admin\Traders;
 
 use App\Enums\CompanyStatus;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateCompanyStatusRequest extends FormRequest
+class UpdateTraderStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
