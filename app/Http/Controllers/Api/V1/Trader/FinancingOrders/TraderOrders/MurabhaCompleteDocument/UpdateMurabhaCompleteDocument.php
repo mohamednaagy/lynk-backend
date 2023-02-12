@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders\MurabhaCompleteDocument;
 
-use App\Actions\Contracts\Orders\TraderOrders\ProceedMurabhaCompleteDocument;
-use App\Actions\Contracts\Orders\TraderOrders\UpdateMurabhaCompleteDocument as UpdateMurabhaCompleteDocumentInterface;
+use App\Actions\Contracts\Orders\TraderOrders\MurabhaCompleteDocument\HandleMurabhaCompleteDocument;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
+use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Trader\Orders\MurabhaCompleteDocument\UpdateMurabhaCompleteDocumentRequest;
+use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -38,11 +39,17 @@ class UpdateMurabhaCompleteDocument extends Controller
         TraderOrder $traderOrder
     ): JsonResponse {
         return DB::transaction(function () use ($request, $order, $traderOrder) {
-            if ($traderOrder->checkOrderStepComplete(FinancingOrderStatus::MurabahaSaleCompleted)) {
-                app(UpdateMurabhaCompleteDocumentInterface::class)->handle($request, $traderOrder);
-            } else {
-                app(ProceedMurabhaCompleteDocument::class)->handle($request, $order, $traderOrder);
+            $order = FinancingOrder::lockForUpdate()->findOrFail($order);
+            $orderStepComplete = $traderOrder->checkOrderStepComplete(FinancingOrderStatus::MurabahaSaleCompleted);
+
+            if (
+                $order->status->cantMoveTo(FinancingOrderStatus::MurabahaSaleCompleted) &&
+                ! $orderStepComplete
+            ) {
+                throw new OrderStatusDoesNotFollowSequenceException();
             }
+
+            app(HandleMurabhaCompleteDocument::class)->handle($request, $order, $traderOrder);
 
             return $this->successResponse();
         });
