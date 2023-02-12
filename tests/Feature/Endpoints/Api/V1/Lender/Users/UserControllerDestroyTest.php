@@ -149,7 +149,7 @@ class UserControllerDestroyTest extends TestCase
     /**
      * @return void
      */
-    public function test_lender_lender_admin_user_cant_delete_lender_users_case_company_pending_unsuccessful(): void
+    public function test_lender_admin_user_cant_delete_lender_users_case_company_pending_unsuccessful(): void
     {
         self::$company->update([
             'status' => CompanyStatus::Pending,
@@ -164,7 +164,7 @@ class UserControllerDestroyTest extends TestCase
     /**
      * @return void
      */
-    public function test_lender_lender_admin_user_cant_delete_lender_users_case_company_under_review_unsuccessful(): void
+    public function test_lender_admin_user_cant_delete_lender_users_case_company_under_review_unsuccessful(): void
     {
         self::$company->update([
             'status' => CompanyStatus::UnderReview,
@@ -179,7 +179,7 @@ class UserControllerDestroyTest extends TestCase
     /**
      * @return void
      */
-    public function test_lender_lender_admin_user_cant_delete_lender_users_case_company_rejected_unsuccessful(): void
+    public function test_lender_admin_user_cant_delete_lender_users_case_company_rejected_unsuccessful(): void
     {
         self::$company->update([
             'status' => CompanyStatus::Rejected,
@@ -194,7 +194,7 @@ class UserControllerDestroyTest extends TestCase
     /**
      * @return void
      */
-    public function test_lender_lender_admin_user_cant_delete_lender_users_case_email_not_verified_unsuccessful(): void
+    public function test_lender_admin_user_cant_delete_lender_users_case_email_not_verified_unsuccessful(): void
     {
         self::$userLenderAdmin->update([
             'email_verified_at' => null,
