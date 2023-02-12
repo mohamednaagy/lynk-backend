@@ -17,24 +17,27 @@ class MakeOrderProceedAction implements MakeOrderProceed
      * @param  mixed  $order
      * @return mixed
      */
-    public function handle(TraderOrder $traderOrder, string $case)
+    public function handle(TraderOrder $traderOrder, string $case, $forceToProceed = false)
     {
         return match ($case) {
-            FinancingOrderProceedCase::ClientWakalaAccepted => $this->handleClientWakalaAccepted($traderOrder),
-            FinancingOrderProceedCase::ContractSigned => $this->handleContractSigned($traderOrder),
+            FinancingOrderProceedCase::ClientWakalaAccepted => $this->handleClientWakalaAccepted($traderOrder, $forceToProceed),
+            FinancingOrderProceedCase::ContractSigned => $this->handleContractSigned($traderOrder, $forceToProceed),
             default => []
         };
     }
 
-    protected function handleClientWakalaAccepted(TraderOrder $traderOrder)
+    protected function handleClientWakalaAccepted(TraderOrder $traderOrder, bool $forceToProceed)
     {
         $order = FinancingOrder::query()
             ->lockForUpdate()
             ->findOrFail($traderOrder->financing_order_id);
 
         if (
-            $order->is_verification_required
-            || $order->status->cantMoveTo(FinancingOrderStatus::ClientWakalaCompleted)
+            $forceToProceed === false
+            && (
+                $order->is_verification_required
+                || $order->status->cantMoveTo(FinancingOrderStatus::ClientWakalaCompleted)
+            )
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
@@ -50,13 +53,13 @@ class MakeOrderProceedAction implements MakeOrderProceed
         ];
     }
 
-    protected function handleContractSigned(TraderOrder $traderOrder)
+    protected function handleContractSigned(TraderOrder $traderOrder, bool $forceToProceed)
     {
         $order = FinancingOrder::query()
             ->lockForUpdate()
             ->findOrFail($traderOrder->financing_order_id);
 
-        if ($order->status->cantMoveTo(FinancingOrderStatus::ContractSigned)) {
+        if ($forceToProceed === false && $order->status->cantMoveTo(FinancingOrderStatus::ContractSigned)) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 

@@ -23,6 +23,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'status',
         'is_cancellable',
         'history',
+        'created_at',
     ];
 
     public function transform(TraderOrder $traderOrder)
@@ -83,21 +84,23 @@ class TraderOrderTransformer extends TransformerAbstract
             'amount' => $traderOrder->amount,
             'product' => $traderOrder->product,
             'currency' => $traderOrder->currency,
-            'new_owner' => $traderOrder->new_owner,
             'quantity' => $traderOrder->quantity,
             'warehouse' => $traderOrder->warehouse,
-            'warrant_no' => $traderOrder->warrant_no,
             'ptp_document' => $this->fileUrl($traderOrder->getFirstMedia(TraderOrderMediaCollection::PromiseToPurchase)),
             'exchange_rate' => $traderOrder->exchange_rate,
             'previous_owner' => $traderOrder->previous_owner,
             'warehouse_or_vault_country' => $traderOrder->warehouse_or_vault_country,
             'warehouse_or_vault_emirates' => $traderOrder->warehouse_or_vault_emirates,
-            'warehouse_or_vault_operator_id' => $traderOrder->warehouse_or_vault_operator_id,
             'date_time_of_purchasing_commodity' => $traderOrder->date_time_of_purchasing_commodity,
             'original_holding_certificate' => $this->fileUrl($traderOrder->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)),
             'auto_generate_financing_institution_certificate' => $traderOrder->auto_generate_financing_institution_certificate,
             'financing_institution_certificate' => $this->fileUrl($traderOrder->getFirstMedia(TraderOrderMediaCollection::TransferOwnershipToLender)),
         ]);
+    }
+
+    public function includeCreatedAt(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->created_at?->toDateTimeString());
     }
 
     private function fileUrl($media): ?string

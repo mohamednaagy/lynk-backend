@@ -80,7 +80,7 @@ class ProcessDmccPtpNotificationTest extends TestCase
                         'owner' => 'owner',
                         'previousOwner' => 'previousOwner',
                         'newOwner' => 'newOwner',
-                        'inventoryRecordId' => 'inventoryRecordId',
+                        'inventoryRecordId' => '12',
                         'warrantPercentage' => 'warrantPercentage',
                         'warehouseOrVaultOperatorId' => 'warehouseOrVaultOperatorId',
                         'warrantNo' => 'warrantNo',

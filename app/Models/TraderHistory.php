@@ -17,6 +17,7 @@ class TraderHistory extends Model
     protected $fillable = [
         'trader_order_id',
         'action',
+        'updated_at',
     ];
 
     public static function getCustomColumns(): array

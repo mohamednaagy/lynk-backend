@@ -10,17 +10,20 @@ use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Transformers\FinancingOrderTransformer;
 use Illuminate\Http\JsonResponse;
+use Stancl\Tenancy\Database\TenantScope;
 
 class OrderController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:'.
-            perm(Area::Trader, [Subject::FinancingOrders, Action::Index, Action::Manage])
+        $this->middleware(
+            'permission:'.
+                perm(Area::Trader, [Subject::FinancingOrders, Action::Index, Action::Manage])
         )->only('index');
 
-        $this->middleware('permission:'.
-            perm(Area::Trader, [Subject::FinancingOrders, Action::Show, Action::Manage])
+        $this->middleware(
+            'permission:'.
+                perm(Area::Trader, [Subject::FinancingOrders, Action::Show, Action::Manage])
         )->only('show');
     }
 
@@ -41,7 +44,19 @@ class OrderController extends Controller
         GetOrder $getOrder,
         int $order
     ): JsonResponse {
-        return fractal($getOrder->setCompany(tenant())->handle($order), new FinancingOrderTransformer())
+        $order = $getOrder->setCompany(tenant())->handle($order);
+
+        $order->load([
+            'traderOrders' => function ($query) {
+                $query->where('provider', tenant()->driver)->latest('id');
+            },
+            'traderOrders.traderHistories',
+            'traderOrders.order' => function ($query) {
+                return $query->withoutGlobalScope(TenantScope::class);
+            },
+        ]);
+
+        return fractal($order, new FinancingOrderTransformer())
             ->parseIncludes([
                 'id',
                 'amount',
@@ -51,7 +66,13 @@ class OrderController extends Controller
                 'active_trader.reference',
                 'active_trader.provider',
                 'active_trader.status',
-                'trader_order_history',
+                'trader_orders.id',
+                'trader_orders.reference',
+                'trader_orders.provider',
+                'trader_orders.is_cancellable',
+                'trader_orders.history',
+                'trader_orders.status',
+                'trader_orders.created_at',
             ])
             ->respond();
     }

@@ -6,5 +6,5 @@ use App\Models\TraderOrder;
 
 interface MakeOrderProceed
 {
-    public function handle(TraderOrder $traderOrder, string $case);
+    public function handle(TraderOrder $traderOrder, string $case, bool $forceToProceed);
 }
