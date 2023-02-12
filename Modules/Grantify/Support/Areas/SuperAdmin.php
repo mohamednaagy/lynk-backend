@@ -90,9 +90,5 @@ class SuperAdmin
             Action::Show,
             Action::Manage,
         ],
-        Subject::TraderStatus => [
-            Action::Manage,
-            Action::Edit,
-        ],
     ];
 }

@@ -87,6 +87,13 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('lenders', LenderController::class);
         Route::apiResource('lenders.users', LenderUserController::class);
 
+        Route::prefix('traders')->group(function () {
+            Route::put('/{trader}/status', UpdateTraderStatus::class);
+        });
+
+        Route::apiResource('traders', TraderController::class)
+            ->only(['index', 'store', 'show', 'update']);
+
         Route::apiResource('traders.users', TraderUserController::class);
 
         Route::get('edaat-invoices', GetEdaatInvoices::class);
@@ -98,12 +105,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::get('media/{media}/download', DownloadMedia::class);
 
         Route::post('/upload-image', [UploadImage::class, 'store']);
-
-        Route::apiResource('traders', TraderController::class)
-            ->only(['index', 'store', 'show', 'update']);
-        Route::prefix('traders')->group(function () {
-            Route::put('/{trader}/status', UpdateTraderStatus::class);
-        });
     });
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.sign-up');

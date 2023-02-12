@@ -17,7 +17,7 @@ class UpdateTraderStatus extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::TraderStatus, Action::Edit, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::Traders, Action::Edit, Action::Manage])
         );
     }
 

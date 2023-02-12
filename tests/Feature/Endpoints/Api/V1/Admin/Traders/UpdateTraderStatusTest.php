@@ -45,11 +45,18 @@ class UpdateTraderStatusTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company] = $this->createTraderCompany('2000', ['company_cr' => '12345678910', 'status' => CompanyStatus::Pending]);
+        [self::$company] = $this->createTraderCompany(
+            '2000',
+            ['company_cr' => '12345678910', 'status' => CompanyStatus::Pending]
+        );
+
         self::$userAdmin = $this->createSuperAdminUser();
+
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
-        $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::TraderStatus, Action::Edit]));
+        $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::Traders, Action::Edit]));
+
         self::$userTraderAdmin = $this->createTraderUser(self::$company->id, Role::TraderAdmin);
+
         self::$companyStatusDetails = [
             'status' => CompanyStatus::Approved(),
             'public_status_comment' => 'public_status_comment',
