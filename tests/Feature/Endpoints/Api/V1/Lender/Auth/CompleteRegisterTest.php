@@ -9,11 +9,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ValidateSignature;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class CompleteRegisterTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static Company $company;
 
@@ -27,7 +28,8 @@ class CompleteRegisterTest extends TestCase
         parent::setUp();
 
         [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com', [
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, [
+            'email' => 'lenderAdmin@bim.com',
             'password' => null,
             'email_verified_at' => null,
         ]);
@@ -42,7 +44,7 @@ class CompleteRegisterTest extends TestCase
         $this->assertNull(self::$userLender->password);
 
         $this->withoutMiddleware(ValidateSignature::class)
-            ->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
+            ->postJson('api/v1/lender/'.self::$userLender->id.'/sign-up', [
                 'first_name' => self::$userLender->first_name,
                 'last_name' => self::$userLender->last_name,
                 'password' => '123456789Aa$$',
@@ -62,7 +64,7 @@ class CompleteRegisterTest extends TestCase
         $this->assertTrue(self::$userLender->isRegisterCompleted());
 
         $this->withoutMiddleware(ValidateSignature::class)
-            ->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
+            ->postJson('api/v1/lender/'.self::$userLender->id.'/sign-up', [
                 'first_name' => self::$userLender->first_name,
                 'last_name' => self::$userLender->last_name,
                 'password' => '123456789Aa$$',
@@ -78,7 +80,7 @@ class CompleteRegisterTest extends TestCase
      */
     public function test_complete_register_fail_without_signature(): void
     {
-        $this->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
+        $this->postJson('api/v1/lender/'.self::$userLender->id.'/sign-up', [
             'first_name' => self::$userLender->first_name,
             'last_name' => self::$userLender->last_name,
             'password' => '123456789Aa$$',
@@ -97,7 +99,7 @@ class CompleteRegisterTest extends TestCase
     public function test_complete_register_validation_rules(): void
     {
         $this->withoutMiddleware(ValidateSignature::class)
-            ->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
+            ->postJson('api/v1/lender/'.self::$userLender->id.'/sign-up', [
                 'password' => '123456789Aa$$',
                 'password_confirmation' => '123456789Aa$$',
                 'source' => 'test',
@@ -107,7 +109,7 @@ class CompleteRegisterTest extends TestCase
             ->assertJsonValidationErrorFor('last_name');
 
         $this->withoutMiddleware(ValidateSignature::class)
-            ->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
+            ->postJson('api/v1/lender/'.self::$userLender->id.'/sign-up', [
                 'first_name' => self::$userLender->first_name,
                 'last_name' => self::$userLender->last_name,
                 'source' => 'test',
@@ -116,7 +118,7 @@ class CompleteRegisterTest extends TestCase
             ->assertJsonValidationErrorFor('password');
 
         $this->withoutMiddleware(ValidateSignature::class)
-            ->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
+            ->postJson('api/v1/lender/'.self::$userLender->id.'/sign-up', [
                 'first_name' => self::$userLender->first_name,
                 'last_name' => self::$userLender->last_name,
                 'password' => '123456789Aa$$',

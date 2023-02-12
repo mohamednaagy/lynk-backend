@@ -9,8 +9,9 @@ use Illuminate\Support\Arr;
 
 class CreateCompanyAction implements CreateCompany
 {
-    public function __construct(protected GenerateWebhookSecretKey $generateWebhookSecretKey)
-    {
+    public function __construct(
+        protected GenerateWebhookSecretKey $generateWebhookSecretKey
+    ) {
     }
 
     /**
@@ -36,6 +37,8 @@ class CreateCompanyAction implements CreateCompany
                     'webhook_secret_key',
                     'public_status_comment',
                     'internal_status_comment',
+                    'driver',
+                    'type',
                 ]
             )
         );

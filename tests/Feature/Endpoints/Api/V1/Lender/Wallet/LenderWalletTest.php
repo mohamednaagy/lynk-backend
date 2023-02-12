@@ -10,11 +10,12 @@ use App\Models\Wallet;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class LenderWalletTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static Company $company;
 
@@ -62,12 +63,12 @@ class LenderWalletTest extends TestCase
         [self::$underReviewCompany, self::$underReviewWallet] = $this->createCompany('2000', ['company_cr' => '12345678912', 'status' => CompanyStatus::UnderReview()->value]);
         [self::$rejectedCompany, self::$rejectedWallet] = $this->createCompany('2000', ['company_cr' => '12345678913', 'status' => CompanyStatus::Rejected()->value]);
         [self::$approvedCompany, self::$approvedWallet] = $this->createCompany('2000', ['company_cr' => '12345678914', 'status' => CompanyStatus::Approved()->value]);
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
-        self::$userLenderAdminWithoutVerifiedEmail = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com', ['email_verified_at' => null]);
-        self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'lenderSupervisor@bim.com');
-        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'lenderBilling@bim.com');
-        self::$userLenderApi = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'lenderApi@bim.com');
-        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'lenderOrderCreator@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$userLenderAdminWithoutVerifiedEmail = $this->createLenderUser(self::$company->id, Role::LenderAdmin, ['email_verified_at' => null]);
+        self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor);
+        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
+        self::$userLenderApi = $this->createLenderUser(self::$company->id, Role::LenderApiUser);
+        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
     }
 
     /**

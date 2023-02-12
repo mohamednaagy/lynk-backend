@@ -11,11 +11,12 @@ use App\Models\Wallet;
 use App\Transformers\UserTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class UserControllerShowTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static Company $company;
 
@@ -46,18 +47,18 @@ class UserControllerShowTest extends TestCase
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         [self::$otherCompany, self::$otherWallet] = $this->createCompany('2000', ['company_cr' => '12345678911']);
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'firstLenderAdmin@bim.com');
-        self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'lenderSupervisor@bim.com');
-        self::$userLenderApi = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'lenderApi@bim.com');
-        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'lenderBilling@bim.com');
-        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'lenderOrderCreator@bim.com');
-        self::$otherUserLenderAdmin = $this->createLenderUser(self::$otherCompany->id, Role::LenderAdmin, 'otherLenderAdmin@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor);
+        self::$userLenderApi = $this->createLenderUser(self::$company->id, Role::LenderApiUser);
+        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
+        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
+        self::$otherUserLenderAdmin = $this->createLenderUser(self::$otherCompany->id, Role::LenderAdmin);
     }
 
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_show_lender_user(): void
+    public function test_un_auth_user_cant_show_lender_user_unsuccessful(): void
     {
         $this->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/users/'.self::$userLenderAdmin->id)
@@ -70,7 +71,7 @@ class UserControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_can_show_lender_user(): void
+    public function test_lender_admin_user_can_show_lender_user_successful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
@@ -95,7 +96,7 @@ class UserControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_supervisor_user_cant_show_lender_user(): void
+    public function test_lender_supervisor_user_cant_show_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderSupervisor)
             ->withHeader('X-Company', self::$company->id)
@@ -106,7 +107,7 @@ class UserControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_billing_user_cant_show_lender_user(): void
+    public function test_lender_billing_user_cant_show_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderBilling)
             ->withHeader('X-Company', self::$company->id)
@@ -117,7 +118,18 @@ class UserControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_api_user_cant_show_lender_user(): void
+    public function test_lender_api_user_cant_show_lender_user_unsuccessful(): void
+    {
+        $this->actingAs(self::$userLenderApi)
+            ->withHeader('X-Company', self::$company->id)
+            ->getJson('api/v1/lender/users/'.self::$userLenderAdmin->id)
+            ->assertForbidden();
+    }
+
+    /**
+     * @return void
+     */
+    public function test_lender_order_creator_user_cant_show_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
             ->withHeader('X-Company', self::$company->id)
@@ -128,18 +140,7 @@ class UserControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_order_creator_user_cant_show_lender_user(): void
-    {
-        $this->actingAs(self::$userLenderOrderCreator)
-            ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/users/'.self::$userLenderAdmin->id)
-            ->assertForbidden();
-    }
-
-    /**
-     * @return void
-     */
-    public function test_that_admin_user_cant_show_lender_user_in_other_company(): void
+    public function test_lender_admin_user_cant_show_lender_user_in_other_company_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
@@ -150,7 +151,7 @@ class UserControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_show_api_user_in_same_company(): void
+    public function test_lender_admin_user_cant_show_api_user_in_same_company_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
@@ -161,7 +162,7 @@ class UserControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_lender_admin_user_cant_index_lender_users_case_company_pending(): void
+    public function test_lender_admin_user_cant_show_lender_users_case_company_pending_unsuccessful(): void
     {
         self::$company->update([
             'status' => CompanyStatus::Pending,
@@ -176,7 +177,7 @@ class UserControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_lender_admin_user_cant_index_lender_users_case_company_under_review(): void
+    public function test_lender_admin_user_cant_show_lender_users_case_company_under_review_unsuccessful(): void
     {
         self::$company->update([
             'status' => CompanyStatus::UnderReview,
@@ -191,7 +192,7 @@ class UserControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_lender_admin_user_cant_index_lender_users_case_company_rejected(): void
+    public function test_lender_admin_user_cant_show_lender_users_case_company_rejected_unsuccessful(): void
     {
         self::$company->update([
             'status' => CompanyStatus::Rejected,
@@ -206,7 +207,7 @@ class UserControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_lender_admin_user_cant_index_lender_users_case_email_not_verified(): void
+    public function test_lender_admin_user_cant_show_lender_users_case_email_not_verified_unsuccessful(): void
     {
         self::$userLenderAdmin->update([
             'email_verified_at' => null,

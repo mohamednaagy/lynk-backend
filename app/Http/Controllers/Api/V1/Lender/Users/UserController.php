@@ -7,6 +7,7 @@ use App\Actions\Contracts\Lenders\GetPaginatedLenderUsers;
 use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CompanyType;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
@@ -44,6 +45,11 @@ class UserController extends Controller
             'permission:'.
             perm(Area::Lender, [Subject::LenderUsers, Action::Edit, Action::Manage])
         )->only('update');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::LenderUsers, Action::Delete, Action::Manage])
+        )->only('destroy');
     }
 
     /**
@@ -82,7 +88,7 @@ class UserController extends Controller
             $user = $createLenderWithRoleAndPermission->handle($storeUserRequest->validated());
 
             $invitationUrl = $storeUserRequest->validated('redirect_url');
-            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl));
+            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Lender));
 
             $user->load('roles', 'permissions');
 
@@ -154,10 +160,13 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  User  $user
      * @return JsonResponse
      */
-    public function destroy($id)
+    public function destroy(User $user)
     {
+        $user->delete();
+
+        return $this->successResponse();
     }
 }

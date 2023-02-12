@@ -13,11 +13,12 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class UserControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static Company $company;
 
@@ -43,11 +44,11 @@ class UserControllerStoreTest extends TestCase
         parent::setUp();
 
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'firstLenderAdmin@bim.com');
-        self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor, 'lenderSupervisor@bim.com');
-        self::$userLenderApi = $this->createLenderUser(self::$company->id, Role::LenderApiUser, 'lenderApi@bim.com');
-        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling, 'lenderBilling@bim.com');
-        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator, 'lenderOrderCreator@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor);
+        self::$userLenderApi = $this->createLenderUser(self::$company->id, Role::LenderApiUser);
+        self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
+        self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
         self::$lenderDetails = [
             'first_name' => 'Lender',
             'last_name' => 'User',
@@ -62,7 +63,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_store_lender_user(): void
+    public function test_un_auth_user_cant_store_lender_user_unsuccessful(): void
     {
         Mail::fake();
         $this->withHeader('X-Company', self::$company->id)
@@ -77,7 +78,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_can_store_lender_user_with_valid_data(): void
+    public function test_lender_admin_user_can_store_lender_user_with_valid_data_successful(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
@@ -102,7 +103,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_lender_user_without_first_name(): void
+    public function test_lender_admin_user_cant_store_lender_user_without_first_name_unsuccessful(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
@@ -123,7 +124,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_lender_user_without_last_name(): void
+    public function test_lender_admin_user_cant_store_lender_user_without_last_name_unsuccessful(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
@@ -144,7 +145,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_lender_user_without_phone_country_code(): void
+    public function test_lender_admin_user_cant_store_lender_user_without_phone_country_code_unsuccessful(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
@@ -168,7 +169,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_lender_user_without_phone_number(): void
+    public function test_lender_admin_user_cant_store_lender_user_without_phone_number_unsuccessful(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
@@ -189,7 +190,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_lender_user_without_email(): void
+    public function test_lender_admin_user_cant_store_lender_user_without_email_unsuccessful(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
@@ -210,7 +211,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_lender_user_without_redirect_url(): void
+    public function test_lender_admin_user_cant_store_lender_user_without_redirect_url_unsuccessful(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
@@ -231,7 +232,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_lender_user_without_role(): void
+    public function test_lender_admin_user_cant_store_lender_user_without_role_unsuccessful(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
@@ -252,7 +253,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_supervisor_user_cant_store_lender_user_with_valid_data(): void
+    public function test_lender_supervisor_user_cant_store_lender_user_with_valid_data_unsuccessful(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderSupervisor)
@@ -265,7 +266,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_billing_user_cant_store_lender_user_with_valid_data(): void
+    public function test_lender_billing_user_cant_store_lender_user_with_valid_data_unsuccessful(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderBilling)
@@ -278,7 +279,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_order_creator_user_cant_store_lender_user_with_valid_data(): void
+    public function test_lender_order_creator_user_cant_store_lender_user_with_valid_data_unsuccessful(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderOrderCreator)
@@ -291,7 +292,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_api_user_cant_store_lender_user_with_valid_data(): void
+    public function test_lender_api_user_cant_store_lender_user_with_valid_data_unsuccessful(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderApi)
@@ -304,7 +305,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_store_api_user_with_valid_data(): void
+    public function test_lender_admin_user_cant_store_api_user_with_valid_data_unsuccessful(): void
     {
         Mail::fake();
         $this->actingAs(self::$userLenderAdmin)
@@ -325,7 +326,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_lender_admin_user_cant_index_lender_users_case_company_pending(): void
+    public function test_lender_admin_user_cant_index_lender_users_case_company_pending_unsuccessful(): void
     {
         self::$company->update([
             'status' => CompanyStatus::Pending,
@@ -340,7 +341,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_lender_admin_user_cant_index_lender_users_case_company_under_review(): void
+    public function test_lender_admin_user_cant_index_lender_users_case_company_under_review_unsuccessful(): void
     {
         self::$company->update([
             'status' => CompanyStatus::UnderReview,
@@ -355,7 +356,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_lender_admin_user_cant_index_lender_users_case_company_rejected(): void
+    public function test_lender_admin_user_cant_index_lender_users_case_company_rejected_unsuccessful(): void
     {
         self::$company->update([
             'status' => CompanyStatus::Rejected,
@@ -370,7 +371,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_lender_admin_user_cant_index_lender_users_case_email_not_verified(): void
+    public function test_lender_admin_user_cant_index_lender_users_case_email_not_verified_unsuccessful(): void
     {
         self::$userLenderAdmin->update([
             'email_verified_at' => null,

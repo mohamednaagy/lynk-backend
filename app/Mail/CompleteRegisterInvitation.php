@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Enums\CompanyType;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -17,25 +18,33 @@ class CompleteRegisterInvitation extends Mailable implements ShouldQueue
 
     public $user;
 
+    public $inviter;
+
     public $url;
+
+    public array $registerRouteNamesByCompanyType = [
+        CompanyType::Lender => 'api.v1.lender.complete-register',
+        CompanyType::Trader => 'api.v1.trader.complete-register',
+    ];
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(User $user, string $externalUrl)
+    public function __construct(User $user, string $externalUrl, int $companyType)
     {
         $this->user = $user;
-        $this->url = URL::signedExternalRoute($externalUrl, 'api.v1.lender.complete-register', ['user' => $user->id]);
+        $this->inviter = auth()->user();
+        $this->url = URL::signedExternalRoute($externalUrl, $this->registerRouteNamesByCompanyType[$companyType], ['user' => $user->id]);
     }
 
     /**
      * Get the message envelope.
      *
-     * @return \Illuminate\Mail\Mailables\Envelope
+     * @return Envelope
      */
-    public function envelope()
+    public function envelope(): Envelope
     {
         return new Envelope(
             subject: __('emails/invitation-complete-register.subject', ['app_name' => config('app.name')]),
@@ -45,9 +54,9 @@ class CompleteRegisterInvitation extends Mailable implements ShouldQueue
     /**
      * Get the message content definition.
      *
-     * @return \Illuminate\Mail\Mailables\Content
+     * @return Content
      */
-    public function content()
+    public function content(): Content
     {
         return new Content(
             markdown: 'emails.invitation-complete-register',
@@ -59,7 +68,7 @@ class CompleteRegisterInvitation extends Mailable implements ShouldQueue
      *
      * @return array
      */
-    public function attachments()
+    public function attachments(): array
     {
         return [];
     }

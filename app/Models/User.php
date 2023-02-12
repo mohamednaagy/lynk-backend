@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Translation\HasLocalePreference;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,6 +43,7 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
         'password',
         'locale',
         'company_id',
+        'is_active',
     ];
 
     /**
@@ -62,7 +64,15 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
     protected $casts = [
         'email_verified_at' => 'datetime',
         'phone_number' => E164PhoneNumberCast::class,
+        'is_active' => 'boolean',
     ];
+
+    protected function password(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => $value ? bcrypt($value) : null,
+        );
+    }
 
     protected function fullName(): Attribute
     {
@@ -148,5 +158,12 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
     public function orders(): HasMany
     {
         return $this->hasMany(FinancingOrder::class, 'creator_id', 'id');
+    }
+
+    public function scopeCompanyType(Builder $query, $type): Builder
+    {
+        return $query->whereHas('company', function ($query) use ($type) {
+            return $query->where('type', $type);
+        });
     }
 }

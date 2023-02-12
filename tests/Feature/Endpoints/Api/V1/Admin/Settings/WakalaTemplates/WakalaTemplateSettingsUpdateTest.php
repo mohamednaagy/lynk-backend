@@ -12,12 +12,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithAdmin;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class WakalaTemplateSettingsUpdateTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     const BaseUrl = 'api/v1/admin/wakala-templates/';
 
@@ -50,14 +50,13 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
     {
         parent::setUp();
 
-        self::$admin = $this->createAdmin();
-        self::$manager = $this->createManager();
-        self::$managerHasPermission = $this->createManager(
-            'managerHasPermission@bim.com',
-            perm(Area::SuperAdmin, [Subject::WakalaTemplates, Action::Edit])
-        );
+        self::$admin = $this->createSuperAdminUser();
+        self::$manager = $this->createSuperAdminUser(Role::Manager);
+        self::$managerHasPermission = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(self::$managerHasPermission, perm(Area::SuperAdmin, [Subject::WakalaTemplates, Action::Edit]));
+
         [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$clientWakalaUrl = self::BaseUrl.self::$wakalaTemplatesTypes['client'];
         self::$companyWakalaUrl = self::BaseUrl.self::$wakalaTemplatesTypes['company'];
         self::$wakalaSettingsData = [

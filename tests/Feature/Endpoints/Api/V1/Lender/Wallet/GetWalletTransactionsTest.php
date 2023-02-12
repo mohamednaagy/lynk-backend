@@ -15,12 +15,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class GetWalletTransactionsTest extends TestCase
 {
     use RefreshDatabase;
-    use InteractsWithLender;
+    use InteractsWithUser;
+    use InteractsWithCompany;
 
     private static Company $company;
 
@@ -36,7 +38,7 @@ class GetWalletTransactionsTest extends TestCase
         parent::setUp();
 
         [self::$company, self::$wallet] = $this->createCompany('5000');
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
+        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
     }
 
     public function test_get_wallet_transaction_successfully_with_lender_admin()

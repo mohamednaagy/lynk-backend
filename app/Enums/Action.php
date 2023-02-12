@@ -40,4 +40,6 @@ final class Action extends Enum
     const Calculate = 'calculate';
 
     const Refresh = 'refresh';
+
+    const Send = 'send';
 }

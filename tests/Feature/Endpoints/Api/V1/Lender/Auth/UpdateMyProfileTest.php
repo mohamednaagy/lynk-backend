@@ -10,11 +10,12 @@ use App\Transformers\UserTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
-use Tests\Traits\InteractsWithLender;
+use Tests\Traits\InteractsWithCompany;
+use Tests\Traits\InteractsWithUser;
 
 class UpdateMyProfileTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
     private static Company $approvedCompany;
 
@@ -42,13 +43,13 @@ class UpdateMyProfileTest extends TestCase
             'company_cr' => '12345678911',
             'status' => CompanyStatus::UnderReview,
         ]);
-        self::$userLenderWithApprovedCompany = $this->createLenderUser(self::$approvedCompany->id, Role::LenderAdmin, 'lenderAdminApproved@bim.com');
-        self::$userLenderWithApprovedCompany1 = $this->createLenderUser(self::$approvedCompany->id, Role::LenderAdmin, 'lenderAdminApproved1@bim.com');
-        self::$notApprovedCompanyUserLender = $this->createLenderUser(self::$notApprovedCompany->id, Role::LenderAdmin, 'lenderAdminNotApproved@bim.com');
-        self::$emailNotVerifiedUserLender = $this->createLenderUser(self::$approvedCompany->id, Role::LenderAdmin, 'lenderAdminNotApproved@bim.com', [
+        self::$userLenderWithApprovedCompany = $this->createLenderUser(self::$approvedCompany->id, Role::LenderAdmin);
+        self::$userLenderWithApprovedCompany1 = $this->createLenderUser(self::$approvedCompany->id, Role::LenderAdmin);
+        self::$notApprovedCompanyUserLender = $this->createLenderUser(self::$notApprovedCompany->id, Role::LenderAdmin);
+        self::$emailNotVerifiedUserLender = $this->createLenderUser(self::$approvedCompany->id, Role::LenderAdmin, [
             'email_verified_at' => null,
         ]);
-        self::$userLenderApi = $this->createLenderUser(self::$approvedCompany->id, Role::LenderApiUser, 'lenderApi@bim.com');
+        self::$userLenderApi = $this->createLenderUser(self::$approvedCompany->id, Role::LenderApiUser);
     }
 
     /**

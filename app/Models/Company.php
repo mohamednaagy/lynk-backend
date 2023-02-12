@@ -3,17 +3,20 @@
 namespace App\Models;
 
 use App\Enums\CompanyStatus;
+use App\Enums\CompanyType;
 use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\Wallets\Traits\HasWallet;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Stancl\Tenancy\Database\Concerns\HasScopedValidationRules;
 use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
 class Company extends BaseTenant
 {
-    use HasFactory, HasScopedValidationRules, SoftDeletes, HasWallet;
+    use HasFactory, HasScopedValidationRules, SoftDeletes, HasWallet, LogsActivity;
 
     protected $table = 'companies';
 
@@ -26,6 +29,7 @@ class Company extends BaseTenant
         'does_order_require_approval' => 'boolean',
         'webhook_secret_key' => 'encrypted',
         'order_cost' => MoneyStringCast::class.':order_cost_currency',
+        'type' => CompanyType::class,
     ];
 
     public static function getCustomColumns(): array
@@ -44,7 +48,16 @@ class Company extends BaseTenant
             'created_at',
             'updated_at',
             'order_cost_currency',
+            'type',
+            'driver',
+            'deleted_at',
         ];
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['status']);
     }
 
     public function users(): HasMany
@@ -60,5 +73,10 @@ class Company extends BaseTenant
     public function webhooks(): HasMany
     {
         return $this->hasMany(Webhook::class);
+    }
+
+    public function scopeTraderType($query, string $type)
+    {
+        return $query->where('type', $type);
     }
 }

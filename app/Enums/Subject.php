@@ -10,8 +10,6 @@ final class Subject extends Enum
 
     const Admins = 'admins';
 
-    const Customers = 'customers';
-
     const Roles = 'roles';
 
     const Permissions = 'permissions';
@@ -47,4 +45,10 @@ final class Subject extends Enum
     const LenderAreaSettings = 'lenderAreaSettings';
 
     const ProjectSettings = 'projectSettings';
+
+    const TraderUsers = 'traderUsers';
+
+    const Traders = 'traders';
+
+    const TraderUserInvitation = 'traderUserInvitation';
 }

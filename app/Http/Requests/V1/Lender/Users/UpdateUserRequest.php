@@ -28,15 +28,14 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules()
     {
-        // __REVIEW__ add attributes translations
-        // See: https://laravel.com/docs/9.x/validation#specifying-attribute-in-language-files
         return  [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'email' => [
                 'required',
                 'email',
-                tenant()->unique(User::class, 'email'),
+                tenant()->unique(User::class, 'email')
+                    ->ignore($this->route('user')->id),
             ],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],

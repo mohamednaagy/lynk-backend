@@ -19,6 +19,7 @@ class ActionsServiceProvider extends ServiceProvider
         $actionPrefix = 'App\\Actions';
         $actionSuffix = 'Action';
 
+        // dd(get_declared_interfaces());
         foreach (get_declared_interfaces() as $contract) {
             if (str_starts_with($contract, $contractPrefix)) {
                 $action = $actionPrefix.explode('Contracts', $contract)[1].$actionSuffix;

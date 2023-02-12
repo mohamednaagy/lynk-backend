@@ -4,10 +4,12 @@ namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -18,7 +20,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessDmccMpoNotification implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
     protected string $ttiId;
 
@@ -75,6 +77,28 @@ class ProcessDmccMpoNotification implements ShouldQueue
             );
 
             $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);
+
+            $mpoDocument = $trader->getDocumentByTypeAndTransaction(
+                $this->ttiId,
+                'Murabaha Purchase Offer Document'
+            );
+
+            $trader->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::GetMurabahaPurchaseOfferDocument
+            );
+
+            $this->attachDocumentToOrder(
+                $traderOrder,
+                $mpoDocument,
+                TraderOrderMediaCollection::MurabahaPurchaseOrder,
+                'base64'
+            );
+
+            $trader->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::AttachMpoDocument
+            );
         });
     }
 

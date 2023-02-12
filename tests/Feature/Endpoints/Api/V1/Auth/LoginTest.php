@@ -13,6 +13,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_body(): void
@@ -39,6 +40,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_password_and_source(): void
@@ -61,6 +63,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_source_and_email(): void
@@ -83,6 +86,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_email_and_password(): void
@@ -105,6 +109,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_email(): void
@@ -127,6 +132,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_password(): void
@@ -149,6 +155,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_empty_source(): void
@@ -171,6 +178,7 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_throw_exception_for_not_exist_user(): void
@@ -192,23 +200,23 @@ class LoginTest extends TestCase
 
     /**
      * @return void
+     *
      * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
      */
     public function test_login_success_for_exist_user(): void
     {
         $email = 'a@a.aa';
-        $passwordPlainText = '12345678';
-        $passwordEncrypted = bcrypt('12345678');
+        $password = '12345678';
         $source = 'admin';
 
         User::factory()->create([
             'email' => $email,
-            'password' => $passwordEncrypted,
+            'password' => $password,
         ]);
 
         $response = $this->postJson('api/v1/auth/login', [
             'email' => $email,
-            'password' => $passwordPlainText,
+            'password' => $password,
             'source' => $source,
         ]);
 
@@ -226,23 +234,22 @@ class LoginTest extends TestCase
     public function testTwoUsersWithSameEmailAndDifferentCompanyNotPassed()
     {
         $email = 'a@a.aa';
-        $passwordPlainText = '12345678';
-        $passwordEncrypted = bcrypt('12345678');
+        $password = '12345678';
         $source = 'admin';
 
         $campanies = Company::factory(2)->create();
 
-        $campanies->each(function ($company) use ($email, $passwordEncrypted) {
+        $campanies->each(function ($company) use ($email, $password) {
             User::factory()->create([
                 'email' => $email,
-                'password' => $passwordEncrypted,
+                'password' => $password,
                 'company_id' => $company->id,
             ]);
         });
 
         $response = $this->postJson('api/v1/auth/login', [
             'email' => $email,
-            'password' => $passwordPlainText,
+            'password' => $password,
             'source' => $source,
         ]);
 
@@ -259,23 +266,22 @@ class LoginTest extends TestCase
     public function testTwoUsersWithSameEmailAndDifferentCompanyPassedByUniqueName()
     {
         $email = 'a@a.aa';
-        $passwordPlainText = '12345678';
-        $passwordEncrypted = bcrypt('12345678');
+        $password = '12345678';
         $source = 'admin';
 
         $campanies = Company::factory(2)->create();
 
-        $campanies->each(function ($company) use ($email, $passwordEncrypted) {
+        $campanies->each(function ($company) use ($email, $password) {
             User::factory()->create([
                 'email' => $email,
-                'password' => $passwordEncrypted,
+                'password' => $password,
                 'company_id' => $company->id,
             ]);
         });
 
         $response = $this->postJson('api/v1/auth/login', [
             'email' => $email,
-            'password' => $passwordPlainText,
+            'password' => $password,
             'source' => $source,
             'unique_name' => $campanies->first()->unique_name,
         ]);

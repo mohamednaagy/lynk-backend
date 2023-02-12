@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Enums\CompanyType;
+use App\Models\Company;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -39,6 +41,10 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware('api')
                 ->prefix('api')
+                ->group(base_path('routes/api/trader.php'));
+
+            Route::middleware('api')
+                ->prefix('api')
                 ->group(base_path('routes/api/admin.php'));
 
             Route::middleware('api')
@@ -53,8 +59,24 @@ class RouteServiceProvider extends ServiceProvider
                 ->prefix('api')
                 ->group(base_path('routes/api/edaat.php'));
 
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/api/trader.php'));
+
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
+        });
+
+        Route::bind('trader', function ($id) {
+            return Company::query()->where('id', $id)
+                ->where('type', CompanyType::Trader)
+                ->firstOrFail();
+        });
+
+        Route::bind('lender', function ($id) {
+            return Company::where('id', $id)
+                ->where('type', CompanyType::Lender)
+                ->firstOrFail();
         });
     }
 
