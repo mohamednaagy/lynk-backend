@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\V1\Lender\Wallets\CalculateOrderCost;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetBalance;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetWalletTransactions;
 use App\Http\Controllers\Api\V1\Lender\Webhooks\WebhookController;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
@@ -42,7 +43,10 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 */
 
 Route::get('v1/lender/media/{media}/download', DownloadMediaFile::class)->name('api.v1.media.download');
-Route::webhooks('webhook-receiving-url');
+
+if (! App::environment('production')) {
+    Route::webhooks('webhook-receiving-url');
+}
 
 Route::prefix('v1/lender')->name('api.v1.')->group(function () {
     Route::get('/area-settings', GetLenderAreaSettings::class);

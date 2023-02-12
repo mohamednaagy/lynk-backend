@@ -28,7 +28,7 @@ class WebhookEventManager
                                 ->url($webhook->url)
                                 ->payload($payload)
                                 ->useSecret($company->webhook_secret_key)
-                                ->dispatchSync();
+                                ->dispatch();
                         }
                     );
                 }
