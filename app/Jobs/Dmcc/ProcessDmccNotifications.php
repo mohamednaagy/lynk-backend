@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class ProcessDmccNotifications implements ShouldQueue
 {
@@ -30,6 +31,7 @@ class ProcessDmccNotifications implements ShouldQueue
         collect(
             $trader->fetchNotifications('ACTIONABLE')
         )->each(function ($notification) {
+            Log::debug('not', [$notification]);
             try {
                 if (
                     $notification->notificationHeaderAndEntity->notification

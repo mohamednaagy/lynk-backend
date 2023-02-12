@@ -368,7 +368,7 @@ class DmccDriver implements TraderInterface
                 'responseBody' => $response->body(),
             ]));
         }
-
+        Log::debug('tes', [$response->object()->inventoryDetails[0]]);
         $details = $response->object()->inventoryDetails[0];
 
         $traderOrder->update([

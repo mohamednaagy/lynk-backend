@@ -37,7 +37,7 @@ Route::prefix('v1/trader')->name('api.v1.')->group(function () {
             Route::put('auth/profile', UpdateMyProfile::class);
 
             Route::prefix('orders/{order}/')->group(function () {
-                Route::prefix('trader_orders/{trader_order}')->group(function () {
+                Route::prefix('trader-orders/{trader_order}')->group(function () {
                     Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
                     Route::get('/purchasing-commodity', GetPurchasingCommodity::class);
                 });
