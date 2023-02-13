@@ -49,7 +49,10 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
         Artisan::call('module:seed');
 
-        [self::$trader] = $this->createTraderCompany('2000', ['company_cr' => '1234567891']);
+        [self::$trader] = $this->createTraderCompany('2000', [
+            'company_cr' => '1234567891',
+            'driver' => 'fake',
+        ]);
         [self::$lender] = $this->createLenderCompany('2000', ['company_cr' => '1234567892']);
         self::$traderAdminUser = $this->createTraderUser(self::$trader->id);
         self::$userLender = $this->createLenderUser(self::$lender->id);
@@ -64,16 +67,16 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
         // create trader order
         self::$traderOrder = self::$financingOrder->traderOrders()->create([
-            'provider' => 'dmcc',
+            'provider' => self::$trader->driver,
             'reference' => '123456789',
             'status' => TraderOrderStatus::InProgress,
         ]);
 
         self::$updateMurabhaCompleteDocumentUrl = self::BaseUrl.
             '/orders/'.
-            self::$financingOrder->getOriginal('id').
+            self::$financingOrder->id.
             '/trader-orders/'.
-            self::$traderOrder->getOriginal('id').
+            self::$traderOrder->id.
             '/murabha-complete';
 
         self::$requestData = [

@@ -56,5 +56,6 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
         FinancingOrderStatus::CommodityPurchased => self::GetMurabahaPurchaseOfferDocument,
         FinancingOrderStatus::MurabhaOfferIssued => self::AttachMpoDocument,
         FinancingOrderStatus::CommoditySoldToCustomer => self::CreateSellingCommodityToCustomerDocument,
+        FinancingOrderStatus::MurabahaSaleCompleted => self::MurabahaSaleCompleted,
     ];
 }
