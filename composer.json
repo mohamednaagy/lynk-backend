@@ -75,7 +75,8 @@
         "cghooks": "./vendor/bin/cghooks",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi",
+            "@php artisan structure-scouts:cache"
         ],
         "post-install-cmd": [
             "cghooks update"
