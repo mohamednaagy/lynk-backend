@@ -57,7 +57,9 @@ class LenderController extends Controller
     public function index(
         GetPaginatedCompanies $getPaginatedCompanies
     ): JsonResponse {
-        return fractal($getPaginatedCompanies->handle(CompanyType::Lender), new CompanyTransformer())
+        $getPaginatedCompanies->setType(CompanyType::Lender);
+
+        return fractal($getPaginatedCompanies->handle(), new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',

@@ -4,6 +4,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CompanyType;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\Company;
@@ -38,6 +39,7 @@ class LenderControllerIndexTest extends TestCase
         parent::setUp();
 
         [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::Lenders, Action::Index]));
@@ -60,7 +62,10 @@ class LenderControllerIndexTest extends TestCase
      */
     public function test_that_auth_admin_user_can_index_lenders(): void
     {
-        $lenders = Company::query()->withCount('orders')->paginate();
+        $lenders = Company::query()
+            ->traderType(CompanyType::Lender)
+            ->withCount('orders')
+            ->paginate();
 
         $this->actingAs(self::$userAdmin)
             ->getJson('api/v1/admin/lenders')
@@ -78,6 +83,25 @@ class LenderControllerIndexTest extends TestCase
                     ->respond()
                     ->getData(true)
             );
+    }
+
+    /**
+     * @return void
+     */
+    public function test_lender_controller_index_get_lender_companies_only(): void
+    {
+        // create extra trader company
+        $this->createTraderCompany('2000');
+
+        $lenders = Company::query()
+            ->traderType(CompanyType::Lender)
+            ->withCount('orders')
+            ->paginate();
+
+        $getPaginatedCompanies = app(\App\Actions\Contracts\Companies\GetPaginatedCompanies::class);
+        $getPaginatedCompanies->setType(CompanyType::Lender);
+
+        $this->assertTrue($getPaginatedCompanies->handle()->total() == $lenders->total());
     }
 
     /**
