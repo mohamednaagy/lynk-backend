@@ -95,13 +95,12 @@ class LenderControllerIndexTest extends TestCase
 
         $lenders = Company::query()
             ->type(CompanyType::Lender)
-            ->withCount('orders')
-            ->paginate();
+            ->count();
 
-        $getPaginatedCompanies = app(\App\Actions\Contracts\Companies\GetPaginatedCompanies::class);
-        $getPaginatedCompanies->setType(CompanyType::Lender);
+        $actualResponse = $this->actingAs(self::$userAdmin)
+            ->getJson('api/v1/admin/lenders');
 
-        $this->assertTrue($getPaginatedCompanies->handle()->total() == $lenders->total());
+        $this->assertTrue($actualResponse->json('meta.pagination.total') == $lenders);
     }
 
     /**
