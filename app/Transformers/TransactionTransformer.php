@@ -3,7 +3,6 @@
 namespace App\Transformers;
 
 use App\Enums\MediaCollections\TransactionMediaCollection;
-use App\Models\FinancingOrder;
 use App\Models\Transaction;
 use App\Support\Wallets\Contracts\TransactionUtilInterface;
 use Carbon\Carbon;
@@ -52,11 +51,9 @@ class TransactionTransformer extends TransformerAbstract
     public function includeReceipt(Transaction $transaction): Primitive
     {
         return $this->primitive(
-            isset($transaction->meta['financing_order_id'])
-                ? FinancingOrder::query()->find($transaction->meta['financing_order_id'])
-                    ->getFirstMedia(TransactionMediaCollection::Attachments)
-                    ?->fileUrl()
-                : null
+            $transaction->financingOrder()
+                ?->getFirstMedia(TransactionMediaCollection::Attachments)
+                ?->fileUrl()
         );
     }
 }

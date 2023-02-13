@@ -44,4 +44,11 @@ class Transaction extends Model implements HasMedia
         $this->addMediaCollection(TransactionMediaCollection::Attachments)
             ->singleFile();
     }
+
+    public function financingOrder()
+    {
+        return isset($this->meta['financing_order_id'])
+            ? FinancingOrder::find($this->meta['financing_order_id'])
+            : null;
+    }
 }
