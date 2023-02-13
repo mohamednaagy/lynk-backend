@@ -37,13 +37,13 @@ class UpdateCompanyRequest extends FormRequest
                 'min:3',
                 new CompanyUniqueNameRule,
                 Rule::unique('companies', 'unique_name')
-                    ->ignore($this->route('company')),
+                    ->ignore($this->route('lender')->id),
             ],
             'company_cr' => [
                 'string',
                 'size:10',
                 Rule::unique('companies', 'company_cr')
-                    ->ignore($this->route('company')),
+                    ->ignore($this->route('lender')->id),
             ],
             'does_order_require_approval' => [
                 'required',

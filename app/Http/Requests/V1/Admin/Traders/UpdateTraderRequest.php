@@ -14,7 +14,7 @@ class UpdateTraderRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -24,7 +24,7 @@ class UpdateTraderRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'name' => [
@@ -38,13 +38,13 @@ class UpdateTraderRequest extends FormRequest
                 'min:3',
                 new CompanyUniqueNameRule,
                 Rule::unique(Company::class, 'unique_name')
-                    ->ignore($this->route('trader')),
+                    ->ignore($this->route('trader')->id),
             ],
             'driver' => [
                 'nullable',
                 'string',
                 Rule::unique(Company::class, 'driver')
-                    ->ignore($this->route('trader')),
+                    ->ignore($this->route('trader')->id),
                 Rule::in(['dmcc', 'fake']),
             ],
         ];
