@@ -30,7 +30,7 @@ class UpdateMyProfileRequest extends FormRequest
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'email' => [
                 'required',
-                'email',
+                'email:filter',
                 Rule::unique(User::class, 'email')
                     ->ignore($this->user()->getAuthIdentifier(), 'id')
                     ->where(
