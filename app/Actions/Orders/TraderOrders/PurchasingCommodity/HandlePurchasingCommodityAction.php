@@ -19,7 +19,7 @@ class HandlePurchasingCommodityAction implements HandlePurchasingCommodity
 
     /**
      * @param  Request  $request
-     * @param  int  $order
+     * @param  FinancingOrder  $order
      * @param  TraderOrder  $traderOrder
      * @return void
      *
@@ -27,14 +27,12 @@ class HandlePurchasingCommodityAction implements HandlePurchasingCommodity
      */
     public function handle(
         Request $request,
-        int $order,
+        FinancingOrder $order,
         TraderOrder $traderOrder
     ): void {
-        $order = FinancingOrder::lockForUpdate()->findOrFail($order);
-        $trader = Trader::driver($traderOrder->provider);
-
         app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
 
+        $trader = Trader::driver($traderOrder->provider);
         $this->createStepHistories(
             $request,
             $trader,
