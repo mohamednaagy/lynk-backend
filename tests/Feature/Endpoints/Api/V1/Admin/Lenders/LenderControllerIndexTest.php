@@ -63,7 +63,7 @@ class LenderControllerIndexTest extends TestCase
     public function test_that_auth_admin_user_can_index_lenders(): void
     {
         $lenders = Company::query()
-            ->traderType(CompanyType::Lender)
+            ->type(CompanyType::Lender)
             ->withCount('orders')
             ->paginate();
 
@@ -94,7 +94,7 @@ class LenderControllerIndexTest extends TestCase
         $this->createTraderCompany('2000');
 
         $lenders = Company::query()
-            ->traderType(CompanyType::Lender)
+            ->type(CompanyType::Lender)
             ->withCount('orders')
             ->paginate();
 
