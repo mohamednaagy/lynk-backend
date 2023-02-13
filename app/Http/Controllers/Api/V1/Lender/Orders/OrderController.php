@@ -178,7 +178,7 @@ class OrderController extends Controller
 
                 dispatch(new NotifyAdminsAboutOrderCreated($financingOrder, $user));
 
-                Trader::getTti($financingOrder);
+                // Trader::getTti($financingOrder);
 
                 return fractal($financingOrder, new FinancingOrderTransformer())
                     ->parseIncludes([

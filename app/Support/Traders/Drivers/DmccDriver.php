@@ -314,7 +314,8 @@ class DmccDriver implements TraderInterface
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
         try {
-            $dateTime = Carbon::createFromFormat('d/m/Y H:i A', $traderOrder->dateTimeOfPurchasingCommodity);
+            logs()->debug('tee', [$traderOrder->id]);
+            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $traderOrder->date_time_of_purchasing_commodity);
 
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
@@ -336,6 +337,7 @@ class DmccDriver implements TraderInterface
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
         } catch (Exception $exception) {
+            logs()->debug('test', [$exception]);
             throw new TraderException(collect([
                 'driver' => 'dmcc',
                 'step' => 'createTransferOwnershipToLenderDocument',
@@ -370,6 +372,8 @@ class DmccDriver implements TraderInterface
         }
 
         $details = $response->object()->inventoryDetails[0];
+
+        logs()->debug('test', [$response->object()->inventoryDetails[0]]);
 
         $traderOrder->update([
             'product' => $details->hsCodeDescription,

@@ -3,7 +3,7 @@
 namespace App\Support\Sms\Events;
 
 use App\Contracts\LogServiceRequest;
-use App\Enums\SmsEvent;
+use App\Enums\ActivityLogEvents\SmsEvent;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
