@@ -121,7 +121,7 @@ class GetAuthAdminTest extends TestCase
      */
     public function test_that_admin_manager_taken_permissions(): void
     {
-        $response = fractal(self::$userManager, new UserTransformer(Area::SuperAdmin))
+        $expectedResponse = fractal(self::$userManager, new UserTransformer(Area::SuperAdmin))
             ->parseIncludes([
                 'id',
                 'first_name',
@@ -134,17 +134,18 @@ class GetAuthAdminTest extends TestCase
                 'formatted_phone_number',
             ])->respond();
 
-        $this->actingAs(self::$userManager)
-            ->getJson('api/v1/admin/auth')
-            ->assertStatus(Response::HTTP_OK)
+        $response = $this->actingAs(self::$userManager)
+            ->getJson('api/v1/admin/auth');
+
+        $response->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                $response->getData(true)
+                $expectedResponse->getData(true)
             );
 
-        $responsePermissions = array_shift($response->original->data->permissions);
+        $responsePermissionsFirstItem = $response->json('data.permissions')[0];
 
-        $this->assertTrue($responsePermissions->subject == Area::SuperAdmin.'-'.Subject::Admins);
-        $this->assertTrue($responsePermissions->action == Action::Show);
+        $this->assertTrue($responsePermissionsFirstItem['subject'] == Area::SuperAdmin.'-'.Subject::Admins);
+        $this->assertTrue($responsePermissionsFirstItem['action'] == Action::Show);
     }
 
     /**
