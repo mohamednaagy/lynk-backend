@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Auth;
 
+use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
+use App\Enums\Subject;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
@@ -45,7 +47,7 @@ class GetAuthAdminTest extends TestCase
 
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
-
+        $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::Admins, Action::Show]));
         [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser);
@@ -117,13 +119,45 @@ class GetAuthAdminTest extends TestCase
     /**
      * @return void
      */
+    public function test_that_admin_manager_taken_permissions(): void
+    {
+        $response = fractal(self::$userManager, new UserTransformer(Area::SuperAdmin))
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'role',
+                'permissions',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+            ])->respond();
+
+        $this->actingAs(self::$userManager)
+            ->getJson('api/v1/admin/auth')
+            ->assertStatus(Response::HTTP_OK)
+            ->assertExactJson(
+                $response->getData(true)
+            );
+
+        $responsePermissions = array_shift($response->original->data->permissions);
+
+        $this->assertTrue($responsePermissions->subject == Area::SuperAdmin.'-'.Subject::Admins);
+        $this->assertTrue($responsePermissions->action == Action::Show);
+    }
+
+    /**
+     * @return void
+     */
     public function test_that_lender_admin_can_not_fetch_his_details(): void
     {
         $this->actingAs(self::$userLender)
             ->getJson('api/v1/admin/auth')
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJsonPath(
-                'message', 'User does not have the right roles.'
+                'message',
+                'User does not have the right roles.'
             );
     }
 
@@ -136,7 +170,8 @@ class GetAuthAdminTest extends TestCase
             ->getJson('api/v1/admin/auth')
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJsonPath(
-                'message', 'User does not have the right roles.'
+                'message',
+                'User does not have the right roles.'
             );
     }
 
@@ -149,7 +184,8 @@ class GetAuthAdminTest extends TestCase
             ->getJson('api/v1/admin/auth')
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJsonPath(
-                'message', 'User does not have the right roles.'
+                'message',
+                'User does not have the right roles.'
             );
     }
 
@@ -162,7 +198,8 @@ class GetAuthAdminTest extends TestCase
             ->getJson('api/v1/admin/auth')
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJsonPath(
-                'message', 'User does not have the right roles.'
+                'message',
+                'User does not have the right roles.'
             );
     }
 
@@ -175,7 +212,8 @@ class GetAuthAdminTest extends TestCase
             ->getJson('api/v1/admin/auth')
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJsonPath(
-                'message', 'User does not have the right roles.'
+                'message',
+                'User does not have the right roles.'
             );
     }
 }

@@ -42,9 +42,7 @@ class UserTransformer extends TransformerAbstract
 
     public function transform(User $user)
     {
-        return [
-
-        ];
+        return [];
     }
 
     public function includeId(User $user): Primitive
@@ -95,7 +93,6 @@ class UserTransformer extends TransformerAbstract
     {
         $roles = $this->getRolesBasedOnArea($user);
         $directPermissions = $this->getPermissionsBasedOnArea($user);
-
         $permissions = Permission::role($roles)->get()->merge($directPermissions);
 
         $subjectPermissions = Grantify::transformPermissionsToSubjectAction($permissions);
@@ -133,7 +130,8 @@ class UserTransformer extends TransformerAbstract
         $permissions = $user->permissions;
 
         return match ($this->area) {
-            Area::Lender, Area::SuperAdmin => $permissions->where('name', 'Like', $this->area.'-%'),
+            Area::Lender,
+            Area::SuperAdmin => $permissions->filter(fn ($item) => false !== stripos($item, $this->area)),
             default => $permissions
         };
     }
