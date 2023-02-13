@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Support\Actions;
+namespace App\Support\StructureScouts;
 
 use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
-use Spatie\StructureDiscoverer\Cache\LaravelDiscoverCacheDriver;
+use Spatie\StructureDiscoverer\Cache\FileDiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Discover;
 use Spatie\StructureDiscoverer\StructureScout;
 
@@ -22,6 +22,6 @@ class ActionsStructureScout extends StructureScout
 
     public function cacheDriver(): DiscoverCacheDriver
     {
-        return new LaravelDiscoverCacheDriver();
+        return new FileDiscoverCacheDriver(base_path('bootstrap/cache'));
     }
 }

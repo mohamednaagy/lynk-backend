@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Support\Actions\ActionsStructureScout;
+use App\Support\StructureScouts\ActionsStructureScout;
 use Illuminate\Support\ServiceProvider;
 use Spatie\StructureDiscoverer\Support\StructureScoutManager;
 
