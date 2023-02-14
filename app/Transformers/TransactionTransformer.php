@@ -51,7 +51,7 @@ class TransactionTransformer extends TransformerAbstract
     public function includeReceipt(Transaction $transaction): Primitive
     {
         return $this->primitive(
-            $transaction->financingOrder()
+            $transaction->financingOrder
                 ?->getFirstMedia(TransactionMediaCollection::Attachments)
                 ?->fileUrl()
         );
