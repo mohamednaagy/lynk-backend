@@ -23,7 +23,7 @@ class SendEmailVerificationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['sometimes', 'email', Rule::unique(User::class, 'email')->ignore($this->user()->id)],
+            'email' => ['sometimes', 'email:filter', Rule::unique(User::class, 'email')->ignore($this->user()->id)],
             'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
         ];
     }
