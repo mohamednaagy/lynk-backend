@@ -44,7 +44,7 @@ class TraderUserController extends Controller
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Edit, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Delete, Action::Manage])
         )->only('destroy');
     }
 

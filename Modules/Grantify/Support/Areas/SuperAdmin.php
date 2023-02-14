@@ -90,5 +90,13 @@ class SuperAdmin
             Action::Show,
             Action::Manage,
         ],
+        Subject::TraderUsers => [
+            Action::Index,
+            Action::Create,
+            Action::Edit,
+            Action::Show,
+            Action::Delete,
+            Action::Manage,
+        ],
     ];
 }

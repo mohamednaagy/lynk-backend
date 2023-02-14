@@ -48,5 +48,5 @@ final class Subject extends Enum
 
     const TraderUsers = 'traderUsers';
 
-    const Traders = 'Traders ';
+    const Traders = 'traders ';
 }

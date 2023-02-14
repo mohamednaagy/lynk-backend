@@ -89,13 +89,31 @@ class UserControllerDestroyTest extends TestCase
     /**
      * @return void
      */
+    public function test_admin_manager_user_can_delete_trader_user_successful(): void
+    {
+        Grantify::assignPermissionToModel(self::$managerAdminUser, 'SuperAdmin-traderUsers.delete');
+        $this->actingAs(self::$managerAdminUser)
+            ->deleteJson(self::$endPoint)
+            ->assertOk()
+            ->assertExactJson([
+                'data' => [],
+            ]);
+    }
+
+    /**
+     * @return void
+     */
     public function test_admin_user_cant_delete_trader_user_witout_trader_role_unsuccessful(): void
     {
-        Grantify::syncRoleToModel(self::$userTraderAdmin, Role::LenderSupervisor);
+        array_map(function ($role) {
+            if ($role !== Role::TraderAdmin) {
+                Grantify::syncRoleToModel(self::$userTraderAdmin, $role);
 
-        $this->actingAs(self::$userAdmin)
-            ->deleteJson(self::$endPoint)
-            ->assertStatus(Response::HTTP_FORBIDDEN)
-            ->assertJsonPath('message', __('This action is unauthorized.'));
+                $this->actingAs(self::$userAdmin)
+                    ->deleteJson(self::$endPoint)
+                    ->assertStatus(Response::HTTP_FORBIDDEN)
+                    ->assertJsonPath('message', __('This action is unauthorized.'));
+            }
+        }, Role::getValues());
     }
 }
