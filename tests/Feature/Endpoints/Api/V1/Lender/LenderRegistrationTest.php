@@ -91,6 +91,44 @@ class LenderRegistrationTest extends TestCase
      *
      * @return void
      */
+    public function test_register_company_notifications_email_taken_from_lender_email(): void
+    {
+        $email = 'test@uselynk.test';
+        $response = $this->postJson('/api/v1/lender/register', [
+            'first_name' => 'Joe',
+            'last_name' => 'Doe',
+            'phone_country_code' => 'SA',
+            'phone_number' => '503811000',
+            'email' => $email,
+            'password' => 'Qwer@1234',
+            'password_confirmation' => 'Qwer@1234',
+            'source' => 'Postman',
+            'company_name' => 'test company1',
+            'company_unique_name' => 'lynk06',
+            'company_cr' => '1234567891',
+        ]);
+
+        $response->assertStatus(201)->assertJsonStructure(
+            [
+                'data' => [
+                    'token',
+                    'type',
+                    'company_id',
+                ],
+            ]
+        );
+
+        $this->assertTrue(
+            Company::find($response->json('data.company_id'))->notifications_email
+            == $email
+        );
+    }
+
+    /**
+     * A basic feature test example.
+     *
+     * @return void
+     */
     public function test_register_and_check_if_lender_order_cost_as_in_default_settings(): void
     {
         $response = $this->postJson('/api/v1/lender/register', [

@@ -50,6 +50,7 @@ class LenderControllerUpdateTest extends TestCase
 
         self::$lenderDetails = [
             'name' => 'testCompany',
+            'notifications_email' => 'notifications_email@email.com',
             'unique_name' => 'companyUniqueName',
             'company_cr' => '1234567891',
             'order_cost' => 20,

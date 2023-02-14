@@ -37,6 +37,7 @@ class Company extends BaseTenant
         return [
             'id',
             'name',
+            'notifications_email',
             'unique_name',
             'company_cr',
             'status',
