@@ -21,7 +21,8 @@ return new class extends Migration
 
         Company::whereNull('notifications_email')
             ->withWhereHas('users')
-            ->orderBy('id')->chunk(50, function ($companies) {
+            ->orderBy('id')
+            ->chunk(50, function ($companies) {
                 $companies->each(
                     function ($company) {
                         $role = null;
