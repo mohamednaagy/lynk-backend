@@ -38,7 +38,9 @@ class TraderCompanyControllerUpdateTest extends TestCase
             'driver' => 'dmcc',
         ];
 
-        [self::$company, self::$wallet] = $this->createTraderCompany(2000);
+        [self::$company, self::$wallet] = $this->createTraderCompany(2000, [
+            'unique_name' => 'companyUniqueNameTest',
+        ]);
 
         self::$superAdmin = $this->createSuperAdminUser();
     }
@@ -99,6 +101,26 @@ class TraderCompanyControllerUpdateTest extends TestCase
         $this->actingAs(self::$superAdmin)
             ->putJson('api/v1/admin/traders/'.self::$company->id, self::$companyDetails)
             ->assertStatus(Response::HTTP_OK);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_trader_company_controller_update_successful_with_even_same_unique_name(): void
+    {
+        $this->actingAs(self::$superAdmin)
+            ->putJson('api/v1/admin/traders/'.self::$company->id,
+                array_merge(
+                    self::$companyDetails,
+                    [
+                        'unique_name' => self::$company->unique_name,
+                    ]
+                )
+            )
+            ->assertOk()
+            ->assertExactJson([
+                'data' => [],
+            ]);
     }
 
     public function test_trader_company_controller_update_wallet_checked_successful()

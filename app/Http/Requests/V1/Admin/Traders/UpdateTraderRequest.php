@@ -38,13 +38,13 @@ class UpdateTraderRequest extends FormRequest
                 'min:3',
                 new CompanyUniqueNameRule,
                 Rule::unique(Company::class, 'unique_name')
-                    ->ignore($this->route('trader')->id),
+                    ->ignore($this->route('trader')),
             ],
             'driver' => [
                 'nullable',
                 'string',
                 Rule::unique(Company::class, 'driver')
-                    ->ignore($this->route('trader')->id),
+                    ->ignore($this->route('trader')),
                 Rule::in(['dmcc', 'fake']),
             ],
         ];

@@ -85,17 +85,17 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::get('lenders/statuses', GetLenderStatuses::class);
 
-        Route::scopeBindings()->group(function () {
-            Route::prefix('lenders')->group(function () {
-                Route::put('/{lender}/status', UpdateLenderStatus::class);
-                Route::get('/{lender}/balance ', GetLenderBalance::class);
-                Route::get('/{lender}/orders/{order}', [LenderOrderController::class, 'show']);
-                Route::get('{lender}/orders', [LenderOrderController::class, 'index']);
-                Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
-                Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
-                Route::get('/{lender}/settings ', GetLenderSetting::class);
-            });
+        Route::prefix('lenders')->group(function () {
+            Route::put('/{lender}/status', UpdateLenderStatus::class);
+            Route::get('/{lender}/balance ', GetLenderBalance::class);
+            Route::get('/{lender}/orders/{order}', [LenderOrderController::class, 'show']);
+            Route::get('{lender}/orders', [LenderOrderController::class, 'index']);
+            Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
+            Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
+            Route::get('/{lender}/settings ', GetLenderSetting::class);
+        });
 
+        Route::scopeBindings()->group(function () {
             Route::prefix('orders/{order}')->group(function () {
                 Route::prefix('/trader-orders/{trader_order}')->group(function () {
                     Route::post('/proceed', MakeOrderProceed::class);
@@ -109,19 +109,21 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                     Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
                 });
             });
+        });
 
-            Route::apiResource('lenders', LenderController::class);
+        Route::prefix('traders')->group(function () {
+            Route::get('/{trader}/orders/{order}', [TraderOrderController::class, 'show']);
+            Route::get('{trader}/orders', [TraderOrderController::class, 'index']);
+            Route::post('{trader}/users/{user}/resend-invitation', ResendInvitationToUser::class);
+            Route::put('/{trader}/status', UpdateTraderStatus::class);
+        });
+
+        Route::apiResource('lenders', LenderController::class);
+        Route::apiResource('traders', TraderController::class)
+            ->only(['index', 'store', 'show', 'update']);
+
+        Route::scopeBindings()->group(function () {
             Route::apiResource('lenders.users', LenderUserController::class);
-
-            Route::prefix('traders')->group(function () {
-                Route::get('/{trader}/orders/{order}', [TraderOrderController::class, 'show']);
-                Route::get('{trader}/orders', [TraderOrderController::class, 'index']);
-                Route::post('{trader}/users/{user}/resend-invitation', ResendInvitationToUser::class);
-                Route::put('/{trader}/status', UpdateTraderStatus::class);
-            });
-
-            Route::apiResource('traders', TraderController::class)
-                ->only(['index', 'store', 'show', 'update']);
             Route::apiResource('traders.users', TraderUserController::class);
         });
 
