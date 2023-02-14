@@ -65,7 +65,7 @@ class UpdateCompanyRequest extends FormRequest
             ],
             'notifications_email' => [
                 'required',
-                'email',
+                'email:filter',
                 'string',
                 'max:255',
             ],
