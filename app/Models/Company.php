@@ -75,7 +75,7 @@ class Company extends BaseTenant
         return $this->hasMany(Webhook::class);
     }
 
-    public function scopeTraderType($query, string $type)
+    public function scopeType($query, string $type)
     {
         return $query->where('type', $type);
     }
