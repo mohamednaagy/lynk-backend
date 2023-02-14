@@ -47,6 +47,11 @@ class LenderUserController extends Controller
             'permission:'.
             perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Edit, Action::Manage])
         )->only('update');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Delete, Action::Manage])
+        )->only('update');
     }
 
     public function index(
@@ -80,14 +85,7 @@ class LenderUserController extends Controller
      */
     public function show(Request $request, Company $lender, User $user): JsonResponse
     {
-        if (! $user->hasAnyRole([
-            Role::LenderAdmin,
-            Role::LenderOrderCreator,
-            Role::LenderBilling,
-            Role::LenderSupervisor,
-        ])) {
-            throw new AuthorizationException();
-        }
+        $this->checkIfUserDoesNotHaveLenderApiUserRole($user);
 
         return fractal($user, new UserTransformer(Area::Lender))
             ->parseIncludes([
@@ -160,5 +158,40 @@ class LenderUserController extends Controller
 
             return $this->successResponse();
         }));
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  User  $user
+     * @param  Company  $lender
+     * @return JsonResponse
+     */
+    public function destroy(Company $lender, User $user): JsonResponse
+    {
+        $this->checkIfUserDoesNotHaveLenderAreaRole($user);
+        $this->checkIfUserDoesNotHaveLenderApiUserRole($user);
+        $user->delete();
+
+        return $this->successResponse();
+    }
+
+    public function checkIfUserDoesNotHaveLenderAreaRole(User $user)
+    {
+        if (! $user->hasRole(Area::roles(Area::Lender))) {
+            throw new AuthorizationException();
+        }
+    }
+
+    public function checkIfUserDoesNotHaveLenderApiUserRole(User $user)
+    {
+        if (! $user->hasAnyRole([
+            Role::LenderAdmin,
+            Role::LenderOrderCreator,
+            Role::LenderBilling,
+            Role::LenderSupervisor,
+        ])) {
+            throw new AuthorizationException();
+        }
     }
 }
