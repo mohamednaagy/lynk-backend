@@ -93,14 +93,14 @@ class LenderControllerIndexTest extends TestCase
         // create extra trader company
         $this->createTraderCompany('2000');
 
-        $lenders = Company::query()
+        $lendersCount = Company::query()
             ->type(CompanyType::Lender)
             ->count();
 
         $actualResponse = $this->actingAs(self::$userAdmin)
             ->getJson('api/v1/admin/lenders');
 
-        $this->assertTrue($actualResponse->json('meta.pagination.total') == $lenders);
+        $this->assertTrue($actualResponse->json('meta.pagination.total') == $lendersCount);
     }
 
     /**
