@@ -16,13 +16,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
-use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithSettings;
-use Tests\Traits\InteractsWithUser;
 
 class ProjectSettingsIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithSettings, InteractsWithUser, AssertsAccessByRoleAndArea;
+    use RefreshDatabase, InteractsWithSettings, AssertsAccessByRoleAndArea;
 
     const BaseUrl = 'api/v1/admin/settings/project';
 
