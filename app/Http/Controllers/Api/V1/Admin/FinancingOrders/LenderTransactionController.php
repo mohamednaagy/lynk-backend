@@ -8,7 +8,6 @@ use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
-use App\Models\FinancingOrder;
 use App\Transformers\TransactionTransformer;
 use Illuminate\Http\JsonResponse;
 
@@ -18,7 +17,7 @@ class LenderTransactionController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::LenderTransactions, Action::Index, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::LenderTransactions, Action::Index, Action::Manage])
         )->only('index');
     }
 
@@ -30,15 +29,7 @@ class LenderTransactionController extends Controller
     {
         $transactions = $lender->transactions(WalletType::CompanyWallet)->paginate();
 
-        tap($transactions)->transform(function ($transaction) {
-            if (array_key_exists('financing_order_id', $transaction->meta)) {
-                return $transaction->setRelation('financingOrder',
-                    FinancingOrder::find($transaction->meta['financing_order_id'])
-                );
-            }
-
-            return $transaction;
-        });
+        tap($transactions)->loadZatcaInvoicesMedia();
 
         return fractal(
             $transactions,
@@ -49,7 +40,7 @@ class LenderTransactionController extends Controller
                 'date',
                 'description',
                 'amount',
-                'receipt',
+                'receipt_url',
             ])
             ->respond();
     }

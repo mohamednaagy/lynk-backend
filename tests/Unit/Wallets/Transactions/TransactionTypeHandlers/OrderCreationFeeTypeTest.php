@@ -49,7 +49,7 @@ class OrderCreationFeeTypeTest extends TestCase
                 null,
                 [
                     'type' => 'test',
-                    'order_number' => '123456',
+                    'financing_order_id' => '123456',
                 ]
             );
     }

@@ -4,7 +4,7 @@ namespace App\Actions\Wallets;
 
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
-use App\Enums\MediaCollections\TransactionMediaCollection;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Models\Transaction;
 use App\Support\PdfGenerator\PdfGenerator;
@@ -23,7 +23,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
 {
     protected string $template = 'templates.zatca-invoice';
 
-    protected string $collectionName = TransactionMediaCollection::Attachments;
+    protected string $collectionName = FinancingOrderMediaCollection::ZatcaInvoice;
 
     public function __construct(protected GetProjectSettings $getProjectSettings)
     {
