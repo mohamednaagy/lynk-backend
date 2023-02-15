@@ -4,6 +4,7 @@ namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocu
 
 use App\Enums\Area;
 use App\Enums\ErrorCode;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
@@ -113,6 +114,13 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
      */
     public function test_proceed_murabha_complete_document_succeed(): void
     {
+        // create trader order history of previous last step
+        self::$traderOrder->traderHistories()->create(
+            [
+                'action' => FinancingOrderHistory::AttachMpoDocument,
+            ]
+        );
+
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertJsonStructure(['data']);
@@ -123,9 +131,11 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
      */
     public function test_update_murabha_complete_document_not_follow_sequence(): void
     {
-        self::$financingOrder->update([
-            'status' => FinancingOrderStatus::ContractSigned,
-        ]);
+        self::$traderOrder->traderHistories()->create(
+            [
+                'action' => FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+            ]
+        );
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)

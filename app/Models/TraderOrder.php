@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
+use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -115,5 +116,18 @@ class TraderOrder extends Model implements HasMedia
         return (bool) $this->traderHistories
             ->where('action', $action)
             ->first();
+    }
+
+    /**
+     * @throws OrderStatusDoesNotFollowSequenceException
+     */
+    public function canAccessCurrentStep(int $previousStepComplete, int $currentStepComplete)
+    {
+        if (
+            ! $this->checkOrderStepComplete($previousStepComplete) &&
+            ! $this->checkOrderStepComplete($currentStepComplete)
+        ) {
+            throw new OrderStatusDoesNotFollowSequenceException();
+        }
     }
 }
