@@ -121,6 +121,7 @@ class LenderController extends Controller
                 'company_cr',
                 'does_order_require_approval',
                 'order_cost',
+                'notifications_email',
             ])
             ->respond();
     }

@@ -21,6 +21,7 @@ class CompanyTransformer extends TransformerAbstract
         'webhook_secret_key',
         'public_status_comment',
         'driver',
+        'notifications_email',
     ];
 
     public function transform(Company $company): array
@@ -53,6 +54,11 @@ class CompanyTransformer extends TransformerAbstract
     public function includeCompanyCr(Company $company): Primitive
     {
         return $this->primitive($company->company_cr);
+    }
+
+    public function includeNotificationsEmail(Company $company): Primitive
+    {
+        return $this->primitive($company->notifications_email);
     }
 
     public function includeStatus(Company $company): Primitive
