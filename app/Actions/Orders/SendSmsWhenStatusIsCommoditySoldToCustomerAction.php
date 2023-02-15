@@ -27,7 +27,7 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
             ->first()->uom ?? '';
         $sellingPrice = optional($financingOrder->selling_price)->formatByDecimal() ?? '';
         $query = ['o' => $financingOrder->id];
-        $host = ' https://'.get_host_from_url(Config::get('app.frontend_url.client'));
+        $host = Config::get('app.frontend_url.client');
         $url = $host.'/?'.http_build_query($query);
         $locale = app()->getLocale();
 
