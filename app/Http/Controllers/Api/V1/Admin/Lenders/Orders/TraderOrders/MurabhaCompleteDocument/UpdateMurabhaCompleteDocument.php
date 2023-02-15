@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument;
 
+use App\Actions\Contracts\Orders\GetOrderAndTraderOrderLocked;
 use App\Actions\Contracts\Orders\TraderOrders\MurabhaCompleteDocument\HandleMurabhaCompleteDocument;
 use App\Enums\Action;
 use App\Enums\Area;
@@ -9,7 +10,6 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabhaCompleteDocumentRequest;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +20,7 @@ class UpdateMurabhaCompleteDocument extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit, Action::Manage])
         );
     }
 
@@ -35,14 +35,13 @@ class UpdateMurabhaCompleteDocument extends Controller
     public function __invoke(
         UpdateMurabhaCompleteDocumentRequest $request,
         int $order,
-        TraderOrder $traderOrder
+        int $traderOrder
     ): JsonResponse {
         return DB::transaction(function () use ($request, $order, $traderOrder) {
-            $order = FinancingOrder::lockForUpdate()->findOrFail($order);
+            [$order, $traderOrder] = app(GetOrderAndTraderOrderLocked::class)->handle();
 
-            $traderOrder->canAccessCurrentStep(
-                FinancingOrderStatus::MurabhaOfferIssued,
-                FinancingOrderStatus::MurabahaSaleCompleted
+            $traderOrder->ensureCanAccessStep(
+                FinancingOrderStatus::MurabhaOfferIssued
             );
 
             app(HandleMurabhaCompleteDocument::class)->handle($request, $order, $traderOrder);

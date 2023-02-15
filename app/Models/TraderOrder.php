@@ -99,7 +99,7 @@ class TraderOrder extends Model implements HasMedia
     public function checkOrderStepComplete(int $status): bool
     {
         if (! array_key_exists($status, FinancingOrderHistory::$orderHistoryLastActionMap)) {
-            throw new UnexpectedValueException('no mapping for this status');
+            throw new UnexpectedValueException('No mapping for this status');
         }
 
         return (bool) $this->traderHistories
@@ -121,12 +121,9 @@ class TraderOrder extends Model implements HasMedia
     /**
      * @throws OrderStatusDoesNotFollowSequenceException
      */
-    public function canAccessCurrentStep(int $previousStepComplete, int $currentStepComplete)
+    public function ensureCanAccessStep(int $step)
     {
-        if (
-            ! $this->checkOrderStepComplete($previousStepComplete) &&
-            ! $this->checkOrderStepComplete($currentStepComplete)
-        ) {
+        if (! $this->checkOrderStepComplete($step)) {
             throw new OrderStatusDoesNotFollowSequenceException();
         }
     }
