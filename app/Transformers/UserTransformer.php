@@ -120,7 +120,9 @@ class UserTransformer extends TransformerAbstract
         $roles = $user->roles;
 
         return match ($this->area) {
-            Area::Lender, Area::SuperAdmin => $roles->whereIn('name', Area::roles($this->area)),
+            Area::Lender,
+            Area::Trader,
+            Area::SuperAdmin => $roles->whereIn('name', Area::roles($this->area)),
             default => $roles
         };
     }
@@ -131,6 +133,7 @@ class UserTransformer extends TransformerAbstract
 
         return match ($this->area) {
             Area::Lender,
+            Area::Trader,
             Area::SuperAdmin => $permissions->filter(fn ($item) => false !== stripos($item, $this->area)),
             default => $permissions
         };

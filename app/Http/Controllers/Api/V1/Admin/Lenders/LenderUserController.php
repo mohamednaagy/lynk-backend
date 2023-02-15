@@ -11,7 +11,6 @@ use App\Enums\CompanyType;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Admin\Companies\GetCompanyUsersRequest;
 use App\Http\Requests\V1\Admin\Companies\Users\StoreUserRequest;
 use App\Http\Requests\V1\Admin\Companies\Users\UpdateUserRequest;
 use App\Mail\CompleteRegisterInvitation;
@@ -50,7 +49,6 @@ class LenderUserController extends Controller
     }
 
     public function index(
-        GetCompanyUsersRequest $request,
         Company $lender,
         GetPaginatedLenderUsers $getPaginatedLenderUsers
     ): JsonResponse {
