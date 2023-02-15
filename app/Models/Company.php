@@ -37,6 +37,7 @@ class Company extends BaseTenant
         return [
             'id',
             'name',
+            'notifications_email',
             'unique_name',
             'company_cr',
             'status',
@@ -75,7 +76,7 @@ class Company extends BaseTenant
         return $this->hasMany(Webhook::class);
     }
 
-    public function scopeTraderType($query, string $type)
+    public function scopeType($query, string $type)
     {
         return $query->where('type', $type);
     }

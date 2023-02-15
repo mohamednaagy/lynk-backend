@@ -8,6 +8,7 @@ use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodityRequest;
+use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\TraderHelperTrait;
 use App\Transformers\TraderOrderTransformer;
@@ -32,7 +33,9 @@ class UpdatePurchasingCommodity extends Controller
         TraderOrder $traderOrder
     ): JsonResponse {
         return DB::transaction(function () use ($order, $traderOrder, $request) {
-            app(HandlePurchasingCommodity::class)->handle($request, $order, $traderOrder);
+            $financingOrder = FinancingOrder::lockForUpdate()->findOrFail($order);
+
+            app(HandlePurchasingCommodity::class)->handle($request, $financingOrder, $traderOrder);
 
             return fractal($traderOrder, new TraderOrderTransformer())
                 ->parseIncludes(

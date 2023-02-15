@@ -28,7 +28,7 @@ class SendLinkRequest extends FormRequest
     public function rules()
     {
         return [
-            'email' => ['required', 'email', Rule::exists(User::class, 'email')],
+            'email' => ['required', 'email:filter', Rule::exists(User::class, 'email')],
             'company_unique_name' => ['nullable', 'string'],
             'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
         ];

@@ -36,7 +36,7 @@ class StoreUserRequest extends FormRequest
             'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],
             'email' => [
                 'required',
-                'email',
+                'email:filter',
                 Rule::unique(User::class, 'email')
                     ->where('company_id', tenant('id')),
             ],
