@@ -27,6 +27,6 @@ return [
     'total' => 'إجمالي قيمة الفاتورة شامل الضريبة',
     'invoice_number' => 'فاتورة #:number',
     'amount_with_currency' => ':amount ريال',
-    'create_order_cost' => 'تكلفة طلب تمويلي رقم #number:',
+    'create_order_cost' => 'رسوم إنشاء طلب تمويلي #number:',
     'vat' => 'نسبه قيمه الضريبه المضافه',
 ];

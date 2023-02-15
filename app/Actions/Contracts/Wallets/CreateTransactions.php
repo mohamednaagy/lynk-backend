@@ -2,6 +2,7 @@
 
 namespace App\Actions\Contracts\Wallets;
 
+use App\Models\Transaction;
 use App\Models\Wallet;
 use Cknow\Money\Money;
 
@@ -14,7 +15,7 @@ interface CreateTransactions
      * @param  int  $transactionReason
      * @param  Money  $amount
      * @param  array  $meta
-     * @return void
+     * @return Transaction
      */
-    public function handle(Wallet $wallet, int $transactionReason, Money $amount, array $meta);
+    public function handle(Wallet $wallet, int $transactionReason, Money $amount, array $meta): Transaction;
 }
