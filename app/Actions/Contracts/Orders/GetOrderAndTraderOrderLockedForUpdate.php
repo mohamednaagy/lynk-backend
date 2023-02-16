@@ -2,7 +2,7 @@
 
 namespace App\Actions\Contracts\Orders;
 
-interface GetOrderAndTraderOrderLocked
+interface GetOrderAndTraderOrderLockedForUpdate
 {
     public function handle($traderOrderId): array;
 }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument;
 
-use App\Actions\Contracts\Orders\GetOrderAndTraderOrderLocked;
+use App\Actions\Contracts\Orders\GetOrderAndTraderOrderLockedForUpdate;
 use App\Actions\Contracts\Orders\TraderOrders\MurabhaCompleteDocument\HandleMurabhaCompleteDocument;
 use App\Enums\Action;
 use App\Enums\Area;
@@ -38,7 +38,7 @@ class UpdateMurabhaCompleteDocument extends Controller
         int $traderOrder
     ): JsonResponse {
         return DB::transaction(function () use ($request, $order, $traderOrder) {
-            [$order, $traderOrder] = app(GetOrderAndTraderOrderLocked::class)->handle();
+            [$order, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
 
             $traderOrder->ensureCanAccessStep(
                 FinancingOrderStatus::MurabhaOfferIssued

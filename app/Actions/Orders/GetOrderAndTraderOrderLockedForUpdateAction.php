@@ -2,10 +2,10 @@
 
 namespace App\Actions\Orders;
 
-use App\Actions\Contracts\Orders\GetOrderAndTraderOrderLocked as GetOrderAndTraderOrderLockedInterface;
+use App\Actions\Contracts\Orders\GetOrderAndTraderOrderLockedForUpdate;
 use App\Models\TraderOrder;
 
-class GetOrderAndTraderOrderLocked implements GetOrderAndTraderOrderLockedInterface
+class GetOrderAndTraderOrderLockedForUpdateAction implements GetOrderAndTraderOrderLockedForUpdate
 {
     public function handle($traderOrderId): array
     {

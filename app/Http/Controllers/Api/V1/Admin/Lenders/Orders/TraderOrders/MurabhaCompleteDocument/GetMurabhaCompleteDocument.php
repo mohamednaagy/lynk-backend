@@ -17,7 +17,7 @@ class GetMurabhaCompleteDocument extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show, Action::Manage])
         );
     }
 
@@ -32,9 +32,8 @@ class GetMurabhaCompleteDocument extends Controller
         FinancingOrder $order,
         TraderOrder $traderOrder
     ): JsonResponse {
-        $media = $traderOrder->getMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
-            ->first();
+        $media = $traderOrder->getFirstMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo);
 
-        return $this->successResponse(['url' => $media->fileDownloadableUrl ?? null]);
+        return $this->successResponse(['url' => $media->fileUrl ?? null]);
     }
 }

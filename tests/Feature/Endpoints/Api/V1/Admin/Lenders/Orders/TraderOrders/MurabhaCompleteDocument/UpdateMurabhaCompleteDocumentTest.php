@@ -112,18 +112,22 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
     /**
      * @return void
      */
-    public function test_proceed_murabha_complete_document_succeed(): void
+    public function test_proceed_murabha_complete_document_is_successfull_and_order_status_will_be_updated(): void
     {
         // create trader order history of previous last step
         self::$traderOrder->traderHistories()->create(
             [
-                'action' => FinancingOrderHistory::AttachMpoDocument,
+                'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabhaOfferIssued],
             ]
         );
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertJsonStructure(['data']);
+
+        $freshOrderStatus = self::$financingOrder->fresh()->status;
+
+        $this->assertTrue($freshOrderStatus->is(FinancingOrderStatus::MurabahaSaleCompleted));
     }
 
     /**
@@ -149,14 +153,28 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_murabha_complete_document_succeed(): void
+    public function test_update_murabha_complete_document_is_successful_and_order_status_will_not_be_updated(): void
     {
+        self::$traderOrder->traderHistories()->create(
+            [
+                'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabhaOfferIssued],
+            ]
+        );
+
         self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderStatus::MurabahaSaleCompleted,
+            'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted],
+        ]);
+
+        self::$financingOrder->update([
+            'status' => FinancingOrderStatus::Completed,
         ]);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertJsonStructure(['data']);
+
+        $freshOrderStatus = self::$financingOrder->fresh()->status;
+
+        $this->assertTrue($freshOrderStatus->is(FinancingOrderStatus::Completed));
     }
 }

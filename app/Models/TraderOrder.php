@@ -127,4 +127,15 @@ class TraderOrder extends Model implements HasMedia
             throw new OrderStatusDoesNotFollowSequenceException();
         }
     }
+
+    public function canChangeParentOrderStatusIfStepWillBeUpdated(int $step): bool
+    {
+        if ($this->status->isNot(TraderOrderStatus::InProgress)) {
+            return false;
+        }
+
+        $isCurrentStepComplete = $this->checkOrderStepComplete($step);
+
+        return false === $isCurrentStepComplete;
+    }
 }
