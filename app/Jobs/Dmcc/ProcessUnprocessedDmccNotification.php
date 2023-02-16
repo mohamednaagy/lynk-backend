@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Dmcc;
 
+use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -53,12 +54,18 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
                 ->lockForUpdate()
                 ->first();
 
-            if ($traderOrder === null) {
+            if (! $traderOrder) {
                 return;
             }
 
             $trader = Trader::driver($driver);
             $trader->processNotification($this->notificationId);
+
+            if ($traderOrder->status->is(TraderOrderStatus::InProgress)) {
+                $traderOrder->update([
+                    'status' => TraderOrderStatus::Completed,
+                ]);
+            }
         });
     }
 

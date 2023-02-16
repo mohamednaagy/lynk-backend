@@ -60,7 +60,7 @@ class ProcessDmccNotificationsUnitTest extends TestCase
         Http::fake(function () {
             return Http::response([
                 'Body' => [
-                    'notification' => 'Murabaha Sale Completed',
+                    'notification' => 'Tradeflow Transaction (Islamic) - Payment Settlement Required',
                     'ttiId' => 252,
                     'id' => '3dc10552-e6d0-4776-ad16-8ab5efde260d',
                 ],
