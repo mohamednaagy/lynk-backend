@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommodityPurchased;
 use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommoditySoldToCustomer;
+use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsMurabhaOfferIssued;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
 use App\Enums\FinancingOrderStatus;
@@ -40,6 +41,10 @@ class FinancingOrderObserver
 
         foreach ($actions as $action) {
             app($action)->handle($financingOrder, $product, $quantity);
+        }
+
+        if ($financingOrder->status->is(FinancingOrderStatus::MurabhaOfferIssued)) {
+            app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)->handle($financingOrder);
         }
     }
 }
