@@ -14,9 +14,9 @@ class GetOrderAndTraderOrderLockedForUpdateAction implements GetOrderAndTraderOr
 
         $order = $traderOrder->order()->lockForUpdate()->first();
 
-        $traderHistories = $traderOrder->traderHistories()->lockForUpdate()->get();
-
-        $traderOrder->setRelation('traderHistories', $traderHistories);
+        $traderOrder->load([
+            'traderHistories' => fn ($query) => $query->loadForUpdate(),
+        ]);
 
         return [$order, $traderOrder];
     }

@@ -134,8 +134,8 @@ class TraderOrder extends Model implements HasMedia
             return false;
         }
 
-        $isCurrentStepComplete = $this->checkOrderStepComplete($step);
+        $stepIsNotCompleted = ! $this->checkOrderStepComplete($step);
 
-        return false === $isCurrentStepComplete;
+        return $stepIsNotCompleted;
     }
 }
