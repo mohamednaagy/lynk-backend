@@ -44,16 +44,20 @@ class ProcessDmccClientWakalaCompletedOrder implements ShouldQueue
             $lastTraderOrder = $financingOrder->activeTraderOrder()
                 ->whereIn('provider', ['dmcc', 'fake'])->first();
 
+            if (! $lastTraderOrder) {
+                return;
+            }
+
             if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::MurabhaOfferIssued)) {
                 return;
             }
 
             $trader = Trader::driver($lastTraderOrder->provider);
 
-            $versionNo = $trader->uploadTTIDocumentAndGetVersionNumber($lastTraderOrder->ttiId);
+            $versionNo = $trader->uploadTTIDocumentAndGetVersionNumber($lastTraderOrder->reference);
 
             $trader->issueMurabahaPurchaseOffer(
-                $lastTraderOrder->ttiId,
+                $lastTraderOrder->reference,
                 $versionNo
             );
 
@@ -65,7 +69,7 @@ class ProcessDmccClientWakalaCompletedOrder implements ShouldQueue
             $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);
 
             $mpoDocument = $trader->getDocumentByTypeAndTransaction(
-                $lastTraderOrder->ttiId,
+                $lastTraderOrder->reference,
                 'Murabaha Purchase Offer Document'
             );
 

@@ -6,7 +6,6 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Jobs\Dmcc\ProcessDmccContractSignedOrder;
 use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
-use App\Jobs\Dmcc\ProcessPtpDocumentRetrievedOrder;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Jobs\General\ProcessFinancingOrders;
 use App\Jobs\General\ProcessInProgressOrder;
@@ -54,17 +53,6 @@ class ProcessFinancingOrdersTest extends TestCase
         (new ProcessFinancingOrders)->handle();
 
         Bus::assertDispatched(ProcessDmccRespondedToPtpOrder::class);
-    }
-
-    public function test_process_financing_orders_ptp_document_retrieved_status_matching_process_ptp_document_retrieved_order_job()
-    {
-        $this->createOrder($this->company->id, $this->lender->id, ['status' => FinancingOrderStatus::PtpDocumentRetrieved]);
-
-        Bus::fake();
-
-        (new ProcessFinancingOrders)->handle();
-
-        Bus::assertDispatched(ProcessPtpDocumentRetrievedOrder::class);
     }
 
     public function test_process_financing_orders_responded_contract_signed_status_matching_process_dmcc_contract_signed_order_job()

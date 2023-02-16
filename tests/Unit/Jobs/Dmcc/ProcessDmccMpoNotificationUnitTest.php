@@ -11,15 +11,12 @@ use App\Jobs\Dmcc\ProcessDmccMpoNotification;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\Media;
-use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\User;
 use CodeDredd\Soap\Facades\Soap;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
@@ -47,50 +44,75 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
         [self::$company] = $this->createCompany();
         self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::ClientWakalaCompleted,
+            'is_verification_required' => true,
+            'status' => FinancingOrderStatus::PtpDocumentRetrieved,
         ]);
-        self::$traderOrder = TraderOrder::query()->create([
-            'financing_order_id' => self::$order->id,
-            'reference' => 1,
+
+        self::$traderOrder = self::$order->traderOrders()->create([
             'provider' => 'dmcc',
+            'reference' => '123456789',
             'status' => TraderOrderStatus::InProgress,
-            'amount' => 1,
-            'product' => 'product',
-            'quantity' => 1,
-            'warehouse' => 'warehouse',
-            'owner' => 'owner',
         ]);
+
         self::$notification = (object) [
             'notificationHeaderAndEntity' => (object) [
                 'notification' => 'Action Required for Issue Murabaha Purchase Offer',
                 'notificationEntityDetails' => (object) [
                     'notificationEntity' => [
                         (object) [
-                            'entityValue' => '1',
+                            'entityValue' => '123456789',
                         ],
                     ],
                 ],
             ],
         ];
+
         Soap::fake(function () {
             return Soap::response([
                 'successCode' => '0000',
-                'versionNo' => 1,
-                'getdocument' => [
+                'errorCode' => '',
+                'exchangeRate' => 'exchangeRate',
+                'inventoryDetails' => [
                     [
-                        'getDocumentByTypeResponse' => [
-                            ['document' => 'document'],
-                        ],
+                        'hsCodeDescription' => 'hsCodeDescription',
+                        'quantity' => 'quantity',
+                        'totalValue' => 'totalValue',
+                        'currency' => 'currency',
+                        'warehouseOrVaultId' => 'warehouseOrVaultId',
+                        'owner' => 'owner',
+                        'previousOwner' => 'previousOwner',
+                        'newOwner' => 'newOwner',
+                        'inventoryRecordId' => '12',
+                        'warrantPercentage' => 'warrantPercentage',
+                        'warehouseOrVaultOperatorId' => 'warehouseOrVaultOperatorId',
+                        'warrantNo' => 'warrantNo',
+                        'uom' => 'uom',
+                        'hsCode' => 'hsCode',
+                        'dateTimeOfPurchasingCommodity' => '01/01/2023 00:00 AM',
+                        'warehouseOrVaultEmirates' => 'warehouseOrVaultEmirates',
+                        'warehouseOrVaultCountry' => 'warehouseOrVaultCountry',
                     ],
                 ],
-            ]);
+            ], 200);
         });
     }
 
     public function test_process_dmcc_mpo_notification_with_dmcc_as_trader_will_success()
     {
         (new ProcessDmccMpoNotification(self::$notification))->handle();
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
+
+        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::CommodityPurchased));
+
+        $this->assertEquals(
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
+            self::$traderOrder->traderHistories()->first()->action
+        );
+
+        $this->assertDatabaseHas((new Media())->getTable(), [
+            'model_id' => self::$traderOrder->id,
+            'model_type' => (new TraderOrder)->getMorphClass(),
+            'collection_name' => TraderOrderMediaCollection::TransferOwnershipToLender,
+        ]);
     }
 
     public function test_process_dmcc_mpo_notification_with_fake_as_trader_order_will_success()
@@ -98,8 +120,21 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
         self::$traderOrder->update([
             'provider' => 'fake',
         ]);
+
         (new ProcessDmccMpoNotification(self::$notification))->handle();
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
+
+        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::CommodityPurchased));
+
+        $this->assertEquals(
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
+            self::$traderOrder->traderHistories()->first()->action
+        );
+
+        $this->assertDatabaseHas((new Media())->getTable(), [
+            'model_id' => self::$traderOrder->id,
+            'model_type' => (new TraderOrder)->getMorphClass(),
+            'collection_name' => TraderOrderMediaCollection::TransferOwnershipToLender,
+        ]);
     }
 
     public function test_process_dmcc_mpo_notification_with_not_supported_trader_will_fail()
@@ -108,50 +143,22 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
             'provider' => 'else',
         ]);
         (new ProcessDmccMpoNotification(self::$notification))->handle();
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::ClientWakalaCompleted));
+        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::PtpDocumentRetrieved));
     }
 
-    public function test_process_dmcc_mpo_notification_when_order_status_not_client_wakala_complete_fail()
+    public function test_process_dmcc_mpo_notification_when_order_status_not_ptp_document_retrieved_fail()
     {
-        self::$order->update([
-            'status' => FinancingOrderStatus::MurabhaOfferIssued,
-        ]);
-        (new ProcessDmccMpoNotification(self::$notification))->handle();
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
-    }
-
-    public function test_process_dmcc_mpo_notification_histories_created()
-    {
-        Storage::fake();
-        UploadedFile::fake();
-
-        $traderHistories = TraderHistory::query()->count();
-        $media = Media::query()->count();
-
-        (new ProcessDmccMpoNotification(self::$notification))->handle();
-
-        $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderHistories + 3);
-        $this->assertDatabaseHas((new TraderHistory())->getTable(), [
-            'trader_order_id' => self::$traderOrder->id,
-            'action' => FinancingOrderHistory::IssueMurabahaOffer,
-        ]);
-        $this->assertDatabaseHas((new TraderHistory())->getTable(), [
-            'trader_order_id' => self::$traderOrder->id,
-            'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
-        ]);
-        $this->assertDatabaseHas((new TraderHistory())->getTable(), [
-            'trader_order_id' => self::$traderOrder->id,
-            'action' => FinancingOrderHistory::AttachMpoDocument,
-        ]);
-
-        $this->assertDatabaseCount((new Media())->getTable(), $media + 1);
-
-        $this->assertDatabaseHas((new Media())->getTable(), [
-            'model_id' => self::$traderOrder->id,
-            'model_type' => (new TraderOrder)->getMorphClass(),
-            'collection_name' => TraderOrderMediaCollection::MurabahaPurchaseOrder,
-        ]);
-
-        $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::MurabahaPurchaseOrder));
+        foreach (FinancingOrderStatus::getValues() as $status) {
+            if (
+                $status == FinancingOrderStatus::PtpDocumentRetrieved ||
+                $status == FinancingOrderStatus::CommodityPurchased
+            ) {
+                continue;
+            }
+            //change the order status with invalid one
+            self::$order->update(['status' => FinancingOrderStatus::PendingApproval]);
+            (new ProcessDmccMpoNotification(self::$notification))->handle();
+            $this->assertTrue(self::$order->fresh()->status->isNot(FinancingOrderStatus::CommodityPurchased));
+        }
     }
 }
