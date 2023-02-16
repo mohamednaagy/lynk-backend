@@ -31,7 +31,8 @@ class UpdateUserRequest extends FormRequest
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'email' => [
-                'required', 'email',
+                'required',
+                'email:filter',
                 Rule::unique(User::class, 'email')
                     ->ignore($this->route('user')->id)
                     ->where('company_id', $this->route('user')->company_id),

@@ -57,7 +57,9 @@ class LenderController extends Controller
     public function index(
         GetPaginatedCompanies $getPaginatedCompanies
     ): JsonResponse {
-        return fractal($getPaginatedCompanies->handle(CompanyType::Lender), new CompanyTransformer())
+        $getPaginatedCompanies->setType(CompanyType::Lender);
+
+        return fractal($getPaginatedCompanies->handle(), new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',
@@ -119,6 +121,7 @@ class LenderController extends Controller
                 'company_cr',
                 'does_order_require_approval',
                 'order_cost',
+                'notifications_email',
             ])
             ->respond();
     }

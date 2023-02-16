@@ -17,7 +17,7 @@ class LenderTransactionController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::LenderTransactions, Action::Index, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::LenderTransactions, Action::Index, Action::Manage])
         )->only('index');
     }
 
@@ -27,8 +27,12 @@ class LenderTransactionController extends Controller
      */
     public function index(Company $lender): JsonResponse
     {
+        $transactions = $lender->transactions(WalletType::CompanyWallet)->paginate();
+
+        tap($transactions)->loadZatcaInvoicesMedia();
+
         return fractal(
-            $lender->transactions(WalletType::CompanyWallet)->paginate(),
+            $transactions,
             new TransactionTransformer()
         )
             ->parseIncludes([
@@ -36,6 +40,7 @@ class LenderTransactionController extends Controller
                 'date',
                 'description',
                 'amount',
+                'receipt_url',
             ])
             ->respond();
     }

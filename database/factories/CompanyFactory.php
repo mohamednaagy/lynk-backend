@@ -26,6 +26,7 @@ class CompanyFactory extends Factory
             'internal_status_comment' => $this->faker->randomLetter,
             'does_order_require_approval' => $this->faker->boolean,
             'order_cost' => $this->faker->randomDigitNotNull,
+            'notifications_email' => $this->faker->email,
         ];
     }
 }

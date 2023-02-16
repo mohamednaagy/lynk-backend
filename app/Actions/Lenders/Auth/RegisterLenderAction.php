@@ -39,6 +39,7 @@ class RegisterLenderAction implements RegisterLender
     {
         $company = $this->createCompany->handle([
             'name' => $data['company_name'],
+            'notifications_email' => $data['notifications_email'],
             'unique_name' => $data['company_unique_name'],
             'company_cr' => $data['company_cr'],
             'status' => $data['company_status'],
