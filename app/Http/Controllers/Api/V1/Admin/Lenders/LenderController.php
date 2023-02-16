@@ -26,27 +26,27 @@ class LenderController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::Lenders, Action::Index, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::Lenders, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::Lenders, Action::Show, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::Lenders, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::Lenders, Action::Create, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::Lenders, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::Lenders, Action::Edit, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::Lenders, Action::Edit, Action::Manage])
         )->only('update');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::Lenders, Action::Delete, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::Lenders, Action::Delete, Action::Manage])
         )->only('destroy');
     }
 
@@ -86,7 +86,14 @@ class LenderController extends Controller
             $data = $request->validated();
             $data['status'] = $getSettingsClassInstance->handle(Area::Lender)->default_company_status_created_by_operation;
 
-            $company = $createCompany->handle($data);
+            $company = $createCompany->handle(
+                array_merge($data, [
+                    'order_cost' => Money::parseByDecimal(
+                        $data['order_cost'],
+                        Money::getDefaultCurrency()
+                    ),
+                ])
+            );
 
             $company->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
 

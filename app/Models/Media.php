@@ -19,9 +19,4 @@ class Media extends baseMedia
             fn () => route('api.v1.media.download', ['media' => $this->uuid])
         );
     }
-
-    public function fileUrl(): string
-    {
-        return route('api.v1.media.download', ['media' => $this->uuid]);
-    }
 }
