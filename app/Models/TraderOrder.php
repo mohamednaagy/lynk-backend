@@ -134,8 +134,11 @@ class TraderOrder extends Model implements HasMedia
             return false;
         }
 
-        $stepIsNotCompleted = ! $this->checkOrderStepComplete($step);
+        return ! $this->checkOrderStepComplete($step);
+    }
 
-        return $stepIsNotCompleted;
+    public function scopeCompletedOrInProgress($query)
+    {
+        return $query->whereIn('trader_orders.status', [TraderOrderStatus::Completed, TraderOrderStatus::InProgress]);
     }
 }
