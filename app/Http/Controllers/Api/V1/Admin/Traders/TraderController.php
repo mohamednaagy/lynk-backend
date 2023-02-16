@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Admin\Traders;
 
 use App\Actions\Contracts\Companies\CreateCompany;
-use App\Actions\Contracts\Companies\GetPaginatedCompanies;
+use App\Actions\Contracts\Companies\GetPaginatedTraders;
 use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Actions\Contracts\Traders\LoadOrdersAmountSumAndOrdersCountOfTrader;
@@ -46,11 +46,11 @@ class TraderController extends Controller
         )->only('update');
     }
 
-    public function index(GetPaginatedCompanies $getPaginatedCompanies)
+    public function index(GetPaginatedTraders $getPaginatedTraders)
     {
-        $getPaginatedCompanies->setType(CompanyType::Trader);
+        $traders = $getPaginatedTraders->handle();
 
-        return fractal($getPaginatedCompanies->handle(), new CompanyTransformer())
+        return fractal($traders, new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',

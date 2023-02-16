@@ -10,6 +10,7 @@ use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
 use App\Transformers\CompanyTransformer;
+use Cknow\Money\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Tests\TestCase;
@@ -22,9 +23,15 @@ class TraderCompanyControllerShowTest extends TestCase
 
     private static User $superAdmin;
 
-    private static Company $company;
+    private static string $endpoint;
+
+    private static Company $trader;
+
+    private static Company $lender;
 
     private static FinancingOrder $order;
+
+    private static FinancingOrder $anotherOrder;
 
     private static TraderOrder $traderOrder;
 
@@ -35,17 +42,54 @@ class TraderCompanyControllerShowTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company] = $this->createTraderCompany(2000, ['driver' => 'fake']);
+        [self::$lender] = $this->createLenderCompany(2000);
+        [self::$trader] = $this->createTraderCompany(2000, ['driver' => 'fake']);
 
         self::$superAdmin = $this->createSuperAdminUser();
 
-        self::$order = $this->createOrder(self::$company->id, self::$superAdmin->id);
+        self::$order = $this->createOrder(
+            self::$lender->id,
+            self::$superAdmin->id,
+            ['amount' => Money::parseByDecimal(1000.00, Money::getDefaultCurrency())]
+        );
+
+        self::$anotherOrder = $this->createOrder(
+            self::$lender->id,
+            self::$superAdmin->id,
+            ['amount' => Money::parseByDecimal(1000.00, Money::getDefaultCurrency())]
+        );
+
+        self::$anotherOrder->traderOrders()->create([
+            'provider' => 'dmcc',
+            'status' => TraderOrderStatus::InProgress,
+            'reference' => 2303,
+        ]);
 
         self::$traderOrder = self::$order->traderOrders()->create([
             'provider' => 'fake',
             'status' => TraderOrderStatus::InProgress,
             'reference' => 123,
         ]);
+
+        self::$traderOrder = self::$order->traderOrders()->create([
+            'provider' => 'fake',
+            'status' => TraderOrderStatus::Completed,
+            'reference' => 123,
+        ]);
+
+        self::$order->traderOrders()->create([
+            'provider' => 'fake',
+            'status' => TraderOrderStatus::Cancelled,
+            'reference' => 124,
+        ]);
+
+        self::$order->traderOrders()->create([
+            'provider' => 'fake',
+            'status' => TraderOrderStatus::Expired,
+            'reference' => 125,
+        ]);
+
+        self::$endpoint = 'api/v1/admin/traders/'.self::$trader->id;
     }
 
     /**
@@ -53,7 +97,7 @@ class TraderCompanyControllerShowTest extends TestCase
      */
     public function test_trader_company_controller_show_un_auth_user_cant_show_company(): void
     {
-        $this->getJson('api/v1/admin/traders/'.self::$company->id)
+        $this->getJson(self::$endpoint)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -63,7 +107,7 @@ class TraderCompanyControllerShowTest extends TestCase
     public function test_trader_company_controller_show_successful()
     {
         $this->actingAs(self::$superAdmin)
-            ->getJson('api/v1/admin/traders/'.self::$company->id)
+            ->getJson(self::$endpoint)
             ->assertStatus(Response::HTTP_OK)
             ->assertOk();
     }
@@ -72,28 +116,32 @@ class TraderCompanyControllerShowTest extends TestCase
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
-                ->getJson('api/v1/admin/traders/'.self::$company->id);
+                ->getJson(self::$endpoint);
         });
     }
 
     public function test_trader_company_controller_show_succeed()
     {
-        $loadRelationsForTrader = app(LoadOrdersAmountSumAndOrdersCountOfTrader::class)->handle(self::$company);
+        $loadRelationsForTrader = app(LoadOrdersAmountSumAndOrdersCountOfTrader::class)->handle(self::$trader);
 
-        $this->actingAs(self::$superAdmin)
-            ->getJson('api/v1/admin/traders/'.self::$company->id)
-            ->assertExactJson(
-                fractal($loadRelationsForTrader, new CompanyTransformer())
-                    ->parseIncludes([
-                        'id',
-                        'name',
-                        'unique_name',
-                        'driver',
-                        'orders_count',
-                        'orders_sum_amount',
-                    ])
-                    ->respond()
-                    ->getData(true)
-            );
+        $response = $this->actingAs(self::$superAdmin)
+            ->getJson(self::$endpoint);
+
+        $response->assertExactJson(
+            fractal($loadRelationsForTrader, new CompanyTransformer())
+                ->parseIncludes([
+                    'id',
+                    'name',
+                    'unique_name',
+                    'driver',
+                    'orders_count',
+                    'orders_sum_amount',
+                ])
+                ->respond()
+                ->getData(true)
+        );
+
+        $response->assertJsonPath('data.orders_count', 1);
+        $response->assertJsonPath('data.orders_sum_amount', '1,000.00');
     }
 }

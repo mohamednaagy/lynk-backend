@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Models\Company;
+use Cknow\Money\Money;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -94,6 +95,10 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeOrdersSumAmount(Company $company): Primitive
     {
-        return $this->primitive($company->traderOrders->sum('order_sum_amount'));
+        $amount = (new Money($company->orders_sum_amount, Money::getDefaultCurrency()))->formatByDecimal();
+
+        return $this->primitive(
+            number_format($amount, 2)
+        );
     }
 }

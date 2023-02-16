@@ -58,8 +58,8 @@ class TraderOrder extends Model
         return ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions));
     }
 
-    public function scopeNotCancelled($query)
+    public function scopeCompletedOrInProgress($query)
     {
-        return $query->where('status', '!=', TraderOrderStatus::Cancelled);
+        return $query->whereIn('trader_orders.status', [TraderOrderStatus::Completed, TraderOrderStatus::InProgress]);
     }
 }
