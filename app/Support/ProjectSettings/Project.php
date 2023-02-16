@@ -71,7 +71,7 @@ class Project
      */
     public function getVatRate(): float
     {
-        return $this->vatRate;
+        return $this->vatRate ?? 0.0;
     }
 
     /**

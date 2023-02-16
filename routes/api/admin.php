@@ -40,6 +40,7 @@ use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
 use App\Http\Controllers\Api\V1\Admin\Traders\ResendInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
+use App\Http\Controllers\Api\V1\Admin\Traders\UpdateTraderStatus;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
 
@@ -108,13 +109,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             });
         });
 
-        Route::prefix('orders/{order}')->group(function () {
-            Route::prefix('/trader-orders/{trader_order}')->group(function () {
-                Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
-                Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
-            });
-        });
-
         Route::prefix('traders')->group(function () {
             Route::get('/{trader}/orders/{order}', [TraderOrderController::class, 'show']);
             Route::get('{trader}/orders', [TraderOrderController::class, 'index']);
@@ -125,10 +119,10 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::prefix('traders')->group(function () {
             Route::post('{trader}/users/{user}/resend-invitation', ResendInvitationToUser::class);
+            Route::put('/{trader}/status', UpdateTraderStatus::class);
         });
 
         Route::apiResource('traders.users', TraderUserController::class);
-
         Route::apiResource('traders', TraderController::class)
             ->only(['index', 'store', 'show', 'update']);
 

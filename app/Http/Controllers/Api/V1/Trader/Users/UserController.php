@@ -43,6 +43,11 @@ class UserController extends Controller
             'permission:'.
             perm(Area::Trader, [Subject::TraderUsers, Action::Edit, Action::Manage])
         )->only('update');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::Trader, [Subject::TraderUsers, Action::Edit, Action::Manage])
+        )->only('destroy');
     }
 
     /**
@@ -156,11 +161,13 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  User  $user
+     * @return JsonResponse
      */
-    public function destroy($id)
+    public function destroy(User $user): JsonResponse
     {
-        //
+        $user->delete();
+
+        return $this->successResponse();
     }
 }

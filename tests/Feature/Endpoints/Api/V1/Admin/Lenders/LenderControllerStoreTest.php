@@ -52,6 +52,7 @@ class LenderControllerStoreTest extends TestCase
 
         self::$lenderDetails = [
             'name' => 'testCompany',
+            'notifications_email' => 'notifications_email@email.com',
             'unique_name' => 'companyUniqueName',
             'company_cr' => '1234567891',
             'order_cost' => 20,
@@ -101,10 +102,12 @@ class LenderControllerStoreTest extends TestCase
             ->default_company_status_created_by_operation;
         $hasWallet = $lender->getWallets(WalletType::CompanyWallet)->count() > 0;
         $hasOrderCost = $lender->order_cost->getAmount() > 0;
+        $isOrderCostCorrect = ($lender->order_cost->getAmount() === (string) (self::$lenderDetails['order_cost'] * 100));
 
         $this->assertEquals($defaultStatus, $lender->status->value);
         $this->assertTrue($hasWallet);
         $this->assertTrue($hasOrderCost);
+        $this->assertTrue($isOrderCostCorrect);
         $this->assertNotNull($lender->webhook_secret_key);
     }
 
@@ -137,10 +140,12 @@ class LenderControllerStoreTest extends TestCase
             ->default_company_status_created_by_operation;
         $hasWallet = $lender->getWallets(WalletType::CompanyWallet)->count() > 0;
         $hasOrderCost = $lender->order_cost->getAmount() > 0;
+        $isOrderCostCorrect = ($lender->order_cost->getAmount() === (string) (self::$lenderDetails['order_cost'] * 100));
 
         $this->assertEquals($defaultStatus, $lender->status->value);
         $this->assertTrue($hasWallet);
         $this->assertTrue($hasOrderCost);
+        $this->assertTrue($isOrderCostCorrect);
         $this->assertNotNull($lender->webhook_secret_key);
     }
 

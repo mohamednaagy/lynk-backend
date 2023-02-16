@@ -74,6 +74,7 @@ class LenderOrderTransactionControllerTest extends TestCase
                     'date',
                     'description',
                     'amount',
+                    'receipt_url',
                 ])->respond()->getData(true)
             );
     }
@@ -95,6 +96,7 @@ class LenderOrderTransactionControllerTest extends TestCase
                     'date',
                     'description',
                     'amount',
+                    'receipt_url',
                 ])->respond()->getData(true)
             );
     }
