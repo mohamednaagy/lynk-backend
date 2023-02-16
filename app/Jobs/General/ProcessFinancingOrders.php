@@ -3,6 +3,7 @@
 namespace App\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
+use App\Jobs\Dmcc\ProcessDmccClientWakalaCompletedOrder;
 use App\Jobs\Dmcc\ProcessDmccContractSignedOrder;
 use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
 use App\Jobs\Dmcc\ProcessPtpDocumentRetrievedOrder;
@@ -38,6 +39,7 @@ class ProcessFinancingOrders implements ShouldQueue
                         FinancingOrderStatus::Approved => ProcessInProgressOrder::dispatch($order->id),
                         FinancingOrderStatus::RespondedToPtp => ProcessDmccRespondedToPtpOrder::dispatch($order->id),
                         FinancingOrderStatus::PtpDocumentRetrieved => ProcessPtpDocumentRetrievedOrder::dispatch($order->id),
+                        FinancingOrderStatus::ClientWakalaCompleted => ProcessDmccClientWakalaCompletedOrder::dispatch($order->id),
                         FinancingOrderStatus::ContractSigned => ProcessDmccContractSignedOrder::dispatch($order->id),
                         FinancingOrderStatus::CommoditySoldToCustomer => ProcessAskClientForWakala::dispatch($order->id),
                         default => null
