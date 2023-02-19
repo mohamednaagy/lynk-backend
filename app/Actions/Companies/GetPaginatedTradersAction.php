@@ -12,7 +12,7 @@ class GetPaginatedTradersAction implements GetPaginatedTraders
     public function handle(): LengthAwarePaginator
     {
         return Company::query()
-            ->traderType(CompanyType::Trader)
+            ->type(CompanyType::Trader)
             ->selectTraderOrdersCountBySubquery()
             ->addSelect('companies.*')
             ->paginate();
