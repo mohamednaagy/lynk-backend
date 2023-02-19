@@ -10,7 +10,6 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabhaCompleteDocumentRequest;
-use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -29,7 +28,7 @@ class UpdateMurabhaCompleteDocument extends Controller
      *
      * @param  UpdateMurabhaCompleteDocumentRequest  $request
      * @param  int  $order
-     * @param  TraderOrder  $traderOrder
+     * @param  int  $traderOrder
      * @return JsonResponse
      *
      * @throws \Throwable
