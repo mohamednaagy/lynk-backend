@@ -103,7 +103,7 @@ class GetMurabahaPurchaseOfferTest extends TestCase
     /**
      * @return void
      */
-    public function test_auth_user_cant_get_murabaha_purchase_offer(): void
+    public function test_auth_user_cant_get_murabaha_purchase_offer_with_invalid_permissions(): void
     {
         $this->assertStatusCodeExceptForPermissions(Response::HTTP_FORBIDDEN,
             [

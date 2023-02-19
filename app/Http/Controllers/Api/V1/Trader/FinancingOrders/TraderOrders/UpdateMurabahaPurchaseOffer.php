@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders;
 
 use App\Actions\Contracts\Orders\GetOrderAndTraderOrderLockedForUpdate;
-use App\Actions\Contracts\Orders\TraderOrders\MurabahaPurchaseOffer\HandleMurabahaPurchaseOffer;
+use App\Actions\Contracts\Orders\TraderOrders\MurabahaPurchaseOffer\HandleIssuingMurabahaPurchaseOffer;
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
+use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Trader\Orders\TraderOrders\UpdateMurabahaPurchaseOfferRequest;
 use App\Models\Company;
@@ -36,11 +36,11 @@ class UpdateMurabahaPurchaseOffer extends Controller
         return DB::transaction(function () use ($request, $order, $traderOrder) {
             [$order, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
 
-            $traderOrder->ensureCanAccessStep(
-                FinancingOrderStatus::MurabhaOfferIssued
-            );
+            if (! $traderOrder->client_wakala_accepted_at) {
+                throw new OrderStatusDoesNotFollowSequenceException();
+            }
 
-            app(HandleMurabahaPurchaseOffer::class)->handle($request, $order, $traderOrder);
+            app(HandleIssuingMurabahaPurchaseOffer::class)->handle($request, $order, $traderOrder);
 
             return $this->successResponse();
         });

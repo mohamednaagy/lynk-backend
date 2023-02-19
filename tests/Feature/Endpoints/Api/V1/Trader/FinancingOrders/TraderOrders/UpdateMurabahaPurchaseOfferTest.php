@@ -48,6 +48,7 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
             'provider' => 'fake',
             'status' => TraderOrderStatus::InProgress,
             'reference' => 123,
+            'client_wakala_accepted_at' => now(),
         ]);
 
         self::$apiUrl = 'api/v1/trader/orders/'.self::$order->id.'/trader-orders/'.self::$traderOrder->id.'/murabaha-purchase-offer';
@@ -108,7 +109,7 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
     }
 
-    public function test_other_users_areas_can_not_update_process_murabaha_purchase_offer()
+    public function test_other_users_areas_can_not_update_process_murabaha_purchase_offer_with_invalid_permissions()
     {
         $this->assertStatusCodeExceptForPermissions(Response::HTTP_FORBIDDEN,
             [

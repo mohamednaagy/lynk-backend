@@ -2,7 +2,7 @@
 
 namespace App\Actions\Orders\TraderOrders\MurabahaPurchaseOffer;
 
-use App\Actions\Contracts\Orders\TraderOrders\MurabahaPurchaseOffer\HandleMurabahaPurchaseOffer;
+use App\Actions\Contracts\Orders\TraderOrders\MurabahaPurchaseOffer\HandleIssuingMurabahaPurchaseOffer;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -13,7 +13,7 @@ use App\Support\Traders\TraderHelperTrait;
 use Exception;
 use Illuminate\Http\Request;
 
-class HandleMurabahaPurchaseOfferAction implements HandleMurabahaPurchaseOffer
+class HandleIssuingMurabahaPurchaseOfferAction implements HandleIssuingMurabahaPurchaseOffer
 {
     use TraderHelperTrait;
 
@@ -28,7 +28,7 @@ class HandleMurabahaPurchaseOfferAction implements HandleMurabahaPurchaseOffer
     public function handle(Request $request, FinancingOrder $order, TraderOrder $traderOrder): void
     {
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
-            FinancingOrderStatus::MurabahaSaleCompleted
+            FinancingOrderStatus::MurabhaOfferIssued
         );
 
         $trader = Trader::driver($traderOrder->provider);
