@@ -22,8 +22,17 @@ class SendEmailVerificationRequest extends FormRequest
 
     public function rules(): array
     {
+        $emailUniqueRule = Rule::unique(User::class, 'email')
+            ->ignore($this->user()->id);
+
+        if ($this->user()->company_id !== null) {
+            $emailUniqueRule->where('company_id', $this->user()->company_id);
+        } else {
+            $emailUniqueRule->whereNull('company_id');
+        }
+
         return [
-            'email' => ['sometimes', 'email', Rule::unique(User::class, 'email')->ignore($this->user()->id)],
+            'email' => ['sometimes', 'email', $emailUniqueRule],
             'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
         ];
     }
