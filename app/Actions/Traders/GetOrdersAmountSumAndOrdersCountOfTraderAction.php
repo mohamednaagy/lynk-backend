@@ -23,8 +23,8 @@ class GetOrdersAmountSumAndOrdersCountOfTraderAction implements GetOrdersAmountS
             ->get();
 
         return [
-            'orders_count' => $financingOrdersOfTraders->count(),
-            'orders_sum_amount' => $financingOrdersOfTraders->sum('amount'),
+            'ordersCount' => $financingOrdersOfTraders->count(),
+            'ordersSumAmount' => $financingOrdersOfTraders->sum('amount'),
         ];
     }
 }

@@ -129,8 +129,8 @@ class TraderCompanyControllerShowTest extends TestCase
     public function test_trader_company_controller_show_succeed()
     {
         $ordersAmountSumAndOrdersCountOfTrader = app(GetOrdersAmountSumAndOrdersCountOfTrader::class)->handle(self::$trader);
-        self::$trader->setAttribute('orders_count', $ordersAmountSumAndOrdersCountOfTrader['orders_count']);
-        self::$trader->setAttribute('orders_sum_amount', $ordersAmountSumAndOrdersCountOfTrader['orders_sum_amount']);
+        self::$trader->setAttribute('orders_count', $ordersAmountSumAndOrdersCountOfTrader['ordersCount']);
+        self::$trader->setAttribute('orders_sum_amount', $ordersAmountSumAndOrdersCountOfTrader['ordersSumAmount']);
 
         $response = $this->actingAs(self::$superAdmin)
             ->getJson(self::$endpoint);
