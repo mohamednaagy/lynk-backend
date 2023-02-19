@@ -7,7 +7,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
-use App\Jobs\Dmcc\ProcessDmccMpoNotification;
+use App\Jobs\Dmcc\ProcessDmccPtpDocumentRetrievedOrder;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\Media;
@@ -20,7 +20,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class ProcessDmccMpoNotificationUnitTest extends TestCase
+class ProcessDmccPtpDocumentRetrievedOrderTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -97,9 +97,9 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
         });
     }
 
-    public function test_process_dmcc_mpo_notification_with_dmcc_as_trader_will_success()
+    public function test_process_dmcc_ptp_document_retrieved_with_dmcc_as_trader_will_success()
     {
-        (new ProcessDmccMpoNotification(self::$notification))->handle();
+        (new ProcessDmccPtpDocumentRetrievedOrder(self::$notification))->handle();
 
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::CommodityPurchased));
 
@@ -115,13 +115,13 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
         ]);
     }
 
-    public function test_process_dmcc_mpo_notification_with_fake_as_trader_order_will_success()
+    public function test_process_dmcc_ptp_document_retrieved_with_fake_as_trader_order_will_success()
     {
         self::$traderOrder->update([
             'provider' => 'fake',
         ]);
 
-        (new ProcessDmccMpoNotification(self::$notification))->handle();
+        (new ProcessDmccPtpDocumentRetrievedOrder(self::$notification))->handle();
 
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::CommodityPurchased));
 
@@ -137,16 +137,16 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
         ]);
     }
 
-    public function test_process_dmcc_mpo_notification_with_not_supported_trader_will_fail()
+    public function test_process_dmcc_ptp_document_retrieved_with_not_supported_trader_will_fail()
     {
         self::$traderOrder->update([
             'provider' => 'else',
         ]);
-        (new ProcessDmccMpoNotification(self::$notification))->handle();
+        (new ProcessDmccPtpDocumentRetrievedOrder(self::$notification))->handle();
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::PtpDocumentRetrieved));
     }
 
-    public function test_process_dmcc_mpo_notification_when_order_status_not_ptp_document_retrieved_fail()
+    public function test_process_dmcc_ptp_document_retrieved_when_order_status_not_ptp_document_retrieved_fail()
     {
         foreach (FinancingOrderStatus::getValues() as $status) {
             if (
@@ -157,7 +157,7 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
             }
             //change the order status with invalid one
             self::$order->update(['status' => FinancingOrderStatus::PendingApproval]);
-            (new ProcessDmccMpoNotification(self::$notification))->handle();
+            (new ProcessDmccPtpDocumentRetrievedOrder(self::$notification))->handle();
             $this->assertTrue(self::$order->fresh()->status->isNot(FinancingOrderStatus::CommodityPurchased));
         }
     }

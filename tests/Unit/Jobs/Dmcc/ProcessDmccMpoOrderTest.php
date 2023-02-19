@@ -7,7 +7,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
-use App\Jobs\Dmcc\ProcessDmccClientWakalaCompletedOrder;
+use App\Jobs\Dmcc\ProcessDmccMpoOrder;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\Media;
@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class ProcessDmccClientWakalaCompletedOrderTest extends TestCase
+class ProcessDmccMpoOrderTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -74,40 +74,40 @@ class ProcessDmccClientWakalaCompletedOrderTest extends TestCase
         });
     }
 
-    public function test_process_dmcc_client_wakala_completed_with_dmcc_as_trader_will_success()
+    public function test_process_dmcc_mpo_with_dmcc_as_trader_will_success()
     {
-        (new ProcessDmccClientWakalaCompletedOrder(self::$order->id))->handle();
+        (new ProcessDmccMpoOrder(self::$order->id))->handle();
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
     }
 
-    public function test_process_dmcc_client_wakala_completed_with_fake_as_trader_order_will_success()
+    public function test_process_dmcc_mpo_with_fake_as_trader_order_will_success()
     {
         self::$traderOrder->update([
             'provider' => 'fake',
         ]);
-        (new ProcessDmccClientWakalaCompletedOrder(self::$order->id))->handle();
+        (new ProcessDmccMpoOrder(self::$order->id))->handle();
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
     }
 
-    public function test_process_dmcc_client_wakala_completed_with_not_supported_trader_will_fail()
+    public function test_process_dmcc_mpo_with_not_supported_trader_will_fail()
     {
         self::$traderOrder->update([
             'provider' => 'else',
         ]);
-        (new ProcessDmccClientWakalaCompletedOrder(self::$order->id))->handle();
+        (new ProcessDmccMpoOrder(self::$order->id))->handle();
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::ClientWakalaCompleted));
     }
 
-    public function test_process_dmcc_client_wakala_completed_when_order_status_not_client_wakala_complete_fail()
+    public function test_process_dmcc_mpo_when_order_status_not_client_wakala_complete_fail()
     {
         self::$order->update([
             'status' => FinancingOrderStatus::MurabhaOfferIssued,
         ]);
-        (new ProcessDmccClientWakalaCompletedOrder(self::$order->id))->handle();
+        (new ProcessDmccMpoOrder(self::$order->id))->handle();
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
     }
 
-    public function test_process_dmcc_client_wakala_completed_histories_created()
+    public function test_process_dmcc_mpo_histories_created()
     {
         Storage::fake();
         UploadedFile::fake();
@@ -115,7 +115,7 @@ class ProcessDmccClientWakalaCompletedOrderTest extends TestCase
         $traderHistories = TraderHistory::query()->count();
         $media = Media::query()->count();
 
-        (new ProcessDmccClientWakalaCompletedOrder(self::$order->id))->handle();
+        (new ProcessDmccMpoOrder(self::$order->id))->handle();
 
         $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderHistories + 3);
         $this->assertDatabaseHas((new TraderHistory())->getTable(), [

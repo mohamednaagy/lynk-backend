@@ -68,16 +68,6 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
             self::CommoditySoldToCustomer,
             self::WaitingPurchasingCommodity,
         ],
-        self::Expired => [
-            self::RespondedToPtp,
-            self::PendingApproval,
-            self::CommodityPurchased,
-            self::WaitingClientWakala,
-            self::PtpDocumentRetrieved,
-            self::ClientWakalaCompleted,
-            self::CommoditySoldToCustomer,
-            self::WaitingPurchasingCommodity,
-        ],
         self::ClientWakalaCompleted => [
             self::WaitingClientWakala,
             self::CommoditySoldToCustomer,

@@ -58,10 +58,6 @@ class ProcessDmccExpiredOrderNotification implements ShouldQueue
 
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::Expired)) {
-                return;
-            }
-
             $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::Expired);
 
             $trader->createTraderOrderHistory(

@@ -43,7 +43,7 @@ class ProcessDmccNotifications implements ShouldQueue
                     ==
                     'Action Required for Issue Murabaha Purchase Offer'
                 ) {
-                    ProcessDmccMpoNotification::dispatch($notification);
+                    ProcessDmccPtpDocumentRetrievedOrder::dispatch($notification);
                 }
             } catch (\Throwable $th) {
                 //throw $th;

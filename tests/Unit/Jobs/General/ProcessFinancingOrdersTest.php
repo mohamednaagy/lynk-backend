@@ -4,8 +4,8 @@ namespace Tests\Unit\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
-use App\Jobs\Dmcc\ProcessDmccClientWakalaCompletedOrder;
 use App\Jobs\Dmcc\ProcessDmccContractSignedOrder;
+use App\Jobs\Dmcc\ProcessDmccMpoOrder;
 use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Jobs\General\ProcessFinancingOrders;
@@ -97,6 +97,6 @@ class ProcessFinancingOrdersTest extends TestCase
 
         (new ProcessFinancingOrders)->handle();
 
-        Bus::assertDispatched(ProcessDmccClientWakalaCompletedOrder::class);
+        Bus::assertDispatched(ProcessDmccMpoOrder::class);
     }
 }
