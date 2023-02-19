@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Traders;
 
-use App\Actions\Contracts\Traders\LoadOrdersAmountSumAndOrdersCountOfTrader;
+use App\Actions\Contracts\Traders\GetOrdersAmountSumAndOrdersCountOfTrader;
 use App\Enums\Area;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
@@ -65,6 +65,12 @@ class TraderCompanyControllerShowTest extends TestCase
             'reference' => 2303,
         ]);
 
+        self::$anotherOrder->traderOrders()->create([
+            'provider' => 'fake',
+            'status' => TraderOrderStatus::InProgress,
+            'reference' => 2303,
+        ]);
+
         self::$traderOrder = self::$order->traderOrders()->create([
             'provider' => 'fake',
             'status' => TraderOrderStatus::InProgress,
@@ -122,26 +128,36 @@ class TraderCompanyControllerShowTest extends TestCase
 
     public function test_trader_company_controller_show_succeed()
     {
-        $loadRelationsForTrader = app(LoadOrdersAmountSumAndOrdersCountOfTrader::class)->handle(self::$trader);
+        $ordersAmountSumAndOrdersCountOfTrader = app(GetOrdersAmountSumAndOrdersCountOfTrader::class)->handle(self::$trader);
 
         $response = $this->actingAs(self::$superAdmin)
             ->getJson(self::$endpoint);
 
         $response->assertExactJson(
-            fractal($loadRelationsForTrader, new CompanyTransformer())
+            fractal(self::$trader, new CompanyTransformer())
                 ->parseIncludes([
                     'id',
                     'name',
                     'unique_name',
                     'driver',
-                    'orders_count',
-                    'orders_sum_amount',
+                ])
+                ->addMeta([
+                    'orders_count' => $ordersAmountSumAndOrdersCountOfTrader['orders_count'],
+                    'orders_sum_amount' => $ordersAmountSumAndOrdersCountOfTrader['orders_sum_amount'],
                 ])
                 ->respond()
                 ->getData(true)
         );
 
-        $response->assertJsonPath('data.orders_count', 1);
-        $response->assertJsonPath('data.orders_sum_amount', '1,000.00');
+        $totalAmount = (new Money(
+            self::$order->amount->add(self::$anotherOrder->amount),
+            Money::getDefaultCurrency()
+        ))
+            ->formatByDecimal();
+
+        $ordersSumAmountFormatted = number_format($totalAmount, 2);
+
+        $response->assertJsonPath('meta.orders_count', 2);
+        $response->assertJsonPath('meta.orders_sum_amount', $ordersSumAmountFormatted);
     }
 }

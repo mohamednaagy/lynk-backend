@@ -6,8 +6,8 @@ use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\Companies\GetPaginatedTraders;
 use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Actions\Contracts\GetSettingsClassInstance;
-use App\Actions\Contracts\Traders\LoadOrdersAmountSumAndOrdersCountOfTrader;
 use App\Actions\Contracts\Wallets\CreateWallet;
+use App\Actions\Traders\GetOrdersAmountSumAndOrdersCountOfTraderAction;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\CompanyType;
@@ -95,9 +95,9 @@ class TraderController extends Controller
 
     public function show(
         Company $trader,
-        LoadOrdersAmountSumAndOrdersCountOfTrader $loadOrdersAmountSumAndOrdersCountOfTrader
+        GetOrdersAmountSumAndOrdersCountOfTraderAction $loadOrdersAmountSumAndOrdersCountOfTrader
     ) {
-        $trader = $loadOrdersAmountSumAndOrdersCountOfTrader->handle($trader);
+        $ordersAmountSumAndOrdersCountOfTrader = $loadOrdersAmountSumAndOrdersCountOfTrader->handle($trader);
 
         return fractal($trader, new CompanyTransformer())
             ->parseIncludes([
@@ -105,8 +105,10 @@ class TraderController extends Controller
                 'name',
                 'unique_name',
                 'driver',
-                'orders_count',
-                'orders_sum_amount',
+            ])
+            ->addMeta([
+                'orders_count' => $ordersAmountSumAndOrdersCountOfTrader['orders_count'],
+                'orders_sum_amount' => $ordersAmountSumAndOrdersCountOfTrader['orders_sum_amount'],
             ])
             ->respond();
     }
