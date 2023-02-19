@@ -98,6 +98,8 @@ class TraderController extends Controller
         GetOrdersAmountSumAndOrdersCountOfTraderAction $loadOrdersAmountSumAndOrdersCountOfTrader
     ) {
         $ordersAmountSumAndOrdersCountOfTrader = $loadOrdersAmountSumAndOrdersCountOfTrader->handle($trader);
+        $trader->setAttribute('orders_count', $ordersAmountSumAndOrdersCountOfTrader['orders_count']);
+        $trader->setAttribute('orders_sum_amount', $ordersAmountSumAndOrdersCountOfTrader['orders_sum_amount']);
 
         return fractal($trader, new CompanyTransformer())
             ->parseIncludes([
@@ -105,10 +107,8 @@ class TraderController extends Controller
                 'name',
                 'unique_name',
                 'driver',
-            ])
-            ->addMeta([
-                'orders_count' => $ordersAmountSumAndOrdersCountOfTrader['orders_count'],
-                'orders_sum_amount' => $ordersAmountSumAndOrdersCountOfTrader['orders_sum_amount'],
+                'orders_count',
+                'orders_sum_amount',
             ])
             ->respond();
     }

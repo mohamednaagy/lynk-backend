@@ -5,7 +5,6 @@ namespace App\Actions\Traders;
 use App\Actions\Contracts\Traders\GetOrdersAmountSumAndOrdersCountOfTrader;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
-use App\Support\Money\Money;
 
 class GetOrdersAmountSumAndOrdersCountOfTraderAction implements GetOrdersAmountSumAndOrdersCountOfTrader
 {
@@ -23,14 +22,9 @@ class GetOrdersAmountSumAndOrdersCountOfTraderAction implements GetOrdersAmountS
             ->groupBy('financing_order_id')
             ->get();
 
-        $totalAmount = (new Money($financingOrdersOfTraders->sum('amount'), Money::getDefaultCurrency()))
-            ->formatByDecimal();
-
-        $totalAmountFormatted = number_format($totalAmount, 2);
-
         return [
             'orders_count' => $financingOrdersOfTraders->count(),
-            'orders_sum_amount' => $totalAmountFormatted,
+            'orders_sum_amount' => $financingOrdersOfTraders->sum('amount'),
         ];
     }
 }

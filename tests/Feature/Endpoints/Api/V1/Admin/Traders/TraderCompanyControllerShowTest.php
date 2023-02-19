@@ -129,6 +129,8 @@ class TraderCompanyControllerShowTest extends TestCase
     public function test_trader_company_controller_show_succeed()
     {
         $ordersAmountSumAndOrdersCountOfTrader = app(GetOrdersAmountSumAndOrdersCountOfTrader::class)->handle(self::$trader);
+        self::$trader->setAttribute('orders_count', $ordersAmountSumAndOrdersCountOfTrader['orders_count']);
+        self::$trader->setAttribute('orders_sum_amount', $ordersAmountSumAndOrdersCountOfTrader['orders_sum_amount']);
 
         $response = $this->actingAs(self::$superAdmin)
             ->getJson(self::$endpoint);
@@ -140,10 +142,8 @@ class TraderCompanyControllerShowTest extends TestCase
                     'name',
                     'unique_name',
                     'driver',
-                ])
-                ->addMeta([
-                    'orders_count' => $ordersAmountSumAndOrdersCountOfTrader['orders_count'],
-                    'orders_sum_amount' => $ordersAmountSumAndOrdersCountOfTrader['orders_sum_amount'],
+                    'orders_count',
+                    'orders_sum_amount',
                 ])
                 ->respond()
                 ->getData(true)
@@ -157,7 +157,7 @@ class TraderCompanyControllerShowTest extends TestCase
 
         $ordersSumAmountFormatted = number_format($totalAmount, 2);
 
-        $response->assertJsonPath('meta.orders_count', 2);
-        $response->assertJsonPath('meta.orders_sum_amount', $ordersSumAmountFormatted);
+        $response->assertJsonPath('data.orders_count', 2);
+        $response->assertJsonPath('data.orders_sum_amount', $ordersSumAmountFormatted);
     }
 }
