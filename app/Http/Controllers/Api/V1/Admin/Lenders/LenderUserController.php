@@ -85,7 +85,7 @@ class LenderUserController extends Controller
      */
     public function show(Request $request, Company $lender, User $user): JsonResponse
     {
-        $this->checkIfUserDoesNotHaveLenderApiUserRole($user);
+        $this->ensureUserHasRoleInLenderAreaExceptApiUserRole($user);
 
         return fractal($user, new UserTransformer(Area::Lender))
             ->parseIncludes([
@@ -169,21 +169,13 @@ class LenderUserController extends Controller
      */
     public function destroy(Company $lender, User $user): JsonResponse
     {
-        $this->checkIfUserDoesNotHaveLenderAreaRole($user);
-        $this->checkIfUserDoesNotHaveLenderApiUserRole($user);
+        $this->ensureUserHasRoleInLenderAreaExceptApiUserRole($user);
         $user->delete();
 
         return $this->successResponse();
     }
 
-    public function checkIfUserDoesNotHaveLenderAreaRole(User $user)
-    {
-        if (! $user->hasRole(Area::roles(Area::Lender))) {
-            throw new AuthorizationException();
-        }
-    }
-
-    public function checkIfUserDoesNotHaveLenderApiUserRole(User $user)
+    public function ensureUserHasRoleInLenderAreaExceptApiUserRole(User $user)
     {
         if (! $user->hasAnyRole([
             Role::LenderAdmin,
