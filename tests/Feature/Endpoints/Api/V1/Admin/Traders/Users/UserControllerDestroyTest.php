@@ -2,7 +2,10 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Traders\Users;
 
+use App\Enums\Action;
+use App\Enums\Area;
 use App\Enums\Role;
+use App\Enums\Subject;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
@@ -27,7 +30,7 @@ class UserControllerDestroyTest extends TestCase
 
     private static User $managerAdminUser;
 
-    private static string $endPoint;
+    private static string $endpoint;
 
     /**
      * @return void
@@ -40,7 +43,7 @@ class UserControllerDestroyTest extends TestCase
         self::$managerAdminUser = $this->createSuperAdminUser(Role::Manager);
         [self::$company, self::$wallet] = $this->createTraderCompany('2000', ['company_cr' => '12345678910']);
         self::$userTraderAdmin = $this->createTraderUser(self::$company->id);
-        self::$endPoint = 'api/v1/admin/traders/'.self::$company->id.'/users/'.self::$userTraderAdmin->id;
+        self::$endpoint = 'api/v1/admin/traders/'.self::$company->id.'/users/'.self::$userTraderAdmin->id;
     }
 
     /**
@@ -48,7 +51,7 @@ class UserControllerDestroyTest extends TestCase
      */
     public function test_un_auth_user_cant_delete_trader_user_unsuccessful(): void
     {
-        $this->deleteJson(self::$endPoint)
+        $this->deleteJson(self::$endpoint)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -63,7 +66,7 @@ class UserControllerDestroyTest extends TestCase
         $tradersUserCount = User::query()->count();
 
         $this->actingAs(self::$userAdmin)
-            ->deleteJson(self::$endPoint)
+            ->deleteJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson([
                 'data' => [],
@@ -76,12 +79,12 @@ class UserControllerDestroyTest extends TestCase
     /**
      * @return void
      */
-    public function test_admin_manager_user_cant_delete_trader_user_unsuccessful(): void
+    public function test_admin_manager_user_cant_delete_trader_user_with_permissions(): void
     {
         Grantify::syncPermissionToModel(self::$managerAdminUser, []);
 
         $this->actingAs(self::$managerAdminUser)
-            ->deleteJson(self::$endPoint)
+            ->deleteJson(self::$endpoint)
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJsonPath('message', __('User does not have the right permissions.'));
     }
@@ -91,9 +94,13 @@ class UserControllerDestroyTest extends TestCase
      */
     public function test_admin_manager_user_can_delete_trader_user_successful(): void
     {
-        Grantify::assignPermissionToModel(self::$managerAdminUser, 'SuperAdmin-traderUsers.delete');
+        Grantify::assignPermissionToModel(
+            self::$managerAdminUser,
+            perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Delete])
+        );
+
         $this->actingAs(self::$managerAdminUser)
-            ->deleteJson(self::$endPoint)
+            ->deleteJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson([
                 'data' => [],
@@ -105,15 +112,19 @@ class UserControllerDestroyTest extends TestCase
      */
     public function test_admin_user_cant_delete_trader_user_witout_trader_role_unsuccessful(): void
     {
-        array_map(function ($role) {
-            if ($role !== Role::TraderAdmin) {
+        foreach (Area::roles() as $area => $roles) {
+            if ($area === Area::Trader) {
+                continue;
+            }
+
+            foreach ($roles as $role) {
                 Grantify::syncRoleToModel(self::$userTraderAdmin, $role);
 
                 $this->actingAs(self::$userAdmin)
-                    ->deleteJson(self::$endPoint)
+                    ->deleteJson(self::$endpoint)
                     ->assertStatus(Response::HTTP_FORBIDDEN)
                     ->assertJsonPath('message', __('This action is unauthorized.'));
             }
-        }, Role::getValues());
+        }
     }
 }
