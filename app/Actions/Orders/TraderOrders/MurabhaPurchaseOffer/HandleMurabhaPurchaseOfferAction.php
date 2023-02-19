@@ -16,18 +16,15 @@ class HandleMurabhaPurchaseOfferAction implements HandleMurabhaPurchaseOffer
 
     /**
      * @param  Request  $request
-     * @param  int  $order
+     * @param  FinancingOrder  $order
      * @param  TraderOrder  $traderOrder
      * @return void
-     *
-     * @throws \Exception
      */
     public function handle(
         Request $request,
-        int $order,
+        FinancingOrder $order,
         TraderOrder $traderOrder
     ): void {
-        $order = FinancingOrder::lockForUpdate()->findOrFail($order);
         $trader = Trader::driver($traderOrder->provider);
 
         $this->createStepHistories(

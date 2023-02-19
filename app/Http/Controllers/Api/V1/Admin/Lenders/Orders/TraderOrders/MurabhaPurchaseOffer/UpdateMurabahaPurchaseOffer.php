@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer;
 
+use App\Actions\Contracts\Orders\GetOrderAndTraderOrderLockedForUpdate;
 use App\Actions\Contracts\Orders\TraderOrders\MurabhaPurchaseOffer\HandleMurabhaPurchaseOffer;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabahaPurchaseOfferRequest;
-use App\Models\TraderOrder;
 use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -28,9 +29,15 @@ class UpdateMurabahaPurchaseOffer extends Controller
     public function __invoke(
         UpdateMurabahaPurchaseOfferRequest $request,
         int $order,
-        TraderOrder $traderOrder
+        int $traderOrder
     ): JsonResponse {
         return DB::transaction(function () use ($request, $order, $traderOrder) {
+            [$order, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
+
+            $traderOrder->ensureCanAccessStep(
+                FinancingOrderStatus::ClientWakalaCompleted
+            );
+
             app(HandleMurabhaPurchaseOffer::class)->handle($request, $order, $traderOrder);
 
             return $this->successResponse();

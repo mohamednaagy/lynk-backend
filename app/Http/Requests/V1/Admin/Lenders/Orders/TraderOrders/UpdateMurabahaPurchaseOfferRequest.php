@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders;
 
-use App\Enums\FinancingOrderHistory;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateMurabahaPurchaseOfferRequest extends FormRequest
@@ -24,16 +23,8 @@ class UpdateMurabahaPurchaseOfferRequest extends FormRequest
      */
     public function rules()
     {
-        $traderOrder = $this->route('trader_order');
-
-        $isMpoDocumentAttached = $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::AttachMpoDocument);
-
         return [
-            'document' => [
-                $isMpoDocumentAttached ? 'nullable' : 'required',
-                'file',
-                'mimes:pdf',
-            ],
+            'document' => ['required', 'file', 'mimes:pdf'],
         ];
     }
 }
