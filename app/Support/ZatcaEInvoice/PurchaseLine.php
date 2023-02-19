@@ -75,7 +75,7 @@ class PurchaseLine
     public function getLineTotalWithoutVat()
     {
         return $this->getLineSubtotal()
-            ->subtract($this->getTotalDiscountAmount());
+            ->subtract($this->getTotalVatAmount());
     }
 
     /**

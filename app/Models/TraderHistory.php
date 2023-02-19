@@ -26,6 +26,8 @@ class TraderHistory extends Model
             'id',
             'trader_order_id',
             'action',
+            'created_at',
+            'updated_at',
         ];
     }
 

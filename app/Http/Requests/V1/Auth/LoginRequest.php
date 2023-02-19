@@ -28,7 +28,7 @@ class LoginRequest extends FormRequest
     {
         return [
             'unique_name' => ['nullable', 'string', Rule::exists(Company::class, 'unique_name')],
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string', 'email:filter'],
             'password' => ['required', 'string'],
             'source' => ['required', 'string'],
         ];

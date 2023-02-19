@@ -36,7 +36,7 @@ class StoreUserRequest extends FormRequest
             'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],
             'email' => [
                 'required',
-                'email',
+                'email:filter',
                 tenant()->unique(User::class, 'email'),
             ],
             'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],

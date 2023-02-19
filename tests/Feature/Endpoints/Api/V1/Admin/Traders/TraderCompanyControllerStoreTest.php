@@ -31,6 +31,7 @@ class TraderCompanyControllerStoreTest extends TestCase
 
         self::$companyDetails = [
             'name' => 'testCompany',
+            'notifications_email' => 'notifications_email@email.com',
             'unique_name' => 'companyUniqueName',
             'driver' => 'dmcc',
         ];

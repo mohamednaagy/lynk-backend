@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1\Trader\Orders\TraderOrders;
 
+use App\Enums\FinancingOrderHistory;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdatePurchasingCommodityRequest extends FormRequest
@@ -23,12 +24,26 @@ class UpdatePurchasingCommodityRequest extends FormRequest
      */
     public function rules(): array
     {
+        $traderOrder = $this->route('trader_order');
+
+        $isPtpDocumentAttached = $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::AttachPtpDocumentToOrder);
+        $isHoldingCertAttached = $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
+        $isLenderOwnershipDocumentAttached = $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+
         return [
-            'ptp_document' => ['required', 'file', 'mimes:pdf'],
-            'original_holding_certificate' => ['required', 'file', 'mimes:pdf'],
+            'ptp_document' => [
+                $isPtpDocumentAttached ? 'nullable' : 'required',
+                'file',
+                'mimes:pdf',
+            ],
+            'original_holding_certificate' => [
+                $isHoldingCertAttached ? 'nullable' : 'required',
+                'file',
+                'mimes:pdf',
+            ],
             'financing_institution_certificate' => [
                 'exclude_if:auto_generate_financing_institution_certificate,true',
-                'required',
+                $isLenderOwnershipDocumentAttached ? 'nullable' : 'required',
                 'file',
                 'mimes:pdf',
             ],

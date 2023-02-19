@@ -74,6 +74,7 @@ class LenderControllerShowTest extends TestCase
                         'company_cr',
                         'does_order_require_approval',
                         'order_cost',
+                        'notifications_email',
                     ])
                     ->respond()
                     ->getData(true)
@@ -99,6 +100,7 @@ class LenderControllerShowTest extends TestCase
                         'company_cr',
                         'does_order_require_approval',
                         'order_cost',
+                        'notifications_email',
                     ])
                     ->respond()
                     ->getData(true)

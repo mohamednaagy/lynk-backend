@@ -22,7 +22,7 @@ class DeductVatPercentageAction implements DeductVatPercentage
     public function handle(FinancingOrder $financingOrder, Transaction $transaction, Company $company)
     {
         $vatRate = $this->getProjectSettings->handle()->getVatRate();
-        $vatPercentageFee = $financingOrder->amount->multiply($vatRate);
+        $vatPercentageFee = $company->order_cost->multiply($vatRate);
 
         return $this->createTransactions->handle(
             $company->getWallet(WalletType::CompanyWallet),
@@ -32,7 +32,7 @@ class DeductVatPercentageAction implements DeductVatPercentage
                 'financing_order_id' => $financingOrder->id,
                 'reference_number' => $transaction->reference_number,
                 'transaction_id' => $transaction->id,
-                'vat_rate' => $vatRate ?? '',
+                'vat_rate' => $vatRate,
             ]
         );
     }

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\MediaCollections\TransactionMediaCollection;
+use App\Support\Collections\TransactionCollection;
 use App\Support\Money\Casts\MoneyStringCast;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -36,5 +38,16 @@ class Transaction extends Model implements HasMedia
     public function getConnectionName()
     {
         return Config::get('wallet.database.connection', parent::getConnectionName());
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection(TransactionMediaCollection::Attachments)
+            ->singleFile();
+    }
+
+    public function newCollection(array $models = [])
+    {
+        return new TransactionCollection($models);
     }
 }

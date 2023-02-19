@@ -19,6 +19,8 @@ class ProjectSettingsController extends Controller
         $this->middleware(
             'permission:'.
             perm(Area::SuperAdmin, [Subject::ProjectSettings, Action::Index, Action::Manage])
+            .'|'.
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Create, Action::Edit, Action::Manage])
         )->only('index');
 
         $this->middleware(

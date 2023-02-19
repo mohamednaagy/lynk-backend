@@ -27,8 +27,8 @@ class UpdateCompanyStatusRequest extends FormRequest
     {
         return [
             'status' => ['required', new EnumValue(CompanyStatus::class)],
-            'public_status_comment' => ['required', 'string', 'max:2000'],
-            'internal_status_comment' => ['required', 'string', 'max:2000'],
+            'public_status_comment' => ['required', 'string', 'max:1000'],
+            'internal_status_comment' => ['required', 'string', 'max:1000'],
         ];
     }
 }

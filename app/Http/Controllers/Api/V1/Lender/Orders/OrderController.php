@@ -174,8 +174,6 @@ class OrderController extends Controller
                     vatPercentageTransaction: $vatPercentageTransaction
                 );
 
-                $user = auth()->user();
-
                 dispatch(new NotifyAdminsAboutOrderCreated($financingOrder, $user));
 
                 Trader::getTti($financingOrder);

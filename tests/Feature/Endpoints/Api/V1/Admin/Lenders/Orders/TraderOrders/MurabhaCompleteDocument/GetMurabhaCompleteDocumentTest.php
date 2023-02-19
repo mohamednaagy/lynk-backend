@@ -24,7 +24,7 @@ class GetMurabhaCompleteDocumentTest extends TestCase
 {
     use RefreshDatabase, AssertsAccessByRoleAndArea;
 
-    const BaseUrl = 'api/v1/admin/lenders/';
+    const BaseUrl = 'api/v1/admin';
 
     private static Company $lender;
 
@@ -67,7 +67,6 @@ class GetMurabhaCompleteDocumentTest extends TestCase
         ]);
 
         self::$getMurabhaCompleteDocumentUrl = self::BaseUrl.
-            self::$lender->getOriginal('id').
             '/orders/'.
             self::$financingOrder->getOriginal('id').
             '/trader-orders/'.

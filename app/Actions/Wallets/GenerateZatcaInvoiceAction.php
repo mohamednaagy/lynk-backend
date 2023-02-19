@@ -4,7 +4,7 @@ namespace App\Actions\Wallets;
 
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
-use App\Enums\MediaCollections\ZatcaInvoiceMediaCollection;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Models\Transaction;
 use App\Support\PdfGenerator\PdfGenerator;
@@ -23,7 +23,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
 {
     protected string $template = 'templates.zatca-invoice';
 
-    protected string $collectionName = ZatcaInvoiceMediaCollection::Transactions;
+    protected string $collectionName = FinancingOrderMediaCollection::ZatcaInvoice;
 
     public function __construct(protected GetProjectSettings $getProjectSettings)
     {
@@ -33,7 +33,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
     {
         $seller = $this->getProjectSettings->handle();
 
-        DB::transaction(function () use ($financingOrder, $seller, $creationFeeTransaction, $vatPercentageTransaction) {
+        DB::transaction(function () use ($financingOrder, $seller, $creationFeeTransaction) {
             $displayQRCodeAsBase64 = GenerateQrCode::fromArray([
                 new Seller($seller->getCompanyName(Config::get('app.locale', 'en'))),
                 new TaxNumber($seller->getVatId()),
@@ -55,20 +55,21 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
                             $seller->getVatRateInPercentage()
                         ),
                     ],
-                    now('Asia/Riyadh'),
+                    $financingOrder->created_at,
                     $financingOrder
                 ),
                 'qr_code' => $displayQRCodeAsBase64,
                 'buyer' => $financingOrder->company,
-                'creationFeeTransaction' => $creationFeeTransaction,
-                'vatPercentageTransaction' => $vatPercentageTransaction,
+                'creation_fee_transaction' => $creationFeeTransaction,
             ])->render();
 
-            PdfGenerator::outputFromHtml($html, function ($fileResource) use ($financingOrder) {
-                return $financingOrder->addMediaFromStream($fileResource)
-                    ->usingFileName("zatca-{$financingOrder->getKey()}".'.pdf')
-                    ->toMediaCollection($this->getCollectionName());
-            }
+            PdfGenerator::outputFromHtml(
+                $html,
+                function ($fileResource) use ($financingOrder) {
+                    return $financingOrder->addMediaFromStream($fileResource)
+                        ->usingFileName("zatca-{$financingOrder->getKey()}".'.pdf')
+                        ->toMediaCollection($this->getCollectionName());
+                }
             );
         });
     }
