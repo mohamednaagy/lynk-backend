@@ -6,8 +6,8 @@ use App\Actions\Contracts\Orders\GetOrderAndTraderOrderLockedForUpdate;
 use App\Actions\Contracts\Orders\TraderOrders\MurabahaPurchaseOffer\HandleIssuingMurabahaPurchaseOffer;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
-use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabahaPurchaseOfferRequest;
 use App\Models\Company;
@@ -36,9 +36,9 @@ class UpdateMurabahaPurchaseOffer extends Controller
         return DB::transaction(function () use ($request, $order, $traderOrder) {
             [$order, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
 
-            if (! $traderOrder->client_wakala_accepted_at) {
-                throw new OrderStatusDoesNotFollowSequenceException();
-            }
+            $traderOrder->ensureCanAccessStep(
+                FinancingOrderStatus::ClientWakalaCompleted
+            );
 
             app(HandleIssuingMurabahaPurchaseOffer::class)->handle($request, $order, $traderOrder);
 
