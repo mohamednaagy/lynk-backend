@@ -23,33 +23,33 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
 
     private function resolveSmsMessage(FinancingOrder $financingOrder, $product, $quantity)
     {
-        $uom = $financingOrder->activeTraderOrder()
-            ->first()->uom ?? '';
+        $uom = $financingOrder->activeTraderOrder()->first()?->uom ?? '';
+
         $sellingPrice = optional($financingOrder->selling_price)->formatByDecimal() ?? '';
+
         $query = ['o' => $financingOrder->id];
         $host = Config::get('app.frontend_url.client');
         $url = $host.'/?'.http_build_query($query);
-        $locale = app()->getLocale();
 
         if ($financingOrder->is_verification_required) {
             return __(ClientMessage::CommoditySoldToCustomer, [
                 'product' => $product,
-                'orderId' => $financingOrder->id,
-                'companyName' => $financingOrder->company->name,
+                'order_id' => $financingOrder->id,
+                'company_name' => $financingOrder->company->name,
                 'quantity' => $quantity,
                 'uom' => $uom,
-                'sellingPrice' => $sellingPrice,
+                'selling_price' => $sellingPrice,
                 'url' => $url,
-            ], $locale);
+            ]);
         }
 
         return __(ClientMessage::CommoditySoldToCustomerWithoutVerification, [
             'product' => $product,
-            'orderId' => $financingOrder->id,
-            'companyName' => $financingOrder->company->name,
+            'order_id' => $financingOrder->id,
+            'company_name' => $financingOrder->company->name,
             'quantity' => $quantity,
             'uom' => $uom,
-            'sellingPrice' => $sellingPrice,
-        ], $locale);
+            'selling_price' => $sellingPrice,
+        ]);
     }
 }
