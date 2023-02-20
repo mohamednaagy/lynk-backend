@@ -32,7 +32,7 @@ class OrderNeedActionScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'need_action' => ['required', Rule::in('1', '0')],
+                'need_action' => ['nullable', Rule::in('1', '0')],
             ]
         );
     }

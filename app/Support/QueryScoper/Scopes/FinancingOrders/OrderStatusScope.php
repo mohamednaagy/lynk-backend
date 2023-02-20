@@ -4,10 +4,10 @@ namespace App\Support\QueryScoper\Scopes\FinancingOrders;
 
 use App\Enums\FinancingOrderStatus;
 use App\Support\QueryScoper\QueryScoper;
-use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class OrderStatusScope extends QueryScoper
 {
@@ -38,7 +38,7 @@ class OrderStatusScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'status' => ['required', 'array', new EnumValue(FinancingOrderStatus::class)],
+                'status' => ['nullable', 'array', Rule::in(FinancingOrderStatus::getValues())],
             ]
         );
     }
