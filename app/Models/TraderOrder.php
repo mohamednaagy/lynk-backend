@@ -19,6 +19,7 @@ use UnexpectedValueException;
 /**
  * @property mixed $reference
  * @property mixed $order
+ * @property TraderOrderStatus $status
  * @property mixed $traderHistories
  * @property Carbon $created_at
  */

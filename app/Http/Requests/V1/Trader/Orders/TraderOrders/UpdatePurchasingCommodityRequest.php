@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\V1\Trader\Orders;
+namespace App\Http\Requests\V1\Trader\Orders\TraderOrders;
 
 use App\Enums\FinancingOrderHistory;
 use Illuminate\Foundation\Http\FormRequest;

@@ -12,7 +12,7 @@ use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
 use Illuminate\Http\JsonResponse;
 
-class LenderOrderController extends Controller
+class OrderController extends Controller
 {
     public function __construct()
     {
@@ -30,13 +30,13 @@ class LenderOrderController extends Controller
     }
 
     /**
-     * @param  Company  $lender
+     * @param  Company  $company
      * @param  GetPaginatedFinancingOrder  $getPaginatedOrders
      * @return JsonResponse
      */
-    public function index(Company $lender, GetPaginatedFinancingOrder $getPaginatedOrders): JsonResponse
+    public function index(Company $company, GetPaginatedFinancingOrder $getPaginatedOrders): JsonResponse
     {
-        $orders = $getPaginatedOrders->setCompany($lender)->handle();
+        $orders = $getPaginatedOrders->setCompany($company)->handle();
 
         return fractal($orders, new FinancingOrderTransformer())
             ->parseIncludes([
@@ -54,11 +54,11 @@ class LenderOrderController extends Controller
     }
 
     /**
-     * @param  Company  $lender
+     * @param  Company  $company
      * @param  FinancingOrder  $order
      * @return JsonResponse
      */
-    public function show(Company $lender, FinancingOrder $order): JsonResponse
+    public function show(Company $company, FinancingOrder $order): JsonResponse
     {
         $order->load([
             'creator',

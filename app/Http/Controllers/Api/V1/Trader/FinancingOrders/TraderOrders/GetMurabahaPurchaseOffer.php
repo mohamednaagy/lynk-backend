@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer;
+namespace App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -18,7 +18,7 @@ class GetMurabahaPurchaseOffer extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show, Action::Manage])
+            perm(Area::Lender, [Subject::FinancingOrders, Action::Show, Action::Manage])
         );
     }
 
