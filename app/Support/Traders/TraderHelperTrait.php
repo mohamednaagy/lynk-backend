@@ -28,6 +28,17 @@ trait TraderHelperTrait
                 'file' => 'original_holding_certificate',
             ],
         ],
+        FinancingOrderStatus::ClientWakalaCompleted => [
+            FinancingOrderHistory::ClientWakalaAccepted => null,
+        ],
+        FinancingOrderStatus::MurabhaOfferIssued => [
+            FinancingOrderHistory::IssueMurabahaOffer => null,
+            FinancingOrderHistory::GetMurabahaPurchaseOfferDocument => null,
+            FinancingOrderHistory::AttachMpoDocument => [
+                'collection' => TraderOrderMediaCollection::MurabahaPurchaseOrder,
+                'file' => 'document',
+            ],
+        ],
         FinancingOrderStatus::MurabahaSaleCompleted => [
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
             FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [

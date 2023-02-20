@@ -55,6 +55,7 @@ class GetWalletTransactionsTest extends TestCase
                         'date',
                         'description',
                         'amount',
+                        'receipt_url',
                     ])
                     ->respond()
                     ->getData(true)
@@ -76,6 +77,7 @@ class GetWalletTransactionsTest extends TestCase
                         'date',
                         'description',
                         'amount',
+                        'receipt_url',
                     ])
                     ->respond()
                     ->getData(true)
@@ -98,6 +100,7 @@ class GetWalletTransactionsTest extends TestCase
                         'date',
                         'description',
                         'amount',
+                        'receipt_url',
                     ])
                     ->respond()
                     ->getData(true)
@@ -120,6 +123,7 @@ class GetWalletTransactionsTest extends TestCase
                         'date',
                         'description',
                         'amount',
+                        'receipt_url',
                     ])
                     ->respond()
                     ->getData(true)
@@ -142,6 +146,7 @@ class GetWalletTransactionsTest extends TestCase
                         'date',
                         'description',
                         'amount',
+                        'receipt_url',
                     ])
                     ->respond()
                     ->getData(true)

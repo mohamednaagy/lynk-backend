@@ -70,7 +70,7 @@ class GetMurabahaPurchaseOfferTest extends TestCase
             'order_column' => '1',
         ]);
 
-        self::$apiUrl = 'api/v1/admin/lenders/'.self::$company->id.'/orders/'.self::$order->id.'/trader-orders/'.self::$traderOrder->id.'/murabaha-purchase-offer';
+        self::$apiUrl = 'api/v1/admin/orders/'.self::$order->id.'/trader-orders/'.self::$traderOrder->id.'/murabaha-purchase-offer';
     }
 
     /**

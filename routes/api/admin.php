@@ -40,6 +40,7 @@ use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
 use App\Http\Controllers\Api\V1\Admin\Traders\ResendInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
+use App\Http\Controllers\Api\V1\Admin\Traders\UpdateTraderStatus;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
 
@@ -99,8 +100,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                 Route::post('/proceed', MakeOrderProceed::class);
                 Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
                 Route::get('/purchasing-commodity', GetPurchasingCommodity::class);
-                Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
-                Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
+                Route::post('/murabha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
+                Route::get('/murabha-purchase-offer', GetMurabahaPurchaseOffer::class);
                 Route::get('/selling-commodity-to-client', GetSellingCommodityCertificateToClient::class);
                 Route::post('/selling-commodity-to-client', UpdateSellingCommodityCertificateToClient::class);
                 Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
@@ -118,10 +119,10 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::prefix('traders')->group(function () {
             Route::post('{trader}/users/{user}/resend-invitation', ResendInvitationToUser::class);
+            Route::put('/{trader}/status', UpdateTraderStatus::class);
         });
 
         Route::apiResource('traders.users', TraderUserController::class);
-
         Route::apiResource('traders', TraderController::class)
             ->only(['index', 'store', 'show', 'update']);
 

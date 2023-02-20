@@ -43,7 +43,7 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
 Route::get('v1/lender/media/{media}/download', DownloadMediaFile::class)->name('api.v1.media.download');
 
-Route::prefix('v1/lender')->name('api.v1.')->group(function () {
+Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
     Route::get('/area-settings', GetLenderAreaSettings::class);
     Route::post('/register', Register::class);
 
@@ -91,5 +91,5 @@ Route::prefix('v1/lender')->name('api.v1.')->group(function () {
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)->only('index', 'store')->only(['index', 'store']);
         });
 
-    Route::post('{user}/sign-up', CompleteRegister::class)->name('lender.complete-register');
+    Route::post('{user}/complete-register', CompleteRegister::class)->name('complete-register');
 });

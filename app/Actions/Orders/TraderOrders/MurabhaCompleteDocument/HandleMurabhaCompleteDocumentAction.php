@@ -25,6 +25,10 @@ class HandleMurabhaCompleteDocumentAction implements HandleMurabhaCompleteDocume
      */
     public function handle(Request $request, FinancingOrder $order, TraderOrder $traderOrder): void
     {
+        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
+            FinancingOrderStatus::MurabahaSaleCompleted
+        );
+
         $trader = Trader::driver($traderOrder->provider);
 
         $this->createStepHistories(
@@ -34,7 +38,7 @@ class HandleMurabhaCompleteDocumentAction implements HandleMurabhaCompleteDocume
             FinancingOrderStatus::MurabahaSaleCompleted
         );
 
-        if (! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::MurabahaSaleCompleted)) {
+        if ($canUpdateOrderStatus) {
             $trader->updateOrderStatus($order, FinancingOrderStatus::MurabahaSaleCompleted);
         }
     }

@@ -62,7 +62,7 @@ class TraderOrderTransformer extends TransformerAbstract
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
             FinancingOrderHistory::ContractSigned,
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-            'client_wakala',
+            FinancingOrderHistory::ClientWakalaAccepted,
             FinancingOrderHistory::IssueMurabahaOffer,
             FinancingOrderHistory::MurabahaSaleCompleted,
         ]), new TraderHistoryTransformer($traderOrder));
