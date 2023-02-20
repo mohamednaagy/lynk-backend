@@ -23,11 +23,13 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderStatuses;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderUserController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\GetSellingCommodityCertificateToClient;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\CompleteOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetPurchasingCommodity;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument\GetMurabhaCompleteDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument\UpdateMurabhaCompleteDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\GetMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer\UpdateMurabahaPurchaseOffer;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateOrderPaymentProof;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodity;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateSellingCommodityCertificateToClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
@@ -106,6 +108,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                 Route::post('/selling-commodity-to-client', UpdateSellingCommodityCertificateToClient::class);
                 Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
                 Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
+                Route::post('complete', CompleteOrder::class);
+                Route::post('update-payment-proof', UpdateOrderPaymentProof::class);
             });
         });
 
