@@ -32,7 +32,7 @@ class OrderSearchScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'search' => ['nullable', 'string'],
+                'search' => ['required', 'string'],
             ]
         );
     }
