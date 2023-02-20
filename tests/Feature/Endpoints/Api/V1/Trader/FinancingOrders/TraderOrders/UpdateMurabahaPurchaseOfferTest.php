@@ -69,7 +69,35 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
             ->assertUnauthorized();
     }
 
-    public function test_auth_user_can_update_process_murabaha_purchase_offer(): void
+    public function test_auth_user_cannot_proceed_with_murabaha_purchase_offer_if_previous_step_is_not_complete(): void
+    {
+        self::$traderOrder->traderHistories()->delete();
+
+        $this->actingAs(self::$traderAdminUser)
+            ->withHeader('X-Company', self::$company->id)
+            ->postJson(self::$apiUrl, [
+                'document' => UploadedFile::fake()->create('test.pdf'),
+            ])
+            ->assertStatus(400)
+            ->assertJsonPath('code', 1011);
+    }
+
+    public function test_auth_user_can_proceed_with_murabaha_purchase_offer(): void
+    {
+        $this->actingAs(self::$traderAdminUser)
+            ->withHeader('X-Company', self::$company->id)
+            ->postJson(self::$apiUrl, [
+                'document' => UploadedFile::fake()->create('test.pdf'),
+            ])
+            ->assertOk()
+            ->assertJsonStructure([
+                'data' => [],
+            ]);
+
+        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
+    }
+
+    public function test_auth_user_can_update_murabaha_purchase_offer(): void
     {
         $this->actingAs(self::$traderAdminUser)
             ->withHeader('X-Company', self::$company->id)
@@ -96,7 +124,7 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
     }
 
-    public function test_auth_user_can_update_process_murabaha_purchase_offer_with_trader_not_in_progress(): void
+    public function test_auth_user_can_update_murabaha_purchase_offer_with_trader_not_in_progress(): void
     {
         self::$traderOrder->update(['status' => TraderOrderStatus::Completed]);
         self::$order->update(['status' => FinancingOrderStatus::MurabahaSaleCompleted]);
@@ -116,17 +144,20 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
 
     public function test_other_users_areas_can_not_update_process_murabaha_purchase_offer_with_invalid_permissions()
     {
-        $this->assertStatusCodeExceptForPermissions(Response::HTTP_FORBIDDEN,
+        $this->assertStatusCodeExceptForPermissions(
+            Response::HTTP_FORBIDDEN,
             [
                 Area::Trader => [
                     [Subject::All, Action::Manage],
                     [Subject::FinancingOrders, Action::Edit],
                     [Subject::FinancingOrders, Action::Manage],
                 ],
-            ], function ($user, $role, $permission) {
+            ],
+            function ($user, $role, $permission) {
                 return $this->actingAs($user)
                     ->withHeader('X-Company', self::$company->id)
                     ->postJson(self::$apiUrl);
-            });
+            }
+        );
     }
 }
