@@ -4,6 +4,7 @@ namespace Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
 use App\Enums\TraderOrderStatus;
@@ -49,6 +50,10 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
             'status' => TraderOrderStatus::InProgress,
             'reference' => 123,
             'client_wakala_accepted_at' => now(),
+        ]);
+
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::ClientWakalaAccepted,
         ]);
 
         self::$apiUrl = 'api/v1/trader/orders/'.self::$order->id.'/trader-orders/'.self::$traderOrder->id.'/murabaha-purchase-offer';
