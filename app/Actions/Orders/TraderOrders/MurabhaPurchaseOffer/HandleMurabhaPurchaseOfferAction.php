@@ -25,6 +25,10 @@ class HandleMurabhaPurchaseOfferAction implements HandleMurabhaPurchaseOffer
         FinancingOrder $order,
         TraderOrder $traderOrder
     ): void {
+        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
+            FinancingOrderStatus::MurabhaOfferIssued
+        );
+
         $trader = Trader::driver($traderOrder->provider);
 
         $this->createStepHistories(
@@ -34,7 +38,7 @@ class HandleMurabhaPurchaseOfferAction implements HandleMurabhaPurchaseOffer
             FinancingOrderStatus::MurabhaOfferIssued
         );
 
-        if (! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::MurabhaOfferIssued)) {
+        if ($canUpdateOrderStatus) {
             $trader->updateOrderStatus($order, FinancingOrderStatus::MurabhaOfferIssued);
         }
     }
