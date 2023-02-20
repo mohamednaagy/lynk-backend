@@ -38,7 +38,8 @@ class OrderStatusScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'status' => ['required', 'array', new EnumValue(FinancingOrderStatus::class)],
+                'status' => ['required', 'array'],
+                'status.*' => ['required', new EnumValue(FinancingOrderStatus::class, false)],
             ]
         );
     }
