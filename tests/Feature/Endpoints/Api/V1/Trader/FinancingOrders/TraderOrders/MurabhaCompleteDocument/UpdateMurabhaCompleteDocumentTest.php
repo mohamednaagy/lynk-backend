@@ -4,17 +4,19 @@ namespace Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders\MurabhaCompleteDo
 
 use App\Enums\Area;
 use App\Enums\ErrorCode;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Sms\Events\SmsSent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
@@ -47,13 +49,17 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
     {
         parent::setUp();
 
-        Artisan::call('module:seed');
+        Event::fake([
+            SmsSent::class,
+        ]);
 
         [self::$trader] = $this->createTraderCompany('2000', [
             'company_cr' => '1234567891',
             'driver' => 'fake',
         ]);
-        [self::$lender] = $this->createLenderCompany('2000', ['company_cr' => '1234567892']);
+        [self::$lender] = $this->createLenderCompany('2000', [
+            'company_cr' => '1234567892',
+        ]);
         self::$traderAdminUser = $this->createTraderUser(self::$trader->id);
         self::$userLender = $this->createLenderUser(self::$lender->id);
         self::$financingOrder = $this->createOrder(
@@ -121,19 +127,35 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
      */
     public function test_proceed_murabha_complete_document_succeed(): void
     {
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::AttachMpoDocument,
+        ]);
+
         $this->withHeader('X-Company', self::$trader->id)
             ->actingAs(self::$traderAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertJsonStructure(['data']);
     }
 
+    public function unsuitableOrderStatusDataProvider()
+    {
+        return collect(FinancingOrderHistory::getValues())->reject(function ($item) {
+            return $item == FinancingOrderHistory::AttachMpoDocument;
+        })->map(function ($item) {
+            return [$item];
+        })->toArray();
+    }
+
     /**
+     * @dataProvider unsuitableOrderStatusDataProvider
+     *
+     * @param $unsuitableOrderStatusData
      * @return void
      */
-    public function test_update_murabha_complete_document_not_follow_sequence(): void
+    public function test_update_murabha_complete_document_not_follow_sequence($unsuitableOrderStatusData): void
     {
-        self::$financingOrder->update([
-            'status' => FinancingOrderStatus::ContractSigned,
+        self::$traderOrder->traderHistories()->create([
+            'action' => $unsuitableOrderStatusData,
         ]);
 
         $this->withHeader('X-Company', self::$trader->id)
@@ -144,20 +166,5 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
                 'message' => __('error.order_status_doesnt_follow_sequence'),
                 'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
             ]);
-    }
-
-    /**
-     * @return void
-     */
-    public function test_update_murabha_complete_document_succeed(): void
-    {
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderStatus::MurabahaSaleCompleted,
-        ]);
-
-        $this->withHeader('X-Company', self::$trader->id)
-            ->actingAs(self::$traderAdminUser)
-            ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
-            ->assertJsonStructure(['data']);
     }
 }

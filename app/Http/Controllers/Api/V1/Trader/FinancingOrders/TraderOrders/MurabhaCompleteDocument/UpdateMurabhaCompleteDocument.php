@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders\MurabhaCompleteDocument;
 
-use App\Actions\Contracts\Orders\GetOrder;
+use App\Actions\Contracts\Orders\GetOrderAndTraderOrderLockedForUpdate;
 use App\Actions\Contracts\Orders\TraderOrders\MurabhaCompleteDocument\HandleMurabhaCompleteDocument;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
-use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Trader\Orders\MurabhaCompleteDocument\UpdateMurabhaCompleteDocumentRequest;
-use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -29,27 +27,21 @@ class UpdateMurabhaCompleteDocument extends Controller
      * Handle the incoming request.
      *
      * @param  UpdateMurabhaCompleteDocumentRequest  $request
-     * @param  GetOrder  $getOrder
      * @param  int  $order
-     * @param  TraderOrder  $traderOrder
+     * @param  int  $traderOrder
      * @return JsonResponse
      */
     public function __invoke(
         UpdateMurabhaCompleteDocumentRequest $request,
-        GetOrder $getOrder,
         int $order,
-        TraderOrder $traderOrder
+        int $traderOrder
     ): JsonResponse {
-        return DB::transaction(function () use ($request, $getOrder, $order, $traderOrder) {
-            $order = $getOrder->setCompany(tenant())->handle($order);
-            $orderStepComplete = $traderOrder->checkOrderStepComplete(FinancingOrderStatus::MurabahaSaleCompleted);
+        return DB::transaction(function () use ($request, $order, $traderOrder) {
+            [$order, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
 
-            if (
-                $order->status->cantMoveTo(FinancingOrderStatus::MurabahaSaleCompleted) &&
-                ! $orderStepComplete
-            ) {
-                throw new OrderStatusDoesNotFollowSequenceException();
-            }
+            $traderOrder->ensureCanAccessStep(
+                FinancingOrderStatus::MurabhaOfferIssued
+            );
 
             app(HandleMurabhaCompleteDocument::class)->handle($request, $order, $traderOrder);
 

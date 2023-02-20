@@ -10,12 +10,13 @@ use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Sms\Events\SmsSent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
@@ -46,10 +47,14 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
     {
         parent::setUp();
 
-        Artisan::call('module:seed');
+        Event::fake([
+            SmsSent::class,
+        ]);
 
         self::$superAdminUser = $this->createSuperAdminUser();
-        [self::$lender] = $this->createLenderCompany('2000', ['company_cr' => '1234567891']);
+        [self::$lender] = $this->createLenderCompany('2000', [
+            'company_cr' => '1234567891',
+        ]);
         self::$userLender = $this->createLenderUser(self::$lender->id);
         self::$financingOrder = $this->createOrder(
             self::$lender->id,
@@ -130,10 +135,23 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
         $this->assertTrue($freshOrderStatus->is(FinancingOrderStatus::MurabahaSaleCompleted));
     }
 
+    public function unsuitableOrderStatusDataProvider()
+    {
+        return collect(FinancingOrderHistory::getValues())->reject(function ($item) {
+            return $item == FinancingOrderStatus::MurabahaSaleCompleted
+                || $item == FinancingOrderStatus::Completed;
+        })->map(function ($item) {
+            return [$item];
+        })->toArray();
+    }
+
     /**
+     * @dataProvider unsuitableOrderStatusDataProvider
+     *
+     * @param $unsuitableOrderStatusData
      * @return void
      */
-    public function test_update_murabha_complete_document_not_follow_sequence(): void
+    public function test_update_murabha_complete_document_not_follow_sequence($unsuitableOrderStatusData): void
     {
         self::$traderOrder->traderHistories()->create(
             [

@@ -14,7 +14,6 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Artisan;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 use Tests\TestCase;
@@ -47,10 +46,12 @@ class GetMurabhaCompleteDocumentTest extends TestCase
     {
         parent::setUp();
 
-        Artisan::call('module:seed');
-
-        [self::$trader] = $this->createTraderCompany('2000', ['company_cr' => '1234567891']);
-        [self::$lender] = $this->createLenderCompany('2000', ['company_cr' => '1234567892']);
+        [self::$trader] = $this->createTraderCompany('2000', [
+            'company_cr' => '1234567891',
+        ]);
+        [self::$lender] = $this->createLenderCompany('2000', [
+            'company_cr' => '1234567892',
+        ]);
         self::$traderAdminUser = $this->createTraderUser(self::$trader->id);
         self::$userLender = $this->createLenderUser(self::$lender->id);
         self::$financingOrder = $this->createOrder(

@@ -4,6 +4,7 @@ namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\GetOrderAndTraderOrderLockedForUpdate;
 use App\Models\TraderOrder;
+use Stancl\Tenancy\Database\TenantScope;
 
 class GetOrderAndTraderOrderLockedForUpdateAction implements GetOrderAndTraderOrderLockedForUpdate
 {
@@ -12,12 +13,16 @@ class GetOrderAndTraderOrderLockedForUpdateAction implements GetOrderAndTraderOr
         $traderOrder = TraderOrder::lockForUpdate()
             ->findOrFail($traderOrderId);
 
-        $order = $traderOrder->order()->lockForUpdate()->first();
+        $order = $traderOrder->order();
+
+        if (tenant()) {
+            $order->withoutGlobalScope(TenantScope::class);
+        }
 
         $traderOrder->load([
             'traderHistories' => fn ($query) => $query->lockForUpdate(),
         ]);
 
-        return [$order, $traderOrder];
+        return [$order->lockForUpdate()->first(), $traderOrder];
     }
 }
