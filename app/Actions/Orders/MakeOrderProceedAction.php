@@ -10,12 +10,19 @@ use App\Enums\FinancingOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Support\Traders\TraderHelperTrait;
 
 class MakeOrderProceedAction implements MakeOrderProceed
 {
+    use TraderHelperTrait;
+
     /**
-     * @param  mixed  $order
+     * @param  TraderOrder  $traderOrder
+     * @param  string  $case
+     * @param  bool  $forceToProceed
      * @return mixed
+     *
+     * @throws OrderStatusDoesNotFollowSequenceException
      */
     public function handle(TraderOrder $traderOrder, string $case, $forceToProceed = false)
     {
@@ -43,6 +50,8 @@ class MakeOrderProceedAction implements MakeOrderProceed
         }
 
         $media = app(AcceptClientWakala::class)->handle($order);
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ClientWakalaAccepted);
 
         $order->update([
             'status' => FinancingOrderStatus::ClientWakalaCompleted,

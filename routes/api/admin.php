@@ -100,8 +100,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                 Route::post('/proceed', MakeOrderProceed::class);
                 Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
                 Route::get('/purchasing-commodity', GetPurchasingCommodity::class);
-                Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
-                Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
+                Route::post('/murabha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
+                Route::get('/murabha-purchase-offer', GetMurabahaPurchaseOffer::class);
                 Route::get('/selling-commodity-to-client', GetSellingCommodityCertificateToClient::class);
                 Route::post('/selling-commodity-to-client', UpdateSellingCommodityCertificateToClient::class);
                 Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
@@ -109,12 +109,15 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             });
         });
 
+        Route::prefix('traders')->group(function () {
+            Route::get('/{trader}/orders/{order}', [TraderOrderController::class, 'show']);
+            Route::get('{trader}/orders', [TraderOrderController::class, 'index']);
+        });
+
         Route::apiResource('lenders', LenderController::class);
         Route::apiResource('lenders.users', LenderUserController::class);
 
         Route::prefix('traders')->group(function () {
-            Route::get('/{trader}/orders/{order}', [TraderOrderController::class, 'show']);
-            Route::get('{trader}/orders', [TraderOrderController::class, 'index']);
             Route::post('{trader}/users/{user}/resend-invitation', ResendInvitationToUser::class);
             Route::put('/{trader}/status', UpdateTraderStatus::class);
         });
