@@ -4,7 +4,7 @@ namespace App\Actions\Contracts\Traders;
 
 use App\Models\Company;
 
-interface LoadOrdersAmountSumAndOrdersCountOfTrader
+interface GetOrdersAmountSumAndOrdersCountOfTrader
 {
     public function handle(Company $trader);
 }

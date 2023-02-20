@@ -41,6 +41,8 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
 
     const OrderCancelled = 17;
 
+    const ClientWakalaAccepted = 18;
+
     public static array $notCancellableActions = [
         self::GetMurabahaPurchaseOfferDocument,
         self::AttachMpoDocument,
@@ -54,6 +56,7 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
 
     public static array $orderHistoryLastActionMap = [
         FinancingOrderStatus::CommodityPurchased => self::GetMurabahaPurchaseOfferDocument,
+        FinancingOrderStatus::ClientWakalaCompleted => self::ClientWakalaAccepted,
         FinancingOrderStatus::MurabhaOfferIssued => self::AttachMpoDocument,
         FinancingOrderStatus::CommoditySoldToCustomer => self::CreateSellingCommodityToCustomerDocument,
         FinancingOrderStatus::MurabahaSaleCompleted => self::MurabahaSaleCompleted,

@@ -33,10 +33,10 @@ class TraderHistoryTransformer extends TransformerAbstract
         $getWarrantAmendmentExceptWarrantNoDocument = $this->traderHistories->where('action', FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)->first();
 
         return match ($traderHistoryKey) {
-            'client_wakala' => [
+            FinancingOrderHistory::ClientWakalaAccepted => [
                 'step' => 'client_wakala',
-                'is_complete' => (bool) $this->traderOrder->order->client_wakala_accepted_at,
-                'completed_at' => optional($this->traderOrder->order->client_wakala_accepted_at)->format('Y-m-d h:i:s A'),
+                'is_complete' => (bool) $traderOrderHistoryExist,
+                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
                 'document' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::ClientWakala)),
             ],
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => [

@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Api\V1\Client;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala as AcceptWakalaInterface;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Client\AcceptClientWakalaRequest;
 use App\Models\FinancingOrder;
-use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\Hash;
 
 class AcceptClientWakala extends Controller
 {
+    use TraderHelperTrait;
+
     /**
      * Handle the incoming request.
      *
@@ -27,12 +30,11 @@ class AcceptClientWakala extends Controller
         AcceptClientWakalaRequest $request,
         AcceptWakalaInterface $acceptClientWakala
     ) {
-        $driver = config('trader.default');
-        $trader = Trader::driver($driver);
-
         return DB::transaction(function () use ($request, $acceptClientWakala) {
             $order = FinancingOrder::lockForUpdate()
                 ->findOrFail($request->validated('order_id'));
+
+            $traderOrder = $order->activeTraderOrder()->first();
 
             $tokenCacheKey = sprintf('client_wakala_token_%s_%s', $order->id, $order->getNationalId());
 
@@ -43,11 +45,14 @@ class AcceptClientWakala extends Controller
             }
 
             $canProceed = $order->getNationalId() === $request->validated('national_id')
-                && $order->client_wakala_accepted_at === null;
+                && $traderOrder !== null
+                && ! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::ClientWakalaCompleted);
 
             abort_if(! $canProceed, 404);
 
             $media = $acceptClientWakala->handle($order);
+
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ClientWakalaAccepted);
 
             $order->update([
                 'status' => FinancingOrderStatus::ClientWakalaCompleted,
