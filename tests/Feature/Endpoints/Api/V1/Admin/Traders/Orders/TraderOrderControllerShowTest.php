@@ -95,6 +95,13 @@ class TraderOrderControllerShowTest extends TestCase
                         'amount',
                         'selling_price',
                         'created_at',
+                        'trader_orders.id',
+                        'trader_orders.reference',
+                        'trader_orders.provider',
+                        'trader_orders.is_cancellable',
+                        'trader_orders.history',
+                        'trader_orders.status',
+                        'trader_orders.created_at',
                     ])
                     ->respond()
                     ->getData(true)
@@ -110,6 +117,7 @@ class TraderOrderControllerShowTest extends TestCase
                 return $this->actingAs($user)
                     ->withHeader('X-Company', self::$traderCompany->id)
                     ->getJson(self::$baseURL);
-            });
+            }
+        );
     }
 }

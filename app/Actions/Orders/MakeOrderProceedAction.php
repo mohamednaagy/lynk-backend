@@ -51,11 +51,11 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
         $media = app(AcceptClientWakala::class)->handle($order);
 
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ClientWakalaAccepted);
+
         $order->update([
             'status' => FinancingOrderStatus::ClientWakalaCompleted,
         ]);
-
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ClientWakalaAccepted);
 
         return [
             'wakala_file_url' => route('api.v1.media.download', ['media' => $media->uuid]),
