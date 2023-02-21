@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument;
+namespace Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders\MurabhaCompleteDocument;
 
 use App\Enums\Area;
 use App\Enums\ErrorCode;
@@ -24,13 +24,15 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 {
     use RefreshDatabase, AssertsAccessByRoleAndArea;
 
-    const BaseUrl = 'api/v1/admin';
+    const BaseUrl = 'api/v1/trader';
+
+    private static Company $trader;
 
     private static Company $lender;
 
     private static User $userLender;
 
-    private static User $superAdminUser;
+    private static User $traderAdminUser;
 
     private static Builder|Model $financingOrder;
 
@@ -51,13 +53,15 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
             SmsSent::class,
         ]);
 
-        self::$superAdminUser = $this->createSuperAdminUser();
-
-        [self::$lender] = $this->createLenderCompany('2000', [
+        [self::$trader] = $this->createTraderCompany('2000', [
             'company_cr' => '1234567891',
+            'driver' => 'fake',
         ]);
+        [self::$lender] = $this->createLenderCompany('2000', [
+            'company_cr' => '1234567892',
+        ]);
+        self::$traderAdminUser = $this->createTraderUser(self::$trader->id);
         self::$userLender = $this->createLenderUser(self::$lender->id);
-
         self::$financingOrder = $this->createOrder(
             self::$lender->id,
             self::$userLender->id,
@@ -69,16 +73,16 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
         // create trader order
         self::$traderOrder = self::$financingOrder->traderOrders()->create([
-            'provider' => 'dmcc',
+            'provider' => self::$trader->driver,
             'reference' => '123456789',
             'status' => TraderOrderStatus::InProgress,
         ]);
 
         self::$updateMurabhaCompleteDocumentUrl = self::BaseUrl.
             '/orders/'.
-            self::$financingOrder->getOriginal('id').
+            self::$financingOrder->id.
             '/trader-orders/'.
-            self::$traderOrder->getOriginal('id').
+            self::$traderOrder->id.
             '/murabha-complete';
 
         self::$requestData = [
@@ -92,7 +96,8 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
      */
     public function test_that_unauth_user_cant_update_murabha_complete_document(): void
     {
-        $this->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
+        $this->withHeader('X-Company', self::$trader->id)
+            ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
                 'message' => 'Unauthenticated.',
@@ -102,15 +107,16 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_other_area_roles_of_not_super_admin_area_cant_update_murabha_complete_document(): void
+    public function test_that_other_area_roles_of_not_trader_area_cant_update_murabha_complete_document(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
             Response::HTTP_FORBIDDEN,
             [
-                Area::SuperAdmin,
+                Area::Trader,
             ],
             function ($user, $role) {
-                return $this->actingAs($user)
+                return $this->withHeader('X-Company', self::$trader->id)
+                    ->actingAs($user)
                     ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData);
             }
         );
@@ -119,22 +125,16 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
     /**
      * @return void
      */
-    public function test_proceed_murabha_complete_document_is_successfull_and_order_status_will_be_updated(): void
+    public function test_proceed_murabha_complete_document_succeed(): void
     {
-        // create trader order history of previous last step
-        self::$traderOrder->traderHistories()->create(
-            [
-                'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabhaOfferIssued],
-            ]
-        );
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::AttachMpoDocument,
+        ]);
 
-        $this->actingAs(self::$superAdminUser)
+        $this->withHeader('X-Company', self::$trader->id)
+            ->actingAs(self::$traderAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertJsonStructure(['data']);
-
-        $freshOrderStatus = self::$financingOrder->fresh()->status;
-
-        $this->assertTrue($freshOrderStatus->is(FinancingOrderStatus::MurabahaSaleCompleted));
     }
 
     /**
@@ -145,13 +145,12 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
      */
     public function test_update_murabha_complete_document_not_follow_sequence($unsuitableTraderHistoryData): void
     {
-        self::$traderOrder->traderHistories()->create(
-            [
-                'action' => $unsuitableTraderHistoryData,
-            ]
-        );
+        self::$traderOrder->traderHistories()->create([
+            'action' => $unsuitableTraderHistoryData,
+        ]);
 
-        $this->actingAs(self::$superAdminUser)
+        $this->withHeader('X-Company', self::$trader->id)
+            ->actingAs(self::$traderAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertStatus(400)
             ->assertExactJson([
@@ -165,38 +164,9 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
         return [
             'histories_that_doesnt_follow_sequence' => collect(FinancingOrderHistory::getValues())
                 ->reject(function ($item) {
-                    return $item == FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted]
-                        || $item == FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabhaOfferIssued];
+                    return $item == FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderHistory::AttachMpoDocument];
                 })
                 ->toArray(),
         ];
-    }
-
-    /**
-     * @return void
-     */
-    public function test_update_murabha_complete_document_is_successful_and_order_status_will_not_be_updated(): void
-    {
-        self::$traderOrder->traderHistories()->create(
-            [
-                'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabhaOfferIssued],
-            ]
-        );
-
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted],
-        ]);
-
-        self::$financingOrder->update([
-            'status' => FinancingOrderStatus::Completed,
-        ]);
-
-        $this->actingAs(self::$superAdminUser)
-            ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
-            ->assertJsonStructure(['data']);
-
-        $freshOrderStatus = self::$financingOrder->fresh()->status;
-
-        $this->assertTrue($freshOrderStatus->is(FinancingOrderStatus::Completed));
     }
 }

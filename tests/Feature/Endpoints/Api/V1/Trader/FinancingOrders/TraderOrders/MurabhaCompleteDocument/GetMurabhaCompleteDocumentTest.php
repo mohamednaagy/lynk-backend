@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders;
+namespace Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders\MurabhaCompleteDocument;
 
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
@@ -23,13 +23,15 @@ class GetMurabhaCompleteDocumentTest extends TestCase
 {
     use RefreshDatabase, AssertsAccessByRoleAndArea;
 
-    const BaseUrl = 'api/v1/admin';
+    const BaseUrl = 'api/v1/trader';
+
+    private static Company $trader;
 
     private static Company $lender;
 
     private static User $userLender;
 
-    private static User $superAdminUser;
+    private static User $traderAdminUser;
 
     private static Builder|Model $financingOrder;
 
@@ -44,8 +46,13 @@ class GetMurabhaCompleteDocumentTest extends TestCase
     {
         parent::setUp();
 
-        self::$superAdminUser = $this->createSuperAdminUser();
-        [self::$lender] = $this->createLenderCompany('2000', ['company_cr' => '1234567891']);
+        [self::$trader] = $this->createTraderCompany('2000', [
+            'company_cr' => '1234567891',
+        ]);
+        [self::$lender] = $this->createLenderCompany('2000', [
+            'company_cr' => '1234567892',
+        ]);
+        self::$traderAdminUser = $this->createTraderUser(self::$trader->id);
         self::$userLender = $this->createLenderUser(self::$lender->id);
         self::$financingOrder = $this->createOrder(
             self::$lender->id,
@@ -76,7 +83,8 @@ class GetMurabhaCompleteDocumentTest extends TestCase
      */
     public function test_that_unauth_user_cant_get_murabha_complete_document(): void
     {
-        $this->getJson(self::$getMurabhaCompleteDocumentUrl)
+        $this->withHeader('X-Company', self::$trader->id)
+            ->getJson(self::$getMurabhaCompleteDocumentUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
                 'message' => 'Unauthenticated.',
@@ -86,15 +94,16 @@ class GetMurabhaCompleteDocumentTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_other_area_roles_of_not_super_admin_area_cant_get_murabha_complete_document(): void
+    public function test_that_other_area_roles_of_not_trader_area_cant_get_murabha_complete_document(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
             Response::HTTP_FORBIDDEN,
             [
-                Area::SuperAdmin,
+                Area::Trader,
             ],
             function ($user, $role) {
-                return $this->actingAs($user)
+                return $this->withHeader('X-Company', self::$trader->id)
+                    ->actingAs($user)
                     ->getJson(self::$getMurabhaCompleteDocumentUrl);
             }
         );
@@ -114,7 +123,8 @@ class GetMurabhaCompleteDocumentTest extends TestCase
                 ->image($fileName)
         )->toMediaCollection(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo);
 
-        $this->actingAs(self::$superAdminUser)
+        $this->withHeader('X-Company', self::$trader->id)
+            ->actingAs(self::$traderAdminUser)
             ->getJson(self::$getMurabhaCompleteDocumentUrl)
             ->assertJsonStructure([
                 'data' => [
