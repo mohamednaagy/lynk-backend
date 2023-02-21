@@ -80,6 +80,7 @@ class TraderOrderController extends Controller
                 'status',
                 'amount',
                 'selling_price',
+                'can_completed',
                 'created_at',
                 'trader_orders.id',
                 'trader_orders.reference',

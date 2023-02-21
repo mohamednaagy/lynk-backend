@@ -16,12 +16,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
-use Tests\Traits\InteractsWithCompany;
-use Tests\Traits\InteractsWithUser;
 
 class TraderOrderControllerShowTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser, AssertsAccessByRoleAndArea;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     private static Company $traderCompany;
 
@@ -59,6 +57,7 @@ class TraderOrderControllerShowTest extends TestCase
             'status' => TraderOrderStatus::InProgress,
             'reference' => 123,
         ]);
+
         self::$traderHistory = self::$traderOrder->traderHistories()->create([
             'action' => FinancingOrderHistory::GetTtiId,
         ]);
@@ -94,6 +93,7 @@ class TraderOrderControllerShowTest extends TestCase
                         'status',
                         'amount',
                         'selling_price',
+                        'can_completed',
                         'created_at',
                         'trader_orders.id',
                         'trader_orders.reference',
@@ -106,6 +106,20 @@ class TraderOrderControllerShowTest extends TestCase
                     ->respond()
                     ->getData(true)
             );
+    }
+
+    /**
+     * @return void
+     */
+    public function test_trader_order_controller_can_completed(): void
+    {
+        self::$traderOrder->update(['status' => TraderOrderStatus::Completed]);
+
+        $response = $this->actingAs(self::$userAdmin)
+            ->withHeader('X-Company', self::$traderCompany->id)
+            ->getJson(self::$baseURL);
+
+        $this->assertTrue($response->json('data.can_completed') == true);
     }
 
     public function test_trader_roles_only_can_access()

@@ -141,4 +141,9 @@ class TraderOrder extends Model implements HasMedia
     {
         return $query->whereIn('trader_orders.status', [TraderOrderStatus::Completed, TraderOrderStatus::InProgress]);
     }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', TraderOrderStatus::Completed);
+    }
 }

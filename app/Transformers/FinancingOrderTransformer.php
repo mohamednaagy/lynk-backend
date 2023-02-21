@@ -45,6 +45,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'active_trader',
         'trader_orders',
         'trader_order_history',
+        'can_completed',
     ];
 
     public function transform(FinancingOrder $financingOrder)
@@ -188,5 +189,14 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeTraderOrderHistory(FinancingOrder $financingOrder): Primitive
     {
         return $this->primitive(optional($financingOrder->activeTraderOrder->first())->traderHistories);
+    }
+
+    public function includeCanCompleted(FinancingOrder $financingOrder): Primitive
+    {
+        $canCompleteOrder = $financingOrder->traderOrders()->completed()->exists()
+            &&
+            ! $financingOrder->status->is(FinancingOrderStatus::Completed);
+
+        return $this->primitive($canCompleteOrder);
     }
 }

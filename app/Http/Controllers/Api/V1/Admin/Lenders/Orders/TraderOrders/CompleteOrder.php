@@ -37,7 +37,7 @@ class CompleteOrder extends Controller
                 $paymentProofMedia = $completeOrder->handle($traderOrder, $request->validated());
 
                 return $this->successResponse([
-                    'payment_proof_uel' => $paymentProofMedia?->fileUrl,
+                    'payment_proof_url' => $paymentProofMedia?->fileUrl,
                 ]);
             }
         );
