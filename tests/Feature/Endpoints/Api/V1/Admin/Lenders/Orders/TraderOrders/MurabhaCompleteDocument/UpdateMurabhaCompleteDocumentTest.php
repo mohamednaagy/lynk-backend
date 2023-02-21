@@ -52,10 +52,12 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
         ]);
 
         self::$superAdminUser = $this->createSuperAdminUser();
+
         [self::$lender] = $this->createLenderCompany('2000', [
             'company_cr' => '1234567891',
         ]);
         self::$userLender = $this->createLenderUser(self::$lender->id);
+
         self::$financingOrder = $this->createOrder(
             self::$lender->id,
             self::$userLender->id,
@@ -135,27 +137,17 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
         $this->assertTrue($freshOrderStatus->is(FinancingOrderStatus::MurabahaSaleCompleted));
     }
 
-    public function unsuitableOrderStatusDataProvider()
-    {
-        return collect(FinancingOrderHistory::getValues())->reject(function ($item) {
-            return $item == FinancingOrderStatus::MurabahaSaleCompleted
-                || $item == FinancingOrderStatus::Completed;
-        })->map(function ($item) {
-            return [$item];
-        })->toArray();
-    }
-
     /**
-     * @dataProvider unsuitableOrderStatusDataProvider
+     * @dataProvider unsuitableTraderHistoryDataProvider
      *
-     * @param $unsuitableOrderStatusData
+     * @param $unsuitableTraderHistoryData
      * @return void
      */
-    public function test_update_murabha_complete_document_not_follow_sequence($unsuitableOrderStatusData): void
+    public function test_update_murabha_complete_document_not_follow_sequence($unsuitableTraderHistoryData): void
     {
         self::$traderOrder->traderHistories()->create(
             [
-                'action' => FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+                'action' => $unsuitableTraderHistoryData,
             ]
         );
 
@@ -166,6 +158,18 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
                 'message' => __('error.order_status_doesnt_follow_sequence'),
                 'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
             ]);
+    }
+
+    public function unsuitableTraderHistoryDataProvider()
+    {
+        return [
+            'histories_that_doesnt_follow_sequence' => collect(FinancingOrderHistory::getValues())
+                ->reject(function ($item) {
+                    return $item == FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted]
+                        || $item == FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabhaOfferIssued];
+                })
+                ->toArray(),
+        ];
     }
 
     /**

@@ -137,25 +137,16 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
             ->assertJsonStructure(['data']);
     }
 
-    public function unsuitableOrderStatusDataProvider()
-    {
-        return collect(FinancingOrderHistory::getValues())->reject(function ($item) {
-            return $item == FinancingOrderHistory::AttachMpoDocument;
-        })->map(function ($item) {
-            return [$item];
-        })->toArray();
-    }
-
     /**
-     * @dataProvider unsuitableOrderStatusDataProvider
+     * @dataProvider unsuitableTraderHistoryDataProvider
      *
-     * @param $unsuitableOrderStatusData
+     * @param $unsuitableTraderHistoryData
      * @return void
      */
-    public function test_update_murabha_complete_document_not_follow_sequence($unsuitableOrderStatusData): void
+    public function test_update_murabha_complete_document_not_follow_sequence($unsuitableTraderHistoryData): void
     {
         self::$traderOrder->traderHistories()->create([
-            'action' => $unsuitableOrderStatusData,
+            'action' => $unsuitableTraderHistoryData,
         ]);
 
         $this->withHeader('X-Company', self::$trader->id)
@@ -166,5 +157,16 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
                 'message' => __('error.order_status_doesnt_follow_sequence'),
                 'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
             ]);
+    }
+
+    public function unsuitableTraderHistoryDataProvider()
+    {
+        return [
+            'histories_that_doesnt_follow_sequence' => collect(FinancingOrderHistory::getValues())
+                ->reject(function ($item) {
+                    return $item == FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderHistory::AttachMpoDocument];
+                })
+                ->toArray(),
+        ];
     }
 }
