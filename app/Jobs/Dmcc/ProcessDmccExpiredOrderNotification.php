@@ -4,12 +4,10 @@ namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -18,9 +16,9 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccMpoNotification implements ShouldQueue
+class ProcessDmccExpiredOrderNotification implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected string $ttiId;
 
@@ -56,49 +54,20 @@ class ProcessDmccMpoNotification implements ShouldQueue
                 return;
             }
 
-            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
-
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::MurabhaOfferIssued)) {
-                return;
-            }
-
             $trader = Trader::driver($traderOrder->provider);
 
-            $versionNo = $trader->uploadTTIDocumentAndGetVersionNumber($this->ttiId);
+            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
-            $trader->issueMurabahaPurchaseOffer(
-                $this->ttiId,
-                $versionNo
-            );
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::Expired);
 
             $trader->createTraderOrderHistory(
                 $traderOrder,
-                FinancingOrderHistory::IssueMurabahaOffer
+                FinancingOrderHistory::Expired
             );
 
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);
-
-            $mpoDocument = $trader->getDocumentByTypeAndTransaction(
-                $this->ttiId,
-                'Murabaha Purchase Offer Document'
-            );
-
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::GetMurabahaPurchaseOfferDocument
-            );
-
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                $mpoDocument,
-                TraderOrderMediaCollection::MurabahaPurchaseOrder,
-                'base64'
-            );
-
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::AttachMpoDocument
-            );
+            $traderOrder->update([
+                'status' => TraderOrderStatus::Expired,
+            ]);
         });
     }
 

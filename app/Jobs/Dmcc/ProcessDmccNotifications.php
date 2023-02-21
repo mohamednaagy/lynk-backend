@@ -6,6 +6,7 @@ use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Foundation\Bus\PendingDispatch;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
@@ -42,7 +43,7 @@ class ProcessDmccNotifications implements ShouldQueue
                     ==
                     'Action Required for Issue Murabaha Purchase Offer'
                 ) {
-                    ProcessDmccMpoNotification::dispatch($notification);
+                    ProcessDmccPtpDocumentRetrievedOrder::dispatch($notification);
                 }
             } catch (\Throwable $th) {
                 //throw $th;
@@ -52,20 +53,31 @@ class ProcessDmccNotifications implements ShouldQueue
         collect(
             $trader->fetchNotifications('FYI')
         )->each(function ($notification) {
+            $dispatchedJob = null;
             if (
                 in_array($notification->notificationHeaderAndEntity->notification, [
                     'Tradeflow Transaction (Islamic) - Payment Settlement Required',
                 ])
             ) {
-                ProcessDmccMpoSaleCompleteNotification::dispatch($notification)->chain([
-                    new ProcessUnprocessedDmccNotification($notification),
-                ]);
+                $dispatchedJob = ProcessDmccMpoSaleCompleteNotification::dispatch($notification);
             } elseif (
                 $notification->notificationHeaderAndEntity->notification
                 ==
                 'Tradeflow Transaction (Islamic) Cancelled'
             ) {
-                ProcessDmccCancelNotification::dispatch($notification);
+                $dispatchedJob = ProcessDmccCancelNotification::dispatch($notification);
+            } elseif (
+                $notification->notificationHeaderAndEntity->notification
+                ==
+                'Tradeflow Transaction (Islamic) Expired'
+            ) {
+                $dispatchedJob = ProcessDmccExpiredOrderNotification::dispatch($notification);
+            }
+
+            if ($dispatchedJob instanceof PendingDispatch) {
+                $dispatchedJob->chain([
+                    new ProcessUnprocessedDmccNotification($notification),
+                ]);
             }
         });
     }

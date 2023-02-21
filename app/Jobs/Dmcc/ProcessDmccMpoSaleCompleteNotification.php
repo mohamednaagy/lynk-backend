@@ -94,6 +94,10 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
             );
 
             $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabahaSaleCompleted);
+
+            $traderOrder->update([
+                'status' => TraderOrderStatus::Completed,
+            ]);
         });
     }
 
