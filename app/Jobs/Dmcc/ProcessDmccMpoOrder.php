@@ -42,7 +42,8 @@ class ProcessDmccMpoOrder implements ShouldQueue
         DB::transaction(function () {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             $lastTraderOrder = $financingOrder->activeTraderOrder()
-                ->whereIn('provider', ['dmcc', 'fake'])->first();
+                ->whereIn('provider', ['dmcc', 'fake'])
+                ->first();
 
             if (! $lastTraderOrder) {
                 return;

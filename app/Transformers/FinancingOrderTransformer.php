@@ -4,6 +4,7 @@ namespace App\Transformers;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use League\Fractal\Resource\Collection;
@@ -155,7 +156,14 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeHistory(FinancingOrder $financingOrder): Primitive|Collection
     {
-        $activeTraderOrder = $financingOrder->activeTraderOrder()->first();
+        // TODO: handle not expired + cancelled cases or show all trading requests
+        $activeTraderOrder = $financingOrder->traderOrders()
+            ->whereIn('status', [
+                TraderOrderStatus::Completed,
+                TraderOrderStatus::InProgress,
+            ])
+            ->latest()
+            ->first();
 
         if (! $activeTraderOrder) {
             return $this->primitive(null);
