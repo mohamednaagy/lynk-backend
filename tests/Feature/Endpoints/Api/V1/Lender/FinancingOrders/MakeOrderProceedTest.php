@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Modules\Grantify\Facades\Grantify;
@@ -314,12 +315,50 @@ class MakeOrderProceedTest extends TestCase
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
                 'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'client_wakala' => UploadedFile::fake()->create('client_wakala.pdf'),
             ]);
 
         $response->assertStatus(400)->assertExactJson([
             'message' => __('error.order_status_doesnt_follow_sequence'),
             'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
         ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_admin_proceed_order_client_wakala_file_required_when_case_is_client_wakala_accepted_and_order_verification_is_true(): void
+    {
+        self::$financingOrder->update([
+            'is_verification_required' => true,
+        ]);
+
+        $this->actingAs(self::$userLender)
+            ->withHeader('X-Company', self::$company->getOriginal('id'))
+            ->postJson(self::$orderProceedUrl, [
+                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrorFor('client_wakala');
+    }
+
+    /**
+     * @return void
+     */
+    public function test_admin_proceed_order_client_wakala_should_be_pdf_file(): void
+    {
+        self::$financingOrder->update([
+            'is_verification_required' => true,
+        ]);
+
+        $this->actingAs(self::$userLender)
+            ->withHeader('X-Company', self::$company->getOriginal('id'))
+            ->postJson(self::$orderProceedUrl, [
+                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'client_wakala' => UploadedFile::fake()->create('client_wakala.jpg'),
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrorFor('client_wakala');
     }
 
     /**
