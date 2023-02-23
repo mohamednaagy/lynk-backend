@@ -57,6 +57,7 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
     ];
 
     public static array $orderHistoryLastActionMap = [
+        FinancingOrderStatus::WaitingPurchasingCommodity => self::AttachPtpDocumentToOrder,
         FinancingOrderStatus::CommodityPurchased => self::GetMurabahaPurchaseOfferDocument,
         FinancingOrderStatus::ClientWakalaCompleted => self::ClientWakalaAccepted,
         FinancingOrderStatus::MurabhaOfferIssued => self::AttachMpoDocument,

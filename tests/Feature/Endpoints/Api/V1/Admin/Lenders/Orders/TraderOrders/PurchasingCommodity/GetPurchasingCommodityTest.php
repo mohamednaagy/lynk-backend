@@ -1,10 +1,9 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\PurchasingCommodity;
 
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\TraderOrder;
@@ -13,13 +12,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
-use Illuminate\Http\UploadedFile;
-use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
-use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
-class GetMurabhaCompleteDocumentTest extends TestCase
+class GetPurchasingCommodityTest extends TestCase
 {
     use RefreshDatabase, AssertsAccessByRoleAndArea;
 
@@ -35,7 +31,7 @@ class GetMurabhaCompleteDocumentTest extends TestCase
 
     private static TraderOrder $traderOrder;
 
-    private static string $getMurabhaCompleteDocumentUrl;
+    private static string $getPurchasingCommodityUrl;
 
     /**
      * @return void
@@ -45,14 +41,16 @@ class GetMurabhaCompleteDocumentTest extends TestCase
         parent::setUp();
 
         self::$superAdminUser = $this->createSuperAdminUser();
-        [self::$lender] = $this->createLenderCompany('2000', ['company_cr' => '1234567891']);
+        [self::$lender] = $this->createLenderCompany('2000', [
+            'company_cr' => '1234567891',
+        ]);
         self::$userLender = $this->createLenderUser(self::$lender->id);
         self::$financingOrder = $this->createOrder(
             self::$lender->id,
             self::$userLender->id,
             [
                 'is_verification_required' => true,
-                'status' => FinancingOrderStatus::CommodityPurchased,
+                'status' => FinancingOrderStatus::WaitingPurchasingCommodity,
             ]
         );
 
@@ -63,20 +61,20 @@ class GetMurabhaCompleteDocumentTest extends TestCase
             'status' => TraderOrderStatus::InProgress,
         ]);
 
-        self::$getMurabhaCompleteDocumentUrl = self::BaseUrl.
+        self::$getPurchasingCommodityUrl = self::BaseUrl.
             '/orders/'.
             self::$financingOrder->getOriginal('id').
             '/trader-orders/'.
             self::$traderOrder->getOriginal('id').
-            '/murabha-complete';
+            '/purchasing-commodity';
     }
 
     /**
      * @return void
      */
-    public function test_that_unauth_user_cant_get_murabha_complete_document(): void
+    public function test_that_unauth_user_cant_fetch_purchasing_commodity(): void
     {
-        $this->getJson(self::$getMurabhaCompleteDocumentUrl)
+        $this->getJson(self::$getPurchasingCommodityUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
                 'message' => 'Unauthenticated.',
@@ -86,7 +84,7 @@ class GetMurabhaCompleteDocumentTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_other_area_roles_of_not_super_admin_area_cant_get_murabha_complete_document(): void
+    public function test_that_other_area_roles_of_not_super_admin_area_cant_fetch_purchasing_commodity(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
             Response::HTTP_FORBIDDEN,
@@ -95,30 +93,21 @@ class GetMurabhaCompleteDocumentTest extends TestCase
             ],
             function ($user, $role) {
                 return $this->actingAs($user)
-                    ->getJson(self::$getMurabhaCompleteDocumentUrl);
+                    ->getJson(self::$getPurchasingCommodityUrl);
             }
         );
     }
 
     /**
      * @return void
-     *
-     * @throws FileDoesNotExist
-     * @throws FileIsTooBig
      */
-    public function test_get_murabha_complete_document_succeed(): void
+    public function test_fetch_purchasing_commodity_succeed(): void
     {
-        $fileName = self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf';
-        self::$traderOrder->addMedia(
-            UploadedFile::fake()
-                ->image($fileName)
-        )->toMediaCollection(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo);
-
         $this->actingAs(self::$superAdminUser)
-            ->getJson(self::$getMurabhaCompleteDocumentUrl)
+            ->getJson(self::$getPurchasingCommodityUrl)
             ->assertJsonStructure([
                 'data' => [
-                    'url',
+                    'purchasing_commodity_information',
                 ],
             ]);
     }
