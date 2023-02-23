@@ -15,7 +15,7 @@ use Illuminate\Http\Response;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
-class FetchPurchasingCommodityTest extends TestCase
+class GetPurchasingCommodityTest extends TestCase
 {
     use RefreshDatabase, AssertsAccessByRoleAndArea;
 
