@@ -13,16 +13,14 @@ class GetOrderAndTraderOrderLockedForUpdateAction implements GetOrderAndTraderOr
         $traderOrder = TraderOrder::lockForUpdate()
             ->findOrFail($traderOrderId);
 
-        $order = $traderOrder->order();
-
-        if (tenant()) {
-            $order->withoutGlobalScope(TenantScope::class);
-        }
-
         $traderOrder->load([
+            'order' => function ($query) {
+                $query->when(tenant(), fn ($query) => $query->withoutGlobalScope(TenantScope::class))
+                    ->lockForUpdate();
+            },
             'traderHistories' => fn ($query) => $query->lockForUpdate(),
         ]);
 
-        return [$order->lockForUpdate()->first(), $traderOrder];
+        return [$traderOrder->order, $traderOrder];
     }
 }
