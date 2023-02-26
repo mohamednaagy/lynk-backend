@@ -39,7 +39,11 @@ class OrderController extends Controller
     {
         $company = Company::find($request->input('company'));
 
-        $orders = $getPaginatedOrders->setCompany($company)->handle();
+        if ($company) {
+            $getPaginatedOrders = $getPaginatedOrders->setCompany($company);
+        }
+
+        $orders = $getPaginatedOrders->handle();
 
         return fractal($orders, new FinancingOrderTransformer())
             ->parseIncludes([
