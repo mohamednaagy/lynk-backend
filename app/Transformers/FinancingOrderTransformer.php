@@ -111,13 +111,12 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive($financingOrder->selling_price->formatByDecimal());
     }
 
-    public function includeCreatorName(FinancingOrder $financingOrder)
-    {
-        return $this->primitive($financingOrder->creator->full_name);
-    }
-
     public function includeCreator(FinancingOrder $financingOrder)
     {
+        if (is_null($financingOrder->creator)) {
+            return $this->primitive(null);
+        }
+
         return $this->primitive([
             'id' => $financingOrder->creator->id,
             'name' => $financingOrder->creator->full_name,
