@@ -28,7 +28,7 @@ class GetMurabahaPurchaseOffer extends Controller
         TraderOrder $traderOrder
     ): JsonResponse {
         $url = $traderOrder->getFirstMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder)
-            ->file_url;
+            ?->file_url;
 
         return $this->successResponse([
             'murabaha_purchase_offer' => $url,

@@ -86,15 +86,15 @@ class TraderOrderTransformer extends TransformerAbstract
             'currency' => $traderOrder->currency,
             'quantity' => $traderOrder->quantity,
             'warehouse' => $traderOrder->warehouse,
-            'ptp_document' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::PromiseToPurchase)->file_url,
+            'ptp_document' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::PromiseToPurchase)?->file_url,
             'exchange_rate' => $traderOrder->exchange_rate,
             'previous_owner' => $traderOrder->previous_owner,
             'warehouse_or_vault_country' => $traderOrder->warehouse_or_vault_country,
             'warehouse_or_vault_emirates' => $traderOrder->warehouse_or_vault_emirates,
             'date_time_of_purchasing_commodity' => $traderOrder->date_time_of_purchasing_commodity,
-            'original_holding_certificate' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)->file_url,
+            'original_holding_certificate' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)?->file_url,
             'auto_generate_financing_institution_certificate' => $traderOrder->auto_generate_financing_institution_certificate,
-            'financing_institution_certificate' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::TransferOwnershipToLender)->file_url,
+            'financing_institution_certificate' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::TransferOwnershipToLender)?->file_url,
         ]);
     }
 

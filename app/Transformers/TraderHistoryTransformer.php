@@ -39,7 +39,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
                 'document' => $this->traderOrder
                     ->getFirstMedia(TraderOrderMediaCollection::ClientWakala)
-                    ->file_url,
+                    ?->file_url,
             ],
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => [
                 'step' => 'commodity_purchased',
@@ -48,13 +48,13 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'cert_document' => [
                     'url' => $this->traderOrder
                         ->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)
-                        ->file_url,
+                        ?->file_url,
                     'date' => optional($getPtpDocument)->created_at?->format('Y-m-d h:i:s A'),
                 ],
                 'ownership_document' => [
                     'url' => $this->traderOrder
                         ->getFirstMedia(TraderOrderMediaCollection::TransferOwnershipToLender)
-                        ->file_url,
+                        ?->file_url,
                     'date' => optional($transferOwnershipToLender)->created_at?->format('Y-m-d h:i:s A'),
                 ],
             ],
@@ -69,7 +69,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
                 'document' => $this->traderOrder
                     ->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer)
-                    ->file_url,
+                    ?->file_url,
             ],
             FinancingOrderHistory::IssueMurabahaOffer => [
                 'step' => 'selling_commodity_to_open_market',
@@ -78,7 +78,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'mpo_document' => [
                     'url' => $this->traderOrder
                         ->getFirstMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder)
-                        ->file_url,
+                        ?->file_url,
                     'date' => optional($getMurabahaPurchaseOfferDocument)->created_at?->format('Y-m-d h:i:s A'),
                 ],
             ],
@@ -89,7 +89,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'warranty_document' => [
                     'url' => $this->traderOrder
                         ->getFirstMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
-                        ->file_url,
+                        ?->file_url,
                     'date' => optional($getWarrantAmendmentExceptWarrantNoDocument)->created_at?->format('Y-m-d h:i:s A'),
                 ],
             ],

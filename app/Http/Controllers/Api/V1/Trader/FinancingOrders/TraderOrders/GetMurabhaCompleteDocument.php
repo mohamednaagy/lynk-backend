@@ -33,6 +33,6 @@ class GetMurabhaCompleteDocument extends Controller
     ): JsonResponse {
         $media = $traderOrder->getFirstMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo);
 
-        return $this->successResponse(['url' => $media->file_url ?? null]);
+        return $this->successResponse(['url' => $media?->file_url]);
     }
 }
