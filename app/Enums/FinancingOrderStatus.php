@@ -113,6 +113,20 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         self::Rejected,
     ];
 
+    public static array $nextStep = [
+        self::PendingApproval => self::Approved,
+        self::Approved => self::WaitingPurchasingCommodity,
+        self::WaitingPurchasingCommodity => self::RespondedToPtp,
+        self::RespondedToPtp => self::PtpDocumentRetrieved,
+        self::PtpDocumentRetrieved => self::CommodityPurchased,
+        self::CommodityPurchased => self::ContractSigned,
+        self::ContractSigned => self::CommoditySoldToCustomer,
+        self::CommoditySoldToCustomer => self::WaitingClientWakala,
+        self::WaitingClientWakala => self::ClientWakalaCompleted,
+        self::ClientWakalaCompleted => self::MurabhaOfferIssued,
+        self::MurabhaOfferIssued => self::MurabahaSaleCompleted,
+    ];
+
     /**
      * @param  Status|int  $status
      * @return bool

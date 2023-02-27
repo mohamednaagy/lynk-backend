@@ -64,4 +64,63 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
         FinancingOrderStatus::CommoditySoldToCustomer => self::CreateSellingCommodityToCustomerDocument,
         FinancingOrderStatus::MurabahaSaleCompleted => self::MurabahaSaleCompleted,
     ];
+
+    public static array $orderHistoryMapToFinancingOrder = [
+        FinancingOrderHistory::GetTtiId => FinancingOrderStatus::WaitingPurchasingCommodity,
+        FinancingOrderHistory::RespondPtp => FinancingOrderStatus::RespondedToPtp,
+        FinancingOrderHistory::GetPtpDocument => FinancingOrderStatus::PtpDocumentRetrieved,
+        FinancingOrderHistory::AttachPtpDocumentToOrder => FinancingOrderStatus::PtpDocumentRetrieved,
+        FinancingOrderHistory::GetTtiHoldingCertificateDocument => FinancingOrderStatus::PtpDocumentRetrieved,
+        FinancingOrderHistory::AttachTtiHoldingCertificateDocument => FinancingOrderStatus::PtpDocumentRetrieved,
+        FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => FinancingOrderStatus::CommodityPurchased,
+        FinancingOrderHistory::ContractSigned => FinancingOrderStatus::ContractSigned,
+        FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => FinancingOrderStatus::CommoditySoldToCustomer,
+        FinancingOrderHistory::ClientWakalaAccepted => FinancingOrderStatus::ClientWakalaCompleted,
+        FinancingOrderHistory::IssueMurabahaOffer => FinancingOrderStatus::MurabhaOfferIssued,
+        FinancingOrderHistory::GetMurabahaPurchaseOfferDocument => FinancingOrderStatus::MurabhaOfferIssued,
+        FinancingOrderHistory::AttachMpoDocument => FinancingOrderStatus::MurabhaOfferIssued,
+        FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => FinancingOrderStatus::MurabahaSaleCompleted,
+        FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => FinancingOrderStatus::MurabahaSaleCompleted,
+        FinancingOrderHistory::MurabahaSaleCompleted => FinancingOrderStatus::MurabahaSaleCompleted,
+    ];
+
+    public const StepToHistoriesDictionary = [
+        FinancingOrderStatus::PendingApproval => [],
+        FinancingOrderStatus::Approved => [],
+        FinancingOrderStatus::WaitingPurchasingCommodity => [
+            FinancingOrderHistory::GetTtiId,
+        ],
+        FinancingOrderStatus::RespondedToPtp => [
+            FinancingOrderHistory::RespondPtp,
+        ],
+        FinancingOrderStatus::PtpDocumentRetrieved => [
+            FinancingOrderHistory::GetPtpDocument,
+            FinancingOrderHistory::AttachPtpDocumentToOrder,
+            FinancingOrderHistory::GetTtiHoldingCertificateDocument,
+            FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
+        ],
+        FinancingOrderStatus::CommodityPurchased => [
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
+        ],
+        FinancingOrderStatus::ContractSigned => [
+            FinancingOrderHistory::ContractSigned,
+        ],
+        FinancingOrderStatus::CommoditySoldToCustomer => [
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+        ],
+        FinancingOrderStatus::WaitingClientWakala => [],
+        FinancingOrderStatus::ClientWakalaCompleted => [
+            FinancingOrderHistory::ClientWakalaAccepted,
+        ],
+        FinancingOrderStatus::MurabhaOfferIssued => [
+            FinancingOrderHistory::IssueMurabahaOffer,
+            FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+            FinancingOrderHistory::AttachMpoDocument,
+        ],
+        FinancingOrderStatus::MurabahaSaleCompleted => [
+            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
+            FinancingOrderHistory::MurabahaSaleCompleted,
+        ],
+    ];
 }
