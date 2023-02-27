@@ -111,7 +111,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive($financingOrder->selling_price->formatByDecimal());
     }
 
-    public function includeCreator(?FinancingOrder $financingOrder)
+    public function includeCreator(FinancingOrder $financingOrder)
     {
         if (is_null($financingOrder->creator)) {
             return $this->primitive(null);

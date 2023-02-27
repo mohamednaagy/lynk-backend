@@ -68,6 +68,10 @@ class EdaatInvoiceTransformer extends TransformerAbstract
 
     public function includeCreator(EdaatInvoice $edaatInvoice): Primitive
     {
+        if (is_null($edaatInvoice->creator)) {
+            return $this->primitive(null);
+        }
+
         return $this->primitive([
             'id' => $edaatInvoice->creator->id,
             'name' => $edaatInvoice->creator->full_name,
