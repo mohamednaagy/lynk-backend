@@ -718,7 +718,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             الوحيد من
             تاريخ و توقيت هذه الشهادة ، وقد تم شراؤها من {{$owner}} بناءاً على طلب الشركة رقم {{$orderNumber}} مقابل
             مبلغ وقدره
-            {{$amount}} ، وسيتم تحصيل مبلغ السلعة في تاريخ {{ $date }}</p>
+            {{number_format($amount, 2)}} ريال سعودي ، وسيتم تحصيل مبلغ السلعة في تاريخ {{ $date }}</p>
         <p class="text-center text-lg font-semibold text-black">بيانات السلعة</p>
 
         <table class="min-w-full">
@@ -729,11 +729,11 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             </tr>
             <tr>
                 <td class="w-1/2 border border-black px-4 text-right">الكمية</td>
-                <td class="w-1/2 border border-black">{{$quantity}}</td>
+                <td class="w-1/2 border border-black">{{$quantity}} {{$uom}}</td>
             </tr>
             <tr>
                 <td class="w-1/2 border border-black px-4 text-right">قيمة السلعة</td>
-                <td class="w-1/2 border border-black">{{$amount}}</td>
+                <td class="w-1/2 border border-black">{{number_format($amount, 2)}} ريال سعودي</td>
             </tr>
             <tr>
                 <td class="w-1/2 border border-black px-4 text-right">موقع السلعة</td>

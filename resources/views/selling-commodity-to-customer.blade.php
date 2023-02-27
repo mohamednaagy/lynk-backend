@@ -750,8 +750,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 <h4 class="pt-3 text-center font-extrabold">شهادة ملكية</h4>
                 <p class="text-center">نؤكد نحن لنك أن السلعة المذكورة أدناه هي ملك لـ / {{$owner}} و هو/هي المالك/ة
                     الوحيد/ة من تاريخ و توقيت هذه الشهادة ، و قد تم شراؤها من {{$companyName}} بناءاً على العقد المبرم
-                    بين الطرفين بتاريخ ( يكون مطابق لتاريخ تأكيد شركة التمويل لتوقيع المقترض عقد التمويل،و يستخرج من
-                    تأكيد وقت جهة التمويل ) مقابل مبلغ وقدره {{number_format($amount, 2)}} ريال سعودي ، و سيتم
+                    بين الطرفين بتاريخ مقابل مبلغ وقدره {{number_format($amount, 2)}} ريال سعودي ، و سيتم
                     بيع السلعة من قبل لنك بناءاً على طلب السيد/ة {{$owner}} و تحصيل مبلغ السلعة في تاريخ
                     {{$date}} ، و يمكنكم استلامه من قبل {{$companyName}} بعد إتمام عملية البيع.</p>
             </div>
@@ -764,7 +763,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </tr>
                 <tr>
                     <td class="w-1/2 border border-black px-4">الكمية</td>
-                    <td class="w-1/2 border border-black">{{$quantity}}</td>
+                    <td class="w-1/2 border border-black">{{$quantity}} {{$uom}}</td>
                 </tr>
                 <tr>
                     <td class="w-1/2 border border-black px-4">قيمة السلعة</td>
