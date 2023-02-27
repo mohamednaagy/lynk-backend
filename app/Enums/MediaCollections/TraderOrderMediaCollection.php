@@ -8,6 +8,8 @@ final class TraderOrderMediaCollection extends Enum
 {
     const ClientWakala = 'client_wakala';
 
+    const SignedClientWakala = 'signed_client_wakala';
+
     const LenderWakala = 'lender_wakala';
 
     const PromiseToPurchase = 'promise_to_purchase';

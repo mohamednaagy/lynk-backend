@@ -27,19 +27,41 @@ class TraderHistoryTransformer extends TransformerAbstract
     public function transform($traderHistoryKey): array
     {
         $traderOrderHistoryExist = $this->traderHistories->where('action', $traderHistoryKey)->first();
+
         $getPtpDocument = $this->traderHistories->where('action', FinancingOrderHistory::GetPtpDocument)->first();
-        $transferOwnershipToLender = $this->traderHistories->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)->first();
-        $getMurabahaPurchaseOfferDocument = $this->traderHistories->where('action', FinancingOrderHistory::GetMurabahaPurchaseOfferDocument)->first();
-        $getWarrantAmendmentExceptWarrantNoDocument = $this->traderHistories->where('action', FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)->first();
+
+        $transferOwnershipToLender = $this->traderHistories
+            ->where(
+                'action',
+                FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
+            )
+            ->first();
+
+        $getMurabahaPurchaseOfferDocument = $this->traderHistories
+            ->where('action', FinancingOrderHistory::GetMurabahaPurchaseOfferDocument)
+            ->first();
+
+        $getWarrantAmendmentExceptWarrantNoDocument = $this->traderHistories
+            ->where('action', FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)
+            ->first();
+
+        $signedWakalaMedia = $this->traderOrder->getFirstMedia(TraderOrderMediaCollection::SignedClientWakala);
+
+        $wakalaMedia = $this->traderOrder->getFirstMedia(TraderOrderMediaCollection::ClientWakala);
 
         return match ($traderHistoryKey) {
             FinancingOrderHistory::ClientWakalaAccepted => [
                 'step' => 'client_wakala',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'document' => $this->traderOrder
-                    ->getFirstMedia(TraderOrderMediaCollection::ClientWakala)
-                    ?->file_url,
+                'wakala_document' => [
+                    'url' => $wakalaMedia?->file_url,
+                    'date' => optional($wakalaMedia)->created_at?->format('Y-m-d h:i:s A'),
+                ],
+                'signed_wakala_document' => [
+                    'url' => $signedWakalaMedia?->file_url,
+                    'date' => optional($signedWakalaMedia)->created_at?->format('Y-m-d h:i:s A'),
+                ],
             ],
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => [
                 'step' => 'commodity_purchased',

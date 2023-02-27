@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\V1\Client;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala as AcceptWakalaInterface;
-use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Client\AcceptClientWakalaRequest;
 use App\Models\FinancingOrder;
@@ -50,9 +50,7 @@ class AcceptClientWakala extends Controller
 
             abort_if(! $canProceed, 404);
 
-            $media = $acceptClientWakala->handle($order);
-
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ClientWakalaAccepted);
+            $acceptClientWakala->handle($order);
 
             $order->update([
                 'status' => FinancingOrderStatus::ClientWakalaCompleted,
@@ -61,7 +59,12 @@ class AcceptClientWakala extends Controller
             Cache::forget($tokenCacheKey);
 
             return $this->successResponse([
-                'wakala_file_url' => route('api.v1.client.media.download', ['media' => $media->uuid]),
+                'wakala_file_url' => route(
+                    'api.v1.client.media.download',
+                    [
+                        'media' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::ClientWakala),
+                    ]
+                ),
             ]);
         });
     }
