@@ -89,10 +89,10 @@ class LenderOrderControllerIndexTest extends TestCase
     public function test_admin_financing_order_controller_index_only_get_lender_orders()
     {
         $this->actingAs(self::$admin)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/orders')
+            ->getJson('api/v1/admin/orders')
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$userLender->orders()->where('company_id', self::$lender->id)->paginate(), new FinancingOrderTransformer())
+                fractal(FinancingOrder::paginate(), new FinancingOrderTransformer())
                     ->parseIncludes([
                         'id',
                         'status',
@@ -112,21 +112,21 @@ class LenderOrderControllerIndexTest extends TestCase
     public function test_admin_financing_order_controller_index_admin_can_access()
     {
         $this->actingAs(self::$admin)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/orders')
+            ->getJson('api/v1/admin/orders')
             ->assertStatus(200);
     }
 
     public function test_admin_financing_order_controller_index_manager_can_not_access_with_no_permission()
     {
         $this->actingAs(self::$manager)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/orders')
+            ->getJson('api/v1/admin/orders')
             ->assertStatus(403);
     }
 
     public function test_admin_financing_order_controller_index_manager_can_access_when_has_permisson()
     {
         $this->actingAs(self::$managerHasPermissionToIndexMethod)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/orders')
+            ->getJson('api/v1/admin/orders')
             ->assertStatus(200);
     }
 
@@ -134,7 +134,7 @@ class LenderOrderControllerIndexTest extends TestCase
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
-                ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/orders');
+                ->getJson('api/v1/admin/orders');
         });
     }
 }
