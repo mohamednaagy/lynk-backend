@@ -113,11 +113,32 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCreatorName(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->creator->full_name);
+        // will remove creator key from response
+//        if (is_null($financingOrder->creator))
+//            return;
+
+//        return $this->primitive($financingOrder->creator?->full_name);
+
+        return $this->primitive($financingOrder->creator?->full_name);
     }
 
-    public function includeCreator(FinancingOrder $financingOrder)
+    public function includeCreator(?FinancingOrder $financingOrder)
     {
+        // will remove creator key from response
+//        if (is_null($financingOrder->creator))
+//            return;
+
+        // using optional operator will return following
+//        "creator": {
+//                "id": null,
+//                "name": null
+//            },
+
+//        return $this->primitive([
+//            'id' => $financingOrder->creator?->id,
+//            'name' => $financingOrder->creator?->full_name,
+//        ]);
+
         return $this->primitive([
             'id' => $financingOrder->creator->id,
             'name' => $financingOrder->creator->full_name,
