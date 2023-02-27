@@ -32,12 +32,23 @@ class TraderHistoryTransformer extends TransformerAbstract
         $getMurabahaPurchaseOfferDocument = $this->traderHistories->where('action', FinancingOrderHistory::GetMurabahaPurchaseOfferDocument)->first();
         $getWarrantAmendmentExceptWarrantNoDocument = $this->traderHistories->where('action', FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)->first();
 
+        $signedWakalaMedia = $this->traderOrder->getFirstMedia(TraderOrderMediaCollection::SignedClientWakala);
+        $wakalaMedia = $this->traderOrder->getFirstMedia(TraderOrderMediaCollection::ClientWakala);
+
         return match ($traderHistoryKey) {
             FinancingOrderHistory::ClientWakalaAccepted => [
                 'step' => 'client_wakala',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
                 'document' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::ClientWakala)),
+                'wakala_document' => [
+                    'url' => $this->fileUrl($wakalaMedia),
+                    'date' => optional($wakalaMedia)->created_at?->format('Y-m-d h:i:s A'),
+                ],
+                'signed_wakala_document' => [
+                    'url' => $this->fileUrl($signedWakalaMedia),
+                    'date' => optional($signedWakalaMedia)->created_at?->format('Y-m-d h:i:s A'),
+                ],
             ],
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => [
                 'step' => 'commodity_purchased',

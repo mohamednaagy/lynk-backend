@@ -145,7 +145,7 @@ class MakeOrderProceedTest extends TestCase
     public function test_admin_proceed_order_client_wakala_file_required_when_case_is_client_wakala_accepted_and_order_verification_is_true(): void
     {
         self::$financingOrder->update([
-            'is_verification_required' => true,
+            'is_verification_required' => false,
         ]);
 
         $this->actingAs(self::$admin)
@@ -159,7 +159,7 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
-    public function test_admin_proceed_order_client_wakala_should_be_pdf_file(): void
+    public function test_admin_proceed_order_client_wakala_should_be_pdf_or_jpg_png_file(): void
     {
         self::$financingOrder->update([
             'is_verification_required' => true,
@@ -168,7 +168,7 @@ class MakeOrderProceedTest extends TestCase
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
                 'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
-                'client_wakala' => UploadedFile::fake()->create('client_wakala.jpg'),
+                'client_wakala' => UploadedFile::fake()->create('client_wakala.gif'),
             ])
             ->assertStatus(422)
             ->assertJsonValidationErrorFor('client_wakala');
@@ -199,7 +199,7 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
-    public function test_admin_can_make_order_proceed_on_client_wakala_accepted_even_order_verification_is_required(): void
+    public function test_admin_can_make_order_proceed_on_client_wakala_accepted_when_order_verification_is_required(): void
     {
         self::$financingOrder->update([
             'is_verification_required' => true,
@@ -212,12 +212,7 @@ class MakeOrderProceedTest extends TestCase
                 'client_wakala' => UploadedFile::fake()->create('client_wakala.pdf'),
             ]);
 
-        $media = self::$traderOrder->getFirstMedia(TraderOrderMediaCollection::ClientWakala);
-
-        $response->assertStatus(Response::HTTP_OK)
-            ->assertJsonFragment([
-                'wakala_file_url' => route('api.v1.media.download', ['media' => $media->uuid]),
-            ]);
+        $response->assertStatus(Response::HTTP_OK);
     }
 
     /**
@@ -263,7 +258,7 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
-    public function test_admin_proceed_order_on_client_wakala_accepted_successfully(): void
+    public function test_admin_proceed_order_on_client_wakala_accepted_successfully_when_verification_is_not_required(): void
     {
         self::$financingOrder->update([
             'status' => FinancingOrderStatus::WaitingClientWakala,
@@ -272,8 +267,10 @@ class MakeOrderProceedTest extends TestCase
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
                 'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'client_wakala' => UploadedFile::fake()->create('client_wakala.pdf'),
             ])
-            ->assertStatus(200)->assertJsonStructure([
+            ->assertStatus(200)
+            ->assertJsonStructure([
                 'data',
             ]);
 
@@ -282,13 +279,13 @@ class MakeOrderProceedTest extends TestCase
             FinancingOrderStatus::ClientWakalaCompleted
         );
 
-        $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::ClientWakala));
+        $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::SignedClientWakala));
     }
 
     /**
      * @return void
      */
-    public function test_admin_proceed_order_on_client_wakala_accepted_successfully_when_admin_upload_client_wakala(): void
+    public function test_admin_proceed_order_on_client_wakala_accepted_successfully_when_verification_is_required(): void
     {
         self::$financingOrder->update([
             'is_verification_required' => true,
@@ -298,9 +295,9 @@ class MakeOrderProceedTest extends TestCase
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
                 'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
-                'client_wakala' => UploadedFile::fake()->create('client_wakala.pdf'),
             ])
-            ->assertStatus(200)->assertJsonStructure([
+            ->assertStatus(200)
+            ->assertJsonStructure([
                 'data',
             ]);
 
@@ -309,6 +306,6 @@ class MakeOrderProceedTest extends TestCase
             FinancingOrderStatus::ClientWakalaCompleted
         );
 
-        $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::ClientWakala));
+        $this->assertFalse(self::$traderOrder->hasMedia(TraderOrderMediaCollection::SignedClientWakala));
     }
 }

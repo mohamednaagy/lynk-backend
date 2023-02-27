@@ -29,7 +29,7 @@ class MakeOrderProceed extends Controller
      *
      * @param  MakeOrderProceedRequest  $request
      * @param  AcceptClientWakala  $acceptClientWakala
-     * @param  int  $order
+     * @param  FinancingOrder  $order
      * @return JsonResponse
      *
      * @throws Throwable
@@ -44,13 +44,16 @@ class MakeOrderProceed extends Controller
 
             $traderOrder = $order->activeTraderOrder()->lockForUpdate()->firstOrFail();
 
-            if ($clientWakala = $request->validated('client_wakala')) {
-                $makeOrderProceed->setClientWakala($clientWakala);
+            if (
+                $order->is_verification_required === false
+                && $clientWakala = $request->validated('client_wakala')
+            ) {
+                $makeOrderProceed->setSignedClientWakala($clientWakala);
             }
 
-            $makeOrderProceedResponse = $makeOrderProceed->handle($traderOrder, $request->validated('case'));
+            $makeOrderProceed->handle($traderOrder, $request->validated('case'), false);
 
-            return $this->successResponse($makeOrderProceedResponse);
+            return $this->successResponse();
         });
     }
 }

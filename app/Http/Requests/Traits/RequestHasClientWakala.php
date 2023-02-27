@@ -17,9 +17,7 @@ trait RequestHasClientWakala
     {
         $validator->after(
             function ($validator) {
-                if (
-                    $this->isClientWakalaRequired()
-                ) {
+                if ($this->isClientWakalaNotProvidedIfNeeded()) {
                     $validator->errors()->add(
                         'client_wakala',
                         __('validation.required', ['attribute' => __('validation.attributes.client_wakala')])
@@ -29,12 +27,10 @@ trait RequestHasClientWakala
         );
     }
 
-    private function isClientWakalaRequired()
+    private function isClientWakalaNotProvidedIfNeeded()
     {
         return  $this->validated('case') == FinancingOrderProceedCase::ClientWakalaAccepted
-            &&
-            $this->order?->is_verification_required
-            &&
-            is_null($this->validated('client_wakala'));
+            && $this->route('order')?->is_verification_required === false
+            && is_null($this->validated('client_wakala'));
     }
 }

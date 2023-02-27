@@ -37,20 +37,23 @@ class MakeOrderProceed extends Controller
         FinancingOrder $order,
         int $traderOrder,
     ): JsonResponse {
-        return DB::transaction(function () use ($request, $traderOrder, $makeOrderProceed) {
+        return DB::transaction(function () use ($request, $traderOrder, $makeOrderProceed, $order) {
             $traderOrder = TraderOrder::lockForUpdate()->findOrFail($traderOrder);
 
-            if ($clientWakala = $request->validated('client_wakala')) {
-                $makeOrderProceed->setClientWakala($clientWakala);
+            if (
+                $order->is_verification_required === false
+                && $clientWakala = $request->validated('client_wakala')
+            ) {
+                $makeOrderProceed->setSignedClientWakala($clientWakala);
             }
 
-            $makeOrderProceedResponse = $makeOrderProceed->handle(
+            $makeOrderProceed->handle(
                 $traderOrder,
                 $request->validated('case'),
                 true
             );
 
-            return $this->successResponse($makeOrderProceedResponse);
+            return $this->successResponse();
         });
     }
 }
