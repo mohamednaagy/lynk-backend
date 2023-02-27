@@ -37,18 +37,24 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'step' => 'client_wakala',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'document' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::ClientWakala)),
+                'document' => $this->traderOrder
+                    ->getFirstMedia(TraderOrderMediaCollection::ClientWakala)
+                    ->file_url,
             ],
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => [
                 'step' => 'commodity_purchased',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
                 'cert_document' => [
-                    'url' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)),
+                    'url' => $this->traderOrder
+                        ->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)
+                        ->file_url,
                     'date' => optional($getPtpDocument)->created_at?->format('Y-m-d h:i:s A'),
                 ],
                 'ownership_document' => [
-                    'url' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::TransferOwnershipToLender)),
+                    'url' => $this->traderOrder
+                        ->getFirstMedia(TraderOrderMediaCollection::TransferOwnershipToLender)
+                        ->file_url,
                     'date' => optional($transferOwnershipToLender)->created_at?->format('Y-m-d h:i:s A'),
                 ],
             ],
@@ -61,14 +67,18 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'step' => 'selling_commodity_to_customer',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'document' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer)),
+                'document' => $this->traderOrder
+                    ->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer)
+                    ->file_url,
             ],
             FinancingOrderHistory::IssueMurabahaOffer => [
                 'step' => 'selling_commodity_to_open_market',
                 'is_complete' => (bool) $this->traderHistories->where('action', FinancingOrderHistory::AttachMpoDocument)->first(),
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
                 'mpo_document' => [
-                    'url' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder)),
+                    'url' => $this->traderOrder
+                        ->getFirstMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder)
+                        ->file_url,
                     'date' => optional($getMurabahaPurchaseOfferDocument)->created_at?->format('Y-m-d h:i:s A'),
                 ],
             ],
@@ -77,20 +87,13 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
                 'warranty_document' => [
-                    'url' => $this->fileUrl($this->traderOrder->getFirstMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo)),
+                    'url' => $this->traderOrder
+                        ->getFirstMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
+                        ->file_url,
                     'date' => optional($getWarrantAmendmentExceptWarrantNoDocument)->created_at?->format('Y-m-d h:i:s A'),
                 ],
             ],
             default => null,
         };
-    }
-
-    public function fileUrl($media): ?string
-    {
-        if ($media) {
-            return route('api.v1.media.download', ['media' => $media->uuid]);
-        }
-
-        return null;
     }
 }

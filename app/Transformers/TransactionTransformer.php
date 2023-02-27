@@ -53,7 +53,7 @@ class TransactionTransformer extends TransformerAbstract
     {
         if (in_array($transaction->reason, TransactionReason::$reasonsAssociatedWithZatcaInvoice)) {
             return $this->primitive(
-                $transaction->zatca_invoice_media?->fileUrl()
+                $transaction->zatca_invoice_media?->file_url
             );
         }
 

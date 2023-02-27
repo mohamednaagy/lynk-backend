@@ -18,7 +18,7 @@ class GetMurabahaPurchaseOffer extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::FinancingOrders, Action::Show, Action::Manage])
+                perm(Area::Lender, [Subject::FinancingOrders, Action::Show, Action::Manage])
         );
     }
 
@@ -27,19 +27,11 @@ class GetMurabahaPurchaseOffer extends Controller
         FinancingOrder $order,
         TraderOrder $traderOrder
     ): JsonResponse {
-        $url = $this->fileUrl($traderOrder->getFirstMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder));
+        $url = $traderOrder->getFirstMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder)
+            ->file_url;
 
         return $this->successResponse([
             'murabaha_purchase_offer' => $url,
         ]);
-    }
-
-    public function fileUrl($media): ?string
-    {
-        if ($media) {
-            return route('api.v1.media.download', ['media' => $media->uuid]);
-        }
-
-        return null;
     }
 }
