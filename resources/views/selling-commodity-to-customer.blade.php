@@ -751,8 +751,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 <p class="text-center">نؤكد نحن لنك أن السلعة المذكورة أدناه هي ملك لـ / {{$owner}} و هو/هي المالك/ة
                     الوحيد/ة من تاريخ و توقيت هذه الشهادة ، و قد تم شراؤها من {{$companyName}} بناءاً على العقد المبرم
                     بين الطرفين بتاريخ ( يكون مطابق لتاريخ تأكيد شركة التمويل لتوقيع المقترض عقد التمويل،و يستخرج من
-                    تأكيد وقت جهة التمويل ) مقابل مبلغ وقدره {{$amount}} ، و سيتم
-                    بيع السلعة من قبل لنك بناءاً على طلب السيد/ة {{$owner}} و تحصيل مبلغ السلعة في تاريخ ( نفس
+                    تأكيد وقت جهة التمويل ) مقابل مبلغ وقدره {{number_format($amount, 2)}} ريال سعودي ، و سيتم
+                    بيع السلعة من قبل لنك بناءاً على طلب السيد/ة {{$owner}} و تحصيل مبلغ السلعة في تاريخ
                     {{$date}} ، و يمكنكم استلامه من قبل {{$companyName}} بعد إتمام عملية البيع.</p>
             </div>
             <h5 class="py-3 text-center font-extrabold">بيانات السلعة</h5>
@@ -768,7 +768,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </tr>
                 <tr>
                     <td class="w-1/2 border border-black px-4">قيمة السلعة</td>
-                    <td class="w-1/2 border border-black">{{$amount}}</td>
+                    <td class="w-1/2 border border-black">{{number_format($amount, 2)}} ريال سعودي</td>
                 </tr>
                 <tr>
                     <td class="w-1/2 border border-black px-4">موقع السلعة</td>

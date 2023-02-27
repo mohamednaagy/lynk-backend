@@ -256,7 +256,7 @@ class DmccDriver implements TraderInterface
                     'hsCodeDescription' => $traderOrder->product,
                     'quantity' => $traderOrder->quantity,
                     'warehouse' => $traderOrder->warehouse,
-                    'owner' => $traderOrder->owner,
+                    'owner' => $traderOrder->previous_owner,
                     'date' => $dateTime->toDateString(),
                     'time' => $dateTime->toTimeString(),
                 ],
