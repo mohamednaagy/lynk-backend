@@ -9,5 +9,5 @@ interface MakeOrderProceed
 {
     public function handle(TraderOrder $traderOrder, string $case, bool $forceToProceed);
 
-    public function setClientWakala(UploadedFile $clientWakalaFile);
+    public function setSignedClientWakala(UploadedFile $clientWakalaFile);
 }

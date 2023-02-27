@@ -6,13 +6,13 @@ use App\Enums\CompanyStatus;
 use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
@@ -33,7 +33,9 @@ class MakeOrderProceedTest extends TestCase
 
     private static User $userLender;
 
-    private static Builder|Model $financingOrder;
+    private static Model $financingOrder;
+
+    private static Model $traderOrder;
 
     private static string $orderProceedUrl;
 
@@ -58,12 +60,12 @@ class MakeOrderProceedTest extends TestCase
         );
         self::$orderProceedUrl = self::BaseUrl.self::$financingOrder->getOriginal('id').'/proceed';
 
-        // create trader order
-        self::$financingOrder->traderOrders()->create([
-            'provider' => 'dmcc',
-            'reference' => '123456789',
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        self::$traderOrder = self::$financingOrder->traderOrders()
+            ->create([
+                'provider' => 'dmcc',
+                'reference' => '123456789',
+                'status' => TraderOrderStatus::InProgress,
+            ]);
     }
 
     /**
@@ -96,9 +98,10 @@ class MakeOrderProceedTest extends TestCase
                 'case' => FinancingOrderProceedCase::ContractSigned,
             ]);
 
-        $response->assertStatus(200)->assertJson(
-            fn (AssertableJson $json) => $json->has('data')->where('data', [])
-        );
+        $response->assertStatus(200)
+            ->assertJson(
+                fn (AssertableJson $json) => $json->has('data')->where('data', [])
+            );
     }
 
     /**
@@ -118,9 +121,10 @@ class MakeOrderProceedTest extends TestCase
                 'case' => FinancingOrderProceedCase::ContractSigned,
             ]);
 
-        $response->assertStatus(200)->assertJson(
-            fn (AssertableJson $json) => $json->has('data')->where('data', [])
-        );
+        $response->assertStatus(200)
+            ->assertJson(
+                fn (AssertableJson $json) => $json->has('data')->where('data', [])
+            );
     }
 
     /**
@@ -157,7 +161,7 @@ class MakeOrderProceedTest extends TestCase
 
         Grantify::syncRoleToModel(self::$userLender, Role::LenderOrderCreator);
 
-        $response = $this->actingAs(self::$userLender)
+        $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
                 'case' => FinancingOrderProceedCase::ContractSigned,
@@ -181,7 +185,7 @@ class MakeOrderProceedTest extends TestCase
         self::$financingOrder->status = FinancingOrderStatus::CommodityPurchased;
         self::$financingOrder->save();
 
-        $response = $this->actingAs(self::$userLender)
+        $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
                 'case' => FinancingOrderProceedCase::ContractSigned,
@@ -206,7 +210,7 @@ class MakeOrderProceedTest extends TestCase
         self::$financingOrder->status = FinancingOrderStatus::CommodityPurchased;
         self::$financingOrder->save();
 
-        $response = $this->actingAs(self::$userLender)
+        $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
                 'case' => FinancingOrderProceedCase::ContractSigned,
@@ -275,10 +279,11 @@ class MakeOrderProceedTest extends TestCase
                 'case' => FinancingOrderProceedCase::ContractSigned,
             ]);
 
-        $response->assertStatus(400)->assertExactJson([
-            'message' => __('error.order_status_doesnt_follow_sequence'),
-            'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
-        ]);
+        $response->assertStatus(400)
+            ->assertExactJson([
+                'message' => __('error.order_status_doesnt_follow_sequence'),
+                'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
+            ]);
     }
 
     /**
@@ -309,19 +314,19 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
-    public function test_make_order_proceed_cannot_work_if_is_verification_required_set_as_true(): void
+    public function test_make_order_proceed_for_client_wakala_if_order_doesnt_follow_sequence(): void
     {
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
                 'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
-                'client_wakala' => UploadedFile::fake()->create('client_wakala.pdf'),
             ]);
 
-        $response->assertStatus(400)->assertExactJson([
-            'message' => __('error.order_status_doesnt_follow_sequence'),
-            'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
-        ]);
+        $response->assertStatus(400)
+            ->assertExactJson([
+                'message' => __('error.order_status_doesnt_follow_sequence'),
+                'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
+            ]);
     }
 
     /**
@@ -330,7 +335,7 @@ class MakeOrderProceedTest extends TestCase
     public function test_admin_proceed_order_client_wakala_file_required_when_case_is_client_wakala_accepted_and_order_verification_is_true(): void
     {
         self::$financingOrder->update([
-            'is_verification_required' => true,
+            'is_verification_required' => false,
         ]);
 
         $this->actingAs(self::$userLender)
@@ -348,14 +353,14 @@ class MakeOrderProceedTest extends TestCase
     public function test_admin_proceed_order_client_wakala_should_be_pdf_file(): void
     {
         self::$financingOrder->update([
-            'is_verification_required' => true,
+            'is_verification_required' => false,
         ]);
 
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
                 'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
-                'client_wakala' => UploadedFile::fake()->create('client_wakala.jpg'),
+                'client_wakala' => UploadedFile::fake()->create('client_wakala.gif'),
             ])
             ->assertStatus(422)
             ->assertJsonValidationErrorFor('client_wakala');
@@ -364,7 +369,7 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
-    public function test_make_order_proceed_on_client_wakala_accepted(): void
+    public function test_make_order_proceed_on_client_wakala_accepted_when_verification_is_required(): void
     {
         // update financing order is_verification_required to be able to move to client wakala accepted
         self::$financingOrder->is_verification_required = false;
@@ -375,15 +380,19 @@ class MakeOrderProceedTest extends TestCase
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
                 'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'client_wakala' => UploadedFile::fake()->create('client_wakala.pdf'),
             ]);
 
-        $response->assertStatus(200)->assertJsonStructure([
-            'data',
-        ]);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data',
+            ]);
 
         $this->assertEquals(
             FinancingOrder::find(self::$financingOrder->getOriginal('id'))->status->value,
             FinancingOrderStatus::ClientWakalaCompleted
         );
+
+        $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::SignedClientWakala));
     }
 }

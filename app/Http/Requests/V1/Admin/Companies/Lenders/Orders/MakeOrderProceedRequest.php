@@ -30,7 +30,7 @@ class MakeOrderProceedRequest extends FormRequest
     {
         return [
             'case' => ['required', 'string', new EnumValue(FinancingOrderProceedCase::class)],
-            'client_wakala' => ['nullable', 'file', 'mimes:pdf'],
+            'client_wakala' => ['nullable', 'file', 'mimes:pdf,png,jpg,jpeg'],
         ];
     }
 }

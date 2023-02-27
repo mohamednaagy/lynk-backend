@@ -18,7 +18,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
 {
     use TraderHelperTrait;
 
-    protected ?UploadedFile $clientWakalaFile = null;
+    protected ?UploadedFile $signedClientWakala = null;
 
     /**
      * @param  TraderOrder  $traderOrder
@@ -37,13 +37,6 @@ class MakeOrderProceedAction implements MakeOrderProceed
         };
     }
 
-    public function setClientWakala(UploadedFile $clientWakalaFile)
-    {
-        $this->clientWakalaFile = $clientWakalaFile;
-
-        return $this;
-    }
-
     protected function handleClientWakalaAccepted(TraderOrder $traderOrder, bool $forceToProceed)
     {
         $order = FinancingOrder::query()
@@ -59,17 +52,16 @@ class MakeOrderProceedAction implements MakeOrderProceed
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
-        $media = $this->proceedClientWakalaMedia($order, $traderOrder);
+        if ($this->signedClientWakala) {
+            $traderOrder->addMedia($this->signedClientWakala)
+                ->toMediaCollection(TraderOrderMediaCollection::SignedClientWakala);
+        }
 
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ClientWakalaAccepted);
+        app(AcceptClientWakala::class)->handle($traderOrder);
 
         $order->update([
             'status' => FinancingOrderStatus::ClientWakalaCompleted,
         ]);
-
-        return [
-            'wakala_file_url' => route('api.v1.media.download', ['media' => $media->uuid]),
-        ];
     }
 
     protected function handleContractSigned(TraderOrder $traderOrder, bool $forceToProceed)
@@ -95,25 +87,10 @@ class MakeOrderProceedAction implements MakeOrderProceed
         return [];
     }
 
-    protected function proceedClientWakalaMedia(FinancingOrder $order, TraderOrder $traderOrder)
+    public function setSignedClientWakala(UploadedFile $signedClientWakala)
     {
-        if (! $this->clientWakalaFile) {
-            return app(AcceptClientWakala::class)->handle($order);
-        }
+        $this->signedClientWakala = $signedClientWakala;
 
-        $order->update([
-            'client_wakala_accepted_at' => now(),
-        ]);
-
-        return $traderOrder->addMedia($this->clientWakalaFile)
-            ->toMediaCollection(TraderOrderMediaCollection::ClientWakala);
-    }
-
-    /**
-     * @param  UploadedFile|null  $clientWakalaFile
-     */
-    public function __construct(?Illuminate\Http\UploadedFile $clientWakalaFile)
-    {
-        $this->clientWakalaFile = $clientWakalaFile;
+        return $this;
     }
 }
