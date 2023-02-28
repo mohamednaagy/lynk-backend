@@ -740,42 +740,42 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
     <img class="h-20" src="{{ asset('color-logo.svg') }}" alt=""/>
 </div>
 <div class="mx-4 divide-y divide-gray-300/50" dir="rtl">
-    <div class="space-y-6 py-8 text-base leading-7">
+    <div class="py-8 space-y-6 text-base leading-7">
         <div>
-            <div class="space-y-6 py-8 text-base font-semibold leading-7 text-gray-600">
+            <div class="py-8 space-y-6 text-base font-semibold leading-7 text-gray-600">
                 <img/>
                 <p>التاريخ: {{$date}}</p>
                 <p>الوقت: {{$time}}</p>
-                <p class="text-center">رقم المرجع: {{$ttiId}}</p>
-                <h4 class="pt-3 text-center font-extrabold">شهادة ملكية</h4>
-                <p class="text-center">نؤكد نحن لنك أن السلعة المذكورة أدناه هي ملك لـ / {{$owner}} و هو/هي المالك/ة
-                    الوحيد/ة من تاريخ و توقيت هذه الشهادة ، و قد تم شراؤها من {{$companyName}} بناءاً على العقد المبرم
+                <p class="text-center">رقم المرجع: {{$reference_number}}</p>
+                <h4 class="pt-3 font-extrabold text-center">شهادة ملكية</h4>
+                <p class="text-center">نؤكد نحن لنك أن السلعة المذكورة أدناه هي ملك لـ / {{$new_owner}} و هو/هي المالك/ة
+                    الوحيد/ة من تاريخ و توقيت هذه الشهادة ، و قد تم شراؤها من {{$company_name}} بناءاً على العقد المبرم
                     بين الطرفين بتاريخ مقابل مبلغ وقدره {{number_format($amount, 2)}} ريال سعودي ، و سيتم
-                    بيع السلعة من قبل لنك بناءاً على طلب السيد/ة {{$owner}} و تحصيل مبلغ السلعة في تاريخ
-                    {{$date}} ، و يمكنكم استلامه من قبل {{$companyName}} بعد إتمام عملية البيع.</p>
+                    بيع السلعة من قبل لنك بناءاً على طلب السيد/ة {{$new_owner}} و تحصيل مبلغ السلعة في تاريخ
+                    {{$date}} ، و يمكنكم استلامه من قبل {{$company_name}} بعد إتمام عملية البيع.</p>
             </div>
-            <h5 class="py-3 text-center font-extrabold">بيانات السلعة</h5>
+            <h5 class="py-3 font-extrabold text-center">بيانات السلعة</h5>
             <table class="min-w-full">
                 <tbody>
                 <tr>
-                    <td class="w-1/2 border border-black px-4">نوع السلعة</td>
-                    <td class="w-1/2 border border-black">{{$hsCodeDescription}}</td>
+                    <td class="w-1/2 px-4 border border-black">نوع السلعة</td>
+                    <td class="w-1/2 border border-black">{{$hs_code_description}}</td>
                 </tr>
                 <tr>
-                    <td class="w-1/2 border border-black px-4">الكمية</td>
+                    <td class="w-1/2 px-4 border border-black">الكمية</td>
                     <td class="w-1/2 border border-black">{{$quantity}} {{$uom}}</td>
                 </tr>
                 <tr>
-                    <td class="w-1/2 border border-black px-4">قيمة السلعة</td>
+                    <td class="w-1/2 px-4 border border-black">قيمة السلعة</td>
                     <td class="w-1/2 border border-black">{{number_format($amount, 2)}} ريال سعودي</td>
                 </tr>
                 <tr>
-                    <td class="w-1/2 border border-black px-4">موقع السلعة</td>
+                    <td class="w-1/2 px-4 border border-black">موقع السلعة</td>
                     <td class="w-1/2 border border-black">{{$warehouse}}</td>
                 </tr>
                 </tbody>
             </table>
-            <p class="pt-7 text-center text-black">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
+            <p class="text-center text-black pt-7">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
             <hr class="mx-auto mt-10 h-[2px] w-48 bg-gray-700"/>
         </div>
     </div>

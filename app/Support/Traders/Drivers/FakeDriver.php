@@ -190,15 +190,16 @@ class FakeDriver implements TraderInterface
             $this->storeOrderDocumentAsPdf(
                 'selling-commodity-to-customer',
                 [
-                    'ttiId' => $traderOrder->reference,
-                    'companyName' => $traderOrder->order->company->name,
-                    'orderNumber' => $traderOrder->financing_order_id,
+                    'reference_number' => $traderOrder->id,
+                    'company_name' => $traderOrder->order->company->name,
+                    'order_number' => $traderOrder->financing_order_id,
                     'amount' => $traderOrder->order->amount->formatByDecimal(),
-                    'hsCodeDescription' => 'Solid yogurt (jameed).',
+                    'hs_code_description' => 'Solid yogurt (jameed).',
                     'quantity' => 100,
                     'uom' => 'MTT',
                     'warehouse' => 'DMC03-S-0038',
-                    'owner' => 'Mohamed Ali',
+                    // TODO: change later after fix from business
+                    'new_owner' => 'محمد علي',
                     'date' => Carbon::now()->toDateString(),
                     'time' => Carbon::now()->toTimeString(),
                 ],
@@ -254,7 +255,7 @@ class FakeDriver implements TraderInterface
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
-                    'ttiId' => $traderOrder->reference,
+                    'reference_number' => $traderOrder->id,
                     'companyName' => $traderOrder->order->company->name,
                     'orderNumber' => $traderOrder->financing_order_id,
                     'amount' => $traderOrder->order->amount->formatByDecimal(),
