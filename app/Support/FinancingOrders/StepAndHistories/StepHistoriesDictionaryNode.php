@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Support\FinancingOrder;
+namespace App\Support\FinancingOrders\StepAndHistories;
 
-class DictionaryNode
+class StepHistoriesDictionaryNode
 {
     public function __construct(public $status, public $histories)
     {

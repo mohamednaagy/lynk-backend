@@ -2,7 +2,8 @@
 
 namespace App\Observers;
 
-use App\Jobs\FinancingOrders\NotifyAdminsAboutOrderDelayed;
+use App\Enums\FinancingOrderHistory;
+use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
 use App\Models\TraderHistory;
 
 class TraderHistoryObserver
@@ -10,19 +11,23 @@ class TraderHistoryObserver
     /**
      * Handle the TraderHistory "created" event.
      *
-     * @param  \App\Models\TraderHistory  $traderHistory
+     * @param  TraderHistory  $traderHistory
      * @return void
      */
     public function created(TraderHistory $traderHistory)
     {
-        NotifyAdminsAboutOrderDelayed::dispatch($traderHistory->traderOrder)
-            ->delay(now()->addMinutes(5));
+        $financingOrderStatus = $traderHistory->traderOrder->order->status->value;
+
+        if ($traderHistory->action == FinancingOrderHistory::$orderHistoryLastActionMap[$financingOrderStatus]) {
+            NotifyAdminsIfTraderOrderHasStopped::dispatchSync($traderHistory->traderOrder);
+//                ->delay(now()->addMinutes(5));
+        }
     }
 
     /**
      * Handle the TraderHistory "updated" event.
      *
-     * @param  \App\Models\TraderHistory  $traderHistory
+     * @param  TraderHistory  $traderHistory
      * @return void
      */
     public function updated(TraderHistory $traderHistory)
@@ -33,7 +38,7 @@ class TraderHistoryObserver
     /**
      * Handle the TraderHistory "deleted" event.
      *
-     * @param  \App\Models\TraderHistory  $traderHistory
+     * @param  TraderHistory  $traderHistory
      * @return void
      */
     public function deleted(TraderHistory $traderHistory)
@@ -44,7 +49,7 @@ class TraderHistoryObserver
     /**
      * Handle the TraderHistory "restored" event.
      *
-     * @param  \App\Models\TraderHistory  $traderHistory
+     * @param  TraderHistory  $traderHistory
      * @return void
      */
     public function restored(TraderHistory $traderHistory)
@@ -55,7 +60,7 @@ class TraderHistoryObserver
     /**
      * Handle the TraderHistory "force deleted" event.
      *
-     * @param  \App\Models\TraderHistory  $traderHistory
+     * @param  TraderHistory  $traderHistory
      * @return void
      */
     public function forceDeleted(TraderHistory $traderHistory)

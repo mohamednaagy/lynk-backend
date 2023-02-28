@@ -2,14 +2,18 @@
 
 namespace App\Notifications\FinancingOrders\TraderOrders;
 
+use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class StepOrderDelayed extends Notification
+class TraderOrderProgressStopped extends Notification
 {
     use Queueable;
+
+    private FinancingOrder $financingOrder;
 
     /**
      * Create a new notification instance.
@@ -18,7 +22,7 @@ class StepOrderDelayed extends Notification
      */
     public function __construct(private TraderOrder $traderOrder)
     {
-        //
+        $financingOrder = $this->traderOrder->order;
     }
 
     /**
@@ -40,11 +44,16 @@ class StepOrderDelayed extends Notification
      */
     public function toMail(mixed $notifiable): MailMessage
     {
+        $nextStepNode = app(StepHistoriesDictionary::class)->getNextOf($this->financingOrder->status->value);
+
         return (new MailMessage)
-            ->subject('OrderDelayed')
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+            ->subject(__('emails/trader-order-stopped.subject', [
+                'order_id' => $this->traderOrder->id,
+            ]))
+            ->line(__('emails/trader-order-stopped.body', [
+                'order_id' => $this->traderOrder->id,
+                'next_step' => $nextStepNode->status->description,
+            ]));
     }
 
     /**

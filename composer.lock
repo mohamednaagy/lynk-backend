@@ -4,11 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< HEAD
-    "content-hash": "28444e2dbcda1431ba59b32d7b433c35",
-=======
     "content-hash": "51a722af5d61e4dbc5f043c2883f8a3c",
->>>>>>> y.okiel/LYNK-150-webhook-notification-notify-company-when-murabha-offer-is-issued
     "packages": [
         {
             "name": "amphp/amp",

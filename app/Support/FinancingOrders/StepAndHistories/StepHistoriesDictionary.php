@@ -1,22 +1,13 @@
 <?php
 
-namespace App\Support\FinancingOrder;
+namespace App\Support\FinancingOrders\StepAndHistories;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 
-class FinancingOrderDictionary
+class StepHistoriesDictionary
 {
-    public $list;
-
-    public function __construct()
-    {
-        $this->list = new \SplDoublyLinkedList();
-
-        foreach (self::StepToHistoriesDictionary as $status => $histories) {
-            $this->list->push(new DictionaryNode($status, $histories));
-        }
-    }
+    public \SplDoublyLinkedList $DictionaryNodeList;
 
     public const StepToHistoriesDictionary = [
         FinancingOrderStatus::PendingApproval => [],
@@ -58,29 +49,49 @@ class FinancingOrderDictionary
         ],
     ];
 
+    public function __construct()
+    {
+        $this->DictionaryNodeList = new \SplDoublyLinkedList();
+
+        foreach (self::StepToHistoriesDictionary as $status => $histories) {
+            $this->DictionaryNodeList->push(new StepHistoriesDictionaryNode($status, $histories));
+        }
+    }
+
     public function getPreviousStepOf($status)
     {
-        $this->list->rewind();
-        while ($this->list->valid()) {
-            if ($this->list->current()->status == $status) {
-                $this->list->prev();
+        $this->DictionaryNodeList->rewind();
+        while ($this->DictionaryNodeList->valid()) {
+            if ($this->DictionaryNodeList->current()->status == $status) {
+                $this->DictionaryNodeList->prev();
 
-                return $this->list->current();
+                return $this->DictionaryNodeList->current();
             }
-            $this->list->next();
+            $this->DictionaryNodeList->next();
         }
     }
 
     public function getNextStepOf($status)
     {
-        $this->list->rewind();
-        while ($this->list->valid()) {
-            if ($this->list->current()->status == $status) {
-                $this->list->next();
+        $this->DictionaryNodeList->rewind();
+        while ($this->DictionaryNodeList->valid()) {
+            if ($this->DictionaryNodeList->current()->status == $status) {
+                $this->DictionaryNodeList->next();
 
-                return $this->list->current();
+                return $this->DictionaryNodeList->current();
             }
-            $this->list->next();
+            $this->DictionaryNodeList->next();
+        }
+    }
+
+    public function getStepOf($status)
+    {
+        $this->DictionaryNodeList->rewind();
+        while ($this->DictionaryNodeList->valid()) {
+            if ($this->DictionaryNodeList->current()->status == $status) {
+                return $this->DictionaryNodeList->current();
+            }
+            $this->DictionaryNodeList->next();
         }
     }
 }
