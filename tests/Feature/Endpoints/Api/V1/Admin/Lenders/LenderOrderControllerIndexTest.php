@@ -20,12 +20,9 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class LenderOrderControllerIndexTest extends TestCase
 {
-    use RefreshDatabase;
-    use AssertsAccessByRoleAndArea;
+    use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     private static Company $lender;
-
-    private static Company $secondLender;
 
     private static User $userLender;
 
@@ -34,6 +31,8 @@ class LenderOrderControllerIndexTest extends TestCase
     private static User $manager;
 
     private static User $managerHasPermissionToIndexMethod;
+
+    private static string $endpoint;
 
     /**
      * @return void
@@ -46,8 +45,6 @@ class LenderOrderControllerIndexTest extends TestCase
 
         [self::$lender] = $this->createCompany();
 
-        [self::$secondLender] = $this->createCompany();
-
         self::$managerHasPermissionToIndexMethod = $this->createSuperAdminUser();
 
         $this->assignPermissionToUser(
@@ -58,6 +55,7 @@ class LenderOrderControllerIndexTest extends TestCase
         self::$userLender = $this->createLenderUser(self::$lender->id, Role::LenderAdmin);
         self::$admin = $this->createSuperAdminUser();
         self::$manager = $this->createSuperAdminUser(Role::Manager);
+        self::$endpoint = 'api/v1/admin/orders';
 
         FinancingOrder::factory(5)->create([
             'company_id' => self::$lender->id,
@@ -71,25 +69,12 @@ class LenderOrderControllerIndexTest extends TestCase
             'status' => FinancingOrderStatus::WaitingClientWakala,
             'is_verification_required' => true,
         ]);
-
-        FinancingOrder::factory(5)->create([
-            'company_id' => self::$secondLender->id,
-            'approved_at' => Carbon::now(),
-            'creator_id' => self::$userLender->id,
-            'creator_type' => User::class,
-            'national_id' => '2553451234',
-            'phone_number' => '+966500112233',
-            'amount' => 200,
-            'selling_price' => 220,
-            'status' => FinancingOrderStatus::WaitingClientWakala,
-            'is_verification_required' => true,
-        ]);
     }
 
-    public function test_admin_financing_order_controller_index_only_get_lender_orders()
+    public function test_admin_can_access_order_controller_index_successfully()
     {
         $this->actingAs(self::$admin)
-            ->getJson('api/v1/admin/orders')
+            ->getJson(self::$endpoint)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
                 fractal(FinancingOrder::paginate(), new FinancingOrderTransformer())
@@ -109,32 +94,25 @@ class LenderOrderControllerIndexTest extends TestCase
             );
     }
 
-    public function test_admin_financing_order_controller_index_admin_can_access()
-    {
-        $this->actingAs(self::$admin)
-            ->getJson('api/v1/admin/orders')
-            ->assertStatus(200);
-    }
-
-    public function test_admin_financing_order_controller_index_manager_can_not_access_with_no_permission()
+    public function test_admin_manager_can_not_access_order_controller_index_with_no_permission()
     {
         $this->actingAs(self::$manager)
-            ->getJson('api/v1/admin/orders')
+            ->getJson(self::$endpoint)
             ->assertStatus(403);
     }
 
-    public function test_admin_financing_order_controller_index_manager_can_access_when_has_permisson()
+    public function test_admin_manager_can_access_order_controller_index_when_has_permisson_successfully()
     {
         $this->actingAs(self::$managerHasPermissionToIndexMethod)
-            ->getJson('api/v1/admin/orders')
+            ->getJson(self::$endpoint)
             ->assertStatus(200);
     }
 
-    public function test_admin_financing_order_controller_index_other_roles_can_not_access()
+    public function test_user_has_not_admin_roles_can_not_access_order_controller_index()
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
-                ->getJson('api/v1/admin/orders');
+                ->getJson(self::$endpoint);
         });
     }
 }
