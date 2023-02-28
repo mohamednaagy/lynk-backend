@@ -2,9 +2,9 @@
 
 namespace App\Observers;
 
-use App\Enums\FinancingOrderHistory;
 use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
 use App\Models\TraderHistory;
+use App\Settings\Classes\GeneralSettings;
 
 class TraderHistoryObserver
 {
@@ -17,11 +17,10 @@ class TraderHistoryObserver
     public function created(TraderHistory $traderHistory)
     {
         $financingOrderStatus = $traderHistory->traderOrder->order->status->value;
+        $timeout = app(GeneralSettings::class)->trader_order_timeout;
 
-        if ($traderHistory->action == FinancingOrderHistory::$orderHistoryLastActionMap[$financingOrderStatus]) {
-            NotifyAdminsIfTraderOrderHasStopped::dispatchSync($traderHistory->traderOrder);
-//                ->delay(now()->addMinutes(5));
-        }
+        NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $financingOrderStatus)
+            ->delay(now()->addMinutes($timeout));
     }
 
     /**

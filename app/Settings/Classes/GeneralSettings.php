@@ -10,6 +10,8 @@ class GeneralSettings extends Settings
 
     public string $order_cost;
 
+    public int $trader_order_timeout;
+
     public static function group(): string
     {
         return 'general';

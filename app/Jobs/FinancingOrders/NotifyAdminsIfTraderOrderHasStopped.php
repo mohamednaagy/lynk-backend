@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Models\TraderOrder;
 use App\Models\User;
 use App\Notifications\FinancingOrders\TraderOrders\TraderOrderProgressStopped;
-use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -23,7 +22,7 @@ class NotifyAdminsIfTraderOrderHasStopped implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected TraderOrder $traderOrder)
+    public function __construct(protected TraderOrder $traderOrder, protected int $financingOrderStatus)
     {
     }
 
@@ -34,11 +33,9 @@ class NotifyAdminsIfTraderOrderHasStopped implements ShouldQueue
      */
     public function handle()
     {
-        $financingOrderStatus = $this->traderOrder->order->status->value;
+        $currentFinancingOrderStatus = $this->traderOrder->order->status->value;
 
-        $nextStepDictNode = app(StepHistoriesDictionary::class)->getNextStepOf($financingOrderStatus);
-
-        if (! $this->traderOrder->checkOrderStepComplete($nextStepDictNode->status)) {
+        if ($currentFinancingOrderStatus == $this->financingOrderStatus) {
             $admins = User::role([Role::Admin])->get();
 
             Notification::send($admins, new TraderOrderProgressStopped($this->traderOrder));
