@@ -3,7 +3,6 @@
 namespace App\Jobs\General;
 
 use App\Actions\Contracts\Clients\AskClientWakala;
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use Illuminate\Bus\Queueable;
@@ -47,8 +46,6 @@ class ProcessAskClientForWakala implements ShouldQueue
         if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::WaitingClientWakala)) {
             return;
         }
-
-        app()->make(GenerateClientWakala::class)->handle($financingOrder);
 
         if ($financingOrder->is_verification_required) {
             app()->make(AskClientWakala::class)->handle(
