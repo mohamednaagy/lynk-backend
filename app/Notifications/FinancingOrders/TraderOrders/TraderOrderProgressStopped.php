@@ -2,6 +2,7 @@
 
 namespace App\Notifications\FinancingOrders\TraderOrders;
 
+use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -22,7 +23,7 @@ class TraderOrderProgressStopped extends Notification
      */
     public function __construct(private TraderOrder $traderOrder)
     {
-        $financingOrder = $this->traderOrder->order;
+        $this->financingOrder = $this->traderOrder->order;
     }
 
     /**
@@ -44,7 +45,7 @@ class TraderOrderProgressStopped extends Notification
      */
     public function toMail(mixed $notifiable): MailMessage
     {
-        $nextStepNode = app(StepHistoriesDictionary::class)->getNextOf($this->financingOrder->status->value);
+        $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($this->financingOrder->status->value);
 
         return (new MailMessage)
             ->subject(__('emails/trader-order-stopped.subject', [
@@ -52,7 +53,7 @@ class TraderOrderProgressStopped extends Notification
             ]))
             ->line(__('emails/trader-order-stopped.body', [
                 'order_id' => $this->traderOrder->id,
-                'next_step' => $nextStepNode->status->description,
+                'next_step' => FinancingOrderStatus::fromValue($nextStepNode->status)->description,
             ]));
     }
 
