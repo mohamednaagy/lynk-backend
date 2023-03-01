@@ -92,19 +92,17 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/{lender}/settings ', GetLenderSetting::class);
         });
 
-        Route::scopeBindings()->group(function () {
-            Route::prefix('orders/{order}')->group(function () {
-                Route::prefix('/trader-orders/{trader_order}')->group(function () {
-                    Route::post('/proceed', MakeOrderProceed::class);
-                    Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
-                    Route::get('/purchasing-commodity', GetPurchasingCommodity::class);
-                    Route::post('/murabha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
-                    Route::get('/murabha-purchase-offer', GetMurabahaPurchaseOffer::class);
-                    Route::get('/selling-commodity-to-client', GetSellingCommodityCertificateToClient::class);
-                    Route::post('/selling-commodity-to-client', UpdateSellingCommodityCertificateToClient::class);
-                    Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
-                    Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
-                });
+        Route::prefix('orders/{order}')->group(function () {
+            Route::prefix('/trader-orders/{trader_order}')->group(function () {
+                Route::post('/proceed', MakeOrderProceed::class);
+                Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
+                Route::get('/purchasing-commodity', GetPurchasingCommodity::class);
+                Route::post('/murabha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
+                Route::get('/murabha-purchase-offer', GetMurabahaPurchaseOffer::class);
+                Route::get('/selling-commodity-to-client', GetSellingCommodityCertificateToClient::class);
+                Route::post('/selling-commodity-to-client', UpdateSellingCommodityCertificateToClient::class);
+                Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
+                Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
             });
         });
 
