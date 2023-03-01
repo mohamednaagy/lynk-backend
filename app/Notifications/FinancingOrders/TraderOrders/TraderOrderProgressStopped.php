@@ -23,7 +23,7 @@ class TraderOrderProgressStopped extends Notification
      */
     public function __construct(private TraderOrder $traderOrder)
     {
-        $this->financingOrder = $this->traderOrder->order;
+        $this->financingOrder = $this->traderOrder->order->fresh();
     }
 
     /**

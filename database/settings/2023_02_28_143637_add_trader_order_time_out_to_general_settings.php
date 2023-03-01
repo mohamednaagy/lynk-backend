@@ -2,7 +2,7 @@
 
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-class AddTraderOrderTimeOutToSuperAdminSettings extends SettingsMigration
+class AddTraderOrderTimeOutToGeneralSettings extends SettingsMigration
 {
     public function up(): void
     {
