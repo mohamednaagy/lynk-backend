@@ -33,9 +33,9 @@ class NotifyAdminsIfTraderOrderHasStopped implements ShouldQueue
      */
     public function handle()
     {
-        $currentFinancingOrderStatus = $this->traderOrder->order->status->value;
+        $currentFinancingOrderStatus = $this->traderOrder->order->status;
 
-        if ($currentFinancingOrderStatus == $this->financingOrderStatus) {
+        if ($currentFinancingOrderStatus->is($this->financingOrderStatus)) {
             $admins = User::role([Role::Admin])->get();
 
             Notification::send($admins, new TraderOrderProgressStopped($this->traderOrder));
