@@ -4,6 +4,7 @@ namespace App\Transformers;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use League\Fractal\Resource\Collection;
@@ -110,13 +111,12 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive($financingOrder->selling_price->formatByDecimal());
     }
 
-    public function includeCreatorName(FinancingOrder $financingOrder)
-    {
-        return $this->primitive($financingOrder->creator->full_name);
-    }
-
     public function includeCreator(FinancingOrder $financingOrder)
     {
+        if (is_null($financingOrder->creator)) {
+            return $this->primitive(null);
+        }
+
         return $this->primitive([
             'id' => $financingOrder->creator->id,
             'name' => $financingOrder->creator->full_name,
@@ -155,7 +155,14 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeHistory(FinancingOrder $financingOrder): Primitive|Collection
     {
-        $activeTraderOrder = $financingOrder->activeTraderOrder()->first();
+        // TODO: handle not expired + cancelled cases or show all trading requests
+        $activeTraderOrder = $financingOrder->traderOrders()
+            ->whereIn('status', [
+                TraderOrderStatus::Completed,
+                TraderOrderStatus::InProgress,
+            ])
+            ->latest()
+            ->first();
 
         if (! $activeTraderOrder) {
             return $this->primitive(null);
@@ -165,7 +172,7 @@ class FinancingOrderTransformer extends TransformerAbstract
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
             FinancingOrderHistory::ContractSigned,
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-            'client_wakala',
+            FinancingOrderHistory::ClientWakalaAccepted,
             FinancingOrderHistory::IssueMurabahaOffer,
             FinancingOrderHistory::MurabahaSaleCompleted,
         ]), new TraderHistoryTransformer($activeTraderOrder));

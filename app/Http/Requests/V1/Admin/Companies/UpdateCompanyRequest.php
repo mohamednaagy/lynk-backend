@@ -63,6 +63,12 @@ class UpdateCompanyRequest extends FormRequest
                 'string',
                 'max:1000',
             ],
+            'notifications_email' => [
+                'required',
+                'email:filter',
+                'string',
+                'max:255',
+            ],
         ];
     }
 }

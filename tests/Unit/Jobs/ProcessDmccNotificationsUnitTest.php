@@ -4,9 +4,9 @@ namespace Tests\Unit\Jobs;
 
 use App\Exceptions\TraderException;
 use App\Jobs\Dmcc\ProcessDmccCancelNotification;
-use App\Jobs\Dmcc\ProcessDmccMpoNotification;
 use App\Jobs\Dmcc\ProcessDmccMpoSaleCompleteNotification;
 use App\Jobs\Dmcc\ProcessDmccNotifications;
+use App\Jobs\Dmcc\ProcessDmccPtpDocumentRetrievedOrder;
 use App\Jobs\Dmcc\ProcessDmccPtpNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
@@ -51,7 +51,7 @@ class ProcessDmccNotificationsUnitTest extends TestCase
 
         (new ProcessDmccNotifications())->handle();
 
-        Bus::assertDispatched(ProcessDmccMpoNotification::class);
+        Bus::assertDispatched(ProcessDmccPtpDocumentRetrievedOrder::class);
     }
 
     public function test_process_dmcc_mpo_sale_complete_notification_dispatched()
@@ -60,7 +60,7 @@ class ProcessDmccNotificationsUnitTest extends TestCase
         Http::fake(function () {
             return Http::response([
                 'Body' => [
-                    'notification' => 'Murabaha Sale Completed',
+                    'notification' => 'Tradeflow Transaction (Islamic) - Payment Settlement Required',
                     'ttiId' => 252,
                     'id' => '3dc10552-e6d0-4776-ad16-8ab5efde260d',
                 ],

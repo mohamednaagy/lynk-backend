@@ -37,6 +37,7 @@ class Company extends BaseTenant
         return [
             'id',
             'name',
+            'notifications_email',
             'unique_name',
             'company_cr',
             'status',
@@ -70,13 +71,32 @@ class Company extends BaseTenant
         return $this->hasMany(FinancingOrder::class);
     }
 
+    public function traderOrders(): HasMany
+    {
+        return $this->hasMany(TraderOrder::class, 'provider', 'driver');
+    }
+
     public function webhooks(): HasMany
     {
         return $this->hasMany(Webhook::class);
     }
 
-    public function scopeTraderType($query, string $type)
+    public function wallets()
+    {
+        return $this->morphMany(Wallet::class, 'holder');
+    }
+
+    public function scopeType($query, string $type)
     {
         return $query->where('type', $type);
+    }
+
+    public function scopeSelectTraderOrdersCountBySubquery($query)
+    {
+        return $query->addSelect([
+            'orders_count' => TraderOrder::selectRaw('COUNT(DISTINCT financing_order_id) as orders_count')
+                ->whereColumn('provider', 'companies.driver')
+                ->limit(1),
+        ]);
     }
 }

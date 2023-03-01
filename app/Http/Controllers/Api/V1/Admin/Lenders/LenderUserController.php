@@ -47,6 +47,11 @@ class LenderUserController extends Controller
             'permission:'.
             perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Edit, Action::Manage])
         )->only('update');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Delete, Action::Manage])
+        )->only('update');
     }
 
     public function index(
@@ -80,14 +85,7 @@ class LenderUserController extends Controller
      */
     public function show(Request $request, Company $lender, User $user): JsonResponse
     {
-        if (! $user->hasAnyRole([
-            Role::LenderAdmin,
-            Role::LenderOrderCreator,
-            Role::LenderBilling,
-            Role::LenderSupervisor,
-        ])) {
-            throw new AuthorizationException();
-        }
+        $this->ensureUserHasRoleInLenderAreaExceptApiUserRole($user);
 
         return fractal($user, new UserTransformer(Area::Lender))
             ->parseIncludes([
@@ -160,5 +158,32 @@ class LenderUserController extends Controller
 
             return $this->successResponse();
         }));
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  User  $user
+     * @param  Company  $lender
+     * @return JsonResponse
+     */
+    public function destroy(Company $lender, User $user): JsonResponse
+    {
+        $this->ensureUserHasRoleInLenderAreaExceptApiUserRole($user);
+        $user->delete();
+
+        return $this->successResponse();
+    }
+
+    public function ensureUserHasRoleInLenderAreaExceptApiUserRole(User $user)
+    {
+        if (! $user->hasAnyRole([
+            Role::LenderAdmin,
+            Role::LenderOrderCreator,
+            Role::LenderBilling,
+            Role::LenderSupervisor,
+        ])) {
+            throw new AuthorizationException();
+        }
     }
 }

@@ -7,15 +7,26 @@ use App\Actions\Contracts\Orders\MakeOrderProceed;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Support\Traders\TraderHelperTrait;
+use Illuminate\Http\UploadedFile;
 
 class MakeOrderProceedAction implements MakeOrderProceed
 {
+    use TraderHelperTrait;
+
+    protected ?UploadedFile $signedClientWakala = null;
+
     /**
-     * @param  mixed  $order
+     * @param  TraderOrder  $traderOrder
+     * @param  string  $case
+     * @param  bool  $forceToProceed
      * @return mixed
+     *
+     * @throws OrderStatusDoesNotFollowSequenceException
      */
     public function handle(TraderOrder $traderOrder, string $case, $forceToProceed = false)
     {
@@ -34,23 +45,23 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
         if (
             $forceToProceed === false
-            && (
-                $order->is_verification_required
+            && ($order->is_verification_required
                 || $order->status->cantMoveTo(FinancingOrderStatus::ClientWakalaCompleted)
             )
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
-        $media = app(AcceptClientWakala::class)->handle($order);
+        if ($this->signedClientWakala) {
+            $traderOrder->addMedia($this->signedClientWakala)
+                ->toMediaCollection(TraderOrderMediaCollection::SignedClientWakala);
+        }
+
+        app(AcceptClientWakala::class)->handle($traderOrder);
 
         $order->update([
             'status' => FinancingOrderStatus::ClientWakalaCompleted,
         ]);
-
-        return [
-            'wakala_file_url' => route('api.v1.media.download', ['media' => $media->uuid]),
-        ];
     }
 
     protected function handleContractSigned(TraderOrder $traderOrder, bool $forceToProceed)
@@ -74,5 +85,12 @@ class MakeOrderProceedAction implements MakeOrderProceed
         ]);
 
         return [];
+    }
+
+    public function setSignedClientWakala(UploadedFile $signedClientWakala)
+    {
+        $this->signedClientWakala = $signedClientWakala;
+
+        return $this;
     }
 }

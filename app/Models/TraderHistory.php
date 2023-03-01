@@ -33,6 +33,6 @@ class TraderHistory extends Model
 
     public function traderOrder(): BelongsTo
     {
-        return $this->belongsTo(TraderOrder::class, 'id', 'trader_order_id');
+        return $this->belongsTo(TraderOrder::class, 'trader_order_id', 'id');
     }
 }

@@ -97,12 +97,7 @@ class ProcessUnprocessedDmccNotificationTest extends TestCase
             (new ProcessUnprocessedDmccNotification(self::$notification))->handle();
             self::$traderOrder->refresh();
 
-            if ($status == FinancingOrderStatus::MurabahaSaleCompleted) {
-                $this->assertTrue(self::$traderOrder->status->is(TraderOrderStatus::Completed));
-                self::$traderOrder->update(['status' => TraderOrderStatus::InProgress]);
-
-                continue;
-            }
+            self::$traderOrder->update(['status' => TraderOrderStatus::InProgress]);
 
             $this->assertFalse(self::$traderOrder->status->is(TraderOrderStatus::Completed));
         }

@@ -33,7 +33,7 @@ class UpdateUserRequest extends FormRequest
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'email' => [
                 'required',
-                'email',
+                'email:filter',
                 tenant()->unique(User::class, 'email')
                     ->ignore($this->route('user')->id),
             ],

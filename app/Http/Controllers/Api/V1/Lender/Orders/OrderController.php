@@ -20,7 +20,6 @@ use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
 use App\Jobs\FinancingOrders\NotifyAdminsAboutOrderCreated;
 use App\Models\FinancingOrder;
-use App\Support\Traders\Facades\Trader;
 use App\Transformers\FinancingOrderTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -174,11 +173,7 @@ class OrderController extends Controller
                     vatPercentageTransaction: $vatPercentageTransaction
                 );
 
-                $user = auth()->user();
-
                 dispatch(new NotifyAdminsAboutOrderCreated($financingOrder, $user));
-
-                Trader::getTti($financingOrder);
 
                 return fractal($financingOrder, new FinancingOrderTransformer())
                     ->parseIncludes([

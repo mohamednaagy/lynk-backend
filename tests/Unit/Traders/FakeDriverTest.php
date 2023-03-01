@@ -372,7 +372,7 @@ class FakeDriverTest extends TestCase
             'owner' => 'Owner 1',
             'previous_owner' => 'Owner 0',
             'new_owner' => 'Owner 1',
-            'date_time_of_purchasing_commodity' => now()->toDateTimeString(),
+            'date_time_of_purchasing_commodity' => '2023-01-01 00:00:00',
             'warehouse_or_vault_emirates' => 'Emirates',
             'warehouse_or_vault_country' => 'Saudi Arabia',
             'inventory_record_id' => '1000',

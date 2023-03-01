@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
+use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,7 @@ use UnexpectedValueException;
 /**
  * @property mixed $reference
  * @property mixed $order
+ * @property TraderOrderStatus $status
  * @property mixed $traderHistories
  * @property Carbon $created_at
  */
@@ -98,7 +100,11 @@ class TraderOrder extends Model implements HasMedia
     public function checkOrderStepComplete(int $status): bool
     {
         if (! array_key_exists($status, FinancingOrderHistory::$orderHistoryLastActionMap)) {
-            throw new UnexpectedValueException('no mapping for this status');
+            throw new UnexpectedValueException('No mapping for this status');
+        }
+
+        if (is_null(FinancingOrderHistory::$orderHistoryLastActionMap[$status])) {
+            return true;
         }
 
         return (bool) $this->traderHistories
@@ -115,5 +121,29 @@ class TraderOrder extends Model implements HasMedia
         return (bool) $this->traderHistories
             ->where('action', $action)
             ->first();
+    }
+
+    /**
+     * @throws OrderStatusDoesNotFollowSequenceException
+     */
+    public function ensureCanAccessStep(int $step)
+    {
+        if (! $this->checkOrderStepComplete($step)) {
+            throw new OrderStatusDoesNotFollowSequenceException();
+        }
+    }
+
+    public function canChangeParentOrderStatusIfStepWillBeUpdated(int $step): bool
+    {
+        if ($this->status->isNot(TraderOrderStatus::InProgress)) {
+            return false;
+        }
+
+        return ! $this->checkOrderStepComplete($step);
+    }
+
+    public function scopeCompletedOrInProgress($query)
+    {
+        return $query->whereIn('trader_orders.status', [TraderOrderStatus::Completed, TraderOrderStatus::InProgress]);
     }
 }

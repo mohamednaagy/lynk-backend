@@ -2,8 +2,6 @@
 
 namespace App\Jobs\Dmcc;
 
-use App\Enums\FinancingOrderStatus;
-use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -51,7 +49,6 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
 
         DB::transaction(function () use ($driver) {
             $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::InProgress)
                 ->where('reference', $this->ttiId)
                 ->lockForUpdate()
                 ->first();
@@ -60,18 +57,8 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
                 return;
             }
 
-            $financingOrder = $traderOrder->order;
-
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::Completed)) {
-                return;
-            }
-
             $trader = Trader::driver($driver);
             $trader->processNotification($this->notificationId);
-
-            $traderOrder->update([
-                'status' => TraderOrderStatus::Completed,
-            ]);
         });
     }
 

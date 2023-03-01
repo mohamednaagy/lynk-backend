@@ -41,6 +41,11 @@ class TraderUserController extends Controller
             'permission:'.
                 perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Edit, Action::Manage])
         )->only('update');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Delete, Action::Manage])
+        )->only('destroy');
     }
 
     /**
@@ -159,12 +164,16 @@ class TraderUserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return void
+     * @param  User  $user
+     * @param  Company  $trader
+     * @return JsonResponse
      */
-    public function destroy($id)
+    public function destroy(Company $trader, User $user): JsonResponse
     {
-        //
+        $this->checkIfUserDoesNotHaveTraderAreaRole($user);
+        $user->delete();
+
+        return $this->successResponse();
     }
 
     public function checkIfUserDoesNotHaveTraderAreaRole(User $user)
