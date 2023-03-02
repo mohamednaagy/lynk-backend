@@ -109,17 +109,19 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('orders', OrderController::class)
             ->only('index', 'show');
 
-        Route::apiResource('lenders', LenderController::class);
-        Route::apiResource('lenders.users', LenderUserController::class);
-
         Route::prefix('traders')->group(function () {
             Route::post('{trader}/users/{user}/resend-invitation', ResendInvitationToUser::class);
             Route::put('/{trader}/status', UpdateTraderStatus::class);
         });
 
-        Route::apiResource('traders.users', TraderUserController::class);
+        Route::apiResource('lenders', LenderController::class);
         Route::apiResource('traders', TraderController::class)
             ->only(['index', 'store', 'show', 'update']);
+
+        Route::scopeBindings()->group(function () {
+            Route::apiResource('lenders.users', LenderUserController::class);
+            Route::apiResource('traders.users', TraderUserController::class);
+        });
 
         Route::get('edaat-invoices', GetEdaatInvoices::class);
         Route::post('edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);

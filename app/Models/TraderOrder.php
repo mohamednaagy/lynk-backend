@@ -103,6 +103,10 @@ class TraderOrder extends Model implements HasMedia
             throw new UnexpectedValueException('No mapping for this status');
         }
 
+        if (is_null(FinancingOrderHistory::$orderHistoryLastActionMap[$status])) {
+            return true;
+        }
+
         return (bool) $this->traderHistories
             ->where('action', FinancingOrderHistory::$orderHistoryLastActionMap[$status])
             ->first();

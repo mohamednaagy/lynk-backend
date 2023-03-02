@@ -41,7 +41,7 @@ class TraderCompanyControllerUpdateTest extends TestCase
             'notifications_email' => 'trader@gmail.com',
         ];
 
-        [self::$company, self::$wallet] = $this->createTraderCompany(2002);
+        [self::$company, self::$wallet] = $this->createTraderCompany(2000);
 
         self::$superAdmin = $this->createSuperAdminUser();
         self::$endpoint = 'api/v1/admin/traders/'.self::$company->id;
@@ -87,6 +87,17 @@ class TraderCompanyControllerUpdateTest extends TestCase
             ->assertJsonValidationErrorFor('unique_name');
     }
 
+    public function test_trader_company_controller_update_without_notifications_email_unsuccessful()
+    {
+        $this->actingAs(self::$superAdmin)
+            ->putJson('api/v1/admin/traders/'.self::$company->id, [
+                'name' => 'name',
+                'unique_name' => 'test_name',
+                'driver' => 'dmcc',
+            ])
+            ->assertJsonValidationErrorFor('notifications_email');
+    }
+
     public function test_admin_cant_update_company_controller_update_without_driver_fake_or_dmcc()
     {
         $this->actingAs(self::$superAdmin)
@@ -103,6 +114,25 @@ class TraderCompanyControllerUpdateTest extends TestCase
         $this->actingAs(self::$superAdmin)
             ->putJson(self::$endpoint, self::$companyDetails)
             ->assertStatus(Response::HTTP_OK);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_trader_company_controller_update_successful_with_even_same_unique_name(): void
+    {
+        $this->actingAs(self::$superAdmin)
+            ->putJson(self::$endpoint, array_merge(
+                self::$companyDetails,
+                [
+                    'unique_name' => self::$company->unique_name,
+                ]
+            )
+            )
+            ->assertOk()
+            ->assertExactJson([
+                'data' => [],
+            ]);
     }
 
     public function test_admin_can_checked_wallet_in_company_controller_update_successful()
