@@ -36,6 +36,7 @@ class TraderCompanyControllerUpdateTest extends TestCase
             'name' => 'testCompany',
             'unique_name' => 'companyUniqueName',
             'driver' => 'dmcc',
+            'notifications_email' => 'test@test.com',
         ];
 
         [self::$company, self::$wallet] = $this->createTraderCompany(2000, [
@@ -83,6 +84,17 @@ class TraderCompanyControllerUpdateTest extends TestCase
                 'driver' => 'dmcc',
             ])
             ->assertJsonValidationErrorFor('unique_name');
+    }
+
+    public function test_trader_company_controller_update_without_notifications_email_unsuccessful()
+    {
+        $this->actingAs(self::$superAdmin)
+            ->putJson('api/v1/admin/traders/'.self::$company->id, [
+                'name' => 'name',
+                'unique_name' => 'test_name',
+                'driver' => 'dmcc',
+            ])
+            ->assertJsonValidationErrorFor('notifications_email');
     }
 
     public function test_trader_company_controller_update_driver_should_be_in_fake_dmcc_unsuccessful()
