@@ -3,9 +3,9 @@
 namespace App\Transformers;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\TraderOrder;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use Illuminate\Support\Collection;
 use League\Fractal\TransformerAbstract;
 
@@ -130,7 +130,14 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     public function getDurationForHistoryStep($step)
     {
-        $financingOrderStatus = FinancingOrderHistory::$orderHistoryMapToFinancingOrder[$step];
+        $financingOrderStatus = app(StepHistoriesDictionary::class)
+            ->getStepByHistory($step)
+            ?->status;
+
+        if (! $financingOrderStatus) {
+            return;
+        }
+
         $previousAction = $this->getLatestTraderHistoryForPreviousStatus($financingOrderStatus);
         $latestAction = $this->getLatestTraderHistoryForCurrentStatus($financingOrderStatus);
 
@@ -144,13 +151,10 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     private function getLatestTraderHistoryForPreviousStatus($currentStatus)
     {
-        $orderStatusStepsFlipped = array_flip(FinancingOrderStatus::$nextStep);
-        if (! isset($orderStatusStepsFlipped[$currentStatus])) {
-            return;
-        }
-
-        $orderPreviousStatusStep = $orderStatusStepsFlipped[$currentStatus];
-        $previousStepActions = FinancingOrderHistory::StepToHistoriesDictionary[$orderPreviousStatusStep];
+        $previousStepActions = app(StepHistoriesDictionary::class)
+            ->getPreviousStepOf($currentStatus)
+            ?->histories
+            ?? [];
 
         return $this->traderHistories->whereIn('action', $previousStepActions)
             ->sortBy('updated_at', descending: true)
@@ -159,7 +163,10 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     private function getLatestTraderHistoryForCurrentStatus($status)
     {
-        $stepActions = FinancingOrderHistory::StepToHistoriesDictionary[$status];
+        $stepActions = app(StepHistoriesDictionary::class)
+            ->getStepOf($status)
+            ?->histories
+            ?? [];
 
         return $this->traderHistories->whereIn('action', $stepActions)
             ->sortBy('updated_at', descending: true)
