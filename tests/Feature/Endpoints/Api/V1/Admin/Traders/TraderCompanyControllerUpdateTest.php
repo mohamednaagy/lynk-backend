@@ -41,7 +41,9 @@ class TraderCompanyControllerUpdateTest extends TestCase
             'notifications_email' => 'trader@gmail.com',
         ];
 
-        [self::$company, self::$wallet] = $this->createTraderCompany(2000);
+        [self::$company, self::$wallet] = $this->createTraderCompany(2000, [
+            'unique_name' => 'companyUniqueName',
+        ]);
 
         self::$superAdmin = $this->createSuperAdminUser();
         self::$endpoint = 'api/v1/admin/traders/'.self::$company->id;
