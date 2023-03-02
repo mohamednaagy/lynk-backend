@@ -36,9 +36,12 @@ class TraderCompanyControllerUpdateTest extends TestCase
             'name' => 'testCompany',
             'unique_name' => 'companyUniqueName',
             'driver' => 'dmcc',
+            'notifications_email' => 'test@test.com',
         ];
 
-        [self::$company, self::$wallet] = $this->createTraderCompany(2000);
+        [self::$company, self::$wallet] = $this->createTraderCompany(2000, [
+            'unique_name' => 'companyUniqueNameTest',
+        ]);
 
         self::$superAdmin = $this->createSuperAdminUser();
     }
@@ -83,6 +86,17 @@ class TraderCompanyControllerUpdateTest extends TestCase
             ->assertJsonValidationErrorFor('unique_name');
     }
 
+    public function test_trader_company_controller_update_without_notifications_email_unsuccessful()
+    {
+        $this->actingAs(self::$superAdmin)
+            ->putJson('api/v1/admin/traders/'.self::$company->id, [
+                'name' => 'name',
+                'unique_name' => 'test_name',
+                'driver' => 'dmcc',
+            ])
+            ->assertJsonValidationErrorFor('notifications_email');
+    }
+
     public function test_trader_company_controller_update_driver_should_be_in_fake_dmcc_unsuccessful()
     {
         $this->actingAs(self::$superAdmin)
@@ -99,6 +113,26 @@ class TraderCompanyControllerUpdateTest extends TestCase
         $this->actingAs(self::$superAdmin)
             ->putJson('api/v1/admin/traders/'.self::$company->id, self::$companyDetails)
             ->assertStatus(Response::HTTP_OK);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_trader_company_controller_update_successful_with_even_same_unique_name(): void
+    {
+        $this->actingAs(self::$superAdmin)
+            ->putJson('api/v1/admin/traders/'.self::$company->id,
+                array_merge(
+                    self::$companyDetails,
+                    [
+                        'unique_name' => self::$company->unique_name,
+                    ]
+                )
+            )
+            ->assertOk()
+            ->assertExactJson([
+                'data' => [],
+            ]);
     }
 
     public function test_trader_company_controller_update_wallet_checked_successful()
