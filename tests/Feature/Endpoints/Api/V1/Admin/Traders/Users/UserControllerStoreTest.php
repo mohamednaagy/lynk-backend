@@ -48,6 +48,7 @@ class UserControllerStoreTest extends TestCase
             'redirect_url' => 'http://Lynk.com',
             'role' => Role::TraderAdmin,
             'is_active' => 1,
+            'is_invitation_accepted' => false,
         ];
 
         self::$endPoint = 'api/v1/admin/traders/'.self::$company->id.'/users';
@@ -114,7 +115,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_super_admin_roles_can_store_trader_user(): void
+    public function test_super_admin_roles_can_store_trader_user_successful(): void
     {
         $this->assertStatusCodeForAreaRoles(200, Area::Trader, function ($user, $role) {
             return $this->actingAs(self::$userAdmin)
