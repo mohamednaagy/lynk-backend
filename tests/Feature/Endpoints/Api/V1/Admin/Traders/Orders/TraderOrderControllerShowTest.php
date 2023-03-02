@@ -69,7 +69,7 @@ class TraderOrderControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_un_auth_user_cant_access_order_controller_show(): void
+    public function test_unauth_user_cant_access_order_controller_show(): void
     {
         $this->withHeader('X-Company', self::$traderCompany->id)
             ->getJson(self::$baseURL)
@@ -116,7 +116,7 @@ class TraderOrderControllerShowTest extends TestCase
             );
     }
 
-    public function test_any_user_has_not_admin_roles_cant_access_order_controller_show()
+    public function test_other_user_has_not_super_admin_area_cant_access_order_controller_show()
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
             Response::HTTP_FORBIDDEN,
