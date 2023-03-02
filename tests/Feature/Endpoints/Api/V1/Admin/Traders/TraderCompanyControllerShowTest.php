@@ -101,7 +101,7 @@ class TraderCompanyControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_trader_company_controller_show_un_auth_user_cant_show_company(): void
+    public function test_un_auth_user_cant_show_company_in_trader_company_controller_show(): void
     {
         $this->getJson(self::$endpoint)
             ->assertUnauthorized()
@@ -110,7 +110,7 @@ class TraderCompanyControllerShowTest extends TestCase
             ]);
     }
 
-    public function test_trader_company_controller_show_successful()
+    public function test_admin_can_access_trader_company_controller_show_successful()
     {
         $this->actingAs(self::$superAdmin)
             ->getJson(self::$endpoint)
@@ -118,7 +118,7 @@ class TraderCompanyControllerShowTest extends TestCase
             ->assertOk();
     }
 
-    public function test_trader_company_controller_show_other_roles_can_not_access()
+    public function test_any_user_has_not_admin_role_cant_access_trader_company_controller_show()
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
@@ -126,7 +126,7 @@ class TraderCompanyControllerShowTest extends TestCase
         });
     }
 
-    public function test_trader_company_controller_show_succeed()
+    public function test_admin_can_access_trader_company_controller_show_with_valid_data_successful()
     {
         $ordersAmountSumAndOrdersCountOfTrader = app(GetOrdersAmountSumAndOrdersCountOfTrader::class)->handle(self::$trader);
         self::$trader->setAttribute('orders_count', $ordersAmountSumAndOrdersCountOfTrader['ordersCount']);

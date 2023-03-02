@@ -8,7 +8,6 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 
@@ -24,7 +23,8 @@ class GetSellingCommodityCertificateToClient extends Controller
 
     /**
      * @param  Company  $lender
-     * @param  FinancingOrder  $order
+     * @param  int  $order
+     * @param  TraderOrder  $traderOrder
      * @return JsonResponse
      */
     public function __invoke(Company $lender, int $order, TraderOrder $traderOrder): JsonResponse
@@ -32,7 +32,7 @@ class GetSellingCommodityCertificateToClient extends Controller
         $media = $traderOrder->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer);
 
         return $this->successResponse([
-            'url' => $media?->fileUrl,
+            'url' => $media?->file_url,
         ]);
     }
 }

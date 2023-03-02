@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders;
 
+use App\Actions\Contracts\Orders\GetOrderAndTraderOrderLockedForUpdate;
 use App\Actions\Contracts\Orders\TraderOrders\PurchasingCommodity\HandlePurchasingCommodity;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodityRequest;
-use App\Models\FinancingOrder;
-use App\Models\TraderOrder;
 use App\Support\Traders\TraderHelperTrait;
 use App\Transformers\TraderOrderTransformer;
 use Illuminate\Http\JsonResponse;
@@ -30,10 +30,14 @@ class UpdatePurchasingCommodity extends Controller
     public function __invoke(
         UpdatePurchasingCommodityRequest $request,
         int $order,
-        TraderOrder $traderOrder
+        int $traderOrder
     ): JsonResponse {
-        return DB::transaction(function () use ($order, $traderOrder, $request) {
-            $financingOrder = FinancingOrder::lockForUpdate()->findOrFail($order);
+        return DB::transaction(function () use ($traderOrder, $request) {
+            [$financingOrder, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
+
+            $traderOrder->ensureCanAccessStep(
+                FinancingOrderStatus::WaitingPurchasingCommodity
+            );
 
             app(HandlePurchasingCommodity::class)->handle($request, $financingOrder, $traderOrder);
 

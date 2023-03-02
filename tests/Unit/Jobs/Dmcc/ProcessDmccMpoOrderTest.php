@@ -1,13 +1,13 @@
 <?php
 
-namespace Tests\Unit\Jobs\Dmcc;
+namespace Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
-use App\Jobs\Dmcc\ProcessDmccMpoNotification;
+use App\Jobs\Dmcc\ProcessDmccMpoOrder;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\Media;
@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
-class ProcessDmccMpoNotificationUnitTest extends TestCase
+class ProcessDmccMpoOrderTest extends TestCase
 {
     use RefreshDatabase, InteractsWithLender;
 
@@ -34,8 +34,6 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
     protected static FinancingOrder $order;
 
     protected static Model|TraderOrder $traderOrder;
-
-    protected static object $notification;
 
     /**
      * @throws BindingResolutionException
@@ -60,18 +58,7 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
             'warehouse' => 'warehouse',
             'owner' => 'owner',
         ]);
-        self::$notification = (object) [
-            'notificationHeaderAndEntity' => (object) [
-                'notification' => 'Action Required for Issue Murabaha Purchase Offer',
-                'notificationEntityDetails' => (object) [
-                    'notificationEntity' => [
-                        (object) [
-                            'entityValue' => '1',
-                        ],
-                    ],
-                ],
-            ],
-        ];
+
         Soap::fake(function () {
             return Soap::response([
                 'successCode' => '0000',
@@ -87,40 +74,40 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
         });
     }
 
-    public function test_process_dmcc_mpo_notification_with_dmcc_as_trader_will_success()
+    public function test_process_dmcc_mpo_with_dmcc_as_trader_will_success()
     {
-        (new ProcessDmccMpoNotification(self::$notification))->handle();
+        (new ProcessDmccMpoOrder(self::$order->id))->handle();
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
     }
 
-    public function test_process_dmcc_mpo_notification_with_fake_as_trader_order_will_success()
+    public function test_process_dmcc_mpo_with_fake_as_trader_order_will_success()
     {
         self::$traderOrder->update([
             'provider' => 'fake',
         ]);
-        (new ProcessDmccMpoNotification(self::$notification))->handle();
+        (new ProcessDmccMpoOrder(self::$order->id))->handle();
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
     }
 
-    public function test_process_dmcc_mpo_notification_with_not_supported_trader_will_fail()
+    public function test_process_dmcc_mpo_with_not_supported_trader_will_fail()
     {
         self::$traderOrder->update([
             'provider' => 'else',
         ]);
-        (new ProcessDmccMpoNotification(self::$notification))->handle();
+        (new ProcessDmccMpoOrder(self::$order->id))->handle();
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::ClientWakalaCompleted));
     }
 
-    public function test_process_dmcc_mpo_notification_when_order_status_not_client_wakala_complete_fail()
+    public function test_process_dmcc_mpo_when_order_status_not_client_wakala_complete_fail()
     {
         self::$order->update([
             'status' => FinancingOrderStatus::MurabhaOfferIssued,
         ]);
-        (new ProcessDmccMpoNotification(self::$notification))->handle();
+        (new ProcessDmccMpoOrder(self::$order->id))->handle();
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
     }
 
-    public function test_process_dmcc_mpo_notification_histories_created()
+    public function test_process_dmcc_mpo_histories_created()
     {
         Storage::fake();
         UploadedFile::fake();
@@ -128,7 +115,7 @@ class ProcessDmccMpoNotificationUnitTest extends TestCase
         $traderHistories = TraderHistory::query()->count();
         $media = Media::query()->count();
 
-        (new ProcessDmccMpoNotification(self::$notification))->handle();
+        (new ProcessDmccMpoOrder(self::$order->id))->handle();
 
         $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderHistories + 3);
         $this->assertDatabaseHas((new TraderHistory())->getTable(), [

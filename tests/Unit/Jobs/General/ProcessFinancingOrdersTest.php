@@ -5,8 +5,8 @@ namespace Tests\Unit\Jobs\General;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Jobs\Dmcc\ProcessDmccContractSignedOrder;
+use App\Jobs\Dmcc\ProcessDmccMpoOrder;
 use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
-use App\Jobs\Dmcc\ProcessPtpDocumentRetrievedOrder;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Jobs\General\ProcessFinancingOrders;
 use App\Jobs\General\ProcessInProgressOrder;
@@ -56,7 +56,7 @@ class ProcessFinancingOrdersTest extends TestCase
         Bus::assertDispatched(ProcessDmccRespondedToPtpOrder::class);
     }
 
-    public function test_process_financing_orders_ptp_document_retrieved_status_matching_process_ptp_document_retrieved_order_job()
+    public function test_process_financing_orders_ptp_document_retrieved_status_not_matching_any_job()
     {
         $this->createOrder($this->company->id, $this->lender->id, ['status' => FinancingOrderStatus::PtpDocumentRetrieved]);
 
@@ -64,7 +64,7 @@ class ProcessFinancingOrdersTest extends TestCase
 
         (new ProcessFinancingOrders)->handle();
 
-        Bus::assertDispatched(ProcessPtpDocumentRetrievedOrder::class);
+        Bus::assertNothingDispatched();
     }
 
     public function test_process_financing_orders_responded_contract_signed_status_matching_process_dmcc_contract_signed_order_job()
@@ -89,7 +89,7 @@ class ProcessFinancingOrdersTest extends TestCase
         Bus::assertDispatched(ProcessAskClientForWakala::class);
     }
 
-    public function test_process_financing_orders_client_wakala_completed_status_not_matching_any_job()
+    public function test_process_financing_orders_client_wakala_completed_status__matching_process_dmcc_client_wakala_completed_order_job()
     {
         $this->createOrder($this->company->id, $this->lender->id, ['status' => FinancingOrderStatus::ClientWakalaCompleted]);
 
@@ -97,6 +97,6 @@ class ProcessFinancingOrdersTest extends TestCase
 
         (new ProcessFinancingOrders)->handle();
 
-        Bus::assertNothingDispatched();
+        Bus::assertDispatched(ProcessDmccMpoOrder::class);
     }
 }

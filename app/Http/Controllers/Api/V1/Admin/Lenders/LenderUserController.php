@@ -51,7 +51,7 @@ class LenderUserController extends Controller
         $this->middleware(
             'permission:'.
             perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Delete, Action::Manage])
-        )->only('update');
+        )->only('destroy');
     }
 
     public function index(

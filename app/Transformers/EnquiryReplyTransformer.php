@@ -46,6 +46,10 @@ class EnquiryReplyTransformer extends TransformerAbstract
             ]);
         }
 
+        if (is_null($enquiryReply->enquiry)) {
+            return $this->primitive(null);
+        }
+
         return $this->primitive([
             'email' => $enquiryReply->enquiry->email,
             'name' => $enquiryReply->enquiry->name,

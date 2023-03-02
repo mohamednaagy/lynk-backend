@@ -32,7 +32,12 @@ class HandlePurchasingCommodityAction implements HandlePurchasingCommodity
     ): void {
         app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
 
+        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
+            FinancingOrderStatus::CommodityPurchased
+        );
+
         $trader = Trader::driver($traderOrder->provider);
+
         $this->createStepHistories(
             $request,
             $trader,
@@ -42,7 +47,7 @@ class HandlePurchasingCommodityAction implements HandlePurchasingCommodity
 
         $this->transferOwnershipToLender($request, $trader, $traderOrder);
 
-        if (! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::CommodityPurchased)) {
+        if ($canUpdateOrderStatus) {
             $trader->updateOrderStatus($order, FinancingOrderStatus::CommodityPurchased);
         }
     }

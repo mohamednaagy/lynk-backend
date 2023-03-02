@@ -62,13 +62,13 @@ class TraderOrderControllerShowTest extends TestCase
             'action' => FinancingOrderHistory::GetTtiId,
         ]);
 
-        self::$baseURL = 'api/v1/admin/traders/'.self::$traderCompany->id.'/orders/'.self::$order->id;
+        self::$baseURL = 'api/v1/admin/orders/'.self::$order->id;
     }
 
     /**
      * @return void
      */
-    public function test_unauth_user_cannot_access(): void
+    public function test_un_auth_user_cant_access_order_controller_show(): void
     {
         $this->withHeader('X-Company', self::$traderCompany->id)
             ->getJson(self::$baseURL)
@@ -78,7 +78,7 @@ class TraderOrderControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_auth_user_with_proper_permission_can_access(): void
+    public function test_admin_can_access_order_controller_show_successful(): void
     {
         $this->actingAs(self::$userAdmin)
             ->withHeader('X-Company', self::$traderCompany->id)
@@ -88,11 +88,19 @@ class TraderOrderControllerShowTest extends TestCase
                 fractal(self::$order, new FinancingOrderTransformer(self::$traderCompany))
                     ->parseIncludes([
                         'id',
-                        'company_id',
-                        'company_name',
                         'status',
+                        'reference_number',
+                        'national_id',
                         'amount',
                         'selling_price',
+                        'is_updatable',
+                        'is_approved',
+                        'status_reason',
+                        'approver',
+                        'phone_country_code',
+                        'phone_number',
+                        'phone_number_formatted',
+                        'creator',
                         'can_completed',
                         'created_at',
                         'trader_orders.id',
@@ -122,7 +130,7 @@ class TraderOrderControllerShowTest extends TestCase
         $this->assertTrue($response->json('data.can_completed') == true);
     }
 
-    public function test_trader_roles_only_can_access()
+    public function test_any_user_has_not_admin_roles_cant_access_order_controller_show()
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
             Response::HTTP_FORBIDDEN,

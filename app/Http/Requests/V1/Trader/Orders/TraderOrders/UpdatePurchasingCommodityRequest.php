@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Requests\V1\Trader\Orders;
+namespace App\Http\Requests\V1\Trader\Orders\TraderOrders;
 
 use App\Enums\FinancingOrderHistory;
+use App\Models\TraderOrder;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdatePurchasingCommodityRequest extends FormRequest
@@ -24,7 +25,7 @@ class UpdatePurchasingCommodityRequest extends FormRequest
      */
     public function rules(): array
     {
-        $traderOrder = $this->route('trader_order');
+        $traderOrder = TraderOrder::query()->findOrFail($this->route('trader_order'));
 
         $isPtpDocumentAttached = $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::AttachPtpDocumentToOrder);
         $isHoldingCertAttached = $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::AttachTtiHoldingCertificateDocument);

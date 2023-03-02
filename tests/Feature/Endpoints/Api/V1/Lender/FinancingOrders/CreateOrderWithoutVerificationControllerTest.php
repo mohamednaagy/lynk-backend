@@ -156,13 +156,10 @@ class CreateOrderWithoutVerificationControllerTest extends TestCase
                 ['X-Company' => self::$company->id]
             );
         $walletAfterCreation = self::$company->balance(WalletType::CompanyWallet);
-        $orderCost = self::$company->order_cost->getMoney();
+        $orderCost = self::$company->order_cost;
         $vatRate = self::$projectSettings->vat_rate;
 
-        $financingOrder = $response->getOriginalContent()->data;
-        $vatPercentageFee = money($financingOrder->amount * $vatRate)->getMoney();
-
-        $this->assertTrue($wallet->subtract($orderCost->add($vatPercentageFee))->equals($walletAfterCreation));
+        $this->assertTrue($wallet->subtract($orderCost->multiply(($vatRate) + 1))->equals($walletAfterCreation));
     }
 
     public function test_create_order_without_verification_lender_user_can_not_ceate_order_without_email_verification()

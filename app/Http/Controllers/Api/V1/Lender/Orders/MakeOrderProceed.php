@@ -29,7 +29,7 @@ class MakeOrderProceed extends Controller
      *
      * @param  MakeOrderProceedRequest  $request
      * @param  AcceptClientWakala  $acceptClientWakala
-     * @param  int  $order
+     * @param  FinancingOrder  $order
      * @return JsonResponse
      *
      * @throws Throwable
@@ -37,18 +37,23 @@ class MakeOrderProceed extends Controller
     public function __invoke(
         MakeOrderProceedRequest $request,
         ProceedOrderInterface $makeOrderProceed,
-        int $order
+        FinancingOrder $order
     ): JsonResponse {
         return DB::transaction(function () use ($request, $order, $makeOrderProceed) {
-            $order = FinancingOrder::findOrFail($order);
-
             $this->authorize('view', $order);
 
-            $traderOrder = $order->activeTraderOrder()->lockForUpdate()->first();
+            $traderOrder = $order->activeTraderOrder()->lockForUpdate()->firstOrFail();
 
-            $makeOrderProceedResponse = $makeOrderProceed->handle($traderOrder, $request->validated('case'));
+            if (
+                $order->is_verification_required === false
+                && $clientWakala = $request->validated('client_wakala')
+            ) {
+                $makeOrderProceed->setSignedClientWakala($clientWakala);
+            }
 
-            return $this->successResponse($makeOrderProceedResponse);
+            $makeOrderProceed->handle($traderOrder, $request->validated('case'), false);
+
+            return $this->successResponse();
         });
     }
 }

@@ -22,7 +22,7 @@ class TraderCompanyControllerIndexTest extends TestCase
 
     private static Company $trader;
 
-    const Endpoint = 'api/v1/admin/traders';
+    private static string $endpoint = 'api/v1/admin/traders';
 
     /**
      * @return void
@@ -80,9 +80,9 @@ class TraderCompanyControllerIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_trader_company_controller_index_un_auth_user_cant_index_companies(): void
+    public function test_un_auth_user_cant_access_trader_company_controller_index(): void
     {
-        $this->getJson(self::Endpoint)
+        $this->getJson(self::$endpoint)
             ->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
@@ -91,10 +91,10 @@ class TraderCompanyControllerIndexTest extends TestCase
      *
      * @return void
      */
-    public function test_trader_company_controller_index()
+    public function test_admin_can_access_trader_company_controller_index_successful()
     {
         $response = $this->actingAs(self::$superAdmin)
-            ->getJson(self::Endpoint);
+            ->getJson(self::$endpoint);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -122,11 +122,11 @@ class TraderCompanyControllerIndexTest extends TestCase
         );
     }
 
-    public function test_trader_company_controller_index_other_roles_can_not_access()
+    public function test_any_user_has_not_admin_role_can_not_access_trader_company_controller_index()
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
-                ->getJson(self::Endpoint);
+                ->getJson(self::$endpoint);
         });
     }
 }

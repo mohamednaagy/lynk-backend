@@ -6,6 +6,10 @@ use App\Http\Controllers\Api\V1\Trader\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Trader\Auth\ResendInvitationToUser;
 use App\Http\Controllers\Api\V1\Trader\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Trader\FinancingOrders\OrderController;
+use App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders\GetMurabahaPurchaseOffer;
+use App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders\GetMurabhaCompleteDocument;
+use App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders\UpdateMurabahaPurchaseOffer;
+use App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders\UpdateMurabhaCompleteDocument;
 use App\Http\Controllers\Api\V1\Trader\TraderOrders\GetPurchasingCommodity;
 use App\Http\Controllers\Api\V1\Trader\TraderOrders\UpdatePurchasingCommodity;
 use App\Http\Controllers\Api\V1\Trader\Users\UserController;
@@ -40,6 +44,10 @@ Route::prefix('v1/trader')->name('api.v1.trader.')->group(function () {
                 Route::prefix('trader-orders/{trader_order}')->group(function () {
                     Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
                     Route::get('/purchasing-commodity', GetPurchasingCommodity::class);
+                    Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
+                    Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
+                    Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
+                    Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
                 });
             });
 

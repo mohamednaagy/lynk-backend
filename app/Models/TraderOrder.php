@@ -19,6 +19,7 @@ use UnexpectedValueException;
 /**
  * @property mixed $reference
  * @property mixed $order
+ * @property TraderOrderStatus $status
  * @property mixed $traderHistories
  * @property Carbon $created_at
  */
@@ -100,6 +101,10 @@ class TraderOrder extends Model implements HasMedia
     {
         if (! array_key_exists($status, FinancingOrderHistory::$orderHistoryLastActionMap)) {
             throw new UnexpectedValueException('No mapping for this status');
+        }
+
+        if (is_null(FinancingOrderHistory::$orderHistoryLastActionMap[$status])) {
+            return true;
         }
 
         return (bool) $this->traderHistories

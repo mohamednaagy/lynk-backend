@@ -41,6 +41,8 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
 
     const PendingCancellation = 16;
 
+    const Expired = 17;
+
     private static array $state = [
         self::Approved => [
             self::PendingApproval,
@@ -110,6 +112,45 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         self::PendingApproval,
         self::Rejected,
     ];
+
+    // Temporary map to handel backend status to end-user status
+    public static array $userInterfaceStepsToRealStepsMap = [
+        self::CommodityPurchased => [
+            self::Approved,
+            self::WaitingPurchasingCommodity,
+            self::RespondedToPtp,
+            self::PtpDocumentRetrieved,
+            self::CommodityPurchased,
+        ],
+        self::ContractSigned => [
+            self::ContractSigned,
+        ],
+        self::CommoditySoldToCustomer => [
+            self::CommoditySoldToCustomer,
+        ],
+        self::ClientWakalaCompleted => [
+            self::WaitingClientWakala,
+            self::ClientWakalaCompleted,
+        ],
+        self::MurabhaOfferIssued => [
+            self::MurabhaOfferIssued,
+        ],
+        self::MurabahaSaleCompleted => [
+            self::MurabahaSaleCompleted,
+        ],
+    ];
+
+    // Temporary map to handel backend status to end-user status
+    public static function getUserInterfaceStep($step): string
+    {
+        foreach (self::$userInterfaceStepsToRealStepsMap as $uiStep => $realSteps) {
+            if (in_array($step, $realSteps)) {
+                return FinancingOrderStatus::fromValue($uiStep)->description;
+            }
+        }
+
+        return FinancingOrderStatus::fromValue($step)->description;
+    }
 
     /**
      * @param  Status|int  $status

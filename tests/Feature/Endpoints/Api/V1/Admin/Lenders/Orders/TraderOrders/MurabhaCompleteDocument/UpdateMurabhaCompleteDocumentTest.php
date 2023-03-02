@@ -10,12 +10,13 @@ use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Sms\Events\SmsSent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
@@ -46,11 +47,17 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
     {
         parent::setUp();
 
-        Artisan::call('module:seed');
+        Event::fake([
+            SmsSent::class,
+        ]);
 
         self::$superAdminUser = $this->createSuperAdminUser();
-        [self::$lender] = $this->createLenderCompany('2000', ['company_cr' => '1234567891']);
+
+        [self::$lender] = $this->createLenderCompany('2000', [
+            'company_cr' => '1234567891',
+        ]);
         self::$userLender = $this->createLenderUser(self::$lender->id);
+
         self::$financingOrder = $this->createOrder(
             self::$lender->id,
             self::$userLender->id,
@@ -131,13 +138,16 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
     }
 
     /**
+     * @dataProvider unsuitableTraderHistoryDataProvider
+     *
+     * @param $unsuitableTraderHistoryData
      * @return void
      */
-    public function test_update_murabha_complete_document_not_follow_sequence(): void
+    public function test_update_murabha_complete_document_not_follow_sequence($unsuitableTraderHistoryData): void
     {
         self::$traderOrder->traderHistories()->create(
             [
-                'action' => FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+                'action' => $unsuitableTraderHistoryData,
             ]
         );
 
@@ -148,6 +158,18 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
                 'message' => __('error.order_status_doesnt_follow_sequence'),
                 'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
             ]);
+    }
+
+    public function unsuitableTraderHistoryDataProvider()
+    {
+        return [
+            'histories_that_doesnt_follow_sequence' => collect(FinancingOrderHistory::getValues())
+                ->reject(function ($item) {
+                    return $item == FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted]
+                        || $item == FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabhaOfferIssued];
+                })
+                ->toArray(),
+        ];
     }
 
     /**

@@ -1,10 +1,12 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders;
+namespace Tests\Feature\Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders;
 
+use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\Subject;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\Media;
@@ -14,7 +16,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
@@ -25,7 +26,7 @@ class GetMurabahaPurchaseOfferTest extends TestCase
 
     private static Company $company;
 
-    private static User $superAdminUser;
+    private static User $traderAdminUser;
 
     private static Builder|Model $order;
 
@@ -40,9 +41,9 @@ class GetMurabahaPurchaseOfferTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company] = $this->createLenderCompany('2000', ['company_cr' => '12345678911']);
-        self::$superAdminUser = $this->createSuperAdminUser();
-        self::$order = $this->createOrder(self::$company->id, self::$superAdminUser->id, [
+        [self::$company] = $this->createTraderCompany('2000', ['company_cr' => '12345678911']);
+        self::$traderAdminUser = $this->createTraderUser(self::$company->id);
+        self::$order = $this->createOrder(self::$company->id, self::$traderAdminUser->id, [
             'status' => FinancingOrderStatus::ClientWakalaCompleted,
         ]);
 
@@ -70,7 +71,7 @@ class GetMurabahaPurchaseOfferTest extends TestCase
             'order_column' => '1',
         ]);
 
-        self::$apiUrl = 'api/v1/admin/orders/'.self::$order->id.'/trader-orders/'.self::$traderOrder->id.'/murabaha-purchase-offer';
+        self::$apiUrl = 'api/v1/trader/orders/'.self::$order->id.'/trader-orders/'.self::$traderOrder->id.'/murabaha-purchase-offer';
     }
 
     /**
@@ -88,7 +89,7 @@ class GetMurabahaPurchaseOfferTest extends TestCase
      */
     public function test_auth_user_can_get_murabaha_purchase_offer(): void
     {
-        $this->actingAs(self::$superAdminUser)
+        $this->actingAs(self::$traderAdminUser)
             ->withHeader('X-Company', self::$company->id)
             ->getJson(self::$apiUrl)
             ->assertOk()
@@ -99,23 +100,22 @@ class GetMurabahaPurchaseOfferTest extends TestCase
             ]);
     }
 
-    public function test_auth_user_can_update_process_murabaha_purchase_offer(): void
+    /**
+     * @return void
+     */
+    public function test_auth_user_cant_get_murabaha_purchase_offer_with_invalid_permissions(): void
     {
-        $this->actingAs(self::$superAdminUser)
-            ->postJson(self::$apiUrl, [
-                'document' => UploadedFile::fake()->create('test.pdf'),
-            ])
-            ->assertOk()
-            ->assertJsonStructure([
-                'data' => [],
-            ]);
-    }
-
-    public function test_other_users_areas_can_not_update_process_murabaha_purchase_offer()
-    {
-        $this->assertStatusCodeForAllRolesExceptForArea(Response::HTTP_FORBIDDEN, [Area::SuperAdmin], function ($user, $role) {
-            return $this->actingAs($user)
-                ->getJson(self::$apiUrl);
-        });
+        $this->assertStatusCodeExceptForPermissions(Response::HTTP_FORBIDDEN,
+            [
+                Area::Trader => [
+                    [Subject::All, Action::Manage],
+                    [Subject::FinancingOrders, Action::Edit],
+                    [Subject::FinancingOrders, Action::Manage],
+                ],
+            ], function ($user, $role, $permission) {
+                return $this->actingAs($user)
+                    ->withHeader('X-Company', self::$company->id)
+                    ->getJson(self::$apiUrl);
+            });
     }
 }

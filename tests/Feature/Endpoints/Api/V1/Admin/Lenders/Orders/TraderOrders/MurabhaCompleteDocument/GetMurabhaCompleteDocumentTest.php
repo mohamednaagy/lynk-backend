@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument;
 
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
@@ -14,7 +14,6 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Artisan;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 use Tests\TestCase;
@@ -44,8 +43,6 @@ class GetMurabhaCompleteDocumentTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-
-        Artisan::call('module:seed');
 
         self::$superAdminUser = $this->createSuperAdminUser();
         [self::$lender] = $this->createLenderCompany('2000', ['company_cr' => '1234567891']);
