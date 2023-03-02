@@ -32,7 +32,7 @@ class GetSellingCommodityCertificateToClient extends Controller
         $media = $traderOrder->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer);
 
         return $this->successResponse([
-            'url' => $media?->fileUrl,
+            'url' => $media?->file_url,
         ]);
     }
 }

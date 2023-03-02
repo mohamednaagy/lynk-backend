@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Traders\Orders;
 
-use App\Actions\Orders\GetPaginatedFinancingOrderAction;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
+use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Transformers\FinancingOrderTransformer;
@@ -64,13 +64,13 @@ class TraderOrderControllerIndexTest extends TestCase
             'action' => FinancingOrderHistory::GetTtiId,
         ]);
 
-        self::$baseURL = 'api/v1/admin/traders/'.self::$traderCompany->id.'/orders';
+        self::$baseURL = 'api/v1/admin/orders';
     }
 
     /**
      * @return void
      */
-    public function test_unauth_user_cannot_access(): void
+    public function test_un_auth_user_cant_access_order_controller_index(): void
     {
         $this->withHeader('X-Company', self::$traderCompany->id)
             ->getJson(self::$baseURL)
@@ -80,50 +80,23 @@ class TraderOrderControllerIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_auth_user_with_proper_permission_can_access(): void
-    {
-        $data = (new GetPaginatedFinancingOrderAction())->setCompany(self::$traderCompany)->handle();
-
-        $this->actingAs(self::$userAdmin)
-            ->withHeader('X-Company', self::$traderCompany->id)
-            ->getJson(self::$baseURL)
-            ->assertOk()
-            ->assertExactJson(
-                fractal($data, new FinancingOrderTransformer(self::$traderCompany))
-                    ->parseIncludes([
-                        'id',
-                        'company_id',
-                        'company_name',
-                        'status',
-                        'amount',
-                        'selling_price',
-                        'created_at',
-                    ])
-                    ->respond()
-                    ->getData(true)
-            );
-
-        $this->assertEquals(1, $data->count());
-    }
-
-    /**
-     * @return void
-     */
-    public function test_can_see_only_current_trader_company_orders(): void
+    public function test_admin_can_access_order_controller_index_successful(): void
     {
         $this->actingAs(self::$userAdmin)
             ->withHeader('X-Company', self::$traderCompany->id)
             ->getJson(self::$baseURL)
             ->assertOk()
             ->assertExactJson(
-                fractal((new GetPaginatedFinancingOrderAction())->setCompany(self::$traderCompany)->handle(), new FinancingOrderTransformer(self::$traderCompany))
+                fractal(FinancingOrder::paginate(), new FinancingOrderTransformer(self::$traderCompany))
                     ->parseIncludes([
                         'id',
-                        'company_id',
-                        'company_name',
                         'status',
+                        'reference_number',
+                        'national_id',
                         'amount',
                         'selling_price',
+                        'status_reason',
+                        'creator',
                         'created_at',
                     ])
                     ->respond()
@@ -131,7 +104,7 @@ class TraderOrderControllerIndexTest extends TestCase
             );
     }
 
-    public function test_trader_roles_only_can_access()
+    public function test_any_user_has_not_admin_role_cant_access_order_controller_index()
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
             Response::HTTP_FORBIDDEN,
@@ -140,6 +113,7 @@ class TraderOrderControllerIndexTest extends TestCase
                 return $this->actingAs($user)
                     ->withHeader('X-Company', self::$traderCompany->id)
                     ->getJson(self::$baseURL);
-            });
+            }
+        );
     }
 }

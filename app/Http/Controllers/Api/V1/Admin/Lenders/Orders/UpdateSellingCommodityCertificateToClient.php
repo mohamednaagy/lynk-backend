@@ -69,7 +69,7 @@ class UpdateSellingCommodityCertificateToClient extends Controller
             return $this->successResponse([
                 'url' => $traderOrder
                     ->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer)
-                    ?->fileUrl ?? null,
+                    ?->file_url ?? null,
             ]);
         });
     }

@@ -5,7 +5,6 @@ namespace App\Transformers;
 use App\Enums\TransactionReason;
 use App\Models\Transaction;
 use App\Support\Wallets\Contracts\TransactionUtilInterface;
-use Carbon\Carbon;
 use League\Fractal\Resource\NullResource;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
@@ -32,7 +31,7 @@ class TransactionTransformer extends TransformerAbstract
 
     public function includeDate(Transaction $transaction): Primitive
     {
-        return $this->primitive(Carbon::parse($transaction->created_at)->format('Y-m-d'));
+        return $this->primitive($transaction->created_at->format('Y-m-d'));
     }
 
     public function includeDescription(Transaction $transaction): Primitive
@@ -53,7 +52,7 @@ class TransactionTransformer extends TransformerAbstract
     {
         if (in_array($transaction->reason, TransactionReason::$reasonsAssociatedWithZatcaInvoice)) {
             return $this->primitive(
-                $transaction->zatca_invoice_media?->fileUrl()
+                $transaction->zatca_invoice_media?->file_url
             );
         }
 

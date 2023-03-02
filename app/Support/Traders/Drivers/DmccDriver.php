@@ -249,14 +249,16 @@ class DmccDriver implements TraderInterface
             $this->storeOrderDocumentAsPdf(
                 'selling-commodity-to-customer',
                 [
-                    'ttiId' => $traderOrder->reference,
-                    'companyName' => $traderOrder->order->company->name,
-                    'orderNumber' => $traderOrder->financing_order_id,
+                    'reference_number' => $traderOrder->id,
+                    'company_name' => $traderOrder->order->company->name,
+                    'order_number' => $traderOrder->financing_order_id,
                     'amount' => $traderOrder->amount,
-                    'hsCodeDescription' => $traderOrder->product,
+                    'hs_code_description' => $traderOrder->product,
                     'quantity' => $traderOrder->quantity,
+                    'uom' => $traderOrder->uom,
                     'warehouse' => $traderOrder->warehouse,
-                    'owner' => $traderOrder->owner,
+                    // TODO: change later after fix from business
+                    'new_owner' => 'محمد علي',
                     'date' => $dateTime->toDateString(),
                     'time' => $dateTime->toTimeString(),
                 ],
@@ -320,14 +322,15 @@ class DmccDriver implements TraderInterface
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
-                    'ttiId' => $traderOrder->reference,
-                    'companyName' => $traderOrder->order->company->name,
-                    'orderNumber' => $traderOrder->financing_order_id,
+                    'reference_number' => $traderOrder->id,
+                    'company_name' => $traderOrder->order->company->name,
+                    'order_number' => $traderOrder->financing_order_id,
                     'amount' => $traderOrder->amount,
-                    'hsCodeDescription' => $traderOrder->product,
+                    'hs_code_description' => $traderOrder->product,
                     'quantity' => $traderOrder->quantity,
+                    'uom' => $traderOrder->uom,
                     'warehouse' => $traderOrder->warehouse,
-                    'owner' => $traderOrder->owner,
+                    'previous_owner' => $traderOrder->previous_owner,
                     'date' => $dateTime->toDateString(),
                     'time' => $dateTime->toTimeString(),
                 ],
@@ -383,6 +386,7 @@ class DmccDriver implements TraderInterface
             'warehouse' => $details->warehouseOrVaultId,
             'owner' => $details->owner,
             'previous_owner' => $details->previousOwner,
+            'new_owner' => $details->newOwner ?? null,
             'date_time_of_purchasing_commodity' => Carbon::createFromFormat(
                 'd/m/Y H:i A',
                 $details->dateTimeOfPurchasingCommodity

@@ -3,11 +3,14 @@
 namespace App\Http\Requests\V1\Lender\Orders;
 
 use App\Enums\FinancingOrderProceedCase;
+use App\Http\Requests\Traits\RequestHasClientWakala;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 
 class MakeOrderProceedRequest extends FormRequest
 {
+    use RequestHasClientWakala;
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -27,6 +30,7 @@ class MakeOrderProceedRequest extends FormRequest
     {
         return [
             'case' => ['required', 'string', new EnumValue(FinancingOrderProceedCase::class)],
+            'client_wakala' => ['nullable', 'file', 'mimes:pdf,png,jpeg,jpg'],
         ];
     }
 }
