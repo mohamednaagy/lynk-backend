@@ -25,6 +25,8 @@ class TraderCompanyControllerUpdateTest extends TestCase
 
     private static array $companyDetails;
 
+    private static string $endpoint;
+
     /**
      * @return void
      */
@@ -36,50 +38,51 @@ class TraderCompanyControllerUpdateTest extends TestCase
             'name' => 'testCompany',
             'unique_name' => 'companyUniqueName',
             'driver' => 'dmcc',
-            'notifications_email' => 'test@test.com',
+            'notifications_email' => 'trader@gmail.com',
         ];
 
         [self::$company, self::$wallet] = $this->createTraderCompany(2000, [
-            'unique_name' => 'companyUniqueNameTest',
+            'unique_name' => 'companyUniqueName',
         ]);
 
         self::$superAdmin = $this->createSuperAdminUser();
+        self::$endpoint = 'api/v1/admin/traders/'.self::$company->id;
     }
 
     /**
      * @return void
      */
-    public function test_trader_company_controller_update_un_auth_user_cant_store_company(): void
+    public function test_un_auth_user_cant_access_trader_company_controller_update(): void
     {
-        $this->putJson('api/v1/admin/traders/'.self::$company->id, self::$companyDetails)
+        $this->putJson(self::$endpoint, self::$companyDetails)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
             ]);
     }
 
-    public function test_trader_company_controller_update_other_roles_can_not_access()
+    public function test_any_user_has_not_admin_role_can_not_access_trader_company_controller_update()
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
-                ->putJson('api/v1/admin/traders/'.self::$company->id, self::$companyDetails);
+                ->putJson(self::$endpoint, self::$companyDetails);
         });
     }
 
-    public function test_trader_company_controller_update_without_name_unsuccessful()
+    public function test_admin_cant_update_company_controller_update_without_name()
     {
         $this->actingAs(self::$superAdmin)
-            ->putJson('api/v1/admin/traders/'.self::$company->id, [
+            ->putJson(self::$endpoint, [
                 'unique_name' => 'companyUniqueName',
                 'driver' => 'dmcc',
             ])
             ->assertJsonValidationErrorFor('name');
     }
 
-    public function test_trader_company_controller_update_without_unique_name_unsuccessful()
+    public function test_admin_cant_update_company_controller_update_without_unique_name()
     {
         $this->actingAs(self::$superAdmin)
-            ->putJson('api/v1/admin/traders/'.self::$company->id, [
+            ->putJson(self::$endpoint, [
                 'name' => 'name',
                 'driver' => 'dmcc',
             ])
@@ -97,10 +100,10 @@ class TraderCompanyControllerUpdateTest extends TestCase
             ->assertJsonValidationErrorFor('notifications_email');
     }
 
-    public function test_trader_company_controller_update_driver_should_be_in_fake_dmcc_unsuccessful()
+    public function test_admin_cant_update_company_controller_update_without_driver_fake_or_dmcc()
     {
         $this->actingAs(self::$superAdmin)
-            ->putJson('api/v1/admin/traders/'.self::$company->id, [
+            ->putJson(self::$endpoint, [
                 'name' => 'testCompany',
                 'unique_name' => 'companyUniqueName',
                 'driver' => 'random',
@@ -108,10 +111,10 @@ class TraderCompanyControllerUpdateTest extends TestCase
             ->assertJsonValidationErrorFor('driver');
     }
 
-    public function test_trader_company_controller_update_successful()
+    public function test_admin_can_update_company_controller_update_successful()
     {
         $this->actingAs(self::$superAdmin)
-            ->putJson('api/v1/admin/traders/'.self::$company->id, self::$companyDetails)
+            ->putJson(self::$endpoint, self::$companyDetails)
             ->assertStatus(Response::HTTP_OK);
     }
 
@@ -121,13 +124,12 @@ class TraderCompanyControllerUpdateTest extends TestCase
     public function test_trader_company_controller_update_successful_with_even_same_unique_name(): void
     {
         $this->actingAs(self::$superAdmin)
-            ->putJson('api/v1/admin/traders/'.self::$company->id,
-                array_merge(
-                    self::$companyDetails,
-                    [
-                        'unique_name' => self::$company->unique_name,
-                    ]
-                )
+            ->putJson(self::$endpoint, array_merge(
+                self::$companyDetails,
+                [
+                    'unique_name' => self::$company->unique_name,
+                ]
+            )
             )
             ->assertOk()
             ->assertExactJson([
@@ -135,10 +137,10 @@ class TraderCompanyControllerUpdateTest extends TestCase
             ]);
     }
 
-    public function test_trader_company_controller_update_wallet_checked_successful()
+    public function test_admin_can_checked_wallet_in_company_controller_update_successful()
     {
         $this->actingAs(self::$superAdmin)
-            ->putJson('api/v1/admin/traders/'.self::$company->id, self::$companyDetails)
+            ->putJson(self::$endpoint, self::$companyDetails)
             ->assertStatus(Response::HTTP_OK);
 
         $hasWallet = self::$company->getWallets(WalletType::CompanyWallet)->count() > 0;
