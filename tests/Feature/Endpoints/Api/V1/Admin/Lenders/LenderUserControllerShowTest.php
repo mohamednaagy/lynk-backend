@@ -33,6 +33,8 @@ class LenderUserControllerShowTest extends TestCase
 
     private static User $userLenderApi;
 
+    private static string $endpoint;
+
     /**
      * @return void
      *
@@ -49,6 +51,7 @@ class LenderUserControllerShowTest extends TestCase
 
         self::$userLenderAdmin = $this->createLenderUser(self::$lender->id, Role::LenderAdmin);
         self::$userLenderApi = $this->createLenderUser(self::$lender->id, Role::LenderApiUser);
+        self::$endpoint = 'api/v1/admin/lenders/'.self::$lender->id.'/users/';
     }
 
     /**
@@ -56,7 +59,7 @@ class LenderUserControllerShowTest extends TestCase
      */
     public function test_that_un_auth_user_cant_show_lender_user(): void
     {
-        $this->getJson('api/v1/admin/lenders/'.self::$lender->id.'/users/'.self::$userLenderAdmin->id)
+        $this->getJson(self::$endpoint.self::$userLenderAdmin->id)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -69,7 +72,7 @@ class LenderUserControllerShowTest extends TestCase
     public function test_that_auth_admin_user_can_show_lender_user(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/users/'.(int) self::$userLenderAdmin->id)
+            ->getJson(self::$endpoint.(int) self::$userLenderAdmin->id)
             ->assertOk()
             ->assertExactJson(
                 fractal(self::$userLenderAdmin, new UserTransformer(Area::Lender))
@@ -93,7 +96,7 @@ class LenderUserControllerShowTest extends TestCase
     public function test_that_auth_manager_user_can_show_lender_user(): void
     {
         $this->actingAs(self::$userManager)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/users/'.(int) self::$userLenderAdmin->id)
+            ->getJson(self::$endpoint.(int) self::$userLenderAdmin->id)
             ->assertOk()
             ->assertExactJson(
                 fractal(self::$userLenderAdmin, new UserTransformer(Area::Lender))
@@ -119,7 +122,7 @@ class LenderUserControllerShowTest extends TestCase
         Grantify::syncPermissionToModel(self::$userManager, []);
 
         $this->actingAs(self::$userManager)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/users/'.(int) self::$userLenderAdmin->id)
+            ->getJson(self::$endpoint.(int) self::$userLenderAdmin->id)
             ->assertForbidden();
     }
 
@@ -129,7 +132,7 @@ class LenderUserControllerShowTest extends TestCase
     public function test_that_auth_admin_user_cant_show_lender_api_user(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/users/'.(int) self::$userLenderApi->id)
+            ->getJson(self::$endpoint.(int) self::$userLenderApi->id)
             ->assertForbidden();
     }
 }
