@@ -43,6 +43,8 @@ class OrderControllerShowTest extends TestCase
 
     private static Builder|Model $traderHistory;
 
+    private static string $endpoint;
+
     /**
      * @return void
      *
@@ -65,26 +67,28 @@ class OrderControllerShowTest extends TestCase
         self::$traderHistory = self::$traderOrder->traderHistories()->create([
             'action' => FinancingOrderHistory::GetTtiId,
         ]);
+
+        self::$endpoint = 'api/v1/trader/orders/';
     }
 
     /**
      * @return void
      */
-    public function test_unauth_user_cannot_access(): void
+    public function test_un_auth_user_cannot_access_order_controller_show(): void
     {
         $this->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/trader/orders/'.self::$order->id)
+            ->getJson(self::$endpoint.self::$order->id)
             ->assertUnauthorized();
     }
 
     /**
      * @return void
      */
-    public function test_auth_user_with_proper_permission_can_access(): void
+    public function test_trader_admin_with_proper_permission_can_access_order_controller_show_successful(): void
     {
         $this->actingAs(self::$userTraderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/trader/orders/'.self::$order->id)
+            ->getJson(self::$endpoint.self::$order->id)
             ->assertOk()
             ->assertExactJson(
                 fractal((new GetOrderAction())->setCompany(tenant())->handle(self::$order->id), new FinancingOrderTransformer())
@@ -97,7 +101,13 @@ class OrderControllerShowTest extends TestCase
                         'active_trader.reference',
                         'active_trader.provider',
                         'active_trader.status',
-                        'trader_order_history',
+                        'trader_orders.id',
+                        'trader_orders.reference',
+                        'trader_orders.provider',
+                        'trader_orders.is_cancellable',
+                        'trader_orders.history',
+                        'trader_orders.status',
+                        'trader_orders.created_at',
                     ])
                     ->respond()
                     ->getData(true)
@@ -107,15 +117,15 @@ class OrderControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_can_see_only_current_trader_company_orders(): void
+    public function test_trader_admin_cant_access_another_company_order(): void
     {
         $this->actingAs(self::$userTraderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/trader/orders/'.self::$orderTwo->id)
+            ->getJson(self::$endpoint.self::$orderTwo->id)
             ->assertNotFound();
     }
 
-    public function test_trader_roles_only_can_access()
+    public function test_trader_roles_only_can_access_order_controller_show()
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
             Response::HTTP_FORBIDDEN,
@@ -123,7 +133,8 @@ class OrderControllerShowTest extends TestCase
             function ($user, $role) {
                 return $this->actingAs($user)
                     ->withHeader('X-Company', self::$company->id)
-                    ->getJson('api/v1/trader/orders/'.self::$company->id);
-            });
+                    ->getJson(self::$endpoint.self::$company->id);
+            }
+        );
     }
 }
