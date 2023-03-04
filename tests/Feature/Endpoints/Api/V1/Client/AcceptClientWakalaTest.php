@@ -42,13 +42,13 @@ class AcceptClientWakalaTest extends TestCase
             'national_id' => '2553451234',
         ]);
         self::$order->traderOrders()->create([
-            'provider' => 'dmcc',
+            'provider' => 'fake',
             'status' => TraderOrderStatus::InProgress,
             'reference' => 123,
         ]);
     }
 
-    public function test_accept_client_wakala_success()
+    public function test_accept_client_wakala_successful()
     {
         $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->getNationalId());
 
@@ -75,7 +75,7 @@ class AcceptClientWakalaTest extends TestCase
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::ClientWakalaCompleted));
     }
 
-    public function test_accept_client_wakala_with_invalid_national_id_unsuccessful()
+    public function test_accept_client_wakala_with_invalid_national_id_nothing_work()
     {
         $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->getNationalId());
 
@@ -95,7 +95,7 @@ class AcceptClientWakalaTest extends TestCase
             ->assertStatus(Response::HTTP_NOT_FOUND);
     }
 
-    public function test_accept_client_wakala_with_already_verified_order_unsuccessful()
+    public function test_accept_client_wakala_with_already_verified_order_nothing_work()
     {
         self::$order->update(['client_wakala_accepted_at' => now()]);
 
@@ -117,7 +117,7 @@ class AcceptClientWakalaTest extends TestCase
             ->assertStatus(Response::HTTP_NOT_FOUND);
     }
 
-    public function test_accept_client_wakala_with_token_expired_unsuccessful()
+    public function test_accept_client_wakala_with_token_expired_nothing_work()
     {
         $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->getNationalId());
 
