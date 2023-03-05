@@ -35,7 +35,7 @@ class OrderController extends Controller
      * @param  Request  $request
      * @return JsonResponse
      */
-    public function index(GetPaginatedFinancingOrder $getPaginatedOrders, Request $request): JsonResponse
+    public function index(Request $request, GetPaginatedFinancingOrder $getPaginatedOrders): JsonResponse
     {
         $company = Company::find($request->input('company'));
 
