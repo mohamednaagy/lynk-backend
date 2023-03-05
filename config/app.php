@@ -60,6 +60,13 @@ return [
 
     'asset_url' => env('ASSET_URL'),
 
+    'frontend_url' => [
+        'client' => env('CLIENT_URL', 'http://localhost:4200'),
+        'lender' => env('LENDER_URL', 'http://localhost:4200'),
+        'trader' => env('TRADER_URL', 'http://localhost:4200'),
+        'admin' => env('ADMIN_URL', 'http://localhost:4200'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
