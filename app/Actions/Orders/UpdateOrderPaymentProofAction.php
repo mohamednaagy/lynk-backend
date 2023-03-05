@@ -19,13 +19,11 @@ class UpdateOrderPaymentProofAction implements UpdateOrderPaymentProof
         $order = FinancingOrder::lockForUpdate()
             ->findOrFail($financingOrderId);
 
-        if (! $order->status->is(FinancingOrderStatus::Completed)) {
+        if ($order->status->isNot(FinancingOrderStatus::Completed)) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
-        $order->addMedia(Arr::get($data, 'payment_proof'))
-            ->toMediaCollection(FinancingOrderMediaCollection::PaymentProof);
-
-        return $order->getFirstMedia(FinancingOrderMediaCollection::PaymentProof);
+        return $order->addMedia(Arr::get($data, 'payment_proof'))
+            ->toMediaCollection(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer);
     }
 }

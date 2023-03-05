@@ -54,7 +54,7 @@ class UpdateOrderPaymentProofTest extends TestCase
             'status' => TraderOrderStatus::InProgress,
         ]);
 
-        self::$apiUrl = 'api/v1/lender/orders/'.self::$financingOrder->getRawOriginal('id').'/update-payment-proof';
+        self::$apiUrl = 'api/v1/lender/orders/'.self::$financingOrder->getRawOriginal('id').'/payment-proof';
     }
 
     /**
@@ -63,7 +63,7 @@ class UpdateOrderPaymentProofTest extends TestCase
     public function test_update_order_payment_proof_unauth_user_cant_make_order_completed(): void
     {
         $this->withHeader('X-Company', self::$company->getOriginal('id'))
-            ->postJson(self::$apiUrl)
+            ->putJson(self::$apiUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
                 'message' => 'Unauthenticated.',
@@ -73,12 +73,12 @@ class UpdateOrderPaymentProofTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_only_lender_area_users_can_access(): void
+    public function test_update_order_payment_proof_only_roles_in_super_admin_area_users_can_access(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::Lender], function ($user, $role) {
             return $this->actingAs($user)
                 ->withHeader('X-Company', self::$company->getOriginal('id'))
-                ->postJson(self::$apiUrl);
+                ->putJson(self::$apiUrl);
         });
     }
 
@@ -102,7 +102,7 @@ class UpdateOrderPaymentProofTest extends TestCase
             $user = $this->createLenderUser(self::$company->id, $role);
             $this->actingAs($user)
                 ->withHeader('X-Company', self::$company->id)
-                ->postJson(self::$apiUrl, [
+                ->putJson(self::$apiUrl, [
                     'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
                 ])->assertStatus(Response::HTTP_OK);
         }
@@ -111,7 +111,7 @@ class UpdateOrderPaymentProofTest extends TestCase
             $user = $this->createLenderUser(self::$company->id, $role);
             $this->actingAs($user)
                 ->withHeader('X-Company', self::$company->id)
-                ->postJson(self::$apiUrl, [
+                ->putJson(self::$apiUrl, [
                     'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
                 ])->assertStatus(Response::HTTP_FORBIDDEN);
         }
@@ -124,21 +124,21 @@ class UpdateOrderPaymentProofTest extends TestCase
     {
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
-            ->postJson(self::$apiUrl)
+            ->putJson(self::$apiUrl)
             ->assertJsonValidationErrorFor('payment_proof');
     }
 
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_payment_proof_file_should_be_pdf_type(): void
+    public function test_update_order_payment_proof_payment_proof_file_should_be_supported_type(): void
     {
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
-            ->postJson(
+            ->putJson(
                 self::$apiUrl,
                 [
-                    'payment_proof' => UploadedFile::fake()->create('payment_proof.jpg'),
+                    'payment_proof' => UploadedFile::fake()->create('payment_proof.xlx'),
                 ]
             )
             ->assertJsonValidationErrorFor('payment_proof');
@@ -151,19 +151,21 @@ class UpdateOrderPaymentProofTest extends TestCase
     {
         $statuses = FinancingOrderStatus::getValues();
         foreach ($statuses as $status) {
-            if ($status != FinancingOrderStatus::Completed) {
-                self::$financingOrder->update(['status' => $status]);
-                self::$financingOrder->refresh();
-                $this->actingAs(self::$userLender)
-                    ->withHeader('X-Company', self::$company->getOriginal('id'))
-                    ->postJson(self::$apiUrl, [
-                        'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
-                    ])
-                    ->assertStatus(Response::HTTP_BAD_REQUEST)
-                    ->assertJsonFragment([
-                        'message' => __('error.order_status_doesnt_follow_sequence'),
-                    ]);
+            if ($status == FinancingOrderStatus::Completed) {
+                continue;
             }
+
+            self::$financingOrder->update(['status' => $status]);
+            self::$financingOrder->refresh();
+            $this->actingAs(self::$userLender)
+                ->withHeader('X-Company', self::$company->getOriginal('id'))
+                ->putJson(self::$apiUrl, [
+                    'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
+                ])
+                ->assertStatus(Response::HTTP_BAD_REQUEST)
+                ->assertJsonFragment([
+                    'message' => __('error.order_status_doesnt_follow_sequence'),
+                ]);
         }
     }
 
@@ -177,12 +179,12 @@ class UpdateOrderPaymentProofTest extends TestCase
 
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
-            ->postJson(self::$apiUrl, [
+            ->putJson(self::$apiUrl, [
                 'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
             ])
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonFragment([
-                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProof)?->fileUrl,
+                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer)?->fileUrl,
             ]);
     }
 }

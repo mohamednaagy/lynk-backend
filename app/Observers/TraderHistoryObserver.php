@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
 use App\Models\TraderHistory;
 use App\Settings\Classes\GeneralSettings;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 
 class TraderHistoryObserver
 {
@@ -18,9 +19,13 @@ class TraderHistoryObserver
     {
         $financingOrderStatus = $traderHistory->traderOrder->order->status->value;
         $timeout = app(GeneralSettings::class)->trader_order_timeout;
-
-        NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $financingOrderStatus)
-            ->delay(now()->addMinutes($timeout));
+        // TO DO
+        // some Order at last step so no next step I think  another mail content needed
+        $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($financingOrderStatus);
+        if ($nextStepNode) {
+            NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $financingOrderStatus)
+                ->delay(now()->addMinutes($timeout));
+        }
     }
 
     /**

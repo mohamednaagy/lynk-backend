@@ -101,7 +101,7 @@ class TraderOrderControllerShowTest extends TestCase
                         'phone_number',
                         'phone_number_formatted',
                         'creator',
-                        'can_completed',
+                        'can_be_completed',
                         'created_at',
                         'trader_orders.id',
                         'trader_orders.reference',
@@ -119,7 +119,7 @@ class TraderOrderControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_trader_order_controller_can_completed(): void
+    public function test_trader_order_controller_ensure_order_is_not_complete(): void
     {
         self::$traderOrder->update(['status' => TraderOrderStatus::Completed]);
 
@@ -127,7 +127,7 @@ class TraderOrderControllerShowTest extends TestCase
             ->withHeader('X-Company', self::$traderCompany->id)
             ->getJson(self::$baseURL);
 
-        $this->assertTrue($response->json('data.can_completed') == true);
+        $this->assertTrue($response->json('data.can_be_completed') == true);
     }
 
     public function test_any_user_has_not_admin_roles_cant_access_order_controller_show()

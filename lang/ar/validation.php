@@ -249,6 +249,6 @@ return [
         'public_status_comment' => 'التعليق للعامة',
         'internal_status_comment' => 'التعليق الداخلى',
         'client_wakala' => 'الوكالة',
-        'payment_proof' => 'وثيقة إثبات الدفع',
+        'payment_proof' => 'مستند إثبات التحويل للعميل',
     ],
 ];

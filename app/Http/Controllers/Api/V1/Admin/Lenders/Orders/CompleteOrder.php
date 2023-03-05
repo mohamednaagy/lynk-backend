@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders;
+namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders;
 
 use App\Actions\Contracts\Orders\CompleteOrder as CompleteOrderInterface;
 use App\Enums\Action;
@@ -37,7 +37,7 @@ class CompleteOrder extends Controller
                 $paymentProofMedia = $completeOrder->handle($traderOrder, $request->validated());
 
                 return $this->successResponse([
-                    'payment_proof_url' => $paymentProofMedia?->fileUrl,
+                    'payment_proof_url' => $paymentProofMedia?->file_url,
                 ]);
             }
         );

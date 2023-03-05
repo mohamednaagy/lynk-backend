@@ -24,7 +24,7 @@ class UpdateOrderPaymentProofRequest extends FormRequest
     public function rules()
     {
         return [
-            'payment_proof' => ['required', 'file', 'mimes:pdf'],
+            'payment_proof' => ['required', 'file', 'mimes:pdf,png,jpeg,jpg', 'max:5120'],
         ];
     }
 }

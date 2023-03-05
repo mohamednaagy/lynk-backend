@@ -12,5 +12,5 @@ final class FinancingOrderMediaCollection extends Enum
 
     const ZatcaInvoice = 'zatca_invoice';
 
-    const PaymentProof = 'payment_proof';
+    const PaymentProofFromLenderToCustomer = 'payment_proof_from_lender_to_customer';
 }

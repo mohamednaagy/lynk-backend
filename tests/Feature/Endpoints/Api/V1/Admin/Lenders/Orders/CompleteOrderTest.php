@@ -1,12 +1,14 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders;
 
+use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\Role;
+use App\Enums\Subject;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\User;
@@ -18,7 +20,7 @@ use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
-class AdminCompleteOrderTest extends TestCase
+class CompleteOrderTest extends TestCase
 {
     use RefreshDatabase, AssertsAccessByRoleAndArea;
 
@@ -27,6 +29,8 @@ class AdminCompleteOrderTest extends TestCase
     private static User $userLender;
 
     private static User $superAdminUser;
+
+    private static User $managerHasPermissions;
 
     private static Builder|Model $financingOrder;
 
@@ -44,6 +48,12 @@ class AdminCompleteOrderTest extends TestCase
         [self::$company] = $this->createCompany('2000', ['company_cr' => '1234567891']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$superAdminUser = $this->createSuperAdminUser();
+        self::$managerHasPermissions = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(
+            self::$managerHasPermissions,
+            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit])
+        );
+
         self::$financingOrder = $this->createOrder(
             self::$company->id,
             self::$userLender->id,
@@ -55,7 +65,7 @@ class AdminCompleteOrderTest extends TestCase
         self::$traderOrder = self::$financingOrder->traderOrders()->create([
             'provider' => 'fake',
             'reference' => '123456789',
-            'status' => TraderOrderStatus::InProgress,
+            'status' => TraderOrderStatus::Completed,
         ]);
 
         self::$apiUrl = 'api/v1/admin/orders/'
@@ -79,12 +89,48 @@ class AdminCompleteOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_complete_order_only_admin_can_access(): void
+    public function test_complete_order_only_roles_of_super_admin_area_can_access(): void
     {
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted],
+        ]);
+
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
-                ->postJson(self::$apiUrl);
+                ->postJson(self::$apiUrl, [
+                    'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
+                ]);
         });
+    }
+
+    public function test_complete_order_super_admin_can_access()
+    {
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted],
+        ]);
+
+        $this->actingAs(self::$superAdminUser)
+            ->postJson(self::$apiUrl, [
+                'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
+            ])->assertStatus(Response::HTTP_OK)
+            ->assertJsonFragment([
+                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer)?->fileUrl,
+            ]);
+    }
+
+    public function test_complete_order_that_manager_with_permissions_can_access()
+    {
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted],
+        ]);
+
+        $this->actingAs(self::$managerHasPermissions)
+            ->postJson(self::$apiUrl, [
+                'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
+            ])->assertStatus(Response::HTTP_OK)
+            ->assertJsonFragment([
+                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer)?->fileUrl,
+            ]);
     }
 
     /**
@@ -100,39 +146,16 @@ class AdminCompleteOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_complete_order_payment_proof_file_should_be_pdf_type(): void
+    public function test_complete_order_payment_proof_file_should_be_supported_type(): void
     {
         $this->actingAs(self::$superAdminUser)
             ->postJson(
                 self::$apiUrl,
                 [
-                    'payment_proof' => UploadedFile::fake()->create('payment_proof.jpg'),
+                    'payment_proof' => UploadedFile::fake()->create('payment_proof.xlx'),
                 ]
             )
             ->assertJsonValidationErrorFor('payment_proof');
-    }
-
-    /**
-     * @return void
-     */
-    public function test_complete_order_not_follow_the_sequence(): void
-    {
-        $statuses = array_keys(FinancingOrderHistory::$orderHistoryLastActionMap);
-        foreach ($statuses as $status) {
-            if ($status != FinancingOrderStatus::MurabahaSaleCompleted) {
-                self::$traderOrder->traderHistories()->create([
-                    'action' => FinancingOrderHistory::$orderHistoryLastActionMap[$status],
-                ]);
-
-                $this->actingAs(self::$superAdminUser)
-                    ->postJson(self::$apiUrl, [
-                        'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
-                    ])->assertStatus(Response::HTTP_BAD_REQUEST)
-                    ->assertJsonFragment([
-                        'message' => __('error.order_status_doesnt_follow_sequence'),
-                    ]);
-            }
-        }
     }
 
     /**
@@ -149,7 +172,7 @@ class AdminCompleteOrderTest extends TestCase
                 'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
             ])->assertStatus(Response::HTTP_OK)
             ->assertJsonFragment([
-                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProof)?->fileUrl,
+                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer)?->fileUrl,
             ]);
 
         $this->assertTrue(self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Completed));

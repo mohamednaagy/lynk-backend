@@ -108,7 +108,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->addMediaCollection(FinancingOrderMediaCollection::PowerOfAttorney)
             ->singleFile();
         $this
-            ->addMediaCollection(FinancingOrderMediaCollection::PaymentProof)
+            ->addMediaCollection(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer)
             ->singleFile();
     }
 

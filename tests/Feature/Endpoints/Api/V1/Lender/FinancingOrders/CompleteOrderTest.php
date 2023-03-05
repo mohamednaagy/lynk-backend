@@ -9,6 +9,7 @@ use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
+use App\Models\TraderHistory;
 use App\Models\User;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -52,7 +53,7 @@ class CompleteOrderTest extends TestCase
         self::$traderOrder = self::$financingOrder->traderOrders()->create([
             'provider' => 'fake',
             'reference' => '123456789',
-            'status' => TraderOrderStatus::InProgress,
+            'status' => TraderOrderStatus::Completed,
         ]);
 
         self::$apiUrl = 'api/v1/lender/orders/'.self::$financingOrder->getRawOriginal('id').'/complete';
@@ -88,8 +89,9 @@ class CompleteOrderTest extends TestCase
      */
     public function test_complete_order_only_lender_admin_and_supervisor_and_creator_can_access(): void
     {
-        self::$traderOrder->traderHistories()->create([
+        TraderHistory::create([
             'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted],
+            'trader_order_id' => self::$traderOrder->id,
         ]);
 
         $rolesHasAccess = [
@@ -136,14 +138,14 @@ class CompleteOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_complete_order_payment_proof_file_should_be_pdf_type(): void
+    public function test_complete_order_payment_proof_file_should_be_supported_type(): void
     {
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(
                 self::$apiUrl,
                 [
-                    'payment_proof' => UploadedFile::fake()->create('payment_proof.jpg'),
+                    'payment_proof' => UploadedFile::fake()->create('payment_proof.xlx'),
                 ]
             )
             ->assertJsonValidationErrorFor('payment_proof');
@@ -156,21 +158,23 @@ class CompleteOrderTest extends TestCase
     {
         $statuses = array_keys(FinancingOrderHistory::$orderHistoryLastActionMap);
         foreach ($statuses as $status) {
-            if ($status != FinancingOrderStatus::MurabahaSaleCompleted) {
-                self::$traderOrder->traderHistories()->create([
-                    'action' => FinancingOrderHistory::$orderHistoryLastActionMap[$status],
-                ]);
-
-                $this->actingAs(self::$userLender)
-                    ->withHeader('X-Company', self::$company->getOriginal('id'))
-                    ->postJson(self::$apiUrl, [
-                        'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
-                    ])
-                    ->assertStatus(Response::HTTP_BAD_REQUEST)
-                    ->assertJsonFragment([
-                        'message' => __('error.order_status_doesnt_follow_sequence'),
-                    ]);
+            if ($status == FinancingOrderStatus::MurabahaSaleCompleted || ! isset(FinancingOrderHistory::$orderHistoryLastActionMap[$status])) {
+                continue;
             }
+
+            self::$traderOrder->traderHistories()->create([
+                'action' => FinancingOrderHistory::$orderHistoryLastActionMap[$status],
+            ]);
+
+            $this->actingAs(self::$userLender)
+                ->withHeader('X-Company', self::$company->getOriginal('id'))
+                ->postJson(self::$apiUrl, [
+                    'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
+                ])
+                ->assertStatus(Response::HTTP_BAD_REQUEST)
+                ->assertJsonFragment([
+                    'message' => __('error.order_status_doesnt_follow_sequence'),
+                ]);
         }
     }
 
@@ -190,7 +194,7 @@ class CompleteOrderTest extends TestCase
             ])
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonFragment([
-                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProof)?->fileUrl,
+                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer)?->fileUrl,
             ]);
     }
 }

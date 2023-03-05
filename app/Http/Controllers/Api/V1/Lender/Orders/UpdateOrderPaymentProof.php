@@ -36,7 +36,7 @@ class UpdateOrderPaymentProof extends Controller
                 $paymentProofMedia = $updateOrderPaymentProof->handle($order, $request->validated());
 
                 return $this->successResponse([
-                    'payment_proof_url' => $paymentProofMedia?->fileUrl,
+                    'payment_proof_url' => $paymentProofMedia?->file_url,
                 ]);
             }
         );

@@ -60,15 +60,15 @@ class AdminUpdateOrderPaymentProofTest extends TestCase
         self::$apiUrl = 'api/v1/admin/orders/'
             .self::$financingOrder->getRawOriginal('id').
             '/trader-orders/'.self::$traderOrder->id.
-            '/update-payment-proof';
+            '/payment-proof';
     }
 
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_unauth_user_cant_make_order_completed(): void
+    public function test_update_order_payment_proof_that_unauth_user_cant_make_order_completed(): void
     {
-        $this->postJson(self::$apiUrl)
+        $this->putJson(self::$apiUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
             ->assertExactJson([
                 'message' => 'Unauthenticated.',
@@ -78,34 +78,34 @@ class AdminUpdateOrderPaymentProofTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_only_lender_area_users_can_access(): void
+    public function test_update_order_payment_proof_that_only_lender_area_users_can_access(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
-                ->postJson(self::$apiUrl);
+                ->putJson(self::$apiUrl);
         });
     }
 
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_payment_proof_file_is_required(): void
+    public function test_update_order_payment_proof_that_payment_proof_file_is_required(): void
     {
         $this->actingAs(self::$admin)
-            ->postJson(self::$apiUrl)
+            ->putJson(self::$apiUrl)
             ->assertJsonValidationErrorFor('payment_proof');
     }
 
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_payment_proof_file_should_be_pdf_type(): void
+    public function test_update_order_payment_proof_that_payment_proof_file_should_be_supported_type(): void
     {
         $this->actingAs(self::$admin)
-            ->postJson(
+            ->putJson(
                 self::$apiUrl,
                 [
-                    'payment_proof' => UploadedFile::fake()->create('payment_proof.jpg'),
+                    'payment_proof' => UploadedFile::fake()->create('payment_proof.xlx'),
                 ]
             )
             ->assertJsonValidationErrorFor('payment_proof');
@@ -114,41 +114,43 @@ class AdminUpdateOrderPaymentProofTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_order_not_follow_the_sequence(): void
+    public function test_update_order_payment_proof_that_order_not_follow_the_sequence(): void
     {
         $statuses = FinancingOrderStatus::getValues();
         foreach ($statuses as $status) {
-            if ($status != FinancingOrderStatus::Completed) {
-                self::$financingOrder->update(['status' => $status]);
-                self::$financingOrder->refresh();
-                $this->actingAs(self::$admin)
-
-                    ->postJson(self::$apiUrl, [
-                        'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
-                    ])
-                    ->assertStatus(Response::HTTP_BAD_REQUEST)
-                    ->assertJsonFragment([
-                        'message' => __('error.order_status_doesnt_follow_sequence'),
-                    ]);
+            if ($status == FinancingOrderStatus::Completed) {
+                continue;
             }
+
+            self::$financingOrder->update(['status' => $status]);
+            self::$financingOrder->refresh();
+            $this->actingAs(self::$admin)
+
+                ->putJson(self::$apiUrl, [
+                    'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
+                ])
+                ->assertStatus(Response::HTTP_BAD_REQUEST)
+                ->assertJsonFragment([
+                    'message' => __('error.order_status_doesnt_follow_sequence'),
+                ]);
         }
     }
 
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_successfully(): void
+    public function test_update_order_payment_proof_that_successfully(): void
     {
         self::$financingOrder->update(['status' => FinancingOrderStatus::Completed]);
         self::$financingOrder->refresh();
 
         $this->actingAs(self::$admin)
-            ->postJson(self::$apiUrl, [
+            ->putJson(self::$apiUrl, [
                 'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
             ])
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonFragment([
-                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProof)?->fileUrl,
+                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer)?->fileUrl,
             ]);
     }
 }
