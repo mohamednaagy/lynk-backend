@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Models\Company;
+use Cknow\Money\Money;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -22,13 +23,12 @@ class CompanyTransformer extends TransformerAbstract
         'public_status_comment',
         'driver',
         'notifications_email',
+        'orders_sum_amount',
     ];
 
     public function transform(Company $company): array
     {
-        return [
-
-        ];
+        return [];
     }
 
     public function includeId(Company $company): Primitive
@@ -97,5 +97,14 @@ class CompanyTransformer extends TransformerAbstract
     public function includeDriver(Company $company): Primitive
     {
         return $this->primitive($company->driver);
+    }
+
+    public function includeOrdersSumAmount(Company $company): Primitive
+    {
+        $amount = (new Money($company->orders_sum_amount, Money::getDefaultCurrency()))->formatByDecimal();
+
+        return $this->primitive(
+            number_format($amount, 2)
+        );
     }
 }

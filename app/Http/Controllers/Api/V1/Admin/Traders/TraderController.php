@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Api\V1\Admin\Traders;
 
 use App\Actions\Contracts\Companies\CreateCompany;
-use App\Actions\Contracts\Companies\GetPaginatedCompanies;
+use App\Actions\Contracts\Companies\GetPaginatedTraders;
 use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Actions\Contracts\GetSettingsClassInstance;
+use App\Actions\Contracts\Traders\GetOrdersAmountSumAndOrdersCountOfTrader;
 use App\Actions\Contracts\Wallets\CreateWallet;
 use App\Enums\Action;
 use App\Enums\Area;
@@ -45,11 +46,11 @@ class TraderController extends Controller
         )->only('update');
     }
 
-    public function index(GetPaginatedCompanies $getPaginatedCompanies)
+    public function index(GetPaginatedTraders $getPaginatedTraders)
     {
-        $getPaginatedCompanies->setType(CompanyType::Trader);
+        $traders = $getPaginatedTraders->handle();
 
-        return fractal($getPaginatedCompanies->handle(), new CompanyTransformer())
+        return fractal($traders, new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',
@@ -92,14 +93,22 @@ class TraderController extends Controller
         );
     }
 
-    public function show(Company $trader)
-    {
+    public function show(
+        Company $trader,
+        GetOrdersAmountSumAndOrdersCountOfTrader $loadOrdersAmountSumAndOrdersCountOfTrader
+    ) {
+        $ordersAmountSumAndOrdersCountOfTrader = $loadOrdersAmountSumAndOrdersCountOfTrader->handle($trader);
+        $trader->setAttribute('orders_count', $ordersAmountSumAndOrdersCountOfTrader['ordersCount']);
+        $trader->setAttribute('orders_sum_amount', $ordersAmountSumAndOrdersCountOfTrader['ordersSumAmount']);
+
         return fractal($trader, new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',
                 'unique_name',
                 'driver',
+                'orders_count',
+                'orders_sum_amount',
             ])
             ->respond();
     }

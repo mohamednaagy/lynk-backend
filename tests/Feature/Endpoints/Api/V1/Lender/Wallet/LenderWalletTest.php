@@ -7,6 +7,7 @@ use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Settings\Classes\ProjectSettings;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -58,7 +59,7 @@ class LenderWalletTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910', 'order_cost' => 200, 00]);
+        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910', 'order_cost' => 200]);
         [self::$pendingCompany, self::$pendingWallet] = $this->createCompany('2000', ['company_cr' => '12345678911', 'status' => CompanyStatus::Pending()->value]);
         [self::$underReviewCompany, self::$underReviewWallet] = $this->createCompany('2000', ['company_cr' => '12345678912', 'status' => CompanyStatus::UnderReview()->value]);
         [self::$rejectedCompany, self::$rejectedWallet] = $this->createCompany('2000', ['company_cr' => '12345678913', 'status' => CompanyStatus::Rejected()->value]);
@@ -69,6 +70,10 @@ class LenderWalletTest extends TestCase
         self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
         self::$userLenderApi = $this->createLenderUser(self::$company->id, Role::LenderApiUser);
         self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
+
+        $projectSettings = app(ProjectSettings::class);
+        $projectSettings->vat_rate = 0.15;
+        $projectSettings->save();
     }
 
     /**
@@ -95,7 +100,7 @@ class LenderWalletTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    'available_orders' => '10',
+                    'available_orders' => '8',
                     'balance' => '20.00',
                 ],
             ]);
@@ -112,7 +117,7 @@ class LenderWalletTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    'available_orders' => '10',
+                    'available_orders' => '8',
                     'balance' => '20.00',
                 ],
             ]);
@@ -129,7 +134,7 @@ class LenderWalletTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    'available_orders' => '10',
+                    'available_orders' => '8',
                     'balance' => '20.00',
                 ],
             ]);
@@ -146,7 +151,7 @@ class LenderWalletTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    'available_orders' => '10',
+                    'available_orders' => '8',
                     'balance' => '20.00',
                 ],
             ]);

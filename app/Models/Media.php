@@ -13,15 +13,10 @@ class Media extends baseMedia
         return Config::get('database.default', parent::getConnectionName());
     }
 
-    protected function fileDownloadableUrl(): Attribute
+    protected function fileUrl(): Attribute
     {
         return Attribute::make(
             fn () => route('api.v1.media.download', ['media' => $this->uuid])
         );
-    }
-
-    public function fileUrl(): string
-    {
-        return route('api.v1.media.download', ['media' => $this->uuid]);
     }
 }

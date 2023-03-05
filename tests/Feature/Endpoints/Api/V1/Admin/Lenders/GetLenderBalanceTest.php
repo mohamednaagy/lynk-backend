@@ -9,6 +9,7 @@ use App\Enums\Subject;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Settings\Classes\ProjectSettings;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Grantify\Facades\Grantify;
@@ -40,6 +41,10 @@ class GetLenderBalanceTest extends TestCase
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::LenderWallet, Action::Show]));
+
+        $projectSettings = app(ProjectSettings::class);
+        $projectSettings->vat_rate = 0.15;
+        $projectSettings->save();
     }
 
     /**
@@ -64,7 +69,7 @@ class GetLenderBalanceTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    'available_orders' => '10',
+                    'available_orders' => '8',
                     'balance' => '20.00',
                 ],
             ]);
@@ -80,7 +85,7 @@ class GetLenderBalanceTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    'available_orders' => '10',
+                    'available_orders' => '8',
                     'balance' => '20.00',
                 ],
             ]);

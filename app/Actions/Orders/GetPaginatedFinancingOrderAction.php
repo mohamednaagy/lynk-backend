@@ -59,14 +59,14 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
             $baseQuery->byCreator($this->creator);
         }
 
-        if ($this->company?->type->is(CompanyType::Trader)) {
+        if ($this->company?->type?->is(CompanyType::Trader)) {
             $baseQuery->withoutGlobalScope(TenantScope::class)
                 ->withWhereHas('traderOrders', function ($query) {
                     $query->where('provider', $this->company->driver);
                 });
         }
 
-        if ($this->company?->type->is(CompanyType::Lender)) {
+        if ($this->company?->type?->is(CompanyType::Lender)) {
             $baseQuery->with('creator')
                 ->where('company_id', $this->company->id);
         }

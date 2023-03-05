@@ -32,6 +32,8 @@ class LenderUserControllerIndexTest extends TestCase
 
     private static LengthAwarePaginator $users;
 
+    private static string $endpoint;
+
     /**
      * @return void
      *
@@ -45,7 +47,7 @@ class LenderUserControllerIndexTest extends TestCase
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Index]));
-
+        self::$endpoint = 'api/v1/admin/lenders/'.self::$lender->id.'/users';
         self::$users = self::$lender->users()->whereHas('roles', function ($query) {
             return $query->whereIn('name', [
                 Role::LenderAdmin,
@@ -65,7 +67,7 @@ class LenderUserControllerIndexTest extends TestCase
      */
     public function test_that_un_auth_user_cant_index_lender_users(): void
     {
-        $this->getJson('api/v1/admin/lenders/'.self::$lender->id.'/users')
+        $this->getJson(self::$endpoint)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -78,7 +80,7 @@ class LenderUserControllerIndexTest extends TestCase
     public function test_that_auth_admin_user_can_index_lender_users(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/users')
+            ->getJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson(
                 fractal(self::$users, new UserTransformer(Area::Lender))
@@ -105,7 +107,7 @@ class LenderUserControllerIndexTest extends TestCase
         Grantify::syncPermissionToModel(self::$userManager, []);
 
         $this->actingAs(self::$userManager)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/users')
+            ->getJson(self::$endpoint)
             ->assertForbidden();
     }
 
@@ -115,7 +117,7 @@ class LenderUserControllerIndexTest extends TestCase
     public function test_that_auth_manager_user_can_index_lender_users(): void
     {
         $this->actingAs(self::$userManager)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/users')
+            ->getJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson(
                 fractal(self::$users, new UserTransformer(Area::Lender))

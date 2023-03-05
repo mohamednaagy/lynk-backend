@@ -107,11 +107,11 @@ class ProcessDmccContractSignedOrderTest extends TestCase
             'amount' => '1000 SAR',
             'warehouse' => 'Warehouse ID',
             'owner' => 'Owner 1',
-            'previousOwner' => 'Owner 0',
-            'newOwner' => 'Owner 1',
-            'dateTimeOfPurchasingCommodity' => now()->format('d/m/Y H:i A'),
-            'warehouseOrVaultEmirates' => 'Vaault',
-            'warehouseOrVaultCountry' => 'Saudi Arabia',
+            'previous_owner' => 'Owner 0',
+            'new_owner' => 'Owner 1',
+            'date_time_of_purchasing_commodity' => now()->format('Y-m-d H:i:s'),
+            'warehouse_or_vault_emirates' => 'Vaault',
+            'warehouse_or_vault_country' => 'Saudi Arabia',
         ]);
 
         $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);

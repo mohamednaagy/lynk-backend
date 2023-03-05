@@ -16,7 +16,8 @@ class GetPaginatedCompaniesAction implements GetPaginatedCompanies
             ->when($this->type, function ($query) {
                 $query->type($this->type);
             })
-            ->withCount('orders')->paginate();
+            ->withCount('orders')
+            ->paginate();
     }
 
     public function setType(string $type)

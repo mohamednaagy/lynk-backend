@@ -63,11 +63,16 @@ class EdaatInvoiceTransformer extends TransformerAbstract
 
     public function includeCompanyNumber(): Primitive
     {
+        // 903 is a static number for Edaat company
         return $this->primitive(903);
     }
 
     public function includeCreator(EdaatInvoice $edaatInvoice): Primitive
     {
+        if (is_null($edaatInvoice->creator)) {
+            return $this->primitive(null);
+        }
+
         return $this->primitive([
             'id' => $edaatInvoice->creator->id,
             'name' => $edaatInvoice->creator->full_name,
@@ -76,9 +81,13 @@ class EdaatInvoiceTransformer extends TransformerAbstract
 
     public function includeCompany(EdaatInvoice $edaatInvoice): Primitive
     {
+        if (is_null($edaatInvoice->company)) {
+            return $this->primitive(null);
+        }
+
         return $this->primitive([
-            'id' => optional($edaatInvoice->company)->id,
-            'name' => optional($edaatInvoice->company)->name,
+            'id' => $edaatInvoice->company->id,
+            'name' => $edaatInvoice->company->name,
         ]);
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Dmcc;
 
+use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
@@ -33,6 +34,8 @@ class ProcessDmccContractSignedOrder implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     *
+     * @throws \Throwable
      */
     public function handle(): void
     {
@@ -50,6 +53,8 @@ class ProcessDmccContractSignedOrder implements ShouldQueue
             $trader->createSellingCommodityToCustomerDocument($lastTraderOrder);
 
             $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommoditySoldToCustomer);
+
+            app()->make(GenerateClientWakala::class)->handle($financingOrder);
         });
     }
 

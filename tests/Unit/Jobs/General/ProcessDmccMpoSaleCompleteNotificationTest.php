@@ -76,10 +76,10 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
             ->where('status', TraderOrderStatus::InProgress)
             ->where('provider', 'dmcc')
             ->first();
-        $traderOrderHistory = $traderOrder->traderHistories()->first();
+        $traderOrderHistory = $traderOrder->traderHistories()->where('action', FinancingOrderHistory::MurabahaSaleCompleted)->exists();
 
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
-        $this->assertEquals($traderOrderHistory->action, FinancingOrderHistory::MurabahaSaleCompleted);
+        $this->assertTrue($traderOrderHistory);
     }
 
     public function test_process_dmcc_mpo_sale_complete_notification_fake_driver_success()
@@ -105,10 +105,10 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
             ->where('status', TraderOrderStatus::InProgress)
             ->where('provider', 'dmcc')
             ->first();
-        $traderOrderHistory = $traderOrder->traderHistories()->first();
+        $traderOrderHistory = $traderOrder->traderHistories()->where('action', FinancingOrderHistory::MurabahaSaleCompleted)->exists();
 
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
-        $this->assertEquals(FinancingOrderHistory::MurabahaSaleCompleted, $traderOrderHistory->action);
+        $this->assertTrue($traderOrderHistory);
     }
 
     public function test_process_dmcc_mpo_sale_complete_notification_with_invalid_status()
