@@ -60,7 +60,7 @@ class UpdateOrderPaymentProofTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_unauth_user_cant_make_order_completed(): void
+    public function test_update_order_payment_proof_that_unauth_user_cant_make_order_completed(): void
     {
         $this->withHeader('X-Company', self::$company->getOriginal('id'))
             ->putJson(self::$apiUrl)
@@ -73,7 +73,7 @@ class UpdateOrderPaymentProofTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_only_roles_in_super_admin_area_users_can_access(): void
+    public function test_update_order_payment_proof_that_only_roles_in_super_admin_area_users_can_access(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::Lender], function ($user, $role) {
             return $this->actingAs($user)
@@ -85,7 +85,7 @@ class UpdateOrderPaymentProofTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_only_lender_admin_and_supervisor_and_creator_can_access(): void
+    public function test_update_order_payment_proof_that_only_lender_admin_and_supervisor_and_creator_can_access(): void
     {
         $rolesHasAccess = [
             Role::LenderAdmin,
@@ -120,7 +120,7 @@ class UpdateOrderPaymentProofTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_payment_proof_file_is_required(): void
+    public function test_update_order_payment_proof_that_payment_proof_file_is_required(): void
     {
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
@@ -131,7 +131,7 @@ class UpdateOrderPaymentProofTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_payment_proof_file_should_be_supported_type(): void
+    public function test_update_order_payment_proof_that_payment_proof_file_should_be_supported_type(): void
     {
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
@@ -147,7 +147,7 @@ class UpdateOrderPaymentProofTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_order_not_follow_the_sequence(): void
+    public function test_update_order_payment_proof_that_order_not_follow_the_sequence(): void
     {
         $statuses = FinancingOrderStatus::getValues();
         foreach ($statuses as $status) {
@@ -172,7 +172,7 @@ class UpdateOrderPaymentProofTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_successfully(): void
+    public function test_update_order_payment_proof_that_successfully(): void
     {
         self::$financingOrder->update(['status' => FinancingOrderStatus::Completed]);
         self::$financingOrder->refresh();

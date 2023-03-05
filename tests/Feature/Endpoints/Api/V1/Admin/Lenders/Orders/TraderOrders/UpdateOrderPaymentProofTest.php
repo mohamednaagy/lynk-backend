@@ -17,7 +17,7 @@ use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
-class AdminUpdateOrderPaymentProofTest extends TestCase
+class UpdateOrderPaymentProofTest extends TestCase
 {
     use RefreshDatabase, AssertsAccessByRoleAndArea;
 
