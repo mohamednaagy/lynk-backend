@@ -3,7 +3,6 @@
 namespace App\Actions\Contracts\Clients;
 
 use App\Models\TraderOrder;
-use App\Models\TraderOrder;
 
 interface AcceptClientWakala
 {
