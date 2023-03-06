@@ -91,5 +91,5 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)->only('index', 'store')->only(['index', 'store']);
         });
 
-    Route::post('{user}/complete-register', CompleteRegister::class)->name('complete-register');
+    Route::post('{user}/sign-up', CompleteRegister::class)->name('sign-up');
 });

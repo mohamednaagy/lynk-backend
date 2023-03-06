@@ -20,6 +20,8 @@ class CompleteRegisterTest extends TestCase
 
     private static User $userLender;
 
+    private static string $endpoint;
+
     /**
      * @return void
      */
@@ -33,6 +35,8 @@ class CompleteRegisterTest extends TestCase
             'password' => null,
             'email_verified_at' => null,
         ]);
+
+        self::$endpoint = 'api/v1/lender/'.self::$userLender->id.'/sign-up';
     }
 
     /**
@@ -44,7 +48,7 @@ class CompleteRegisterTest extends TestCase
         $this->assertNull(self::$userLender->password);
 
         $this->withoutMiddleware(ValidateSignature::class)
-            ->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
+            ->postJson(self::$endpoint, [
                 'first_name' => self::$userLender->first_name,
                 'last_name' => self::$userLender->last_name,
                 'password' => '123456789Aa$$',
@@ -64,7 +68,7 @@ class CompleteRegisterTest extends TestCase
         $this->assertTrue(self::$userLender->isRegisterCompleted());
 
         $this->withoutMiddleware(ValidateSignature::class)
-            ->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
+            ->postJson(self::$endpoint, [
                 'first_name' => self::$userLender->first_name,
                 'last_name' => self::$userLender->last_name,
                 'password' => '123456789Aa$$',
@@ -80,7 +84,7 @@ class CompleteRegisterTest extends TestCase
      */
     public function test_complete_register_fail_without_signature(): void
     {
-        $this->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
+        $this->postJson(self::$endpoint, [
             'first_name' => self::$userLender->first_name,
             'last_name' => self::$userLender->last_name,
             'password' => '123456789Aa$$',
@@ -99,7 +103,7 @@ class CompleteRegisterTest extends TestCase
     public function test_complete_register_validation_rules(): void
     {
         $this->withoutMiddleware(ValidateSignature::class)
-            ->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
+            ->postJson(self::$endpoint, [
                 'password' => '123456789Aa$$',
                 'password_confirmation' => '123456789Aa$$',
                 'source' => 'test',
@@ -109,7 +113,7 @@ class CompleteRegisterTest extends TestCase
             ->assertJsonValidationErrorFor('last_name');
 
         $this->withoutMiddleware(ValidateSignature::class)
-            ->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
+            ->postJson(self::$endpoint, [
                 'first_name' => self::$userLender->first_name,
                 'last_name' => self::$userLender->last_name,
                 'source' => 'test',
@@ -118,7 +122,7 @@ class CompleteRegisterTest extends TestCase
             ->assertJsonValidationErrorFor('password');
 
         $this->withoutMiddleware(ValidateSignature::class)
-            ->postJson('api/v1/lender/'.self::$userLender->id.'/complete-register', [
+            ->postJson(self::$endpoint, [
                 'first_name' => self::$userLender->first_name,
                 'last_name' => self::$userLender->last_name,
                 'password' => '123456789Aa$$',
