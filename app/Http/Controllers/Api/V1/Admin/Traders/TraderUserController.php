@@ -52,10 +52,15 @@ class TraderUserController extends Controller
      * Display a listing of the resource.
      *
      * @param  GetPaginatedTraderUsers  $getPaginatedUsers
+     * @param  Company  $trader
      * @return JsonResponse
      */
-    public function index(GetPaginatedTraderUsers $getPaginatedUsers): JsonResponse
-    {
+    public function index(
+        Company $trader,
+        GetPaginatedTraderUsers $getPaginatedUsers,
+    ): JsonResponse {
+        $getPaginatedUsers->setTrader($trader);
+
         return fractal(
             $getPaginatedUsers->handle(),
             new UserTransformer(Area::Trader)
