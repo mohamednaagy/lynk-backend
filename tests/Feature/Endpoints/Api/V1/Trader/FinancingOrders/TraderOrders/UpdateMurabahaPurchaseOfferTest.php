@@ -49,7 +49,6 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
             'provider' => 'fake',
             'status' => TraderOrderStatus::InProgress,
             'reference' => 123,
-            'client_wakala_accepted_at' => now(),
         ]);
 
         self::$traderOrder->traderHistories()->create([

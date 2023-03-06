@@ -67,8 +67,6 @@ class SendOtpClientWakalaTest extends TestCase
 
     public function test_send_otp_client_wakala_with_already_verified_order_unsuccessful()
     {
-        self::$traderOrder->update(['client_wakala_accepted_at' => now()]);
-
         $this->postJson('api/v1/client/wakala/access', [
             'national_id' => '2553451234',
             'order_id' => self::$order->id,

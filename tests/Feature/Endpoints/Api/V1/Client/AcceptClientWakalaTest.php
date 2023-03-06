@@ -100,8 +100,6 @@ class AcceptClientWakalaTest extends TestCase
 
     public function test_accept_client_wakala_with_already_verified_order_unsuccessful()
     {
-        self::$traderOrder->update(['client_wakala_accepted_at' => now()]);
-
         $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->getNationalId());
 
         $token = Str::random(100);

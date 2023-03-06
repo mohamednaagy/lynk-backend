@@ -23,7 +23,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropColumns('trader_orders', ['client_wakala_accepted_at']);
         Schema::table('financing_orders', function (Blueprint $table) {
             $table->timestamp('client_wakala_accepted_at')->nullable()->after('is_verification_required');
         });
