@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders;
+namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders;
 
 use App\Actions\Contracts\Orders\UpdateOrderPaymentProof as UpdateOrderPaymentProofInterface;
 use App\Enums\Action;
@@ -30,7 +30,6 @@ class UpdateOrderPaymentProof extends Controller
         UpdateOrderPaymentProofRequest $request,
         UpdateOrderPaymentProofInterface $updateOrderPaymentProof,
         int $order,
-        int $traderOrder
     ) {
         return DB::transaction(
             function () use ($request, $updateOrderPaymentProof, $order) {

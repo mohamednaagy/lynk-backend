@@ -213,4 +213,15 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     {
         return $this->traderOrders()->where('status', TraderOrderStatus::InProgress)->latest();
     }
+
+    public function canBeCompleted()
+    {
+        return $this->traderOrders()->completed()->exists()
+            && $this->status->isNot(FinancingOrderStatus::Completed);
+    }
+
+    public function canNotBeCompleted()
+    {
+        return ! $this->canBeCompleted();
+    }
 }

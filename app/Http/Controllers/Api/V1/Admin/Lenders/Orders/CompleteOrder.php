@@ -30,15 +30,12 @@ class CompleteOrder extends Controller
         CompleteOrderRequest $request,
         CompleteOrderInterface $completeOrder,
         int $order,
-        int $traderOrder
     ) {
         return DB::transaction(
-            function () use ($request, $completeOrder, $traderOrder) {
-                $paymentProofMedia = $completeOrder->handle($traderOrder, $request->validated());
+            function () use ($request, $completeOrder, $order) {
+                $completeOrder->handle($order, $request->validated());
 
-                return $this->successResponse([
-                    'payment_proof_url' => $paymentProofMedia?->file_url,
-                ]);
+                return $this->successResponse();
             }
         );
     }

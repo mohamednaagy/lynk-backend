@@ -73,7 +73,7 @@ class UpdateOrderPaymentProofTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_that_only_roles_in_super_admin_area_users_can_access(): void
+    public function test_update_order_payment_proof_only_roles_in_Lender_area_users_can_access(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::Lender], function ($user, $role) {
             return $this->actingAs($user)
@@ -98,23 +98,21 @@ class UpdateOrderPaymentProofTest extends TestCase
             Role::LenderApiUser,
         ];
 
-        foreach ($rolesHasAccess as  $role) {
-            $user = $this->createLenderUser(self::$company->id, $role);
-            $this->actingAs($user)
+        $this->assertStatusCodeToSpecificRoles(Response::HTTP_OK, $rolesHasAccess, function ($user, $role) {
+            return $this->actingAs($user)
                 ->withHeader('X-Company', self::$company->id)
                 ->putJson(self::$apiUrl, [
                     'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
-                ])->assertStatus(Response::HTTP_OK);
-        }
+                ]);
+        });
 
-        foreach ($rolesHasNoAccess as  $role) {
-            $user = $this->createLenderUser(self::$company->id, $role);
-            $this->actingAs($user)
+        $this->assertStatusCodeToSpecificRoles(Response::HTTP_FORBIDDEN, $rolesHasNoAccess, function ($user, $role) {
+            return $this->actingAs($user)
                 ->withHeader('X-Company', self::$company->id)
                 ->putJson(self::$apiUrl, [
                     'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
-                ])->assertStatus(Response::HTTP_FORBIDDEN);
-        }
+                ]);
+        });
     }
 
     /**
@@ -184,7 +182,7 @@ class UpdateOrderPaymentProofTest extends TestCase
             ])
             ->assertStatus(Response::HTTP_OK)
             ->assertJsonFragment([
-                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer)?->fileUrl,
+                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer)?->file_url,
             ]);
     }
 }

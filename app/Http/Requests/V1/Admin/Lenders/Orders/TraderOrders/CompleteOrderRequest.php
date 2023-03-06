@@ -24,7 +24,7 @@ class CompleteOrderRequest extends FormRequest
     public function rules()
     {
         return [
-            'payment_proof' => ['required', 'file', 'mimes:pdf,png,jpeg,jpg', 'max:5120'],
+            'payment_proof' => ['sometimes', 'file', 'mimes:pdf,png,jpeg,jpg', 'max:5120'],
         ];
     }
 }

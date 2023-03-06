@@ -5,11 +5,9 @@ namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
-use App\Models\TraderHistory;
 use App\Models\User;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -87,52 +85,70 @@ class CompleteOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_complete_order_only_lender_admin_and_supervisor_and_creator_can_access(): void
+    public function test_complete_order_that_only_lender_billing_lender_api_user_can_not_access(): void
     {
-        TraderHistory::create([
-            'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted],
-            'trader_order_id' => self::$traderOrder->id,
-        ]);
-
-        $rolesHasAccess = [
-            Role::LenderAdmin,
-            Role::LenderSupervisor,
-            Role::LenderOrderCreator,
-        ];
-
         $rolesHasNoAccess = [
             Role::LenderBilling,
             Role::LenderApiUser,
         ];
 
-        foreach ($rolesHasAccess as  $role) {
-            $user = $this->createLenderUser(self::$company->id, $role);
-            $this->actingAs($user)
-                ->withHeader('X-Company', self::$company->id)
-                ->postJson(self::$apiUrl, [
-                    'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
-                ])->assertStatus(Response::HTTP_OK);
-        }
+        $this->assertStatusCodeToSpecificRoles(Response::HTTP_FORBIDDEN, $rolesHasNoAccess, function ($user, $role) {
+            self::$financingOrder->update(['status' => FinancingOrderStatus::MurabahaSaleCompleted]);
+            self::$financingOrder->refresh();
 
-        foreach ($rolesHasNoAccess as  $role) {
-            $user = $this->createLenderUser(self::$company->id, $role);
-            $this->actingAs($user)
+            return $this->actingAs($user)
                 ->withHeader('X-Company', self::$company->id)
                 ->postJson(self::$apiUrl, [
                     'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
-                ])->assertStatus(Response::HTTP_FORBIDDEN);
-        }
+                ]);
+        });
+    }
+
+    public function test_complete_order_that_lender_admin_can_access()
+    {
+        $user = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+
+        $this->actingAs($user)
+            ->withHeader('X-Company', self::$company->id)
+            ->postJson(self::$apiUrl, [
+                'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
+            ])
+            ->assertStatus(Response::HTTP_OK);
+    }
+
+    public function test_complete_order_that_lender_supervisor_can_access()
+    {
+        $user = $this->createLenderUser(self::$company->id, Role::LenderSupervisor);
+
+        $this->actingAs($user)
+            ->withHeader('X-Company', self::$company->id)
+            ->postJson(self::$apiUrl, [
+                'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
+            ])
+            ->assertStatus(Response::HTTP_OK);
+    }
+
+    public function test_complete_order_that_lender_order_creator_can_access()
+    {
+        $user = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
+
+        $this->actingAs($user)
+            ->withHeader('X-Company', self::$company->id)
+            ->postJson(self::$apiUrl, [
+                'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
+            ])
+            ->assertStatus(Response::HTTP_OK);
     }
 
     /**
      * @return void
      */
-    public function test_complete_order_payment_proof_file_is_required(): void
+    public function test_complete_order_payment_proof_file_is_not_required(): void
     {
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$apiUrl)
-            ->assertJsonValidationErrorFor('payment_proof');
+            ->assertOk();
     }
 
     /**
@@ -156,26 +172,32 @@ class CompleteOrderTest extends TestCase
      */
     public function test_complete_order_order_not_follow_the_sequence(): void
     {
-        $statuses = array_keys(FinancingOrderHistory::$orderHistoryLastActionMap);
-        foreach ($statuses as $status) {
-            if ($status == FinancingOrderStatus::MurabahaSaleCompleted || ! isset(FinancingOrderHistory::$orderHistoryLastActionMap[$status])) {
-                continue;
-            }
+        self::$financingOrder->update(['status' => FinancingOrderStatus::Completed]);
+        self::$financingOrder->refresh();
 
-            self::$traderOrder->traderHistories()->create([
-                'action' => FinancingOrderHistory::$orderHistoryLastActionMap[$status],
+        $this->actingAs(self::$userLender)
+            ->withHeader('X-Company', self::$company->getOriginal('id'))
+            ->postJson(self::$apiUrl, [
+                'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
+            ])
+            ->assertStatus(Response::HTTP_BAD_REQUEST)
+            ->assertJsonFragment([
+                'message' => __('error.order_status_doesnt_follow_sequence'),
             ]);
 
-            $this->actingAs(self::$userLender)
-                ->withHeader('X-Company', self::$company->getOriginal('id'))
-                ->postJson(self::$apiUrl, [
-                    'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
-                ])
-                ->assertStatus(Response::HTTP_BAD_REQUEST)
-                ->assertJsonFragment([
-                    'message' => __('error.order_status_doesnt_follow_sequence'),
-                ]);
-        }
+        self::$financingOrder->traderOrders()->update(['status' => TraderOrderStatus::Cancelled]);
+        self::$financingOrder->update(['status' => FinancingOrderStatus::MurabahaSaleCompleted]);
+        self::$financingOrder->fresh();
+
+        $this->actingAs(self::$userLender)
+            ->withHeader('X-Company', self::$company->getOriginal('id'))
+            ->postJson(self::$apiUrl, [
+                'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
+            ])
+            ->assertStatus(Response::HTTP_BAD_REQUEST)
+            ->assertJsonFragment([
+                'message' => __('error.order_status_doesnt_follow_sequence'),
+            ]);
     }
 
     /**
@@ -192,9 +214,6 @@ class CompleteOrderTest extends TestCase
             ->postJson(self::$apiUrl, [
                 'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
             ])
-            ->assertStatus(Response::HTTP_OK)
-            ->assertJsonFragment([
-                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer)?->fileUrl,
-            ]);
+            ->assertStatus(Response::HTTP_OK);
     }
 }

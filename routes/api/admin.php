@@ -28,8 +28,8 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabhaComp
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetPurchasingCommodity;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabhaCompleteDocument;
-use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateOrderPaymentProof;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodity;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateOrderPaymentProof;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateSellingCommodityCertificateToClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
@@ -95,6 +95,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         });
 
         Route::prefix('orders/{order}')->group(function () {
+            Route::post('complete', CompleteOrder::class);
+            Route::put('payment-proof', UpdateOrderPaymentProof::class);
             Route::prefix('/trader-orders/{trader_order}')->group(function () {
                 Route::post('/proceed', MakeOrderProceed::class);
                 Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
@@ -105,8 +107,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                 Route::post('/selling-commodity-to-client', UpdateSellingCommodityCertificateToClient::class);
                 Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
                 Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
-                Route::post('complete', CompleteOrder::class);
-                Route::put('payment-proof', UpdateOrderPaymentProof::class);
             });
         });
 

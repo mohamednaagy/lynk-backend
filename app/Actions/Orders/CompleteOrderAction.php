@@ -3,32 +3,32 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\CompleteOrder;
-use App\Actions\Contracts\Orders\GetOrderAndTraderOrderLockedForUpdate;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
+use App\Models\FinancingOrder;
 use Illuminate\Support\Arr;
 
 class CompleteOrderAction implements CompleteOrder
 {
-    public function __construct(
-        protected GetOrderAndTraderOrderLockedForUpdate $getOrderAndTraderOrderLockedForUpdate
-    ) {
-    }
-
     /**
      * @return mixed
      */
-    public function handle($traderOrderId, array $data)
+    public function handle($orderId, array $data)
     {
-        [$order, $traderOrder] = $this->getOrderAndTraderOrderLockedForUpdate->handle($traderOrderId);
+        $financingOrder = FinancingOrder::query()
+            ->lockForUpdate()
+            ->findOrFail($orderId);
 
-        $traderOrder->ensureCanAccessStep(
-            FinancingOrderStatus::MurabahaSaleCompleted
-        );
+        if ($financingOrder->canNotBeCompleted()) {
+            throw new OrderStatusDoesNotFollowSequenceException;
+        }
 
-        $order->update(['status' => FinancingOrderStatus::Completed]);
+        if ($paymentProofMedia = Arr::get($data, 'payment_proof')) {
+            $financingOrder->addMedia($paymentProofMedia)
+                ->toMediaCollection(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer);
+        }
 
-        return $order->addMedia(Arr::get($data, 'payment_proof'))
-            ->toMediaCollection(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer);
+        $financingOrder->update(['status' => FinancingOrderStatus::Completed]);
     }
 }

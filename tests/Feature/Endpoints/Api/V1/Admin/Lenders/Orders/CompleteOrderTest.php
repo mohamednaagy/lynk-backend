@@ -6,7 +6,6 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Enums\TraderOrderStatus;
@@ -32,6 +31,8 @@ class CompleteOrderTest extends TestCase
 
     private static User $managerHasPermissions;
 
+    private static User $managerHasNoPermissionPermissions;
+
     private static Builder|Model $financingOrder;
 
     private static Builder|Model $traderOrder;
@@ -49,6 +50,7 @@ class CompleteOrderTest extends TestCase
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$superAdminUser = $this->createSuperAdminUser();
         self::$managerHasPermissions = $this->createSuperAdminUser(Role::Manager);
+        self::$managerHasNoPermissionPermissions = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(
             self::$managerHasPermissions,
             perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit])
@@ -70,7 +72,6 @@ class CompleteOrderTest extends TestCase
 
         self::$apiUrl = 'api/v1/admin/orders/'
             .self::$financingOrder->getRawOriginal('id').
-            '/trader-orders/'.self::$traderOrder->id.
             '/complete';
     }
 
@@ -91,10 +92,6 @@ class CompleteOrderTest extends TestCase
      */
     public function test_complete_order_only_roles_of_super_admin_area_can_access(): void
     {
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted],
-        ]);
-
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
                 ->postJson(self::$apiUrl, [
@@ -105,42 +102,36 @@ class CompleteOrderTest extends TestCase
 
     public function test_complete_order_super_admin_can_access()
     {
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted],
-        ]);
-
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$apiUrl, [
                 'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
-            ])->assertStatus(Response::HTTP_OK)
-            ->assertJsonFragment([
-                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer)?->fileUrl,
-            ]);
+            ])->assertStatus(Response::HTTP_OK);
     }
 
     public function test_complete_order_that_manager_with_permissions_can_access()
     {
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted],
-        ]);
-
         $this->actingAs(self::$managerHasPermissions)
             ->postJson(self::$apiUrl, [
                 'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
-            ])->assertStatus(Response::HTTP_OK)
-            ->assertJsonFragment([
-                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer)?->fileUrl,
-            ]);
+            ])->assertStatus(Response::HTTP_OK);
+    }
+
+    public function test_complete_order_that_manager_without_permissions_can_not_access()
+    {
+        $this->actingAs(self::$managerHasNoPermissionPermissions)
+            ->postJson(self::$apiUrl, [
+                'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
+            ])->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     /**
      * @return void
      */
-    public function test_complete_order_payment_proof_file_is_required(): void
+    public function test_complete_order_payment_proof_file_is_not_required(): void
     {
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$apiUrl)
-            ->assertJsonValidationErrorFor('payment_proof');
+            ->assertOk();
     }
 
     /**
@@ -170,10 +161,7 @@ class CompleteOrderTest extends TestCase
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$apiUrl, [
                 'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
-            ])->assertStatus(Response::HTTP_OK)
-            ->assertJsonFragment([
-                'payment_proof_url' => self::$financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer)?->fileUrl,
-            ]);
+            ])->assertStatus(Response::HTTP_OK);
 
         $this->assertTrue(self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Completed));
         $this->assertTrue(self::$traderOrder->fresh()->status->is(TraderOrderStatus::Completed));
