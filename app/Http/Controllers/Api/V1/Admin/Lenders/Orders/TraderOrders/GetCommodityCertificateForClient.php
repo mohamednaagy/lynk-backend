@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders;
+namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -11,7 +11,7 @@ use App\Models\Company;
 use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 
-class GetSellingCommodityCertificateToClient extends Controller
+class GetCommodityCertificateForClient extends Controller
 {
     public function __construct()
     {

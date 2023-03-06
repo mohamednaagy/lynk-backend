@@ -23,8 +23,8 @@ class CompleteRegisterInvitation extends Mailable implements ShouldQueue
     public $url;
 
     public array $registerRouteNamesByCompanyType = [
-        CompanyType::Lender => 'api.v1.lender.complete-register',
-        CompanyType::Trader => 'api.v1.trader.complete-register',
+        CompanyType::Lender => 'api.v1.lender.sign-up',
+        CompanyType::Trader => 'api.v1.trader.sign-up',
     ];
 
     /**
