@@ -26,11 +26,13 @@ class TraderHistory extends Model
             'id',
             'trader_order_id',
             'action',
+            'created_at',
+            'updated_at',
         ];
     }
 
     public function traderOrder(): BelongsTo
     {
-        return $this->belongsTo(TraderOrder::class, 'id', 'trader_order_id');
+        return $this->belongsTo(TraderOrder::class, 'trader_order_id', 'id');
     }
 }

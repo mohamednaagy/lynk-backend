@@ -43,13 +43,17 @@ class LenderControllerUpdateTest extends TestCase
     {
         parent::setUp();
 
-        [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        [self::$lender, self::$wallet] = $this->createCompany('2000', [
+            'company_cr' => '1234567890',
+            'unique_name' => 'companyUniqueNameTest',
+        ]);
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::Lenders, Action::Edit]));
 
         self::$lenderDetails = [
             'name' => 'testCompany',
+            'notifications_email' => 'notifications_email@email.com',
             'unique_name' => 'companyUniqueName',
             'company_cr' => '1234567891',
             'order_cost' => 20,
@@ -98,6 +102,27 @@ class LenderControllerUpdateTest extends TestCase
             ]);
 
         $this->assertEquals(self::$lender->refresh()->unique_name, 'companyUniqueName');
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_admin_can_update_lender_with_even_same_company_cr_and_unique_name(): void
+    {
+        $this->actingAs(self::$userAdmin)
+            ->putJson('api/v1/admin/lenders/'.self::$lender->id,
+                array_merge(
+                    self::$lenderDetails,
+                    [
+                        'company_cr' => self::$lender->company_cr,
+                        'unique_name' => self::$lender->unique_name,
+                    ]
+                )
+            )
+            ->assertOk()
+            ->assertExactJson([
+                'data' => [],
+            ]);
     }
 
     /**

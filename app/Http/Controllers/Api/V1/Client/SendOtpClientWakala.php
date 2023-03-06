@@ -9,7 +9,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Client\SendOtpRequest;
 use App\Models\FinancingOrder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -58,7 +57,10 @@ class SendOtpClientWakala extends Controller
 
             $traderOrder = $order->activeTraderOrder()->first();
 
-            if ($traderOrder->client_wakala_accepted_at !== null) {
+            if (
+                $traderOrder === null
+                || $traderOrder->checkOrderStepComplete(FinancingOrderStatus::ClientWakalaCompleted)
+            ) {
                 return $this->errorResponse(
                     __('error.client_wakala_already_accepted'),
                     Response::HTTP_BAD_REQUEST,

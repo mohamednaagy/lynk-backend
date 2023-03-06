@@ -2,11 +2,12 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Wallet;
 
+use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
-use App\Support\Money\Money;
+use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,6 +38,10 @@ class CalculateOrderCostTest extends TestCase
 
     public static User $lenderCreatorUser;
 
+    public static float $vatRate;
+
+    public static Money $approvedCompanyOrderCostWithVat;
+
     /**
      * @throws BindingResolutionException
      */
@@ -44,7 +49,9 @@ class CalculateOrderCostTest extends TestCase
     {
         parent::setUp();
         [self::$company] = $this->createCompany();
+
         [self::$notApprovedCompany] = $this->createCompany(data: ['company_cr' => '12345678911', 'status' => CompanyStatus::Pending]);
+
         self::$lenderAdminUserNotApproved = $this->createLenderUser(self::$notApprovedCompany->id, Role::LenderAdmin);
         self::$lenderAdminUserNotVerified = $this->createLenderUser(self::$company->id, Role::LenderAdmin, data: ['email_verified_at' => null]);
         self::$lenderAdminUser = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
@@ -52,6 +59,10 @@ class CalculateOrderCostTest extends TestCase
         self::$lenderBillingUser = $this->createLenderUser(self::$company->id, Role::LenderBilling);
         self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser);
         self::$lenderCreatorUser = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
+
+        self::$vatRate = app(GetProjectSettings::class)->handle()->getVatRate();
+
+        self::$approvedCompanyOrderCostWithVat = self::$company->order_cost->multiply(self::$vatRate + 1);
     }
 
     /**
@@ -62,9 +73,8 @@ class CalculateOrderCostTest extends TestCase
     public function test_calculate_order_cost_calculation_and_response(): void
     {
         $orderCount = rand(1, 200);
-        /** @var Money $orderCost */
-        $orderCost = self::$company->order_cost;
-        $total = $orderCost->multiply($orderCount);
+
+        $total = self::$approvedCompanyOrderCostWithVat->multiply($orderCount);
 
         $this->actingAs(self::$lenderAdminUser)
             ->withHeader('X-Company', self::$company->id)
@@ -106,9 +116,8 @@ class CalculateOrderCostTest extends TestCase
     public function test_calculate_order_lender_supervisor_can_access(): void
     {
         $orderCount = rand(1, 200);
-        /** @var Money $orderCost */
-        $orderCost = self::$company->order_cost;
-        $total = $orderCost->multiply($orderCount);
+
+        $total = self::$approvedCompanyOrderCostWithVat->multiply($orderCount);
 
         $this->actingAs(self::$lenderSupervisorUser)
             ->withHeader('X-Company', self::$company->id)
@@ -126,9 +135,8 @@ class CalculateOrderCostTest extends TestCase
     public function test_calculate_order_lender_billing_can_access(): void
     {
         $orderCount = rand(1, 200);
-        /** @var Money $orderCost */
-        $orderCost = self::$company->order_cost;
-        $total = $orderCost->multiply($orderCount);
+
+        $total = self::$approvedCompanyOrderCostWithVat->multiply($orderCount);
 
         $this->actingAs(self::$lenderBillingUser)
             ->withHeader('X-Company', self::$company->id)
@@ -146,9 +154,8 @@ class CalculateOrderCostTest extends TestCase
     public function test_calculate_order_with_lender_api_user_can_access(): void
     {
         $orderCount = rand(1, 200);
-        /** @var Money $orderCost */
-        $orderCost = self::$company->order_cost;
-        $total = $orderCost->multiply($orderCount);
+
+        $total = self::$approvedCompanyOrderCostWithVat->multiply($orderCount);
 
         $this->actingAs(self::$lenderApiUser)
             ->withHeader('X-Company', self::$company->id)
@@ -166,9 +173,6 @@ class CalculateOrderCostTest extends TestCase
     public function test_calculate_order_with_lender_order_creator_cant_access(): void
     {
         $orderCount = rand(1, 200);
-        /** @var Money $orderCost */
-        $orderCost = self::$company->order_cost;
-        $total = $orderCost->multiply($orderCount);
 
         $this->actingAs(self::$lenderCreatorUser)
             ->withHeader('X-Company', self::$company->id)
@@ -182,9 +186,6 @@ class CalculateOrderCostTest extends TestCase
     public function test_calculate_order_lender_with_not_verified_email_cannot_access(): void
     {
         $orderCount = rand(1, 200);
-        /** @var Money $orderCost */
-        $orderCost = self::$company->order_cost;
-        $total = $orderCost->multiply($orderCount);
 
         $this->actingAs(self::$lenderAdminUserNotVerified)
             ->withHeader('X-Company', self::$company->id)
@@ -201,9 +202,6 @@ class CalculateOrderCostTest extends TestCase
     public function test_calculate_order_lender_of_not_approved_company_cannot_access(): void
     {
         $orderCount = rand(1, 200);
-        /** @var Money $orderCost */
-        $orderCost = self::$company->order_cost;
-        $total = $orderCost->multiply($orderCount);
 
         $this->actingAs(self::$lenderAdminUserNotApproved)
             ->withHeader('X-Company', self::$notApprovedCompany->id)

@@ -64,35 +64,6 @@ class ProcessDmccPtpNotificationTest extends TestCase
             'reference' => $ttiId,
             'status' => TraderOrderStatus::InProgress,
         ]);
-
-        Soap::fake(function () {
-            return Soap::response([
-                'successCode' => '0000',
-                'errorCode' => '',
-                'exchangeRate' => 'exchangeRate',
-                'inventoryDetails' => [
-                    [
-                        'hsCodeDescription' => 'hsCodeDescription',
-                        'quantity' => 'quantity',
-                        'totalValue' => 'totalValue',
-                        'currency' => 'currency',
-                        'warehouseOrVaultId' => 'warehouseOrVaultId',
-                        'owner' => 'owner',
-                        'previousOwner' => 'previousOwner',
-                        'newOwner' => 'newOwner',
-                        'inventoryRecordId' => '12',
-                        'warrantPercentage' => 'warrantPercentage',
-                        'warehouseOrVaultOperatorId' => 'warehouseOrVaultOperatorId',
-                        'warrantNo' => 'warrantNo',
-                        'uom' => 'uom',
-                        'hsCode' => 'hsCode',
-                        'dateTimeOfPurchasingCommodity' => 'dateTimeOfPurchasingCommodity',
-                        'warehouseOrVaultEmirates' => 'warehouseOrVaultEmirates',
-                        'warehouseOrVaultCountry' => 'warehouseOrVaultCountry',
-                    ],
-                ],
-            ], 200);
-        });
     }
 
     public function test_job_not_processed_if_active_trader_order_has_invalid_provider()
@@ -121,6 +92,12 @@ class ProcessDmccPtpNotificationTest extends TestCase
 
     public function test_job_processed_if_active_trader_order_has_dmcc_provider()
     {
+        Soap::fake(function () {
+            return Soap::response([
+                'successCode' => '0000',
+            ]);
+        });
+
         self::$traderOrder->update(['provider' => 'dmcc']);
 
         $process = new ProcessDmccPtpNotification(self::$notification);

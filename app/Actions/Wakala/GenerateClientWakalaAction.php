@@ -34,12 +34,15 @@ class GenerateClientWakalaAction implements GenerateClientWakala
             'template' => $template,
         ])->render();
 
-        return PdfGenerator::outputFromHtml($wakalaTemplate, function ($fileResource) use ($financingOrder, $traderOrder) {
-            return $traderOrder
-                ->addMediaFromStream($fileResource)
-                ->usingFileName($financingOrder->getNationalId().'.pdf')
-                ->toMediaCollection($this->getCollectionName());
-        });
+        return PdfGenerator::outputFromHtml(
+            $wakalaTemplate,
+            function ($fileResource) use ($financingOrder, $traderOrder) {
+                return $traderOrder
+                    ->addMediaFromStream($fileResource)
+                    ->usingFileName($financingOrder->getNationalId().'.pdf')
+                    ->toMediaCollection($this->getCollectionName());
+            }
+        );
     }
 
     public function setTemplate(string $template)

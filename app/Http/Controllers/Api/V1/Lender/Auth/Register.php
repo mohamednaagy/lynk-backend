@@ -26,6 +26,7 @@ class Register extends Controller
             $data = array_merge(
                 $request->validated(),
                 [
+                    'notifications_email' => $request->validated('email'),
                     'does_order_require_approval' => $getSettingsClassInstance->handle(Area::Lender)
                         ->default_does_order_require_approval,
                     'company_status' => $getSettingsClassInstance->handle(Area::Lender)

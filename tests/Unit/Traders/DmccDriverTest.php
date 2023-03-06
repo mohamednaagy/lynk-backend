@@ -55,7 +55,7 @@ class DmccDriverTest extends TestCase
             'quantity' => 1,
             'warehouse' => 'warehouse',
             'owner' => 'owner',
-            'dateTimeOfPurchasingCommodity' => Carbon::now()->format('d/m/Y H:i A'),
+            'date_time_of_purchasing_commodity' => Carbon::now()->format('Y-m-d H:i:s'),
         ]);
     }
 

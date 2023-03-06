@@ -3,24 +3,16 @@
 namespace App\Actions\Clients;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala;
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
+use App\Enums\FinancingOrderHistory;
 use App\Models\TraderOrder;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Support\Traders\TraderHelperTrait;
 
 class AcceptClientWakalaAction implements AcceptClientWakala
 {
-    public function __construct(protected GenerateClientWakala $generateClientWakala)
-    {
-    }
+    use TraderHelperTrait;
 
-    public function handle(TraderOrder $traderOrder): Media
+    public function handle(TraderOrder $traderOrder): void
     {
-        if ($traderOrder->client_wakala_accepted_at === null) {
-            $traderOrder->update([
-                'client_wakala_accepted_at' => now(),
-            ]);
-        }
-
-        return $this->generateClientWakala->handle($traderOrder);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ClientWakalaAccepted);
     }
 }

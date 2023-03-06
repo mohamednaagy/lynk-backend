@@ -33,7 +33,7 @@ class UpdateMyProfileRequest extends FormRequest
             'password' => ['nullable', 'string', 'min:8', 'max:100'],
             'email' => [
                 'required',
-                'email',
+                'email:filter',
                 Rule::unique(User::class, 'email')
                     ->ignore(
                         $this->user()->id

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Client;
 
 use App\Actions\Contracts\Clients\VerifiedClientWakala;
 use App\Actions\Contracts\Clients\VerifyOtpClientWakala as VerifyOtpClientWakalaInterface;
+use App\Enums\FinancingOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Client\VerifyOtpRequest;
 use App\Models\FinancingOrder;
@@ -34,11 +35,15 @@ class VerifyOtpClientWakala extends Controller
             $traderOrder = $order->activeTraderOrder()->first();
 
             $canProceed = $order->getNationalId() === $request->validated('national_id')
-                && $traderOrder->client_wakala_accepted_at === null;
+                && $traderOrder !== null
+                && ! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::ClientWakalaCompleted);
 
             abort_if(! $canProceed, 404);
 
-            abort_if(! $verifyOtpClientWakala->handle($request, $request->validated('vid'), $request->validated('code'), $order), 404);
+            abort_if(
+                ! $verifyOtpClientWakala->handle($request, $request->validated('vid'), $request->validated('code'), $order),
+                404
+            );
 
             return $this->successResponse($verifiedClientWakala->handle($order));
         });

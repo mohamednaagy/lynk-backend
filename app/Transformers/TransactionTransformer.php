@@ -2,9 +2,10 @@
 
 namespace App\Transformers;
 
+use App\Enums\TransactionReason;
 use App\Models\Transaction;
 use App\Support\Wallets\Contracts\TransactionUtilInterface;
-use Carbon\Carbon;
+use League\Fractal\Resource\NullResource;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -15,6 +16,7 @@ class TransactionTransformer extends TransformerAbstract
         'date',
         'description',
         'amount',
+        'receipt_url',
     ];
 
     public function transform(Transaction $transaction): array
@@ -29,20 +31,31 @@ class TransactionTransformer extends TransformerAbstract
 
     public function includeDate(Transaction $transaction): Primitive
     {
-        return $this->primitive(Carbon::parse($transaction->created_at)->format('Y-m-d'));
+        return $this->primitive($transaction->created_at->format('Y-m-d'));
     }
 
     public function includeDescription(Transaction $transaction): Primitive
     {
         return $this->primitive(
             ! is_null($transaction->reason)
-            ? app(TransactionUtilInterface::class)->getDescription($transaction)
-            : null
+                ? app(TransactionUtilInterface::class)->getDescription($transaction)
+                : null
         );
     }
 
     public function includeAmount(Transaction $transaction): Primitive
     {
         return $this->primitive($transaction->amount->formatByDecimal());
+    }
+
+    public function includeReceiptUrl(Transaction $transaction): Primitive|NullResource
+    {
+        if (in_array($transaction->reason, TransactionReason::$reasonsAssociatedWithZatcaInvoice)) {
+            return $this->primitive(
+                $transaction->zatca_invoice_media?->file_url
+            );
+        }
+
+        return $this->null();
     }
 }

@@ -22,9 +22,9 @@ class GetPurchasingCommodity extends Controller
 
     public function __invoke(
         int $order,
-        TraderOrder $trader_order
+        TraderOrder $traderOrder
     ): JsonResponse {
-        return fractal($trader_order, new TraderOrderTransformer())
+        return fractal($traderOrder, new TraderOrderTransformer())
             ->parseIncludes(
                 'purchasing_commodity_information',
             )->respond();

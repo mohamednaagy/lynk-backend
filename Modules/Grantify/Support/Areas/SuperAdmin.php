@@ -92,6 +92,13 @@ class SuperAdmin
         ],
         Subject::TraderUserInvitation => [
             Action::Send,
+        ],
+        Subject::TraderUsers => [
+            Action::Index,
+            Action::Create,
+            Action::Edit,
+            Action::Show,
+            Action::Delete,
             Action::Manage,
         ],
     ];
