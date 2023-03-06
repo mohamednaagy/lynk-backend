@@ -212,13 +212,14 @@ class MakeOrderProceedTest extends TestCase
                 ]);
             });
 
-        $response = $this->actingAs(self::$admin)
-            ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
-                'client_wakala' => UploadedFile::fake()->create('client_wakala.pdf'),
-            ]);
+            $response = $this->actingAs(self::$admin)
+                ->postJson(self::$orderProceedUrl, [
+                    'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                    'client_wakala' => UploadedFile::fake()->create('client_wakala.pdf'),
+                ]);
 
-        $response->assertStatus(Response::HTTP_OK);
+            $response->assertStatus(Response::HTTP_OK);
+        }
     }
 
     /**

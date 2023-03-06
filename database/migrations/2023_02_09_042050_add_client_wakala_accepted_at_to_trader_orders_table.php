@@ -13,10 +13,6 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('trader_orders', function (Blueprint $table) {
-            $table->timestamp('client_wakala_accepted_at')->nullable()->after('data');
-        });
-
         Schema::dropColumns('financing_orders', ['client_wakala_accepted_at']);
     }
 
