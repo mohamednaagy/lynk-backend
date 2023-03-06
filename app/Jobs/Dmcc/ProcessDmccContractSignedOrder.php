@@ -54,7 +54,7 @@ class ProcessDmccContractSignedOrder implements ShouldQueue
 
             $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommoditySoldToCustomer);
 
-            app()->make(GenerateClientWakala::class)->handle($financingOrder);
+            app()->make(GenerateClientWakala::class)->handle($lastTraderOrder);
         });
     }
 

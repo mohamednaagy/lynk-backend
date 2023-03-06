@@ -2,6 +2,7 @@
 
 namespace Endpoints\Api\V1\Client;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
@@ -85,6 +86,10 @@ class VerifyOtpClientWakalaTest extends TestCase
 
     public function test_verify_otp_client_wakala_with_already_verified_order_unsuccessful()
     {
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::ClientWakalaAccepted,
+        ]);
+
         $this->postJson('api/v1/client/wakala/verify', [
             'national_id' => self::$order->national_id,
             'order_id' => self::$order->id,
