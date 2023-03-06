@@ -7,6 +7,7 @@ use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Stancl\Tenancy\Database\TenantScope;
 
 class GetPaginatedTraderUsersAction implements GetPaginatedTraderUsers
 {
@@ -19,7 +20,8 @@ class GetPaginatedTraderUsersAction implements GetPaginatedTraderUsers
     {
         return User::query()
             ->when($this->trader, function ($query) {
-                return $query->where('company_id', $this->trader->id);
+                return $query->where('company_id', $this->trader->id)
+                    ->withoutGlobalScope(TenantScope::class);
             })
             ->whereHas('roles', function ($query) {
                 return $query->whereIn('name', [
