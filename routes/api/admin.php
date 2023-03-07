@@ -123,6 +123,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::apiResource('traders', TraderController::class)
             ->only(['index', 'store', 'show', 'update']);
+        Route::apiResource('traders.users', TraderUserController::class);
 
         Route::apiResource('traders.users', TraderUserController::class)->scoped();
 
