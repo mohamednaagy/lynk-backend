@@ -244,7 +244,7 @@ class DmccDriver implements TraderInterface
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
         try {
-            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $traderOrder->date_time_of_purchasing_commodity);
+            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $traderOrder->products[0]['date_time_of_purchasing_commodity']);
 
             $this->storeOrderDocumentAsPdf(
                 'selling-commodity-to-customer',
@@ -252,13 +252,7 @@ class DmccDriver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'amount' => $traderOrder->amount,
-                    'hs_code_description' => $traderOrder->product,
-                    'quantity' => $traderOrder->quantity,
-                    'uom' => $traderOrder->uom,
-                    'warehouse' => $traderOrder->warehouse,
-                    // TODO: change later after fix from business
-                    'new_owner' => 'محمد علي',
+                    'products' => $traderOrder->products,
                     'date' => $dateTime->toDateString(),
                     'time' => $dateTime->toTimeString(),
                 ],
@@ -317,20 +311,15 @@ class DmccDriver implements TraderInterface
     {
         try {
             logs()->debug('tee', [$traderOrder->id]);
-            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $traderOrder->date_time_of_purchasing_commodity);
+            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $traderOrder->products[0]['date_time_of_purchasing_commodity']);
 
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
+                    'products' => $traderOrder->products,
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'amount' => $traderOrder->amount,
-                    'hs_code_description' => $traderOrder->product,
-                    'quantity' => $traderOrder->quantity,
-                    'uom' => $traderOrder->uom,
-                    'warehouse' => $traderOrder->warehouse,
-                    'previous_owner' => $traderOrder->previous_owner,
                     'date' => $dateTime->toDateString(),
                     'time' => $dateTime->toTimeString(),
                 ],
