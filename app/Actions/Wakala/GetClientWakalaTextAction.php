@@ -13,8 +13,8 @@ class GetClientWakalaTextAction implements GetClientWakalaText
         $date = now()->toDateString();
         $time = now()->toTimeString();
         $commodityNumber = $financingOrder->reference_number;
-        $amount = $traderDetails->amount ?? '';
-        $commodity = $traderDetails->product ?? '';
+        $amount = $traderOrder->amount ?? '';
+        $commodity = $traderOrder->product ?? '';
         $orderNumber = $financingOrder->id;
         $orderDate = $financingOrder->created_at->format('Y-m-d');
 

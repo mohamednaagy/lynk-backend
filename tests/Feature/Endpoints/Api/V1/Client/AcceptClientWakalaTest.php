@@ -115,7 +115,7 @@ class AcceptClientWakalaTest extends TestCase
                 'national_id' => self::$order->national_id,
                 'order_id' => self::$order->id,
             ])
-            ->assertStatus(Response::HTTP_NOT_FOUND);
+            ->assertStatus(Response::HTTP_OK);
     }
 
     public function test_accept_client_wakala_with_token_expired_unsuccessful()

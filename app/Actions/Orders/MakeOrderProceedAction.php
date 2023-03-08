@@ -8,7 +8,6 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -60,6 +59,10 @@ class MakeOrderProceedAction implements MakeOrderProceed
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
+        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
+            FinancingOrderStatus::ClientWakalaCompleted
+        );
+
         if ($this->signedClientWakala) {
             $traderOrder->addMedia($this->signedClientWakala)
                 ->toMediaCollection(TraderOrderMediaCollection::SignedClientWakala);
@@ -67,9 +70,11 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
         app(AcceptClientWakala::class)->handle($traderOrder);
 
-        $order->update([
-            'status' => FinancingOrderStatus::ClientWakalaCompleted,
-        ]);
+        if ($canUpdateOrderStatus) {
+            $order->update([
+                'status' => FinancingOrderStatus::ClientWakalaCompleted,
+            ]);
+        }
     }
 
     /**
@@ -89,18 +94,17 @@ class MakeOrderProceedAction implements MakeOrderProceed
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
-        if (
-            $traderOrder->status->is(TraderOrderStatus::InProgress) &&
-            ! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::ContractSigned)
-        ) {
+        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
+            FinancingOrderStatus::ContractSigned
+        );
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
+
+        if ($canUpdateOrderStatus) {
             $order->update([
                 'status' => FinancingOrderStatus::ContractSigned,
             ]);
         }
-
-        $traderOrder->traderHistories()->updateOrCreate([
-            'action' => FinancingOrderHistory::ContractSigned,
-        ]);
 
         return [];
     }
