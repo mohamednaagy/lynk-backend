@@ -7,16 +7,19 @@ use App\Actions\Contracts\Traders\GetPaginatedTraderUsers;
 use App\Actions\Contracts\Traders\UpdateTraderUserWithRoleAndPermission;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CompanyType;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Traders\Users\StoreUserRequest;
 use App\Http\Requests\V1\Admin\Traders\Users\UpdateUserRequest;
+use App\Mail\CompleteRegisterInvitation;
 use App\Models\Company;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class TraderUserController extends Controller
 {
@@ -44,7 +47,7 @@ class TraderUserController extends Controller
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Delete, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::TraderUsers, Action::Delete, Action::Manage])
         )->only('destroy');
     }
 
@@ -87,17 +90,20 @@ class TraderUserController extends Controller
      * @return JsonResponse
      */
     public function store(
-        StoreUserRequest $storeUserRequest,
+        StoreUserRequest $request,
         Company $trader,
         CreateTraderUserWithRoleAndPermission $createTraderUserWithRoleAndPermission
     ): JsonResponse {
-        return DB::transaction(function () use ($trader, $storeUserRequest, $createTraderUserWithRoleAndPermission) {
+        return DB::transaction(function () use ($trader, $request, $createTraderUserWithRoleAndPermission) {
             $user = $createTraderUserWithRoleAndPermission->handle(
-                $storeUserRequest->validated() +
+                $request->validated() +
                     [
                         'company_id' => $trader->id,
                     ]
             );
+
+            $invitationUrl = $request->validated('redirect_url');
+            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Trader));
 
             return fractal($user, new UserTransformer())
                 ->parseIncludes([
