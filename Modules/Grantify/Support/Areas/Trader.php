@@ -17,6 +17,7 @@ class Trader
             Action::Manage,
             Action::Index,
             Action::Show,
+            Action::Edit,
         ],
         Subject::TraderUsers => [
             Action::Manage,

@@ -69,7 +69,7 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
             ->assertUnauthorized();
     }
 
-    public function test_auth_user_cannot_proceed_with_murabaha_purchase_offer_if_previous_step_is_not_complete(): void
+    public function test_trader_admin_cannot_proceed_with_murabaha_purchase_offer_if_previous_step_is_not_complete(): void
     {
         self::$traderOrder->traderHistories()->delete();
 
@@ -82,7 +82,7 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
             ->assertJsonPath('code', 1011);
     }
 
-    public function test_auth_user_can_proceed_with_murabaha_purchase_offer(): void
+    public function test_trader_admin_can_proceed_with_murabaha_purchase_offer_successful(): void
     {
         $this->actingAs(self::$traderAdminUser)
             ->withHeader('X-Company', self::$company->id)
@@ -97,7 +97,7 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
     }
 
-    public function test_auth_user_can_update_murabaha_purchase_offer(): void
+    public function test_trader_admin_can_update_murabaha_purchase_offer_successful(): void
     {
         $this->actingAs(self::$traderAdminUser)
             ->withHeader('X-Company', self::$company->id)
@@ -124,7 +124,7 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
     }
 
-    public function test_auth_user_can_update_murabaha_purchase_offer_with_trader_not_in_progress(): void
+    public function test_trader_admin_can_update_murabaha_purchase_offer_when_trader_order_status_not_in_progress(): void
     {
         self::$traderOrder->update(['status' => TraderOrderStatus::Completed]);
         self::$order->update(['status' => FinancingOrderStatus::MurabahaSaleCompleted]);
@@ -142,7 +142,7 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
     }
 
-    public function test_other_users_areas_can_not_update_process_murabaha_purchase_offer_with_invalid_permissions()
+    public function test_other_users_roles_not_in_trader_area_can_not_update_process_murabaha_purchase_offer_with_invalid_permissions()
     {
         $this->assertStatusCodeExceptForPermissions(
             Response::HTTP_FORBIDDEN,
