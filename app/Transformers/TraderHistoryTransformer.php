@@ -7,6 +7,7 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use League\Fractal\TransformerAbstract;
 
 class TraderHistoryTransformer extends TransformerAbstract
@@ -55,7 +56,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'step' => 'client_wakala',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'duration' => $this->getDurationForHistoryStep(FinancingOrderHistory::ClientWakalaAccepted),
+                'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
                 'wakala_document' => [
                     'url' => $wakalaMedia?->file_url,
                     'date' => optional($wakalaMedia)->created_at?->format('Y-m-d h:i:s A'),
@@ -81,7 +82,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                         ?->file_url,
                     'date' => optional($transferOwnershipToLender)->created_at?->format('Y-m-d h:i:s A'),
                 ],
-                'duration' => $this->getDurationForHistoryStep(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument),
+                'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
             ],
             FinancingOrderHistory::ContractSigned => [
                 'step' => 'contract_singed',
@@ -94,7 +95,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'step' => 'selling_commodity_to_customer',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'duration' => $this->getDurationForHistoryStep(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument),
+                'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
                 'document' => $this->traderOrder
                     ->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer)
                     ?->file_url,
@@ -109,7 +110,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                         ?->file_url,
                     'date' => optional($getMurabahaPurchaseOfferDocument)->created_at?->format('Y-m-d h:i:s A'),
                 ],
-                'duration' => $this->getDurationForHistoryStep(FinancingOrderHistory::IssueMurabahaOffer),
+                'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
 
             ],
             FinancingOrderHistory::MurabahaSaleCompleted => [
@@ -122,7 +123,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                         ?->file_url,
                     'date' => optional($getWarrantAmendmentExceptWarrantNoDocument)->created_at?->format('Y-m-d h:i:s A'),
                 ],
-                'duration' => $this->getDurationForHistoryStep(FinancingOrderHistory::MurabahaSaleCompleted),
+                'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
             ],
             default => null,
         };
@@ -134,34 +135,45 @@ class TraderHistoryTransformer extends TransformerAbstract
             ->getStepByHistory($step)
             ?->status;
 
-        if (! $financingOrderStatus) {
-            return;
+        if (blank($financingOrderStatus)) {
+            return null;
         }
 
-        $previousAction = $this->getLatestTraderHistoryForPreviousStatus($financingOrderStatus);
-        $latestAction = $this->getLatestTraderHistoryForCurrentStatus($financingOrderStatus);
+        $previousAction = $this->getLatestTraderHistoryForPreviousStatusOfStatus($financingOrderStatus);
+        $latestAction = $this->getLatestTraderHistoryForStatus($financingOrderStatus);
 
-        if ($previousAction?->updated_at && $latestAction?->updated_at) {
-            $previousActionDate = \Carbon\Carbon::createFromFormat('Y-m-d H:s:i', $previousAction?->created_at);
-            $latestActionDate = \Carbon\Carbon::createFromFormat('Y-m-d H:s:i', $latestAction?->created_at);
+        if ($previousAction?->created_at && $latestAction?->created_at) {
+            $diffTime = $previousAction->created_at->diffForHumans(
+                $latestAction->created_at,
+                [
+                    'parts' => 3,
+                    'join' => true,
+                ]
+            );
 
-            return $previousActionDate->diffInSeconds($latestActionDate);
+            $ignoredWords = ['ago', 'before', 'after', 'منذ', 'قبل'];
+
+            $diffTime = Str::remove($ignoredWords, $diffTime);
+
+            return $latestAction->created_at->format('Y-m-d h:m A')
+                .__('common.processing_time', ['time' => $diffTime]);
         }
     }
 
-    private function getLatestTraderHistoryForPreviousStatus($currentStatus)
+    private function getLatestTraderHistoryForPreviousStatusOfStatus($status)
     {
         $previousStepActions = app(StepHistoriesDictionary::class)
-            ->getPreviousStepOf($currentStatus)
-            ?->histories
-            ?? [];
+            ->getPreviousStepOf($status)
+            ?->histories;
 
-        return $this->traderHistories->whereIn('action', $previousStepActions)
-            ->sortBy('updated_at', descending: true)
-            ->first();
+        return blank($previousStepActions)
+            ? null
+            : $this->traderHistories->whereIn('action', $previousStepActions)
+                ->sortBy('updated_at', descending: true)
+                ->first();
     }
 
-    private function getLatestTraderHistoryForCurrentStatus($status)
+    private function getLatestTraderHistoryForStatus($status)
     {
         $stepActions = app(StepHistoriesDictionary::class)
             ->getStepOf($status)
