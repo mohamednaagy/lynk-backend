@@ -3,6 +3,7 @@
 namespace App\Jobs\Dmcc;
 
 use App\Models\TraderOrder;
+use App\Support\Traders\Events\ProcessNotification;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -59,6 +60,8 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
 
             $trader = Trader::driver($driver);
             $trader->processNotification($this->notificationId);
+
+            ProcessNotification::dispatch('trader', [], [], now());
         });
     }
 
