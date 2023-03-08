@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Listeners\LogActivity;
+use App\Support\Traders\Events\ProcessNotification;
 use App\Support\Traders\TraderManager;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -68,5 +71,10 @@ class AppServiceProvider extends ServiceProvider
                 ->numbers()
                 ->symbols();
         });
+
+        Event::listen(
+            ProcessNotification::class,
+            [LogActivity::class, 'handle']
+        );
     }
 }

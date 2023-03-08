@@ -11,8 +11,10 @@ use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Traders\Events\ProcessNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Fluent;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
@@ -65,60 +67,37 @@ class ProcessUnprocessedDmccNotificationTest extends TestCase
         ]);
     }
 
-    public function test_process_unprocessed_dmcc_notification_job_will_processed_only_if_the_active_trader_has_dmcc_or_fake_as_provider()
+    public function test_process_unprocessed_dmcc_notification_job_will_processed_only_if_the_active_trader_has_dmcc_as_provider()
     {
-        config()->set('trader.default', 'wrong provider');
+        config()->set('trader.default', 'dmcc');
         Bus::fake();
+        Event::fake([
+            ProcessNotification::class,
+        ]);
 
         (new ProcessUnprocessedDmccNotification(self::$notification))->handle();
 
-        self::$traderOrder->refresh();
+        Event::assertDispatched(ProcessNotification::class);
+    }
 
-        $this->assertFalse(self::$traderOrder->status->is(TraderOrderStatus::Completed));
-
+    public function test_process_unprocessed_dmcc_notification_job_will_processed_only_if_the_active_trader_has_fake_as_provider()
+    {
         config()->set('trader.default', 'fake');
+        Bus::fake();
+        Event::fake([
+            ProcessNotification::class,
+        ]);
 
         (new ProcessUnprocessedDmccNotification(self::$notification))->handle();
 
-        self::$traderOrder->refresh();
-
-        $this->assertTrue(self::$traderOrder->status->is(TraderOrderStatus::Completed));
+        Event::assertDispatched(ProcessNotification::class);
     }
 
-    public function test_process_unprocessed_dmcc_notification_job_will_processed_only_if_the_current_order_status_is_murabaha_sale_completed()
-    {
-        Bus::fake();
-        $statuses = FinancingOrderStatus::getValues();
-        foreach ($statuses as  $status) {
-            FinancingOrder::first()
-                ->update(['status' => $status]);
-            self::$order->refresh();
-
-            (new ProcessUnprocessedDmccNotification(self::$notification))->handle();
-            self::$traderOrder->refresh();
-
-            self::$traderOrder->update(['status' => TraderOrderStatus::InProgress]);
-
-            $this->assertFalse(self::$traderOrder->status->is(TraderOrderStatus::Completed));
-        }
-    }
-
-    public function test_process_unprocessed_dmcc_notification_process_notification_is_called_successfully()
+    public function test_process_unprocessed_dmcc_notification_process_notification_with_wrong_driver_will_fail()
     {
         $this->expectException(TraderException::class);
         config()->set('trader.providers.fake.username', 'wrong username');
 
         (new ProcessUnprocessedDmccNotification(self::$notification))->handle();
-    }
-
-    public function test_process_unprocessed_dmcc_notification_trader_status_is_updated_to_completed()
-    {
-        Bus::fake();
-
-        (new ProcessUnprocessedDmccNotification(self::$notification))->handle();
-
-        self::$traderOrder->refresh();
-
-        $this->assertTrue(self::$traderOrder->status->is(TraderOrderStatus::Completed));
     }
 }
