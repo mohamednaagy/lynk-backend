@@ -47,16 +47,21 @@ class ProcessDmccMpoOrderTest extends TestCase
         self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
             'status' => FinancingOrderStatus::ClientWakalaCompleted,
         ]);
+        $products = [
+            'products' => [
+                'amount' => 1,
+                'product' => 'product',
+                'quantity' => 1,
+                'warehouse' => 'warehouse',
+                'owner' => 'owner',
+            ],
+        ];
         self::$traderOrder = TraderOrder::query()->create([
             'financing_order_id' => self::$order->id,
             'reference' => 1,
             'provider' => 'dmcc',
             'status' => TraderOrderStatus::InProgress,
-            'amount' => 1,
-            'product' => 'product',
-            'quantity' => 1,
-            'warehouse' => 'warehouse',
-            'owner' => 'owner',
+            $products,
         ]);
 
         Soap::fake(function () {

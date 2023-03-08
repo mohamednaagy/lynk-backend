@@ -28,4 +28,6 @@ return [
     'client_wakala_already_accepted' => 'تم قبول الطلب مسبقا',
     'order_still_pending' => 'حالة الطلب مازالت معلقة',
     'order_is_rejected' => 'تم رفض الطلب الرجاء التواصل مع الدعم الفني',
+    'trader_not_supported' => 'هذة الشركة غير مدعومة',
+
 ];

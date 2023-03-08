@@ -5,22 +5,33 @@ namespace App\Actions\Orders;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
 use App\Enums\ClientMessage;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Support\Sms\Sms;
 
 class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatusIsMurabahaSaleCompleted
 {
-    public function handle(FinancingOrder $financingOrder, string $product, string $quantity): void
+    public function handle(FinancingOrder $financingOrder, TraderOrder $traderOrder): void
     {
-        $sellingPrice = $financingOrder->selling_price ?? '';
         $phoneNumber = ltrim($financingOrder->getPhoneNumber()->formatE164(), '+');
-        $locale = app()->getLocale();
+        $message = $this->resolveMessage($financingOrder, $traderOrder);
 
-        Sms::send(
-            __(ClientMessage::MurabahaSaleCompleted, [
-                'product' => $product,
-                'quantity' => $quantity,
+        Sms::send($message, $phoneNumber);
+    }
+
+    public function resolveMessage(FinancingOrder $financingOrder, TraderOrder $traderOrder)
+    {
+        $locale = app()->getLocale();
+        $products = $traderOrder->products;
+        $sellingPrice = $financingOrder->selling_price ?? '';
+        $message = '';
+        foreach ($products as $product) {
+            $message .= __(ClientMessage::MurabahaSaleCompleted, [
+                'product' => $product['product'],
+                'quantity' => $product['quantity'],
                 'amount' => $sellingPrice,
-            ], $locale), $phoneNumber
-        );
+            ], $locale);
+        }
+
+        return $message .= ' '.__(ClientMessage::MurabahaSaleCompletedWillTransfer);
     }
 }

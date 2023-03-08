@@ -15,11 +15,11 @@ final class ClientMessage extends Enum
 {
     const CommoditySoldToCustomer = 'client-sms.commodity_sold_to_customer';
 
-    const MultiCommoditySoldToCustomer = 'client-sms.multi_commodity_sold_to_customer';
-
-    const MultiCommoditySoldToCustomerUrl = 'client-sms.multi_commodity_sold_to_customer_url';
+    const CommoditySoldToCustomerUrl = 'client-sms.commodity_sold_to_customer_url';
 
     const CommoditySoldToCustomerWithoutVerification = 'client-sms.commodity_sold_to_customer_without_verification';
 
     const MurabahaSaleCompleted = 'client-sms.murabaha_sale_completed';
+
+    const MurabahaSaleCompletedWillTransfer = 'client-sms.murabaha_sale_completed_will_transfer';
 }

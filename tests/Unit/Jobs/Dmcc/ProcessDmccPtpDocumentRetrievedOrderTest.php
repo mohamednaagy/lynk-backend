@@ -75,8 +75,8 @@ class ProcessDmccPtpDocumentRetrievedOrderTest extends TestCase
                 'inventoryDetails' => [
                     [
                         'hsCodeDescription' => 'hsCodeDescription',
-                        'quantity' => 'quantity',
-                        'totalValue' => 'totalValue',
+                        'quantity' => 10,
+                        'totalValue' => 100,
                         'currency' => 'currency',
                         'warehouseOrVaultId' => 'warehouseOrVaultId',
                         'owner' => 'owner',

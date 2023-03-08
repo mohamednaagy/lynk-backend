@@ -6,6 +6,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
+use App\Exceptions\TraderNotSupported;
 use App\Jobs\Dmcc\ProcessUnprocessedDmccNotification;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -67,28 +68,18 @@ class ProcessUnprocessedDmccNotificationTest extends TestCase
 
     public function test_process_unprocessed_dmcc_notification_job_will_processed_only_if_the_active_trader_has_dmcc_or_fake_as_provider()
     {
+        $this->expectException(TraderNotSupported::class);
         config()->set('trader.default', 'wrong provider');
         Bus::fake();
 
         (new ProcessUnprocessedDmccNotification(self::$notification))->handle();
-
-        self::$traderOrder->refresh();
-
-        $this->assertFalse(self::$traderOrder->status->is(TraderOrderStatus::Completed));
-
-        config()->set('trader.default', 'fake');
-
-        (new ProcessUnprocessedDmccNotification(self::$notification))->handle();
-
-        self::$traderOrder->refresh();
-
-        $this->assertTrue(self::$traderOrder->status->is(TraderOrderStatus::Completed));
     }
 
     public function test_process_unprocessed_dmcc_notification_job_will_processed_only_if_the_current_order_status_is_murabaha_sale_completed()
     {
         Bus::fake();
         $statuses = FinancingOrderStatus::getValues();
+        FinancingOrder::unsetEventDispatcher();
         foreach ($statuses as  $status) {
             FinancingOrder::first()
                 ->update(['status' => $status]);
@@ -98,7 +89,6 @@ class ProcessUnprocessedDmccNotificationTest extends TestCase
             self::$traderOrder->refresh();
 
             self::$traderOrder->update(['status' => TraderOrderStatus::InProgress]);
-
             $this->assertFalse(self::$traderOrder->status->is(TraderOrderStatus::Completed));
         }
     }

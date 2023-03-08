@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Dmcc;
 
+use App\Exceptions\TraderNotSupported;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -44,7 +45,7 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
         $driver = config('trader.default');
 
         if (! in_array($driver, ['dmcc', 'fake'])) {
-            return;
+            throw new TraderNotSupported;
         }
 
         DB::transaction(function () use ($driver) {
