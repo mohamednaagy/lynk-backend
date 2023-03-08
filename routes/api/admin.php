@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderSetting;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderStatuses;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderUserController;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\CompleteOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabhaCompleteDocument;
@@ -29,6 +30,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateCommodit
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabhaCompleteDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodity;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateOrderPaymentProof;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
@@ -96,6 +98,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('lenders.users', LenderUserController::class)->scoped();
 
         Route::prefix('orders/{order}')->group(function () {
+            Route::post('complete', CompleteOrder::class);
+            Route::put('payment-proof', UpdateOrderPaymentProof::class);
             Route::prefix('/trader-orders/{trader_order}')->group(function () {
                 Route::post('/proceed', MakeOrderProceed::class);
                 Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
@@ -124,8 +128,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('traders', TraderController::class)
             ->only(['index', 'store', 'show', 'update']);
         Route::apiResource('traders.users', TraderUserController::class);
-
-        Route::apiResource('traders.users', TraderUserController::class)->scoped();
 
         Route::get('edaat-invoices', GetEdaatInvoices::class);
         Route::post('edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);

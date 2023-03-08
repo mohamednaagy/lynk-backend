@@ -107,6 +107,9 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         $this
             ->addMediaCollection(FinancingOrderMediaCollection::PowerOfAttorney)
             ->singleFile();
+        $this
+            ->addMediaCollection(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer)
+            ->singleFile();
     }
 
     public function company()
@@ -209,5 +212,16 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function activeTraderOrder()
     {
         return $this->traderOrders()->where('status', TraderOrderStatus::InProgress)->latest();
+    }
+
+    public function canBeCompleted()
+    {
+        return $this->traderOrders()->completed()->exists()
+            && $this->status->isNot(FinancingOrderStatus::Completed);
+    }
+
+    public function cantBeCompleted()
+    {
+        return ! $this->canBeCompleted();
     }
 }

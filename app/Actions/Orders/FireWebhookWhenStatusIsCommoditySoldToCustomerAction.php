@@ -12,6 +12,12 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
 {
     public function handle(FinancingOrder $financingOrder, string $product, string $quantity): void
     {
+        $activeTraderOrder = $financingOrder->activeTraderOrder()->first();
+
+        if ($activeTraderOrder === null) {
+            return;
+        }
+
         $sellingCommodityToCustomerMedia = $financingOrder->activeTraderOrder()
             ->first()
             ->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer);
@@ -20,13 +26,15 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
 
         WebhookEvent::fire(
             $financingOrder->company,
-            WebhookType::OrderUpdates, [
+            WebhookType::OrderUpdates,
+            [
                 'order_id' => $financingOrder->id,
                 'order_status' => [
                     'value' => $financingOrder->status->value,
                     'label' => $financingOrder->status->description,
                 ],
                 'certificate_url' => $url,
-            ]);
+            ]
+        );
     }
 }

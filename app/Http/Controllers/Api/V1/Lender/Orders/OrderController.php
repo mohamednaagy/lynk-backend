@@ -105,6 +105,7 @@ class OrderController extends Controller
                 'is_verification_required',
                 'is_updatable',
                 'is_approved',
+                'can_be_completed',
                 'status_reason',
                 'creator',
                 'approver',

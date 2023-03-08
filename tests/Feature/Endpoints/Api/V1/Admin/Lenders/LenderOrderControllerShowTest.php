@@ -82,7 +82,7 @@ class LenderOrderControllerShowTest extends TestCase
             },
         ]);
         $this->actingAs(self::$admin)
-            ->getJson(self::$endpoint . $order->id)
+            ->getJson(self::$endpoint.$order->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
                 fractal($order, new FinancingOrderTransformer())
@@ -118,7 +118,7 @@ class LenderOrderControllerShowTest extends TestCase
     public function test_admin_cant_access_order_controller_show_if_order_not_found()
     {
         $this->actingAs(self::$admin)
-            ->getJson(self::$endpoint . 400)
+            ->getJson(self::$endpoint. 400)
             ->assertStatus(404);
     }
 
@@ -126,7 +126,7 @@ class LenderOrderControllerShowTest extends TestCase
     {
         $order = FinancingOrder::where('company_id', self::$lender->id)->first();
         $this->actingAs(self::$admin)
-            ->getJson(self::$endpoint . $order->id)
+            ->getJson(self::$endpoint.$order->id)
             ->assertStatus(200);
     }
 
@@ -134,7 +134,7 @@ class LenderOrderControllerShowTest extends TestCase
     {
         $order = FinancingOrder::where('company_id', self::$lender->id)->first();
         $this->actingAs(self::$manager)
-            ->getJson(self::$endpoint . $order->id)
+            ->getJson(self::$endpoint.$order->id)
             ->assertStatus(403);
     }
 
@@ -143,7 +143,7 @@ class LenderOrderControllerShowTest extends TestCase
         $order = FinancingOrder::where('company_id', self::$lender->id)->first();
 
         $this->actingAs(self::$managerHasPermissionToShowMethod)
-            ->getJson(self::$endpoint . $order->id)
+            ->getJson(self::$endpoint.$order->id)
             ->assertStatus(200);
     }
 
@@ -154,8 +154,7 @@ class LenderOrderControllerShowTest extends TestCase
                 ->first();
 
             return $this->actingAs($user)
-                ->getJson(self::$endpoint . $order->id);
+                ->getJson(self::$endpoint.$order->id);
         });
     }
 }
-

@@ -11,4 +11,6 @@ final class FinancingOrderMediaCollection extends Enum
     const PowerOfAttorney = 'power_of_attorney';
 
     const ZatcaInvoice = 'zatca_invoice';
+
+    const PaymentProofFromLenderToCustomer = 'payment_proof_from_lender_to_customer';
 }

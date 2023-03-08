@@ -5,6 +5,7 @@ namespace App\Actions\Orders;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
 use App\Enums\ClientMessage;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Support\Sms\Sms;
 use Illuminate\Support\Facades\Config;
 
@@ -12,8 +13,14 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
 {
     public function handle(FinancingOrder $financingOrder, string $product, string $quantity): void
     {
+        $activeTraderOrder = $financingOrder->activeTraderOrder()->first();
+
+        if ($activeTraderOrder === null) {
+            return;
+        }
+
         $phoneNumber = ltrim($financingOrder->getPhoneNumber()->formatE164(), '+');
-        $message = $this->resolveSmsMessage($financingOrder, $product, $quantity);
+        $message = $this->resolveSmsMessage($financingOrder, $activeTraderOrder, $product, $quantity);
 
         Sms::send(
             $message,
@@ -21,9 +28,9 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
         );
     }
 
-    private function resolveSmsMessage(FinancingOrder $financingOrder, $product, $quantity)
+    private function resolveSmsMessage(FinancingOrder $financingOrder, TraderOrder $activeTraderOrder, $product, $quantity)
     {
-        $uom = $financingOrder->activeTraderOrder()->first()?->uom ?? '';
+        $uom = $activeTraderOrder->uom ?? '';
 
         $sellingPrice = optional($financingOrder->selling_price)->formatByDecimal() ?? '';
 

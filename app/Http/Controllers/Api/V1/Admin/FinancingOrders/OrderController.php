@@ -87,6 +87,7 @@ class OrderController extends Controller
                 'phone_number_formatted',
                 'is_approved',
                 'status_reason',
+                'can_be_completed',
                 'is_updatable',
                 'creator',
                 'approver',
