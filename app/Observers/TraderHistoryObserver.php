@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
 use App\Models\TraderHistory;
 use App\Settings\Classes\GeneralSettings;
+use Stancl\Tenancy\Database\TenantScope;
 
 class TraderHistoryObserver
 {
@@ -16,7 +17,12 @@ class TraderHistoryObserver
      */
     public function created(TraderHistory $traderHistory)
     {
-        $financingOrderStatus = $traderHistory->traderOrder->order->status->value;
+        $financingOrder = $traderHistory->traderOrder
+            ->order()
+            ->withoutGlobalScope(TenantScope::class)
+            ->first();
+        $financingOrder = $financingOrder->status->value;
+
         $timeout = app(GeneralSettings::class)->trader_order_timeout;
 
         NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $financingOrderStatus)
