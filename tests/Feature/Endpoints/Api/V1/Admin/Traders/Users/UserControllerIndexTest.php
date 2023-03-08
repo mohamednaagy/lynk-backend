@@ -6,7 +6,6 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
-use App\Models\Wallet;
 use App\Transformers\UserTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,9 +19,7 @@ class UserControllerIndexTest extends TestCase
 
     private static User $userAdmin;
 
-    private static Company $company;
-
-    private static Wallet $wallet;
+    private static Company $traderCompany;
 
     private static User $userTraderAdmin;
 
@@ -38,9 +35,16 @@ class UserControllerIndexTest extends TestCase
         parent::setUp();
 
         self::$userAdmin = $this->createSuperAdminUser();
-        [self::$company, self::$wallet] = $this->createTraderCompany('2000');
-        self::$userTraderAdmin = $this->createTraderUser(self::$company->id);
-        self::$traderUsersCollection = self::$company->users()->whereHas('roles', function ($query) {
+        [self::$traderCompany] = $this->createTraderCompany('2000');
+        self::$userTraderAdmin = $this->createTraderUser(self::$traderCompany->id);
+
+        [$secondTraderCompany] = $this->createTraderCompany('2000');
+        $this->createTraderUser($secondTraderCompany->id);
+
+        [$lenderCompany] = $this->createLenderCompany('2000');
+        $this->createLenderUser($lenderCompany->id);
+
+        self::$traderUsersCollection = self::$traderCompany->users()->whereHas('roles', function ($query) {
             return $query->whereIn('name', [
                 Role::TraderAdmin,
             ]);
@@ -52,7 +56,7 @@ class UserControllerIndexTest extends TestCase
      */
     public function test_un_auth_user_cant_index_trader_users(): void
     {
-        $this->getJson('api/v1/admin/traders/'.self::$company->id.'/users')
+        $this->getJson('api/v1/admin/traders/'.self::$traderCompany->id.'/users')
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -65,7 +69,7 @@ class UserControllerIndexTest extends TestCase
     public function test_admin_user_can_index_trader_users(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->getJson('api/v1/admin/traders/'.self::$company->id.'/users')
+            ->getJson('api/v1/admin/traders/'.self::$traderCompany->id.'/users')
             ->assertOk()
             ->assertExactJson(
                 fractal(self::$traderUsersCollection, new UserTransformer(Area::Trader))
@@ -92,7 +96,7 @@ class UserControllerIndexTest extends TestCase
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
-                ->getJson('api/v1/admin/traders/'.self::$company->id.'/users');
+                ->getJson('api/v1/admin/traders/'.self::$traderCompany->id.'/users');
         });
     }
 }
