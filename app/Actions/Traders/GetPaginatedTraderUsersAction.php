@@ -11,7 +11,7 @@ use Stancl\Tenancy\Database\TenantScope;
 
 class GetPaginatedTraderUsersAction implements GetPaginatedTraderUsers
 {
-    protected Company $trader;
+    protected ?Company $trader;
 
     /**
      * @return LengthAwarePaginator
