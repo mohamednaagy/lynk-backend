@@ -252,7 +252,7 @@ class DmccDriver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'amount' => $traderOrder->amount,
+                    'amount' => (float) $traderOrder->amount,
                     'hs_code_description' => $traderOrder->product,
                     'quantity' => $traderOrder->quantity,
                     'uom' => $traderOrder->uom,

@@ -113,7 +113,6 @@ class ProcessDmccContractSignedOrderTest extends TestCase
             'warehouse_or_vault_emirates' => 'Vaault',
             'warehouse_or_vault_country' => 'Saudi Arabia',
         ]);
-
         $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);
         $processOrder->handle();
         self::$order = self::$order->fresh();
