@@ -119,7 +119,7 @@ class TraderOrderControllerShowTest extends TestCase
     /**
      * @return void
      */
-    public function test_trader_order_controller_ensure_order_is_not_complete(): void
+    public function test_trader_order_controller_ensure_order_can_be_completed_is_true(): void
     {
         self::$traderOrder->update(['status' => TraderOrderStatus::Completed]);
 

@@ -144,7 +144,7 @@ class UpdateOrderPaymentProofTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_that_order_not_follow_the_sequence(): void
+    public function test_update_order_payment_proof_will_return_error_response_if_flow_is_not_correct(): void
     {
         $statuses = FinancingOrderStatus::getValues();
         foreach ($statuses as $status) {
@@ -155,7 +155,6 @@ class UpdateOrderPaymentProofTest extends TestCase
             self::$financingOrder->update(['status' => $status]);
             self::$financingOrder->refresh();
             $this->actingAs(self::$admin)
-
                 ->putJson(self::$apiUrl, [
                     'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
                 ])

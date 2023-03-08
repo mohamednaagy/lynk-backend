@@ -60,7 +60,7 @@ class UpdateOrderPaymentProofTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_order_payment_proof_that_unauth_user_cant_make_order_completed(): void
+    public function test_update_order_payment_proof_that_unauth_user_cant_update_proof(): void
     {
         $this->withHeader('X-Company', self::$company->getOriginal('id'))
             ->putJson(self::$apiUrl)

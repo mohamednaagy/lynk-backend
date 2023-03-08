@@ -20,7 +20,7 @@ class CompleteOrderAction implements CompleteOrder
             ->lockForUpdate()
             ->findOrFail($orderId);
 
-        if ($financingOrder->canNotBeCompleted()) {
+        if ($financingOrder->cantBeCompleted()) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 

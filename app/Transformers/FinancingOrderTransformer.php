@@ -200,9 +200,6 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCanBeCompleted(FinancingOrder $financingOrder): Primitive
     {
-        $canCompleteOrder = $financingOrder->traderOrders()->completed()->exists()
-            && $financingOrder->status->isNot(FinancingOrderStatus::Completed);
-
-        return $this->primitive($canCompleteOrder);
+        return $this->primitive($financingOrder->canBeCompleted());
     }
 }

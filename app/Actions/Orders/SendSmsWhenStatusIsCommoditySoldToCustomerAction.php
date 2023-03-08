@@ -13,9 +13,13 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
     public function handle(FinancingOrder $financingOrder, string $product, string $quantity): void
     {
         $sellingPrice = $financingOrder->selling_price ?? '';
-        $url = $financingOrder->activeTraderOrder()
-            ->first()
-            ->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer) ?? '';
+        $activeTraderOrder = $financingOrder->activeTraderOrder()->first();
+
+        if ($activeTraderOrder === null) {
+            return;
+        }
+
+        $url = $activeTraderOrder->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer) ?? '';
         $phoneNumber = ltrim($financingOrder->getPhoneNumber()->formatE164(), '+');
         $locale = app()->getLocale();
 

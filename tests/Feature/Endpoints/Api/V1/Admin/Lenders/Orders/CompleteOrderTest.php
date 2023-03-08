@@ -132,6 +132,8 @@ class CompleteOrderTest extends TestCase
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$apiUrl)
             ->assertOk();
+
+        self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Completed);
     }
 
     /**
@@ -165,5 +167,36 @@ class CompleteOrderTest extends TestCase
 
         $this->assertTrue(self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Completed));
         $this->assertTrue(self::$traderOrder->fresh()->status->is(TraderOrderStatus::Completed));
+    }
+
+    /**
+     * @return void
+     */
+    public function test_complete_order_will_return_error_response_if_flow_is_not_correct(): void
+    {
+        self::$financingOrder->traderOrders()->update([
+            'status' => TraderOrderStatus::Expired,
+        ]);
+
+        $statuses = FinancingOrderStatus::getValues();
+        foreach ($statuses as $status) {
+            if ($status == FinancingOrderStatus::Completed) {
+                continue;
+            }
+
+            self::$financingOrder->update([
+                'status' => $status,
+            ]);
+            self::$financingOrder->refresh();
+
+            $this->actingAs(self::$superAdminUser)
+                ->postJson(self::$apiUrl, [
+                    'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
+                ])
+                ->assertStatus(Response::HTTP_BAD_REQUEST)
+                ->assertJsonFragment([
+                    'message' => __('error.order_status_doesnt_follow_sequence'),
+                ]);
+        }
     }
 }

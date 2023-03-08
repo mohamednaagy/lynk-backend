@@ -149,6 +149,8 @@ class CompleteOrderTest extends TestCase
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$apiUrl)
             ->assertOk();
+
+        self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Completed);
     }
 
     /**
@@ -170,39 +172,6 @@ class CompleteOrderTest extends TestCase
     /**
      * @return void
      */
-    public function test_complete_order_order_not_follow_the_sequence(): void
-    {
-        self::$financingOrder->update(['status' => FinancingOrderStatus::Completed]);
-        self::$financingOrder->refresh();
-
-        $this->actingAs(self::$userLender)
-            ->withHeader('X-Company', self::$company->getOriginal('id'))
-            ->postJson(self::$apiUrl, [
-                'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
-            ])
-            ->assertStatus(Response::HTTP_BAD_REQUEST)
-            ->assertJsonFragment([
-                'message' => __('error.order_status_doesnt_follow_sequence'),
-            ]);
-
-        self::$financingOrder->traderOrders()->update(['status' => TraderOrderStatus::Cancelled]);
-        self::$financingOrder->update(['status' => FinancingOrderStatus::MurabahaSaleCompleted]);
-        self::$financingOrder->fresh();
-
-        $this->actingAs(self::$userLender)
-            ->withHeader('X-Company', self::$company->getOriginal('id'))
-            ->postJson(self::$apiUrl, [
-                'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
-            ])
-            ->assertStatus(Response::HTTP_BAD_REQUEST)
-            ->assertJsonFragment([
-                'message' => __('error.order_status_doesnt_follow_sequence'),
-            ]);
-    }
-
-    /**
-     * @return void
-     */
     public function test_complete_order_successfully(): void
     {
         self::$traderOrder->traderHistories()->create([
@@ -215,5 +184,37 @@ class CompleteOrderTest extends TestCase
                 'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
             ])
             ->assertStatus(Response::HTTP_OK);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_complete_order_will_return_error_response_if_flow_is_not_correct(): void
+    {
+        self::$financingOrder->traderOrders()->update([
+            'status' => TraderOrderStatus::Expired,
+        ]);
+
+        $statuses = FinancingOrderStatus::getValues();
+        foreach ($statuses as $status) {
+            if ($status == FinancingOrderStatus::Completed) {
+                continue;
+            }
+
+            self::$financingOrder->update([
+                'status' => $status,
+            ]);
+            self::$financingOrder->refresh();
+
+            $this->actingAs(self::$userLender)
+                ->withHeader('X-Company', self::$company->getOriginal('id'))
+                ->postJson(self::$apiUrl, [
+                    'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
+                ])
+                ->assertStatus(Response::HTTP_BAD_REQUEST)
+                ->assertJsonFragment([
+                    'message' => __('error.order_status_doesnt_follow_sequence'),
+                ]);
+        }
     }
 }
