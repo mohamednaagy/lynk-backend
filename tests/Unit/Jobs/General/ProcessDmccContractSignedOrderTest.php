@@ -104,7 +104,7 @@ class ProcessDmccContractSignedOrderTest extends TestCase
             'status' => TraderOrderStatus::InProgress,
             'product' => 'Product',
             'quantity' => 2,
-            'amount' => '1000 SAR',
+            'amount' => 1000,
             'warehouse' => 'Warehouse ID',
             'owner' => 'Owner 1',
             'previous_owner' => 'Owner 0',
@@ -113,6 +113,7 @@ class ProcessDmccContractSignedOrderTest extends TestCase
             'warehouse_or_vault_emirates' => 'Vaault',
             'warehouse_or_vault_country' => 'Saudi Arabia',
         ]);
+
         $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);
         $processOrder->handle();
         self::$order = self::$order->fresh();
