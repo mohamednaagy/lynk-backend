@@ -9,6 +9,7 @@ use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Stancl\Tenancy\Database\TenantScope;
 
 class TraderOrderProgressStopped extends Notification
 {
@@ -23,7 +24,10 @@ class TraderOrderProgressStopped extends Notification
      */
     public function __construct(private TraderOrder $traderOrder)
     {
-        $this->financingOrder = $this->traderOrder->order->fresh();
+        $this->financingOrder = $this->traderOrder
+            ->order()
+            ->withoutGlobalScope(TenantScope::class)
+            ->first();
     }
 
     /**

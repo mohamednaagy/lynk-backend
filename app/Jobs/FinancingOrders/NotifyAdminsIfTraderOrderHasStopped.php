@@ -12,6 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Notification;
+use Stancl\Tenancy\Database\TenantScope;
 
 class NotifyAdminsIfTraderOrderHasStopped implements ShouldQueue
 {
@@ -33,7 +34,12 @@ class NotifyAdminsIfTraderOrderHasStopped implements ShouldQueue
      */
     public function handle()
     {
-        $currentFinancingOrderStatus = $this->traderOrder->order->status;
+        $currentFinancingOrder = $this->traderOrder
+            ->order()
+            ->withoutGlobalScope(TenantScope::class)
+            ->first();
+
+        $currentFinancingOrderStatus = $currentFinancingOrder->status;
 
         if ($currentFinancingOrderStatus->is($this->financingOrderStatus)) {
             $admins = User::role([Role::Admin])->get();
