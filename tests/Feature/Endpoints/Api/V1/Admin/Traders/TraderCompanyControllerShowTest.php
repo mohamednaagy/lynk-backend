@@ -118,7 +118,7 @@ class TraderCompanyControllerShowTest extends TestCase
             ->assertOk();
     }
 
-    public function test_other_user_has_not_super_admin_area_cant_access_trader_company_controller_show()
+    public function test_other_user_has_not_role_in_super_admin_area_cant_access_trader_company_controller_show()
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)

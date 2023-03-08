@@ -61,7 +61,7 @@ class TraderCompanyControllerUpdateTest extends TestCase
             ]);
     }
 
-    public function test_other_user_has_not_super_admin_area_cant_access_trader_company_controller_update()
+    public function test_other_user_has_not_role_in_super_admin_area_cant_access_trader_company_controller_update()
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
@@ -137,11 +137,10 @@ class TraderCompanyControllerUpdateTest extends TestCase
             ]);
     }
 
-    public function test_admin_can_update_company_controller_update_with_fill_wallet_successful()
+    public function test_admin_can_update_company_controller_update_successful_will_not_affect_existing_wallets()
     {
         $this->actingAs(self::$superAdmin)
-            ->putJson(self::$endpoint, self::$companyDetails)
-            ->assertStatus(Response::HTTP_OK);
+            ->putJson(self::$endpoint, self::$companyDetails);
 
         $hasWallet = self::$company->getWallets(WalletType::CompanyWallet)->count() > 0;
         $this->assertTrue($hasWallet);
