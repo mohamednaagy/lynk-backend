@@ -114,7 +114,7 @@ class UserControllerStoreTest extends TestCase
     /**
      * @return void
      */
-    public function test_super_admin_roles_can_store_trader_user(): void
+    public function test_super_admin_roles_can_store_trader_user_successfully(): void
     {
         $this->assertStatusCodeForAreaRoles(200, Area::Trader, function ($user, $role) {
             return $this->actingAs(self::$userAdmin)
