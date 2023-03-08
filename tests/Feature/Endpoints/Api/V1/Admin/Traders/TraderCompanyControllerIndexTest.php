@@ -80,7 +80,7 @@ class TraderCompanyControllerIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_un_auth_user_cant_access_trader_company_controller_index(): void
+    public function test_unauth_user_cant_access_trader_company_controller_index(): void
     {
         $this->getJson(self::$endpoint)
             ->assertStatus(Response::HTTP_UNAUTHORIZED);
@@ -122,7 +122,7 @@ class TraderCompanyControllerIndexTest extends TestCase
         );
     }
 
-    public function test_any_user_has_not_admin_role_can_not_access_trader_company_controller_index()
+    public function test_other_user_has_not_role_in_super_admin_area_can_not_access_trader_company_controller_index()
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)

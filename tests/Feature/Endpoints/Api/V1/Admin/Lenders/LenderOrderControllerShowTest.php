@@ -72,7 +72,7 @@ class LenderOrderControllerShowTest extends TestCase
         self::$endpoint = 'api/v1/admin/orders/';
     }
 
-    public function test_admin_can_access_order_controller_show_order_successed()
+    public function test_admin_can_access_order_controller_show_successed()
     {
         $order = FinancingOrder::where('company_id', self::$lender->id)->first();
         $order->load([
@@ -122,7 +122,7 @@ class LenderOrderControllerShowTest extends TestCase
             ->assertStatus(404);
     }
 
-    public function test_admin_financing_order_controller_show_admin_can_access()
+    public function test_admin_can_access_order_controller_show_successful()
     {
         $order = FinancingOrder::where('company_id', self::$lender->id)->first();
         $this->actingAs(self::$admin)
@@ -147,7 +147,7 @@ class LenderOrderControllerShowTest extends TestCase
             ->assertStatus(200);
     }
 
-    public function test_other_user_has_not_admin_role_cant_access_order_controller_show()
+    public function test_other_user_has_not_role_in_super_admin_area_cant_access_order_controller_show()
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             $order = FinancingOrder::where('company_id', self::$lender->id)

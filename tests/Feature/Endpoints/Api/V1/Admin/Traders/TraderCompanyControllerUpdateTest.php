@@ -52,7 +52,7 @@ class TraderCompanyControllerUpdateTest extends TestCase
     /**
      * @return void
      */
-    public function test_un_auth_user_cant_access_trader_company_controller_update(): void
+    public function test_unauth_user_cant_access_trader_company_controller_update(): void
     {
         $this->putJson(self::$endpoint, self::$companyDetails)
             ->assertUnauthorized()
@@ -61,7 +61,7 @@ class TraderCompanyControllerUpdateTest extends TestCase
             ]);
     }
 
-    public function test_any_user_has_not_admin_role_can_not_access_trader_company_controller_update()
+    public function test_other_user_has_not_role_in_super_admin_area_cant_access_trader_company_controller_update()
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
@@ -69,7 +69,7 @@ class TraderCompanyControllerUpdateTest extends TestCase
         });
     }
 
-    public function test_admin_cant_update_company_controller_update_without_name()
+    public function test_admin_cant_update_company_without_name()
     {
         $this->actingAs(self::$superAdmin)
             ->putJson(self::$endpoint, [
@@ -79,7 +79,7 @@ class TraderCompanyControllerUpdateTest extends TestCase
             ->assertJsonValidationErrorFor('name');
     }
 
-    public function test_admin_cant_update_company_controller_update_without_unique_name()
+    public function test_admin_cant_update_company_without_unique_name()
     {
         $this->actingAs(self::$superAdmin)
             ->putJson(self::$endpoint, [
@@ -89,7 +89,7 @@ class TraderCompanyControllerUpdateTest extends TestCase
             ->assertJsonValidationErrorFor('unique_name');
     }
 
-    public function test_trader_company_controller_update_without_notifications_email_unsuccessful()
+    public function test_admin_cant_update_company_without_notifications_email()
     {
         $this->actingAs(self::$superAdmin)
             ->putJson('api/v1/admin/traders/'.self::$company->id, [
@@ -137,11 +137,10 @@ class TraderCompanyControllerUpdateTest extends TestCase
             ]);
     }
 
-    public function test_admin_can_checked_wallet_in_company_controller_update_successful()
+    public function test_admin_can_update_company_controller_update_successful_will_not_affect_existing_wallets()
     {
         $this->actingAs(self::$superAdmin)
-            ->putJson(self::$endpoint, self::$companyDetails)
-            ->assertStatus(Response::HTTP_OK);
+            ->putJson(self::$endpoint, self::$companyDetails);
 
         $hasWallet = self::$company->getWallets(WalletType::CompanyWallet)->count() > 0;
         $this->assertTrue($hasWallet);
