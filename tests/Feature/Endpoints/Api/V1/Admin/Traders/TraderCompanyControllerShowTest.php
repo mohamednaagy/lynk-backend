@@ -128,6 +128,12 @@ class TraderCompanyControllerShowTest extends TestCase
 
     public function test_admin_can_access_trader_company_controller_show_with_valid_data_successful()
     {
+        $traderFinancingOrdersQuery = FinancingOrder::query()
+            ->whereHas('traderOrders', function ($query) {
+                $query->where('provider', self::$trader->driver)
+                    ->whereIn('status', TraderOrderStatus::$inProgressOrComplete);
+            });
+
         $ordersAmountSumAndOrdersCountOfTrader = app(GetOrdersAmountSumAndOrdersCountOfTrader::class)->handle(self::$trader);
         self::$trader->setAttribute('orders_count', $ordersAmountSumAndOrdersCountOfTrader['ordersCount']);
         self::$trader->setAttribute('orders_sum_amount', $ordersAmountSumAndOrdersCountOfTrader['ordersSumAmount']);
@@ -150,14 +156,14 @@ class TraderCompanyControllerShowTest extends TestCase
         );
 
         $totalAmount = (new Money(
-            self::$order->amount->add(self::$anotherOrder->amount),
+            $traderFinancingOrdersQuery->sum('amount'),
             Money::getDefaultCurrency()
         ))
             ->formatByDecimal();
 
         $ordersSumAmountFormatted = number_format($totalAmount, 2);
 
-        $response->assertJsonPath('data.orders_count', 2);
+        $response->assertJsonPath('data.orders_count', $traderFinancingOrdersQuery->count());
         $response->assertJsonPath('data.orders_sum_amount', $ordersSumAmountFormatted);
     }
 }
