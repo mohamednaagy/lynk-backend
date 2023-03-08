@@ -142,7 +142,7 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
     }
 
-    public function test_other_users_areas_not_trader_area_can_not_update_process_murabaha_purchase_offer_with_invalid_permissions()
+    public function test_other_users_roles_not_in_trader_area_can_not_update_process_murabaha_purchase_offer_with_invalid_permissions()
     {
         $this->assertStatusCodeExceptForPermissions(
             Response::HTTP_FORBIDDEN,
