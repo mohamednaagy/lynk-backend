@@ -21,7 +21,7 @@ class TraderHistoryObserver
             ->order()
             ->withoutGlobalScope(TenantScope::class)
             ->first();
-        $financingOrder = $financingOrder->status->value;
+        $financingOrderStatus = $financingOrder->status->value;
 
         $timeout = app(GeneralSettings::class)->trader_order_timeout;
 
