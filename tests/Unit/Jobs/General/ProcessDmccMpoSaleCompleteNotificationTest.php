@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobs\General;
+namespace Tests\Unit\Jobs\General;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
@@ -9,9 +9,7 @@ use App\Enums\TraderOrderStatus;
 use App\Jobs\Dmcc\ProcessDmccMpoSaleCompleteNotification;
 use App\Models\Company;
 use App\Models\FinancingOrder;
-use App\Models\TraderOrder;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
@@ -27,10 +25,6 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
 
     protected static FinancingOrder $order;
 
-    protected static TraderOrder|Model $traderOrderDmcc;
-
-    protected static TraderOrder|Model $traderOrderFake;
-
     protected static mixed $notification;
 
     public function setUp(): void
@@ -42,22 +36,6 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
         self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
             'status' => FinancingOrderStatus::MurabhaOfferIssued,
         ]);
-
-        self::$traderOrderDmcc = self::$order->traderOrders()->create([
-            'provider' => 'dmcc',
-            'reference' => '1',
-            'status' => TraderOrderStatus::InProgress,
-        ]);
-        self::$traderOrderFake = self::$order->traderOrders()->create([
-            'provider' => 'fake',
-            'reference' => '1',
-            'status' => TraderOrderStatus::InProgress,
-        ]);
-    }
-
-    public function test_process_dmcc_mpo_sale_complete_notification_dmcc_driver_success()
-    {
-        config()->set('trader.default', 'dmcc');
 
         $ttiId = 1;
 
@@ -72,12 +50,23 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
                 ],
             ],
         ];
+    }
+
+    public function test_process_dmcc_mpo_sale_complete_notification_dmcc_driver_success()
+    {
+        config()->set('trader.default', 'dmcc');
+
+        $traderOrderDmcc = self::$order->traderOrders()->create([
+            'provider' => 'dmcc',
+            'reference' => '1',
+            'status' => TraderOrderStatus::InProgress,
+        ]);
 
         (new ProcessDmccMpoSaleCompleteNotification(self::$notification))->handle();
 
         self::$order = self::$order->fresh();
 
-        $traderOrderHistory = self::$traderOrderDmcc->traderHistories()->where('action', FinancingOrderHistory::MurabahaSaleCompleted)->exists();
+        $traderOrderHistory = $traderOrderDmcc->traderHistories()->where('action', FinancingOrderHistory::MurabahaSaleCompleted)->exists();
 
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
         $this->assertTrue($traderOrderHistory);
@@ -87,45 +76,37 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
     {
         config()->set('trader.default', 'fake');
 
-        $ttiId = 1;
+        $traderOrderFake = self::$order->traderOrders()->create([
+            'provider' => 'fake',
+            'reference' => '1',
+            'status' => TraderOrderStatus::InProgress,
+        ]);
 
-        $notification = (object) [
-            'notificationHeaderAndEntity' => (object) [
-                'notificationEntityDetails' => (object) [
-                    'notificationEntity' => [(object) ['entityValue' => $ttiId]],
-                ],
-            ],
-        ];
-
-        (new ProcessDmccMpoSaleCompleteNotification($notification))->handle();
+        (new ProcessDmccMpoSaleCompleteNotification(self::$notification))->handle();
 
         self::$order = self::$order->fresh();
 
-        $traderOrderHistory = self::$traderOrderFake->traderHistories()->where('action', FinancingOrderHistory::MurabahaSaleCompleted)->exists();
-        dd($traderOrderHistory);
+        $traderOrderHistory = $traderOrderFake->traderHistories()->where('action', FinancingOrderHistory::MurabahaSaleCompleted)->exists();
+
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
         $this->assertTrue($traderOrderHistory);
     }
 
     public function test_process_dmcc_mpo_sale_complete_notification_with_invalid_status()
     {
-        $ttiId = 1;
-
-        $notification = (object) [
-            'notificationHeaderAndEntity' => (object) [
-                'notificationEntityDetails' => (object) [
-                    'notificationEntity' => [(object) ['entityValue' => $ttiId]],
-                ],
-            ],
-        ];
+        self::$order->traderOrders()->create([
+            'provider' => 'fake',
+            'reference' => '1',
+            'status' => TraderOrderStatus::InProgress,
+        ]);
 
         collect(FinancingOrderStatus::asSelectArray())
             ->except([FinancingOrderStatus::MurabhaOfferIssued])
             ->keys()
-            ->each(function ($status) use ($notification) {
+            ->each(function ($status) {
                 self::$order->update(['status' => $status]);
 
-                (new ProcessDmccMpoSaleCompleteNotification($notification))->handle();
+                (new ProcessDmccMpoSaleCompleteNotification(self::$notification))->handle();
 
                 self::$order = self::$order->fresh();
 
