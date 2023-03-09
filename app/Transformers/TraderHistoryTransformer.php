@@ -129,10 +129,10 @@ class TraderHistoryTransformer extends TransformerAbstract
         };
     }
 
-    public function getDurationForHistoryStep($step)
+    public function getDurationForHistoryStep($history)
     {
         $financingOrderStatus = app(StepHistoriesDictionary::class)
-            ->getStepByHistory($step)
+            ->getStepByHistory($history)
             ?->status;
 
         if (blank($financingOrderStatus)) {
@@ -155,6 +155,8 @@ class TraderHistoryTransformer extends TransformerAbstract
 
             return Str::remove($ignoredWords, $diffTime);
         }
+
+        return null;
     }
 
     private function getLatestTraderHistoryForPreviousStatusOfStatus($status)
