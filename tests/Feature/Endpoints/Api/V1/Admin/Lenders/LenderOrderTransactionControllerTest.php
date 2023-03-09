@@ -30,6 +30,8 @@ class LenderOrderTransactionControllerTest extends TestCase
 
     private static User $userManager;
 
+    private static string $endpoint;
+
     /**
      * @return void
      *
@@ -42,15 +44,20 @@ class LenderOrderTransactionControllerTest extends TestCase
         [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910', 'order_cost' => '200']);
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
-        $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::LenderTransactions, Action::Index]));
+        $this->assignPermissionToUser(
+            self::$userManager,
+            perm(Area::SuperAdmin, [Subject::LenderTransactions, Action::Index])
+        );
+
+        self::$endpoint = 'api/v1/admin/lenders/';
     }
 
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_get_lender_transactions(): void
+    public function test_un_auth_user_cant_get_lender_transactions(): void
     {
-        $this->getJson('api/v1/admin/lenders/'.self::$lender->id.'/transactions')
+        $this->getJson(self::$endpoint.self::$lender->id.'/transactions')
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -60,10 +67,10 @@ class LenderOrderTransactionControllerTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_can_get_lender_transactions(): void
+    public function test_admin_can_get_lender_transactions_successfully(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/transactions')
+            ->getJson(self::$endpoint.self::$lender->id.'/transactions')
             ->assertOk()
             ->assertExactJson(
                 fractal(
@@ -82,10 +89,10 @@ class LenderOrderTransactionControllerTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_manager_can_get_lender_transactions(): void
+    public function test_manager_with_permissions_can_get_lender_transactions_successfully(): void
     {
         $this->actingAs(self::$userManager)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/transactions')
+            ->getJson(self::$endpoint.self::$lender->id.'/transactions')
             ->assertOk()
             ->assertExactJson(
                 fractal(
@@ -104,12 +111,12 @@ class LenderOrderTransactionControllerTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_manager_without_permissions_cant_get_lender_transactions(): void
+    public function test_manager_without_permissions_cant_get_lender_transactions(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
 
         $this->actingAs(self::$userManager)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/transactions')
+            ->getJson(self::$endpoint.self::$lender->id.'/transactions')
             ->assertForbidden();
     }
 }

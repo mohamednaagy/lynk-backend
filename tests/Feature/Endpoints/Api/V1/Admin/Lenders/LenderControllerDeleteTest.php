@@ -27,6 +27,8 @@ class LenderControllerDeleteTest extends TestCase
 
     private static User $userManager;
 
+    private static string $endpoint;
+
     /**
      * @return void
      *
@@ -39,15 +41,19 @@ class LenderControllerDeleteTest extends TestCase
         [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
-        $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::Lenders, Action::Delete]));
+        $this->assignPermissionToUser(
+            self::$userManager,
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Delete])
+        );
+        self::$endpoint = 'api/v1/admin/lenders/'.self::$lender->id;
     }
 
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_delete_lenders(): void
+    public function test_un_auth_user_cant_delete_lenders(): void
     {
-        $this->deleteJson('api/v1/admin/lenders/'.self::$lender->id)
+        $this->deleteJson(self::$endpoint)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -57,12 +63,12 @@ class LenderControllerDeleteTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_can_delete_lenders(): void
+    public function test_auth_admin_user_can_delete_lenders_successfully(): void
     {
         $lendersCount = Company::query()->count();
 
         $this->actingAs(self::$userAdmin)
-            ->deleteJson('api/v1/admin/lenders/'.self::$lender->id)
+            ->deleteJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson([
                 'data' => [],
@@ -76,12 +82,12 @@ class LenderControllerDeleteTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_manager_user_can_delete_lenders(): void
+    public function test_manager_with_permissions_can_delete_lenders_successfully(): void
     {
         $lendersCount = Company::query()->count();
 
         $this->actingAs(self::$userManager)
-            ->deleteJson('api/v1/admin/lenders/'.self::$lender->id)
+            ->deleteJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson([
                 'data' => [],
@@ -95,12 +101,12 @@ class LenderControllerDeleteTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_manager_user_without_permissions_cant_delete_lenders(): void
+    public function test_manager_without_permissions_cant_delete_lenders(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
 
         $this->actingAs(self::$userManager)
-            ->deleteJson('api/v1/admin/lenders/'.self::$lender->id)
+            ->deleteJson(self::$endpoint)
             ->assertForbidden();
     }
 }
