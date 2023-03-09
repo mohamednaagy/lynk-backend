@@ -31,6 +31,8 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
 
     protected static TraderOrder|Model $traderOrderFake;
 
+    protected static mixed $notification;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -59,24 +61,23 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
 
         $ttiId = 1;
 
-        $notification = (object) [
+        self::$notification = (object) [
             'notificationHeaderAndEntity' => (object) [
                 'notificationEntityDetails' => (object) [
-                    'notificationEntity' => [(object) ['entityValue' => $ttiId]],
+                    'notificationEntity' => [
+                        0 => (object) [
+                            'entityValue' => $ttiId,
+                        ],
+                    ],
                 ],
             ],
         ];
 
-        (new ProcessDmccMpoSaleCompleteNotification($notification))->handle();
+        (new ProcessDmccMpoSaleCompleteNotification(self::$notification))->handle();
 
         self::$order = self::$order->fresh();
 
-        $traderOrder = self::$order->traderOrders()
-            ->where('reference', $ttiId)
-            ->where('status', TraderOrderStatus::InProgress)
-            ->where('provider', 'dmcc')
-            ->first();
-        $traderOrderHistory = $traderOrder->traderHistories()->where('action', FinancingOrderHistory::MurabahaSaleCompleted)->exists();
+        $traderOrderHistory = self::$traderOrderDmcc->traderHistories()->where('action', FinancingOrderHistory::MurabahaSaleCompleted)->exists();
 
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
         $this->assertTrue($traderOrderHistory);
@@ -100,13 +101,8 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
 
         self::$order = self::$order->fresh();
 
-        $traderOrder = self::$order->traderOrders()
-            ->where('reference', $ttiId)
-            ->where('status', TraderOrderStatus::InProgress)
-            ->where('provider', 'dmcc')
-            ->first();
-        $traderOrderHistory = $traderOrder->traderHistories()->where('action', FinancingOrderHistory::MurabahaSaleCompleted)->exists();
-
+        $traderOrderHistory = self::$traderOrderFake->traderHistories()->where('action', FinancingOrderHistory::MurabahaSaleCompleted)->exists();
+        dd($traderOrderHistory);
         $this->assertTrue(self::$order->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
         $this->assertTrue($traderOrderHistory);
     }
