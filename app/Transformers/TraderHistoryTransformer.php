@@ -153,10 +153,7 @@ class TraderHistoryTransformer extends TransformerAbstract
 
             $ignoredWords = ['ago', 'before', 'after', 'منذ', 'قبل'];
 
-            $diffTime = Str::remove($ignoredWords, $diffTime);
-
-            return $latestAction->created_at->format('Y-m-d h:m A')
-                .__('common.processing_time', ['time' => $diffTime]);
+            return Str::remove($ignoredWords, $diffTime);
         }
     }
 
