@@ -36,7 +36,7 @@ class TraderHelperTest extends TestCase
         self::$traderHelperTrait = $this->getObjectForTrait(TraderHelperTrait::class);
     }
 
-    public function test_trader_helper_create_trader_order()
+    public function test_trader_helper_create_trader_order_successfully()
     {
         $count = self::$financingOrder->traderOrders()->count();
         self::$traderHelperTrait->createTraderOrder(self::$financingOrder, '123', 'dmcc');
@@ -44,14 +44,14 @@ class TraderHelperTest extends TestCase
         self::assertEquals($count + 1, self::$financingOrder->traderOrders()->count());
     }
 
-    public function test_trader_helper_update_order_status()
+    public function test_trader_helper_update_order_status_successfully()
     {
         self::$traderHelperTrait->updateOrderStatus(self::$financingOrder, FinancingOrderStatus::Approved);
 
         self::assertTrue(self::$financingOrder->status->is(FinancingOrderStatus::Approved));
     }
 
-    public function test_trader_helper_create_trader_order_history()
+    public function test_trader_helper_create_trader_order_history_successfully()
     {
         $traderOrder = self::$traderHelperTrait->createTraderOrder(self::$financingOrder, '123', 'dmcc');
         $count = $traderOrder->traderHistories()->count();
@@ -61,7 +61,7 @@ class TraderHelperTest extends TestCase
         $this->assertEquals($count + 1, $traderOrder->traderHistories()->count());
     }
 
-    public function test_trader_helper_store_order_document_as_pdf()
+    public function test_trader_helper_store_order_document_as_pdf_successfully()
     {
         $traderOrder = self::$traderHelperTrait->createTraderOrder(self::$financingOrder, '123', 'dmcc');
 
@@ -86,7 +86,7 @@ class TraderHelperTest extends TestCase
         $this->assertNotNull(self::$financingOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
     }
 
-    public function test_trader_helper_attach_document_to_order()
+    public function test_trader_helper_attach_document_to_order_successfully()
     {
         $traderOrder = self::$traderHelperTrait->createTraderOrder(self::$financingOrder, '123', 'dmcc');
 
