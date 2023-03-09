@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Client;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
@@ -100,6 +101,10 @@ class AcceptClientWakalaTest extends TestCase
 
     public function test_accept_client_wakala_with_already_verified_order_unsuccessful()
     {
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::ClientWakalaAccepted,
+        ]);
+
         $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->getNationalId());
 
         $token = Str::random(100);
@@ -115,7 +120,7 @@ class AcceptClientWakalaTest extends TestCase
                 'national_id' => self::$order->national_id,
                 'order_id' => self::$order->id,
             ])
-            ->assertStatus(Response::HTTP_OK);
+            ->assertStatus(Response::HTTP_NOT_FOUND);
     }
 
     public function test_accept_client_wakala_with_token_expired_unsuccessful()

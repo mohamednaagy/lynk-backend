@@ -27,7 +27,7 @@ class MakeOrderProceed extends Controller
      * Handle the incoming request.
      *
      * @param  MakeOrderProceedRequest  $request
-     * @param  AcceptClientWakala  $acceptClientWakala
+     * @param  ProceedOrderInterface  $makeOrderProceed
      * @param  FinancingOrder  $order
      * @return JsonResponse
      *

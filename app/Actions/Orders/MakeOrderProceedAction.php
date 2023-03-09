@@ -52,8 +52,10 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
         if (
             $forceToProceed === false
-            && ($order->is_verification_required
-                || $order->status->cantMoveTo(FinancingOrderStatus::ClientWakalaCompleted)
+            && (
+                $order->is_verification_required
+                || ! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::WaitingClientWakala)
+                || ! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::CommoditySoldToCustomer)
             )
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
@@ -90,7 +92,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
             ->lockForUpdate()
             ->findOrFail($traderOrder->financing_order_id);
 
-        if ($forceToProceed === false && $order->status->cantMoveTo(FinancingOrderStatus::ContractSigned)) {
+        if ($forceToProceed === false && ! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::CommodityPurchased)) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
