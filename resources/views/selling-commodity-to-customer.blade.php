@@ -759,7 +759,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 @foreach($products as $product)
                 <p class="text-black">
                     قد تم شراء السلعة المذكوره ادناه من
-                    {{$prodcut['previous_owner']}}
+                    {{$product['previous_owner']}}
                     بناء على طلب الشركة رقم
                     {{$reference_number}}
                     مقابل مبلغ وقدره

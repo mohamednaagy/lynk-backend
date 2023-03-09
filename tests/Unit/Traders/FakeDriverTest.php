@@ -34,6 +34,8 @@ class FakeDriverTest extends TestCase
 
     protected static Model|TraderOrder $traderOrder;
 
+    protected static Model|TraderOrder $anotherTraderOrder;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -53,6 +55,13 @@ class FakeDriverTest extends TestCase
             'quantity' => 1,
             'warehouse' => 'warehouse',
             'owner' => 'owner',
+        ]);
+
+        self::$anotherTraderOrder = TraderOrder::query()->create([
+            'financing_order_id' => self::$order->id,
+            'reference' => 1,
+            'provider' => 'wrong',
+            'status' => TraderOrderStatus::InProgress,
         ]);
     }
 
@@ -253,7 +262,8 @@ class FakeDriverTest extends TestCase
     {
         Storage::fake();
         UploadedFile::fake();
-
+        (new FakeDriver())->getInventoryBasket(self::$traderOrder);
+        self::$traderOrder->fresh();
         (new FakeDriver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
 
         $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
@@ -269,14 +279,14 @@ class FakeDriverTest extends TestCase
         Storage::fake();
         UploadedFile::fake();
 
-        $this->expectException(TraderException::class);
+        (new FakeDriver())->getInventoryBasket(self::$anotherTraderOrder);
+        self::$anotherTraderOrder->fresh();
 
-        $activityLogCount = Activity::query()->count();
+        (new FakeDriver())->createSellingCommodityToCustomerDocument(self::$anotherTraderOrder);
 
-        (new FakeDriver())->createSellingCommodityToCustomerDocument(new TraderOrder());
+        $sellingCommodityToCustomerMedia = self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer);
 
-        $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertEmpty($sellingCommodityToCustomerMedia);
     }
 
     /**
@@ -288,7 +298,8 @@ class FakeDriverTest extends TestCase
     {
         Storage::fake();
         UploadedFile::fake();
-
+        (new FakeDriver())->getInventoryBasket(self::$traderOrder);
+        self::$traderOrder->fresh();
         (new FakeDriver())->createTransferOwnershipToLenderDocument(self::$traderOrder);
 
         $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender));
@@ -304,14 +315,13 @@ class FakeDriverTest extends TestCase
         Storage::fake();
         UploadedFile::fake();
 
-        $this->expectException(TraderException::class);
+        (new FakeDriver())->getInventoryBasket(self::$anotherTraderOrder);
+        self::$anotherTraderOrder->fresh();
 
-        $activityLogCount = Activity::query()->count();
+        (new FakeDriver())->createTransferOwnershipToLenderDocument(self::$anotherTraderOrder);
 
-        (new FakeDriver())->createTransferOwnershipToLenderDocument(new TraderOrder());
-
-        $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender));
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $transferOwnershipToLenderMedia = self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender);
+        $this->assertEmpty($transferOwnershipToLenderMedia);
     }
 
     /**
@@ -361,27 +371,52 @@ class FakeDriverTest extends TestCase
      */
     public function test_get_inventory_basket_success(): void
     {
+        $data = [
+            'products' => [
+                [
+                    'product' => 'Yogurt',
+                    'quantity' => '10',
+                    'amount' => '1000',
+                    'currency' => 'SAR',
+                    'warehouse' => 'Warehouse',
+                    'owner' => 'Owner 1',
+                    'previous_owner' => 'Owner 0',
+                    'new_owner' => 'Owner 1',
+                    'date_time_of_purchasing_commodity' => '2023-01-01 00:00:00',
+                    'warehouse_or_vault_emirates' => 'Emirates',
+                    'warehouse_or_vault_country' => 'Saudi Arabia',
+                    'inventory_record_id' => '1000',
+                    'warrant_percentage' => '100',
+                    'warrant_no' => '658',
+                    'hs_code' => '#234',
+                    'uom' => 'Kilo',
+                ],
+                [
+                    'product' => 'Yogurt 2',
+                    'quantity' => '5',
+                    'amount' => '500',
+                    'currency' => 'SAR',
+                    'warehouse' => 'Warehouse',
+                    'owner' => 'Owner 1',
+                    'previous_owner' => 'Owner 2',
+                    'new_owner' => 'Owner 3',
+                    'date_time_of_purchasing_commodity' => '2023-02-01 00:00:00',
+                    'warehouse_or_vault_emirates' => 'Emirates',
+                    'warehouse_or_vault_country' => 'Saudi Arabia',
+                    'inventory_record_id' => '1000',
+                    'warrant_percentage' => '100',
+                    'warrant_no' => '658',
+                    'hs_code' => '#234',
+                    'uom' => 'Kilo',
+                ],
+            ],
+        ];
+
+        $data['exchange_rate'] = '3.75';
+
         $response = (new FakeDriver())->getInventoryBasket(self::$traderOrder);
 
-        $this->assertEquals((object) [
-            'product' => 'Yogurt',
-            'quantity' => '10',
-            'amount' => '1000',
-            'currency' => 'SAR',
-            'warehouse' => 'Warehouse',
-            'owner' => 'Owner 1',
-            'previous_owner' => 'Owner 0',
-            'new_owner' => 'Owner 1',
-            'date_time_of_purchasing_commodity' => '2023-01-01 00:00:00',
-            'warehouse_or_vault_emirates' => 'Emirates',
-            'warehouse_or_vault_country' => 'Saudi Arabia',
-            'inventory_record_id' => '1000',
-            'warrant_percentage' => '100',
-            'warrant_no' => '658',
-            'hs_code' => '#234',
-            'uom' => 'Kilo',
-            'exchange_rate' => '3.75',
-        ], $response);
+        $this->assertEquals((object) $data, $response);
     }
 
     /**

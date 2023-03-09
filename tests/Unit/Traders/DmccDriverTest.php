@@ -45,18 +45,58 @@ class DmccDriverTest extends TestCase
         self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
             'status' => FinancingOrderStatus::Approved,
         ]);
-        self::$traderOrder = TraderOrder::query()->create([
-            'financing_order_id' => self::$order->id,
-            'reference' => 1,
-            'provider' => 'dmcc',
-            'status' => TraderOrderStatus::InProgress,
-            'amount' => 1,
-            'product' => 'product',
-            'quantity' => 1,
-            'warehouse' => 'warehouse',
-            'owner' => 'owner',
-            'date_time_of_purchasing_commodity' => Carbon::now()->format('Y-m-d H:i:s'),
-        ]);
+        $data = [
+            'products' => [
+                [
+                    'product' => 'Yogurt',
+                    'quantity' => '10',
+                    'amount' => '1000',
+                    'currency' => 'SAR',
+                    'warehouse' => 'Warehouse',
+                    'owner' => 'Owner 1',
+                    'previous_owner' => 'Owner 0',
+                    'new_owner' => 'Owner 1',
+                    'date_time_of_purchasing_commodity' => '2023-01-01 00:00:00',
+                    'warehouse_or_vault_emirates' => 'Emirates',
+                    'warehouse_or_vault_country' => 'Saudi Arabia',
+                    'inventory_record_id' => '1000',
+                    'warrant_percentage' => '100',
+                    'warrant_no' => '658',
+                    'hs_code' => '#234',
+                    'uom' => 'Kilo',
+                ],
+                [
+                    'product' => 'Yogurt 2',
+                    'quantity' => '5',
+                    'amount' => '500',
+                    'currency' => 'SAR',
+                    'warehouse' => 'Warehouse',
+                    'owner' => 'Owner 1',
+                    'previous_owner' => 'Owner 2',
+                    'new_owner' => 'Owner 3',
+                    'date_time_of_purchasing_commodity' => '2023-02-01 00:00:00',
+                    'warehouse_or_vault_emirates' => 'Emirates',
+                    'warehouse_or_vault_country' => 'Saudi Arabia',
+                    'inventory_record_id' => '1000',
+                    'warrant_percentage' => '100',
+                    'warrant_no' => '658',
+                    'hs_code' => '#234',
+                    'uom' => 'Kilo',
+                ],
+            ],
+        ];
+
+        $data['exchange_rate'] = '3.75';
+
+        self::$traderOrder = TraderOrder::query()->create(array_merge(
+            $data,
+            [
+                'financing_order_id' => self::$order->id,
+                'reference' => 1,
+                'provider' => 'dmcc',
+                'status' => TraderOrderStatus::InProgress,
+            ]
+        ));
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
 use App\Models\Company;
+use App\Models\TraderOrder;
 use App\Models\User;
 use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +26,8 @@ class TraderHelperTest extends TestCase
 
     private static Builder|Model $financingOrder;
 
+    private static TraderOrder $traderOrder;
+
     private static object $traderHelperTrait;
 
     public function setUp(): void
@@ -34,6 +37,53 @@ class TraderHelperTest extends TestCase
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
         self::$financingOrder = $this->createOrder(self::$company->id, self::$userLender->id, ['status' => FinancingOrderStatus::PendingApproval]);
         self::$traderHelperTrait = $this->getObjectForTrait(TraderHelperTrait::class);
+
+        self::$traderOrder = self::$traderHelperTrait->createTraderOrder(self::$financingOrder, '123', 'dmcc');
+        $data = [
+            'products' => [
+                [
+                    'product' => 'Yogurt',
+                    'quantity' => '10',
+                    'amount' => '1000',
+                    'currency' => 'SAR',
+                    'warehouse' => 'Warehouse',
+                    'owner' => 'Owner 1',
+                    'previous_owner' => 'Owner 0',
+                    'new_owner' => 'Owner 1',
+                    'date_time_of_purchasing_commodity' => '2023-01-01 00:00:00',
+                    'warehouse_or_vault_emirates' => 'Emirates',
+                    'warehouse_or_vault_country' => 'Saudi Arabia',
+                    'inventory_record_id' => '1000',
+                    'warrant_percentage' => '100',
+                    'warrant_no' => '658',
+                    'hs_code' => '#234',
+                    'uom' => 'Kilo',
+                ],
+                [
+                    'product' => 'Yogurt 2',
+                    'quantity' => '5',
+                    'amount' => '500',
+                    'currency' => 'SAR',
+                    'warehouse' => 'Warehouse',
+                    'owner' => 'Owner 1',
+                    'previous_owner' => 'Owner 2',
+                    'new_owner' => 'Owner 3',
+                    'date_time_of_purchasing_commodity' => '2023-02-01 00:00:00',
+                    'warehouse_or_vault_emirates' => 'Emirates',
+                    'warehouse_or_vault_country' => 'Saudi Arabia',
+                    'inventory_record_id' => '1000',
+                    'warrant_percentage' => '100',
+                    'warrant_no' => '658',
+                    'hs_code' => '#234',
+                    'uom' => 'Kilo',
+                ],
+            ],
+        ];
+
+        $data['exchange_rate'] = '3.75';
+
+        self::$traderOrder->update($data);
+        self::$traderOrder->refresh();
     }
 
     public function test_trader_helper_create_trader_order()
@@ -63,22 +113,17 @@ class TraderHelperTest extends TestCase
 
     public function test_trader_helper_store_order_document_as_pdf()
     {
-        $traderOrder = self::$traderHelperTrait->createTraderOrder(self::$financingOrder, '123', 'dmcc');
-
         self::$traderHelperTrait->storeOrderDocumentAsPdf('selling-commodity-to-customer',
             [
-                'ttiId' => $traderOrder->reference,
-                'companyName' => self::$financingOrder->company->name,
+                'ttiId' => self::$traderOrder->reference,
+                'company_name' => self::$financingOrder->company->name,
                 'orderNumber' => self::$financingOrder->jd,
-                'amount' => '2000',
-                'hsCodeDescription' => 'test product',
-                'quantity' => '1000',
-                'warehouse' => 'warehouse',
-                'owner' => 'owner',
+                'reference_number' => self::$financingOrder->jd,
+                'products' => self::$traderOrder->products,
                 'date' => now()->toDateString(),
                 'time' => now()->toTimeString(),
             ],
-            $traderOrder,
+            self::$traderOrder,
             TraderOrderMediaCollection::SellingCommodityToCustomer,
         );
 

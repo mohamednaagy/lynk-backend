@@ -195,10 +195,6 @@ class FakeDriver implements TraderInterface
                     'company_name' => $traderOrder->order->company->name,
                     'order_number' => $traderOrder->financing_order_id,
                     'amount' => $traderOrder->order->amount->formatByDecimal(),
-                    'hs_code_description' => 'Solid yogurt (jameed).',
-                    'quantity' => 100,
-                    'uom' => 'MTT',
-                    'warehouse' => 'DMC03-S-0038',
                     // TODO: change later after fix from business
                     'new_owner' => 'محمد علي',
                     'date' => Carbon::now()->toDateString(),
