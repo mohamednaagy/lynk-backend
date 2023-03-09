@@ -107,7 +107,8 @@ class LenderOrderControllerShowTest extends TestCase
                         'trader_orders.is_cancellable',
                         'trader_orders.history',
                         'trader_orders.status',
-                        'creator',
+                        'can_be_completed',
+                        'payment_proof_url',
                         'created_at',
                     ])
                     ->respond()

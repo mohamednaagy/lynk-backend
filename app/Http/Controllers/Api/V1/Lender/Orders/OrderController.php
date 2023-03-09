@@ -106,6 +106,7 @@ class OrderController extends Controller
                 'is_updatable',
                 'is_approved',
                 'can_be_completed',
+                'payment_proof_url',
                 'status_reason',
                 'creator',
                 'approver',

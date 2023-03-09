@@ -4,6 +4,7 @@ namespace App\Transformers;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -47,6 +48,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'trader_orders',
         'trader_order_history',
         'can_be_completed',
+        'payment_proof_url',
     ];
 
     public function transform(FinancingOrder $financingOrder)
@@ -201,5 +203,12 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeCanBeCompleted(FinancingOrder $financingOrder): Primitive
     {
         return $this->primitive($financingOrder->canBeCompleted());
+    }
+
+    public function includePaymentProofUrl(FinancingOrder $financingOrder): Primitive
+    {
+        $url = $financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer);
+
+        return $this->primitive($url?->file_url);
     }
 }

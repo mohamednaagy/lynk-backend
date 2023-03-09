@@ -96,7 +96,6 @@ class OrderControllerShowTest extends TestCase
                         'is_approved',
                         'status_reason',
                         'is_updatable',
-                        'creator',
                         'approver',
                         'trader_orders.id',
                         'trader_orders.reference',
@@ -106,6 +105,8 @@ class OrderControllerShowTest extends TestCase
                         'trader_orders.status',
                         'creator',
                         'created_at',
+                        'payment_proof_url',
+                        'can_be_completed',
                     ])
                     ->respond()
                     ->getData(true)

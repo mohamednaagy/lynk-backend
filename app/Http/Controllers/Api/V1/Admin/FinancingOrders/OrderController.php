@@ -100,6 +100,7 @@ class OrderController extends Controller
                 'trader_orders.created_at',
                 'creator',
                 'created_at',
+                'payment_proof_url',
             ])
             ->respond();
     }

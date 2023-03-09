@@ -104,6 +104,7 @@ class FinancingOrderControllerShowTest extends TestCase
                         'creator',
                         'approver',
                         'history',
+                        'payment_proof_url',
                     ])
                     ->respond()
                     ->getData(true)
@@ -139,6 +140,7 @@ class FinancingOrderControllerShowTest extends TestCase
                         'creator',
                         'approver',
                         'history',
+                        'payment_proof_url',
                     ])
                     ->respond()
                     ->getData(true)
@@ -196,6 +198,7 @@ class FinancingOrderControllerShowTest extends TestCase
                         'approver',
                         'history',
                         'is_verification_required',
+                        'payment_proof_url',
                     ])
                     ->respond()
                     ->getData(true)
