@@ -69,7 +69,7 @@ class OrderControllerShowTest extends TestCase
         ]);
     }
 
-    public function test_admin_financing_order_controller_show_order_successed()
+    public function test_admin_financing_order_controller_show_order_succeeded()
     {
         $order = FinancingOrder::where('company_id', self::$lender->id)->first();
         $order->load([
@@ -78,6 +78,7 @@ class OrderControllerShowTest extends TestCase
                 $query->latest('id');
             },
         ]);
+
         $this->actingAs(self::$admin)
             ->getJson('api/v1/admin/orders/'.$order->id)
             ->assertStatus(Response::HTTP_OK)
@@ -87,6 +88,7 @@ class OrderControllerShowTest extends TestCase
                         'id',
                         'status',
                         'reference_number',
+                        'customer_name',
                         'national_id',
                         'amount',
                         'selling_price',
@@ -95,7 +97,9 @@ class OrderControllerShowTest extends TestCase
                         'phone_number_formatted',
                         'is_approved',
                         'status_reason',
+                        'can_be_completed',
                         'is_updatable',
+                        'creator',
                         'approver',
                         'trader_orders.id',
                         'trader_orders.reference',
@@ -103,10 +107,10 @@ class OrderControllerShowTest extends TestCase
                         'trader_orders.is_cancellable',
                         'trader_orders.history',
                         'trader_orders.status',
+                        'trader_orders.created_at',
                         'creator',
                         'created_at',
                         'payment_proof_url',
-                        'can_be_completed',
                     ])
                     ->respond()
                     ->getData(true)
