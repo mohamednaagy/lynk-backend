@@ -52,6 +52,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'approver_id',
         'creator_id',
         'creator_type',
+        'customer_name',
         'customer_details',
         'status_reason',
         'client_wakala_accepted_at',

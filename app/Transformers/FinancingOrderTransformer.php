@@ -30,6 +30,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'company_id',
         'company_name',
         'reference_number',
+        'customer_name',
         'national_id',
         'amount',
         'selling_price',
@@ -92,6 +93,11 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeReferenceNumber(FinancingOrder $financingOrder)
     {
         return $this->primitive($financingOrder->reference_number);
+    }
+
+    public function includeCustomerName(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->customer_name);
     }
 
     public function includeNationalId(FinancingOrder $financingOrder)
