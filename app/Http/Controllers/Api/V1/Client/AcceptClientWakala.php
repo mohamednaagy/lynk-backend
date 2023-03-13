@@ -50,7 +50,7 @@ class AcceptClientWakala extends Controller
 
             abort_if(! $canProceed, 404);
 
-            $acceptClientWakala->handle($order);
+            $acceptClientWakala->handle($traderOrder);
 
             $order->update([
                 'status' => FinancingOrderStatus::ClientWakalaCompleted,
