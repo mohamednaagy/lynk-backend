@@ -69,44 +69,4 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
         FinancingOrderStatus::ClientWakalaCompleted => self::ClientWakalaAccepted,
         FinancingOrderStatus::MurabahaSaleCompleted => self::MurabahaSaleCompleted,
     ];
-
-    public const StepToHistoriesDictionary = [
-        FinancingOrderStatus::PendingApproval => [],
-        FinancingOrderStatus::Approved => [],
-        FinancingOrderStatus::WaitingPurchasingCommodity => [
-            FinancingOrderHistory::GetTtiId,
-        ],
-        FinancingOrderStatus::RespondedToPtp => [
-            FinancingOrderHistory::RespondPtp,
-        ],
-        FinancingOrderStatus::PtpDocumentRetrieved => [
-            FinancingOrderHistory::GetPtpDocument,
-            FinancingOrderHistory::AttachPtpDocumentToOrder,
-            FinancingOrderHistory::GetTtiHoldingCertificateDocument,
-            FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
-        ],
-        FinancingOrderStatus::CommodityPurchased => [
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-        ],
-        FinancingOrderStatus::ContractSigned => [
-            FinancingOrderHistory::ContractSigned,
-        ],
-        FinancingOrderStatus::CommoditySoldToCustomer => [
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-        ],
-        FinancingOrderStatus::WaitingClientWakala => [],
-        FinancingOrderStatus::ClientWakalaCompleted => [
-            FinancingOrderHistory::ClientWakalaAccepted,
-        ],
-        FinancingOrderStatus::MurabhaOfferIssued => [
-            FinancingOrderHistory::IssueMurabahaOffer,
-            FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
-            FinancingOrderHistory::AttachMpoDocument,
-        ],
-        FinancingOrderStatus::MurabahaSaleCompleted => [
-            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
-            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
-            FinancingOrderHistory::MurabahaSaleCompleted,
-        ],
-    ];
 }
