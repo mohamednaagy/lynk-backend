@@ -94,6 +94,7 @@ trait InteractsWithCompany
             'approved_at' => Carbon::now(),
             'creator_id' => $userId,
             'creator_type' => (new User)->getMorphClass(),
+            'customer_name' => 'youssof okiel',
             'national_id' => '2553451234',
             'phone_number' => '+966500112233',
             'amount' => 200,
