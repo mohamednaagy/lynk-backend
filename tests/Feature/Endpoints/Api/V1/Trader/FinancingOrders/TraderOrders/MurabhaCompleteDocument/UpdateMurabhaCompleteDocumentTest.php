@@ -135,6 +135,12 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
             ->actingAs(self::$traderAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertJsonStructure(['data']);
+
+        $freshOrderStatus = self::$financingOrder->fresh()->status;
+        $this->assertTrue($freshOrderStatus->is(FinancingOrderStatus::MurabahaSaleCompleted));
+
+        $freshTraderOrderStatus = self::$traderOrder->fresh()->status;
+        $this->assertTrue($freshTraderOrderStatus->is(TraderOrderStatus::Completed));
     }
 
     /**

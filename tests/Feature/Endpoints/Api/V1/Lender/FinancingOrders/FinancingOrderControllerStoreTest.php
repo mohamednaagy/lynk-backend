@@ -47,6 +47,7 @@ class FinancingOrderControllerStoreTest extends TestCase
         self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
         self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
         self::$orderDetails = [
+            'customer_name' => 'youssof',
             'national_id' => '1001280070',
             'amount' => '200',
             'selling_price' => '220',
