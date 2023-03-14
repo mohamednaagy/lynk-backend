@@ -7,11 +7,15 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
 use App\Models\Company;
+use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
@@ -34,6 +38,39 @@ class TraderHelperTest extends TestCase
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
         self::$financingOrder = $this->createOrder(self::$company->id, self::$userLender->id, ['status' => FinancingOrderStatus::PendingApproval]);
         self::$traderHelperTrait = $this->getObjectForTrait(TraderHelperTrait::class);
+    }
+
+    public function test_trader_helper_create_step_histories_successfully()
+    {
+        /** @var TraderOrder $traderOrder */
+        $traderOrder = self::$traderHelperTrait->createTraderOrder(self::$financingOrder, '123', 'dmcc');
+        $trader = Trader::driver($traderOrder->provider);
+
+        foreach (self::$traderHelperTrait->stepToHistoriesMap as $status => $history) {
+            $traderOrder->traderHistories()->delete();
+            $filteredHistory = array_filter($history);
+            $collectionNames = [];
+            $uploadedFiles = [];
+            foreach ($filteredHistory as $files) {
+                $uploadedFiles = array_merge([$files['file'] => UploadedFile::fake()->create('test.pdf')], $uploadedFiles);
+                $collectionNames[] = $files['collection'];
+            }
+
+            $request = Request::create('test',
+                'POST',
+                [],
+                [],
+                $uploadedFiles
+            );
+
+            self::$traderHelperTrait->createStepHistories($request, $trader, $traderOrder, $status);
+
+            foreach ($collectionNames as $collection) {
+                $this->assertTrue($traderOrder->fresh()->hasMedia($collection));
+            }
+
+            $this->assertEquals(count($history), $traderOrder->traderHistories()->whereIn('action', array_keys($history))->count());
+        }
     }
 
     public function test_trader_helper_create_trader_order_successfully()
