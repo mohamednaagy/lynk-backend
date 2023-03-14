@@ -60,7 +60,7 @@ class SendOtpClientWakalaTest extends TestCase
             ]);
     }
 
-    public function test_send_otp_client_wakala_with_invalid_national_id()
+    public function test_send_otp_client_wakala_with_invalid_national_id_will_fail()
     {
         $this->postJson(self::$endpoint, [
             'national_id' => '1591192305',
@@ -68,7 +68,7 @@ class SendOtpClientWakalaTest extends TestCase
         ])->assertStatus(Response::HTTP_BAD_REQUEST);
     }
 
-    public function test_send_otp_client_wakala_with_already_verified_order()
+    public function test_send_otp_client_wakala_with_already_verified_order_will_fail()
     {
         self::$order->update(['client_wakala_accepted_at' => now()]);
         self::$traderOrder->traderHistories()->create([
