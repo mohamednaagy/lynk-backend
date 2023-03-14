@@ -80,6 +80,7 @@ class FinancingOrderControllerShowTest extends TestCase
      */
     public function test_that_admin_user_can_show_order_in_same_company(): void
     {
+        self::$firstOrderInSameCompany->load('creator', 'approver');
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$firstCompany->id)
             ->getJson('api/v1/lender/orders/'.self::$firstOrderInSameCompany->id)
@@ -97,15 +98,15 @@ class FinancingOrderControllerShowTest extends TestCase
                         'phone_country_code',
                         'phone_number',
                         'phone_number_formatted',
-                        'is_approved',
-                        'is_updatable',
                         'is_verification_required',
+                        'is_updatable',
+                        'is_approved',
                         'can_be_completed',
+                        'payment_proof_url',
                         'status_reason',
                         'creator',
                         'approver',
                         'history',
-                        'payment_proof_url',
                     ])
                     ->respond()
                     ->getData(true)
@@ -117,6 +118,7 @@ class FinancingOrderControllerShowTest extends TestCase
      */
     public function test_that_supervisor_user_can_show_order_in_same_company(): void
     {
+        self::$firstOrderInSameCompany->load('creator', 'approver');
         $this->actingAs(self::$userLenderSupervisor)
             ->withHeader('X-Company', self::$firstCompany->id)
             ->getJson('api/v1/lender/orders/'.self::$firstOrderInSameCompany->id)
@@ -134,15 +136,15 @@ class FinancingOrderControllerShowTest extends TestCase
                         'phone_country_code',
                         'phone_number',
                         'phone_number_formatted',
-                        'is_approved',
                         'is_verification_required',
                         'is_updatable',
+                        'is_approved',
                         'can_be_completed',
+                        'payment_proof_url',
                         'status_reason',
                         'creator',
                         'approver',
                         'history',
-                        'payment_proof_url',
                     ])
                     ->respond()
                     ->getData(true)
@@ -176,6 +178,7 @@ class FinancingOrderControllerShowTest extends TestCase
      */
     public function test_that_order_creator_user_can_show_order_owned_in_same_company(): void
     {
+        self::$thirdOrderInSameCompany->load('creator', 'approver');
         $this->actingAs(self::$userLenderOrderCreator)
             ->withHeader('X-Company', self::$firstCompany->id)
             ->getJson('api/v1/lender/orders/'.self::$thirdOrderInSameCompany->id)
@@ -193,15 +196,15 @@ class FinancingOrderControllerShowTest extends TestCase
                         'phone_country_code',
                         'phone_number',
                         'phone_number_formatted',
-                        'is_approved',
+                        'is_verification_required',
                         'is_updatable',
+                        'is_approved',
                         'can_be_completed',
+                        'payment_proof_url',
                         'status_reason',
                         'creator',
                         'approver',
                         'history',
-                        'is_verification_required',
-                        'payment_proof_url',
                     ])
                     ->respond()
                     ->getData(true)

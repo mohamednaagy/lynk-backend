@@ -81,7 +81,9 @@ class LenderOrderControllerShowTest extends TestCase
             'traderOrders' => function ($query) {
                 $query->latest('id');
             },
+            'traderOrders.traderHistories',
         ]);
+
         $this->actingAs(self::$admin)
             ->getJson(self::$endpoint.$order->id)
             ->assertStatus(Response::HTTP_OK)
@@ -100,8 +102,8 @@ class LenderOrderControllerShowTest extends TestCase
                         'phone_number_formatted',
                         'is_approved',
                         'status_reason',
+                        'can_be_completed',
                         'is_updatable',
-                        'creator',
                         'approver',
                         'trader_orders.id',
                         'trader_orders.reference',
@@ -109,9 +111,10 @@ class LenderOrderControllerShowTest extends TestCase
                         'trader_orders.is_cancellable',
                         'trader_orders.history',
                         'trader_orders.status',
-                        'can_be_completed',
-                        'payment_proof_url',
+                        'trader_orders.created_at',
+                        'creator',
                         'created_at',
+                        'payment_proof_url',
                     ])
                     ->respond()
                     ->getData(true)

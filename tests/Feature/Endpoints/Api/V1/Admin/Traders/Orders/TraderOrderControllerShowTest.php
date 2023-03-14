@@ -80,6 +80,14 @@ class TraderOrderControllerShowTest extends TestCase
      */
     public function test_admin_can_access_order_controller_show_successful(): void
     {
+        self::$order->load([
+            'creator',
+            'traderOrders' => function ($query) {
+                $query->latest('id');
+            },
+            'traderOrders.traderHistories',
+        ]);
+
         $this->actingAs(self::$userAdmin)
             ->withHeader('X-Company', self::$traderCompany->id)
             ->getJson(self::$baseURL)
@@ -94,17 +102,14 @@ class TraderOrderControllerShowTest extends TestCase
                         'national_id',
                         'amount',
                         'selling_price',
-                        'is_updatable',
-                        'is_approved',
-                        'status_reason',
-                        'approver',
-                        'payment_proof_url',
                         'phone_country_code',
                         'phone_number',
                         'phone_number_formatted',
-                        'creator',
+                        'is_approved',
+                        'status_reason',
                         'can_be_completed',
-                        'created_at',
+                        'is_updatable',
+                        'approver',
                         'trader_orders.id',
                         'trader_orders.reference',
                         'trader_orders.provider',
@@ -112,6 +117,9 @@ class TraderOrderControllerShowTest extends TestCase
                         'trader_orders.history',
                         'trader_orders.status',
                         'trader_orders.created_at',
+                        'creator',
+                        'created_at',
+                        'payment_proof_url',
                     ])
                     ->respond()
                     ->getData(true)
