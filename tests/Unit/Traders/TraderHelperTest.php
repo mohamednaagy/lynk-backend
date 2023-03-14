@@ -7,11 +7,15 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
 use App\Models\Company;
+use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
@@ -36,7 +40,40 @@ class TraderHelperTest extends TestCase
         self::$traderHelperTrait = $this->getObjectForTrait(TraderHelperTrait::class);
     }
 
-    public function test_trader_helper_create_trader_order()
+    public function test_trader_helper_create_step_histories_successfully()
+    {
+        /** @var TraderOrder $traderOrder */
+        $traderOrder = self::$traderHelperTrait->createTraderOrder(self::$financingOrder, '123', 'dmcc');
+        $trader = Trader::driver($traderOrder->provider);
+
+        foreach (self::$traderHelperTrait->stepToHistoriesMap as $status => $history) {
+            $traderOrder->traderHistories()->delete();
+            $filteredHistory = array_filter($history);
+            $collectionNames = [];
+            $uploadedFiles = [];
+            foreach ($filteredHistory as $files) {
+                $uploadedFiles = array_merge([$files['file'] => UploadedFile::fake()->create('test.pdf')], $uploadedFiles);
+                $collectionNames[] = $files['collection'];
+            }
+
+            $request = Request::create('test',
+                'POST',
+                [],
+                [],
+                $uploadedFiles
+            );
+
+            self::$traderHelperTrait->createStepHistories($request, $trader, $traderOrder, $status);
+
+            foreach ($collectionNames as $collection) {
+                $this->assertTrue($traderOrder->fresh()->hasMedia($collection));
+            }
+
+            $this->assertEquals(count($history), $traderOrder->traderHistories()->whereIn('action', array_keys($history))->count());
+        }
+    }
+
+    public function test_trader_helper_create_trader_order_successfully()
     {
         $count = self::$financingOrder->traderOrders()->count();
         self::$traderHelperTrait->createTraderOrder(self::$financingOrder, '123', 'dmcc');
@@ -44,14 +81,14 @@ class TraderHelperTest extends TestCase
         self::assertEquals($count + 1, self::$financingOrder->traderOrders()->count());
     }
 
-    public function test_trader_helper_update_order_status()
+    public function test_trader_helper_update_order_status_successfully()
     {
         self::$traderHelperTrait->updateOrderStatus(self::$financingOrder, FinancingOrderStatus::Approved);
 
         self::assertTrue(self::$financingOrder->status->is(FinancingOrderStatus::Approved));
     }
 
-    public function test_trader_helper_create_trader_order_history()
+    public function test_trader_helper_create_trader_order_history_successfully()
     {
         $traderOrder = self::$traderHelperTrait->createTraderOrder(self::$financingOrder, '123', 'dmcc');
         $count = $traderOrder->traderHistories()->count();
@@ -61,20 +98,21 @@ class TraderHelperTest extends TestCase
         $this->assertEquals($count + 1, $traderOrder->traderHistories()->count());
     }
 
-    public function test_trader_helper_store_order_document_as_pdf()
+    public function test_trader_helper_store_order_document_as_pdf_successfully()
     {
         $traderOrder = self::$traderHelperTrait->createTraderOrder(self::$financingOrder, '123', 'dmcc');
 
         self::$traderHelperTrait->storeOrderDocumentAsPdf('selling-commodity-to-customer',
             [
-                'ttiId' => $traderOrder->reference,
-                'companyName' => self::$financingOrder->company->name,
-                'orderNumber' => self::$financingOrder->jd,
+                'reference_number' => $traderOrder->reference,
+                'company_name' => self::$financingOrder->company->name,
+                'order_number' => self::$financingOrder->jd,
                 'amount' => '2000',
-                'hsCodeDescription' => 'test product',
+                'hs_code_description' => 'test product',
+                'uom' => 'MTT',
                 'quantity' => '1000',
                 'warehouse' => 'warehouse',
-                'owner' => 'owner',
+                'new_owner' => 'owner',
                 'date' => now()->toDateString(),
                 'time' => now()->toTimeString(),
             ],
@@ -85,7 +123,7 @@ class TraderHelperTest extends TestCase
         $this->assertNotNull(self::$financingOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
     }
 
-    public function test_trader_helper_attach_document_to_order()
+    public function test_trader_helper_attach_document_to_order_successfully()
     {
         $traderOrder = self::$traderHelperTrait->createTraderOrder(self::$financingOrder, '123', 'dmcc');
 
