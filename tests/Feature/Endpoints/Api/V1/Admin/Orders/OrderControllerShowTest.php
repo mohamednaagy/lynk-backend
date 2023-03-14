@@ -99,7 +99,6 @@ class OrderControllerShowTest extends TestCase
                         'status_reason',
                         'can_be_completed',
                         'is_updatable',
-                        'creator',
                         'approver',
                         'trader_orders.id',
                         'trader_orders.reference',
