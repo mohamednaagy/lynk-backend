@@ -2,11 +2,13 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Client;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -29,6 +31,8 @@ class AcceptClientWakalaTest extends TestCase
 
     private static FinancingOrder|Model $order;
 
+    private static TraderOrder|Model $traderOrder;
+
     private static OtpifyCode $otpifyCode;
 
     public function setUp(): void
@@ -41,14 +45,15 @@ class AcceptClientWakalaTest extends TestCase
         self::$order = $this->createOrder(self::$company->id, self::$userLender->id, [
             'national_id' => '2553451234',
         ]);
-        self::$order->traderOrders()->create([
-            'provider' => 'dmcc',
+        self::$order->traderOrders()->create(['provider' => 'dmcc',
             'status' => TraderOrderStatus::InProgress,
             'reference' => 123,
         ]);
+
+        self::$traderOrder = self::$order->activeTraderOrder()->first();
     }
 
-    public function test_accept_client_wakala_success()
+    public function test_accept_client_wakala_successful()
     {
         $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->getNationalId());
 
@@ -75,7 +80,7 @@ class AcceptClientWakalaTest extends TestCase
         $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::ClientWakalaCompleted));
     }
 
-    public function test_accept_client_wakala_with_invalid_national_id_unsuccessful()
+    public function test_accept_client_wakala_with_invalid_national_id_nothing_work()
     {
         $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->getNationalId());
 
@@ -95,9 +100,12 @@ class AcceptClientWakalaTest extends TestCase
             ->assertStatus(Response::HTTP_NOT_FOUND);
     }
 
-    public function test_accept_client_wakala_with_already_verified_order_unsuccessful()
+    public function test_accept_client_wakala_with_already_verified_order_nothing_work()
     {
         self::$order->update(['client_wakala_accepted_at' => now()]);
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::ClientWakalaAccepted,
+        ]);
 
         $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->getNationalId());
 
@@ -117,7 +125,7 @@ class AcceptClientWakalaTest extends TestCase
             ->assertStatus(Response::HTTP_NOT_FOUND);
     }
 
-    public function test_accept_client_wakala_with_token_expired_unsuccessful()
+    public function test_accept_client_wakala_with_token_expired_nothing_work()
     {
         $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->getNationalId());
 
