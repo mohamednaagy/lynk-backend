@@ -750,23 +750,24 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     <p class="text-center">رقم المرجع: {{$reference_number}}</p>
                     <h4 class="pt-3 font-extrabold text-center">شهادة حيازة</h4>
                     <p class="text-center">
-                        نؤكد نحن لينك أن السلع المشار لها في الموقع أدناه؛ في حيازتنا بالنيابة عن
+                        نؤكد نحن لينك أن السلع/ـة المشار لها في الموقع أدناه؛ في حيازتنا بالنيابة عن
                         {{$company_name}}
                         من تاريخ و توقيت هذه الشهادة
                     </p>
 
                 </div>
-                @foreach($products as $product)
                 <p class="text-black">
-                    قد تم شراء السلعة المذكوره ادناه من
-                    {{$product['previous_owner']}}
+                    قد تم شراء السلع/ـة المذكوره أدناه من
+                    {{$previous_owner}}
                     بناء على طلب الشركة رقم
                     {{$reference_number}}
                     مقابل مبلغ وقدره
-                    {{number_format($product['amount'], 2)}}
+                    {{$amount}}
                     ريال سعودي
+                </p>
 
-                <h5 class="py-3 font-extrabold text-center">بيانات السلعة</h5>
+                <h5 class="py-3 font-extrabold text-center">بيانات السلع/ـة</h5>
+                @foreach($products as $product)
                 <table class="min-w-full">
                     <tbody>
                         <tr>
@@ -790,12 +791,12 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </table>
                 @endforeach
                 <p class="text-lg text-center text-black">
-                    سيتم حفظ السلعة بالموقع المشار له أعلاه، بالنيابة عن {{$company_name}}
-                    الى أن يتم إشعارنا بالتصرف.
+                    سيتم حفظ السلع/ـة بالموقع المشار له أعلاه، بالنيابة عن {{$company_name}}
+                    إلي أن يتم إشعارنا بالتصرف.
                 </p>
 
                 <p class="text-lg text-center text-black">{{$company_name}} سيكون مسؤولاً عن رسوم التخزين والحفظ إذا تم
-                    الاحتفاظ بـ \ {{collect($products)->pluck('product')->implode(' , ')}} لأكثر من يوم عمل</p>
+                    الاحتفاظ بـ \ {{$product_name}} لأكثر من يوم عمل</p>
 
 
                 <p class="text-center text-black pt-7">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>

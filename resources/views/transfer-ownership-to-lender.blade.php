@@ -721,21 +721,20 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 تاريخ و توقيت هذه الشهادة
             </p>
 
-            @foreach($products as $product)
             <p class="text-center text-black">
-                قد تم شراء السلعة المذكورة ادناه من {{$product['previous_owner']}}
+                قد تم شراء السلع/ـة المذكورة ادناه من {{$previous_owner}}
                 بناء على العقد المبرم بين الطرفين
                 بتاريخ
                 (
-                {{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s',
-                $product['date_time_of_purchasing_commodity'])->toDateString() }}
+                {{ $date}}
                 )
                 مقابل مبلغ وقدره
-                {{number_format($product['amount'], 2)}}
+                {{$amount}}
                 ريال سعودي
             </p>
 
-            <p class="text-lg font-semibold text-center text-black">بيانات السلعة</p>
+            <p class="text-lg font-semibold text-center text-black">بيانات السلع/ـة</p>
+            @foreach($products as $product)
 
             <table class="min-w-full">
                 <tbody>
@@ -759,13 +758,12 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             </table>
             @endforeach
 
-
-            <p class="text-lg text-center text-black">سيتم حفظ السلعة لدينا بالنيابة عن {{$company_name}} إلى أن يتم
+            <p class="text-lg text-center text-black">سيتم حفظ السلع/ـة لدينا بالنيابة عن {{$company_name}} إلى أن يتم
                 إشعارنا
                 بالتصرف.
             </p>
             <p class="text-lg text-center text-black">{{$company_name}} سيكون مسؤولاً عن رسوم التخزين والحفظ إذا تم
-                الاحتفاظ بـ \ {{collect($products)->pluck('product')->implode(' , ')}} لأكثر من يوم عمل</p>
+                الاحتفاظ بـ \ {{$product_name}} لأكثر من يوم عمل</p>
             <p class="pt-2 text-center text-black">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
         </div>
         <div class="flex flex-row justify-between pt-8 font-semibold">

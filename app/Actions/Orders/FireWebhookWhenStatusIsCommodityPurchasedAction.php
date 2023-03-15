@@ -20,7 +20,7 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
                 'value' => $financingOrder->status->value,
                 'label' => $financingOrder->status->description,
             ],
-            $productsDescription,
+            'products_description' => $productsDescription,
         ]);
     }
 

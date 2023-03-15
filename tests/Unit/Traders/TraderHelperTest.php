@@ -113,13 +113,25 @@ class TraderHelperTest extends TestCase
 
     public function test_trader_helper_store_order_document_as_pdf()
     {
-        self::$traderHelperTrait->storeOrderDocumentAsPdf('selling-commodity-to-customer',
+        $separator = ' و ';
+        $products = collect(self::$traderOrder->products);
+        $amount = $products->pluck('amount')->map(function ($amount) {
+            return number_format($amount, 2);
+        })->implode(', ');
+        $previous_owner = $products->pluck('previous_owner')->implode($separator);
+        $product_name = $products->pluck('product')->implode($separator);
+
+        self::$traderHelperTrait->storeOrderDocumentAsPdf(
+            'selling-commodity-to-customer',
             [
                 'ttiId' => self::$traderOrder->reference,
                 'company_name' => self::$financingOrder->company->name,
                 'orderNumber' => self::$financingOrder->jd,
                 'reference_number' => self::$financingOrder->jd,
                 'products' => self::$traderOrder->products,
+                'amount' => $amount,
+                'previous_owner' => $previous_owner,
+                'product_name' => $product_name,
                 'date' => now()->toDateString(),
                 'time' => now()->toTimeString(),
             ],

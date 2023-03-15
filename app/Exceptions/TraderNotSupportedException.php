@@ -7,7 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class TraderNotSupported extends Exception
+class TraderNotSupportedException extends Exception
 {
     /**
      * Render the exception into an HTTP response.

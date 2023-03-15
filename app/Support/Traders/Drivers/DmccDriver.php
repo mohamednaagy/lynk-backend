@@ -244,7 +244,15 @@ class DmccDriver implements TraderInterface
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
         try {
+            $separator = ' و ';
             $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $traderOrder->products[0]['date_time_of_purchasing_commodity']);
+            $products = collect($traderOrder->products);
+            $amount = $products->pluck('amount')->map(function ($amount) {
+                return number_format($amount, 2);
+            })->implode(', ');
+
+            $previous_owner = $products->pluck('previous_owner')->implode($separator);
+            $product_name = $products->pluck('product')->implode($separator);
 
             $this->storeOrderDocumentAsPdf(
                 'selling-commodity-to-customer',
@@ -253,6 +261,9 @@ class DmccDriver implements TraderInterface
                     'company_name' => $traderOrder->order->company->name,
                     'order_number' => $traderOrder->financing_order_id,
                     'products' => $traderOrder->products,
+                    'amount' => $amount,
+                    'product_name' => $product_name,
+                    'previous_owner' => $previous_owner,
                     'date' => $dateTime->toDateString(),
                     'time' => $dateTime->toTimeString(),
                 ],
@@ -311,7 +322,16 @@ class DmccDriver implements TraderInterface
     {
         try {
             logs()->debug('tee', [$traderOrder->id]);
+
+            $separator = ' و ';
             $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $traderOrder->products[0]['date_time_of_purchasing_commodity']);
+            $products = collect($traderOrder->products);
+            $amount = $products->pluck('amount')->map(function ($amount) {
+                return number_format($amount, 2);
+            })->implode(', ');
+
+            $previous_owner = $products->pluck('previous_owner')->implode($separator);
+            $product_name = $products->pluck('product')->implode($separator);
 
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
@@ -320,6 +340,9 @@ class DmccDriver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company->name,
                     'order_number' => $traderOrder->financing_order_id,
+                    'amount' => $amount,
+                    'previous_owner' => $previous_owner,
+                    'product_name' => $product_name,
                     'date' => $dateTime->toDateString(),
                     'time' => $dateTime->toTimeString(),
                 ],

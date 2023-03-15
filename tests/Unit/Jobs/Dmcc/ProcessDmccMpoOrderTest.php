@@ -56,13 +56,13 @@ class ProcessDmccMpoOrderTest extends TestCase
                 'owner' => 'owner',
             ],
         ];
-        self::$traderOrder = TraderOrder::query()->create([
+
+        self::$traderOrder = TraderOrder::query()->create(array_merge($products, [
             'financing_order_id' => self::$order->id,
             'reference' => 1,
             'provider' => 'dmcc',
             'status' => TraderOrderStatus::InProgress,
-            $products,
-        ]);
+        ]));
 
         Soap::fake(function () {
             return Soap::response([

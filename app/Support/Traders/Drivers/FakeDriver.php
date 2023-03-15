@@ -187,6 +187,15 @@ class FakeDriver implements TraderInterface
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
         try {
+            $separator = ' و ';
+            $products = collect($traderOrder->products);
+            $amount = $products->pluck('amount')->map(function ($amount) {
+                return number_format($amount, 2);
+            })->implode(', ');
+
+            $previous_owner = $products->pluck('previous_owner')->implode($separator);
+            $product_name = $products->pluck('product')->implode($separator);
+
             $this->storeOrderDocumentAsPdf(
                 'selling-commodity-to-customer',
                 [
@@ -194,7 +203,9 @@ class FakeDriver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'amount' => $traderOrder->order->amount->formatByDecimal(),
+                    'amount' => $amount,
+                    'previous_owner' => $previous_owner,
+                    'product_name' => $product_name,
                     // TODO: change later after fix from business
                     'new_owner' => 'محمد علي',
                     'date' => Carbon::now()->toDateString(),
@@ -248,9 +259,16 @@ class FakeDriver implements TraderInterface
      */
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
-        $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $traderOrder->products[0]['date_time_of_purchasing_commodity']);
-
         try {
+            $separator = ' و ';
+            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $traderOrder->products[0]['date_time_of_purchasing_commodity']);
+            $products = collect($traderOrder->products);
+            $previous_owner = $products->pluck('previous_owner')->implode($separator);
+            $product_name = $products->pluck('product')->implode($separator);
+            $amount = $products->pluck('amount')->map(function ($amount) {
+                return number_format($amount, 2);
+            })->implode(', ');
+
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
@@ -258,7 +276,9 @@ class FakeDriver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'amount' => $traderOrder->order->amount->formatByDecimal(),
+                    'amount' => $amount,
+                    'previous_owner' => $previous_owner,
+                    'product_name' => $product_name,
                     'date' => $dateTime->toDateString(),
                     'time' => $dateTime->toTimeString(),
                 ],

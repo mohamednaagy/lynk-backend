@@ -26,51 +26,45 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
         $query = ['o' => $financingOrder->id];
         $host = Config::get('app.frontend_url.client');
         $url = $host.'/?'.http_build_query($query);
-        $products = $traderOrder
-            ->first()
-            ->products;
+        $products = $traderOrder->products;
 
         if ($financingOrder->is_verification_require) {
             return $this->productsWithVerificationMessage($financingOrder, $products, $url, $sellingPrice);
         }
 
-        return $this->productsWithOutVerificationMessage($financingOrder, $products, $sellingPrice);
+        return $this->productsWithoutVerificationMessage($financingOrder, $products, $sellingPrice);
     }
 
-    public function productsWithOutVerificationMessage(FinancingOrder $financingOrder, $products, $sellingPrice)
+    public function productsWithoutVerificationMessage(FinancingOrder $financingOrder, $products, $sellingPrice)
     {
-        $message = '';
-        foreach ($products as $product) {
-            $message .= __(ClientMessage::CommoditySoldToCustomerWithoutVerification, [
-                'product' => $product['product'],
-                'order_id' => $financingOrder->id,
-                'company_name' => $financingOrder->company->name,
-                'quantity' => $product['quantity'],
-                'uom' => $product['uom'],
-                'selling_price' => $sellingPrice,
-            ]);
-        }
-
-        return $message;
+        return __(ClientMessage::CommoditySoldToCustomerWithoutVerification, [
+            'product' => $this->getProductsDescription($products),
+            'order_id' => $financingOrder->id,
+            'company_name' => $financingOrder->company->name,
+            'selling_price' => $sellingPrice,
+        ]);
     }
 
     private function productsWithVerificationMessage(FinancingOrder $financingOrder, $products, $url, $sellingPrice)
     {
-        $message = '';
-
-        foreach ($products as $product) {
-            $message .= __(ClientMessage::CommoditySoldToCustomer, [
-                'product' => $product['product'],
-                'company_name' => $financingOrder->company->name,
-                'quantity' => $product['quantity'],
-                'uom' => $product['uom'],
-                'selling_price' => $sellingPrice,
-            ]);
-        }
-
-        return $message .= ' '.__(ClientMessage::CommoditySoldToCustomerUrl, [
+        return __(ClientMessage::CommoditySoldToCustomer, [
+            'product' => $this->getProductsDescription($products),
+            'company_name' => $financingOrder->company->name,
+            'selling_price' => $sellingPrice,
             'order_id' => $financingOrder->id,
             'url' => $url,
         ]);
+    }
+
+    private function getProductsDescription($products)
+    {
+        return collect($products)
+            ->map(function ($product) {
+                return $product['product']
+                    .' '
+                    .'('.$product['quantity']
+                    .' '.$product['uom']
+                    .')';
+            })->implode(', ');
     }
 }

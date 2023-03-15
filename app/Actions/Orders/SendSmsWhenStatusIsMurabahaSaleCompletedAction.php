@@ -23,15 +23,23 @@ class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatu
         $locale = app()->getLocale();
         $products = $traderOrder->products;
         $sellingPrice = $financingOrder->selling_price ?? '';
-        $message = '';
-        foreach ($products as $product) {
-            $message .= __(ClientMessage::MurabahaSaleCompleted, [
-                'product' => $product['product'],
-                'quantity' => $product['quantity'],
-                'amount' => $sellingPrice,
-            ], $locale);
-        }
 
-        return $message .= ' '.__(ClientMessage::MurabahaSaleCompletedWillTransfer);
+        return __(ClientMessage::MurabahaSaleCompleted, [
+            'product' => $this->getProductsDescription($products),
+            'amount' => $sellingPrice,
+            'company_name' => $financingOrder->company->name,
+        ], $locale);
+    }
+
+    private function getProductsDescription($products)
+    {
+        return collect($products)
+            ->map(function ($product) {
+                return $product['product']
+                    .' '
+                    .'('.$product['quantity']
+                    .' '.$product['uom']
+                    .')';
+            })->implode(', ');
     }
 }

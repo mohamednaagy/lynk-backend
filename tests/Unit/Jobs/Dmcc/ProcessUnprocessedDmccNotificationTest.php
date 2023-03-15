@@ -6,7 +6,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
-use App\Exceptions\TraderNotSupported;
+use App\Exceptions\TraderNotSupportedException;
 use App\Jobs\Dmcc\ProcessUnprocessedDmccNotification;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -68,7 +68,7 @@ class ProcessUnprocessedDmccNotificationTest extends TestCase
 
     public function test_process_unprocessed_dmcc_notification_job_will_processed_only_if_the_active_trader_has_dmcc_or_fake_as_provider()
     {
-        $this->expectException(TraderNotSupported::class);
+        $this->expectException(TraderNotSupportedException::class);
         config()->set('trader.default', 'wrong provider');
         Bus::fake();
 
