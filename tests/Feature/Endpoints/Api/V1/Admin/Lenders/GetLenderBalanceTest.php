@@ -83,7 +83,7 @@ class GetLenderBalanceTest extends TestCase
     /**
      * @return void
      */
-    public function test_manager__with_permissions_can_get_lender_balance_successfully(): void
+    public function test_manager_with_permissions_can_get_lender_balance_successfully(): void
     {
         $this->actingAs(self::$userManager)
             ->getJson(self::$endpoint)
