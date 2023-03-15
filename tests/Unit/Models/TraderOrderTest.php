@@ -6,13 +6,14 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
 
 class TraderOrderTest extends TestCase
 {
-    use InteractsWithCompany, InteractsWithUser;
+    use RefreshDatabase, InteractsWithCompany, InteractsWithUser;
 
     protected FinancingOrder $financingOrder;
 
@@ -36,13 +37,13 @@ class TraderOrderTest extends TestCase
 
     public function test_is_trader_order_cancellable()
     {
-        $cancellable = collect(FinancingOrderHistory::asSelectArray())
-            ->except(FinancingOrderHistory::$notCancellableActions)
-            ->keys()
+        $cancellable = collect(FinancingOrderHistory::asArray())
+            ->values()
+            ->reject(fn ($value) => is_array($value))
+            ->reject(fn ($value) => in_array($value, FinancingOrderHistory::$notCancellableActions))
             ->map(fn ($action) => [
                 'action' => $action,
             ])
-            ->values()
             ->toArray();
 
         $notCancellable = collect(FinancingOrderHistory::$notCancellableActions)
@@ -56,8 +57,11 @@ class TraderOrderTest extends TestCase
         $this->assertFalse($this->traderOrder->isCancellable());
 
         $this->traderOrder->traderHistories()->delete();
-        $this->traderOrder->load('traderHistories');
+
         $this->traderOrder->traderHistories()->createMany($cancellable);
+
+        $this->traderOrder->load('traderHistories');
+
         $this->assertTrue($this->traderOrder->isCancellable());
     }
 }
