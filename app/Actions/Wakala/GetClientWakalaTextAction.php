@@ -10,32 +10,44 @@ class GetClientWakalaTextAction implements GetClientWakalaText
     public function handle(TraderOrder $traderOrder, string $clientTemplate)
     {
         $financingOrder = $traderOrder->order;
-        $date = now()->toDateString();
-        $time = now()->toTimeString();
-        $commodityNumber = $financingOrder->reference_number;
-        $amount = $traderOrder->amount ?? '';
+        $now = now('Asia/Riyadh');
+        $date = $now->toDateString();
+        $time = $now->toTimeString();
+        $amount = $financingOrder->amount->formatByDecimal();
+        $commodityNumber = $traderOrder->reference;
         $commodity = $traderOrder->product ?? '';
+        $commodityPrice = $financingOrder->amount->formatByDecimal();
         $orderNumber = $financingOrder->id;
         $orderDate = $financingOrder->created_at->format('Y-m-d');
+        $clientName = $financingOrder->customer_name;
+        $clientNationalId = $financingOrder->national_id;
 
-        $template = str_replace([
-            '{{signingContractDate}}',
-            '{{signingContractTime}}',
-            '{{commodityNumber}}',
-            '{{amount}}',
-            '{{commodity}}',
-            '{{orderNumber}}',
-            '{{orderDate}}',
-        ], [
-            $date,
-            $time,
-            $commodityNumber,
-            $amount,
-            $commodity,
-            $orderNumber,
-            $orderDate,
-        ], $clientTemplate);
-
-        return $template;
+        return str_replace(
+            [
+                '{{signingContractDate}}',
+                '{{signingContractTime}}',
+                '{{commodityNumber}}',
+                '{{amount}}',
+                '{{commodity}}',
+                '{{commodityPrice}}',
+                '{{clientName}}',
+                '{{clientNationalId}}',
+                '{{orderNumber}}',
+                '{{orderDate}}',
+            ],
+            [
+                $date,
+                $time,
+                $commodityNumber,
+                $amount,
+                $commodity,
+                $commodityPrice,
+                $clientName,
+                $clientNationalId,
+                $orderNumber,
+                $orderDate,
+            ],
+            $clientTemplate
+        );
     }
 }
