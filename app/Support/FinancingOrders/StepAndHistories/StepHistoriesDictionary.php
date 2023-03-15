@@ -47,6 +47,9 @@ class StepHistoriesDictionary
             FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
             FinancingOrderHistory::MurabahaSaleCompleted,
         ],
+        FinancingOrderStatus::Cancelled => [
+            FinancingOrderHistory::OrderCancelled,
+        ],
     ];
 
     public function __construct()

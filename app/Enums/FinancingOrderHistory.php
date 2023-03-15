@@ -68,6 +68,7 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
         FinancingOrderStatus::WaitingClientWakala => null,
         FinancingOrderStatus::ClientWakalaCompleted => self::ClientWakalaAccepted,
         FinancingOrderStatus::MurabahaSaleCompleted => self::MurabahaSaleCompleted,
+        FinancingOrderStatus::Cancelled => self::OrderCancelled,
     ];
 
     public const StepToHistoriesDictionary = [
