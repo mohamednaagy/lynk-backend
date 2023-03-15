@@ -14,6 +14,12 @@ class TraderException extends Exception
             ->withProperties($exceptionData)
             ->log($exceptionData->get('driver'));
 
-        parent::__construct($message, $code, $previous);
+        parent::__construct($exceptionData->map(function ($value, $key) {
+            if (is_array($value)) {
+                $value = json_encode($value);
+            }
+
+            return $key.' : '.$value;
+        })->join(PHP_EOL), $code, $previous);
     }
 }
