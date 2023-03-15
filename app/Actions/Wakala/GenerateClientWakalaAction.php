@@ -7,6 +7,7 @@ use App\Actions\Contracts\Wakala\GetClientWakalaText;
 use App\Actions\Contracts\Wakala\GetWakalaTemplate;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Support\PdfGenerator\PdfGenerator;
 
 class GenerateClientWakalaAction implements GenerateClientWakala
@@ -23,12 +24,11 @@ class GenerateClientWakalaAction implements GenerateClientWakala
     ) {
     }
 
-    public function handle(FinancingOrder $financingOrder)
+    public function handle(TraderOrder $traderOrder)
     {
-        $traderOrder = $financingOrder->activeTraderOrder()->first();
-
+        $financingOrder = $traderOrder->order;
         $lenderTemplate = $this->getWakalaTemplate->handle('client')['wakala_template'];
-        $template = $this->getClientWakalaText->handle($financingOrder, $lenderTemplate);
+        $template = $this->getClientWakalaText->handle($traderOrder, $lenderTemplate);
 
         $wakalaTemplate = view($this->getTemplate(), [
             'template' => $template,

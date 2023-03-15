@@ -35,6 +35,7 @@ class SendOtpClientWakalaTest extends TestCase
 
         [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+
         self::$order = $this->createOrder(self::$company->id, self::$userLender->id, [
             'national_id' => '2553451234',
         ]);
@@ -70,7 +71,6 @@ class SendOtpClientWakalaTest extends TestCase
 
     public function test_send_otp_client_wakala_with_already_verified_order_will_fail()
     {
-        self::$order->update(['client_wakala_accepted_at' => now()]);
         self::$traderOrder->traderHistories()->create([
             'action' => FinancingOrderHistory::ClientWakalaAccepted,
         ]);

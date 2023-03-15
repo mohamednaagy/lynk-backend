@@ -4,6 +4,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
 
 use App\Enums\CompanyStatus;
 use App\Enums\ErrorCode;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -11,6 +12,7 @@ use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -33,9 +35,9 @@ class MakeOrderProceedTest extends TestCase
 
     private static User $userLender;
 
-    private static Model $financingOrder;
+    private static Model|FinancingOrder $financingOrder;
 
-    private static Model $traderOrder;
+    private static Model|TraderOrder $traderOrder;
 
     private static string $orderProceedUrl;
 
@@ -90,6 +92,10 @@ class MakeOrderProceedTest extends TestCase
         self::$financingOrder->status = FinancingOrderStatus::CommodityPurchased;
         self::$financingOrder->save();
 
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+        ]);
+
         Grantify::syncRoleToModel(self::$userLender, Role::LenderSupervisor);
 
         $response = $this->actingAs(self::$userLender)
@@ -112,6 +118,10 @@ class MakeOrderProceedTest extends TestCase
         // update financing order status to commodity purchased to be able to move to contract signed
         self::$financingOrder->status = FinancingOrderStatus::CommodityPurchased;
         self::$financingOrder->save();
+
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+        ]);
 
         Grantify::syncRoleToModel(self::$userLender, Role::LenderApiUser);
 
@@ -153,11 +163,15 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_unauthorized_lender_order_creator_can_make_order_proceed_on_contract_signed(): void
+    public function test_that_lender_order_creator_can_make_order_proceed_on_contract_signed(): void
     {
         // update financing order status to commodity purchased to be able to move to contract signed
         self::$financingOrder->status = FinancingOrderStatus::CommodityPurchased;
         self::$financingOrder->save();
+
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+        ]);
 
         Grantify::syncRoleToModel(self::$userLender, Role::LenderOrderCreator);
 
@@ -233,16 +247,17 @@ class MakeOrderProceedTest extends TestCase
                 'case' => '',
             ]);
 
-        $response->assertStatus(422)->assertExactJson(
-            [
-                'message' => 'The case field is required.',
-                'errors' => [
-                    'case' => [
-                        'The case field is required.',
+        $response->assertStatus(422)
+            ->assertExactJson(
+                [
+                    'message' => 'The case field is required.',
+                    'errors' => [
+                        'case' => [
+                            'The case field is required.',
+                        ],
                     ],
-                ],
-            ]
-        );
+                ]
+            );
     }
 
     /**
@@ -256,16 +271,17 @@ class MakeOrderProceedTest extends TestCase
                 'case' => 'TEST_PROCEED_CASE',
             ]);
 
-        $response->assertStatus(422)->assertExactJson(
-            [
-                'message' => 'The value you have entered is invalid.',
-                'errors' => [
-                    'case' => [
-                        'The value you have entered is invalid.',
+        $response->assertStatus(422)
+            ->assertExactJson(
+                [
+                    'message' => 'The value you have entered is invalid.',
+                    'errors' => [
+                        'case' => [
+                            'The value you have entered is invalid.',
+                        ],
                     ],
-                ],
-            ]
-        );
+                ]
+            );
     }
 
     /**
@@ -273,6 +289,8 @@ class MakeOrderProceedTest extends TestCase
      */
     public function test_make_order_proceed_on_order_status_doesnt_follow_sequence(): void
     {
+        self::$traderOrder->traderHistories()->delete();
+
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
@@ -295,15 +313,20 @@ class MakeOrderProceedTest extends TestCase
         self::$financingOrder->status = FinancingOrderStatus::CommodityPurchased;
         self::$financingOrder->save();
 
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+        ]);
+
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
                 'case' => FinancingOrderProceedCase::ContractSigned,
             ]);
 
-        $response->assertStatus(200)->assertJsonStructure([
-            'data',
-        ]);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data',
+            ]);
 
         $this->assertEquals(
             FinancingOrder::find(self::$financingOrder->getOriginal('id'))->status->value,
@@ -311,15 +334,20 @@ class MakeOrderProceedTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
-    public function test_make_order_proceed_for_client_wakala_if_order_doesnt_follow_sequence(): void
+    public function test_make_order_cannot_reprocessed_on_contract_signed(): void
     {
+        self::$financingOrder->update([
+            'status' => FinancingOrderStatus::MurabhaOfferIssued,
+        ]);
+
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::ContractSigned,
+        ]);
+
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'case' => FinancingOrderProceedCase::ContractSigned,
             ]);
 
         $response->assertStatus(400)
@@ -332,7 +360,29 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
-    public function test_admin_proceed_order_client_wakala_file_required_when_case_is_client_wakala_accepted_and_order_verification_is_true(): void
+    public function test_make_order_proceed_for_client_wakala_if_order_doesnt_follow_sequence(): void
+    {
+        self::$traderOrder->traderHistories()->delete();
+        self::$financingOrder->update(['is_verification_required' => false]);
+
+        $response = $this->actingAs(self::$userLender)
+            ->withHeader('X-Company', self::$company->getOriginal('id'))
+            ->postJson(self::$orderProceedUrl, [
+                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'client_wakala' => UploadedFile::fake()->create('client_wakala.pdf'),
+            ]);
+
+        $response->assertStatus(400)
+            ->assertExactJson([
+                'message' => __('error.order_status_doesnt_follow_sequence'),
+                'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
+            ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_proceed_order_client_wakala_file_required_when_client_wakala_accepted_and_order_verification_is_false(): void
     {
         self::$financingOrder->update([
             'is_verification_required' => false,
@@ -369,12 +419,16 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
-    public function test_make_order_proceed_on_client_wakala_accepted_when_verification_is_required(): void
+    public function test_make_order_proceed_on_client_wakala_accepted_when_verification_is_not_required(): void
     {
         // update financing order is_verification_required to be able to move to client wakala accepted
         self::$financingOrder->is_verification_required = false;
         self::$financingOrder->status = FinancingOrderStatus::WaitingClientWakala;
         self::$financingOrder->save();
+
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+        ]);
 
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
@@ -394,5 +448,37 @@ class MakeOrderProceedTest extends TestCase
         );
 
         $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::SignedClientWakala));
+    }
+
+    /**
+     * @return void
+     */
+    public function test_make_order_cannot_reprocessed_on_client_wakala_accepted(): void
+    {
+        self::$financingOrder->update([
+            'is_verification_required' => false,
+            'status' => FinancingOrderStatus::MurabhaOfferIssued,
+        ]);
+
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+        ]);
+
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::ClientWakalaAccepted,
+        ]);
+
+        $response = $this->actingAs(self::$userLender)
+            ->withHeader('X-Company', self::$company->getOriginal('id'))
+            ->postJson(self::$orderProceedUrl, [
+                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'client_wakala' => UploadedFile::fake()->create('client_wakala.pdf'),
+            ]);
+
+        $response->assertStatus(400)
+            ->assertExactJson([
+                'message' => __('error.order_status_doesnt_follow_sequence'),
+                'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
+            ]);
     }
 }

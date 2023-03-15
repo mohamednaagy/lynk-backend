@@ -45,6 +45,11 @@ class VerifyOtpClientWakalaTest extends TestCase
         self::$order = $this->createOrder(self::$company->id, self::$userLender->id, [
             'national_id' => '2553451234',
         ]);
+        self::$traderOrder = self::$order->traderOrders()->create([
+            'provider' => 'dmcc',
+            'status' => TraderOrderStatus::InProgress,
+            'reference' => 123,
+        ]);
 
         self::$otherOrder = $this->createOrder(self::$company->id, self::$userLender->id, [
             'national_id' => '1591192305',
@@ -86,7 +91,6 @@ class VerifyOtpClientWakalaTest extends TestCase
 
     public function test_verify_otp_client_wakala_with_already_verified_order_unsuccessful()
     {
-        self::$order->update(['client_wakala_accepted_at' => now()]);
         self::$traderOrder->traderHistories()->create([
             'action' => FinancingOrderHistory::ClientWakalaAccepted,
         ]);

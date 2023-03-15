@@ -3,18 +3,18 @@
 namespace App\Actions\Wakala;
 
 use App\Actions\Contracts\Wakala\GetClientWakalaText;
-use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 
 class GetClientWakalaTextAction implements GetClientWakalaText
 {
-    public function handle(FinancingOrder $financingOrder, string $clientTemplate)
+    public function handle(TraderOrder $traderOrder, string $clientTemplate)
     {
-        $traderDetails = $financingOrder->activeTraderOrder()->first();
+        $financingOrder = $traderOrder->order;
         $date = now()->toDateString();
         $time = now()->toTimeString();
         $commodityNumber = $financingOrder->reference_number;
-        $amount = $traderDetails->amount ?? '';
-        $commodity = $traderDetails->product ?? '';
+        $amount = $traderOrder->amount ?? '';
+        $commodity = $traderOrder->product ?? '';
         $orderNumber = $financingOrder->id;
         $orderDate = $financingOrder->created_at->format('Y-m-d');
 

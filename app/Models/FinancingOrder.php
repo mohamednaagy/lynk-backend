@@ -55,7 +55,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'customer_name',
         'customer_details',
         'status_reason',
-        'client_wakala_accepted_at',
         'is_verification_required',
         'company_id',
         'created_at',
@@ -64,7 +63,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     protected $casts = [
         'status' => FinancingOrderStatus::class,
         'approved_at' => 'datetime',
-        'client_wakala_accepted_at' => 'datetime',
         'data' => 'array',
         'is_verification_required' => 'boolean',
         'customer_details' => 'array',

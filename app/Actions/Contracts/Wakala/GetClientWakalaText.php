@@ -2,9 +2,9 @@
 
 namespace App\Actions\Contracts\Wakala;
 
-use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 
 interface GetClientWakalaText
 {
-    public function handle(FinancingOrder $financingOrder, string $template);
+    public function handle(TraderOrder $traderOrder, string $template);
 }

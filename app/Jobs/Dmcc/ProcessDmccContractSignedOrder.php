@@ -42,7 +42,8 @@ class ProcessDmccContractSignedOrder implements ShouldQueue
         DB::transaction(function () {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             $lastTraderOrder = $financingOrder->activeTraderOrder()
-                ->whereIn('provider', ['dmcc', 'fake'])->first();
+                ->whereIn('provider', ['dmcc', 'fake'])
+                ->first();
 
             if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::CommoditySoldToCustomer)) {
                 return;
@@ -54,7 +55,7 @@ class ProcessDmccContractSignedOrder implements ShouldQueue
 
             $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommoditySoldToCustomer);
 
-            app()->make(GenerateClientWakala::class)->handle($financingOrder);
+            app()->make(GenerateClientWakala::class)->handle($lastTraderOrder);
         });
     }
 

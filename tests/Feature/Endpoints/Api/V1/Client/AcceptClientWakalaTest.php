@@ -45,6 +45,7 @@ class AcceptClientWakalaTest extends TestCase
         self::$order = $this->createOrder(self::$company->id, self::$userLender->id, [
             'national_id' => '2553451234',
         ]);
+
         self::$order->traderOrders()->create(['provider' => 'dmcc',
             'status' => TraderOrderStatus::InProgress,
             'reference' => 123,
@@ -102,7 +103,6 @@ class AcceptClientWakalaTest extends TestCase
 
     public function test_accept_client_wakala_with_already_verified_order_nothing_work()
     {
-        self::$order->update(['client_wakala_accepted_at' => now()]);
         self::$traderOrder->traderHistories()->create([
             'action' => FinancingOrderHistory::ClientWakalaAccepted,
         ]);

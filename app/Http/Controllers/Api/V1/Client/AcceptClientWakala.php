@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Client;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala as AcceptWakalaInterface;
+use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Http\Controllers\Controller;
@@ -25,16 +26,17 @@ class AcceptClientWakala extends Controller
      * @param  AcceptClientWakalaRequest  $request
      * @param  AcceptWakalaInterface  $acceptClientWakala
      * @return JsonResponse
+     *
+     * @throws \Throwable
      */
     public function __invoke(
         AcceptClientWakalaRequest $request,
-        AcceptWakalaInterface $acceptClientWakala
+        AcceptWakalaInterface $acceptClientWakala,
+        GenerateClientWakala $generateClientWakala
     ) {
-        return DB::transaction(function () use ($request, $acceptClientWakala) {
+        return DB::transaction(function () use ($request, $acceptClientWakala, $generateClientWakala) {
             $order = FinancingOrder::lockForUpdate()
                 ->findOrFail($request->validated('order_id'));
-
-            $traderOrder = $order->activeTraderOrder()->first();
 
             $tokenCacheKey = sprintf('client_wakala_token_%s_%s', $order->id, $order->getNationalId());
 
@@ -44,12 +46,15 @@ class AcceptClientWakala extends Controller
                 throw new AuthorizationException();
             }
 
+            $traderOrder = $order->activeTraderOrder()->first();
+
             $canProceed = $order->getNationalId() === $request->validated('national_id')
                 && $traderOrder !== null
                 && ! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::ClientWakalaCompleted);
 
             abort_if(! $canProceed, 404);
 
+            $generateClientWakala->handle($traderOrder);
             $acceptClientWakala->handle($traderOrder);
 
             $order->update([
