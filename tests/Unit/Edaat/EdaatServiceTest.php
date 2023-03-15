@@ -4,6 +4,7 @@ namespace Tests\Unit\Edaat;
 
 use App\Support\Edaat\EdaatService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -33,9 +34,16 @@ class EdaatServiceTest extends TestCase
      */
     public function test_that_create_invoice_success_if_id_is_unique(): void
     {
+        Http::fake(function () {
+            return Http::response([
+                'Status' => ['Success' => true, 'Code' => 'E000'],
+                'Body' => ['InvoiceNo' => '1'],
+            ]);
+        });
+
         $response = self::$edaatService->createInvoice(self::$randomString, self::$amount);
         $this->assertNotNull($response);
-        $this->assertIsString($response);
+        $this->assertEquals(1, $response);
     }
 
     /**
