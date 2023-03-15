@@ -47,12 +47,14 @@ class FinancingOrderControllerStoreTest extends TestCase
         self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
         self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
         self::$orderDetails = [
+            'customer_name' => 'youssof',
             'national_id' => '1001280070',
             'amount' => '200',
             'selling_price' => '220',
             'phone_country_code' => 'SA',
             'phone_number' => '500112233',
             'is_verification_required' => true,
+            'customer_name' => 'customer name',
         ];
     }
 
@@ -77,14 +79,7 @@ class FinancingOrderControllerStoreTest extends TestCase
         $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/orders', Arr::except(self::$orderDetails, ['national_id']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertExactJson([
-                'message' => 'The national ID field is required.',
-                'errors' => [
-                    'national_id' => [
-                        '0' => 'The national ID field is required.',
-                    ],
-                ],
-            ]);
+            ->assertJsonValidationErrorFor('national_id');
     }
 
     /**

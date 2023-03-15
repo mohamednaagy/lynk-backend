@@ -94,4 +94,16 @@ class StepHistoriesDictionary
             $this->dictionaryNodeList->next();
         }
     }
+
+    public function getStepByHistory($history)
+    {
+        $this->dictionaryNodeList->rewind();
+        while ($this->dictionaryNodeList->valid()) {
+            if (in_array($history, $this->dictionaryNodeList->current()->histories)) {
+                return $this->dictionaryNodeList->current();
+            }
+
+            $this->dictionaryNodeList->next();
+        }
+    }
 }

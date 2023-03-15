@@ -62,6 +62,7 @@ class LenderOrderControllerShowTest extends TestCase
             'approved_at' => Carbon::now(),
             'creator_id' => self::$userLender->id,
             'creator_type' => User::class,
+            'customer_name' => 'youssof',
             'national_id' => '2553451234',
             'phone_number' => '+966500112233',
             'amount' => 200,
@@ -80,7 +81,9 @@ class LenderOrderControllerShowTest extends TestCase
             'traderOrders' => function ($query) {
                 $query->latest('id');
             },
+            'traderOrders.traderHistories',
         ]);
+
         $this->actingAs(self::$admin)
             ->getJson(self::$endpoint.$order->id)
             ->assertStatus(Response::HTTP_OK)
@@ -90,6 +93,7 @@ class LenderOrderControllerShowTest extends TestCase
                         'id',
                         'status',
                         'reference_number',
+                        'customer_name',
                         'national_id',
                         'amount',
                         'selling_price',
@@ -98,8 +102,8 @@ class LenderOrderControllerShowTest extends TestCase
                         'phone_number_formatted',
                         'is_approved',
                         'status_reason',
+                        'can_be_completed',
                         'is_updatable',
-                        'creator',
                         'approver',
                         'trader_orders.id',
                         'trader_orders.reference',
@@ -107,8 +111,10 @@ class LenderOrderControllerShowTest extends TestCase
                         'trader_orders.is_cancellable',
                         'trader_orders.history',
                         'trader_orders.status',
+                        'trader_orders.created_at',
                         'creator',
                         'created_at',
+                        'payment_proof_url',
                     ])
                     ->respond()
                     ->getData(true)

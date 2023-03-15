@@ -79,6 +79,7 @@ class OrderController extends Controller
                 'id',
                 'status',
                 'reference_number',
+                'customer_name',
                 'national_id',
                 'amount',
                 'selling_price',
@@ -100,6 +101,7 @@ class OrderController extends Controller
                 'trader_orders.created_at',
                 'creator',
                 'created_at',
+                'payment_proof_url',
             ])
             ->respond();
     }

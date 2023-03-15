@@ -2,9 +2,12 @@
 
 namespace Endpoints\Api\V1\Client;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\Role;
+use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Otpify\Facades\Otpify;
@@ -30,6 +33,8 @@ class VerifyOtpClientWakalaTest extends TestCase
 
     private static OtpifyCode $otherOtpifyCode;
 
+    private static TraderOrder $traderOrder;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -44,6 +49,12 @@ class VerifyOtpClientWakalaTest extends TestCase
         self::$otherOrder = $this->createOrder(self::$company->id, self::$userLender->id, [
             'national_id' => '1591192305',
         ]);
+        self::$traderOrder = self::$order->traderOrders()->create([
+            'provider' => 'fake',
+            'reference' => '123456789',
+            'status' => TraderOrderStatus::InProgress,
+        ]);
+
         self::$otpifyCode = Otpify::driver(config('otpify.default_ni_driver'))->send(request(), self::$order);
         self::$otherOtpifyCode = Otpify::driver(config('otpify.default_ni_driver'))->send(request(), self::$otherOrder);
     }
@@ -76,6 +87,9 @@ class VerifyOtpClientWakalaTest extends TestCase
     public function test_verify_otp_client_wakala_with_already_verified_order_unsuccessful()
     {
         self::$order->update(['client_wakala_accepted_at' => now()]);
+        self::$traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::ClientWakalaAccepted,
+        ]);
 
         $this->postJson('api/v1/client/wakala/verify', [
             'national_id' => self::$order->national_id,

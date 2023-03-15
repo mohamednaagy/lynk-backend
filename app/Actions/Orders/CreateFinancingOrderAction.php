@@ -24,6 +24,7 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
 
         return $company->orders()->create(
             Arr::only($data, [
+                'customer_name',
                 'reference_number',
                 'national_id',
                 'phone_number',

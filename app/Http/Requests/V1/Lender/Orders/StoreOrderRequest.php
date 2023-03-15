@@ -28,6 +28,7 @@ class StoreOrderRequest extends FormRequest
     public function rules()
     {
         return [
+            'customer_name' => ['required', 'string', 'max:255'],
             'reference_number' => ['nullable', 'string', 'max:100'],
             'national_id' => ['required', 'string', 'size:10', new ValidateSAID()],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],

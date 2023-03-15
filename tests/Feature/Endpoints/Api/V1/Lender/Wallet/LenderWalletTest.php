@@ -50,6 +50,8 @@ class LenderWalletTest extends TestCase
 
     private static Wallet $approvedWallet;
 
+    private static string $endpoint;
+
     /**
      * @return void
      *
@@ -74,15 +76,16 @@ class LenderWalletTest extends TestCase
         $projectSettings = app(ProjectSettings::class);
         $projectSettings->vat_rate = 0.15;
         $projectSettings->save();
+        self::$endpoint = 'api/v1/lender/wallet/balance';
     }
 
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_get_wallet_balance(): void
+    public function test_un_auth_user_cant_get_wallet_balance(): void
     {
         $this->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/wallet/balance')
+            ->getJson(self::$endpoint)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -92,11 +95,11 @@ class LenderWalletTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_can_get_wallet_balance(): void
+    public function test_admin_user_can_get_wallet_balance_successfully(): void
     {
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/wallet/balance')
+            ->getJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson([
                 'data' => [
@@ -109,11 +112,11 @@ class LenderWalletTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_supervisor_user_can_get_wallet_balance(): void
+    public function test_lender_supervisor_user_can_get_wallet_balance_successfully(): void
     {
         $this->actingAs(self::$userLenderSupervisor)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/wallet/balance')
+            ->getJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson([
                 'data' => [
@@ -126,11 +129,11 @@ class LenderWalletTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_billing_user_can_get_wallet_balance(): void
+    public function test_lender_billing_user_can_get_wallet_balance_successfully(): void
     {
         $this->actingAs(self::$userLenderBilling)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/wallet/balance')
+            ->getJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson([
                 'data' => [
@@ -143,11 +146,11 @@ class LenderWalletTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_api_user_can_get_wallet_balance(): void
+    public function test_lender_api_user_can_get_wallet_balance_successfully(): void
     {
         $res = $this->actingAs(self::$userLenderApi)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/wallet/balance')
+            ->getJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson([
                 'data' => [
@@ -160,22 +163,22 @@ class LenderWalletTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_order_creator_user_cant_get_wallet_balance(): void
+    public function test_lender_order_creator_user_cant_get_wallet_balance(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
             ->withHeader('X-Company', self::$company->id)
-            ->getJson('api/v1/lender/wallet/balance')
+            ->getJson(self::$endpoint)
             ->assertForbidden();
     }
 
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_get_wallet_balance_with_pending_company(): void
+    public function test_lender_admin_user_cant_get_wallet_balance_with_pending_company(): void
     {
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$pendingCompany->id)
-            ->getJson('api/v1/lender/wallet/balance')
+            ->getJson(self::$endpoint)
             ->assertForbidden()
             ->assertExactJson([
                 'code' => 1015,
@@ -186,11 +189,11 @@ class LenderWalletTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_get_wallet_balance_with_under_review_company(): void
+    public function test_lender_admin_user_cant_get_wallet_balance_with_under_review_company(): void
     {
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$underReviewCompany->id)
-            ->getJson('api/v1/lender/wallet/balance')
+            ->getJson(self::$endpoint)
             ->assertForbidden()
             ->assertExactJson([
                 'code' => 1015,
@@ -201,11 +204,11 @@ class LenderWalletTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_cant_get_wallet_balance_with_rejected_company(): void
+    public function test_lender_admin_user_cant_get_wallet_balance_with_rejected_company(): void
     {
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$rejectedCompany->id)
-            ->getJson('api/v1/lender/wallet/balance')
+            ->getJson(self::$endpoint)
             ->assertForbidden()
             ->assertExactJson([
                 'code' => 1015,
@@ -216,11 +219,11 @@ class LenderWalletTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_without_verified_email_cant_get_wallet_balance_with_under_review_company(): void
+    public function test_lender_admin_user_without_verified_email_cant_get_wallet_balance_with_under_review_company(): void
     {
         $this->actingAs(self::$userLenderAdminWithoutVerifiedEmail)
             ->withHeader('X-Company', self::$underReviewCompany->id)
-            ->getJson('api/v1/lender/wallet/balance')
+            ->getJson(self::$endpoint)
             ->assertForbidden()
             ->assertExactJson([
                 'code' => 1008,
@@ -231,11 +234,11 @@ class LenderWalletTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_user_without_verified_email_cant_get_wallet_balance_with_approved_company(): void
+    public function test_lender_admin_user_without_verified_email_cant_get_wallet_balance_with_approved_company(): void
     {
         $this->actingAs(self::$userLenderAdminWithoutVerifiedEmail)
             ->withHeader('X-Company', self::$approvedCompany->id)
-            ->getJson('api/v1/lender/wallet/balance')
+            ->getJson(self::$endpoint)
             ->assertForbidden()
             ->assertExactJson([
                 'code' => 1008,

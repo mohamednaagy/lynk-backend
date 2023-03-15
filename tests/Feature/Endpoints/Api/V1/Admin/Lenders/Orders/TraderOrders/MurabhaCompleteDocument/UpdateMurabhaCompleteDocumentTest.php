@@ -133,8 +133,10 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
             ->assertJsonStructure(['data']);
 
         $freshOrderStatus = self::$financingOrder->fresh()->status;
-
         $this->assertTrue($freshOrderStatus->is(FinancingOrderStatus::MurabahaSaleCompleted));
+
+        $freshTraderOrderStatus = self::$traderOrder->fresh()->status;
+        $this->assertTrue($freshTraderOrderStatus->is(TraderOrderStatus::Completed));
     }
 
     /**
@@ -196,7 +198,6 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
             ->assertJsonStructure(['data']);
 
         $freshOrderStatus = self::$financingOrder->fresh()->status;
-
         $this->assertTrue($freshOrderStatus->is(FinancingOrderStatus::Completed));
     }
 }
