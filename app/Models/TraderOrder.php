@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use Carbon\Carbon;
@@ -99,16 +100,14 @@ class TraderOrder extends Model implements HasMedia
 
     public function checkOrderStepComplete(int $status): bool
     {
-        if (! array_key_exists($status, FinancingOrderHistory::$orderHistoryLastActionMap)) {
+        if (! array_key_exists($status, MurabhaStep::StepToHistoriesDictionary)) {
             throw new UnexpectedValueException('No mapping for this status');
         }
 
-        if (is_null(FinancingOrderHistory::$orderHistoryLastActionMap[$status])) {
-            return true;
-        }
-
         return (bool) $this->traderHistories
-            ->where('action', FinancingOrderHistory::$orderHistoryLastActionMap[$status])
+            // or we can use dict
+            // StepHistoriesDictionary::getStepOf(MurabhaSteps::PurchasingCommodity)->histories; // $status
+            ->where('action', end(MurabhaStep::StepToHistoriesDictionary[$status]))
             ->first();
     }
 

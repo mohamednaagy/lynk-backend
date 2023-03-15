@@ -2,61 +2,17 @@
 
 namespace App\Support\FinancingOrders\StepAndHistories;
 
-use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 
 class StepHistoriesDictionary
 {
     public \SplDoublyLinkedList $dictionaryNodeList;
 
-    public const StepToHistoriesDictionary = [
-        FinancingOrderStatus::PendingApproval => [],
-        FinancingOrderStatus::Approved => [],
-        FinancingOrderStatus::WaitingPurchasingCommodity => [
-            FinancingOrderHistory::GetTtiId,
-        ],
-        FinancingOrderStatus::RespondedToPtp => [
-            FinancingOrderHistory::RespondPtp,
-        ],
-        FinancingOrderStatus::PtpDocumentRetrieved => [
-            FinancingOrderHistory::GetPtpDocument,
-            FinancingOrderHistory::AttachPtpDocumentToOrder,
-            FinancingOrderHistory::GetTtiHoldingCertificateDocument,
-            FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
-        ],
-        FinancingOrderStatus::CommodityPurchased => [
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-        ],
-        FinancingOrderStatus::ContractSigned => [
-            FinancingOrderHistory::ContractSigned,
-        ],
-        FinancingOrderStatus::CommoditySoldToCustomer => [
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-        ],
-        FinancingOrderStatus::WaitingClientWakala => [],
-        FinancingOrderStatus::ClientWakalaCompleted => [
-            FinancingOrderHistory::ClientWakalaAccepted,
-        ],
-        FinancingOrderStatus::MurabhaOfferIssued => [
-            FinancingOrderHistory::IssueMurabahaOffer,
-            FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
-            FinancingOrderHistory::AttachMpoDocument,
-        ],
-        FinancingOrderStatus::MurabahaSaleCompleted => [
-            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
-            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
-            FinancingOrderHistory::MurabahaSaleCompleted,
-        ],
-        FinancingOrderStatus::Cancelled => [
-            FinancingOrderHistory::OrderCancelled,
-        ],
-    ];
-
     public function __construct()
     {
         $this->dictionaryNodeList = new \SplDoublyLinkedList();
 
-        foreach (self::StepToHistoriesDictionary as $status => $histories) {
+        foreach (MurabhaStep::getValues() as $status => $histories) {
             $this->dictionaryNodeList->push(new StepHistoriesDictionaryNode($status, $histories));
         }
     }
