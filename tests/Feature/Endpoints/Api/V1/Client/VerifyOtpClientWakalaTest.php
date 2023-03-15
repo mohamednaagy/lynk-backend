@@ -35,6 +35,8 @@ class VerifyOtpClientWakalaTest extends TestCase
 
     private static TraderOrder $traderOrder;
 
+    private static TraderOrder $otherTraderOrder;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -54,7 +56,7 @@ class VerifyOtpClientWakalaTest extends TestCase
         self::$otherOrder = $this->createOrder(self::$company->id, self::$userLender->id, [
             'national_id' => '1591192305',
         ]);
-        self::$traderOrder = self::$order->traderOrders()->create([
+        self::$otherTraderOrder = self::$otherOrder->traderOrders()->create([
             'provider' => 'fake',
             'reference' => '123456789',
             'status' => TraderOrderStatus::InProgress,

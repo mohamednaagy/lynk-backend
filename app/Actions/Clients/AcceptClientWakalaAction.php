@@ -15,6 +15,6 @@ class AcceptClientWakalaAction implements AcceptClientWakala
     public function handle(TraderOrder $traderOrder): void
     {
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ClientWakalaAccepted);
-        app(GenerateClientWakala::class)->handle($traderOrder->order);
+        app(GenerateClientWakala::class)->handle($traderOrder);
     }
 }
