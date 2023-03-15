@@ -28,6 +28,8 @@ class GetLenderBalanceTest extends TestCase
 
     private static User $userManager;
 
+    private static string $endpoint;
+
     /**
      * @return void
      *
@@ -40,19 +42,22 @@ class GetLenderBalanceTest extends TestCase
         [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910', 'order_cost' => '200']);
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
-        $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::LenderWallet, Action::Show]));
-
+        $this->assignPermissionToUser(
+            self::$userManager,
+            perm(Area::SuperAdmin, [Subject::LenderWallet, Action::Show])
+        );
         $projectSettings = app(ProjectSettings::class);
         $projectSettings->vat_rate = 0.15;
         $projectSettings->save();
+        self::$endpoint = 'api/v1/admin/lenders/'.self::$lender->id.'/balance';
     }
 
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_get_lender_balance(): void
+    public function test_un_auth_user_cant_get_lender_balance(): void
     {
-        $this->getJson('api/v1/admin/lenders/'.self::$lender->id.'/balance')
+        $this->getJson(self::$endpoint)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -62,10 +67,10 @@ class GetLenderBalanceTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_admin_can_get_lender_balance(): void
+    public function test_admin_can_get_lender_balance_successfully(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/balance')
+            ->getJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson([
                 'data' => [
@@ -78,10 +83,10 @@ class GetLenderBalanceTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_manager_can_get_lender_balance(): void
+    public function test_manager_with_permissions_can_get_lender_balance_successfully(): void
     {
         $this->actingAs(self::$userManager)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/balance')
+            ->getJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson([
                 'data' => [
@@ -94,12 +99,12 @@ class GetLenderBalanceTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_manager_without_permissions_cant_get_lender_balance(): void
+    public function test_manager_without_permissions_cant_get_lender_balance(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
 
         $this->actingAs(self::$userManager)
-            ->getJson('api/v1/admin/lenders/'.self::$lender->id.'/balance')
+            ->getJson(self::$endpoint)
             ->assertForbidden();
     }
 }

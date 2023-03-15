@@ -29,6 +29,8 @@ class LenderControllerIndexTest extends TestCase
 
     private static User $userManager;
 
+    private static string $endpoint;
+
     /**
      * @return void
      *
@@ -42,15 +44,19 @@ class LenderControllerIndexTest extends TestCase
 
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
-        $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::Lenders, Action::Index]));
+        $this->assignPermissionToUser(
+            self::$userManager,
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Index])
+        );
+        self::$endpoint = 'api/v1/admin/lenders';
     }
 
     /**
      * @return void
      */
-    public function test_that_un_auth_user_cant_index_lenders(): void
+    public function test_un_auth_user_cant_index_lenders(): void
     {
-        $this->getJson('api/v1/admin/lenders')
+        $this->getJson(self::$endpoint)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -60,7 +66,7 @@ class LenderControllerIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_admin_user_can_index_lenders(): void
+    public function test_admin_can_index_lenders_successfully(): void
     {
         $lenders = Company::query()
             ->type(CompanyType::Lender)
@@ -68,7 +74,7 @@ class LenderControllerIndexTest extends TestCase
             ->paginate();
 
         $this->actingAs(self::$userAdmin)
-            ->getJson('api/v1/admin/lenders')
+            ->getJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson(
                 fractal($lenders, new CompanyTransformer())
@@ -88,9 +94,8 @@ class LenderControllerIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_lender_controller_index_get_lender_companies_only(): void
+    public function test_lender_controller_index_lender_companies_only_successfully(): void
     {
-        // create extra trader company
         $this->createTraderCompany('2000');
 
         $lendersCount = Company::query()
@@ -98,7 +103,7 @@ class LenderControllerIndexTest extends TestCase
             ->count();
 
         $actualResponse = $this->actingAs(self::$userAdmin)
-            ->getJson('api/v1/admin/lenders');
+            ->getJson(self::$endpoint);
 
         $this->assertTrue($actualResponse->json('meta.pagination.total') == $lendersCount);
     }
@@ -106,12 +111,12 @@ class LenderControllerIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_manager_user_can_index_lenders(): void
+    public function test_manager_with_permissions_can_index_lenders_successfully(): void
     {
         $lenders = Company::query()->withCount('orders')->paginate();
 
         $this->actingAs(self::$userManager)
-            ->getJson('api/v1/admin/lenders')
+            ->getJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson(
                 fractal($lenders, new CompanyTransformer())
@@ -131,12 +136,12 @@ class LenderControllerIndexTest extends TestCase
     /**
      * @return void
      */
-    public function test_that_auth_manager_user_without_permissions_cant_index_lenders(): void
+    public function test_manager_without_permissions_cant_index_lenders(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
 
         $this->actingAs(self::$userManager)
-            ->getJson('api/v1/admin/lenders')
+            ->getJson(self::$endpoint)
             ->assertForbidden();
     }
 }
