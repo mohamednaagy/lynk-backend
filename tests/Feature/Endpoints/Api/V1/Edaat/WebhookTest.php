@@ -13,6 +13,7 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
@@ -52,6 +53,13 @@ class WebhookTest extends TestCase
 
     public function test_edaat_invoices_webhook_with_paid_invoice_success()
     {
+        Http::fake(function () {
+            return Http::response([
+                'Status' => ['Success' => true, 'Code' => 'E000'],
+                'Body' => ['StatusEn' => 'Paid'],
+            ]);
+        });
+
         $transactionsCount = DB::connection(Config::get('wallet.database.connection'))
             ->table('transactions')->count();
 
