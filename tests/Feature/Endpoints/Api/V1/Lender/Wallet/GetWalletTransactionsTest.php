@@ -30,6 +30,8 @@ class GetWalletTransactionsTest extends TestCase
 
     private static User $userLender;
 
+    private static string $endpoint;
+
     /**
      * @return void
      */
@@ -39,12 +41,13 @@ class GetWalletTransactionsTest extends TestCase
 
         [self::$company, self::$wallet] = $this->createCompany('5000');
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$endpoint = '/api/v1/lender/wallet/transactions';
     }
 
     public function test_get_wallet_transaction_successfully_with_lender_admin()
     {
         $this->actingAs(self::$userLender)
-            ->getJson('/api/v1/lender/wallet/transactions', ['X-Company' => self::$company->id])
+            ->getJson(self::$endpoint, ['X-Company' => self::$company->id])
             ->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
@@ -66,7 +69,7 @@ class GetWalletTransactionsTest extends TestCase
         );
 
         $this->actingAs(self::$userLender)
-            ->getJson('/api/v1/lender/wallet/transactions', ['X-Company' => self::$company->id])
+            ->getJson(self::$endpoint, ['X-Company' => self::$company->id])
             ->assertStatus(200)
             ->assertJsonCount(2, 'data')
             ->assertExactJson(
@@ -89,7 +92,7 @@ class GetWalletTransactionsTest extends TestCase
         Grantify::syncRoleToModel(self::$userLender, Role::LenderSupervisor);
 
         $this->actingAs(self::$userLender)
-            ->getJson('/api/v1/lender/wallet/transactions', ['X-Company' => self::$company->id])
+            ->getJson(self::$endpoint, ['X-Company' => self::$company->id])
             ->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
@@ -112,7 +115,7 @@ class GetWalletTransactionsTest extends TestCase
         Grantify::syncRoleToModel(self::$userLender, Role::LenderBilling);
 
         $this->actingAs(self::$userLender)
-            ->getJson('/api/v1/lender/wallet/transactions', ['X-Company' => self::$company->id])
+            ->getJson(self::$endpoint, ['X-Company' => self::$company->id])
             ->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
@@ -135,7 +138,7 @@ class GetWalletTransactionsTest extends TestCase
         Grantify::syncRoleToModel(self::$userLender, Role::LenderApiUser);
 
         $this->actingAs(self::$userLender)
-            ->getJson('/api/v1/lender/wallet/transactions', ['X-Company' => self::$company->id])
+            ->getJson(self::$endpoint, ['X-Company' => self::$company->id])
             ->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
@@ -158,7 +161,7 @@ class GetWalletTransactionsTest extends TestCase
         Grantify::syncRoleToModel(self::$userLender, Role::LenderOrderCreator);
 
         $this->actingAs(self::$userLender)
-            ->getJson('/api/v1/lender/wallet/transactions', ['X-Company' => self::$company->id])
+            ->getJson(self::$endpoint, ['X-Company' => self::$company->id])
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 }
