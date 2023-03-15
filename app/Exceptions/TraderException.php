@@ -15,7 +15,7 @@ class TraderException extends Exception
             ->log($exceptionData->get('driver'));
 
         parent::__construct($exceptionData->map(function ($value, $key) {
-            if (is_array($value)) {
+            if (is_array($value) || is_object($value)) {
                 $value = json_encode($value);
             }
 
