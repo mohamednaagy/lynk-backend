@@ -54,21 +54,6 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         self::PendingApproval => self::Approved,
     ];
 
-    // Temporary map to handel backend status to end-user status
-    public static array $userInterfaceStepsToRealStepsMap = [];
-
-    // Temporary map to handel backend status to end-user status
-    public static function getUserInterfaceStep($step): string
-    {
-        foreach (self::$userInterfaceStepsToRealStepsMap as $uiStep => $realSteps) {
-            if (in_array($step, $realSteps)) {
-                return FinancingOrderStatus::fromValue($uiStep)->description;
-            }
-        }
-
-        return FinancingOrderStatus::fromValue($step)->description;
-    }
-
     /**
      * @param  Status|int  $status
      * @return bool

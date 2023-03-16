@@ -2,50 +2,63 @@
 
 namespace App\Enums;
 
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use BenSampo\Enum\Enum;
 
 final class MurabhaStep extends Enum
 {
-    const PurchasingCommodity = 1;
+    const PurchasingCommodity = 'purchasing_commodity';
 
-    const ContractSigned = 2;
+    const ContractSigned = 'contract_signed';
 
-    const CommoditySoldToCustomer = 3;
+    const CommoditySoldToCustomer = 'commodity_sold_to_customer';
 
-    const ClientWakala = 4;
+    const ClientWakala = 'client_wakala';
 
-    const MurabhaOfferIssued = 5;
+    const MurabhaOfferIssued = 'murabha_offer_issued';
 
-    const MurabahaSaleCompleted = 6;
+    const MurabahaSaleCompleted = 'murabaha_sale_completed';
 
     const StepToHistoriesDictionary = [
         self::PurchasingCommodity => [
-            FinancingOrderHistory::GetTtiId,
-            FinancingOrderHistory::RespondPtp,
-            FinancingOrderHistory::GetPtpDocument,
-            FinancingOrderHistory::AttachPtpDocumentToOrder,
-            FinancingOrderHistory::GetTtiHoldingCertificateDocument,
-            FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
+            FinancingOrderHistory::GetTtiId => null,
+            FinancingOrderHistory::RespondPtp => null,
+            FinancingOrderHistory::GetPtpDocument => null,
+            FinancingOrderHistory::AttachPtpDocumentToOrder => [
+                'collection' => TraderOrderMediaCollection::PromiseToPurchase,
+                'file' => 'ptp_document',
+            ],
+            FinancingOrderHistory::GetTtiHoldingCertificateDocument => null,
+            FinancingOrderHistory::AttachTtiHoldingCertificateDocument => [
+                'collection' => TraderOrderMediaCollection::TtiHoldingCertificate,
+                'file' => 'original_holding_certificate',
+            ],
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => null,
         ],
         self::ContractSigned => [
-            FinancingOrderHistory::ContractSigned,
+            FinancingOrderHistory::ContractSigned => null,
         ],
         self::CommoditySoldToCustomer => [
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => null,
         ],
         self::ClientWakala => [
-            FinancingOrderHistory::ClientWakalaAccepted,
+            FinancingOrderHistory::ClientWakalaAccepted => null,
         ],
         self::MurabhaOfferIssued => [
-            FinancingOrderHistory::IssueMurabahaOffer,
-            FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
-            FinancingOrderHistory::AttachMpoDocument,
+            FinancingOrderHistory::IssueMurabahaOffer => null,
+            FinancingOrderHistory::GetMurabahaPurchaseOfferDocument => null,
+            FinancingOrderHistory::AttachMpoDocument => [
+                'collection' => TraderOrderMediaCollection::MurabahaPurchaseOrder,
+                'file' => 'document',
+            ],
         ],
         self::MurabahaSaleCompleted => [
-            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
-            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
-            FinancingOrderHistory::MurabahaSaleCompleted,
+            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
+            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
+                'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
+                'file' => 'document',
+            ],
+            FinancingOrderHistory::MurabahaSaleCompleted => null,
         ],
     ];
 }

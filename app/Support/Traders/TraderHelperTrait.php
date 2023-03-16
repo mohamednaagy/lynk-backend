@@ -2,9 +2,7 @@
 
 namespace App\Support\Traders;
 
-use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -14,44 +12,9 @@ use Illuminate\Http\Request;
 
 trait TraderHelperTrait
 {
-    public array $stepToHistoriesMap = [
-        FinancingOrderStatus::CommodityPurchased => [
-            FinancingOrderHistory::RespondPtp => null,
-            FinancingOrderHistory::GetPtpDocument => null,
-            FinancingOrderHistory::GetTtiHoldingCertificateDocument => null,
-            FinancingOrderHistory::AttachPtpDocumentToOrder => [
-                'collection' => TraderOrderMediaCollection::PromiseToPurchase,
-                'file' => 'ptp_document',
-            ],
-            FinancingOrderHistory::AttachTtiHoldingCertificateDocument => [
-                'collection' => TraderOrderMediaCollection::TtiHoldingCertificate,
-                'file' => 'original_holding_certificate',
-            ],
-        ],
-        FinancingOrderStatus::ClientWakalaCompleted => [
-            FinancingOrderHistory::ClientWakalaAccepted => null,
-        ],
-        FinancingOrderStatus::MurabhaOfferIssued => [
-            FinancingOrderHistory::IssueMurabahaOffer => null,
-            FinancingOrderHistory::GetMurabahaPurchaseOfferDocument => null,
-            FinancingOrderHistory::AttachMpoDocument => [
-                'collection' => TraderOrderMediaCollection::MurabahaPurchaseOrder,
-                'file' => 'document',
-            ],
-        ],
-        FinancingOrderStatus::MurabahaSaleCompleted => [
-            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
-            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
-                'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-                'file' => 'document',
-            ],
-            FinancingOrderHistory::MurabahaSaleCompleted => null,
-        ],
-    ];
-
     public function createStepHistories(Request $request, $trader, TraderOrder $traderOrder, $status)
     {
-        foreach ($this->stepToHistoriesMap[$status] as $history => $media) {
+        foreach (MurabhaStep::StepToHistoriesDictionary[$status] as $history => $media) {
             if ($media && $request->has($media['file'])) {
                 $this->attachDocumentToOrder(
                     $traderOrder,

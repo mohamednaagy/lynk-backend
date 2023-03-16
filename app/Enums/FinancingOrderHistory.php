@@ -55,19 +55,4 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
         self::AttachWarrantAmendmentExceptWarrantNoDocument,
         self::OrderCancelled,
     ];
-
-    public static array $orderHistoryLastActionMap = [
-        FinancingOrderStatus::Approved => null,
-        FinancingOrderStatus::WaitingPurchasingCommodity => self::GetTtiId,
-        FinancingOrderStatus::RespondedToPtp => self::RespondPtp,
-        FinancingOrderStatus::PtpDocumentRetrieved => self::AttachTtiHoldingCertificateDocument,
-        FinancingOrderStatus::ContractSigned => self::ContractSigned,
-        FinancingOrderStatus::CommodityPurchased => self::GetMurabahaPurchaseOfferDocument,
-        FinancingOrderStatus::MurabhaOfferIssued => self::AttachMpoDocument,
-        FinancingOrderStatus::CommoditySoldToCustomer => self::CreateSellingCommodityToCustomerDocument,
-        FinancingOrderStatus::WaitingClientWakala => null,
-        FinancingOrderStatus::ClientWakalaCompleted => self::ClientWakalaAccepted,
-        FinancingOrderStatus::MurabahaSaleCompleted => self::MurabahaSaleCompleted,
-        FinancingOrderStatus::Cancelled => self::OrderCancelled,
-    ];
 }

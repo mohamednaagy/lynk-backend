@@ -105,8 +105,6 @@ class TraderOrder extends Model implements HasMedia
         }
 
         return (bool) $this->traderHistories
-            // or we can use dict
-            // StepHistoriesDictionary::getStepOf(MurabhaSteps::PurchasingCommodity)->histories; // $status
             ->where('action', end(MurabhaStep::StepToHistoriesDictionary[$status]))
             ->first();
     }
@@ -120,6 +118,11 @@ class TraderOrder extends Model implements HasMedia
         return (bool) $this->traderHistories
             ->where('action', $action)
             ->first();
+    }
+
+    public function getLastHistory()
+    {
+        return $this->traderHistories->latest()->first();
     }
 
     /**
