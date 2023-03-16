@@ -2,7 +2,6 @@
 
 namespace App\Enums;
 
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use BenSampo\Enum\Enum;
 
 final class MurabhaStep extends Enum
@@ -21,44 +20,32 @@ final class MurabhaStep extends Enum
 
     public static array $stepToHistoriesDictionary = [
         self::PurchasingCommodity => [
-            FinancingOrderHistory::GetTtiId => null,
-            FinancingOrderHistory::RespondPtp => null,
-            FinancingOrderHistory::GetPtpDocument => null,
-            FinancingOrderHistory::AttachPtpDocumentToOrder => [
-                'collection' => TraderOrderMediaCollection::PromiseToPurchase,
-                'file' => 'ptp_document',
-            ],
-            FinancingOrderHistory::GetTtiHoldingCertificateDocument => null,
-            FinancingOrderHistory::AttachTtiHoldingCertificateDocument => [
-                'collection' => TraderOrderMediaCollection::TtiHoldingCertificate,
-                'file' => 'original_holding_certificate',
-            ],
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => null,
+            FinancingOrderHistory::GetTtiId,
+            FinancingOrderHistory::RespondPtp,
+            FinancingOrderHistory::GetPtpDocument,
+            FinancingOrderHistory::AttachPtpDocumentToOrder,
+            FinancingOrderHistory::GetTtiHoldingCertificateDocument,
+            FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ],
         self::ContractSigned => [
-            FinancingOrderHistory::ContractSigned => null,
+            FinancingOrderHistory::ContractSigned,
         ],
         self::CommoditySoldToCustomer => [
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => null,
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
         ],
         self::ClientWakala => [
-            FinancingOrderHistory::ClientWakalaAccepted => null,
+            FinancingOrderHistory::ClientWakalaAccepted,
         ],
         self::MurabhaOfferIssued => [
-            FinancingOrderHistory::IssueMurabahaOffer => null,
-            FinancingOrderHistory::GetMurabahaPurchaseOfferDocument => null,
-            FinancingOrderHistory::AttachMpoDocument => [
-                'collection' => TraderOrderMediaCollection::MurabahaPurchaseOrder,
-                'file' => 'document',
-            ],
+            FinancingOrderHistory::IssueMurabahaOffer,
+            FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+            FinancingOrderHistory::AttachMpoDocument,
         ],
         self::MurabahaSaleCompleted => [
-            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
-            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
-                'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-                'file' => 'document',
-            ],
-            FinancingOrderHistory::MurabahaSaleCompleted => null,
+            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
+            FinancingOrderHistory::MurabahaSaleCompleted,
         ],
     ];
 }
