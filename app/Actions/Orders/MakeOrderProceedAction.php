@@ -78,7 +78,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
     protected function isNotFollowingSequenceForClientWakalaAccepted($traderOrder)
     {
-        return ! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::CommoditySoldToCustomer);
+        return ! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::ContractSigned);
     }
 
     /**

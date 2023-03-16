@@ -5,7 +5,7 @@ namespace Tests\Unit\Jobs\General;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
-use App\Jobs\Dmcc\ProcessDmccContractSignedOrder;
+use App\Jobs\Dmcc\ProcessDmccSellingCommodityToCustomerOrder;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -18,7 +18,7 @@ use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
 
-class ProcessDmccContractSignedOrderTest extends TestCase
+class ProcessDmccSellingCommodityToCustomerOrderTest extends TestCase
 {
     use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
@@ -36,7 +36,7 @@ class ProcessDmccContractSignedOrderTest extends TestCase
         self::$lender = $this->createLenderUser(self::$company->id);
 
         self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::ContractSigned,
+            'status' => FinancingOrderStatus::ClientWakalaCompleted,
         ]);
 
         $inventoryDetails = [
@@ -76,10 +76,10 @@ class ProcessDmccContractSignedOrderTest extends TestCase
         $statuses = FinancingOrderStatus::getValues();
 
         foreach ($statuses as $status) {
-            if ($status != FinancingOrderStatus::ContractSigned) {
+            if ($status != FinancingOrderStatus::ClientWakalaCompleted) {
                 self::$order->update(['status' => $status]);
 
-                $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);
+                $processOrder = new ProcessDmccSellingCommodityToCustomerOrder(self::$order->id);
                 $processOrder->handle();
                 self::$order = self::$order->fresh();
 
@@ -114,7 +114,7 @@ class ProcessDmccContractSignedOrderTest extends TestCase
             'warehouse_or_vault_country' => 'Saudi Arabia',
         ]);
 
-        $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);
+        $processOrder = new ProcessDmccSellingCommodityToCustomerOrder(self::$order->id);
         $processOrder->handle();
         self::$order = self::$order->fresh();
 
@@ -137,7 +137,7 @@ class ProcessDmccContractSignedOrderTest extends TestCase
             'status' => TraderOrderStatus::InProgress,
         ]);
 
-        $processOrder = new ProcessDmccContractSignedOrder(self::$order->id);
+        $processOrder = new ProcessDmccSellingCommodityToCustomerOrder(self::$order->id);
         $processOrder->handle();
         self::$order = self::$order->fresh();
 

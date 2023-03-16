@@ -2,7 +2,6 @@
 
 namespace App\Jobs\Dmcc;
 
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
@@ -14,7 +13,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccContractSignedOrder implements ShouldQueue
+class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -54,8 +53,6 @@ class ProcessDmccContractSignedOrder implements ShouldQueue
             $trader->createSellingCommodityToCustomerDocument($lastTraderOrder);
 
             $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommoditySoldToCustomer);
-
-            app()->make(GenerateClientWakala::class)->handle($lastTraderOrder);
         });
     }
 

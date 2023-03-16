@@ -4,9 +4,9 @@ namespace Tests\Unit\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
-use App\Jobs\Dmcc\ProcessDmccContractSignedOrder;
 use App\Jobs\Dmcc\ProcessDmccMpoOrder;
 use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
+use App\Jobs\Dmcc\ProcessDmccSellingCommodityToCustomerOrder;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Jobs\General\ProcessFinancingOrders;
 use App\Jobs\General\ProcessInProgressOrder;
@@ -75,7 +75,7 @@ class ProcessFinancingOrdersTest extends TestCase
 
         (new ProcessFinancingOrders)->handle();
 
-        Bus::assertDispatched(ProcessDmccContractSignedOrder::class);
+        Bus::assertDispatched(ProcessAskClientForWakala::class);
     }
 
     public function test_process_financing_orders_commodity_sold_to_customer_status_matching_process_ask_client_for_wakala_job()
@@ -86,7 +86,7 @@ class ProcessFinancingOrdersTest extends TestCase
 
         (new ProcessFinancingOrders)->handle();
 
-        Bus::assertDispatched(ProcessAskClientForWakala::class);
+        Bus::assertDispatched(ProcessDmccMpoOrder::class);
     }
 
     public function test_process_financing_orders_client_wakala_completed_status__matching_process_dmcc_client_wakala_completed_order_job()
@@ -97,6 +97,6 @@ class ProcessFinancingOrdersTest extends TestCase
 
         (new ProcessFinancingOrders)->handle();
 
-        Bus::assertDispatched(ProcessDmccMpoOrder::class);
+        Bus::assertDispatched(ProcessDmccSellingCommodityToCustomerOrder::class);
     }
 }

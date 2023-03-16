@@ -427,7 +427,7 @@ class MakeOrderProceedTest extends TestCase
         self::$financingOrder->save();
 
         self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+            'action' => FinancingOrderHistory::ContractSigned,
         ]);
 
         $response = $this->actingAs(self::$userLender)

@@ -25,8 +25,6 @@ class ProcessAskClientForWakalaTest extends TestCase
 
     protected static FinancingOrder $order;
 
-    protected static FinancingOrder $commoditySoldToCustomerOrder;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -34,22 +32,18 @@ class ProcessAskClientForWakalaTest extends TestCase
         [self::$company] = $this->createCompany();
         self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::CommoditySoldToCustomer,
-        ]);
-
-        self::$commoditySoldToCustomerOrder = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::CommoditySoldToCustomer,
+            'status' => FinancingOrderStatus::ContractSigned,
         ]);
     }
 
     public function test_process_ask_client_for_wakala_processed_if_order_status_commodity_sold_to_customer()
     {
-        $processOrder = new ProcessAskClientForWakala(self::$commoditySoldToCustomerOrder->id);
+        $processOrder = new ProcessAskClientForWakala(self::$order->id);
 
         $processOrder->handle();
-        self::$commoditySoldToCustomerOrder = self::$commoditySoldToCustomerOrder->fresh();
+        self::$order = self::$order->fresh();
 
-        $this->assertTrue(self::$commoditySoldToCustomerOrder->status->is(FinancingOrderStatus::WaitingClientWakala));
+        $this->assertTrue(self::$order->status->is(FinancingOrderStatus::WaitingClientWakala));
     }
 
     public function test_process_ask_client_for_wakala_status_moved_to_waiting_client_wakala_successfully()
@@ -66,7 +60,7 @@ class ProcessAskClientForWakalaTest extends TestCase
     {
         $orderStatuses = FinancingOrderStatus::getValues();
         foreach ($orderStatuses as $orderStatus) {
-            if ($orderStatus == FinancingOrderStatus::CommoditySoldToCustomer) {
+            if ($orderStatus == FinancingOrderStatus::ContractSigned) {
                 continue;
             }
 
@@ -83,13 +77,13 @@ class ProcessAskClientForWakalaTest extends TestCase
 
     public function test_process_ask_client_for_wakala_will_not_processed_if_order_is_verification_required_false()
     {
-        self::$commoditySoldToCustomerOrder->update(['is_verification_required' => false]);
-        $processOrder = new ProcessAskClientForWakala(self::$commoditySoldToCustomerOrder->id);
+        self::$order->update(['is_verification_required' => false]);
+        $processOrder = new ProcessAskClientForWakala(self::$order->id);
 
         $processOrder->handle();
-        self::$commoditySoldToCustomerOrder = self::$commoditySoldToCustomerOrder->fresh();
+        self::$order = self::$order->fresh();
 
-        $this->assertTrue(self::$commoditySoldToCustomerOrder->status->is(FinancingOrderStatus::WaitingClientWakala));
+        $this->assertTrue(self::$order->status->is(FinancingOrderStatus::WaitingClientWakala));
     }
 
     public function test_process_ask_client_for_wakala_sms_sent_successfully()
