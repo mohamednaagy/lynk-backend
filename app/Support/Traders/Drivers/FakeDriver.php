@@ -204,7 +204,7 @@ class FakeDriver implements TraderInterface
                 'selling-commodity-to-customer',
                 [
                     'reference_number' => $traderOrder->id,
-                    'company_name' => $traderOrder->order->company->name,
+                    'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
                     'products' => $traderOrder->products,
                     'amount' => $amount,
@@ -275,7 +275,7 @@ class FakeDriver implements TraderInterface
                     'order_id' => $traderOrder->order->id,
                     'products' => $traderOrder->products,
                     'reference_number' => $traderOrder->id,
-                    'company_name' => $traderOrder->order->company->name,
+                    'company_name' => $traderOrder->order->company()->withTrashed()->first()?->name,
                     'order_number' => $traderOrder->financing_order_id,
                     'amount' => $amount,
                     'previous_owner' => $previous_owner,
