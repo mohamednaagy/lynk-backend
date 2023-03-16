@@ -51,4 +51,8 @@ class ErrorCode
     public const ORDER_IS_REJECTED = 1022;
 
     public const TRADER_NOT_SUPPORTED = 1023;
+
+    public const ORDER_IS_ALREADY_COMPLETED = 1024;
+
+    public const ORDER_IS_ALREADY_HAS_ACTIVE_TRADER_ORDER = 1025;
 }

@@ -29,5 +29,7 @@ return [
     'order_still_pending' => 'حالة الطلب مازالت معلقة',
     'order_is_rejected' => 'تم رفض الطلب الرجاء التواصل مع الدعم الفني',
     'trader_not_supported' => 'هذه الشركة غير مدعومة',
+    'order_is_already_completed' => 'الطلب مكتمل مسبقا',
+    'order_is_already_has_active_trader_order' => 'الطلب قيد التنفيذ بالفعذ',
 
 ];
