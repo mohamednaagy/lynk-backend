@@ -48,8 +48,8 @@ class TraderOrderProgressStopped extends Notification
      */
     public function toMail(mixed $notifiable): MailMessage
     {
-        $currentStep = app(StepHistoriesDictionary::class)->getStepByHistory($this->traderOrder->getLastHistory()->action);
-        $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($currentStep->status);
+        $currentStepNode = app(StepHistoriesDictionary::class)->getStepByHistory($this->traderOrder->getLastHistory()->action);
+        $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($currentStepNode->step);
 
         return (new MailMessage)
             ->subject(__('emails/trader-order-stopped.subject', [
@@ -57,7 +57,7 @@ class TraderOrderProgressStopped extends Notification
             ]))
             ->line(__('emails/trader-order-stopped.body', [
                 'order_id' => $this->traderOrder->id,
-                'next_step' => $nextStepNode->status->description,
+                'next_step' => $nextStepNode->step,
             ]));
     }
 

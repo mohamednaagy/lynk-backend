@@ -19,7 +19,7 @@ final class MurabhaStep extends Enum
 
     const MurabahaSaleCompleted = 'murabaha_sale_completed';
 
-    const StepToHistoriesDictionary = [
+    public static array $stepToHistoriesDictionary = [
         self::PurchasingCommodity => [
             FinancingOrderHistory::GetTtiId => null,
             FinancingOrderHistory::RespondPtp => null,

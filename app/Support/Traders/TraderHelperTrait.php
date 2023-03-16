@@ -12,9 +12,9 @@ use Illuminate\Http\Request;
 
 trait TraderHelperTrait
 {
-    public function createStepHistories(Request $request, $trader, TraderOrder $traderOrder, $status)
+    public function createStepHistories(Request $request, $trader, TraderOrder $traderOrder, $step)
     {
-        foreach (MurabhaStep::StepToHistoriesDictionary[$status] as $history => $media) {
+        foreach (MurabhaStep::$stepToHistoriesDictionary[$step] as $history => $media) {
             if ($media && $request->has($media['file'])) {
                 $this->attachDocumentToOrder(
                     $traderOrder,

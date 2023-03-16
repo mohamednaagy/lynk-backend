@@ -98,14 +98,14 @@ class TraderOrder extends Model implements HasMedia
         return ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions));
     }
 
-    public function checkOrderStepComplete(int $status): bool
+    public function checkOrderStepComplete(int $step): bool
     {
-        if (! array_key_exists($status, MurabhaStep::StepToHistoriesDictionary)) {
+        if (! array_key_exists($step, MurabhaStep::$stepToHistoriesDictionary)) {
             throw new UnexpectedValueException('No mapping for this status');
         }
 
         return (bool) $this->traderHistories
-            ->where('action', end(MurabhaStep::StepToHistoriesDictionary[$status]))
+            ->where('action', end(MurabhaStep::$stepToHistoriesDictionary[$step]))
             ->first();
     }
 
@@ -120,9 +120,13 @@ class TraderOrder extends Model implements HasMedia
             ->first();
     }
 
-    public function getLastHistory()
+    public function scopeLastHistory($query)
     {
-        return $this->traderHistories->latest()->first();
+        $query->addSelect(['last_history' => TraderHistory::select('action')
+            ->whereColumn('trader_order_id', 'trader_orders.id')
+            ->latest()
+            ->take(1),
+        ]);
     }
 
     /**

@@ -12,16 +12,16 @@ class StepHistoriesDictionary
     {
         $this->dictionaryNodeList = new \SplDoublyLinkedList();
 
-        foreach (MurabhaStep::getValues() as $status => $histories) {
-            $this->dictionaryNodeList->push(new StepHistoriesDictionaryNode($status, $histories));
+        foreach (MurabhaStep::$stepToHistoriesDictionary as $step => $histories) {
+            $this->dictionaryNodeList->push(new StepHistoriesDictionaryNode($step, $histories));
         }
     }
 
-    public function getPreviousStepOf($status)
+    public function getPreviousStepOf($step)
     {
         $this->dictionaryNodeList->rewind();
         while ($this->dictionaryNodeList->valid()) {
-            if ($this->dictionaryNodeList->current()->status == $status) {
+            if ($this->dictionaryNodeList->current()->step == $step) {
                 $this->dictionaryNodeList->prev();
 
                 return $this->dictionaryNodeList->current();
@@ -30,11 +30,11 @@ class StepHistoriesDictionary
         }
     }
 
-    public function getNextStepOf($status)
+    public function getNextStepOf($step)
     {
         $this->dictionaryNodeList->rewind();
         while ($this->dictionaryNodeList->valid()) {
-            if ($this->dictionaryNodeList->current()->status == $status) {
+            if ($this->dictionaryNodeList->current()->step == $step) {
                 $this->dictionaryNodeList->next();
 
                 return $this->dictionaryNodeList->current();
@@ -43,11 +43,11 @@ class StepHistoriesDictionary
         }
     }
 
-    public function getStepOf($status)
+    public function getStepOf($step)
     {
         $this->dictionaryNodeList->rewind();
         while ($this->dictionaryNodeList->valid()) {
-            if ($this->dictionaryNodeList->current()->status == $status) {
+            if ($this->dictionaryNodeList->current()->step == $step) {
                 return $this->dictionaryNodeList->current();
             }
             $this->dictionaryNodeList->next();
