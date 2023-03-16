@@ -48,8 +48,8 @@ class TraderOrderProgressStopped extends Notification
      */
     public function toMail(mixed $notifiable): MailMessage
     {
-        $traderOrder = $this->traderOrder->lastHistory()->first();
-        $currentStepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderOrder->last_history);
+        $traderOrder = $this->traderOrder->withLastHistoryAction()->first();
+        $currentStepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderOrder->last_history_action);
         $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($currentStepNode->step);
 
         return (new MailMessage)

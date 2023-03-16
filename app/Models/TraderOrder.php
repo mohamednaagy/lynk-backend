@@ -120,12 +120,13 @@ class TraderOrder extends Model implements HasMedia
             ->first();
     }
 
-    public function scopeLastHistory($query)
+    public function scopeWithLastHistoryAction($query)
     {
-        $query->addSelect(['last_history' => TraderHistory::select('action')
-            ->whereColumn('trader_order_id', 'trader_orders.id')
-            ->latest()
-            ->take(1),
+        return $query->addSelect([
+            'last_history_action' => TraderHistory::select('action')
+                ->whereColumn('trader_order_id', 'trader_orders.id')
+                ->latest()
+                ->take(1),
         ]);
     }
 
