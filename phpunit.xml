@@ -37,5 +37,6 @@
         <env name="DEFAULT_TRADER" value="fake"/>
         <env name="SMS_DEFAULT_DRIVER" value="fake"/>
         <env name="HOST_WHITELIST" value="bimventures.com,Lynk.com,localhost"/>
+        <env name="OTPIFY_NATIONAL_ID_DEFAULT_DRIVER" value="fake_absher"/>
     </php>
 </phpunit>
