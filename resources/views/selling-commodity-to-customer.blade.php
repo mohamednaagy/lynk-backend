@@ -566,6 +566,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             margin-right: 1rem;
         }
 
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
         .mx-auto {
             margin-left: auto;
             margin-right: auto;
@@ -732,7 +736,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-text-opacity: 1;
             color: rgb(8 145 178 / var(--tw-text-opacity));
         }
-
     </style>
 </head>
 
@@ -743,61 +746,44 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
     <div class="mx-4 divide-y divide-gray-300/50" dir="rtl">
         <div class="py-8 space-y-6 text-base leading-7">
             <div>
-                <div class="py-8 space-y-6 text-base font-semibold leading-7 text-gray-600">
+                <div class="py-8 space-y-6 text-base leading-7 text-gray-600">
                     <img />
-                    <p>التاريخ: {{$date}}</p>
-                    <p>الوقت: {{$time}}</p>
-                    <p class="text-center">رقم المرجع: {{$reference_number}}</p>
-                    <h4 class="pt-3 font-extrabold text-center">شهادة حيازة</h4>
-                    <p class="text-center">
-                        نؤكد نحن لينك أن السلع/ـة المشار لها في الموقع أدناه؛ في حيازتنا بالنيابة عن
-                        {{$company_name}}
-                        من تاريخ و توقيت هذه الشهادة
+                    <p>التاريخ: {{ $contract_signed_date }}</p>
+                    <p>الوقت: {{ $contract_signed_time }}</p>
+                    <p class="text-center">رقم المرجع: {{ $reference_number }}</p>
+                    <p class="text-xl text-center text-black">شهادة ملكية</p>
+                    <p class="text-center text-black">نؤكد نحن لينك أن السلع المذكورة أدناه هي ملك لـ \
+                        {{ $customer_name }} وهو\هي
+                        المالك\ة الوحيد\ة من تاريخ و توقيت هذه الشهادة، وقد تم شراؤها من {{$company_name}} بناء على العقد المبرم بين الطرفين بتاريخ {{ $contract_signed_date }} مقابل مبلغ وقدره {{$amount}} ريال سعودي
                     </p>
-
                 </div>
-                <p class="text-black">
-                    قد تم شراء السلع/ـة المذكوره أدناه من
-                    {{$previous_owner}}
-                    بناء على طلب الشركة رقم
-                    {{$reference_number}}
-                    مقابل مبلغ وقدره
-                    {{$amount}}
-                    ريال سعودي
-                </p>
 
                 <h5 class="py-3 font-extrabold text-center">بيانات السلع/ـة</h5>
-                @foreach($products as $product)
-                <table class="min-w-full">
-                    <tbody>
-                        <tr>
-                            <td class="w-1/2 px-4 border border-black">نوع السلعة</td>
-                            <td class="w-1/2 border border-black">{{$product['product']}}</td>
-                        </tr>
-                        <tr>
-                            <td class="w-1/2 px-4 border border-black">الكمية</td>
-                            <td class="w-1/2 border border-black">{{$product['quantity']}} {{$product['uom']}}</td>
-                        </tr>
-                        <tr>
-                            <td class="w-1/2 px-4 border border-black">قيمة السلعة</td>
-                            <td class="w-1/2 border border-black">{{number_format($product['amount'], 2)}} ريال سعودي
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="w-1/2 px-4 border border-black">موقع السلعة</td>
-                            <td class="w-1/2 border border-black">{{$product['warehouse']}}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                @foreach ($products as $product)
+                    <table class="min-w-full mt-4">
+                        <tbody>
+                            <tr>
+                                <td class="w-1/2 px-4 border border-black">نوع السلعة</td>
+                                <td class="w-1/2 border border-black">{{ $product['product'] }}</td>
+                            </tr>
+                            <tr>
+                                <td class="w-1/2 px-4 border border-black">الكمية</td>
+                                <td class="w-1/2 border border-black">{{ $product['quantity'] }} {{ $product['uom'] }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-1/2 px-4 border border-black">قيمة السلعة</td>
+                                <td class="w-1/2 border border-black">{{ number_format($product['amount'], 2) }} ريال
+                                    سعودي
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-1/2 px-4 border border-black">موقع السلعة</td>
+                                <td class="w-1/2 border border-black">{{ $product['warehouse'] }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 @endforeach
-                <p class="text-lg text-center text-black">
-                    سيتم حفظ السلع/ـة بالموقع المشار له أعلاه، بالنيابة عن {{$company_name}}
-                    إلي أن يتم إشعارنا بالتصرف.
-                </p>
-
-                <p class="text-lg text-center text-black">{{$company_name}} سيكون مسؤولاً عن رسوم التخزين والحفظ إذا تم
-                    الاحتفاظ بـ \ {{$product_name}} لأكثر من يوم عمل</p>
-
 
                 <p class="text-center text-black pt-7">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
                 <hr class="mx-auto mt-10 h-[2px] w-48 bg-gray-700" />

@@ -702,6 +702,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             color: rgb(8 145 178 / var(--tw-text-opacity));
         }
 
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
     </style>
 </head>
 
@@ -714,29 +718,15 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             <p class="text-black">التاريخ: {{ $date }}</p>
             <p class="text-black">الوقت: {{ $time }}</p>
             <p class="text-center text-black">رقم المرجع: {{$reference_number}}</p>
-            <p class="text-xl font-bold text-center text-black">شهادة ملكية</p>
-            <p class="text-center text-black">نؤكد نحن لينك أن السلع المذكورة أدناه هي ملك لـ \ {{$company_name}} وهي
-                المالك
-                الوحيد من
-                تاريخ و توقيت هذه الشهادة
-            </p>
-
-            <p class="text-center text-black">
-                قد تم شراء السلع/ـة المذكورة ادناه من {{$previous_owner}}
-                بناء على العقد المبرم بين الطرفين
-                بتاريخ
-                (
-                {{ $date}}
-                )
-                مقابل مبلغ وقدره
-                {{$amount}}
-                ريال سعودي
+            <p class="text-xl text-center text-black">شهادة حيازة</p>
+            <p class="text-center text-black">نؤكد نحن لينك أن السلع المشار لها في الموقع أدناه؛ في حيازتنا بالنيابة عن {{$company_name}} من
+                تاريخ وتوقيت هذه الشهادة، وقد تم شراؤها من {{$previous_owner}} بناء على طلب الشركة رقم {{$order_id}} مقابل مبلغ وقدره {{$amount}} ريال سعودي
             </p>
 
             <p class="text-lg font-semibold text-center text-black">بيانات السلع/ـة</p>
             @foreach($products as $product)
 
-            <table class="min-w-full">
+            <table class="min-w-full mt-4">
                 <tbody>
                     <tr>
                         <td class="w-1/2 px-4 text-right border border-black">نوع السلعة</td>
@@ -758,12 +748,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             </table>
             @endforeach
 
-            <p class="text-lg text-center text-black">سيتم حفظ السلع/ـة لدينا بالنيابة عن {{$company_name}} إلى أن يتم
-                إشعارنا
-                بالتصرف.
-            </p>
-            <p class="text-lg text-center text-black">{{$company_name}} سيكون مسؤولاً عن رسوم التخزين والحفظ إذا تم
-                الاحتفاظ بـ \ {{$product_name}} لأكثر من يوم عمل</p>
+            <p class="text-lg text-center text-black">سيتم حفظ السلعة بالموقع المشار له أعلاه، بالنيابة عن {{$company_name}} إلى أن يتم إشعارنا بالتصرف.</p>
+            <p class="text-lg text-center text-black">{{$company_name}} سيكون مسؤولًا عن رسوم التخزين والحفظ إذا تم الاحتفاظ بـ\{{$product_name}} لأكثر من يوم عمل</p>
             <p class="pt-2 text-center text-black">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
         </div>
         <div class="flex flex-row justify-between pt-8 font-semibold">

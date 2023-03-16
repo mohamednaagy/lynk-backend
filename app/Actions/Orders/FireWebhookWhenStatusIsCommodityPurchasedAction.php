@@ -12,7 +12,7 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
 {
     public function handle(FinancingOrder $financingOrder, TraderOrder $traderOrder): void
     {
-        $productsDescription = $this->resolveProductsDescription($traderOrder);
+        $products = $this->resolveProducts($traderOrder);
 
         WebhookEvent::fire($financingOrder->company, WebhookType::OrderUpdates, [
             'order_id' => $financingOrder->id,
@@ -20,11 +20,11 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
                 'value' => $financingOrder->status->value,
                 'label' => $financingOrder->status->description,
             ],
-            'products_description' => $productsDescription,
+            'products' => $products,
         ]);
     }
 
-    public function resolveProductsDescription(TraderOrder $traderOrder)
+    public function resolveProducts(TraderOrder $traderOrder)
     {
         $products = $traderOrder->products;
         $data = [];

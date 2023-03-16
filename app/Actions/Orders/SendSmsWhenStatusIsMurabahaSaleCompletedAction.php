@@ -25,7 +25,7 @@ class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatu
         $sellingPrice = $financingOrder->selling_price ?? '';
 
         return __(ClientMessage::MurabahaSaleCompleted, [
-            'product' => $this->getProductsDescription($products),
+            'products' => $this->getProductsDescription($products),
             'amount' => $sellingPrice,
             'company_name' => $financingOrder->company->name,
         ], $locale);
@@ -35,11 +35,7 @@ class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatu
     {
         return collect($products)
             ->map(function ($product) {
-                return $product['product']
-                    .' '
-                    .'('.$product['quantity']
-                    .' '.$product['uom']
-                    .')';
+                return "{$product['product']} ({$product['quantity']} {$product['uom']})";
             })->implode(', ');
     }
 }

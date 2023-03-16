@@ -29,26 +29,16 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
         $products = $traderOrder->products;
 
         if ($financingOrder->is_verification_require) {
-            return $this->productsWithVerificationMessage($financingOrder, $products, $url, $sellingPrice);
+            return $this->resolveMessageIfVerificationRequired($financingOrder, $products, $url, $sellingPrice);
         }
 
-        return $this->productsWithoutVerificationMessage($financingOrder, $products, $sellingPrice);
+        return $this->resolveMessageIfNoVerificationRequired($financingOrder, $products, $sellingPrice);
     }
 
-    public function productsWithoutVerificationMessage(FinancingOrder $financingOrder, $products, $sellingPrice)
-    {
-        return __(ClientMessage::CommoditySoldToCustomerWithoutVerification, [
-            'product' => $this->getProductsDescription($products),
-            'order_id' => $financingOrder->id,
-            'company_name' => $financingOrder->company->name,
-            'selling_price' => $sellingPrice,
-        ]);
-    }
-
-    private function productsWithVerificationMessage(FinancingOrder $financingOrder, $products, $url, $sellingPrice)
+    private function resolveMessageIfVerificationRequired(FinancingOrder $financingOrder, $products, $url, $sellingPrice)
     {
         return __(ClientMessage::CommoditySoldToCustomer, [
-            'product' => $this->getProductsDescription($products),
+            'products' => $this->getProductsDescription($products),
             'company_name' => $financingOrder->company->name,
             'selling_price' => $sellingPrice,
             'order_id' => $financingOrder->id,
@@ -56,15 +46,21 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
         ]);
     }
 
+    public function resolveMessageIfNoVerificationRequired(FinancingOrder $financingOrder, $products, $sellingPrice)
+    {
+        return __(ClientMessage::CommoditySoldToCustomerWithoutVerification, [
+            'products' => $this->getProductsDescription($products),
+            'order_id' => $financingOrder->id,
+            'company_name' => $financingOrder->company->name,
+            'selling_price' => $sellingPrice,
+        ]);
+    }
+
     private function getProductsDescription($products)
     {
         return collect($products)
             ->map(function ($product) {
-                return $product['product']
-                    .' '
-                    .'('.$product['quantity']
-                    .' '.$product['uom']
-                    .')';
+                return "{$product['product']} ({$product['quantity']} {$product['uom']})";
             })->implode(', ');
     }
 }

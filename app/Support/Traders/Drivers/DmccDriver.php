@@ -245,14 +245,17 @@ class DmccDriver implements TraderInterface
     {
         try {
             $separator = ' و ';
-            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $traderOrder->products[0]['date_time_of_purchasing_commodity']);
-            $products = collect($traderOrder->products);
-            $amount = $products->pluck('amount')->map(function ($amount) {
-                return number_format($amount, 2);
-            })->implode(', ');
+            $dateTime = $traderOrder->traderHistories()
+                ->where('action', FinancingOrderHistory::ContractSigned)
+                ->first()
+                ?->created_at;
 
-            $previous_owner = $products->pluck('previous_owner')->implode($separator);
-            $product_name = $products->pluck('product')->implode($separator);
+            $products = collect($traderOrder->products);
+
+            $amount = $traderOrder->order->selling_price->formatByDecimal();
+
+            $customerName = $traderOrder->order->customer_name;
+            $productName = $products->pluck('product')->implode($separator);
 
             $this->storeOrderDocumentAsPdf(
                 'selling-commodity-to-customer',
@@ -262,10 +265,10 @@ class DmccDriver implements TraderInterface
                     'order_number' => $traderOrder->financing_order_id,
                     'products' => $traderOrder->products,
                     'amount' => $amount,
-                    'product_name' => $product_name,
-                    'previous_owner' => $previous_owner,
-                    'date' => $dateTime->toDateString(),
-                    'time' => $dateTime->toTimeString(),
+                    'product_name' => $productName,
+                    'customer_name' => $customerName,
+                    'contract_signed_date' => $dateTime->toDateString(),
+                    'contract_signed_time' => $dateTime->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::SellingCommodityToCustomer,
@@ -321,14 +324,9 @@ class DmccDriver implements TraderInterface
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
         try {
-            logs()->debug('tee', [$traderOrder->id]);
-
             $separator = ' و ';
-            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $traderOrder->products[0]['date_time_of_purchasing_commodity']);
             $products = collect($traderOrder->products);
-            $amount = $products->pluck('amount')->map(function ($amount) {
-                return number_format($amount, 2);
-            })->implode(', ');
+            $amount = $traderOrder->order->amount->formatByDecimal();
 
             $previous_owner = $products->pluck('previous_owner')->implode($separator);
             $product_name = $products->pluck('product')->implode($separator);
@@ -336,6 +334,7 @@ class DmccDriver implements TraderInterface
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
+                    'order_id' => $traderOrder->order->id,
                     'products' => $traderOrder->products,
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company->name,
@@ -343,11 +342,11 @@ class DmccDriver implements TraderInterface
                     'amount' => $amount,
                     'previous_owner' => $previous_owner,
                     'product_name' => $product_name,
-                    'date' => $dateTime->toDateString(),
-                    'time' => $dateTime->toTimeString(),
+                    'date' => Carbon::now()->toDateString(),
+                    'time' => Carbon::now()->toTimeString(),
                 ],
                 $traderOrder,
-                TraderOrderMediaCollection::TransferOwnershipToLender,
+                TraderOrderMediaCollection::TransferOwnershipToLender
             );
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
