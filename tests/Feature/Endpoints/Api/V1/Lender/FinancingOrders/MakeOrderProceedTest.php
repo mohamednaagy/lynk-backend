@@ -93,7 +93,7 @@ class MakeOrderProceedTest extends TestCase
         self::$financingOrder->save();
 
         self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+            'action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ]);
 
         Grantify::syncRoleToModel(self::$userLender, Role::LenderSupervisor);
@@ -120,7 +120,7 @@ class MakeOrderProceedTest extends TestCase
         self::$financingOrder->save();
 
         self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+            'action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ]);
 
         Grantify::syncRoleToModel(self::$userLender, Role::LenderApiUser);
@@ -170,7 +170,7 @@ class MakeOrderProceedTest extends TestCase
         self::$financingOrder->save();
 
         self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+            'action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ]);
 
         Grantify::syncRoleToModel(self::$userLender, Role::LenderOrderCreator);
@@ -314,7 +314,7 @@ class MakeOrderProceedTest extends TestCase
         self::$financingOrder->save();
 
         self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+            'action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ]);
 
         $response = $this->actingAs(self::$userLender)

@@ -208,7 +208,7 @@ class MakeOrderProceedTest extends TestCase
         ]);
 
         self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+            'action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ]);
 
         $this->actingAs(self::$adminManagerWithPermissions)
@@ -228,7 +228,7 @@ class MakeOrderProceedTest extends TestCase
         ]);
 
         self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+            'action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ]);
 
         $this->actingAs(self::$admin)
@@ -256,7 +256,7 @@ class MakeOrderProceedTest extends TestCase
         ]);
 
         self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+            'action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ]);
 
         self::$traderOrder->traderHistories()->create([
