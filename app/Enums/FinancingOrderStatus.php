@@ -70,7 +70,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         ],
         self::ClientWakalaCompleted => [
             self::WaitingClientWakala,
-            self::CommoditySoldToCustomer,
+            self::ContractSigned,
         ],
         self::WaitingPurchasingCommodity => [
             self::Approved,
@@ -89,7 +89,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
             self::CommodityPurchased,
         ],
         self::CommoditySoldToCustomer => [
-            self::ContractSigned,
+            self::ClientWakalaCompleted,
         ],
         self::WaitingClientWakala => [
             self::CommoditySoldToCustomer,

@@ -30,12 +30,12 @@ class StepHistoriesDictionary
         FinancingOrderStatus::ContractSigned => [
             FinancingOrderHistory::ContractSigned,
         ],
-        FinancingOrderStatus::CommoditySoldToCustomer => [
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-        ],
         FinancingOrderStatus::WaitingClientWakala => [],
         FinancingOrderStatus::ClientWakalaCompleted => [
             FinancingOrderHistory::ClientWakalaAccepted,
+        ],
+        FinancingOrderStatus::CommoditySoldToCustomer => [
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
         ],
         FinancingOrderStatus::MurabhaOfferIssued => [
             FinancingOrderHistory::IssueMurabahaOffer,

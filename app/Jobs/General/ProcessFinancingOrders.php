@@ -3,9 +3,9 @@
 namespace App\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
-use App\Jobs\Dmcc\ProcessDmccContractSignedOrder;
 use App\Jobs\Dmcc\ProcessDmccMpoOrder;
 use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
+use App\Jobs\Dmcc\ProcessDmccSellingCommodityToCustomerOrder;
 use App\Models\FinancingOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -36,9 +36,9 @@ class ProcessFinancingOrders implements ShouldQueue
                     match ($order->status->value) {
                         FinancingOrderStatus::Approved => ProcessInProgressOrder::dispatch($order->id),
                         FinancingOrderStatus::RespondedToPtp => ProcessDmccRespondedToPtpOrder::dispatch($order->id),
-                        FinancingOrderStatus::ClientWakalaCompleted => ProcessDmccMpoOrder::dispatch($order->id),
-                        FinancingOrderStatus::ContractSigned => ProcessDmccContractSignedOrder::dispatch($order->id),
-                        FinancingOrderStatus::CommoditySoldToCustomer => ProcessAskClientForWakala::dispatch($order->id),
+                        FinancingOrderStatus::ClientWakalaCompleted => ProcessDmccSellingCommodityToCustomerOrder::dispatch($order->id),
+                        FinancingOrderStatus::ContractSigned => ProcessAskClientForWakala::dispatch($order->id),
+                        FinancingOrderStatus::CommoditySoldToCustomer => ProcessDmccMpoOrder::dispatch($order->id),
                         default => null
                     };
                 });

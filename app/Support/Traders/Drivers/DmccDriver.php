@@ -268,6 +268,7 @@ class DmccDriver implements TraderInterface
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
         } catch (Exception $exception) {
+            dd($exception);
             throw new TraderException(collect([
                 'driver' => 'dmcc',
                 'step' => 'createSellingCommodityToCustomerDocument',
