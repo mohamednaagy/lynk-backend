@@ -4,6 +4,7 @@ namespace Tests\Traits;
 
 use App\Enums\Area;
 use App\Enums\CompanyType;
+use App\Enums\EdaatInvoiceStatus;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\WalletType;
 use App\Models\Company;
@@ -111,7 +112,7 @@ trait InteractsWithCompany
             'creator_id' => $userId,
             'invoice_number' => Str::uuid(),
             'amount' => 1,
-            'status' => 1,
+            'status' => EdaatInvoiceStatus::Pending,
         ], $data));
     }
 }

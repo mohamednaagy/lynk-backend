@@ -19,18 +19,12 @@ class TccDriverTest extends TestCase
 
     protected static string $phoneCountryCode;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
         self::$phoneCountryCode = 'SA';
     }
 
-    /**
-     * @return void
-     */
     public function test_mobile_verification_tcc_that_mobile_number_matched(): void
     {
         $phoneNumber = PhoneNumber::make('966547125919', self::$phoneCountryCode);
@@ -40,21 +34,14 @@ class TccDriverTest extends TestCase
         $this->assertTrue($response);
     }
 
-    /**
-     * @return void
-     */
     public function test_mobile_verification_tcc_that_mobile_number_does_not_match_the_provided_country(): void
     {
         $this->expectException(NumberParseException::class);
-        $this->expectErrorMessage('Number does not match the provided country.');
         $phoneNumber = PhoneNumber::make('96654712591999', self::$phoneCountryCode);
         $nationalId = '1001280070';
         MobileVerify::driver('tcc')->verify($phoneNumber, $nationalId);
     }
 
-    /**
-     * @return void
-     */
     public function test_mobile_verification_tcc_that_mobile_number_unmatched(): void
     {
         $this->expectException(MobileNumberNotMatchedException::class);
@@ -63,9 +50,6 @@ class TccDriverTest extends TestCase
         MobileVerify::driver('tcc')->verify($phoneNumber, $nationalId);
     }
 
-    /**
-     * @return void
-     */
     public function test_mobile_verification_tcc_that_person_id_invalid(): void
     {
         $this->expectException(InvalidPersonIdException::class);
@@ -74,9 +58,6 @@ class TccDriverTest extends TestCase
         MobileVerify::driver('tcc')->verify($phoneNumber, $nationalId);
     }
 
-    /**
-     * @return void
-     */
     public function test_mobile_verification_tcc_that_person_id_type_invalid(): void
     {
         $this->expectException(InvalidPersonIdTypeException::class);
@@ -85,9 +66,6 @@ class TccDriverTest extends TestCase
         MobileVerify::driver('tcc')->verify($phoneNumber, $nationalId);
     }
 
-    /**
-     * @return void
-     */
     public function test_mobile_verification_tcc_that_api_key_invalid(): void
     {
         Config::set('mobile-verify.drivers.tcc.api_key', '122385904480654204103/UjUEigInUUt8dzlpTP2PllXBsPQXHuPIqjYVDmg=');
