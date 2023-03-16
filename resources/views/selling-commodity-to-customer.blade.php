@@ -566,6 +566,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             margin-right: 1rem;
         }
 
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
         .mx-auto {
             margin-left: auto;
             margin-right: auto;
@@ -627,19 +631,19 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             gap: 0px;
         }
 
-        .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+        .space-y-6> :not([hidden])~ :not([hidden]) {
             --tw-space-y-reverse: 0;
             margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
             margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
         }
 
-        .divide-y > :not([hidden]) ~ :not([hidden]) {
+        .divide-y> :not([hidden])~ :not([hidden]) {
             --tw-divide-y-reverse: 0;
             border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
             border-bottom-width: calc(1px * var(--tw-divide-y-reverse));
         }
 
-        .divide-gray-300\/50 > :not([hidden]) ~ :not([hidden]) {
+        .divide-gray-300\/50> :not([hidden])~ :not([hidden]) {
             border-color: rgb(209 213 219 / 0.5);
         }
 
@@ -736,60 +740,66 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 </head>
 
 <body>
-<div class="flex justify-end">
-    <img class="h-20" src="{{ asset('color-logo.svg') }}" alt=""/>
-</div>
-<div class="mx-4 divide-y divide-gray-300/50" dir="rtl">
-    <div class="py-8 space-y-6 text-base leading-7">
-        <div>
-            <div class="py-8 space-y-6 text-base font-semibold leading-7 text-gray-600">
-                <img/>
-                <p>التاريخ: {{$date}}</p>
-                <p>الوقت: {{$time}}</p>
-                <p class="text-center">رقم المرجع: {{$reference_number}}</p>
-                <h4 class="pt-3 font-extrabold text-center">شهادة ملكية</h4>
-                <p class="text-center">نؤكد نحن لنك أن السلعة المذكورة أدناه هي ملك لـ / {{$new_owner}} و هو/هي المالك/ة
-                    الوحيد/ة من تاريخ و توقيت هذه الشهادة ، و قد تم شراؤها من {{$company_name}} بناءاً على العقد المبرم
-                    بين الطرفين بتاريخ مقابل مبلغ وقدره {{number_format($amount, 2)}} ريال سعودي ، و سيتم
-                    بيع السلعة من قبل لنك بناءاً على طلب السيد/ة {{$new_owner}} و تحصيل مبلغ السلعة في تاريخ
-                    {{$date}} ، و يمكنكم استلامه من قبل {{$company_name}} بعد إتمام عملية البيع.</p>
+    <div class="flex justify-end">
+        <img class="h-20" src="{{ asset('color-logo.svg') }}" alt="" />
+    </div>
+    <div class="mx-4 divide-y divide-gray-300/50" dir="rtl">
+        <div class="py-8 space-y-6 text-base leading-7">
+            <div>
+                <div class="py-8 space-y-6 text-base leading-7 text-gray-600">
+                    <img />
+                    <p>التاريخ: {{ $contract_signed_date }}</p>
+                    <p>الوقت: {{ $contract_signed_time }}</p>
+                    <p class="text-center">رقم المرجع: {{ $reference_number }}</p>
+                    <p class="text-xl text-center text-black">شهادة ملكية</p>
+                    <p class="text-center text-black">نؤكد نحن لينك أن السلع المذكورة أدناه هي ملك لـ \
+                        {{ $customer_name }} وهو\هي
+                        المالك\ة الوحيد\ة من تاريخ و توقيت هذه الشهادة، وقد تم شراؤها من {{$company_name}} بناء على العقد المبرم بين الطرفين بتاريخ {{ $contract_signed_date }} مقابل مبلغ وقدره {{$amount}} ريال سعودي
+                    </p>
+                </div>
+
+                <h5 class="py-3 font-extrabold text-center">بيانات السلع/ـة</h5>
+                @foreach ($products as $product)
+                    <table class="min-w-full mt-4">
+                        <tbody>
+                            <tr>
+                                <td class="w-1/2 px-4 border border-black">نوع السلعة</td>
+                                <td class="w-1/2 border border-black">{{ $product['product'] }}</td>
+                            </tr>
+                            <tr>
+                                <td class="w-1/2 px-4 border border-black">الكمية</td>
+                                <td class="w-1/2 border border-black">{{ $product['quantity'] }} {{ $product['uom'] }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-1/2 px-4 border border-black">قيمة السلعة</td>
+                                <td class="w-1/2 border border-black">{{ number_format($product['amount'], 2) }} ريال
+                                    سعودي
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-1/2 px-4 border border-black">موقع السلعة</td>
+                                <td class="w-1/2 border border-black">{{ $product['warehouse'] }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                @endforeach
+
+                <p class="text-center text-black pt-7">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
+                <hr class="mx-auto mt-10 h-[2px] w-48 bg-gray-700" />
             </div>
-            <h5 class="py-3 font-extrabold text-center">بيانات السلعة</h5>
-            <table class="min-w-full">
-                <tbody>
-                <tr>
-                    <td class="w-1/2 px-4 border border-black">نوع السلعة</td>
-                    <td class="w-1/2 border border-black">{{$hs_code_description}}</td>
-                </tr>
-                <tr>
-                    <td class="w-1/2 px-4 border border-black">الكمية</td>
-                    <td class="w-1/2 border border-black">{{$quantity}} {{$uom}}</td>
-                </tr>
-                <tr>
-                    <td class="w-1/2 px-4 border border-black">قيمة السلعة</td>
-                    <td class="w-1/2 border border-black">{{number_format($amount, 2)}} ريال سعودي</td>
-                </tr>
-                <tr>
-                    <td class="w-1/2 px-4 border border-black">موقع السلعة</td>
-                    <td class="w-1/2 border border-black">{{$warehouse}}</td>
-                </tr>
-                </tbody>
-            </table>
-            <p class="text-center text-black pt-7">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
-            <hr class="mx-auto mt-10 h-[2px] w-48 bg-gray-700"/>
+        </div>
+        <div class="flex flex-row justify-between pt-8 font-semibold">
+            <p class="text-right text-[11px] text-cyan-900">www.lynk.sa</p>
+            <p class="text-right text-[11px] text-cyan-900">الرمز البريدي 13522</p>
+            <div class="flex flex-row-reverse gap-0.5">
+                <p class="text-right text-[11px] text-cyan-900">,3504</p>
+                <p class="text-right text-[11px] text-cyan-900">طريق الامام سعود بن فيصل ، حي الملقا ، 6418</p>
+            </div>
+            <p class="text-right text-[11px] text-cyan-900">السجل التجاري 1010828018</p>
+            <p class="text-right text-[11px] text-cyan-600">شركة تقنيات صلة المالية</p>
         </div>
     </div>
-    <div class="flex flex-row justify-between pt-8 font-semibold">
-        <p class="text-right text-[11px] text-cyan-900">www.lynk.sa</p>
-        <p class="text-right text-[11px] text-cyan-900">الرمز البريدي 13522</p>
-        <div class="flex flex-row-reverse gap-0.5">
-            <p class="text-right text-[11px] text-cyan-900">,3504</p>
-            <p class="text-right text-[11px] text-cyan-900">طريق الامام سعود بن فيصل ، حي الملقا ، 6418</p>
-        </div>
-        <p class="text-right text-[11px] text-cyan-900">السجل التجاري 1010828018</p>
-        <p class="text-right text-[11px] text-cyan-600">شركة تقنيات صلة المالية</p>
-    </div>
-</div>
 
 </body>
 

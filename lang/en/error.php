@@ -28,4 +28,5 @@ return [
     'client_wakala_already_accepted' => 'Order has been accepted',
     'order_still_pending' => 'Order still pending for approval',
     'order_is_rejected' => 'Order has been rejected please contact customer support',
+    'trader_not_supported' => 'Trader Not Supported',
 ];

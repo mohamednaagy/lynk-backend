@@ -79,19 +79,9 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includePurchasingCommodityInformation(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive([
-            'uom' => $traderOrder->uom,
-            'owner' => $traderOrder->owner,
-            'amount' => $traderOrder->amount,
-            'product' => $traderOrder->product,
-            'currency' => $traderOrder->currency,
-            'quantity' => $traderOrder->quantity,
-            'warehouse' => $traderOrder->warehouse,
+            'products' => $traderOrder->products,
             'ptp_document' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::PromiseToPurchase)?->file_url,
             'exchange_rate' => $traderOrder->exchange_rate,
-            'previous_owner' => $traderOrder->previous_owner,
-            'warehouse_or_vault_country' => $traderOrder->warehouse_or_vault_country,
-            'warehouse_or_vault_emirates' => $traderOrder->warehouse_or_vault_emirates,
-            'date_time_of_purchasing_commodity' => $traderOrder->date_time_of_purchasing_commodity,
             'original_holding_certificate' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)?->file_url,
             'auto_generate_financing_institution_certificate' => $traderOrder->auto_generate_financing_institution_certificate,
             'financing_institution_certificate' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::TransferOwnershipToLender)?->file_url,

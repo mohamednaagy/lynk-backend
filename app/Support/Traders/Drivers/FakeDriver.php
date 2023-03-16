@@ -187,21 +187,31 @@ class FakeDriver implements TraderInterface
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
         try {
+            $separator = ' و ';
+            $dateTime = $traderOrder->traderHistories()
+                ->where('action', FinancingOrderHistory::ContractSigned)
+                ->first()
+                ?->created_at;
+
+            $products = collect($traderOrder->products);
+
+            $amount = $traderOrder->order->selling_price->formatByDecimal();
+
+            $customerName = $traderOrder->order->customer_name;
+            $productName = $products->pluck('product')->implode($separator);
+
             $this->storeOrderDocumentAsPdf(
                 'selling-commodity-to-customer',
                 [
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'amount' => $traderOrder->order->amount->formatByDecimal(),
-                    'hs_code_description' => 'Solid yogurt (jameed).',
-                    'quantity' => 100,
-                    'uom' => 'MTT',
-                    'warehouse' => 'DMC03-S-0038',
-                    // TODO: change later after fix from business
-                    'new_owner' => 'محمد علي',
-                    'date' => Carbon::now()->toDateString(),
-                    'time' => Carbon::now()->toTimeString(),
+                    'products' => $traderOrder->products,
+                    'amount' => $amount,
+                    'product_name' => $productName,
+                    'customer_name' => $customerName,
+                    'contract_signed_date' => $dateTime->toDateString(),
+                    'contract_signed_time' => $dateTime->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::SellingCommodityToCustomer,
@@ -252,24 +262,29 @@ class FakeDriver implements TraderInterface
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
         try {
+            $separator = ' و ';
+            $products = collect($traderOrder->products);
+            $amount = $traderOrder->order->amount->formatByDecimal();
+
+            $previous_owner = $products->pluck('previous_owner')->implode($separator);
+            $product_name = $products->pluck('product')->implode($separator);
+
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
+                    'order_id' => $traderOrder->order->id,
+                    'products' => $traderOrder->products,
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'amount' => $traderOrder->order->amount->formatByDecimal(),
-                    'hs_code_description' => 'Solid yogurt (jameed).',
-                    'quantity' => 100,
-                    'uom' => 'MTT',
-                    'warehouse' => 'DMC03-S-0038',
-                    'previous_owner' => $traderOrder->previous_owner,
-                    'owner' => 'Food Security Murabaha Owner',
+                    'amount' => $amount,
+                    'previous_owner' => $previous_owner,
+                    'product_name' => $product_name,
                     'date' => Carbon::now()->toDateString(),
                     'time' => Carbon::now()->toTimeString(),
                 ],
                 $traderOrder,
-                TraderOrderMediaCollection::TransferOwnershipToLender,
+                TraderOrderMediaCollection::TransferOwnershipToLender
             );
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
@@ -291,24 +306,47 @@ class FakeDriver implements TraderInterface
     public function getInventoryBasket(TraderOrder $traderOrder): object
     {
         $data = [
-            'product' => 'Yogurt',
-            'quantity' => '10',
-            'amount' => '1000',
-            'currency' => 'SAR',
-            'warehouse' => 'Warehouse',
-            'owner' => 'Owner 1',
-            'previous_owner' => 'Owner 0',
-            'new_owner' => 'Owner 1',
-            'date_time_of_purchasing_commodity' => '2023-01-01 00:00:00',
-            'warehouse_or_vault_emirates' => 'Emirates',
-            'warehouse_or_vault_country' => 'Saudi Arabia',
-            'inventory_record_id' => '1000',
-            'warrant_percentage' => '100',
-            'warrant_no' => '658',
-            'hs_code' => '#234',
-            'uom' => 'Kilo',
-            'exchange_rate' => '3.75',
+            'products' => [
+                [
+                    'product' => 'Yogurt',
+                    'quantity' => '10',
+                    'amount' => '1000',
+                    'currency' => 'SAR',
+                    'warehouse' => 'Warehouse',
+                    'owner' => 'Owner 1',
+                    'previous_owner' => 'Owner 0',
+                    'new_owner' => 'Owner 1',
+                    'date_time_of_purchasing_commodity' => '2023-01-01 00:00:00',
+                    'warehouse_or_vault_emirates' => 'Emirates',
+                    'warehouse_or_vault_country' => 'Saudi Arabia',
+                    'inventory_record_id' => '1000',
+                    'warrant_percentage' => '100',
+                    'warrant_no' => '658',
+                    'hs_code' => '#234',
+                    'uom' => 'Kilo',
+                ],
+                [
+                    'product' => 'Yogurt 2',
+                    'quantity' => '5',
+                    'amount' => '500',
+                    'currency' => 'SAR',
+                    'warehouse' => 'Warehouse',
+                    'owner' => 'Owner 1',
+                    'previous_owner' => 'Owner 2',
+                    'new_owner' => 'Owner 3',
+                    'date_time_of_purchasing_commodity' => '2023-02-01 00:00:00',
+                    'warehouse_or_vault_emirates' => 'Emirates',
+                    'warehouse_or_vault_country' => 'Saudi Arabia',
+                    'inventory_record_id' => '1000',
+                    'warrant_percentage' => '100',
+                    'warrant_no' => '658',
+                    'hs_code' => '#234',
+                    'uom' => 'Kilo',
+                ],
+            ],
         ];
+
+        $data['exchange_rate'] = '3.75';
 
         $traderOrder->update($data);
 

@@ -15,7 +15,7 @@ class GetClientWakalaTextAction implements GetClientWakalaText
         $time = $now->toTimeString();
         $amount = $financingOrder->amount->formatByDecimal();
         $commodityNumber = $traderOrder->reference;
-        $commodity = $traderOrder->product ?? '';
+        $commodity = collect($traderOrder->products)->pluck('product')->implode(' و ') ?? '';
         $commodityPrice = $financingOrder->amount->formatByDecimal();
         $orderNumber = $financingOrder->id;
         $orderDate = $financingOrder->created_at->format('Y-m-d');

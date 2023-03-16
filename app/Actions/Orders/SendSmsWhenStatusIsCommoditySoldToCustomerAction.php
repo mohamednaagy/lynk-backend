@@ -11,52 +11,56 @@ use Illuminate\Support\Facades\Config;
 
 class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenStatusIsCommoditySoldToCustomer
 {
-    public function handle(FinancingOrder $financingOrder, string $product, string $quantity): void
+    public function handle(FinancingOrder $financingOrder, TraderOrder $traderOrder): void
     {
-        $activeTraderOrder = $financingOrder->activeTraderOrder()->first();
-
-        if ($activeTraderOrder === null) {
-            return;
-        }
-
         $phoneNumber = ltrim($financingOrder->getPhoneNumber()->formatE164(), '+');
-        $message = $this->resolveSmsMessage($financingOrder, $activeTraderOrder, $product, $quantity);
+        $message = $this->resolveSmsMessage($financingOrder, $traderOrder);
 
-        Sms::send(
-            $message,
-            $phoneNumber
-        );
+        Sms::send($message, $phoneNumber);
     }
 
-    private function resolveSmsMessage(FinancingOrder $financingOrder, TraderOrder $activeTraderOrder, $product, $quantity)
+    private function resolveSmsMessage(FinancingOrder $financingOrder, TraderOrder $traderOrder)
     {
-        $uom = $activeTraderOrder->uom ?? '';
-
         $sellingPrice = optional($financingOrder->selling_price)->formatByDecimal() ?? '';
 
         $query = ['o' => $financingOrder->id];
         $host = Config::get('app.frontend_url.client');
         $url = $host.'/?'.http_build_query($query);
+        $products = $traderOrder->products;
 
-        if ($financingOrder->is_verification_required) {
-            return __(ClientMessage::CommoditySoldToCustomer, [
-                'product' => $product,
-                'order_id' => $financingOrder->id,
-                'company_name' => $financingOrder->company->name,
-                'quantity' => $quantity,
-                'uom' => $uom,
-                'selling_price' => $sellingPrice,
-                'url' => $url,
-            ]);
+        if ($financingOrder->is_verification_require) {
+            return $this->resolveMessageIfVerificationRequired($financingOrder, $products, $url, $sellingPrice);
         }
 
+        return $this->resolveMessageIfNoVerificationRequired($financingOrder, $products, $sellingPrice);
+    }
+
+    private function resolveMessageIfVerificationRequired(FinancingOrder $financingOrder, $products, $url, $sellingPrice)
+    {
+        return __(ClientMessage::CommoditySoldToCustomer, [
+            'products' => $this->getProductsDescription($products),
+            'company_name' => $financingOrder->company->name,
+            'selling_price' => $sellingPrice,
+            'order_id' => $financingOrder->id,
+            'url' => $url,
+        ]);
+    }
+
+    public function resolveMessageIfNoVerificationRequired(FinancingOrder $financingOrder, $products, $sellingPrice)
+    {
         return __(ClientMessage::CommoditySoldToCustomerWithoutVerification, [
-            'product' => $product,
+            'products' => $this->getProductsDescription($products),
             'order_id' => $financingOrder->id,
             'company_name' => $financingOrder->company->name,
-            'quantity' => $quantity,
-            'uom' => $uom,
             'selling_price' => $sellingPrice,
         ]);
+    }
+
+    private function getProductsDescription($products)
+    {
+        return collect($products)
+            ->map(function ($product) {
+                return "{$product['product']} ({$product['quantity']} {$product['uom']})";
+            })->implode(', ');
     }
 }

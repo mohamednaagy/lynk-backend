@@ -49,4 +49,6 @@ class ErrorCode
     public const ORDER_STILL_PENDING = 1021;
 
     public const ORDER_IS_REJECTED = 1022;
+
+    public const TRADER_NOT_SUPPORTED = 1023;
 }

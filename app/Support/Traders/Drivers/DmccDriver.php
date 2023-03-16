@@ -244,7 +244,18 @@ class DmccDriver implements TraderInterface
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
         try {
-            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $traderOrder->date_time_of_purchasing_commodity);
+            $separator = ' و ';
+            $dateTime = $traderOrder->traderHistories()
+                ->where('action', FinancingOrderHistory::ContractSigned)
+                ->first()
+                ?->created_at;
+
+            $products = collect($traderOrder->products);
+
+            $amount = $traderOrder->order->selling_price->formatByDecimal();
+
+            $customerName = $traderOrder->order->customer_name;
+            $productName = $products->pluck('product')->implode($separator);
 
             $this->storeOrderDocumentAsPdf(
                 'selling-commodity-to-customer',
@@ -252,15 +263,12 @@ class DmccDriver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'amount' => $traderOrder->amount,
-                    'hs_code_description' => $traderOrder->product,
-                    'quantity' => $traderOrder->quantity,
-                    'uom' => $traderOrder->uom,
-                    'warehouse' => $traderOrder->warehouse,
-                    // TODO: change later after fix from business
-                    'new_owner' => 'محمد علي',
-                    'date' => $dateTime->toDateString(),
-                    'time' => $dateTime->toTimeString(),
+                    'products' => $traderOrder->products,
+                    'amount' => $amount,
+                    'product_name' => $productName,
+                    'customer_name' => $customerName,
+                    'contract_signed_date' => $dateTime->toDateString(),
+                    'contract_signed_time' => $dateTime->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::SellingCommodityToCustomer,
@@ -316,26 +324,29 @@ class DmccDriver implements TraderInterface
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
         try {
-            logs()->debug('tee', [$traderOrder->id]);
-            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $traderOrder->date_time_of_purchasing_commodity);
+            $separator = ' و ';
+            $products = collect($traderOrder->products);
+            $amount = $traderOrder->order->amount->formatByDecimal();
+
+            $previous_owner = $products->pluck('previous_owner')->implode($separator);
+            $product_name = $products->pluck('product')->implode($separator);
 
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
+                    'order_id' => $traderOrder->order->id,
+                    'products' => $traderOrder->products,
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'amount' => $traderOrder->amount,
-                    'hs_code_description' => $traderOrder->product,
-                    'quantity' => $traderOrder->quantity,
-                    'uom' => $traderOrder->uom,
-                    'warehouse' => $traderOrder->warehouse,
-                    'previous_owner' => $traderOrder->previous_owner,
-                    'date' => $dateTime->toDateString(),
-                    'time' => $dateTime->toTimeString(),
+                    'amount' => $amount,
+                    'previous_owner' => $previous_owner,
+                    'product_name' => $product_name,
+                    'date' => Carbon::now()->toDateString(),
+                    'time' => Carbon::now()->toTimeString(),
                 ],
                 $traderOrder,
-                TraderOrderMediaCollection::TransferOwnershipToLender,
+                TraderOrderMediaCollection::TransferOwnershipToLender
             );
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
@@ -374,31 +385,38 @@ class DmccDriver implements TraderInterface
             ]));
         }
 
-        $details = $response->object()->inventoryDetails[0];
+        $inventoryDetails = $response->object()->inventoryDetails;
+        $data = [];
 
-        logs()->debug('test', [$response->object()->inventoryDetails[0]]);
+        foreach ($inventoryDetails as $product) {
+            array_push($data, [
+                'product' => $product->hsCodeDescription,
+                'quantity' => $product->quantity,
+                'amount' => $product->totalValue,
+                'currency' => $product->currency,
+                'warehouse' => $product->warehouseOrVaultId,
+                'owner' => $product->owner,
+                'previous_owner' => $product->previousOwner,
+                'new_owner' => $product->newOwner ?? null,
+                'date_time_of_purchasing_commodity' => Carbon::createFromFormat(
+                    'd/m/Y H:i A',
+                    $product->dateTimeOfPurchasingCommodity
+                )
+                    ->format('Y-m-d H:i:s'),
+                'warehouse_or_vault_emirates' => $product->warehouseOrVaultEmirates,
+                'warehouse_or_vault_country' => $product->warehouseOrVaultCountry,
+                'inventory_record_id' => $product->inventoryRecordId,
+                'warrant_percentage' => $product->warrantPercentage,
+                'uom' => $product->uom,
+            ]);
+        }
 
-        $traderOrder->update([
-            'product' => $details->hsCodeDescription,
-            'quantity' => $details->quantity,
-            'amount' => $details->totalValue,
-            'currency' => $details->currency,
-            'warehouse' => $details->warehouseOrVaultId,
-            'owner' => $details->owner,
-            'previous_owner' => $details->previousOwner,
-            'new_owner' => $details->newOwner ?? null,
-            'date_time_of_purchasing_commodity' => Carbon::createFromFormat(
-                'd/m/Y H:i A',
-                $details->dateTimeOfPurchasingCommodity
-            )
-                ->format('Y-m-d H:i:s'),
-            'warehouse_or_vault_emirates' => $details->warehouseOrVaultEmirates,
-            'warehouse_or_vault_country' => $details->warehouseOrVaultCountry,
-            'inventory_record_id' => $details->inventoryRecordId,
-            'warrant_percentage' => $details->warrantPercentage,
-            'uom' => $details->uom,
-            'exchange_rate' => $response->object()->exchangeRate,
-        ]);
+        $products['products'] = $data;
+        $products['exchange_rate'] = $response->object()->exchangeRate;
+
+        logs()->debug('test', [$products]);
+
+        $traderOrder->update($products);
 
         return $response->object();
     }

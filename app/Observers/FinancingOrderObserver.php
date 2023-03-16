@@ -26,8 +26,17 @@ class FinancingOrderObserver
             return;
         }
 
-        $product = $financingOrder->activeTraderOrder()->first()->product ?? '';
-        $quantity = $financingOrder->activeTraderOrder()->first()->quantity ?? '';
+        if ($financingOrder->status->is(FinancingOrderStatus::MurabhaOfferIssued)) {
+            app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)->handle($financingOrder);
+
+            return;
+        }
+
+        $traderOrder = $financingOrder->activeTraderOrder()->first();
+
+        if (empty($traderOrder->products)) {
+            return;
+        }
 
         $actions = match ($financingOrder->status->value) {
             FinancingOrderStatus::CommoditySoldToCustomer => [
@@ -40,11 +49,7 @@ class FinancingOrderObserver
         };
 
         foreach ($actions as $action) {
-            app($action)->handle($financingOrder, $product, $quantity);
-        }
-
-        if ($financingOrder->status->is(FinancingOrderStatus::MurabhaOfferIssued)) {
-            app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)->handle($financingOrder);
+            app($action)->handle($financingOrder, $traderOrder);
         }
     }
 }
