@@ -43,7 +43,7 @@ class StoreTraderRequest extends FormRequest
                 'nullable',
                 'string',
                 Rule::unique(Company::class, 'driver'),
-                Rule::in(['dmcc', 'fake']),
+                Rule::in(['dmcc', 'fake', 'bursam']),
             ],
             'notifications_email' => [
                 'required',

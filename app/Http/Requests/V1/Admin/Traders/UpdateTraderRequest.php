@@ -45,7 +45,7 @@ class UpdateTraderRequest extends FormRequest
                 'string',
                 Rule::unique(Company::class, 'driver')
                     ->ignore($this->route('trader')),
-                Rule::in(['dmcc', 'fake']),
+                Rule::in(['dmcc', 'fake', 'bursam']),
             ],
             'notifications_email' => [
                 'required',
