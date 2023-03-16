@@ -5,8 +5,8 @@ namespace App\Actions\Orders\TraderOrders\PurchasingCommodity;
 use App\Actions\Contracts\Orders\TraderOrders\PurchasingCommodity\HandlePurchasingCommodity;
 use App\Actions\Contracts\Orders\UpdateTraderOrder;
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -33,7 +33,7 @@ class HandlePurchasingCommodityAction implements HandlePurchasingCommodity
         app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
 
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
-            FinancingOrderStatus::CommodityPurchased
+            MurabhaStep::PurchasingCommodity
         );
 
         $trader = Trader::driver($traderOrder->provider);
@@ -42,13 +42,13 @@ class HandlePurchasingCommodityAction implements HandlePurchasingCommodity
             $request,
             $trader,
             $traderOrder,
-            FinancingOrderStatus::CommodityPurchased
+            MurabhaStep::PurchasingCommodity
         );
 
         $this->transferOwnershipToLender($request, $trader, $traderOrder);
 
         if ($canUpdateOrderStatus) {
-            $trader->updateOrderStatus($order, FinancingOrderStatus::CommodityPurchased);
+            $trader->updateOrderStatus($order, MurabhaStep::PurchasingCommodity);
         }
     }
 

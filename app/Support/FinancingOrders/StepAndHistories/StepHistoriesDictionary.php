@@ -2,70 +2,26 @@
 
 namespace App\Support\FinancingOrders\StepAndHistories;
 
-use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 
 class StepHistoriesDictionary
 {
     public \SplDoublyLinkedList $dictionaryNodeList;
 
-    public const StepToHistoriesDictionary = [
-        FinancingOrderStatus::PendingApproval => [],
-        FinancingOrderStatus::Approved => [],
-        FinancingOrderStatus::WaitingPurchasingCommodity => [
-            FinancingOrderHistory::GetTtiId,
-        ],
-        FinancingOrderStatus::RespondedToPtp => [
-            FinancingOrderHistory::RespondPtp,
-        ],
-        FinancingOrderStatus::PtpDocumentRetrieved => [
-            FinancingOrderHistory::GetPtpDocument,
-            FinancingOrderHistory::AttachPtpDocumentToOrder,
-            FinancingOrderHistory::GetTtiHoldingCertificateDocument,
-            FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
-        ],
-        FinancingOrderStatus::CommodityPurchased => [
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-        ],
-        FinancingOrderStatus::ContractSigned => [
-            FinancingOrderHistory::ContractSigned,
-        ],
-        FinancingOrderStatus::WaitingClientWakala => [],
-        FinancingOrderStatus::ClientWakalaCompleted => [
-            FinancingOrderHistory::ClientWakalaAccepted,
-        ],
-        FinancingOrderStatus::CommoditySoldToCustomer => [
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-        ],
-        FinancingOrderStatus::MurabhaOfferIssued => [
-            FinancingOrderHistory::IssueMurabahaOffer,
-            FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
-            FinancingOrderHistory::AttachMpoDocument,
-        ],
-        FinancingOrderStatus::MurabahaSaleCompleted => [
-            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
-            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
-            FinancingOrderHistory::MurabahaSaleCompleted,
-        ],
-        FinancingOrderStatus::Cancelled => [
-            FinancingOrderHistory::OrderCancelled,
-        ],
-    ];
-
     public function __construct()
     {
         $this->dictionaryNodeList = new \SplDoublyLinkedList();
 
-        foreach (self::StepToHistoriesDictionary as $status => $histories) {
-            $this->dictionaryNodeList->push(new StepHistoriesDictionaryNode($status, $histories));
+        foreach (MurabhaStep::$stepToHistoriesDictionary as $step => $histories) {
+            $this->dictionaryNodeList->push(new StepHistoriesDictionaryNode($step, $histories));
         }
     }
 
-    public function getPreviousStepOf($status)
+    public function getPreviousStepOf($step)
     {
         $this->dictionaryNodeList->rewind();
         while ($this->dictionaryNodeList->valid()) {
-            if ($this->dictionaryNodeList->current()->status == $status) {
+            if ($this->dictionaryNodeList->current()->step == $step) {
                 $this->dictionaryNodeList->prev();
 
                 return $this->dictionaryNodeList->current();
@@ -74,11 +30,11 @@ class StepHistoriesDictionary
         }
     }
 
-    public function getNextStepOf($status)
+    public function getNextStepOf($step)
     {
         $this->dictionaryNodeList->rewind();
         while ($this->dictionaryNodeList->valid()) {
-            if ($this->dictionaryNodeList->current()->status == $status) {
+            if ($this->dictionaryNodeList->current()->step == $step) {
                 $this->dictionaryNodeList->next();
 
                 return $this->dictionaryNodeList->current();
@@ -87,11 +43,11 @@ class StepHistoriesDictionary
         }
     }
 
-    public function getStepOf($status)
+    public function getStepOf($step)
     {
         $this->dictionaryNodeList->rewind();
         while ($this->dictionaryNodeList->valid()) {
-            if ($this->dictionaryNodeList->current()->status == $status) {
+            if ($this->dictionaryNodeList->current()->step == $step) {
                 return $this->dictionaryNodeList->current();
             }
             $this->dictionaryNodeList->next();

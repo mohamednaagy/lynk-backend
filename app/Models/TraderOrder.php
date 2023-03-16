@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use Carbon\Carbon;
@@ -97,18 +98,14 @@ class TraderOrder extends Model implements HasMedia
         return ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions));
     }
 
-    public function checkOrderStepComplete(int $status): bool
+    public function checkOrderStepComplete(int $step): bool
     {
-        if (! array_key_exists($status, FinancingOrderHistory::$orderHistoryLastActionMap)) {
+        if (! array_key_exists($step, MurabhaStep::$stepToHistoriesDictionary)) {
             throw new UnexpectedValueException('No mapping for this status');
         }
 
-        if (is_null(FinancingOrderHistory::$orderHistoryLastActionMap[$status])) {
-            return true;
-        }
-
         return (bool) $this->traderHistories
-            ->where('action', FinancingOrderHistory::$orderHistoryLastActionMap[$status])
+            ->where('action', end(MurabhaStep::$stepToHistoriesDictionary[$step]))
             ->first();
     }
 
@@ -121,6 +118,16 @@ class TraderOrder extends Model implements HasMedia
         return (bool) $this->traderHistories
             ->where('action', $action)
             ->first();
+    }
+
+    public function scopeWithLastHistoryAction($query)
+    {
+        return $query->addSelect([
+            'last_history_action' => TraderHistory::select('action')
+                ->whereColumn('trader_order_id', 'trader_orders.id')
+                ->latest()
+                ->take(1),
+        ]);
     }
 
     /**
