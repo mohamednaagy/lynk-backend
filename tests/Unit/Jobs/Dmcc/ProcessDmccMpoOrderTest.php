@@ -45,7 +45,7 @@ class ProcessDmccMpoOrderTest extends TestCase
         [self::$company] = $this->createCompany();
         self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::ClientWakalaCompleted,
+            'status' => FinancingOrderStatus::CommoditySoldToCustomer,
         ]);
         self::$traderOrder = TraderOrder::query()->create([
             'financing_order_id' => self::$order->id,
