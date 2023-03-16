@@ -61,8 +61,8 @@ class TraderOrderTransformer extends TransformerAbstract
         return $this->collection(collect([
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
             FinancingOrderHistory::ContractSigned,
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
             FinancingOrderHistory::ClientWakalaAccepted,
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
             FinancingOrderHistory::IssueMurabahaOffer,
             FinancingOrderHistory::MurabahaSaleCompleted,
         ]), new TraderHistoryTransformer($traderOrder));

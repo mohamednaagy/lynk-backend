@@ -208,7 +208,7 @@ class MakeOrderProceedTest extends TestCase
         ]);
 
         self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+            'action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ]);
 
         $this->actingAs(self::$adminManagerWithPermissions)
@@ -228,7 +228,7 @@ class MakeOrderProceedTest extends TestCase
         ]);
 
         self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+            'action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ]);
 
         $this->actingAs(self::$admin)
@@ -256,7 +256,7 @@ class MakeOrderProceedTest extends TestCase
         ]);
 
         self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+            'action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ]);
 
         self::$traderOrder->traderHistories()->create([
@@ -289,7 +289,7 @@ class MakeOrderProceedTest extends TestCase
         ]);
 
         self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+            'action' => FinancingOrderHistory::ContractSigned,
         ]);
 
         $this->actingAs(self::$admin)
@@ -321,7 +321,7 @@ class MakeOrderProceedTest extends TestCase
         ]);
 
         self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+            'action' => FinancingOrderHistory::ContractSigned,
         ]);
 
         $this->actingAs(self::$admin)
@@ -349,10 +349,6 @@ class MakeOrderProceedTest extends TestCase
         self::$financingOrder->update([
             'is_verification_required' => true,
             'status' => FinancingOrderStatus::MurabhaOfferIssued,
-        ]);
-
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
         ]);
 
         self::$traderOrder->traderHistories()->create([

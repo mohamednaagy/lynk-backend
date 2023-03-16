@@ -95,7 +95,7 @@ class ProcessDmccMpoOrderTest extends TestCase
             'provider' => 'else',
         ]);
         (new ProcessDmccMpoOrder(self::$order->id))->handle();
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::ClientWakalaCompleted));
+        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::CommoditySoldToCustomer));
     }
 
     public function test_process_dmcc_mpo_when_order_status_not_client_wakala_complete_fail()
