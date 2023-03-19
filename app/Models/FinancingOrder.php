@@ -210,7 +210,9 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function activeTraderOrder()
     {
-        return $this->traderOrders()->where('status', TraderOrderStatus::InProgress)->latest();
+        return $this->traderOrders()
+            ->where('status', TraderOrderStatus::InProgress)
+            ->latest();
     }
 
     public function canBeCompleted()
@@ -224,15 +226,14 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return ! $this->canBeCompleted();
     }
 
-    public function CanCreateTraderOrder()
+    public function canCreateTraderOrder()
     {
-        $orderDoesntHasInprogressTraderOrder = ! $this
-            ->traderOrders()
+        $doesNotHaveInProgressOrder = ! $this->traderOrders()
             ->where('status', TraderOrderStatus::InProgress)
             ->exists();
 
         $orderIsNotCompleted = $this->status->isNot(FinancingOrderStatus::Completed);
 
-        return $orderIsNotCompleted && $orderDoesntHasInprogressTraderOrder;
+        return $orderIsNotCompleted && $doesNotHaveInProgressOrder;
     }
 }
