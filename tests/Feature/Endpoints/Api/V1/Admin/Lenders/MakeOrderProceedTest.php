@@ -22,6 +22,8 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
@@ -43,7 +45,7 @@ class MakeOrderProceedTest extends TestCase
 
     private static Builder|Model|TraderOrder $traderOrder;
 
-    private static string $orderProceedUrl;
+    private static \Closure $orderProceedUrl;
 
     /**
      * @return void
@@ -67,6 +69,13 @@ class MakeOrderProceedTest extends TestCase
             perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit])
         );
 
+        $inProgressOrder = OrderScenario::inProgress();
+        $traderOrder = $inProgressOrder->createTraderOrderWithLastHistory(
+            config('trader.default'),
+            '123456',
+            TraderOrderStatus::In
+        )
+
         self::$financingOrder = $this->createOrder(
             self::$company->id,
             self::$userLender->id,
@@ -82,9 +91,9 @@ class MakeOrderProceedTest extends TestCase
             'status' => TraderOrderStatus::InProgress,
         ]);
 
-        self::$orderProceedUrl = 'api/v1/admin/'
-            .'orders/'.self::$financingOrder->id
-            .'/trader-orders/'.self::$traderOrder->id.'/proceed';
+        self::$orderProceedUrl = fn (FinancingOrder $order, TraderOrder $traderOrder) => 'api/v1/admin/'
+            . 'orders/' . $order->id
+            . '/trader-orders/' . $traderOrder->id . '/proceed';
     }
 
     /**
