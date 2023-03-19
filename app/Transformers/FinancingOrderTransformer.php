@@ -221,6 +221,6 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCanCreateTraderOrder(FinancingOrder $financingOrder): Primitive
     {
-        return $this->primitive($financingOrder->CanCreateTraderOrder());
+        return $this->primitive($financingOrder->canCreateTraderOrder());
     }
 }
