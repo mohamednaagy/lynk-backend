@@ -133,7 +133,7 @@ class TraderHistoryTransformer extends TransformerAbstract
     {
         $financingOrderStatus = app(StepHistoriesDictionary::class)
             ->getStepByHistory($history)
-            ?->status;
+            ?->step;
 
         if (blank($financingOrderStatus)) {
             return null;

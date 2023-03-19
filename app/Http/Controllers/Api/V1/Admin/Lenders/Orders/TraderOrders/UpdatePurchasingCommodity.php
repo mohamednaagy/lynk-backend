@@ -8,6 +8,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
+use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodityRequest;
 use App\Support\Traders\TraderHelperTrait;
@@ -35,9 +36,11 @@ class UpdatePurchasingCommodity extends Controller
         return DB::transaction(function () use ($traderOrder, $request) {
             [$financingOrder, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
 
-            $traderOrder->ensureCanAccessStep(
-                FinancingOrderStatus::WaitingPurchasingCommodity
-            );
+            // b cuz no steps has histories before this step
+            // so that i guess we can depend on order status
+            if ($financingOrder->status->isNot(FinancingOrderStatus::InProgress)) {
+                throw new OrderStatusDoesNotFollowSequenceException();
+            }
 
             app(HandlePurchasingCommodity::class)->handle($request, $financingOrder, $traderOrder);
 

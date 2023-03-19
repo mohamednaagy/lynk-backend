@@ -98,7 +98,7 @@ class TraderOrder extends Model implements HasMedia
         return ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions));
     }
 
-    public function checkOrderStepComplete(int $step): bool
+    public function checkOrderStepComplete($step): bool
     {
         if (! array_key_exists($step, MurabhaStep::$stepToHistoriesDictionary)) {
             throw new UnexpectedValueException('No mapping for this status');
@@ -133,14 +133,14 @@ class TraderOrder extends Model implements HasMedia
     /**
      * @throws OrderStatusDoesNotFollowSequenceException
      */
-    public function ensureCanAccessStep(int $step)
+    public function ensureCanAccessStep($step)
     {
         if (! $this->checkOrderStepComplete($step)) {
             throw new OrderStatusDoesNotFollowSequenceException();
         }
     }
 
-    public function canChangeParentOrderStatusIfStepWillBeUpdated(int $step): bool
+    public function canChangeParentOrderStatusIfStepWillBeUpdated($step): bool
     {
         if ($this->status->isNot(TraderOrderStatus::InProgress)) {
             return false;

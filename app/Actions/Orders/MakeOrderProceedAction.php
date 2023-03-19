@@ -6,8 +6,8 @@ use App\Actions\Contracts\Clients\AcceptClientWakala;
 use App\Actions\Contracts\Orders\MakeOrderProceed;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -50,14 +50,10 @@ class MakeOrderProceedAction implements MakeOrderProceed
             ->lockForUpdate()
             ->findOrFail($traderOrder->financing_order_id);
 
-        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
-            FinancingOrderStatus::ClientWakalaCompleted
-        );
-
         if (
             $this->isNotFollowingSequenceForClientWakalaAccepted($traderOrder)
             || ($forceToProceed === false && $order->is_verification_required)
-            || ($forceToProceed === false && ! $canUpdateOrderStatus)
+            || ($forceToProceed === false)
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
@@ -68,17 +64,11 @@ class MakeOrderProceedAction implements MakeOrderProceed
         }
 
         app(AcceptClientWakala::class)->handle($traderOrder);
-
-        if ($canUpdateOrderStatus) {
-            $order->update([
-                'status' => FinancingOrderStatus::ClientWakalaCompleted,
-            ]);
-        }
     }
 
     protected function isNotFollowingSequenceForClientWakalaAccepted($traderOrder)
     {
-        return ! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::ContractSigned);
+        return ! $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
     }
 
     /**
@@ -94,31 +84,21 @@ class MakeOrderProceedAction implements MakeOrderProceed
             ->lockForUpdate()
             ->findOrFail($traderOrder->financing_order_id);
 
-        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
-            FinancingOrderStatus::ContractSigned
-        );
-
         if (
             $this->isNotFollowingSequenceForContractSigned($traderOrder)
-            || ($forceToProceed === false && ! $canUpdateOrderStatus)
+            || ($forceToProceed === false)
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
 
-        if ($canUpdateOrderStatus) {
-            $order->update([
-                'status' => FinancingOrderStatus::ContractSigned,
-            ]);
-        }
-
         return [];
     }
 
     protected function isNotFollowingSequenceForContractSigned($traderOrder)
     {
-        return ! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::CommodityPurchased);
+        return ! $traderOrder->checkOrderStepComplete(MurabhaStep::PurchasingCommodity);
     }
 
     public function setSignedClientWakala(UploadedFile $signedClientWakala)

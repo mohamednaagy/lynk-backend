@@ -4,6 +4,7 @@ namespace App\Actions\Orders\TraderOrders\MurabhaCompleteDocument;
 
 use App\Actions\Contracts\Orders\TraderOrders\MurabhaCompleteDocument\HandleMurabhaCompleteDocument;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -27,7 +28,7 @@ class HandleMurabhaCompleteDocumentAction implements HandleMurabhaCompleteDocume
     public function handle(Request $request, FinancingOrder $order, TraderOrder $traderOrder): void
     {
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
-            FinancingOrderStatus::MurabahaSaleCompleted
+            MurabhaStep::MurabahaSaleCompleted
         );
 
         $trader = Trader::driver($traderOrder->provider);
@@ -36,11 +37,11 @@ class HandleMurabhaCompleteDocumentAction implements HandleMurabhaCompleteDocume
             $request,
             $trader,
             $traderOrder,
-            FinancingOrderStatus::MurabahaSaleCompleted
+            MurabhaStep::MurabahaSaleCompleted
         );
 
         if ($canUpdateOrderStatus) {
-            $trader->updateOrderStatus($order, FinancingOrderStatus::MurabahaSaleCompleted);
+            $trader->updateOrderStatus($order, FinancingOrderStatus::Completed);
 
             $traderOrder->update([
                 'status' => TraderOrderStatus::Completed,

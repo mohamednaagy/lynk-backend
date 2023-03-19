@@ -108,10 +108,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                 Route::get('/murabha-purchase-offer', GetMurabahaPurchaseOffer::class);
                 Route::get('/selling-commodity-to-client', GetCommodityCertificateForClient::class);
                 Route::post('/selling-commodity-to-client', UpdateCommodityCertificateForClient::class);
-                Route::post('/murabaha-purchase-offer', UpdateMurabahaPurchaseOffer::class);
-                Route::get('/murabaha-purchase-offer', GetMurabahaPurchaseOffer::class);
-                Route::get('/selling-commodity-to-client', GetCommodityCertificateForClient::class);
-                Route::post('/selling-commodity-to-client', UpdateCommodityCertificateForClient::class);
                 Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
                 Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
             });
