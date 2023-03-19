@@ -4,7 +4,6 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders;
 
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
@@ -64,7 +63,7 @@ class TraderOrderControllerStoreTest extends TestCase
         );
 
         self::$apiUrl = 'api/v1/admin/orders/'
-            .self::$financingOrder->getRawOriginal('id').
+            . self::$financingOrder->getRawOriginal('id') .
             '/trader-orders';
     }
 
@@ -100,7 +99,8 @@ class TraderOrderControllerStoreTest extends TestCase
             ->postJson(self::$apiUrl, [
                 'trader' => 'fake',
                 'reference_number' => '102030',
-            ])->assertStatus(Response::HTTP_OK);
+            ])
+            ->assertStatus(Response::HTTP_OK);
     }
 
     public function test_trader_order_controller_store_that_manager_with_permissions_can_access()
@@ -109,7 +109,8 @@ class TraderOrderControllerStoreTest extends TestCase
             ->postJson(self::$apiUrl, [
                 'trader' => 'fake',
                 'reference_number' => '102030',
-            ])->assertStatus(Response::HTTP_OK);
+            ])
+            ->assertStatus(Response::HTTP_OK);
     }
 
     public function test_trader_order_controller_store_that_manager_without_permissions_can_not_access()
@@ -118,7 +119,8 @@ class TraderOrderControllerStoreTest extends TestCase
             ->postJson(self::$apiUrl, [
                 'trader' => 'fake',
                 'reference_number' => '102030',
-            ])->assertStatus(Response::HTTP_FORBIDDEN);
+            ])
+            ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     /**
@@ -176,10 +178,11 @@ class TraderOrderControllerStoreTest extends TestCase
             ->postJson(self::$apiUrl, [
                 'trader' => 'fake',
                 'reference_number' => '102030',
-            ])->assertStatus(Response::HTTP_BAD_REQUEST)
+            ])
+            ->assertStatus(Response::HTTP_BAD_REQUEST)
             ->assertJsonFragment([
                 'message' => __('error.order_is_already_completed'),
-                'code' => ErrorCode::ORDER_IS_ALREADY_COMPLETED,
+                'code' => 1024,
             ]);
     }
 
@@ -206,7 +209,7 @@ class TraderOrderControllerStoreTest extends TestCase
             ->assertStatus(Response::HTTP_BAD_REQUEST)
             ->assertJsonFragment([
                 'message' => __('error.order_already_has_active_trader_order'),
-                'code' => ErrorCode::ORDER_ALREADY_HAS_ACTIVE_TRADER_ORDER,
+                'code' => 1025,
             ]);
     }
 
@@ -219,7 +222,8 @@ class TraderOrderControllerStoreTest extends TestCase
             ->postJson(self::$apiUrl, [
                 'trader' => 'fake',
                 'reference_number' => '102030',
-            ])->assertStatus(Response::HTTP_OK);
+            ])
+            ->assertStatus(Response::HTTP_OK);
 
         $this->assertTrue(self::$financingOrder->activeTraderOrder()->exists());
     }
