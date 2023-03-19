@@ -74,7 +74,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
     protected function isPreviousStepOfClientWakalaComplete(TraderOrder $traderOrder)
     {
         return ! $traderOrder->checkOrderStepComplete(
-            $this->stepHistoriesDictionary->getPreviousStepOf(MurabhaStep::ClientWakala)
+            $this->stepHistoriesDictionary->getPreviousStepOf(MurabhaStep::ClientWakala)->step
         );
     }
 
@@ -107,7 +107,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
     protected function isPreviousStepOfContractSignedComplete(TraderOrder $traderOrder)
     {
         return ! $traderOrder->checkOrderStepComplete(
-            $this->stepHistoriesDictionary->getPreviousStepOf(MurabhaStep::ContractSigned)
+            $this->stepHistoriesDictionary->getPreviousStepOf(MurabhaStep::ContractSigned)->step
         );
     }
 

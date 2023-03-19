@@ -98,7 +98,7 @@ class TraderOrder extends Model implements HasMedia
         return ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions));
     }
 
-    public function checkOrderStepComplete(int $step): bool
+    public function checkOrderStepComplete(string $step): bool
     {
         if (! array_key_exists($step, MurabhaStep::$stepToHistoriesDictionary)) {
             throw new UnexpectedValueException('No mapping for this status');
