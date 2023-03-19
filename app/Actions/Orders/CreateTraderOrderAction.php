@@ -2,20 +2,21 @@
 
 namespace App\Actions\Orders;
 
-use App\Actions\Contracts\Orders\CreateTrading;
+use App\Actions\Contracts\Orders\CreateTraderOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
+use App\Exceptions\OrderAlreadyHasActiveTraderOrderException;
 use App\Exceptions\OrderIsAlreadyCompletedException;
-use App\Exceptions\OrderIsAlreadyHasActiveTraderOrderException;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use Illuminate\Support\Arr;
 
-class CreateTradingAction implements CreateTrading
+class CreateTraderOrderAction implements CreateTraderOrder
 {
     /**
      * @return mixed
      */
-    public function handle($orderId, array $data): void
+    public function handle($orderId, array $data): TraderOrder
     {
         $financingOrder = FinancingOrder::query()
             ->lockForUpdate()
@@ -25,14 +26,16 @@ class CreateTradingAction implements CreateTrading
             throw new OrderIsAlreadyCompletedException;
         }
 
-        if ($financingOrder->traderOrders()->whereIn('status', [
-            TraderOrderStatus::InProgress,
-            TraderOrderStatus::Completed,
-        ])->exists()) {
-            throw new OrderIsAlreadyHasActiveTraderOrderException;
+        $doesInProgressTraderOrderExists = $financingOrder
+            ->traderOrders()
+            ->where('status', TraderOrderStatus::InProgress)
+            ->exists();
+
+        if ($doesInProgressTraderOrderExists) {
+            throw new OrderAlreadyHasActiveTraderOrderException;
         }
 
-        $financingOrder->traderOrders()->create([
+        return $financingOrder->traderOrders()->create([
             'provider' => Arr::get($data, 'trader'),
             'reference' => Arr::get($data, 'reference_number'),
             'status' => TraderOrderStatus::InProgress,

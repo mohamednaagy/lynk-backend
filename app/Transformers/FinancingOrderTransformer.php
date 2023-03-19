@@ -50,6 +50,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'trader_order_history',
         'can_be_completed',
         'payment_proof_url',
+        'can_create_trader_order',
     ];
 
     public function transform(FinancingOrder $financingOrder)
@@ -216,5 +217,10 @@ class FinancingOrderTransformer extends TransformerAbstract
         $url = $financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer);
 
         return $this->primitive($url?->file_url);
+    }
+
+    public function includeCanCreateTraderOrder(FinancingOrder $financingOrder): Primitive
+    {
+        return $this->primitive($financingOrder->CanCreateTraderOrder());
     }
 }

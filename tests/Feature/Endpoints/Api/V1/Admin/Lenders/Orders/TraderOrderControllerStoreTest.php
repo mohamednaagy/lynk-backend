@@ -4,6 +4,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
@@ -17,7 +18,7 @@ use Illuminate\Http\Response;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
-class CreateTradingTest extends TestCase
+class TraderOrderControllerStoreTest extends TestCase
 {
     use RefreshDatabase, AssertsAccessByRoleAndArea;
 
@@ -64,13 +65,13 @@ class CreateTradingTest extends TestCase
 
         self::$apiUrl = 'api/v1/admin/orders/'
             .self::$financingOrder->getRawOriginal('id').
-            '/trading';
+            '/trader-orders';
     }
 
     /**
      * @return void
      */
-    public function test_create_trading_unauth_user_cant_make_order_completed(): void
+    public function test_trader_order_controller_store_unauth_user_cant_make_order_completed(): void
     {
         $this->postJson(self::$apiUrl)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
@@ -82,7 +83,7 @@ class CreateTradingTest extends TestCase
     /**
      * @return void
      */
-    public function test_create_trading_only_roles_of_super_admin_area_can_access(): void
+    public function test_trader_order_controller_store_only_roles_of_super_admin_area_can_access(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
             return $this->actingAs($user)
@@ -93,7 +94,7 @@ class CreateTradingTest extends TestCase
         });
     }
 
-    public function test_create_trading_super_admin_can_access()
+    public function test_trader_order_controller_store_super_admin_can_access()
     {
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$apiUrl, [
@@ -102,7 +103,7 @@ class CreateTradingTest extends TestCase
             ])->assertStatus(Response::HTTP_OK);
     }
 
-    public function test_create_trading_that_manager_with_permissions_can_access()
+    public function test_trader_order_controller_store_that_manager_with_permissions_can_access()
     {
         $this->actingAs(self::$managerHasPermissions)
             ->postJson(self::$apiUrl, [
@@ -111,7 +112,7 @@ class CreateTradingTest extends TestCase
             ])->assertStatus(Response::HTTP_OK);
     }
 
-    public function test_create_trading_that_manager_without_permissions_can_not_access()
+    public function test_trader_order_controller_store_that_manager_without_permissions_can_not_access()
     {
         $this->actingAs(self::$managerHasNoPermissionPermissions)
             ->postJson(self::$apiUrl, [
@@ -123,7 +124,7 @@ class CreateTradingTest extends TestCase
     /**
      * @return void
      */
-    public function test_create_trading_that_trader_is_required(): void
+    public function test_trader_order_controller_store_that_trader_is_required(): void
     {
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$apiUrl, [
@@ -135,7 +136,7 @@ class CreateTradingTest extends TestCase
     /**
      * @return void
      */
-    public function test_create_trading_reference_number_is_required(): void
+    public function test_trader_order_controller_store_reference_number_is_required(): void
     {
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$apiUrl, [
@@ -147,7 +148,7 @@ class CreateTradingTest extends TestCase
     /**
      * @return void
      */
-    public function test_create_trading_trader_should_be_supported(): void
+    public function test_trader_order_controller_store_trader_should_be_supported(): void
     {
         $this->actingAs(self::$superAdminUser)
             ->postJson(
@@ -163,7 +164,7 @@ class CreateTradingTest extends TestCase
     /**
      * @return void
      */
-    public function test_create_trading_will_will_return_error_response_if_order_is_completed(): void
+    public function test_trader_order_controller_store_will_return_error_response_if_order_is_completed(): void
     {
         self::$financingOrder->update([
             'status' => FinancingOrderStatus::Completed,
@@ -178,13 +179,14 @@ class CreateTradingTest extends TestCase
             ])->assertStatus(Response::HTTP_BAD_REQUEST)
             ->assertJsonFragment([
                 'message' => __('error.order_is_already_completed'),
+                'code' => ErrorCode::ORDER_IS_ALREADY_COMPLETED,
             ]);
     }
 
     /**
      * @return void
      */
-    public function test_create_trading_will_return_error_response_if_order_has_active_trader(): void
+    public function test_trader_order_controller_store_will_return_error_response_if_order_has_active_trader(): void
     {
         self::$financingOrder->traderOrders()->create(
             [
@@ -203,14 +205,15 @@ class CreateTradingTest extends TestCase
             ])
             ->assertStatus(Response::HTTP_BAD_REQUEST)
             ->assertJsonFragment([
-                'message' => __('error.order_is_already_has_active_trader_order'),
+                'message' => __('error.order_already_has_active_trader_order'),
+                'code' => ErrorCode::ORDER_ALREADY_HAS_ACTIVE_TRADER_ORDER,
             ]);
     }
 
     /**
      * @return void
      */
-    public function test_create_trading_successfully(): void
+    public function test_trader_order_controller_store_successfully(): void
     {
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$apiUrl, [

@@ -5,7 +5,7 @@ namespace App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class CreateTradingRequest extends FormRequest
+class StoreTradingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
