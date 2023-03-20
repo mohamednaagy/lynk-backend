@@ -28,7 +28,13 @@ trait TraderHelperTrait
                 'file' => 'original_holding_certificate',
             ],
         ],
-        MurabhaStep::ClientWakala => [
+        MurabhaStep::CommodityPurchased => [
+            FinancingOrderHistory::CommodityPurchased => null,
+        ],
+        MurabhaStep::WaitingClientWakala => [
+            FinancingOrderHistory::WaitingClientWakala => null,
+        ],
+        MurabhaStep::ClientWakalaCompleted => [
             FinancingOrderHistory::ClientWakalaAccepted => null,
         ],
         MurabhaStep::MurabhaOfferIssued => [

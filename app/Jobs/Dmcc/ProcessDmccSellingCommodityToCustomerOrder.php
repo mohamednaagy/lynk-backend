@@ -2,7 +2,7 @@
 
 namespace App\Jobs\Dmcc;
 
-use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -44,15 +44,13 @@ class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue
                 ->whereIn('provider', ['dmcc', 'fake'])
                 ->first();
 
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::CommoditySoldToCustomer)) {
+            if (! $lastTraderOrder->checkOrderStepComplete(MurabhaStep::ClientWakalaCompleted)) {
                 return;
             }
 
             $trader = Trader::driver($lastTraderOrder->provider);
 
             $trader->createSellingCommodityToCustomerDocument($lastTraderOrder);
-
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommoditySoldToCustomer);
         });
     }
 

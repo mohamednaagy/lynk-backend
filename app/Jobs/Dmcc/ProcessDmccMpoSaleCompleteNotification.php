@@ -3,8 +3,8 @@
 namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -60,7 +60,7 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
 
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::MurabahaSaleCompleted)) {
+            if (! $traderOrder->checkOrderStepComplete(MurabhaStep::MurabhaOfferIssued)) {
                 return;
             }
 
@@ -92,8 +92,6 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
                 $traderOrder,
                 FinancingOrderHistory::MurabahaSaleCompleted
             );
-
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabahaSaleCompleted);
 
             $traderOrder->update([
                 'status' => TraderOrderStatus::Completed,

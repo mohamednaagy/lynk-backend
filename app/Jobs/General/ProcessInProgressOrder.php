@@ -2,7 +2,6 @@
 
 namespace App\Jobs\General;
 
-use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
@@ -51,13 +50,7 @@ class ProcessInProgressOrder implements ShouldQueue
                 return;
             }
 
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::WaitingPurchasingCommodity)) {
-                return;
-            }
-
             $trader->getTti($financingOrder);
-
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingPurchasingCommodity);
         });
     }
 

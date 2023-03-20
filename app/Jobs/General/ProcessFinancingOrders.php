@@ -3,10 +3,12 @@
 namespace App\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Jobs\Dmcc\ProcessDmccMpoOrder;
 use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
 use App\Jobs\Dmcc\ProcessDmccSellingCommodityToCustomerOrder;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -27,20 +29,33 @@ class ProcessFinancingOrders implements ShouldQueue
         FinancingOrder::query()
             ->whereIn('status', [
                 FinancingOrderStatus::Approved,
-                FinancingOrderStatus::ClientWakalaCompleted,
-                FinancingOrderStatus::RespondedToPtp,
-                FinancingOrderStatus::ContractSigned,
-                FinancingOrderStatus::CommoditySoldToCustomer,
             ])->chunk(10, function ($ordersCollection) {
-                $ordersCollection->each(function ($order) {
-                    match ($order->status->value) {
-                        FinancingOrderStatus::Approved => ProcessInProgressOrder::dispatch($order->id),
-                        FinancingOrderStatus::RespondedToPtp => ProcessDmccRespondedToPtpOrder::dispatch($order->id),
-                        FinancingOrderStatus::ClientWakalaCompleted => ProcessDmccSellingCommodityToCustomerOrder::dispatch($order->id),
-                        FinancingOrderStatus::ContractSigned => ProcessAskClientForWakala::dispatch($order->id),
-                        FinancingOrderStatus::CommoditySoldToCustomer => ProcessDmccMpoOrder::dispatch($order->id),
-                        default => null
-                    };
+                $ordersCollection->each(function (FinancingOrder $order) {
+                    if (! $order->traderOrders()->count()) {
+                        ProcessInProgressOrder::dispatch($order->id);
+                    }
+
+                    /** @var TraderOrder $traderOrder */
+                    $traderOrder = $order->activeTraderOrder()->first();
+                    if (! $traderOrder) {
+                        return;
+                    }
+
+                    if (! $traderOrder->checkOrderStepComplete(MurabhaStep::PurchasingCommodity)) {
+                        ProcessDmccRespondedToPtpOrder::dispatch($order->id);
+                    }
+
+                    if ($traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakalaCompleted)) {
+                        ProcessDmccSellingCommodityToCustomerOrder::dispatch($order->id);
+                    }
+
+                    if ($traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned)) {
+                        ProcessAskClientForWakala::dispatch($order->id);
+                    }
+
+                    if ($traderOrder->checkOrderStepComplete(MurabhaStep::CommoditySoldToCustomer)) {
+                        ProcessDmccMpoOrder::dispatch($order->id);
+                    }
                 });
             });
     }

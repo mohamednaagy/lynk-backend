@@ -45,6 +45,8 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
 
     const Expired = 19;
 
+    const WaitingClientWakala = 20;
+
     public static array $notCancellableActions = [
         self::GetMurabahaPurchaseOfferDocument,
         self::AttachMpoDocument,

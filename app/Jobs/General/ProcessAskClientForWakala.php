@@ -3,8 +3,11 @@
 namespace App\Jobs\General;
 
 use App\Actions\Contracts\Clients\AskClientWakala;
-use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingOrderHistory;
+use App\Enums\MurabhaStep;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
+use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -17,7 +20,7 @@ use Illuminate\Support\Str;
 
 class ProcessAskClientForWakala implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
     protected mixed $financingOrder;
 
@@ -43,7 +46,10 @@ class ProcessAskClientForWakala implements ShouldQueue
         /** @var FinancingOrder $financingOrder */
         $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
 
-        if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::WaitingClientWakala)) {
+        /** @var TraderOrder $traderOrder */
+        $traderOrder = $financingOrder->activeTraderOrder()->lockForUpdate()->first();
+
+        if (! $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned)) {
             return;
         }
 
@@ -54,9 +60,7 @@ class ProcessAskClientForWakala implements ShouldQueue
             );
         }
 
-        $financingOrder->update([
-            'status' => FinancingOrderStatus::WaitingClientWakala,
-        ]);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::WaitingClientWakala);
     }
 
     /**

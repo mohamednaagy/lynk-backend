@@ -7,9 +7,10 @@ use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsMurabhaOfferIssued;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
-use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Models\FinancingOrder;
 
+// :TODO find a handle for this observer
 class FinancingOrderObserver
 {
     /**
@@ -26,7 +27,7 @@ class FinancingOrderObserver
             return;
         }
 
-        if ($financingOrder->status->is(FinancingOrderStatus::MurabhaOfferIssued)) {
+        if ($financingOrder->status->is(MurabhaStep::MurabhaOfferIssued)) {
             app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)->handle($financingOrder);
 
             return;
@@ -39,12 +40,12 @@ class FinancingOrderObserver
         }
 
         $actions = match ($financingOrder->status->value) {
-            FinancingOrderStatus::CommoditySoldToCustomer => [
+            MurabhaStep::CommoditySoldToCustomer => [
                 SendSmsWhenStatusIsCommoditySoldToCustomer::class,
                 FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
             ],
-            FinancingOrderStatus::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
-            FinancingOrderStatus::CommodityPurchased => [FireWebhookWhenStatusIsCommodityPurchased::class],
+            MurabhaStep::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
+            MurabhaStep::CommodityPurchased => [FireWebhookWhenStatusIsCommodityPurchased::class],
             default => []
         };
 

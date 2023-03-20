@@ -3,7 +3,7 @@
 namespace App\Actions\Orders\TraderOrders\MurabhaPurchaseOffer;
 
 use App\Actions\Contracts\Orders\TraderOrders\MurabhaPurchaseOffer\HandleMurabhaPurchaseOffer;
-use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -25,21 +25,13 @@ class HandleMurabhaPurchaseOfferAction implements HandleMurabhaPurchaseOffer
         FinancingOrder $order,
         TraderOrder $traderOrder
     ): void {
-        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
-            FinancingOrderStatus::MurabhaOfferIssued
-        );
-
         $trader = Trader::driver($traderOrder->provider);
 
         $this->createStepHistories(
             $request,
             $trader,
             $traderOrder,
-            FinancingOrderStatus::MurabhaOfferIssued
+            MurabhaStep::MurabhaOfferIssued
         );
-
-        if ($canUpdateOrderStatus) {
-            $trader->updateOrderStatus($order, FinancingOrderStatus::MurabhaOfferIssued);
-        }
     }
 }

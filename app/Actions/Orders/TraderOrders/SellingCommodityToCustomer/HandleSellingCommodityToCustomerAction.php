@@ -4,7 +4,6 @@ namespace App\Actions\Orders\TraderOrders\SellingCommodityToCustomer;
 
 use App\Actions\Contracts\Orders\TraderOrders\SellingCommodityToCustomer\HandleSellingCommodityToCustomer;
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -27,10 +26,6 @@ class HandleSellingCommodityToCustomerAction implements HandleSellingCommodityTo
      */
     public function handle(Request $request, FinancingOrder $order, TraderOrder $traderOrder): void
     {
-        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
-            FinancingOrderStatus::CommoditySoldToCustomer
-        );
-
         $trader = Trader::driver($traderOrder->drive);
 
         if ($request->boolean('automatically_generate_file')) {
@@ -43,10 +38,6 @@ class HandleSellingCommodityToCustomerAction implements HandleSellingCommodityTo
                 ->toMediaCollection(TraderOrderMediaCollection::SellingCommodityToCustomer);
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
-        }
-
-        if ($canUpdateOrderStatus) {
-            $trader->updateOrderStatus($order, FinancingOrderStatus::CommoditySoldToCustomer);
         }
     }
 }

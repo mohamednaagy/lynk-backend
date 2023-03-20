@@ -2,9 +2,9 @@
 
 namespace App\Jobs\Dmcc;
 
-use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingOrderHistory;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -55,11 +55,9 @@ class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue
                 return;
             }
 
-            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
-
             $trader = Trader::driver($traderOrder->provider);
 
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::CommodityPurchased)) {
+            if ($traderOrder->checkOrderStepComplete(MurabhaStep::PurchasingCommodity)) {
                 return;
             }
 
@@ -67,7 +65,7 @@ class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue
 
             $trader->createTransferOwnershipToLenderDocument($traderOrder);
 
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommodityPurchased);
+            $trader->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CommodityPurchased);
         });
     }
 
