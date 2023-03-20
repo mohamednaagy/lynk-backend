@@ -596,6 +596,12 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             <div class="mx-4">
                 {!! $template !!}
             </div>
+            <div style="width: 20%; padding-top: 50px; float: left;text-align: center;">
+                <span>
+                    {{ __('common.client_signature') }}
+                </span>
+                <hr>
+            </div>
         </div>
 
         <div class="flex flex-row justify-between pt-8 font-semibold">
