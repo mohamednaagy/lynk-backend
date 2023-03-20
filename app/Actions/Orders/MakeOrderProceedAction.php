@@ -56,9 +56,9 @@ class MakeOrderProceedAction implements MakeOrderProceed
             ->findOrFail($traderOrder->financing_order_id);
 
         if (
-            $this->isPreviousStepOfClientWakalaNotComplete($traderOrder)
+            $this->isPreviousStepOfClientWakalaNotCompleted($traderOrder)
             || ($forceToProceed === false && $order->is_verification_required)
-            || ($forceToProceed === false && $this->isClientWakalaStepNotComplete($traderOrder))
+            || ($forceToProceed === false && $this->isClientWakalaStepNotCompleted($traderOrder))
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
@@ -71,14 +71,14 @@ class MakeOrderProceedAction implements MakeOrderProceed
         app(AcceptClientWakala::class)->handle($traderOrder);
     }
 
-    protected function isPreviousStepOfClientWakalaNotComplete(TraderOrder $traderOrder)
+    protected function isPreviousStepOfClientWakalaNotCompleted(TraderOrder $traderOrder)
     {
         return ! $traderOrder->checkOrderStepComplete(
             $this->stepHistoriesDictionary->getPreviousStepOf(MurabhaStep::ClientWakala)->step
         );
     }
 
-    protected function isClientWakalaStepNotComplete(TraderOrder $traderOrder)
+    protected function isClientWakalaStepNotCompleted(TraderOrder $traderOrder)
     {
         return ! $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala);
     }
@@ -93,8 +93,8 @@ class MakeOrderProceedAction implements MakeOrderProceed
     protected function handleContractSigned(TraderOrder $traderOrder, bool $forceToProceed)
     {
         if (
-            $this->isPreviousStepOfContractSignedNotComplete($traderOrder)
-            || ($forceToProceed === false && $this->isContractSignedStepNotComplete($traderOrder))
+            $this->isPreviousStepOfContractSignedNotCompleted($traderOrder)
+            || ($forceToProceed === false && $this->isContractSignedStepNotCompleted($traderOrder))
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
@@ -104,14 +104,14 @@ class MakeOrderProceedAction implements MakeOrderProceed
         return [];
     }
 
-    protected function isPreviousStepOfContractSignedNotComplete(TraderOrder $traderOrder)
+    protected function isPreviousStepOfContractSignedNotCompleted(TraderOrder $traderOrder)
     {
         return ! $traderOrder->checkOrderStepComplete(
             $this->stepHistoriesDictionary->getPreviousStepOf(MurabhaStep::ContractSigned)->step
         );
     }
 
-    protected function isContractSignedStepNotComplete(TraderOrder $traderOrder)
+    protected function isContractSignedStepNotCompleted(TraderOrder $traderOrder)
     {
         return ! $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
     }
