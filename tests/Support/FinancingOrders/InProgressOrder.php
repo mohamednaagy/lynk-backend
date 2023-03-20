@@ -2,6 +2,8 @@
 
 namespace Tests\Support\FinancingOrders;
 
+use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 
@@ -11,9 +13,16 @@ class InProgressOrder
     {
     }
 
-    public static function startFrom(FinancingOrder $financingOrder)
+    public static function of(FinancingOrder|CommittedOrder $financingOrder)
     {
-        return new static($financingOrder);
+        if ($financingOrder->status->isNot(FinancingOrderStatus::InProgress)) {
+            throw new \Exception('Order is not in progress');
+        }
+
+        return new static(
+            $financingOrder instanceof CommittedOrder ?
+                $financingOrder->model() : $financingOrder
+        );
     }
 
     public function getFinancingOrder()
@@ -21,8 +30,8 @@ class InProgressOrder
         return $this->financingOrder;
     }
 
-    protected function createTraderOrder(
-        string $driver,
+    public function createTraderOrder(
+        string $driver = null,
         string $reference = '123456',
         int $status = TraderOrderStatus::InProgress
     ) {
@@ -30,13 +39,19 @@ class InProgressOrder
             throw new \Exception('Active trader order exists');
         }
 
-        return $this->financingOrder
+        $traderOrder = $this->financingOrder
             ->traderOrders()
             ->create([
-                'driver' => $driver ?? config('trader.default'),
+                'provider' => $driver ?? config('trader.default'),
                 'reference' => $reference,
                 'status' => $status,
             ]);
+
+        $traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::GetTtiId,
+        ]);
+
+        return $traderOrder;
     }
 
     protected function doesInProgressTraderOrderExist()

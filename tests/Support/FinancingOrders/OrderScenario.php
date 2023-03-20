@@ -18,27 +18,21 @@ class OrderScenario
     public static function rejected(string $rejectionReason = '')
     {
         return (new OrderCreator)->status(FinancingOrderStatus::Rejected)
-            ->statusReason($rejectionReason)
-            ->commit();
+            ->statusReason($rejectionReason);
     }
 
     public static function cancelled()
     {
-        return (new OrderCreator)->status(FinancingOrderStatus::Cancelled)
-            ->commit();
+        return (new OrderCreator)->status(FinancingOrderStatus::Cancelled);
     }
 
     public static function completed()
     {
-        return (new OrderCreator)->status(FinancingOrderStatus::Completed)
-            ->commit();
+        return (new OrderCreator)->status(FinancingOrderStatus::Completed);
     }
 
     public static function inProgress()
     {
-        $order = (new OrderCreator)->status(FinancingOrderStatus::InProgress)
-            ->commit();
-
-        return InProgressOrder::startFrom($order);
+        return (new OrderCreator)->status(FinancingOrderStatus::InProgress);
     }
 }

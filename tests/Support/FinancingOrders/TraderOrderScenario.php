@@ -2,6 +2,7 @@
 
 namespace Tests\Support\FinancingOrders;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -20,7 +21,7 @@ class TraderOrderScenario
         $this->orderedSteps = array_keys(MurabhaStep::$stepToHistoriesDictionary);
     }
 
-    public static function startFrom(TraderOrder $traderOrder)
+    public static function of(TraderOrder $traderOrder)
     {
         return new static(
             TraderOrder::query()
@@ -35,34 +36,32 @@ class TraderOrderScenario
         return $this->traderOrder;
     }
 
-    public function moveToStep(string $nextStep)
+    public function reset()
+    {
+        $this->traderOrder
+            ->traderHistories()
+            ->where('action', '!=', FinancingOrderHistory::GetTtiId)
+            ->delete();
+
+        $this->traderOrder->load('traderHistories');
+
+        $this->traderOrder = $this->traderOrder->query()->withLastHistoryAction()->first();
+
+        return $this;
+    }
+
+    public function moveToStep(string $destinationStep)
     {
         $currentStep = $this->dictionary->getStepByHistory($this->traderOrder->last_history_action);
+        $nextStep = $this->dictionary->getNextStepOf($currentStep->step);
 
-        if (! $currentStep instanceof StepHistoriesDictionaryNode) {
-            throw new \Exception('Step doesn\'t exists');
+        if (! $currentStep instanceof StepHistoriesDictionaryNode || ! $nextStep instanceof StepHistoriesDictionaryNode) {
+            throw new \Exception('Current/next step doesn\'t exists');
         }
 
-        $positionOfCurrentStep = array_search($currentStep->step, $this->orderedSteps);
+        $lastHistoryOfDestinationStep = end(MurabhaStep::$stepToHistoriesDictionary[$destinationStep]);
 
-        if (($positionOfCurrentStep + 1) === count($this->orderedSteps)) {
-            throw new \Exception('The current step is the last one.');
-        }
-
-        $positionOfNextStep = array_search($nextStep, $this->orderedSteps);
-        if ($positionOfCurrentStep >= $positionOfNextStep) {
-            throw new \Exception('Cannot move to next stage because it is the same or before the current one.');
-        }
-
-        $createAt = now();
-        foreach (MurabhaStep::$stepToHistoriesDictionary[$nextStep] as $history) {
-            $this->traderOrder->traderHistories()->create([
-                'action' => $history,
-                'created_at' => $createAt,
-            ]);
-
-            $createAt = $createAt->addMinutes(1);
-        }
+        $this->moveToHistory($lastHistoryOfDestinationStep);
     }
 
     public function moveToHistory(int $destinationHistory)
@@ -76,21 +75,41 @@ class TraderOrderScenario
 
         $positionOfCurrentStep = array_search($currentStep->step, $this->orderedSteps);
 
-        if (($positionOfCurrentStep + 1) === count($this->orderedSteps)) {
+        if (
+            $positionOfCurrentStep !== false
+            && ($positionOfCurrentStep + 1) === count($this->orderedSteps)
+            && $this->traderOrder->checkOrderStepComplete($currentStep->step)
+        ) {
             throw new \Exception('The current step is the last one.');
         }
 
-        $positionOfNextStep = array_search($destinationStep, $this->orderedSteps);
-        if ($positionOfCurrentStep >= $positionOfNextStep) {
+        $positionOfNextStep = array_search($destinationStep->step, $this->orderedSteps);
+        if (
+            $positionOfNextStep !== false
+            && $positionOfCurrentStep >= $positionOfNextStep
+            && $this->traderOrder->checkOrderStepComplete($destinationStep->step)
+        ) {
             throw new \Exception('Cannot move to next stage because it is the same or before the current one.');
         }
 
         $createAt = now();
 
-        for ($i = $positionOfCurrentStep + 1; $i <= $positionOfNextStep; $i++) {
-            $nextStep = $this->orderedSteps[$i];
+        for ($i = $positionOfCurrentStep; $i <= $positionOfNextStep; $i++) {
+            $step = $this->orderedSteps[$i];
+            $histories = MurabhaStep::$stepToHistoriesDictionary[$step];
 
-            foreach (MurabhaStep::$stepToHistoriesDictionary[$nextStep] as $history) {
+            if (
+                $step === $currentStep->step &&
+                ! $this->traderOrder->load('traderHistories')->checkOrderStepComplete($currentStep->step)
+            ) {
+                $lastActionHistoryPosition = array_search(
+                    $this->traderOrder->traderHistories()->latest()->first()->action,
+                    $currentStep->histories
+                );
+                $histories = collect($histories)->slice($lastActionHistoryPosition + 1)->values();
+            }
+
+            foreach ($histories as $history) {
                 $this->traderOrder->traderHistories()->create([
                     'action' => $history,
                     'created_at' => $createAt,

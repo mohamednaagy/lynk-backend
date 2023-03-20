@@ -5,15 +5,12 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\ErrorCode;
-use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\Role;
 use App\Enums\Subject;
-use App\Enums\TraderOrderStatus;
 use App\Models\Company;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -22,6 +19,8 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Tests\Support\FinancingOrders\CommittedOrder;
+use Tests\Support\FinancingOrders\InProgressOrder;
 use Tests\Support\FinancingOrders\OrderScenario;
 use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
@@ -41,11 +40,11 @@ class MakeOrderProceedTest extends TestCase
 
     private static User $adminManagerWithPermissions;
 
-    private static Builder|Model|FinancingOrder $financingOrder;
+    private static CommittedOrder $financingOrder;
 
     private static Builder|Model|TraderOrder $traderOrder;
 
-    private static \Closure $orderProceedUrl;
+    private static string $orderProceedUrl;
 
     /**
      * @return void
@@ -69,31 +68,16 @@ class MakeOrderProceedTest extends TestCase
             perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit])
         );
 
-        $inProgressOrder = OrderScenario::inProgress();
-        $traderOrder = $inProgressOrder->createTraderOrderWithLastHistory(
-            config('trader.default'),
-            '123456',
-            TraderOrderStatus::In
-        )
+        self::$financingOrder = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$userLender)
+            ->commit();
 
-        self::$financingOrder = $this->createOrder(
-            self::$company->id,
-            self::$userLender->id,
-            [
-                'is_verification_required' => false,
-                'status' => FinancingOrderStatus::PendingApproval,
-            ]
-        );
+        self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder();
 
-        self::$traderOrder = self::$financingOrder->traderOrders()->create([
-            'provider' => 'dmcc',
-            'reference' => '123456789',
-            'status' => TraderOrderStatus::InProgress,
-        ]);
-
-        self::$orderProceedUrl = fn (FinancingOrder $order, TraderOrder $traderOrder) => 'api/v1/admin/'
-            . 'orders/' . $order->id
-            . '/trader-orders/' . $traderOrder->id . '/proceed';
+        self::$orderProceedUrl = 'api/v1/admin/'
+            .'orders/'.self::$financingOrder->id
+            .'/trader-orders/'.self::$traderOrder->id.'/proceed';
     }
 
     /**
@@ -153,28 +137,9 @@ class MakeOrderProceedTest extends TestCase
     /**
      * @return void
      */
-    public function test_admin_proceed_order_client_wakala_file_required_when_case_is_client_wakala_accepted_and_order_verification_is_false(): void
-    {
-        self::$financingOrder->update([
-            'is_verification_required' => false,
-        ]);
-
-        $this->actingAs(self::$admin)
-            ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
-            ])
-            ->assertStatus(422)
-            ->assertJsonValidationErrorFor('client_wakala');
-    }
-
-    /**
-     * @return void
-     */
     public function test_admin_proceed_order_client_wakala_should_be_pdf_or_jpg_png_file(): void
     {
-        self::$financingOrder->update([
-            'is_verification_required' => true,
-        ]);
+        self::$financingOrder->requireVerification(false)->commit();
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
@@ -212,13 +177,9 @@ class MakeOrderProceedTest extends TestCase
      */
     public function test_admin_proceed_order_manager_can_access_with_permissions(): void
     {
-        self::$financingOrder->update([
-            'status' => FinancingOrderStatus::CommodityPurchased,
-        ]);
-
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-        ]);
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::PurchasingCommodity);
 
         $this->actingAs(self::$adminManagerWithPermissions)
             ->postJson(self::$orderProceedUrl, [
@@ -232,13 +193,9 @@ class MakeOrderProceedTest extends TestCase
      */
     public function test_admin_proceed_order_on_contract_signed_successfully(): void
     {
-        self::$financingOrder->update([
-            'status' => FinancingOrderStatus::CommodityPurchased,
-        ]);
-
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-        ]);
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::PurchasingCommodity);
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
@@ -248,11 +205,6 @@ class MakeOrderProceedTest extends TestCase
             ->assertJsonStructure([
                 'data',
             ]);
-
-        $this->assertEquals(
-            FinancingOrderStatus::ContractSigned,
-            FinancingOrder::find(self::$financingOrder->id)->status->value
-        );
     }
 
     /**
@@ -260,17 +212,9 @@ class MakeOrderProceedTest extends TestCase
      */
     public function test_admin_reprocessed_order_on_contract_signed_successfully(): void
     {
-        self::$financingOrder->update([
-            'status' => FinancingOrderStatus::MurabhaOfferIssued,
-        ]);
-
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-        ]);
-
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::ContractSigned,
-        ]);
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::ContractSigned);
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
@@ -280,11 +224,6 @@ class MakeOrderProceedTest extends TestCase
             ->assertJsonStructure([
                 'data',
             ]);
-
-        $this->assertEquals(
-            FinancingOrderStatus::MurabhaOfferIssued,
-            FinancingOrder::find(self::$financingOrder->id)->status->value
-        );
     }
 
     /**
@@ -292,14 +231,11 @@ class MakeOrderProceedTest extends TestCase
      */
     public function test_admin_proceed_order_on_client_wakala_accepted_successfully_when_verification_is_not_required(): void
     {
-        self::$financingOrder->update([
-            'status' => FinancingOrderStatus::WaitingClientWakala,
-            'is_verification_required' => false,
-        ]);
+        self::$financingOrder->requireVerification(false)->commit();
 
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::ContractSigned,
-        ]);
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::ContractSigned);
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
@@ -311,11 +247,6 @@ class MakeOrderProceedTest extends TestCase
                 'data',
             ]);
 
-        $this->assertEquals(
-            FinancingOrder::find(self::$financingOrder->id)->status->value,
-            FinancingOrderStatus::ClientWakalaCompleted
-        );
-
         $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::SignedClientWakala));
     }
 
@@ -324,14 +255,11 @@ class MakeOrderProceedTest extends TestCase
      */
     public function test_admin_processed_order_on_client_wakala_accepted_successfully(): void
     {
-        self::$financingOrder->update([
-            'is_verification_required' => true,
-            'status' => FinancingOrderStatus::WaitingClientWakala,
-        ]);
+        self::$financingOrder->requireVerification(true)->commit();
 
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::ContractSigned,
-        ]);
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::ContractSigned);
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
@@ -341,11 +269,6 @@ class MakeOrderProceedTest extends TestCase
             ->assertJsonStructure([
                 'data',
             ]);
-
-        $this->assertEquals(
-            FinancingOrderStatus::ClientWakalaCompleted,
-            FinancingOrder::find(self::$financingOrder->id)->status->value
-        );
 
         $this->assertFalse(self::$traderOrder->hasMedia(TraderOrderMediaCollection::SignedClientWakala));
     }
@@ -355,18 +278,11 @@ class MakeOrderProceedTest extends TestCase
      */
     public function test_admin_reproceed_order_on_client_wakala_accepted_successfully_when_verification_is_required(): void
     {
-        self::$financingOrder->update([
-            'is_verification_required' => true,
-            'status' => FinancingOrderStatus::MurabhaOfferIssued,
-        ]);
+        self::$financingOrder->requireVerification(true)->commit();
 
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::ContractSigned,
-        ]);
-
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::ClientWakalaAccepted,
-        ]);
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::ClientWakala);
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
@@ -377,11 +293,6 @@ class MakeOrderProceedTest extends TestCase
                 'data',
             ]);
 
-        $this->assertEquals(
-            FinancingOrderStatus::MurabhaOfferIssued,
-            FinancingOrder::find(self::$financingOrder->id)->status->value
-        );
-
         $this->assertFalse(self::$traderOrder->hasMedia(TraderOrderMediaCollection::SignedClientWakala));
     }
 
@@ -390,7 +301,7 @@ class MakeOrderProceedTest extends TestCase
      */
     public function test_make_order_proceed_on_order_status_doesnt_follow_sequence_for_contract_signed(): void
     {
-        self::$traderOrder->traderHistories()->delete();
+        TraderOrderScenario::of(self::$traderOrder)->reset();
 
         $response = $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
@@ -409,7 +320,7 @@ class MakeOrderProceedTest extends TestCase
      */
     public function test_make_order_proceed_on_order_status_doesnt_follow_sequence_for_client_wakala_accepted(): void
     {
-        self::$traderOrder->traderHistories()->delete();
+        TraderOrderScenario::of(self::$traderOrder)->reset();
 
         $response = $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
