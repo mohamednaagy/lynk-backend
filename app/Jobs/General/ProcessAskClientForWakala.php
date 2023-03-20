@@ -3,6 +3,7 @@
 namespace App\Jobs\General;
 
 use App\Actions\Contracts\Clients\AskClientWakala;
+use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use Illuminate\Bus\Queueable;
@@ -42,8 +43,16 @@ class ProcessAskClientForWakala implements ShouldQueue
     {
         /** @var FinancingOrder $financingOrder */
         $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
+        $orderCantMoveToNextStep = $financingOrder
+            ->status
+            ->cantMoveTo(FinancingOrderStatus::WaitingClientWakala);
 
-        if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::WaitingClientWakala)) {
+        $lastTraderOrder = $financingOrder
+            ->activeTraderOrder()
+            ->whereIn('provider', ['dmcc', 'fake'])
+            ->first();
+
+        if ($orderCantMoveToNextStep || blank($lastTraderOrder)) {
             return;
         }
 
@@ -53,6 +62,8 @@ class ProcessAskClientForWakala implements ShouldQueue
                 Str::replace('{order_id}', $financingOrder->id, Config::get('frontend.client_wakala_url'))
             );
         }
+
+        app()->make(GenerateClientWakala::class)->handle($lastTraderOrder);
 
         $financingOrder->update([
             'status' => FinancingOrderStatus::WaitingClientWakala,

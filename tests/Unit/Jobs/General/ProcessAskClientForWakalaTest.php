@@ -3,10 +3,13 @@
 namespace Tests\Unit\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
+use App\Enums\TraderOrderStatus;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Models\User;
 use App\Support\Sms\Events\SmsSent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -25,6 +28,8 @@ class ProcessAskClientForWakalaTest extends TestCase
 
     protected static FinancingOrder $order;
 
+    protected static TraderOrder $traderOrder;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -33,6 +38,12 @@ class ProcessAskClientForWakalaTest extends TestCase
         self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
             'status' => FinancingOrderStatus::ContractSigned,
+        ]);
+
+        self::$traderOrder = self::$order->traderOrders()->create([
+            'provider' => 'fake',
+            'reference' => 12300,
+            'status' => TraderOrderStatus::InProgress,
         ]);
     }
 
@@ -97,5 +108,14 @@ class ProcessAskClientForWakalaTest extends TestCase
         $processOrder->handle();
 
         Event::assertDispatched(SmsSent::class);
+    }
+
+    public function test_process_ask_client_for_wakala_client_wakala_is_generated_successfully()
+    {
+        $processOrder = new ProcessAskClientForWakala(self::$order->id);
+
+        $processOrder->handle();
+
+        $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::ClientWakala));
     }
 }
