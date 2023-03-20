@@ -29,27 +29,27 @@ class LenderUserController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Index, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Show, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Create, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Edit, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Edit, Action::Manage])
         )->only('update');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Delete, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Delete, Action::Manage])
         )->only('destroy');
     }
 
@@ -114,9 +114,9 @@ class LenderUserController extends Controller
         return DB::transaction(function () use ($lender, $request, $createUserWithRoleAndPermission) {
             $user = $createUserWithRoleAndPermission->handle(
                 $request->validated() +
-                [
-                    'company_id' => $lender->id,
-                ]
+                    [
+                        'company_id' => $lender->id,
+                    ]
             );
 
             $invitationUrl = $request->validated('redirect_url');
@@ -168,6 +168,8 @@ class LenderUserController extends Controller
     public function destroy(Company $lender, User $user): JsonResponse
     {
         $this->ensureUserHasRoleInLenderAreaExceptApiUserRole($user);
+
+        $user->update(['email' => 'del_'.$user->email]);
         $user->delete();
 
         return $this->successResponse();

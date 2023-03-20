@@ -182,6 +182,8 @@ class TraderUserController extends Controller
     public function destroy(Company $trader, User $user): JsonResponse
     {
         $this->checkIfUserDoesNotHaveTraderAreaRole($user);
+
+        $user->update(['email' => 'del_'.$user->email]);
         $user->delete();
 
         return $this->successResponse();

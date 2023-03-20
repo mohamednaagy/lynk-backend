@@ -28,27 +28,27 @@ class UserController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderUsers, Action::Index, Action::Manage])
+                perm(Area::Lender, [Subject::LenderUsers, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderUsers, Action::Create, Action::Manage])
+                perm(Area::Lender, [Subject::LenderUsers, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderUsers, Action::Show, Action::Manage])
+                perm(Area::Lender, [Subject::LenderUsers, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderUsers, Action::Edit, Action::Manage])
+                perm(Area::Lender, [Subject::LenderUsers, Action::Edit, Action::Manage])
         )->only('update');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderUsers, Action::Delete, Action::Manage])
+                perm(Area::Lender, [Subject::LenderUsers, Action::Delete, Action::Manage])
         )->only('destroy');
     }
 
@@ -165,6 +165,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        $user->update(['email' => 'del_'.$user->email]);
         $user->delete();
 
         return $this->successResponse();
