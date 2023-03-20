@@ -13,7 +13,7 @@ class GetClientWakalaTextAction implements GetClientWakalaText
         $now = now('Asia/Riyadh');
         $date = $now->toDateString();
         $time = $now->toTimeString();
-        $amount = $financingOrder->amount->formatByDecimal();
+        $amount = $financingOrder->selling_price->formatByDecimal();
         $commodityNumber = $traderOrder->reference;
         $commodity = collect($traderOrder->products)->pluck('product')->implode(' و ') ?? '';
         $commodityPrice = $financingOrder->amount->formatByDecimal();

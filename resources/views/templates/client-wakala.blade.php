@@ -519,6 +519,14 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             margin-right: 1rem;
         }
 
+        .mt-16 {
+            margin-top: 4rem;
+        }
+
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
         .flex {
             display: flex;
         }
@@ -563,6 +571,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             padding-top: 2rem;
         }
 
+        .text-center {
+            text-align: center;
+        }
+
         .text-right {
             text-align: right;
         }
@@ -595,6 +607,14 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             </div>
             <div class="mx-4">
                 {!! $template !!}
+            </div>
+            <div class="text-center mt-16">
+                <p>
+                    توقيع العميل
+                </p>
+                <p class="mt-4">
+                    _________________________________
+                </p>
             </div>
         </div>
 
