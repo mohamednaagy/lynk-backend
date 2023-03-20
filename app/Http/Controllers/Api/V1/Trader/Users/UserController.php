@@ -26,27 +26,27 @@ class UserController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Trader, [Subject::TraderUsers, Action::Index, Action::Manage])
+                perm(Area::Trader, [Subject::TraderUsers, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Trader, [Subject::TraderUsers, Action::Create, Action::Manage])
+                perm(Area::Trader, [Subject::TraderUsers, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Trader, [Subject::TraderUsers, Action::Show, Action::Manage])
+                perm(Area::Trader, [Subject::TraderUsers, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Trader, [Subject::TraderUsers, Action::Edit, Action::Manage])
+                perm(Area::Trader, [Subject::TraderUsers, Action::Edit, Action::Manage])
         )->only('update');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Trader, [Subject::TraderUsers, Action::Edit, Action::Manage])
+                perm(Area::Trader, [Subject::TraderUsers, Action::Edit, Action::Manage])
         )->only('destroy');
     }
 
@@ -166,6 +166,7 @@ class UserController extends Controller
      */
     public function destroy(User $user): JsonResponse
     {
+        $user->update(['email' => $user->getEmailForSoftDeleting()]);
         $user->delete();
 
         return $this->successResponse();
