@@ -1,9 +1,7 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -14,13 +12,13 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::table('users')->where('deleted_at', '!=', null)->orderBy('id')->chunk(100, function ($users) {
-            foreach ($users as $user) {
-                DB::table('users')
-                    ->where('id', $user->id)
-                    ->update(['email' => 'del_'.$user->email]);
-            }
-        });
+        User::onlyTrashed()
+            ->orderBy('id')
+            ->chunk(100, function ($users) {
+                foreach ($users as $user) {
+                    $user->update(['email' => User::DELETED_MODEL_EMAIL_PREFIX.$user->email]);
+                }
+            });
     }
 
     /**
@@ -30,8 +28,12 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
-        });
+        User::onlyTrashed()
+            ->orderBy('id')
+            ->chunk(100, function ($users) {
+                foreach ($users as $user) {
+                    $user->update(['email' => explode(User::DELETED_MODEL_EMAIL_PREFIX, $user->email)[1]]);
+                }
+            });
     }
 };

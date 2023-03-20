@@ -169,7 +169,7 @@ class LenderUserController extends Controller
     {
         $this->ensureUserHasRoleInLenderAreaExceptApiUserRole($user);
 
-        $user->update(['email' => 'del_'.$user->email]);
+        $user->update(['email' => $user->getEmailForSoftDeleting()]);
         $user->delete();
 
         return $this->successResponse();

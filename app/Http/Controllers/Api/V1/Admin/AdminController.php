@@ -197,7 +197,7 @@ class AdminController extends Controller
             throw UnauthorizedException::forRoles(Area::roles(Area::SuperAdmin));
         }
 
-        $admin->update(['email' => 'del_'.$admin->email]);
+        $admin->update(['email' => $admin->getEmailForSoftDeleting()]);
         $admin->delete();
 
         return $this->successResponse();

@@ -166,7 +166,7 @@ class UserController extends Controller
      */
     public function destroy(User $user): JsonResponse
     {
-        $user->update(['email' => 'del_'.$user->email]);
+        $user->update(['email' => $user->getEmailForSoftDeleting()]);
         $user->delete();
 
         return $this->successResponse();

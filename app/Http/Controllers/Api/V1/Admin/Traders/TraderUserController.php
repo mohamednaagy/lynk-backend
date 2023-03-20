@@ -183,7 +183,7 @@ class TraderUserController extends Controller
     {
         $this->checkIfUserDoesNotHaveTraderAreaRole($user);
 
-        $user->update(['email' => 'del_'.$user->email]);
+        $user->update(['email' => $user->getEmailForSoftDeleting()]);
         $user->delete();
 
         return $this->successResponse();
