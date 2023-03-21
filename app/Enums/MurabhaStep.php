@@ -6,6 +6,8 @@ use BenSampo\Enum\Enum;
 
 final class MurabhaStep extends Enum
 {
+    const TraderOrderCreated = 'trader_order_created';
+
     const PurchasingCommodity = 'purchasing_commodity';
 
     const ContractSigned = 'contract_signed';
@@ -19,8 +21,10 @@ final class MurabhaStep extends Enum
     const MurabahaSaleCompleted = 'murabaha_sale_completed';
 
     public static array $stepToHistoriesDictionary = [
-        self::PurchasingCommodity => [
+        self::TraderOrderCreated => [
             FinancingOrderHistory::GetTtiId,
+        ],
+        self::PurchasingCommodity => [
             FinancingOrderHistory::RespondPtp,
             FinancingOrderHistory::GetPtpDocument,
             FinancingOrderHistory::AttachPtpDocumentToOrder,

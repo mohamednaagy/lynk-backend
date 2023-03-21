@@ -3,7 +3,6 @@
 namespace App\Actions\Orders\TraderOrders\MurabhaCompleteDocument;
 
 use App\Actions\Contracts\Orders\TraderOrders\MurabhaCompleteDocument\HandleMurabhaCompleteDocument;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
@@ -41,8 +40,6 @@ class HandleMurabhaCompleteDocumentAction implements HandleMurabhaCompleteDocume
         );
 
         if ($canUpdateOrderStatus) {
-            $trader->updateOrderStatus($order, FinancingOrderStatus::Completed);
-
             $traderOrder->update([
                 'status' => TraderOrderStatus::Completed,
             ]);
