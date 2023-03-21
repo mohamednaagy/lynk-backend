@@ -91,7 +91,6 @@ class OrderController extends Controller
                 'can_be_completed',
                 'can_create_trader_order',
                 'is_updatable',
-                'creator',
                 'approver',
                 'trader_orders.id',
                 'trader_orders.reference',
