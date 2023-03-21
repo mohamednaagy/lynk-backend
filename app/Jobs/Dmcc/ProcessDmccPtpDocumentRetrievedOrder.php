@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Dmcc;
 
+use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
@@ -66,6 +67,8 @@ class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue
             $trader->getInventoryBasket($traderOrder);
 
             $trader->createTransferOwnershipToLenderDocument($traderOrder);
+
+            app()->make(GenerateClientWakala::class)->handle($traderOrder);
 
             $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommodityPurchased);
         });

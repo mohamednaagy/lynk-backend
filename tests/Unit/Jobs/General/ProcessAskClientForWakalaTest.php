@@ -3,7 +3,6 @@
 namespace Tests\Unit\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\General\ProcessAskClientForWakala;
@@ -108,14 +107,5 @@ class ProcessAskClientForWakalaTest extends TestCase
         $processOrder->handle();
 
         Event::assertDispatched(SmsSent::class);
-    }
-
-    public function test_process_ask_client_for_wakala_client_wakala_is_generated_successfully()
-    {
-        $processOrder = new ProcessAskClientForWakala(self::$order->id);
-
-        $processOrder->handle();
-
-        $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::ClientWakala));
     }
 }

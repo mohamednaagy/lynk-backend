@@ -3,7 +3,6 @@
 namespace App\Jobs\General;
 
 use App\Actions\Contracts\Clients\AskClientWakala;
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use Illuminate\Bus\Queueable;
@@ -62,8 +61,6 @@ class ProcessAskClientForWakala implements ShouldQueue
                 Str::replace('{order_id}', $financingOrder->id, Config::get('frontend.client_wakala_url'))
             );
         }
-
-        app()->make(GenerateClientWakala::class)->handle($lastTraderOrder);
 
         $financingOrder->update([
             'status' => FinancingOrderStatus::WaitingClientWakala,
