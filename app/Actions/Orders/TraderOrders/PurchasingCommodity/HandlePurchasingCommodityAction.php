@@ -32,10 +32,6 @@ class HandlePurchasingCommodityAction implements HandlePurchasingCommodity
     ): void {
         app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
 
-        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
-            MurabhaStep::PurchasingCommodity
-        );
-
         $trader = Trader::driver($traderOrder->provider);
 
         $this->createStepHistories(
@@ -46,10 +42,6 @@ class HandlePurchasingCommodityAction implements HandlePurchasingCommodity
         );
 
         $this->transferOwnershipToLender($request, $trader, $traderOrder);
-
-        if ($canUpdateOrderStatus) {
-            $trader->updateOrderStatus($order, MurabhaStep::PurchasingCommodity);
-        }
     }
 
     protected function transferOwnershipToLender($request, $trader, TraderOrder $traderOrder)
