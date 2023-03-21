@@ -5,6 +5,7 @@ namespace App\Http\Requests\V1\Admin\Companies;
 use App\Enums\NotifyAboutNewOrderStatus;
 use App\Models\Company;
 use App\Rules\CompanyUniqueNameRule;
+use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -74,7 +75,7 @@ class StoreCompanyRequest extends FormRequest
             'notify_about_new_orders' => [
                 'required',
                 'integer',
-                Rule::in(NotifyAboutNewOrderStatus::getValues()),
+                new EnumValue(NotifyAboutNewOrderStatus::class, false),
             ],
         ];
     }
