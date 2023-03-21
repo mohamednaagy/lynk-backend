@@ -42,8 +42,16 @@ class ProcessAskClientForWakala implements ShouldQueue
     {
         /** @var FinancingOrder $financingOrder */
         $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
+        $orderCantMoveToNextStep = $financingOrder
+            ->status
+            ->cantMoveTo(FinancingOrderStatus::WaitingClientWakala);
 
-        if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::WaitingClientWakala)) {
+        $lastTraderOrder = $financingOrder
+            ->activeTraderOrder()
+            ->whereIn('provider', ['dmcc', 'fake'])
+            ->first();
+
+        if ($orderCantMoveToNextStep || blank($lastTraderOrder)) {
             return;
         }
 
