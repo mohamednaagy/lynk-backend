@@ -63,7 +63,7 @@ class TraderOrderControllerStoreTest extends TestCase
         );
 
         self::$apiUrl = 'api/v1/admin/orders/'
-            . self::$financingOrder->getRawOriginal('id') .
+            .self::$financingOrder->getRawOriginal('id').
             '/trader-orders';
     }
 
