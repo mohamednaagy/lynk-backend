@@ -17,7 +17,7 @@ return new class extends Migration
         Schema::table('companies', function (Blueprint $table) {
             $table
                 ->tinyInteger('notify_about_new_orders')
-                ->default(NotifyAboutNewOrderStatus::Auto)
+                ->default(NotifyAboutNewOrderStatus::BasedOnCompanySettings)
                 ->after('does_order_require_approval');
         });
     }

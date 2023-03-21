@@ -72,7 +72,7 @@ class NotifyAdminsAboutOrderCreated implements ShouldQueue
             ->company
             ->notify_about_new_orders;
 
-        if ($lenderNotifyStatus->is(NotifyAboutNewOrderStatus::Auto)) {
+        if ($lenderNotifyStatus->is(NotifyAboutNewOrderStatus::BasedOnCompanySettings)) {
             return $this->isSettingsEnableNotify();
         }
 

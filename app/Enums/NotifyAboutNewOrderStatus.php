@@ -15,5 +15,5 @@ final class NotifyAboutNewOrderStatus extends Enum
 
     const On = 1;
 
-    const Auto = 2;
+    const BasedOnCompanySettings = 2;
 }
