@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Companies;
 
+use App\Enums\NotifyAboutNewOrderStatus;
 use App\Rules\CompanyUniqueNameRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -69,6 +70,12 @@ class UpdateCompanyRequest extends FormRequest
                 'string',
                 'max:255',
             ],
+            'notify_about_new_orders' => [
+                'required',
+                'integer',
+                Rule::in(NotifyAboutNewOrderStatus::getValues()),
+            ],
+
         ];
     }
 }

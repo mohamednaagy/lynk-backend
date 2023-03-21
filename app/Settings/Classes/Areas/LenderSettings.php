@@ -16,6 +16,8 @@ class LenderSettings extends Settings
 
     public float $default_order_cost;
 
+    public bool $notify_about_new_orders;
+
     public static function group(): string
     {
         return 'area_lender';

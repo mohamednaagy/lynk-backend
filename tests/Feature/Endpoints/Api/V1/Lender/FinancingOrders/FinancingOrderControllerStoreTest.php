@@ -2,13 +2,19 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
 
+use App\Enums\Action;
+use App\Enums\Area;
+use App\Enums\NotifyAboutNewOrderStatus;
 use App\Enums\Role;
+use App\Enums\Subject;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Notifications\FinancingOrders\OrderCreated;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Notification;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
@@ -23,6 +29,12 @@ class FinancingOrderControllerStoreTest extends TestCase
     private static Wallet $wallet;
 
     private static User $userLenderAdmin;
+
+    private static User $admin;
+
+    private static User $mangerHasNoPermissions;
+
+    private static User $managerHasPermissions;
 
     private static User $userLenderSupervisor;
 
@@ -46,6 +58,14 @@ class FinancingOrderControllerStoreTest extends TestCase
         self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor);
         self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
         self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
+        self::$admin = $this->createSuperAdminUser();
+        self::$mangerHasNoPermissions = $this->createSuperAdminUser(Role::Manager);
+        self::$managerHasPermissions = $this->createSuperAdminUser(Role::Manager);
+        $this->assignPermissionToUser(
+            self::$managerHasPermissions,
+            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit])
+        );
+
         self::$orderDetails = [
             'customer_name' => 'youssof',
             'national_id' => '1001280070',
@@ -54,7 +74,6 @@ class FinancingOrderControllerStoreTest extends TestCase
             'phone_country_code' => 'SA',
             'phone_number' => '500112233',
             'is_verification_required' => true,
-            'customer_name' => 'customer name',
         ];
     }
 
@@ -274,5 +293,40 @@ class FinancingOrderControllerStoreTest extends TestCase
                     'status_reason',
                 ],
             ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_admin_and_managers_get_notification_about_new_order(): void
+    {
+        Notification::fake();
+
+        $this->actingAs(self::$userLenderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->postJson('api/v1/lender/orders', self::$orderDetails)
+            ->assertStatus(Response::HTTP_OK);
+
+        Notification::assertSentTo(self::$admin, OrderCreated::class);
+        Notification::assertSentTo(self::$managerHasPermissions, OrderCreated::class);
+        Notification::assertNotSentTo(self::$mangerHasNoPermissions, OrderCreated::class);
+    }
+
+    /**
+     * @return void
+     */
+    public function test_that_admin_and_managers_did_not_get_notification_about_new_order_when_disabled(): void
+    {
+        Notification::fake();
+        self::$company->update(['notify_about_new_orders' => NotifyAboutNewOrderStatus::Of]);
+        self::$company->refresh();
+
+        $this->actingAs(self::$userLenderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->postJson('api/v1/lender/orders', self::$orderDetails)
+            ->assertStatus(Response::HTTP_OK);
+
+        Notification::assertNotSentTo(self::$admin, OrderCreated::class);
+        Notification::assertNotSentTo(self::$managerHasPermissions, OrderCreated::class);
     }
 }

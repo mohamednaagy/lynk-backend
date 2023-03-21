@@ -93,6 +93,7 @@ class LenderSettingsIndexTest extends TestCase
                         'default_does_order_require_approval',
                         'default_company_registration_status',
                         'default_company_status_created_by_operation',
+                        'notify_about_new_orders',
                     ])
                     ->respond()
                     ->getData(true)
@@ -117,6 +118,7 @@ class LenderSettingsIndexTest extends TestCase
                         'default_does_order_require_approval',
                         'default_company_registration_status',
                         'default_company_status_created_by_operation',
+                        'notify_about_new_orders',
                     ])
                     ->respond()
                     ->getData(true)

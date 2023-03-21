@@ -35,6 +35,7 @@ class UpdateCompanyAction implements UpdateCompany
                     'public_status_comment',
                     'internal_status_comment',
                     'driver',
+                    'notify_about_new_orders',
                 ]
             )
         );

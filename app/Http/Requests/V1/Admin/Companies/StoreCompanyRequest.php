@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Companies;
 
+use App\Enums\NotifyAboutNewOrderStatus;
 use App\Models\Company;
 use App\Rules\CompanyUniqueNameRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -69,6 +70,11 @@ class StoreCompanyRequest extends FormRequest
                 'email:filter',
                 'string',
                 'max:255',
+            ],
+            'notify_about_new_orders' => [
+                'required',
+                'integer',
+                Rule::in(NotifyAboutNewOrderStatus::getValues()),
             ],
         ];
     }
