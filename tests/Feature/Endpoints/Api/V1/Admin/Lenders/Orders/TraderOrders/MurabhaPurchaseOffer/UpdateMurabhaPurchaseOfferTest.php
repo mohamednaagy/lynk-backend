@@ -56,7 +56,7 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
             self::$userLender->id,
             [
                 'is_verification_required' => true,
-                'status' => FinancingOrderStatus::ClientWakalaCompleted,
+                'status' => FinancingOrderStatus::InProgress,
             ]
         );
 
@@ -114,7 +114,8 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
      */
     public function test_proceed_murabha_purchase_offer_document_is_successfull_and_order_status_will_be_updated(): void
     {
-        // create trader order history of previous last step
+        // create trader order history of previous step
+
         self::$traderOrder->traderHistories()->create(
             [
                 'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::ClientWakalaCompleted],

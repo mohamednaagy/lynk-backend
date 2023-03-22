@@ -8,11 +8,10 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
+use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
 use App\Support\Sms\Events\SmsSent;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
@@ -32,7 +31,7 @@ class UpdatePurchasingCommodityTest extends TestCase
 
     private static User $superAdminUser;
 
-    private static Builder|Model $financingOrder;
+    private static FinancingOrder $financingOrder;
 
     private static TraderOrder $traderOrder;
 
@@ -63,7 +62,7 @@ class UpdatePurchasingCommodityTest extends TestCase
             self::$userLender->id,
             [
                 'is_verification_required' => true,
-                'status' => FinancingOrderStatus::WaitingPurchasingCommodity,
+                'status' => FinancingOrderStatus::Approved,
             ]
         );
 

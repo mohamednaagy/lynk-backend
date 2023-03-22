@@ -63,7 +63,7 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
             self::$userLender->id,
             [
                 'is_verification_required' => true,
-                'status' => FinancingOrderStatus::MurabhaOfferIssued,
+                'status' => FinancingOrderStatus::InProgress,
             ]
         );
 
