@@ -104,7 +104,7 @@ class TraderOrder extends Model implements HasMedia
             throw new UnexpectedValueException('No mapping for this status');
         }
 
-        return (bool) $this->traderHistories
+        return (bool) $this->traderHistories()
             ->where('action', end(MurabhaStep::$stepToHistoriesDictionary[$step]))
             ->first();
     }
@@ -133,14 +133,14 @@ class TraderOrder extends Model implements HasMedia
     /**
      * @throws OrderStatusDoesNotFollowSequenceException
      */
-    public function ensureCanAccessStep(int $step)
+    public function ensureCanAccessStep(string $step)
     {
         if (! $this->checkOrderStepComplete($step)) {
             throw new OrderStatusDoesNotFollowSequenceException();
         }
     }
 
-    public function canChangeParentOrderStatusIfStepWillBeUpdated(int $step): bool
+    public function canChangeParentOrderStatusIfStepWillBeUpdated(string $step): bool
     {
         if ($this->status->isNot(TraderOrderStatus::InProgress)) {
             return false;

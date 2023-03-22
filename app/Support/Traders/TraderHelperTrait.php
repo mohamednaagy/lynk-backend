@@ -82,7 +82,7 @@ trait TraderHelperTrait
         ]);
     }
 
-    public function updateOrderStatus($order, int $status): void
+    public function updateOrderStatus($order, $status): void
     {
         $order->update([
             'status' => $status,
