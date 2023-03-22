@@ -4,7 +4,6 @@ namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\MurabhaStep;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TraderHelperTrait;
@@ -42,7 +41,7 @@ class ProcessDmccMpoOrder implements ShouldQueue
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
 
-            if ($traderOrder->checkOrderStepComplete(MurabhaStep::MurabhaOfferIssued)) {
+            if ($traderOrder->checkOrderHistoryMatchLastAction(FinancingOrderHistory::AttachMpoDocument)) {
                 return;
             }
 

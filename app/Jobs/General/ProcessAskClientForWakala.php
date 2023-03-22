@@ -4,7 +4,6 @@ namespace App\Jobs\General;
 
 use App\Actions\Contracts\Clients\AskClientWakala;
 use App\Enums\FinancingOrderHistory;
-use App\Enums\MurabhaStep;
 use App\Models\TraderOrder;
 use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
@@ -45,7 +44,7 @@ class ProcessAskClientForWakala implements ShouldQueue
         /** @var TraderOrder $traderOrder */
         $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
 
-        if ($traderOrder->checkOrderStepComplete(MurabhaStep::WaitingClientWakala)) {
+        if ($traderOrder->checkOrderHistoryMatchLastAction(FinancingOrderHistory::WaitingClientWakala)) {
             return;
         }
 
