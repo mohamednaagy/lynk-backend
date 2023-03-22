@@ -2,7 +2,15 @@
 
 namespace App\Observers;
 
+use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommodityPurchased;
+use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommoditySoldToCustomer;
+use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsMurabhaOfferIssued;
+use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
+use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
+use App\Enums\MurabhaStep;
+use App\Enums\TraderOrderStatus;
 use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
+use App\Models\FinancingOrder;
 use App\Models\TraderHistory;
 use App\Settings\Classes\GeneralSettings;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -15,9 +23,12 @@ class TraderHistoryObserver
      *
      * @param  TraderHistory  $traderHistory
      * @return void
+     *
+     * @throws \Exception
      */
     public function created(TraderHistory $traderHistory)
     {
+        /** @var FinancingOrder $financingOrder */
         $financingOrder = $traderHistory->traderOrder
             ->order()
             ->withoutGlobalScope(TenantScope::class)
@@ -31,6 +42,36 @@ class TraderHistoryObserver
         if ($nextStepNode) {
             NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $financingOrderStatus)
                 ->delay(now()->addMinutes($timeout));
+        }
+
+        if ($traderHistory->traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+            return;
+        }
+
+        $stepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderHistory->action);
+
+        if ($stepNode->step === MurabhaStep::MurabhaOfferIssued) {
+            app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)->handle($financingOrder);
+
+            return;
+        }
+
+        if (empty($traderOrder->products)) {
+            return;
+        }
+
+        $actions = match ($stepNode->step) {
+            MurabhaStep::CommoditySoldToCustomer => [
+                SendSmsWhenStatusIsCommoditySoldToCustomer::class,
+                FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
+            ],
+            MurabhaStep::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
+            MurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
+            default => []
+        };
+
+        foreach ($actions as $action) {
+            app($action)->handle($financingOrder, $traderOrder);
         }
     }
 

@@ -5,7 +5,6 @@ namespace App\Jobs\General;
 use App\Actions\Contracts\Clients\AskClientWakala;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
@@ -22,16 +21,16 @@ class ProcessAskClientForWakala implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
-    protected mixed $financingOrder;
+    protected mixed $traderOrder;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($financingOrder)
+    public function __construct($traderOrder)
     {
-        $this->financingOrder = $financingOrder;
+        $this->traderOrder = $traderOrder;
     }
 
     /**
@@ -43,15 +42,14 @@ class ProcessAskClientForWakala implements ShouldQueue
      */
     public function handle(): void
     {
-        /** @var FinancingOrder $financingOrder */
-        $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-
         /** @var TraderOrder $traderOrder */
-        $traderOrder = $financingOrder->activeTraderOrder()->lockForUpdate()->first();
+        $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
 
-        if (! $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned)) {
+        if ($traderOrder->checkOrderStepComplete(MurabhaStep::WaitingClientWakala)) {
             return;
         }
+
+        $financingOrder = $traderOrder->order;
 
         if ($financingOrder->is_verification_required) {
             app()->make(AskClientWakala::class)->handle(
@@ -70,6 +68,6 @@ class ProcessAskClientForWakala implements ShouldQueue
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('financingOrder'.$this->financingOrder)];
+        return [new WithoutOverlapping('traderOrder'.$this->traderOrder)];
     }
 }

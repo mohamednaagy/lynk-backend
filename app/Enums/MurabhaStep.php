@@ -10,8 +10,6 @@ final class MurabhaStep extends Enum
 
     const PurchasingCommodity = 'purchasing_commodity';
 
-    const CommodityPurchased = 'commodity_purchased';
-
     const ContractSigned = 'contract_signed';
 
     const CommoditySoldToCustomer = 'commodity_sold_to_customer';
@@ -35,9 +33,6 @@ final class MurabhaStep extends Enum
             FinancingOrderHistory::GetTtiHoldingCertificateDocument,
             FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-        ],
-        self::CommodityPurchased => [
-            FinancingOrderHistory::CommodityPurchased,
         ],
         self::ContractSigned => [
             FinancingOrderHistory::ContractSigned,

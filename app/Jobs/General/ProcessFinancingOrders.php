@@ -4,16 +4,19 @@ namespace App\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MurabhaStep;
+use App\Enums\TraderOrderStatus;
 use App\Jobs\Dmcc\ProcessDmccMpoOrder;
 use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
 use App\Jobs\Dmcc\ProcessDmccSellingCommodityToCustomerOrder;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Collection;
 
 class ProcessFinancingOrders implements ShouldQueue
 {
@@ -26,36 +29,40 @@ class ProcessFinancingOrders implements ShouldQueue
      */
     public function handle(): void
     {
+        $whiteListedProviders = ['dmcc', 'fake'];
+
         FinancingOrder::query()
+            ->where('status', FinancingOrderStatus::Approved)
+            ->withCount(['traderOrders' => function ($query) use ($whiteListedProviders) {
+                $query->whereIn('provider', $whiteListedProviders)
+                    ->whereIn('status', [
+                        TraderOrderStatus::InProgress,
+                        TraderOrderStatus::Completed,
+                    ]);
+            }])
+            ->having('trader_orders_count', 0)
+            ->chunk(10, function (Collection $orderCollection) {
+                $orderCollection->each(function (FinancingOrder $order) {
+                    ProcessInProgressOrder::dispatch($order->id);
+                });
+            });
+
+        TraderOrder::query()
+            ->withLastHistoryAction()
+            ->whereIn('provider', $whiteListedProviders)
             ->whereIn('status', [
-                FinancingOrderStatus::Approved,
-            ])->chunk(10, function ($ordersCollection) {
-                $ordersCollection->each(function (FinancingOrder $order) {
-                    if (! $order->traderOrders()->count()) {
-                        ProcessInProgressOrder::dispatch($order->id);
-                    }
+                TraderOrderStatus::InProgress,
+            ])->chunk(10, function ($traderOrderCollection) {
+                $traderOrderCollection->each(function (TraderOrder $traderOrder) {
+                    $stepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderOrder->last_history_action);
 
-                    /** @var TraderOrder $traderOrder */
-                    $traderOrder = $order->activeTraderOrder()->first();
-                    if (! $traderOrder) {
-                        return;
-                    }
-
-                    if (! $traderOrder->checkOrderStepComplete(MurabhaStep::PurchasingCommodity)) {
-                        ProcessDmccRespondedToPtpOrder::dispatch($order->id);
-                    }
-
-                    if ($traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakalaCompleted)) {
-                        ProcessDmccSellingCommodityToCustomerOrder::dispatch($order->id);
-                    }
-
-                    if ($traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned)) {
-                        ProcessAskClientForWakala::dispatch($order->id);
-                    }
-
-                    if ($traderOrder->checkOrderStepComplete(MurabhaStep::CommoditySoldToCustomer)) {
-                        ProcessDmccMpoOrder::dispatch($order->id);
-                    }
+                    match ($stepNode->step) {
+                        MurabhaStep::PurchasingCommodity => ProcessDmccRespondedToPtpOrder::dispatch($traderOrder->id),
+                        MurabhaStep::ClientWakalaCompleted => ProcessDmccSellingCommodityToCustomerOrder::dispatch($traderOrder->id),
+                        MurabhaStep::ContractSigned => ProcessAskClientForWakala::dispatch($traderOrder->id),
+                        MurabhaStep::CommoditySoldToCustomer => ProcessDmccMpoOrder::dispatch($traderOrder->id),
+                        default => null,
+                    };
                 });
             });
     }

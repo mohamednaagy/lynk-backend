@@ -65,7 +65,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
         if (
             $this->isPreviousStepOfClientWakalaNotCompleted($traderOrder)
             || ($forceToProceed === false && $order->is_verification_required)
-            || ($forceToProceed === false && $this->isClientWakalaStepNotCompleted($traderOrder))
+            || ($forceToProceed === false && $this->isClientWakalaStepCompleted($traderOrder))
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
@@ -76,20 +76,20 @@ class MakeOrderProceedAction implements MakeOrderProceed
         }
 
         app(AcceptClientWakala::class)->handle($traderOrder);
+
+        return [];
     }
 
     protected function isPreviousStepOfClientWakalaNotCompleted(TraderOrder $traderOrder)
     {
         return ! $traderOrder->checkOrderStepComplete(
-            $this->stepHistoriesDictionary->getPreviousStepOf(MurabhaStep::ClientWakala)->step
+            $this->stepHistoriesDictionary->getPreviousStepOf(MurabhaStep::ClientWakalaCompleted)->step
         );
-
-        return [];
     }
 
-    protected function isClientWakalaStepNotCompleted(TraderOrder $traderOrder)
+    protected function isClientWakalaStepCompleted(TraderOrder $traderOrder)
     {
-        return ! $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala);
+        return $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakalaCompleted);
     }
 
     /**
@@ -103,7 +103,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
     {
         if (
             $this->isPreviousStepOfContractSignedNotCompleted($traderOrder)
-            || ($forceToProceed === false && $this->isContractSignedStepNotCompleted($traderOrder))
+            || ($forceToProceed === false && $this->isContractSignedStepCompleted($traderOrder))
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
@@ -120,9 +120,9 @@ class MakeOrderProceedAction implements MakeOrderProceed
         );
     }
 
-    protected function isContractSignedStepNotCompleted(TraderOrder $traderOrder)
+    protected function isContractSignedStepCompleted(TraderOrder $traderOrder)
     {
-        return ! $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
+        return $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
     }
 
     public function setSignedClientWakala(UploadedFile $signedClientWakala)
