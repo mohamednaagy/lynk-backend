@@ -52,7 +52,7 @@ class ProcessDmccPtpNotification implements ShouldQueue
                 return;
             }
 
-            if ($traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
                 return;
             }
 

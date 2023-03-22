@@ -55,7 +55,7 @@ class TraderHistoryObserver
             return;
         }
 
-        $actions = match ($stepNode->step) {
+        $actions = match ($stepNode?->step) {
             MurabhaStep::CommoditySoldToCustomer => [
                 SendSmsWhenStatusIsCommoditySoldToCustomer::class,
                 FireWebhookWhenStatusIsCommoditySoldToCustomer::class,

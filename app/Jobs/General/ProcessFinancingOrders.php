@@ -52,7 +52,7 @@ class ProcessFinancingOrders implements ShouldQueue
                 TraderOrderStatus::InProgress,
             ])->chunk(10, function ($traderOrderCollection) {
                 $traderOrderCollection->each(function (TraderOrder $traderOrder) {
-                    match ($traderOrder->last_history_action) {
+                    match ((int) $traderOrder->last_history_action) {
                         FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::dispatch($traderOrder->id),
                         FinancingOrderHistory::ContractSigned => ProcessAskClientForWakala::dispatch($traderOrder->id),
                         FinancingOrderHistory::ClientWakalaAccepted => ProcessDmccSellingCommodityToCustomerOrder::dispatch($traderOrder->id),

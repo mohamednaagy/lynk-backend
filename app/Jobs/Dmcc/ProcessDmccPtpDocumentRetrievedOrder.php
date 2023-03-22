@@ -3,7 +3,6 @@
 namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -59,10 +58,6 @@ class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue
             }
 
             $trader = Trader::driver($traderOrder->provider);
-
-            if ($traderOrder->checkOrderStepComplete(MurabhaStep::PurchasingCommodity)) {
-                return;
-            }
 
             $trader->getInventoryBasket($traderOrder);
 

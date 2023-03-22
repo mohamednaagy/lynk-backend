@@ -115,9 +115,10 @@ class TraderOrder extends Model implements HasMedia
         if (! in_array($action, FinancingOrderHistory::getValues())) {
             throw new UnexpectedValueException('invalid Action');
         }
-        $lastAction = $this->traderHistories()->latest()->first();
 
-        return $lastAction->action === $action;
+        $lastAction = $this->traderHistories()->latest('id')->first();
+
+        return $lastAction->action == $action;
     }
 
     public function checkOrderHistoryAction($action): bool
