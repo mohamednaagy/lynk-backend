@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Client;
 
 use App\Actions\Contracts\Clients\VerifiedClientWakala;
 use App\Actions\Contracts\Clients\VerifyOtpClientWakala as VerifyOtpClientWakalaInterface;
-use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Client\VerifyOtpRequest;
 use App\Models\FinancingOrder;
@@ -36,7 +36,7 @@ class VerifyOtpClientWakala extends Controller
 
             $canProceed = $order->getNationalId() === $request->validated('national_id')
                 && $traderOrder !== null
-                && ! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::ClientWakalaCompleted);
+                && ! $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala);
 
             abort_if(! $canProceed, 404);
 

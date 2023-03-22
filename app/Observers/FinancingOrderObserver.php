@@ -31,19 +31,28 @@ class FinancingOrderObserver
             ->withLastHistoryAction()
             ->first();
 
-        $stepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderOrder->last_history_action);
-
-        if ($stepNode->step == MurabhaStep::MurabhaOfferIssued) {
-            app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)->handle($financingOrder);
-
-            return;
-        }
+        $this->triggerAction($traderOrder);
 
         if (empty($traderOrder->products)) {
             return;
         }
+    }
 
-        $actions = match ($stepNode->step) {
+    public function triggerAction($traderOrder): void
+    {
+        if (is_null($traderOrder)) {
+            return;
+        }
+
+        $stepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderOrder->last_history_action);
+
+        if ($stepNode?->step == MurabhaStep::MurabhaOfferIssued) {
+            app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)->handle($traderOrder->order);
+
+            return;
+        }
+
+        $actions = match ($stepNode?->step) {
             MurabhaStep::CommoditySoldToCustomer => [
                 SendSmsWhenStatusIsCommoditySoldToCustomer::class,
                 FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
@@ -54,7 +63,7 @@ class FinancingOrderObserver
         };
 
         foreach ($actions as $action) {
-            app($action)->handle($financingOrder, $traderOrder);
+            app($action)->handle($traderOrder->order, $traderOrder);
         }
     }
 }
