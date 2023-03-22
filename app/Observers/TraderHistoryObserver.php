@@ -10,11 +10,9 @@ use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
-use App\Models\FinancingOrder;
 use App\Models\TraderHistory;
 use App\Settings\Classes\GeneralSettings;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
-use Stancl\Tenancy\Database\TenantScope;
 
 class TraderHistoryObserver
 {
@@ -28,19 +26,14 @@ class TraderHistoryObserver
      */
     public function created(TraderHistory $traderHistory)
     {
-        /** @var FinancingOrder $financingOrder */
-        $financingOrder = $traderHistory->traderOrder
-            ->order()
-            ->withoutGlobalScope(TenantScope::class)
-            ->first();
-        $financingOrderStatus = $financingOrder->status->value;
-
         $timeout = app(GeneralSettings::class)->trader_order_timeout;
-        // TO DO
+
         // some Order at last step so no next step I think  another mail content needed
-        $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($financingOrderStatus);
+        $currentStepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderHistory->action);
+        $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($currentStepNode->step);
+
         if ($nextStepNode) {
-            NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $financingOrderStatus)
+            NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $traderHistory->action)
                 ->delay(now()->addMinutes($timeout));
         }
 
@@ -50,13 +43,15 @@ class TraderHistoryObserver
 
         $stepNode = app(StepHistoriesDictionary::class)->getCompletedStepByHistory($traderHistory->action);
 
+        $financingOrder = $traderHistory->traderOrder->order;
+
         if ($stepNode?->step === MurabhaStep::MurabhaOfferIssued) {
             app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)->handle($financingOrder);
 
             return;
         }
 
-        if (empty($traderOrder->products)) {
+        if (empty($traderHistory->traderOrder->products)) {
             return;
         }
 
@@ -71,7 +66,7 @@ class TraderHistoryObserver
         };
 
         foreach ($actions as $action) {
-            app($action)->handle($financingOrder, $traderOrder);
+            app($action)->handle($financingOrder, $traderHistory->traderOrder);
         }
     }
 

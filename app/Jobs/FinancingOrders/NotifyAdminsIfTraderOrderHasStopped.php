@@ -23,7 +23,7 @@ class NotifyAdminsIfTraderOrderHasStopped implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected TraderOrder $traderOrder, protected int $financingOrderStatus)
+    public function __construct(protected TraderOrder $traderOrder, protected int $historyActionBeforeDispatching)
     {
     }
 
@@ -34,16 +34,14 @@ class NotifyAdminsIfTraderOrderHasStopped implements ShouldQueue
      */
     public function handle()
     {
-        $currentFinancingOrder = $this->traderOrder
-            ->order()
+        $traderOrder = $this->traderOrder
+            ->query()
             ->withoutGlobalScope(TenantScope::class)
+            ->withLastHistoryAction()
             ->first();
 
-        $currentFinancingOrderStatus = $currentFinancingOrder->status;
-
-        if ($currentFinancingOrderStatus->is($this->financingOrderStatus)) {
+        if ($traderOrder->last_history_action === $this->historyActionBeforeDispatching) {
             $admins = User::role([Role::Admin])->get();
-
             Notification::send($admins, new TraderOrderProgressStopped($this->traderOrder));
         }
     }
