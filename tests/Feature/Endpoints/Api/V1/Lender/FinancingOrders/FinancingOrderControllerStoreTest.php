@@ -4,7 +4,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
 
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\NotifyAboutNewOrderStatus;
+use App\Enums\FinancingOrderNotificationStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\Company;
@@ -318,7 +318,7 @@ class FinancingOrderControllerStoreTest extends TestCase
     public function test_that_admin_and_managers_did_not_get_notification_about_new_order_when_disabled(): void
     {
         Notification::fake();
-        self::$company->update(['notify_about_new_orders' => NotifyAboutNewOrderStatus::Of]);
+        self::$company->update(['notify_admins_about_new_orders' => FinancingOrderNotificationStatus::Of]);
         self::$company->refresh();
 
         $this->actingAs(self::$userLenderAdmin)

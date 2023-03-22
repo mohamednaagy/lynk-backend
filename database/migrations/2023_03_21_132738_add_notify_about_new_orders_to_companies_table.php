@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\NotifyAboutNewOrderStatus;
+use App\Enums\FinancingOrderNotificationStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,8 +16,8 @@ return new class extends Migration
     {
         Schema::table('companies', function (Blueprint $table) {
             $table
-                ->tinyInteger('notify_about_new_orders')
-                ->default(NotifyAboutNewOrderStatus::BasedOnCompanySettings)
+                ->tinyInteger('notify_admins_about_new_orders')
+                ->default(FinancingOrderNotificationStatus::On)
                 ->after('does_order_require_approval');
         });
     }
@@ -30,7 +30,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('companies', function (Blueprint $table) {
-            $table->dropColumn('notify_about_new_orders');
+            $table->dropColumn('notify_admins_about_new_orders');
         });
     }
 };

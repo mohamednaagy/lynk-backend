@@ -6,7 +6,7 @@ use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\CompanyStatus;
-use App\Enums\NotifyAboutNewOrderStatus;
+use App\Enums\FinancingOrderNotificationSettingStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Enums\WalletType;
@@ -63,7 +63,7 @@ class LenderControllerStoreTest extends TestCase
             'company_cr' => '1234567891',
             'order_cost' => 20,
             'does_order_require_approval' => '1',
-            'notify_about_new_orders' => NotifyAboutNewOrderStatus::BasedOnCompanySettings,
+            'notify_admins_about_new_orders' => FinancingOrderNotificationSettingStatus::BasedOnCompanySettings,
             'webhook_secret_key' => Str::random(Config::get('webhook-server.secret_key_length', 40)),
         ];
         self::$endpoint = 'api/v1/admin/lenders';

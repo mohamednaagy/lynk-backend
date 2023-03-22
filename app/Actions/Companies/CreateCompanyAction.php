@@ -40,7 +40,7 @@ class CreateCompanyAction implements CreateCompany
                     'internal_status_comment',
                     'driver',
                     'type',
-                    'notify_about_new_orders',
+                    'notify_admins_about_new_orders',
                 ]
             )
         );

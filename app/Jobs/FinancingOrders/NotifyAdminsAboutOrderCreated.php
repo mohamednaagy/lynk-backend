@@ -5,7 +5,7 @@ namespace App\Jobs\FinancingOrders;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\NotifyAboutNewOrderStatus;
+use App\Enums\FinancingOrderNotificationSettingStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\FinancingOrder;
@@ -66,25 +66,25 @@ class NotifyAdminsAboutOrderCreated implements ShouldQueue
 
     public function isNotifyAllowed()
     {
-        $lenderNotifyStatus =
-            $this
-            ->financingOrder
-            ->company
-            ->notify_about_new_orders;
-
-        if ($lenderNotifyStatus->is(NotifyAboutNewOrderStatus::BasedOnCompanySettings)) {
-            return $this->isSettingsEnableNotify();
-        }
-
-        return (bool) $lenderNotifyStatus->value;
-    }
-
-    private function isSettingsEnableNotify()
-    {
         $setting = app(GetSettingsClassInstance::class)
             ->handle(Area::Lender);
 
-        return isset($setting->notify_about_new_orders)
-            && (bool) $setting->notify_about_new_orders;
+        $isNotificationSettingBasedOnCompany = $setting
+            ->notify_admins_about_new_orders
+            ->is(FinancingOrderNotificationSettingStatus::BasedOnCompanySettings);
+
+        if ($isNotificationSettingBasedOnCompany) {
+            return (bool) $this
+                ->financingOrder
+                ->company
+                ->notify_admins_about_new_orders
+                ->value;
+        }
+
+        return $setting
+            ->notify_admins_about_new_orders
+            ->is(FinancingOrderNotificationSettingStatus::On)
+            ? true
+            : false;
     }
 }

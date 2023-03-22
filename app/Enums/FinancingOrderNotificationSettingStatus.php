@@ -9,11 +9,11 @@ use BenSampo\Enum\Enum;
  * @method static static OptionTwo()
  * @method static static OptionThree()
  */
-final class NotifyAboutNewOrderStatus extends Enum
+final class FinancingOrderNotificationSettingStatus extends Enum
 {
-    const Of = 0;
+    const BasedOnCompanySettings = 1;
 
-    const On = 1;
+    const On = 2;
 
-    const BasedOnCompanySettings = 2;
+    const Of = 3;
 }

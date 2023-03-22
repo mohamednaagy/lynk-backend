@@ -42,7 +42,7 @@ class LenderSettingsController extends Controller
                 'default_does_order_require_approval',
                 'default_company_registration_status',
                 'default_company_status_created_by_operation',
-                'notify_about_new_orders',
+                'notify_admins_about_new_orders',
             ])
             ->respond();
     }

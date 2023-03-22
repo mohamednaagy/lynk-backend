@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Companies;
 
-use App\Enums\NotifyAboutNewOrderStatus;
+use App\Enums\FinancingOrderNotificationStatus;
 use App\Models\Company;
 use App\Rules\CompanyUniqueNameRule;
 use BenSampo\Enum\Rules\EnumValue;
@@ -72,10 +72,10 @@ class StoreCompanyRequest extends FormRequest
                 'string',
                 'max:255',
             ],
-            'notify_about_new_orders' => [
+            'notify_admins_about_new_orders' => [
                 'required',
                 'integer',
-                new EnumValue(NotifyAboutNewOrderStatus::class, false),
+                new EnumValue(FinancingOrderNotificationStatus::class, false),
             ],
         ];
     }
