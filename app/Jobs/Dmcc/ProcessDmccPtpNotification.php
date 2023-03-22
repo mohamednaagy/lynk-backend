@@ -3,9 +3,7 @@
 namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -54,9 +52,7 @@ class ProcessDmccPtpNotification implements ShouldQueue
                 return;
             }
 
-            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
-
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::RespondedToPtp)) {
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
                 return;
             }
 
@@ -68,8 +64,6 @@ class ProcessDmccPtpNotification implements ShouldQueue
                 $traderOrder,
                 FinancingOrderHistory::RespondPtp
             );
-
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::RespondedToPtp);
         });
     }
 

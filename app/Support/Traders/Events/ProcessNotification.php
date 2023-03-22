@@ -28,7 +28,7 @@ class ProcessNotification implements LogServiceRequest
 
     public function name(): string
     {
-        return ProcessNotification::$driver;
+        return $this->driver;
     }
 
     public function subject(): null|Model

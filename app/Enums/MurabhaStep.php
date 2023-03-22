@@ -36,6 +36,7 @@ final class MurabhaStep extends Enum
             FinancingOrderHistory::ContractSigned,
         ],
         self::ClientWakala => [
+            FinancingOrderHistory::WaitingClientWakala,
             FinancingOrderHistory::ClientWakalaAccepted,
         ],
         self::CommoditySoldToCustomer => [

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Stancl\VirtualColumn\VirtualColumn;
 
 /**
- * @property mixed $traderOrder
+ * @property TraderOrder $traderOrder
  */
 class TraderHistory extends Model
 {

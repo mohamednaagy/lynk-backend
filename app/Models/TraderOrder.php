@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -21,7 +22,7 @@ use UnexpectedValueException;
  * @property mixed $reference
  * @property mixed $order
  * @property TraderOrderStatus $status
- * @property mixed $traderHistories
+ * @property Collection $traderHistories
  * @property Carbon $created_at
  */
 class TraderOrder extends Model implements HasMedia
@@ -107,6 +108,17 @@ class TraderOrder extends Model implements HasMedia
         return (bool) $this->traderHistories()
             ->where('action', end(MurabhaStep::$stepToHistoriesDictionary[$step]))
             ->first();
+    }
+
+    public function doesLastActionMatchWith($action): bool
+    {
+        if (! in_array($action, FinancingOrderHistory::getValues())) {
+            throw new UnexpectedValueException('invalid Action');
+        }
+
+        $lastAction = $this->traderHistories()->latest('id')->first();
+
+        return $lastAction->action == $action;
     }
 
     public function checkOrderHistoryAction($action): bool

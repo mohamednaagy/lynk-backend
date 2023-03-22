@@ -103,7 +103,7 @@ class TraderOrderScenario
                 ! $this->traderOrder->load('traderHistories')->checkOrderStepComplete($currentStep->step)
             ) {
                 $lastActionHistoryPosition = array_search(
-                    $this->traderOrder->traderHistories()->latest()->first()->action,
+                    $this->traderOrder->traderHistories()->latest('id')->first()->action,
                     $currentStep->histories
                 );
                 $histories = collect($histories)->slice($lastActionHistoryPosition + 1)->values();
