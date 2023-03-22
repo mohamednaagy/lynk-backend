@@ -53,7 +53,7 @@ class ProcessFinancingOrders implements ShouldQueue
             ])->chunk(10, function ($traderOrderCollection) {
                 $traderOrderCollection->each(function (TraderOrder $traderOrder) {
                     match ($traderOrder->last_history_action) {
-                        FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessDmccRespondedToPtpOrder::dispatch($traderOrder->id),
+                        FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::dispatch($traderOrder->id),
                         FinancingOrderHistory::ContractSigned => ProcessAskClientForWakala::dispatch($traderOrder->id),
                         FinancingOrderHistory::ClientWakalaAccepted => ProcessDmccSellingCommodityToCustomerOrder::dispatch($traderOrder->id),
                         FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::dispatch($traderOrder->id),

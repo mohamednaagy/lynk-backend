@@ -6,7 +6,6 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TraderHelperTrait;
@@ -54,11 +53,12 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
                 ->lockForUpdate()
                 ->first();
 
-            if (! $traderOrder) {
+            if (
+                ! $traderOrder
+                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachMpoDocument)
+            ) {
                 return;
             }
-
-            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
             if (! $traderOrder->checkOrderStepComplete(MurabhaStep::MurabhaOfferIssued)) {
                 return;

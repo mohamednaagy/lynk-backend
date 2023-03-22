@@ -3,7 +3,6 @@
 namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -53,7 +52,7 @@ class ProcessDmccPtpNotification implements ShouldQueue
                 return;
             }
 
-            if ($traderOrder->checkOrderStepComplete(MurabhaStep::PurchasingCommodity)) {
+            if ($traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
                 return;
             }
 

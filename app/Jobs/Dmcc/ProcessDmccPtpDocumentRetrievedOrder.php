@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Dmcc;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
@@ -50,7 +51,10 @@ class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue
                 ->lockForUpdate()
                 ->first();
 
-            if (! $traderOrder) {
+            if (
+                ! $traderOrder
+                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)
+            ) {
                 return;
             }
 

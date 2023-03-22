@@ -50,7 +50,7 @@ class TraderHistoryObserver
 
         $stepNode = app(StepHistoriesDictionary::class)->getCompletedStepByHistory($traderHistory->action);
 
-        if ($stepNode->step === MurabhaStep::MurabhaOfferIssued) {
+        if ($stepNode?->step === MurabhaStep::MurabhaOfferIssued) {
             app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)->handle($financingOrder);
 
             return;
