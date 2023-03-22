@@ -14,9 +14,7 @@ final class MurabhaStep extends Enum
 
     const CommoditySoldToCustomer = 'commodity_sold_to_customer';
 
-    const WaitingClientWakala = 'waiting_client_wakala';
-
-    const ClientWakalaCompleted = 'client_wakala_completed';
+    const ClientWakala = 'client_wakala';
 
     const MurabhaOfferIssued = 'murabha_offer_issued';
 
@@ -37,10 +35,8 @@ final class MurabhaStep extends Enum
         self::ContractSigned => [
             FinancingOrderHistory::ContractSigned,
         ],
-        self::WaitingClientWakala => [
+        self::ClientWakala => [
             FinancingOrderHistory::WaitingClientWakala,
-        ],
-        self::ClientWakalaCompleted => [
             FinancingOrderHistory::ClientWakalaAccepted,
         ],
         self::CommoditySoldToCustomer => [

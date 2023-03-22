@@ -41,7 +41,7 @@ class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
 
-            if ($traderOrder->checkOrderHistoryMatchLastAction(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument)) {
+            if ($traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument)) {
                 return;
             }
 

@@ -110,13 +110,12 @@ class TraderOrder extends Model implements HasMedia
             ->first();
     }
 
-    public function checkOrderHistoryMatchLastAction($action): bool
+    public function doesLastActionMatchWith($action): bool
     {
         if (! in_array($action, FinancingOrderHistory::getValues())) {
             throw new UnexpectedValueException('invalid Action');
         }
-        $lastAction = $this->traderHistories
-            ->last();
+        $lastAction = $this->traderHistories()->latest()->first();
 
         return $lastAction->action === $action;
     }

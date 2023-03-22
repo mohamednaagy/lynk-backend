@@ -36,7 +36,6 @@ class ProcessFinancingOrders implements ShouldQueue
                 $query->whereIn('provider', $whiteListedProviders)
                     ->whereIn('status', [
                         TraderOrderStatus::InProgress,
-                        TraderOrderStatus::Completed,
                     ]);
             }])
             ->having('trader_orders_count', 0)

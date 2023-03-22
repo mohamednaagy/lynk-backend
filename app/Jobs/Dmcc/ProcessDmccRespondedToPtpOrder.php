@@ -44,7 +44,7 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
 
-            if ($traderOrder->checkOrderHistoryMatchLastAction(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)) {
+            if ($traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)) {
                 return;
             }
 
