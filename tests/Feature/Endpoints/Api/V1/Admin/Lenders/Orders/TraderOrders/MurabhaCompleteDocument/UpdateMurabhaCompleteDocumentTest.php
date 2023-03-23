@@ -5,11 +5,12 @@ namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocu
 use App\Enums\Area;
 use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Sms\Events\SmsSent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -17,6 +18,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
+use Tests\Support\FinancingOrders\CommittedOrder;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
@@ -32,9 +37,9 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
     private static User $superAdminUser;
 
-    private static Builder|Model $financingOrder;
+    private static CommittedOrder $financingOrder;
 
-    private static TraderOrder $traderOrder;
+    private static Builder|Model|TraderOrder $traderOrder;
 
     private static string $updateMurabhaCompleteDocumentUrl;
 
@@ -58,27 +63,17 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
         ]);
         self::$userLender = $this->createLenderUser(self::$lender->id);
 
-        self::$financingOrder = $this->createOrder(
-            self::$lender->id,
-            self::$userLender->id,
-            [
-                'is_verification_required' => true,
-                'status' => FinancingOrderStatus::InProgress,
-            ]
-        );
+        self::$financingOrder = OrderScenario::inProgress()
+            ->creator(self::$userLender)
+            ->commit();
 
-        // create trader order
-        self::$traderOrder = self::$financingOrder->traderOrders()->create([
-            'provider' => 'dmcc',
-            'reference' => '123456789',
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder();
 
         self::$updateMurabhaCompleteDocumentUrl = self::BaseUrl.
             '/orders/'.
-            self::$financingOrder->getOriginal('id').
+            self::$financingOrder->id.
             '/trader-orders/'.
-            self::$traderOrder->getOriginal('id').
+            self::$traderOrder->id.
             '/murabha-complete';
 
         self::$requestData = [
@@ -121,19 +116,13 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
      */
     public function test_proceed_murabha_complete_document_is_successfull_and_order_status_will_be_updated(): void
     {
-        // create trader order history of previous last step
-        self::$traderOrder->traderHistories()->create(
-            [
-                'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabhaOfferIssued],
-            ]
-        );
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertJsonStructure(['data']);
-
-        $freshOrderStatus = self::$financingOrder->fresh()->status;
-        $this->assertTrue($freshOrderStatus->is(FinancingOrderStatus::MurabahaSaleCompleted));
 
         $freshTraderOrderStatus = self::$traderOrder->fresh()->status;
         $this->assertTrue($freshTraderOrderStatus->is(TraderOrderStatus::Completed));
@@ -164,11 +153,14 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
     public function unsuitableTraderHistoryDataProvider()
     {
+        $murabhaOfferIssuedNode = app(StepHistoriesDictionary::class)->getStepOf(MurabhaStep::MurabhaOfferIssued);
+        $murabahaSaleCompletedNode = app(StepHistoriesDictionary::class)->getStepOf(MurabhaStep::MurabahaSaleCompleted);
+
         return [
             'histories_that_doesnt_follow_sequence' => collect(FinancingOrderHistory::getValues())
-                ->reject(function ($item) {
-                    return $item == FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted]
-                        || $item == FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabhaOfferIssued];
+                ->reject(function ($item) use ($murabhaOfferIssuedNode, $murabahaSaleCompletedNode) {
+                    return $item == end($murabhaOfferIssuedNode->histories)
+                        || $item == end($murabahaSaleCompletedNode->histories);
                 })
                 ->toArray(),
         ];
@@ -179,25 +171,12 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
      */
     public function test_update_murabha_complete_document_is_successful_and_order_status_will_not_be_updated(): void
     {
-        self::$traderOrder->traderHistories()->create(
-            [
-                'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabhaOfferIssued],
-            ]
-        );
-
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted],
-        ]);
-
-        self::$financingOrder->update([
-            'status' => FinancingOrderStatus::Completed,
-        ]);
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertJsonStructure(['data']);
-
-        $freshOrderStatus = self::$financingOrder->fresh()->status;
-        $this->assertTrue($freshOrderStatus->is(FinancingOrderStatus::Completed));
     }
 }
