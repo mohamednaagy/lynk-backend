@@ -4,13 +4,16 @@ namespace Endpoints\Api\V1\Client;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\Role;
-use App\Enums\TraderOrderStatus;
 use App\Models\Company;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
+use Tests\Support\FinancingOrders\CommittedOrder;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
@@ -23,9 +26,9 @@ class SendOtpClientWakalaTest extends TestCase
 
     private static User $userLender;
 
-    private static FinancingOrder $order;
+    private static CommittedOrder $order;
 
-    private static TraderOrder $traderOrder;
+    private static TraderOrder|Model $traderOrder;
 
     private static string $endpoint;
 
@@ -36,16 +39,17 @@ class SendOtpClientWakalaTest extends TestCase
         [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
 
-        self::$order = $this->createOrder(self::$company->id, self::$userLender->id, [
-            'national_id' => '2553451234',
-        ]);
+        self::$order = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$userLender)
+            ->commit();
 
-        self::$order->traderOrders()->create([
-            'provider' => 'dmcc',
-            'status' => TraderOrderStatus::InProgress,
-            'reference' => 123,
-        ]);
-        self::$traderOrder = self::$order->activeTraderOrder()->first();
+        self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder();
+
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToHistory(FinancingOrderHistory::WaitingClientWakala);
+
         self::$endpoint = 'api/v1/client/wakala/access';
     }
 

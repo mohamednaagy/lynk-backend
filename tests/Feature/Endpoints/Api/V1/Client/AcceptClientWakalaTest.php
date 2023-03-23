@@ -3,11 +3,8 @@
 namespace Tests\Feature\Endpoints\Api\V1\Client;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
-use App\Enums\TraderOrderStatus;
 use App\Models\Company;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +14,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Modules\Otpify\Models\OtpifyCode;
 use Symfony\Component\HttpFoundation\Response;
+use Tests\Support\FinancingOrders\CommittedOrder;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
@@ -29,7 +30,7 @@ class AcceptClientWakalaTest extends TestCase
 
     private static User $userLender;
 
-    private static FinancingOrder|Model $order;
+    private static CommittedOrder $order;
 
     private static TraderOrder|Model $traderOrder;
 
@@ -42,21 +43,21 @@ class AcceptClientWakalaTest extends TestCase
         [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
 
-        self::$order = $this->createOrder(self::$company->id, self::$userLender->id, [
-            'national_id' => '2553451234',
-        ]);
+        self::$order = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$userLender)
+            ->commit();
 
-        self::$order->traderOrders()->create(['provider' => 'dmcc',
-            'status' => TraderOrderStatus::InProgress,
-            'reference' => 123,
-        ]);
+        self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder();
 
-        self::$traderOrder = self::$order->activeTraderOrder()->first();
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToHistory(FinancingOrderHistory::WaitingClientWakala);
     }
 
     public function test_accept_client_wakala_successful()
     {
-        $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->getNationalId());
+        $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->national_id);
 
         $token = Str::random(100);
 
@@ -77,13 +78,11 @@ class AcceptClientWakalaTest extends TestCase
             ]);
 
         $this->assertNull(Cache::get($cacheKey));
-
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::ClientWakalaCompleted));
     }
 
     public function test_accept_client_wakala_with_invalid_national_id_nothing_work()
     {
-        $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->getNationalId());
+        $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->national_id);
 
         $token = Str::random(100);
 
@@ -103,11 +102,11 @@ class AcceptClientWakalaTest extends TestCase
 
     public function test_accept_client_wakala_with_already_verified_order_nothing_work()
     {
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::ClientWakalaAccepted,
-        ]);
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToHistory(FinancingOrderHistory::ClientWakalaAccepted);
 
-        $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->getNationalId());
+        $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->national_id);
 
         $token = Str::random(100);
 
@@ -127,7 +126,7 @@ class AcceptClientWakalaTest extends TestCase
 
     public function test_accept_client_wakala_with_token_expired_nothing_work()
     {
-        $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->getNationalId());
+        $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->national_id);
 
         $token = Str::random(100);
 

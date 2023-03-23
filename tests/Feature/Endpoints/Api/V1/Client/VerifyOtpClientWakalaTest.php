@@ -4,15 +4,18 @@ namespace Endpoints\Api\V1\Client;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\Role;
-use App\Enums\TraderOrderStatus;
 use App\Models\Company;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Otpify\Facades\Otpify;
 use Modules\Otpify\Models\OtpifyCode;
 use Symfony\Component\HttpFoundation\Response;
+use Tests\Support\FinancingOrders\CommittedOrder;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
@@ -25,17 +28,17 @@ class VerifyOtpClientWakalaTest extends TestCase
 
     private static User $userLender;
 
-    private static FinancingOrder $order;
+    private static CommittedOrder $order;
 
-    private static FinancingOrder $otherOrder;
+    private static CommittedOrder $otherOrder;
 
     private static OtpifyCode $otpifyCode;
 
     private static OtpifyCode $otherOtpifyCode;
 
-    private static TraderOrder $traderOrder;
+    private static TraderOrder|Model $traderOrder;
 
-    private static TraderOrder $otherTraderOrder;
+    private static TraderOrder|Model $otherTraderOrder;
 
     public function setUp(): void
     {
@@ -44,26 +47,32 @@ class VerifyOtpClientWakalaTest extends TestCase
         [self::$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
 
-        self::$order = $this->createOrder(self::$company->id, self::$userLender->id, [
-            'national_id' => '2553451234',
-        ]);
-        self::$traderOrder = self::$order->traderOrders()->create([
-            'provider' => 'dmcc',
-            'status' => TraderOrderStatus::InProgress,
-            'reference' => 123,
-        ]);
+        self::$order = OrderScenario::inProgress()
+            ->nationalId('2553451234')
+            ->lender(self::$company)
+            ->creator(self::$userLender)
+            ->commit();
 
-        self::$otherOrder = $this->createOrder(self::$company->id, self::$userLender->id, [
-            'national_id' => '1591192305',
-        ]);
-        self::$otherTraderOrder = self::$otherOrder->traderOrders()->create([
-            'provider' => 'fake',
-            'reference' => '123456789',
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder('dmcc');
 
-        self::$otpifyCode = Otpify::driver(config('otpify.default_ni_driver'))->send(request(), self::$order);
-        self::$otherOtpifyCode = Otpify::driver(config('otpify.default_ni_driver'))->send(request(), self::$otherOrder);
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToHistory(FinancingOrderHistory::WaitingClientWakala);
+
+        self::$otherOrder = OrderScenario::inProgress()
+            ->nationalId('1591192305')
+            ->lender(self::$company)
+            ->creator(self::$userLender)
+            ->commit();
+
+        self::$otherTraderOrder = InProgressOrder::of(self::$otherOrder)->createTraderOrder('fake');
+
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToHistory(FinancingOrderHistory::WaitingClientWakala);
+
+        self::$otpifyCode = Otpify::driver(config('otpify.default_ni_driver'))->send(request(), self::$order->model());
+        self::$otherOtpifyCode = Otpify::driver(config('otpify.default_ni_driver'))->send(request(), self::$otherOrder->model());
     }
 
     public function test_verify_otp_client_wakala_success()
@@ -93,9 +102,9 @@ class VerifyOtpClientWakalaTest extends TestCase
 
     public function test_verify_otp_client_wakala_with_already_verified_order_unsuccessful()
     {
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::ClientWakalaAccepted,
-        ]);
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToHistory(FinancingOrderHistory::ClientWakalaAccepted);
 
         $this->postJson('api/v1/client/wakala/verify', [
             'national_id' => self::$order->national_id,
