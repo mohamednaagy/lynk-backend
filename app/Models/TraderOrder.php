@@ -137,7 +137,7 @@ class TraderOrder extends Model implements HasMedia
         return $query->addSelect([
             'last_history_action' => TraderHistory::select('action')
                 ->whereColumn('trader_order_id', 'trader_orders.id')
-                ->latest()
+                ->latest('id')
                 ->take(1),
         ]);
     }
