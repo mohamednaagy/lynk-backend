@@ -29,6 +29,7 @@ trait TraderHelperTrait
             ],
         ],
         MurabhaStep::ClientWakala => [
+            FinancingOrderHistory::WaitingClientWakala => null,
             FinancingOrderHistory::ClientWakalaAccepted => null,
         ],
         MurabhaStep::MurabhaOfferIssued => [

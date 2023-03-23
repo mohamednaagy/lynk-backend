@@ -65,4 +65,16 @@ class StepHistoriesDictionary
             $this->dictionaryNodeList->next();
         }
     }
+
+    public function getCompletedStepByHistory($history)
+    {
+        $this->dictionaryNodeList->rewind();
+        while ($this->dictionaryNodeList->valid()) {
+            if ($history == end($this->dictionaryNodeList->current()->histories)) {
+                return $this->dictionaryNodeList->current();
+            }
+
+            $this->dictionaryNodeList->next();
+        }
+    }
 }

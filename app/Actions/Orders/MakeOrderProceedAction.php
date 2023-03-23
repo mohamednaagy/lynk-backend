@@ -14,6 +14,8 @@ use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Http\UploadedFile;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
 class MakeOrderProceedAction implements MakeOrderProceed
 {
@@ -29,11 +31,13 @@ class MakeOrderProceedAction implements MakeOrderProceed
      * @param  TraderOrder  $traderOrder
      * @param  string  $case
      * @param  bool  $forceToProceed
-     * @return mixed
+     * @return array
      *
+     * @throws FileDoesNotExist
+     * @throws FileIsTooBig
      * @throws OrderStatusDoesNotFollowSequenceException
      */
-    public function handle(TraderOrder $traderOrder, string $case, $forceToProceed = false)
+    public function handle(TraderOrder $traderOrder, string $case, bool $forceToProceed = false)
     {
         return match ($case) {
             FinancingOrderProceedCase::ClientWakalaAccepted => $this->handleClientWakalaAccepted($traderOrder, $forceToProceed),
@@ -48,6 +52,9 @@ class MakeOrderProceedAction implements MakeOrderProceed
      * @return array
      *
      * @throws OrderStatusDoesNotFollowSequenceException
+     * @throws FileDoesNotExist
+     * @throws FileIsTooBig
+     * @throws \Exception
      */
     protected function handleClientWakalaAccepted(TraderOrder $traderOrder, bool $forceToProceed)
     {
@@ -58,7 +65,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
         if (
             $this->isPreviousStepOfClientWakalaNotCompleted($traderOrder)
             || ($forceToProceed === false && $order->is_verification_required)
-            || ($forceToProceed === false && $this->isClientWakalaStepNotCompleted($traderOrder))
+            || ($forceToProceed === false && $this->isClientWakalaStepCompleted($traderOrder))
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
@@ -69,6 +76,8 @@ class MakeOrderProceedAction implements MakeOrderProceed
         }
 
         app(AcceptClientWakala::class)->handle($traderOrder);
+
+        return [];
     }
 
     protected function isPreviousStepOfClientWakalaNotCompleted(TraderOrder $traderOrder)
@@ -78,9 +87,9 @@ class MakeOrderProceedAction implements MakeOrderProceed
         );
     }
 
-    protected function isClientWakalaStepNotCompleted(TraderOrder $traderOrder)
+    protected function isClientWakalaStepCompleted(TraderOrder $traderOrder)
     {
-        return ! $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala);
+        return $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala);
     }
 
     /**
@@ -94,7 +103,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
     {
         if (
             $this->isPreviousStepOfContractSignedNotCompleted($traderOrder)
-            || ($forceToProceed === false && $this->isContractSignedStepNotCompleted($traderOrder))
+            || ($forceToProceed === false && $this->isContractSignedStepCompleted($traderOrder))
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
@@ -111,9 +120,9 @@ class MakeOrderProceedAction implements MakeOrderProceed
         );
     }
 
-    protected function isContractSignedStepNotCompleted(TraderOrder $traderOrder)
+    protected function isContractSignedStepCompleted(TraderOrder $traderOrder)
     {
-        return ! $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
+        return $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
     }
 
     public function setSignedClientWakala(UploadedFile $signedClientWakala)

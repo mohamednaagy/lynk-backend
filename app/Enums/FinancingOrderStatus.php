@@ -40,6 +40,9 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
             self::PendingApproval,
             self::InProgress,
         ],
+        self::InProgress => [
+            self::Approved,
+        ],
     ];
 
     public static array $requireActionStatuses = [
