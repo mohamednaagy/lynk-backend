@@ -3,7 +3,6 @@
 namespace Tests\Unit\Jobs\General;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Jobs\Dmcc\ProcessDmccMpoOrder;
 use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
@@ -53,7 +52,7 @@ class ProcessFinancingOrdersTest extends TestCase
         Bus::assertDispatched(ProcessInProgressOrder::class);
     }
 
-    public function test_process_financing_orders_responded_to_ptp_status_matching_process_dmcc_responded_to_ptp_order_job()
+    public function test_process_financing_orders_responded_to_ptp_history_matching_process_dmcc_responded_to_ptp_order_job()
     {
         $financingOrder = OrderScenario::inProgress()
             ->lender(self::$company)
@@ -67,8 +66,6 @@ class ProcessFinancingOrdersTest extends TestCase
             ->reset()
             ->moveToHistory(FinancingOrderHistory::RespondPtp);
 
-        dd($traderOrder->traderHistories);
-
         Bus::fake();
 
         (new ProcessFinancingOrders)->handle();
@@ -76,7 +73,7 @@ class ProcessFinancingOrdersTest extends TestCase
         Bus::assertDispatched(ProcessDmccRespondedToPtpOrder::class);
     }
 
-    public function test_process_financing_orders_ptp_document_retrieved_status_not_matching_any_job()
+    public function test_process_financing_orders_ptp_document_retrieved_history_not_matching_any_job()
     {
         $financingOrder = OrderScenario::inProgress()
             ->lender(self::$company)
@@ -89,8 +86,6 @@ class ProcessFinancingOrdersTest extends TestCase
             ->reset()
             ->moveToHistory(FinancingOrderHistory::GetPtpDocument);
 
-        $this->createOrder($this->company->id, $this->lender->id, ['status' => FinancingOrderStatus::PtpDocumentRetrieved]);
-
         Bus::fake();
 
         (new ProcessFinancingOrders)->handle();
@@ -98,9 +93,18 @@ class ProcessFinancingOrdersTest extends TestCase
         Bus::assertNothingDispatched();
     }
 
-    public function test_process_financing_orders_responded_contract_signed_status_matching_process_dmcc_contract_signed_order_job()
+    public function test_process_financing_orders_responded_contract_signed_history_matching_process_dmcc_contract_signed_order_job()
     {
-        $this->createOrder($this->company->id, $this->lender->id, ['status' => FinancingOrderStatus::ContractSigned]);
+        $financingOrder = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$lender)
+            ->commit();
+
+        $traderOrder = InProgressOrder::of($financingOrder)->createTraderOrder();
+
+        TraderOrderScenario::of($traderOrder)
+            ->reset()
+            ->moveToHistory(FinancingOrderHistory::ContractSigned);
 
         Bus::fake();
 
@@ -109,9 +113,18 @@ class ProcessFinancingOrdersTest extends TestCase
         Bus::assertDispatched(ProcessAskClientForWakala::class);
     }
 
-    public function test_process_financing_orders_commodity_sold_to_customer_status_matching_process_ask_client_for_wakala_job()
+    public function test_process_financing_orders_commodity_sold_to_customer_history_matching_process_ask_client_for_wakala_job()
     {
-        $this->createOrder($this->company->id, $this->lender->id, ['status' => FinancingOrderStatus::CommoditySoldToCustomer]);
+        $financingOrder = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$lender)
+            ->commit();
+
+        $traderOrder = InProgressOrder::of($financingOrder)->createTraderOrder();
+
+        TraderOrderScenario::of($traderOrder)
+            ->reset()
+            ->moveToHistory(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
 
         Bus::fake();
 
@@ -120,9 +133,18 @@ class ProcessFinancingOrdersTest extends TestCase
         Bus::assertDispatched(ProcessDmccMpoOrder::class);
     }
 
-    public function test_process_financing_orders_client_wakala_completed_status__matching_process_dmcc_client_wakala_completed_order_job()
+    public function test_process_financing_orders_client_wakala_completed_history_matching_process_dmcc_client_wakala_completed_order_job()
     {
-        $this->createOrder($this->company->id, $this->lender->id, ['status' => FinancingOrderStatus::ClientWakalaCompleted]);
+        $financingOrder = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$lender)
+            ->commit();
+
+        $traderOrder = InProgressOrder::of($financingOrder)->createTraderOrder();
+
+        TraderOrderScenario::of($traderOrder)
+            ->reset()
+            ->moveToHistory(FinancingOrderHistory::ClientWakalaAccepted);
 
         Bus::fake();
 
