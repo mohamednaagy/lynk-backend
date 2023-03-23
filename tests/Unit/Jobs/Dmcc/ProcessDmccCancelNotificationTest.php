@@ -8,11 +8,13 @@ use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\Dmcc\ProcessDmccCancelNotification;
 use App\Models\Company;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\FinancingOrders\CommittedOrder;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 use Throwable;
@@ -25,7 +27,7 @@ class ProcessDmccCancelNotificationTest extends TestCase
 
     protected static User $userLender;
 
-    protected static FinancingOrder $financingOrder;
+    protected static CommittedOrder $financingOrder;
 
     protected static mixed $notification;
 
@@ -37,14 +39,12 @@ class ProcessDmccCancelNotificationTest extends TestCase
 
         [self::$company] = $this->createLenderCompany('2000', ['company_cr' => '1234567891']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, ['email' => 'lenderAdmin@bim.com']);
-        self::$financingOrder = $this->createOrder(
-            self::$company->id,
-            self::$userLender->id,
-            [
-                'is_verification_required' => true,
-                'status' => FinancingOrderStatus::PendingCancellation,
-            ]
-        );
+
+        self::$financingOrder = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$userLender)
+            ->requireVerification(true)
+            ->commit();
 
         self::$notification = (object) [
             'notificationHeaderAndEntity' => (object) [
@@ -64,11 +64,8 @@ class ProcessDmccCancelNotificationTest extends TestCase
             ->entityValue;
 
         // create trader order
-        self::$traderOrder = self::$financingOrder->traderOrders()->create([
-            'provider' => 'fake',
-            'reference' => $ttiId,
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder('fake', $ttiId);
+        self::$financingOrder->status(FinancingOrderStatus::PendingCancellation)->commit();
     }
 
     /**
@@ -77,13 +74,13 @@ class ProcessDmccCancelNotificationTest extends TestCase
     public function test_process_cannot_proceed_with_invalid_trader_order_provider()
     {
         //change the trader order provider with invalid one
-        self::$financingOrder->traderOrders()->first()->update(['provider' => 'invalid']);
+        self::$traderOrder->update(['provider' => 'invalid']);
 
         $process = new ProcessDmccCancelNotification(self::$notification);
         $process->handle();
 
         $this->assertFalse(
-            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Cancelled)
+            self::$financingOrder->model()->fresh()->status->is(FinancingOrderStatus::Cancelled)
         );
     }
 
@@ -101,13 +98,13 @@ class ProcessDmccCancelNotificationTest extends TestCase
             }
 
             //change the order status with invalid one
-            self::$financingOrder->update(['status' => $status]);
+            self::$financingOrder->model()->update(['status' => $status]);
 
             $process = new ProcessDmccCancelNotification(self::$notification);
             $process->handle();
 
             $this->assertFalse(
-                self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Cancelled)
+                self::$financingOrder->model()->fresh()->status->is(FinancingOrderStatus::Cancelled)
             );
         }
     }
@@ -122,7 +119,7 @@ class ProcessDmccCancelNotificationTest extends TestCase
 
         $this->assertEquals(
             FinancingOrderHistory::OrderCancelled,
-            self::$traderOrder->traderHistories()->first()->action
+            self::$traderOrder->traderHistories()->latest('id')->first()->action
         );
     }
 
@@ -135,7 +132,7 @@ class ProcessDmccCancelNotificationTest extends TestCase
         $process->handle();
 
         $this->assertTrue(
-            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Cancelled)
+            self::$financingOrder->model()->fresh()->status->is(FinancingOrderStatus::Cancelled)
         );
     }
 
@@ -149,7 +146,7 @@ class ProcessDmccCancelNotificationTest extends TestCase
 
         $this->assertEquals(
             TraderOrderStatus::Cancelled,
-            self::$financingOrder->traderOrders()->first()->status->value
+            self::$financingOrder->model()->traderOrders()->first()->status->value
         );
     }
 
@@ -162,7 +159,7 @@ class ProcessDmccCancelNotificationTest extends TestCase
         $process->handle();
 
         $this->assertTrue(
-            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Cancelled)
+            self::$financingOrder->model()->fresh()->status->is(FinancingOrderStatus::Cancelled)
         );
     }
 
@@ -171,13 +168,13 @@ class ProcessDmccCancelNotificationTest extends TestCase
      */
     public function test_process_passes_with_valid_provider_as_dmcc_succeed()
     {
-        self::$financingOrder->traderOrders()->first()->update(['provider' => 'dmcc']);
+        self::$traderOrder->update(['provider' => 'dmcc']);
 
         $process = new ProcessDmccCancelNotification(self::$notification);
         $process->handle();
 
         $this->assertTrue(
-            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Cancelled)
+            self::$financingOrder->model()->fresh()->status->is(FinancingOrderStatus::Cancelled)
         );
     }
 }

@@ -30,6 +30,11 @@ class TraderHistoryObserver
 
         // some Order at last step so no next step I think  another mail content needed
         $currentStepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderHistory->action);
+
+        if (! $currentStepNode) {
+            return;
+        }
+
         $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($currentStepNode->step);
 
         if ($nextStepNode) {
