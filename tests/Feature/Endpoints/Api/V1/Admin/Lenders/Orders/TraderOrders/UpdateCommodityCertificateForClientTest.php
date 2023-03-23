@@ -62,7 +62,23 @@ class UpdateCommodityCertificateForClientTest extends TestCase
             ->commit();
 
         self::$traderOrder = InProgressOrder::of(self::$financingOrder)
-            ->createTraderOrder('fake');
+            ->createTraderOrder('fake', data: [
+                'products' => [
+                    [
+                        'product' => 'product',
+                        'quantity' => 100,
+                        'amount' => 100,
+                        'currency' => 'currency',
+                        'warehouse' => 'warehouse',
+                        'owner' => 'owner',
+                        'previous_owner' => 'previous_owner',
+                        'date_time_of_purchasing_commodity' => '2023-02-21 09:30:00',
+                        'warehouse_or_vault_emirates' => 'dummy',
+                        'warehouse_or_vault_country' => 'dummy',
+                        'uom' => 'dummy',
+                    ],
+                ],
+            ]);
 
         self::$traderOrder->traderHistories()->create([
             'action' => FinancingOrderHistory::ContractSigned,

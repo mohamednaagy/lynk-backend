@@ -759,7 +759,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </div>
 
                 <h5 class="py-3 font-extrabold text-center">بيانات السلع/ـة</h5>
-                @foreach ($products as $product)
+                @foreach ($products ?? [] as $product)
                     <table class="min-w-full mt-4">
                         <tbody>
                             <tr>
