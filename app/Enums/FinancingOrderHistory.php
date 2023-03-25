@@ -15,8 +15,6 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
 
     const AttachPtpDocumentToOrder = 4;
 
-    const CommodityPurchased = 5;
-
     const CreateTransferOwnershipToLenderDocument = 6;
 
     const RespondPtp = 7;

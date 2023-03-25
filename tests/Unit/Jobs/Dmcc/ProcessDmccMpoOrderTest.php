@@ -3,7 +3,6 @@
 namespace Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
@@ -19,7 +18,12 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
@@ -44,25 +48,60 @@ class ProcessDmccMpoOrderTest extends TestCase
 
         [self::$company] = $this->createCompany();
         self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
-        self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::CommoditySoldToCustomer,
-        ]);
-        $products = [
+
+        self::$order = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$lender)
+            ->commit()
+            ->model();
+
+        $data = [
             'products' => [
-                'amount' => 1,
-                'product' => 'product',
-                'quantity' => 1,
-                'warehouse' => 'warehouse',
-                'owner' => 'owner',
+                [
+                    'product' => 'Yogurt',
+                    'quantity' => '10',
+                    'amount' => '1000',
+                    'currency' => 'SAR',
+                    'warehouse' => 'Warehouse',
+                    'owner' => 'Owner 1',
+                    'previous_owner' => 'Owner 0',
+                    'new_owner' => 'Owner 1',
+                    'date_time_of_purchasing_commodity' => '2023-01-01 00:00:00',
+                    'warehouse_or_vault_emirates' => 'Emirates',
+                    'warehouse_or_vault_country' => 'Saudi Arabia',
+                    'inventory_record_id' => '1000',
+                    'warrant_percentage' => '100',
+                    'warrant_no' => '658',
+                    'hs_code' => '#234',
+                    'uom' => 'Kilo',
+                ],
+                [
+                    'product' => 'Yogurt 2',
+                    'quantity' => '5',
+                    'amount' => '500',
+                    'currency' => 'SAR',
+                    'warehouse' => 'Warehouse',
+                    'owner' => 'Owner 1',
+                    'previous_owner' => 'Owner 2',
+                    'new_owner' => 'Owner 3',
+                    'date_time_of_purchasing_commodity' => '2023-02-01 00:00:00',
+                    'warehouse_or_vault_emirates' => 'Emirates',
+                    'warehouse_or_vault_country' => 'Saudi Arabia',
+                    'inventory_record_id' => '1000',
+                    'warrant_percentage' => '100',
+                    'warrant_no' => '658',
+                    'hs_code' => '#234',
+                    'uom' => 'Kilo',
+                ],
             ],
         ];
 
-        self::$traderOrder = TraderOrder::query()->create(array_merge($products, [
-            'financing_order_id' => self::$order->id,
-            'reference' => 1,
-            'provider' => 'dmcc',
-            'status' => TraderOrderStatus::InProgress,
-        ]));
+        $data['exchange_rate'] = '3.75';
+
+        self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder('dmcc', data: $data);
+
+        TraderOrderScenario::of(self::$traderOrder)
+            ->moveToHistory(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
 
         Soap::fake(function () {
             return Soap::response([
@@ -77,12 +116,21 @@ class ProcessDmccMpoOrderTest extends TestCase
                 ],
             ]);
         });
+
+        Http::fake(function () {
+            return Http::response([
+                'data' => [
+                    'fileContent' => 'document',
+                ],
+            ], 200);
+        });
     }
 
     public function test_process_dmcc_mpo_with_dmcc_as_trader_will_success()
     {
-        (new ProcessDmccMpoOrder(self::$order->id))->handle();
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
+        (new ProcessDmccMpoOrder(self::$traderOrder->id))->handle();
+
+        $this->assertTrue(self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachMpoDocument));
     }
 
     public function test_process_dmcc_mpo_with_fake_as_trader_order_will_success()
@@ -90,8 +138,9 @@ class ProcessDmccMpoOrderTest extends TestCase
         self::$traderOrder->update([
             'provider' => 'fake',
         ]);
-        (new ProcessDmccMpoOrder(self::$order->id))->handle();
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
+        (new ProcessDmccMpoOrder(self::$traderOrder->id))->handle();
+
+        $this->assertTrue(self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachMpoDocument));
     }
 
     public function test_process_dmcc_mpo_with_not_supported_trader_will_fail()
@@ -99,17 +148,37 @@ class ProcessDmccMpoOrderTest extends TestCase
         self::$traderOrder->update([
             'provider' => 'else',
         ]);
-        (new ProcessDmccMpoOrder(self::$order->id))->handle();
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::CommoditySoldToCustomer));
+
+        $this->expectException(InvalidArgumentException::class);
+
+        (new ProcessDmccMpoOrder(self::$traderOrder->id))->handle();
+
+        $this->assertTrue(self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument));
     }
 
     public function test_process_dmcc_mpo_when_order_status_not_client_wakala_complete_fail()
     {
-        self::$order->update([
-            'status' => FinancingOrderStatus::MurabhaOfferIssued,
-        ]);
-        (new ProcessDmccMpoOrder(self::$order->id))->handle();
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
+        $financeHistories = FinancingOrderHistory::asArray();
+
+        foreach ($financeHistories as $financeHistory) {
+            if (in_array($financeHistory, [
+                FinancingOrderHistory::CreateSellingCommodityToCustomerDocument, FinancingOrderHistory::GetTtiId, FinancingOrderHistory::OrderCancelled, FinancingOrderHistory::Expired,
+            ])) {
+                continue;
+            }
+
+            self::$traderOrder->update([
+                'status' => TraderOrderStatus::InProgress,
+            ]);
+
+            TraderOrderScenario::of(self::$traderOrder)
+                ->reset()
+                ->moveToHistory($financeHistory);
+
+            (new ProcessDmccMpoOrder(self::$traderOrder->id))->handle();
+
+            $this->assertTrue(self::$traderOrder->doesLastActionMatchWith($financeHistory));
+        }
     }
 
     public function test_process_dmcc_mpo_histories_created()

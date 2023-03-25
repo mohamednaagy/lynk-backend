@@ -2,20 +2,23 @@
 
 namespace Tests\Unit\Jobs\Dmcc;
 
-use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Enums\Role;
-use App\Enums\TraderOrderStatus;
-use App\Exceptions\TraderException;
+use App\Exceptions\TraderNotSupportedException;
 use App\Jobs\Dmcc\ProcessUnprocessedDmccNotification;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
 use App\Support\Traders\Events\ProcessNotification;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Fluent;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
@@ -27,9 +30,9 @@ class ProcessUnprocessedDmccNotificationTest extends TestCase
 
     protected static User $lender;
 
-    protected static $notification;
+    protected static Fluent $notification;
 
-    protected static $traderOrder;
+    protected static Model|TraderOrder $traderOrder;
 
     protected static $ttiId;
 
@@ -41,9 +44,11 @@ class ProcessUnprocessedDmccNotificationTest extends TestCase
 
         [self::$company] = $this->createCompany();
         self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
-        self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::MurabahaSaleCompleted,
-        ]);
+        self::$order = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$lender)
+            ->commit()
+            ->model();
 
         self::$notification = new Fluent([
             'notificationHeaderAndEntity' => new Fluent([
@@ -59,12 +64,10 @@ class ProcessUnprocessedDmccNotificationTest extends TestCase
 
         self::$ttiId = self::$notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
 
-        self::$traderOrder = TraderOrder::create([
-            'status' => TraderOrderStatus::InProgress,
-            'financing_order_id' => self::$order->id,
-            'reference' => self::$ttiId,
-            'provider' => 'fake',
-        ]);
+        self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder('fake', self::$ttiId);
+
+        TraderOrderScenario::of(self::$traderOrder)
+            ->moveToStep(MurabhaStep::MurabahaSaleCompleted);
     }
 
     public function test_process_unprocessed_dmcc_notification_job_will_processed_only_if_the_active_trader_has_dmcc_as_provider()
@@ -95,8 +98,8 @@ class ProcessUnprocessedDmccNotificationTest extends TestCase
 
     public function test_process_unprocessed_dmcc_notification_process_notification_with_wrong_driver_will_fail()
     {
-        $this->expectException(TraderException::class);
-        config()->set('trader.providers.fake.username', 'wrong username');
+        $this->expectException(TraderNotSupportedException::class);
+        config()->set('trader.default', 'wrong driver');
 
         (new ProcessUnprocessedDmccNotification(self::$notification))->handle();
     }

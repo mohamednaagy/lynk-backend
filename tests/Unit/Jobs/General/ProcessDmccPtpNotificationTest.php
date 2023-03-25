@@ -3,8 +3,7 @@
 namespace Jobs\General;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
-use App\Enums\TraderOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Jobs\Dmcc\ProcessDmccPtpNotification;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -14,6 +13,9 @@ use CodeDredd\Soap\Facades\Soap;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
@@ -38,9 +40,12 @@ class ProcessDmccPtpNotificationTest extends TestCase
 
         [self::$company] = $this->createCompany();
         self::$lender = $this->createLenderUser(self::$company->id);
-        self::$financingOrder = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::WaitingPurchasingCommodity,
-        ]);
+
+        self::$financingOrder = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$lender)
+            ->commit()
+            ->model();
 
         self::$notification = (object) [
             'notificationHeaderAndEntity' => (object) [
@@ -59,11 +64,10 @@ class ProcessDmccPtpNotificationTest extends TestCase
             ->notificationEntity[0]
             ->entityValue;
 
-        self::$traderOrder = self::$financingOrder->traderOrders()->create([
-            'provider' => 'fake',
-            'reference' => $ttiId,
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder('fake', '123456789');
+
+        TraderOrderScenario::of(self::$traderOrder)
+            ->moveToStep(MurabhaStep::PurchasingCommodity);
     }
 
     public function test_job_not_processed_if_active_trader_order_has_invalid_provider()
@@ -74,7 +78,7 @@ class ProcessDmccPtpNotificationTest extends TestCase
         $process->handle();
 
         $this->assertTrue(
-            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::WaitingPurchasingCommodity)
+            self::$traderOrder->checkOrderHistoryAction(FinancingOrderHistory::RespondPtp)
         );
     }
 
@@ -86,7 +90,7 @@ class ProcessDmccPtpNotificationTest extends TestCase
         $process->handle();
 
         $this->assertTrue(
-            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::RespondedToPtp)
+            self::$traderOrder->checkOrderHistoryAction(FinancingOrderHistory::RespondPtp)
         );
     }
 
@@ -104,7 +108,7 @@ class ProcessDmccPtpNotificationTest extends TestCase
         $process->handle();
 
         $this->assertTrue(
-            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::RespondedToPtp)
+            self::$traderOrder->checkOrderHistoryAction(FinancingOrderHistory::RespondPtp)
         );
     }
 
@@ -113,20 +117,25 @@ class ProcessDmccPtpNotificationTest extends TestCase
      */
     public function test_job_not_processed_if_current_financing_order_is_unsuitable_status($unsuitableOrderStatusData)
     {
-        self::$financingOrder->update(['status' => $unsuitableOrderStatusData]);
+        self::$traderOrder = TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToHistory($unsuitableOrderStatusData)
+            ->getTraderOrder();
 
         $process = new ProcessDmccPtpNotification(self::$notification);
         $process->handle();
 
         $this->assertFalse(
-            self::$financingOrder->refresh()->status->is(FinancingOrderStatus::RespondedToPtp)
+            self::$traderOrder->checkOrderHistoryAction(FinancingOrderHistory::RespondPtp)
         );
     }
 
     public function unsuitableOrderStatusDataProvider()
     {
-        return collect(FinancingOrderStatus::getValues())->reject(function ($item) {
-            return $item == FinancingOrderStatus::WaitingPurchasingCommodity || $item == FinancingOrderStatus::RespondedToPtp;
+        return collect(FinancingOrderHistory::getValues())->reject(function ($item) {
+            return in_array($item, [
+                FinancingOrderHistory::RespondPtp, FinancingOrderHistory::GetTtiId, FinancingOrderHistory::OrderCancelled, FinancingOrderHistory::Expired,
+            ]);
         })->map(function ($item) {
             return [$item];
         })->toArray();
@@ -138,7 +147,7 @@ class ProcessDmccPtpNotificationTest extends TestCase
         $process = new ProcessDmccPtpNotification(self::$notification);
         $process->handle();
 
-        $this->assertDatabaseCount('trader_histories', 1)
+        $this->assertDatabaseCount('trader_histories', 8)
             ->assertDatabaseHas('trader_histories', [
                 'trader_order_id' => self::$traderOrder->id,
                 'action' => FinancingOrderHistory::RespondPtp,
@@ -152,7 +161,7 @@ class ProcessDmccPtpNotificationTest extends TestCase
         $process->handle();
 
         $this->assertTrue(
-            self::$financingOrder->fresh()->status->is(FinancingOrderStatus::RespondedToPtp)
+            self::$traderOrder->checkOrderHistoryAction(FinancingOrderHistory::RespondPtp)
         );
     }
 }

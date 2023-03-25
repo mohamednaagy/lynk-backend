@@ -6,6 +6,7 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Exceptions\TraderException;
 use App\Models\Company;
+use App\Models\FinancingOrder;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\User;
@@ -18,7 +19,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Spatie\Activitylog\Models\Activity;
-use Tests\Support\FinancingOrders\CommittedOrder;
 use Tests\Support\FinancingOrders\InProgressOrder;
 use Tests\Support\FinancingOrders\OrderScenario;
 use Tests\Support\FinancingOrders\TraderOrderScenario;
@@ -34,7 +34,7 @@ class DmccDriverTest extends TestCase
 
     protected static User $lender;
 
-    protected static CommittedOrder $order;
+    protected static FinancingOrder $order;
 
     protected static Model|TraderOrder $traderOrder;
 
@@ -48,7 +48,8 @@ class DmccDriverTest extends TestCase
         self::$order = OrderScenario::inProgress()
             ->lender(self::$company)
             ->creator(self::$lender)
-            ->commit();
+            ->commit()
+            ->model();
 
         $data = [
             'products' => [
@@ -114,7 +115,7 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccDriver())->getTti(self::$order->model());
+        (new DmccDriver())->getTti(self::$order);
 
         $this->assertDatabaseCount((new TraderOrder())->getTable(), $traderOrderCount + 1);
         $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderOrderHistoryCount + 1);
@@ -138,7 +139,7 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccDriver())->getTti(self::$order->model());
+        (new DmccDriver())->getTti(self::$order);
 
         $this->assertDatabaseCount((new TraderOrder())->getTable(), 0);
         $this->assertDatabaseCount((new TraderHistory())->getTable(), 0);
@@ -228,7 +229,7 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccDriver())->getTtiId(self::$order->model());
+        $response = (new DmccDriver())->getTtiId(self::$order);
 
         $this->assertIsString($response);
         $this->assertEquals(1, $response);
@@ -253,7 +254,7 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccDriver())->getTtiId(self::$order->model());
+        (new DmccDriver())->getTtiId(self::$order);
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
@@ -271,7 +272,7 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccDriver())->cancelOrder(self::$order->model());
+        $response = (new DmccDriver())->cancelOrder(self::$order);
 
         $this->assertEquals('0000', $response->successCode);
     }
@@ -293,7 +294,7 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccDriver())->cancelOrder(self::$order->model());
+        (new DmccDriver())->cancelOrder(self::$order);
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
@@ -311,7 +312,7 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccDriver())->respondPtpService(self::$order->model());
+        $response = (new DmccDriver())->respondPtpService(self::$order);
 
         $this->assertEquals('0000', $response->successCode);
     }
@@ -333,7 +334,7 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccDriver())->respondPtpService(self::$order->model());
+        (new DmccDriver())->respondPtpService(self::$order);
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }

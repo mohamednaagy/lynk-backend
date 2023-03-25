@@ -2,8 +2,9 @@
 
 namespace Tests\Unit\Jobs\General;
 
-use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\Dmcc\ProcessDmccSellingCommodityToCustomerOrder;
 use App\Models\Company;
@@ -14,6 +15,9 @@ use CodeDredd\Soap\Facades\Soap;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
@@ -35,9 +39,11 @@ class ProcessDmccSellingCommodityToCustomerOrderTest extends TestCase
 
         self::$lender = $this->createLenderUser(self::$company->id);
 
-        self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::ClientWakalaCompleted,
-        ]);
+        self::$order = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$lender)
+            ->commit()
+            ->model();
 
         $inventoryDetails = [
             'inventoryDetails' => [
@@ -65,28 +71,34 @@ class ProcessDmccSellingCommodityToCustomerOrderTest extends TestCase
     /**
      * @throws \Throwable
      */
-    public function test_job_process_if_order_status_isnt_contract_signed_will_not_work()
+    public function test_job_process_if_murabha_step_is_not_contract_signed_will_not_work()
     {
-        self::$order->traderOrders()->create([
-            'provider' => 'dmcc',
-            'reference' => 123,
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        $financeHistories = FinancingOrderHistory::getValues();
 
-        $statuses = FinancingOrderStatus::getValues();
+        $traderOrder = InProgressOrder::of(self::$order)->createTraderOrder('dmcc', 123);
 
-        foreach ($statuses as $status) {
-            if ($status != FinancingOrderStatus::ClientWakalaCompleted) {
-                self::$order->update(['status' => $status]);
-
-                $processOrder = new ProcessDmccSellingCommodityToCustomerOrder(self::$order->id);
-                $processOrder->handle();
-                self::$order = self::$order->fresh();
-
-                $this->assertNull(self::$order->media->first());
-
-                $this->assertTrue(self::$order->status->is($status));
+        foreach ($financeHistories as $financeHistory) {
+            if (in_array($financeHistory, [
+                FinancingOrderHistory::ClientWakalaAccepted,
+                FinancingOrderHistory::GetTtiId,
+                FinancingOrderHistory::OrderCancelled,
+                FinancingOrderHistory::Expired,
+            ])) {
+                continue;
             }
+
+            $traderOrder = TraderOrderScenario::of($traderOrder)
+                ->reset()
+                ->moveToHistory($financeHistory)
+                ->getTraderOrder();
+
+            dump($financeHistory);
+            $processOrder = new ProcessDmccSellingCommodityToCustomerOrder($traderOrder->id);
+            $processOrder->handle();
+
+            $this->assertFalse($traderOrder->hasMedia(TraderOrderMediaCollection::SellingCommodityToCustomer));
+
+            $this->assertTrue($traderOrder->doesLastActionMatchWith($financeHistory));
         }
     }
 
@@ -98,9 +110,7 @@ class ProcessDmccSellingCommodityToCustomerOrderTest extends TestCase
         Storage::fake();
 
         /** @var TraderOrder $traderOrder */
-        $traderOrder = self::$order->traderOrders()->create([
-            'provider' => 'dmcc',
-            'reference' => 123,
+        $traderOrder = InProgressOrder::of(self::$order)->createTraderOrder('dmcc', data:[
             'status' => TraderOrderStatus::InProgress,
             'product' => 'Product',
             'quantity' => 2,
@@ -114,13 +124,16 @@ class ProcessDmccSellingCommodityToCustomerOrderTest extends TestCase
             'warehouse_or_vault_country' => 'Saudi Arabia',
         ]);
 
-        $processOrder = new ProcessDmccSellingCommodityToCustomerOrder(self::$order->id);
+        TraderOrderScenario::of($traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::ClientWakala);
+
+        $processOrder = new ProcessDmccSellingCommodityToCustomerOrder($traderOrder->id);
         $processOrder->handle();
-        self::$order = self::$order->fresh();
 
-        $this->assertNotNull($traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
+        $this->assertTrue($traderOrder->hasMedia(TraderOrderMediaCollection::SellingCommodityToCustomer));
 
-        $this->assertTrue(self::$order->status->is(FinancingOrderStatus::CommoditySoldToCustomer));
+        $this->assertTrue($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument));
     }
 
     /**
@@ -131,17 +144,17 @@ class ProcessDmccSellingCommodityToCustomerOrderTest extends TestCase
         Storage::fake();
 
         /** @var TraderOrder $traderOrder */
-        $traderOrder = self::$order->traderOrders()->create([
-            'provider' => 'fake',
-            'reference' => 123,
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        $traderOrder = InProgressOrder::of(self::$order)->createTraderOrder('fake');
 
-        $processOrder = new ProcessDmccSellingCommodityToCustomerOrder(self::$order->id);
+        TraderOrderScenario::of($traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::ClientWakala);
+
+        $processOrder = new ProcessDmccSellingCommodityToCustomerOrder($traderOrder->id);
         $processOrder->handle();
-        self::$order = self::$order->fresh();
 
-        $this->assertTrue(self::$order->status->is(FinancingOrderStatus::CommoditySoldToCustomer));
-        $this->assertNotNull($traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
+        $this->assertTrue($traderOrder->hasMedia(TraderOrderMediaCollection::SellingCommodityToCustomer));
+
+        $this->assertTrue($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument));
     }
 }
