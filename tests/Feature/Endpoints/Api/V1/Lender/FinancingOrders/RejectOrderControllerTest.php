@@ -82,7 +82,7 @@ class RejectOrderControllerTest extends TestCase
         );
         self::$statusReason = Str::random(80);
 
-        self::$unrejectableOrder = $this->createOrder(self::$company->id, self::$userLenderAdmin->id, ['status' => FinancingOrderStatus::ContractSigned]);
+        self::$unrejectableOrder = $this->createOrder(self::$company->id, self::$userLenderAdmin->id, ['status' => FinancingOrderStatus::Approved]);
         self::$pendingApprovalOrder = $this->createOrder(self::$company->id, self::$userLenderAdmin->id, ['status' => FinancingOrderStatus::PendingApproval]);
 
         self::$rejectedOrder = $this->createOrder(self::$company->id, self::$userLenderAdmin->id, [

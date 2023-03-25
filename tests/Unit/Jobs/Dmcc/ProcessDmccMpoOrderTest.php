@@ -189,7 +189,7 @@ class ProcessDmccMpoOrderTest extends TestCase
         $traderHistories = TraderHistory::query()->count();
         $media = Media::query()->count();
 
-        (new ProcessDmccMpoOrder(self::$order->id))->handle();
+        (new ProcessDmccMpoOrder(self::$traderOrder->id))->handle();
 
         $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderHistories + 3);
         $this->assertDatabaseHas((new TraderHistory())->getTable(), [

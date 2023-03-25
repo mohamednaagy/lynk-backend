@@ -3,7 +3,6 @@
 namespace Jobs\General;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\MurabhaStep;
 use App\Jobs\Dmcc\ProcessDmccPtpNotification;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -65,9 +64,6 @@ class ProcessDmccPtpNotificationTest extends TestCase
             ->entityValue;
 
         self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder('fake', '123456789');
-
-        TraderOrderScenario::of(self::$traderOrder)
-            ->moveToStep(MurabhaStep::PurchasingCommodity);
     }
 
     public function test_job_not_processed_if_active_trader_order_has_invalid_provider()
@@ -78,7 +74,7 @@ class ProcessDmccPtpNotificationTest extends TestCase
         $process->handle();
 
         $this->assertTrue(
-            self::$traderOrder->checkOrderHistoryAction(FinancingOrderHistory::RespondPtp)
+            self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)
         );
     }
 
@@ -90,7 +86,7 @@ class ProcessDmccPtpNotificationTest extends TestCase
         $process->handle();
 
         $this->assertTrue(
-            self::$traderOrder->checkOrderHistoryAction(FinancingOrderHistory::RespondPtp)
+            self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::RespondPtp)
         );
     }
 
@@ -108,7 +104,7 @@ class ProcessDmccPtpNotificationTest extends TestCase
         $process->handle();
 
         $this->assertTrue(
-            self::$traderOrder->checkOrderHistoryAction(FinancingOrderHistory::RespondPtp)
+            self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::RespondPtp)
         );
     }
 
@@ -147,7 +143,7 @@ class ProcessDmccPtpNotificationTest extends TestCase
         $process = new ProcessDmccPtpNotification(self::$notification);
         $process->handle();
 
-        $this->assertDatabaseCount('trader_histories', 8)
+        $this->assertDatabaseCount('trader_histories', 2)
             ->assertDatabaseHas('trader_histories', [
                 'trader_order_id' => self::$traderOrder->id,
                 'action' => FinancingOrderHistory::RespondPtp,
