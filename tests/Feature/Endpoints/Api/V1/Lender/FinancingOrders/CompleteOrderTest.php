@@ -3,8 +3,8 @@
 namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
 
 use App\Enums\Area;
-use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
@@ -14,6 +14,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Tests\Support\FinancingOrders\CommittedOrder;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
@@ -40,19 +44,15 @@ class CompleteOrderTest extends TestCase
 
         [self::$company] = $this->createCompany('2000', ['company_cr' => '1234567891']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
-        self::$financingOrder = $this->createOrder(
-            self::$company->id,
-            self::$userLender->id,
-            [
-                'status' => FinancingOrderStatus::MurabahaSaleCompleted,
-            ]
-        );
 
-        self::$traderOrder = self::$financingOrder->traderOrders()->create([
-            'provider' => 'fake',
-            'reference' => '123456789',
-            'status' => TraderOrderStatus::Completed,
-        ]);
+        self::$financingOrder = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$userLender)
+            ->commit()
+            ->model();
+
+        self::$traderOrder = InProgressOrder::of(self::$financingOrder)
+            ->createTraderOrder('fake', '123456789', TraderOrderStatus::Completed);
 
         self::$apiUrl = 'api/v1/lender/orders/'.self::$financingOrder->getRawOriginal('id').'/complete';
     }
@@ -93,7 +93,7 @@ class CompleteOrderTest extends TestCase
         ];
 
         $this->assertStatusCodeToSpecificRoles(Response::HTTP_FORBIDDEN, $rolesHasNoAccess, function ($user, $role) {
-            self::$financingOrder->update(['status' => FinancingOrderStatus::MurabahaSaleCompleted]);
+            CommittedOrder::of(self::$financingOrder)->status(FinancingOrderStatus::InProgress)->commit();
             self::$financingOrder->refresh();
 
             return $this->actingAs($user)
@@ -174,9 +174,9 @@ class CompleteOrderTest extends TestCase
      */
     public function test_complete_order_successfully(): void
     {
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted],
-        ]);
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::MurabahaSaleCompleted);
 
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
