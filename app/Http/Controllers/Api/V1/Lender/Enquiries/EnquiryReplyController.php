@@ -33,6 +33,7 @@ class EnquiryReplyController extends Controller
                 'id',
                 'body',
                 'creation_date',
+                'creator',
             ])
             ->respond();
     }
@@ -82,6 +83,7 @@ class EnquiryReplyController extends Controller
                     'id',
                     'body',
                     'creation_date',
+                    'creator',
                 ])
                 ->respond();
         });

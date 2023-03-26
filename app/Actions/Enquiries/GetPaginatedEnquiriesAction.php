@@ -17,7 +17,7 @@ class GetPaginatedEnquiriesAction implements GetPaginatedEnquiries
     public function handle(int $paginate = null): LengthAwarePaginator
     {
         return Enquiry::query()
-            ->with('user')
+            ->with('user.company')
             ->toScopes($this->scopes())
             ->latest()
             ->paginate($paginate);
