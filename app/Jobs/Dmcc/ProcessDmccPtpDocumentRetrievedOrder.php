@@ -3,9 +3,8 @@
 namespace App\Jobs\Dmcc;
 
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
-use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -52,25 +51,20 @@ class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue
                 ->lockForUpdate()
                 ->first();
 
-            if (! $traderOrder) {
+            if (
+                ! $traderOrder
+                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)
+            ) {
                 return;
             }
-
-            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
 
             $trader = Trader::driver($traderOrder->provider);
-
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::CommodityPurchased)) {
-                return;
-            }
 
             $trader->getInventoryBasket($traderOrder);
 
             $trader->createTransferOwnershipToLenderDocument($traderOrder);
 
             app()->make(GenerateClientWakala::class)->handle($traderOrder);
-
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommodityPurchased);
         });
     }
 

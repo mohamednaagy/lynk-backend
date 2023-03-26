@@ -50,7 +50,7 @@ class GetPurchasingCommodityTest extends TestCase
             self::$userLender->id,
             [
                 'is_verification_required' => true,
-                'status' => FinancingOrderStatus::WaitingPurchasingCommodity,
+                'status' => FinancingOrderStatus::InProgress,
             ]
         );
 

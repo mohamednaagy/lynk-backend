@@ -5,16 +5,20 @@ namespace Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Enums\Subject;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
+use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
@@ -26,9 +30,9 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
 
     private static User $traderAdminUser;
 
-    private static Builder|Model $order;
+    private static FinancingOrder|Model $order;
 
-    private static Builder|Model $traderOrder;
+    private static TraderOrder|Model $traderOrder;
 
     private static string $apiUrl;
 
@@ -41,19 +45,16 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
 
         [self::$company] = $this->createTraderCompany('2000', ['company_cr' => '12345678911']);
         self::$traderAdminUser = $this->createTraderUser(self::$company->id);
-        self::$order = $this->createOrder(self::$company->id, self::$traderAdminUser->id, [
-            'status' => FinancingOrderStatus::ClientWakalaCompleted,
-        ]);
 
-        self::$traderOrder = self::$order->traderOrders()->create([
-            'provider' => 'fake',
-            'status' => TraderOrderStatus::InProgress,
-            'reference' => 123,
-        ]);
+        self::$order = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$traderAdminUser)
+            ->commit()
+            ->model();
 
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::ClientWakalaAccepted,
-        ]);
+        self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder('fake');
+
+        TraderOrderScenario::of(self::$traderOrder)->moveToStep(MurabhaStep::ClientWakala);
 
         self::$apiUrl = 'api/v1/trader/orders/'.self::$order->id.'/trader-orders/'.self::$traderOrder->id.'/murabaha-purchase-offer';
     }
@@ -93,7 +94,7 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
                 'data' => [],
             ]);
 
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabhaOfferIssued));
+        $this->assertTrue(self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachMpoDocument));
     }
 
     public function test_trader_admin_can_update_murabaha_purchase_offer_successful(): void
@@ -108,7 +109,9 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
                 'data' => [],
             ]);
 
-        self::$order->update(['status' => FinancingOrderStatus::MurabahaSaleCompleted]);
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::MurabahaSaleCompleted);
 
         $this->actingAs(self::$traderAdminUser)
             ->withHeader('X-Company', self::$company->id)
@@ -120,13 +123,15 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
                 'data' => [],
             ]);
 
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
+        $this->assertTrue(self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted));
     }
 
     public function test_trader_admin_can_update_murabaha_purchase_offer_when_trader_order_status_not_in_progress(): void
     {
         self::$traderOrder->update(['status' => TraderOrderStatus::Completed]);
-        self::$order->update(['status' => FinancingOrderStatus::MurabahaSaleCompleted]);
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::MurabahaSaleCompleted);
 
         $this->actingAs(self::$traderAdminUser)
             ->withHeader('X-Company', self::$company->id)
@@ -138,7 +143,7 @@ class UpdateMurabahaPurchaseOfferTest extends TestCase
                 'data' => [],
             ]);
 
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
+        $this->assertTrue(self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted));
     }
 
     public function test_other_users_roles_not_in_trader_area_can_not_update_process_murabaha_purchase_offer_with_invalid_permissions()

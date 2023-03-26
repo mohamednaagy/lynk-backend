@@ -67,7 +67,7 @@ class ApproveOrderTest extends TestCase
     public function test_approve_order_fails_if_order_is_approved(): void
     {
         self::$financingOrder = $this->createOrder(self::$company->id, self::$userLender->id, [
-            'status' => FinancingOrderStatus::WaitingClientWakala,
+            'status' => FinancingOrderStatus::InProgress,
         ]);
         self::$apiUrl = 'api/v1/lender/orders/'.self::$financingOrder->getRawOriginal('id').'/approve';
 

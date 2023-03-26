@@ -10,6 +10,7 @@ use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\FinancingOrders\OrderScenario;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
@@ -29,9 +30,11 @@ class ProcessInProgressOrderTest extends TestCase
 
         [self::$company] = $this->createCompany();
         self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
-        self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::Approved,
-        ]);
+        self::$order = OrderScenario::approved(self::$lender, now())
+            ->lender(self::$company)
+            ->creator(self::$lender)
+            ->commit()
+            ->model();
     }
 
     /**
@@ -44,7 +47,7 @@ class ProcessInProgressOrderTest extends TestCase
         self::$order = self::$order->fresh();
 
         $this->assertNotNull(self::$order->traderOrders()->first());
-        $this->assertTrue(self::$order->status->is(FinancingOrderStatus::WaitingPurchasingCommodity));
+        $this->assertTrue(self::$order->status->is(FinancingOrderStatus::InProgress));
     }
 
     /**
@@ -55,7 +58,6 @@ class ProcessInProgressOrderTest extends TestCase
         $notValidStatuses = collect(FinancingOrderStatus::getValues())->filter(function ($status) {
             return ! in_array($status, [
                 FinancingOrderStatus::Approved,
-                FinancingOrderStatus::ClientWakalaCompleted,
             ]);
         });
 

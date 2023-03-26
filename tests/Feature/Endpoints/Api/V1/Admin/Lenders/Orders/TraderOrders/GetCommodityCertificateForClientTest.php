@@ -61,7 +61,7 @@ class GetCommodityCertificateForClientTest extends TestCase
             self::$userLender->id,
             [
                 'is_verification_required' => true,
-                'status' => FinancingOrderStatus::CommodityPurchased,
+                'status' => FinancingOrderStatus::InProgress,
             ]
         );
 

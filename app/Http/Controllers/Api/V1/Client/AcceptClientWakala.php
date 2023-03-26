@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Client;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala as AcceptWakalaInterface;
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
-use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Client\AcceptClientWakalaRequest;
@@ -50,16 +50,12 @@ class AcceptClientWakala extends Controller
 
             $canProceed = $order->getNationalId() === $request->validated('national_id')
                 && $traderOrder !== null
-                && ! $traderOrder->checkOrderStepComplete(FinancingOrderStatus::ClientWakalaCompleted);
+                && $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::WaitingClientWakala);
 
             abort_if(! $canProceed, 404);
 
             $generateClientWakala->handle($traderOrder);
             $acceptClientWakala->handle($traderOrder);
-
-            $order->update([
-                'status' => FinancingOrderStatus::ClientWakalaCompleted,
-            ]);
 
             Cache::forget($tokenCacheKey);
 

@@ -2,8 +2,8 @@
 
 namespace App\Jobs\Dmcc;
 
-use App\Enums\FinancingOrderStatus;
-use App\Models\FinancingOrder;
+use App\Enums\FinancingOrderHistory;
+use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -17,16 +17,16 @@ class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected mixed $financingOrder;
+    protected mixed $traderOrder;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($financingOrder)
+    public function __construct($traderOrder)
     {
-        $this->financingOrder = $financingOrder;
+        $this->traderOrder = $traderOrder;
     }
 
     /**
@@ -39,20 +39,15 @@ class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue
     public function handle(): void
     {
         DB::transaction(function () {
-            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-            $lastTraderOrder = $financingOrder->activeTraderOrder()
-                ->whereIn('provider', ['dmcc', 'fake'])
-                ->first();
+            $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
 
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::CommoditySoldToCustomer)) {
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted)) {
                 return;
             }
 
-            $trader = Trader::driver($lastTraderOrder->provider);
+            $trader = Trader::driver($traderOrder->provider);
 
-            $trader->createSellingCommodityToCustomerDocument($lastTraderOrder);
-
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::CommoditySoldToCustomer);
+            $trader->createSellingCommodityToCustomerDocument($traderOrder);
         });
     }
 
@@ -63,6 +58,6 @@ class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('financingOrder'.$this->financingOrder)];
+        return [new WithoutOverlapping('traderOrder'.$this->traderOrder)];
     }
 }

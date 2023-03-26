@@ -3,9 +3,7 @@
 namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -55,10 +53,6 @@ class ProcessDmccExpiredOrderNotification implements ShouldQueue
             }
 
             $trader = Trader::driver($traderOrder->provider);
-
-            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
-
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::Expired);
 
             $trader->createTraderOrderHistory(
                 $traderOrder,

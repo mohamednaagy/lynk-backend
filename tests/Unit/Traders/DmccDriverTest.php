@@ -2,9 +2,8 @@
 
 namespace Tests\Unit\Traders;
 
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\TraderOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Exceptions\TraderException;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -20,6 +19,9 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Spatie\Activitylog\Models\Activity;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
@@ -42,9 +44,13 @@ class DmccDriverTest extends TestCase
 
         self::$company = $this->createCompanyWithoutWallet();
         self::$lender = $this->createLenderUser(self::$company->id);
-        self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::Approved,
-        ]);
+
+        self::$order = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$lender)
+            ->commit()
+            ->model();
+
         $data = [
             'products' => [
                 [
@@ -88,15 +94,7 @@ class DmccDriverTest extends TestCase
 
         $data['exchange_rate'] = '3.75';
 
-        self::$traderOrder = TraderOrder::query()->create(array_merge(
-            $data,
-            [
-                'financing_order_id' => self::$order->id,
-                'reference' => 1,
-                'provider' => 'dmcc',
-                'status' => TraderOrderStatus::InProgress,
-            ]
-        ));
+        self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder(data: $data);
     }
 
     /**
@@ -350,6 +348,10 @@ class DmccDriverTest extends TestCase
     {
         Storage::fake();
         UploadedFile::fake();
+
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::ContractSigned);
 
         (new DmccDriver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
 

@@ -5,7 +5,6 @@ namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Enums\TraderOrderStatus;
@@ -17,6 +16,9 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Tests\Support\FinancingOrders\CommittedOrder;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
@@ -34,9 +36,9 @@ class UpdateCommodityCertificateForClientTest extends TestCase
 
     private static User $managerUser;
 
-    private static Builder|Model $financingOrder;
+    private static CommittedOrder $financingOrder;
 
-    private static TraderOrder $traderOrder;
+    private static Builder|Model|TraderOrder $traderOrder;
 
     private static string $endpoint;
 
@@ -54,26 +56,29 @@ class UpdateCommodityCertificateForClientTest extends TestCase
 
         [self::$lender] = $this->createLenderCompany('2000', ['company_cr' => '1234567891']);
         self::$userLender = $this->createLenderUser(self::$lender->id);
-        self::$financingOrder = $this->createOrder(
-            self::$lender->id,
-            self::$userLender->id,
-            [
-                'is_verification_required' => true,
-                'status' => FinancingOrderStatus::ContractSigned,
-            ]
-        );
 
-        // create trader order
-        self::$traderOrder = self::$financingOrder->traderOrders()->create([
-            'provider' => 'dmcc',
-            'reference' => 1,
-            'status' => TraderOrderStatus::InProgress,
-            'amount' => 1,
-            'product' => 'product',
-            'quantity' => 1,
-            'warehouse' => 'warehouse',
-            'owner' => 'owner',
-        ]);
+        self::$financingOrder = OrderScenario::inProgress()
+            ->creator(self::$userLender)
+            ->commit();
+
+        self::$traderOrder = InProgressOrder::of(self::$financingOrder)
+            ->createTraderOrder('fake', data: [
+                'products' => [
+                    [
+                        'product' => 'product',
+                        'quantity' => 100,
+                        'amount' => 100,
+                        'currency' => 'currency',
+                        'warehouse' => 'warehouse',
+                        'owner' => 'owner',
+                        'previous_owner' => 'previous_owner',
+                        'date_time_of_purchasing_commodity' => '2023-02-21 09:30:00',
+                        'warehouse_or_vault_emirates' => 'dummy',
+                        'warehouse_or_vault_country' => 'dummy',
+                        'uom' => 'dummy',
+                    ],
+                ],
+            ]);
 
         self::$traderOrder->traderHistories()->create([
             'action' => FinancingOrderHistory::ContractSigned,
@@ -166,10 +171,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
                 ],
             ]);
 
-        $this->assertTrue(self::$financingOrder->fresh()->status->is(FinancingOrderStatus::CommoditySoldToCustomer));
-
-        self::$financingOrder->update(['status' => FinancingOrderStatus::ClientWakalaCompleted]);
-
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$endpoint, [
                 'document' => UploadedFile::fake()->create(self::$fileName),
@@ -180,8 +181,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
                     'url',
                 ],
             ]);
-
-        $this->assertTrue(self::$financingOrder->fresh()->status->is(FinancingOrderStatus::ClientWakalaCompleted));
     }
 
     /**
@@ -191,8 +190,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
     {
         self::$traderOrder->update(['status' => TraderOrderStatus::Completed]);
 
-        self::$financingOrder->update(['status' => FinancingOrderStatus::ClientWakalaCompleted]);
-
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$endpoint, [
                 'document' => UploadedFile::fake()->create(self::$fileName),
@@ -203,8 +200,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
                     'url',
                 ],
             ]);
-
-        $this->assertTrue(self::$financingOrder->fresh()->status->is(FinancingOrderStatus::ClientWakalaCompleted));
     }
 
     /**
@@ -223,8 +218,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
                 ],
             ]);
 
-        self::$financingOrder->update(['status' => FinancingOrderStatus::ClientWakalaCompleted]);
-
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$endpoint, [
                 'document' => null,
@@ -235,8 +228,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
                     'url',
                 ],
             ]);
-
-        $this->assertTrue(self::$financingOrder->fresh()->status->is(FinancingOrderStatus::ClientWakalaCompleted));
     }
 
     /**
@@ -246,8 +237,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
     {
         self::$traderOrder->update(['status' => TraderOrderStatus::Completed]);
 
-        self::$financingOrder->update(['status' => FinancingOrderStatus::ClientWakalaCompleted]);
-
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$endpoint, [
                 'document' => null,
@@ -258,7 +247,5 @@ class UpdateCommodityCertificateForClientTest extends TestCase
                     'url',
                 ],
             ]);
-
-        $this->assertTrue(self::$financingOrder->fresh()->status->is(FinancingOrderStatus::ClientWakalaCompleted));
     }
 }
