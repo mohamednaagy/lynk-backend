@@ -3,20 +3,20 @@
 namespace Tests\Unit\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
-use App\Enums\TraderOrderStatus;
 use App\Jobs\Dmcc\ProcessDmccPtpDocumentRetrievedOrder;
 use App\Models\Company;
 use App\Models\FinancingOrder;
-use App\Models\Media;
 use App\Models\TraderOrder;
 use App\Models\User;
 use CodeDredd\Soap\Facades\Soap;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithLender;
 
@@ -43,16 +43,17 @@ class ProcessDmccPtpDocumentRetrievedOrderTest extends TestCase
 
         [self::$company] = $this->createCompany();
         self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
-        self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
-            'is_verification_required' => true,
-            'status' => FinancingOrderStatus::PtpDocumentRetrieved,
-        ]);
 
-        self::$traderOrder = self::$order->traderOrders()->create([
-            'provider' => 'dmcc',
-            'reference' => '123456789',
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        self::$order = OrderScenario::inProgress()
+            ->requireVerification(true)
+            ->lender(self::$company)
+            ->creator(self::$lender)
+            ->commit()
+            ->model();
+
+        self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder();
+
+        TraderOrderScenario::of(self::$traderOrder)->moveToHistory(FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
 
         self::$notification = (object) [
             'notificationHeaderAndEntity' => (object) [
@@ -60,7 +61,7 @@ class ProcessDmccPtpDocumentRetrievedOrderTest extends TestCase
                 'notificationEntityDetails' => (object) [
                     'notificationEntity' => [
                         (object) [
-                            'entityValue' => '123456789',
+                            'entityValue' => self::$traderOrder->reference,
                         ],
                     ],
                 ],
@@ -101,18 +102,11 @@ class ProcessDmccPtpDocumentRetrievedOrderTest extends TestCase
     {
         (new ProcessDmccPtpDocumentRetrievedOrder(self::$notification))->handle();
 
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::CommodityPurchased));
-
-        $this->assertEquals(
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-            self::$traderOrder->traderHistories()->first()->action
+        $this->assertTrue(
+            self::$traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
         );
 
-        $this->assertDatabaseHas((new Media())->getTable(), [
-            'model_id' => self::$traderOrder->id,
-            'model_type' => (new TraderOrder)->getMorphClass(),
-            'collection_name' => TraderOrderMediaCollection::TransferOwnershipToLender,
-        ]);
+        $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::TransferOwnershipToLender));
     }
 
     public function test_process_dmcc_ptp_document_retrieved_with_fake_as_trader_order_will_success()
@@ -123,18 +117,11 @@ class ProcessDmccPtpDocumentRetrievedOrderTest extends TestCase
 
         (new ProcessDmccPtpDocumentRetrievedOrder(self::$notification))->handle();
 
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::CommodityPurchased));
-
-        $this->assertEquals(
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-            self::$traderOrder->traderHistories()->first()->action
+        $this->assertTrue(
+            self::$traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
         );
 
-        $this->assertDatabaseHas((new Media())->getTable(), [
-            'model_id' => self::$traderOrder->id,
-            'model_type' => (new TraderOrder)->getMorphClass(),
-            'collection_name' => TraderOrderMediaCollection::TransferOwnershipToLender,
-        ]);
+        $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::TransferOwnershipToLender));
     }
 
     public function test_process_dmcc_ptp_document_retrieved_with_not_supported_trader_will_fail()
@@ -142,23 +129,41 @@ class ProcessDmccPtpDocumentRetrievedOrderTest extends TestCase
         self::$traderOrder->update([
             'provider' => 'else',
         ]);
+
         (new ProcessDmccPtpDocumentRetrievedOrder(self::$notification))->handle();
-        $this->assertTrue(self::$order->fresh()->status->is(FinancingOrderStatus::PtpDocumentRetrieved));
+
+        $this->assertFalse(
+            self::$traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
+        );
+
+        $this->assertFalse(self::$traderOrder->hasMedia(TraderOrderMediaCollection::TransferOwnershipToLender));
     }
 
-    public function test_process_dmcc_ptp_document_retrieved_when_order_status_not_ptp_document_retrieved_fail()
+    public function test_process_dmcc_ptp_document_retrieved_when_muraha_step_not_ptp_document_retrieved_fail()
     {
-        foreach (FinancingOrderStatus::getValues() as $status) {
-            if (
-                $status == FinancingOrderStatus::PtpDocumentRetrieved ||
-                $status == FinancingOrderStatus::CommodityPurchased
-            ) {
+        $financeHistories = FinancingOrderHistory::getValues();
+
+        foreach ($financeHistories as $financeHistory) {
+            if (in_array($financeHistory, [
+                FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
+                FinancingOrderHistory::GetTtiId,
+                FinancingOrderHistory::OrderCancelled,
+                FinancingOrderHistory::Expired,
+            ])) {
                 continue;
             }
-            //change the order status with invalid one
-            self::$order->update(['status' => FinancingOrderStatus::PendingApproval]);
+
+            TraderOrderScenario::of(self::$traderOrder)
+                ->reset()
+                ->moveToHistory($financeHistory);
+
             (new ProcessDmccPtpDocumentRetrievedOrder(self::$notification))->handle();
-            $this->assertTrue(self::$order->fresh()->status->isNot(FinancingOrderStatus::CommodityPurchased));
+
+            $this->assertTrue(
+                self::$traderOrder->doesLastActionMatchWith($financeHistory)
+            );
+
+            $this->assertFalse(self::$traderOrder->hasMedia(TraderOrderMediaCollection::TransferOwnershipToLender));
         }
     }
 

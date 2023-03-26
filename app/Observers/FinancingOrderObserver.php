@@ -7,8 +7,9 @@ use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsMurabhaOfferIssued;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
-use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Models\FinancingOrder;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 
 class FinancingOrderObserver
 {
@@ -26,30 +27,34 @@ class FinancingOrderObserver
             return;
         }
 
-        if ($financingOrder->status->is(FinancingOrderStatus::MurabhaOfferIssued)) {
-            app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)->handle($financingOrder);
-
-            return;
-        }
-
-        $traderOrder = $financingOrder->activeTraderOrder()->first();
-
-        if (empty($traderOrder->products)) {
-            return;
-        }
-
-        $actions = match ($financingOrder->status->value) {
-            FinancingOrderStatus::CommoditySoldToCustomer => [
-                SendSmsWhenStatusIsCommoditySoldToCustomer::class,
-                FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
-            ],
-            FinancingOrderStatus::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
-            FinancingOrderStatus::CommodityPurchased => [FireWebhookWhenStatusIsCommodityPurchased::class],
-            default => []
-        };
-
-        foreach ($actions as $action) {
-            app($action)->handle($financingOrder, $traderOrder);
-        }
+//        $traderOrder = $financingOrder->activeTraderOrder()
+//            ->withLastHistoryAction()
+//            ->first();
+//
+//        $stepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderOrder->last_history_action);
+//
+//        if ($stepNode->step == MurabhaStep::MurabhaOfferIssued) {
+//            app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)->handle($financingOrder);
+//
+//            return;
+//        }
+//
+//        if (empty($traderOrder->products)) {
+//            return;
+//        }
+//
+//        $actions = match ($stepNode->step) {
+//            MurabhaStep::CommoditySoldToCustomer => [
+//                SendSmsWhenStatusIsCommoditySoldToCustomer::class,
+//                FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
+//            ],
+//            MurabhaStep::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
+//            MurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
+//            default => []
+//        };
+//
+//        foreach ($actions as $action) {
+//            app($action)->handle($financingOrder, $traderOrder);
+//        }
     }
 }

@@ -15,8 +15,6 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
 
     const AttachPtpDocumentToOrder = 4;
 
-    const CommodityPurchased = 5;
-
     const CreateTransferOwnershipToLenderDocument = 6;
 
     const RespondPtp = 7;
@@ -45,6 +43,8 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
 
     const Expired = 19;
 
+    const WaitingClientWakala = 20;
+
     public static array $notCancellableActions = [
         self::GetMurabahaPurchaseOfferDocument,
         self::AttachMpoDocument,
@@ -54,20 +54,5 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
         self::ContractSigned,
         self::AttachWarrantAmendmentExceptWarrantNoDocument,
         self::OrderCancelled,
-    ];
-
-    public static array $orderHistoryLastActionMap = [
-        FinancingOrderStatus::Approved => null,
-        FinancingOrderStatus::WaitingPurchasingCommodity => self::GetTtiId,
-        FinancingOrderStatus::RespondedToPtp => self::RespondPtp,
-        FinancingOrderStatus::PtpDocumentRetrieved => self::AttachTtiHoldingCertificateDocument,
-        FinancingOrderStatus::ContractSigned => self::ContractSigned,
-        FinancingOrderStatus::CommodityPurchased => self::CreateTransferOwnershipToLenderDocument,
-        FinancingOrderStatus::MurabhaOfferIssued => self::AttachMpoDocument,
-        FinancingOrderStatus::CommoditySoldToCustomer => self::CreateSellingCommodityToCustomerDocument,
-        FinancingOrderStatus::WaitingClientWakala => null,
-        FinancingOrderStatus::ClientWakalaCompleted => self::ClientWakalaAccepted,
-        FinancingOrderStatus::MurabahaSaleCompleted => self::MurabahaSaleCompleted,
-        FinancingOrderStatus::Cancelled => self::OrderCancelled,
     ];
 }

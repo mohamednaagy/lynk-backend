@@ -2,17 +2,22 @@
 
 namespace Tests\Unit\Jobs\General;
 
-use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingOrderHistory;
+use App\Enums\MurabhaStep;
 use App\Enums\Role;
-use App\Enums\TraderOrderStatus;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
 use App\Support\Sms\Events\SmsSent;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Tests\Support\FinancingOrders\CommittedOrder;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
@@ -27,7 +32,7 @@ class ProcessAskClientForWakalaTest extends TestCase
 
     protected static FinancingOrder $order;
 
-    protected static TraderOrder $traderOrder;
+    protected static Model|TraderOrder $traderOrder;
 
     protected function setUp(): void
     {
@@ -35,65 +40,61 @@ class ProcessAskClientForWakalaTest extends TestCase
 
         [self::$company] = $this->createCompany();
         self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
-        self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::ContractSigned,
-        ]);
 
-        self::$traderOrder = self::$order->traderOrders()->create([
-            'provider' => 'fake',
-            'reference' => 12300,
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        self::$order = OrderScenario::inProgress()
+            ->requireVerification(true)
+            ->lender(self::$company)
+            ->creator(self::$lender)
+            ->commit()
+            ->model();
+
+        self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder();
+
+        TraderOrderScenario::of(self::$traderOrder)
+            ->moveToStep(MurabhaStep::ContractSigned);
     }
 
-    public function test_process_ask_client_for_wakala_processed_if_order_status_commodity_sold_to_customer()
+    public function test_process_ask_client_for_wakala_processed_if_murabha_step_contract_signed()
     {
-        $processOrder = new ProcessAskClientForWakala(self::$order->id);
+        $processOrder = new ProcessAskClientForWakala(self::$traderOrder->id);
 
         $processOrder->handle();
-        self::$order = self::$order->fresh();
 
-        $this->assertTrue(self::$order->status->is(FinancingOrderStatus::WaitingClientWakala));
+        $this->assertTrue(self::$traderOrder->checkOrderHistoryAction(FinancingOrderHistory::WaitingClientWakala));
     }
 
-    public function test_process_ask_client_for_wakala_status_moved_to_waiting_client_wakala_successfully()
+    public function test_process_ask_client_for_wakala_will_not_processed_if_murabha_step_not_contract_signed()
     {
-        $processOrder = new ProcessAskClientForWakala(self::$order->id);
-
-        $processOrder->handle();
-        self::$order = self::$order->fresh();
-
-        $this->assertTrue(self::$order->status->is(FinancingOrderStatus::WaitingClientWakala));
-    }
-
-    public function test_process_ask_client_for_wakala_will_not_processed_if_order_status_not_commodity_sold_to_customer()
-    {
-        $orderStatuses = FinancingOrderStatus::getValues();
-        foreach ($orderStatuses as $orderStatus) {
-            if ($orderStatus == FinancingOrderStatus::ContractSigned) {
+        $murabhaSteps = MurabhaStep::getValues();
+        foreach ($murabhaSteps as $murabhaStep) {
+            if (
+                $murabhaStep == MurabhaStep::ContractSigned
+                || $murabhaStep == MurabhaStep::TraderOrderCreated
+            ) {
                 continue;
             }
 
-            $order = $this->createOrder(self::$company->id, self::$lender->id, [
-                'status' => $orderStatus,
-            ]);
-            $processOrder = new ProcessAskClientForWakala($order->id);
-            $processOrder->handle();
-            $order->refresh();
+            $traderOrder = TraderOrderScenario::of(self::$traderOrder)
+                ->reset()
+                ->moveToStep($murabhaStep)
+                ->getTraderOrder();
 
-            $this->assertTrue($order->status->is($orderStatus));
+            $processOrder = new ProcessAskClientForWakala($traderOrder->id);
+            $processOrder->handle();
+
+            $this->assertTrue($traderOrder->checkOrderStepComplete($murabhaStep));
         }
     }
 
     public function test_process_ask_client_for_wakala_will_not_processed_if_order_is_verification_required_false()
     {
-        self::$order->update(['is_verification_required' => false]);
-        $processOrder = new ProcessAskClientForWakala(self::$order->id);
+        CommittedOrder::of(self::$order)->requireVerification(false)->commit();
+
+        $processOrder = new ProcessAskClientForWakala(self::$traderOrder->id);
 
         $processOrder->handle();
-        self::$order = self::$order->fresh();
 
-        $this->assertTrue(self::$order->status->is(FinancingOrderStatus::WaitingClientWakala));
+        $this->assertTrue(self::$traderOrder->checkOrderHistoryAction(FinancingOrderHistory::WaitingClientWakala));
     }
 
     public function test_process_ask_client_for_wakala_sms_sent_successfully()
@@ -102,7 +103,7 @@ class ProcessAskClientForWakalaTest extends TestCase
             SmsSent::class,
         ]);
 
-        $processOrder = new ProcessAskClientForWakala(self::$order->id);
+        $processOrder = new ProcessAskClientForWakala(self::$traderOrder->id);
 
         $processOrder->handle();
 

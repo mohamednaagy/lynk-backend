@@ -4,10 +4,9 @@ namespace Tests\Feature\Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders;
 
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\Subject;
-use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\Media;
 use App\Models\TraderOrder;
@@ -17,6 +16,9 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
@@ -43,15 +45,17 @@ class GetMurabahaPurchaseOfferTest extends TestCase
 
         [self::$company] = $this->createTraderCompany('2000', ['company_cr' => '12345678911']);
         self::$traderAdminUser = $this->createTraderUser(self::$company->id);
-        self::$order = $this->createOrder(self::$company->id, self::$traderAdminUser->id, [
-            'status' => FinancingOrderStatus::ClientWakalaCompleted,
-        ]);
 
-        self::$traderOrder = self::$order->traderOrders()->create([
-            'provider' => 'fake',
-            'status' => TraderOrderStatus::InProgress,
-            'reference' => 123,
-        ]);
+        self::$order = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$traderAdminUser)
+            ->commit()
+            ->model();
+
+        self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder('fake');
+
+        TraderOrderScenario::of(self::$traderOrder)
+            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
 
         Media::query()->create([
             'model_type' => TraderOrder::class,

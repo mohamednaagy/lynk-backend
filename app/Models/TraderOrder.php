@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use Carbon\Carbon;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -20,7 +22,7 @@ use UnexpectedValueException;
  * @property mixed $reference
  * @property mixed $order
  * @property TraderOrderStatus $status
- * @property mixed $traderHistories
+ * @property Collection $traderHistories
  * @property Carbon $created_at
  */
 class TraderOrder extends Model implements HasMedia
@@ -97,19 +99,26 @@ class TraderOrder extends Model implements HasMedia
         return ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions));
     }
 
-    public function checkOrderStepComplete(int $status): bool
+    public function checkOrderStepComplete(string $step): bool
     {
-        if (! array_key_exists($status, FinancingOrderHistory::$orderHistoryLastActionMap)) {
+        if (! array_key_exists($step, MurabhaStep::$stepToHistoriesDictionary)) {
             throw new UnexpectedValueException('No mapping for this status');
         }
 
-        if (is_null(FinancingOrderHistory::$orderHistoryLastActionMap[$status])) {
-            return true;
+        return (bool) $this->traderHistories()
+            ->where('action', end(MurabhaStep::$stepToHistoriesDictionary[$step]))
+            ->first();
+    }
+
+    public function doesLastActionMatchWith($action): bool
+    {
+        if (! in_array($action, FinancingOrderHistory::getValues())) {
+            throw new UnexpectedValueException('invalid Action');
         }
 
-        return (bool) $this->traderHistories
-            ->where('action', FinancingOrderHistory::$orderHistoryLastActionMap[$status])
-            ->first();
+        $lastAction = $this->traderHistories()->latest('id')->first();
+
+        return $lastAction->action == $action;
     }
 
     public function checkOrderHistoryAction($action): bool
@@ -123,17 +132,27 @@ class TraderOrder extends Model implements HasMedia
             ->first();
     }
 
+    public function scopeWithLastHistoryAction($query)
+    {
+        return $query->addSelect([
+            'last_history_action' => TraderHistory::select('action')
+                ->whereColumn('trader_order_id', 'trader_orders.id')
+                ->latest('id')
+                ->take(1),
+        ]);
+    }
+
     /**
      * @throws OrderStatusDoesNotFollowSequenceException
      */
-    public function ensureCanAccessStep(int $step)
+    public function ensureCanAccessStep(string $step)
     {
         if (! $this->checkOrderStepComplete($step)) {
             throw new OrderStatusDoesNotFollowSequenceException();
         }
     }
 
-    public function canChangeParentOrderStatusIfStepWillBeUpdated(int $step): bool
+    public function canChangeParentOrderStatusIfStepWillBeUpdated(string $step): bool
     {
         if ($this->status->isNot(TraderOrderStatus::InProgress)) {
             return false;

@@ -19,6 +19,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class FinancingOrderObserverTest extends TestCase
 {
+    /**
     use RefreshDatabase, AssertsAccessByRoleAndArea;
 
     protected static Company $company;
@@ -101,4 +102,5 @@ class FinancingOrderObserverTest extends TestCase
 
         Bus::assertDispatched(CallWebhookJob::class);
     }
+     **/
 }

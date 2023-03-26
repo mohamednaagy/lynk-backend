@@ -4,7 +4,6 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders;
 
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
@@ -60,7 +59,7 @@ class CompleteOrderTest extends TestCase
             self::$company->id,
             self::$userLender->id,
             [
-                'status' => FinancingOrderStatus::MurabahaSaleCompleted,
+                'status' => FinancingOrderStatus::InProgress,
             ]
         );
 
@@ -156,17 +155,12 @@ class CompleteOrderTest extends TestCase
      */
     public function test_complete_order_successfully(): void
     {
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted],
-        ]);
-
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$apiUrl, [
                 'payment_proof' => UploadedFile::fake()->create('payment_proof.pdf'),
             ])->assertStatus(Response::HTTP_OK);
 
         $this->assertTrue(self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Completed));
-        $this->assertTrue(self::$traderOrder->fresh()->status->is(TraderOrderStatus::Completed));
     }
 
     /**

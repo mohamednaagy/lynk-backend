@@ -46,18 +46,19 @@ class ProcessInProgressOrder implements ShouldQueue
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             if ($financingOrder->traderOrders()->whereIn('status', [
                 TraderOrderStatus::InProgress,
-                TraderOrderStatus::Completed,
             ])->count() > 0) {
                 return;
             }
 
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::WaitingPurchasingCommodity)) {
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::InProgress)) {
                 return;
             }
 
             $trader->getTti($financingOrder);
 
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::WaitingPurchasingCommodity);
+            $financingOrder->update([
+                'status' => FinancingOrderStatus::InProgress,
+            ]);
         });
     }
 

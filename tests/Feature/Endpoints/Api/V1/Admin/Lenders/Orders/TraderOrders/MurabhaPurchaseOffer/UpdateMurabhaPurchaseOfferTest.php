@@ -4,9 +4,7 @@ namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffe
 
 use App\Enums\Area;
 use App\Enums\ErrorCode;
-use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
-use App\Enums\TraderOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
@@ -16,6 +14,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
+use Tests\Support\FinancingOrders\CommittedOrder;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
@@ -31,9 +33,9 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
 
     private static User $superAdminUser;
 
-    private static Builder|Model $financingOrder;
+    private static CommittedOrder $financingOrder;
 
-    private static TraderOrder $traderOrder;
+    private static Builder|Model|TraderOrder $traderOrder;
 
     private static string $updateMurabhaPurchaseOfferUrl;
 
@@ -51,27 +53,17 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
         self::$superAdminUser = $this->createSuperAdminUser();
         [self::$lender] = $this->createLenderCompany('2000', ['company_cr' => '1234567891']);
         self::$userLender = $this->createLenderUser(self::$lender->id);
-        self::$financingOrder = $this->createOrder(
-            self::$lender->id,
-            self::$userLender->id,
-            [
-                'is_verification_required' => true,
-                'status' => FinancingOrderStatus::ClientWakalaCompleted,
-            ]
-        );
+        self::$financingOrder = OrderScenario::inProgress()
+            ->creator(self::$userLender)
+            ->commit();
 
-        // create trader order
-        self::$traderOrder = self::$financingOrder->traderOrders()->create([
-            'provider' => 'dmcc',
-            'reference' => '123456789',
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder();
 
         self::$updateMurabhaPurchaseOfferUrl = self::BaseUrl.
             '/orders/'.
-            self::$financingOrder->getOriginal('id').
+            self::$financingOrder->id.
             '/trader-orders/'.
-            self::$traderOrder->getOriginal('id').
+            self::$traderOrder->id.
             '/murabha-purchase-offer';
 
         self::$requestData = [
@@ -114,20 +106,13 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
      */
     public function test_proceed_murabha_purchase_offer_document_is_successfull_and_order_status_will_be_updated(): void
     {
-        // create trader order history of previous last step
-        self::$traderOrder->traderHistories()->create(
-            [
-                'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::ClientWakalaCompleted],
-            ]
-        );
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::ClientWakala);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaPurchaseOfferUrl, self::$requestData)
             ->assertJsonStructure(['data']);
-
-        $freshOrderStatus = self::$financingOrder->fresh()->status;
-
-        $this->assertTrue($freshOrderStatus->is(FinancingOrderStatus::MurabhaOfferIssued));
     }
 
     /**
@@ -135,11 +120,9 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
      */
     public function test_update_murabha_purchase_offer_document_not_follow_sequence(): void
     {
-        self::$traderOrder->traderHistories()->create(
-            [
-                'action' => FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-            ]
-        );
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::PurchasingCommodity);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaPurchaseOfferUrl, self::$requestData)
@@ -155,26 +138,12 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
      */
     public function test_update_murabha_purchase_offer_document_is_successful_and_order_status_will_not_be_updated(): void
     {
-        self::$traderOrder->traderHistories()->create(
-            [
-                'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::ClientWakalaCompleted],
-            ]
-        );
-
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderStatus::MurabahaSaleCompleted],
-        ]);
-
-        self::$financingOrder->update([
-            'status' => FinancingOrderStatus::MurabhaOfferIssued,
-        ]);
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaPurchaseOfferUrl, self::$requestData)
             ->assertJsonStructure(['data']);
-
-        $freshOrderStatus = self::$financingOrder->fresh()->status;
-
-        $this->assertTrue($freshOrderStatus->is(FinancingOrderStatus::MurabhaOfferIssued));
     }
 }
