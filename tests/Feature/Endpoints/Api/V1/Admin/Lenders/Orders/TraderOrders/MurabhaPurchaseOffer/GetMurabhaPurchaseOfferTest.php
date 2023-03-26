@@ -55,7 +55,7 @@ class GetMurabhaPurchaseOfferTest extends TestCase
             self::$userLender->id,
             [
                 'is_verification_required' => true,
-                'status' => FinancingOrderStatus::ClientWakalaCompleted,
+                'status' => FinancingOrderStatus::InProgress,
             ]
         );
 

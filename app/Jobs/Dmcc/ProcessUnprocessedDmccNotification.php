@@ -40,6 +40,8 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     *
+     * @throws TraderNotSupportedException
      */
     public function handle(): void
     {

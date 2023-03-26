@@ -62,6 +62,8 @@ class TraderOrderScenario
         $lastHistoryOfDestinationStep = end(MurabhaStep::$stepToHistoriesDictionary[$destinationStep]);
 
         $this->moveToHistory($lastHistoryOfDestinationStep);
+
+        return $this;
     }
 
     public function moveToHistory(int $destinationHistory)
@@ -110,8 +112,9 @@ class TraderOrderScenario
             }
 
             foreach ($histories as $history) {
-                $this->traderOrder->traderHistories()->create([
+                $this->traderOrder->traderHistories()->updateOrCreate([
                     'action' => $history,
+                ], [
                     'created_at' => $createAt,
                 ]);
 
@@ -122,5 +125,7 @@ class TraderOrderScenario
                 $createAt = $createAt->addMinutes(1);
             }
         }
+
+        return $this;
     }
 }

@@ -11,8 +11,7 @@ class OrderScenario
     public static function approved(User $approver, null|Carbon $approvedAt)
     {
         return (new OrderCreator)->approvedAt($approver, $approvedAt ?? now())
-            ->status(FinancingOrderStatus::Approved)
-            ->commit();
+            ->status(FinancingOrderStatus::Approved);
     }
 
     public static function rejected(string $rejectionReason = '')

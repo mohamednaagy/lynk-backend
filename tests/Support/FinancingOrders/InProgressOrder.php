@@ -33,7 +33,8 @@ class InProgressOrder
     public function createTraderOrder(
         string $driver = null,
         string $reference = '123456',
-        int $status = TraderOrderStatus::InProgress
+        int $status = TraderOrderStatus::InProgress,
+        array $data = []
     ) {
         if ($status === TraderOrderStatus::InProgress && $this->doesInProgressTraderOrderExist()) {
             throw new \Exception('Active trader order exists');
@@ -41,11 +42,11 @@ class InProgressOrder
 
         $traderOrder = $this->financingOrder
             ->traderOrders()
-            ->create([
+            ->create(array_merge([
                 'provider' => $driver ?? config('trader.default'),
                 'reference' => $reference,
                 'status' => $status,
-            ]);
+            ], $data));
 
         $traderOrder->traderHistories()->create([
             'action' => FinancingOrderHistory::GetTtiId,
