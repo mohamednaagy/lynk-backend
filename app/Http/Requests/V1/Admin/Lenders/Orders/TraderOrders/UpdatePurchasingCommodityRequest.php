@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders;
 
-use App\Enums\FinancingOrderHistory;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\TraderOrder;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -27,9 +27,9 @@ class UpdatePurchasingCommodityRequest extends FormRequest
     {
         $traderOrder = TraderOrder::query()->findOrFail($this->route('trader_order'));
 
-        $isPtpDocumentAttached = $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::AttachPtpDocumentToOrder);
-        $isHoldingCertAttached = $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
-        $isLenderOwnershipDocumentAttached = $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+        $isPtpDocumentAttached = $traderOrder->hasMedia(TraderOrderMediaCollection::PromiseToPurchase);
+        $isHoldingCertAttached = $traderOrder->hasMedia(TraderOrderMediaCollection::TtiHoldingCertificate);
+        $isLenderOwnershipDocumentAttached = $traderOrder->hasMedia(TraderOrderMediaCollection::TransferOwnershipToLender);
 
         return [
             'products' => ['required', 'array'],

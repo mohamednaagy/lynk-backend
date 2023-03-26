@@ -3,6 +3,7 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\CreateTraderOrder;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderAlreadyHasActiveTraderOrderException;
@@ -35,10 +36,16 @@ class CreateTraderOrderAction implements CreateTraderOrder
             throw new OrderAlreadyHasActiveTraderOrderException;
         }
 
-        return $financingOrder->traderOrders()->create([
+        $traderOrder = $financingOrder->traderOrders()->create([
             'provider' => Arr::get($data, 'trader'),
             'reference' => Arr::get($data, 'reference_number'),
             'status' => TraderOrderStatus::InProgress,
         ]);
+
+        $traderOrder->traderHistories()->create([
+            'action' => FinancingOrderHistory::GetTtiId,
+        ]);
+
+        return $traderOrder;
     }
 }
