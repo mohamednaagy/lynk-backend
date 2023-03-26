@@ -91,6 +91,7 @@ class EnquiryControllerIndexTest extends TestCase
                         'status',
                         'creation_date',
                         'creator',
+                        'company',
                     ])
                     ->respond()
                     ->getData(true)
@@ -113,6 +114,7 @@ class EnquiryControllerIndexTest extends TestCase
                         'status',
                         'creation_date',
                         'creator',
+                        'company',
                     ])
                     ->respond()
                     ->getData(true)
