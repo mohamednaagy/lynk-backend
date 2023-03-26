@@ -85,7 +85,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
             ],
             FinancingOrderHistory::ContractSigned => [
-                'step' => 'contract_singed',
+                'step' => 'contract_signed',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
                 'duration' => $this->getDurationForHistoryStep(FinancingOrderHistory::ContractSigned),

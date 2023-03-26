@@ -28,27 +28,27 @@ class AdminController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::Admins, Action::Index, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::Admins, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::Admins, Action::Create, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::Admins, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::Admins, Action::Show, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::Admins, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::Admins, Action::Edit, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::Admins, Action::Edit, Action::Manage])
         )->only('update');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::Admins, Action::Delete, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::Admins, Action::Delete, Action::Manage])
         )->only('destroy');
     }
 
@@ -197,6 +197,7 @@ class AdminController extends Controller
             throw UnauthorizedException::forRoles(Area::roles(Area::SuperAdmin));
         }
 
+        $admin->update(['email' => $admin->getEmailForSoftDeleting()]);
         $admin->delete();
 
         return $this->successResponse();

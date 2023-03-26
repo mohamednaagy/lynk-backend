@@ -166,4 +166,13 @@ class ProcessDmccPtpDocumentRetrievedOrderTest extends TestCase
             $this->assertFalse(self::$traderOrder->hasMedia(TraderOrderMediaCollection::TransferOwnershipToLender));
         }
     }
+
+    public function test_process_ask_client_for_wakala_client_wakala_is_generated_successfully()
+    {
+        $processOrder = new ProcessDmccPtpDocumentRetrievedOrder(self::$notification);
+
+        $processOrder->handle();
+
+        $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::ClientWakala));
+    }
 }

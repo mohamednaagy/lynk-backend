@@ -29,6 +29,8 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, BelongsToTenant;
 
+    const DELETED_MODEL_EMAIL_PREFIX = 'deleted@@@';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -165,5 +167,14 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
         return $query->whereHas('company', function ($query) use ($type) {
             return $query->where('type', $type);
         });
+    }
+
+    public function getEmailForSoftDeleting()
+    {
+        if ($this->deleted_at === null) {
+            return self::DELETED_MODEL_EMAIL_PREFIX.$this->email;
+        }
+
+        return $this->email;
     }
 }

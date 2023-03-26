@@ -29,4 +29,6 @@ return [
     'order_still_pending' => 'Order still pending for approval',
     'order_is_rejected' => 'Order has been rejected please contact customer support',
     'trader_not_supported' => 'Trader Not Supported',
+    'order_is_already_completed' => 'Order is already completed',
+    'order_is_already_has_active_trader_order' => 'Order already has active trading request',
 ];

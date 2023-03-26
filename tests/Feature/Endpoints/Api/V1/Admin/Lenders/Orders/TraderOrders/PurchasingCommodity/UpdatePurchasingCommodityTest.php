@@ -74,6 +74,23 @@ class UpdatePurchasingCommodityTest extends TestCase
             '/purchasing-commodity';
 
         self::$requestData = [
+            'products' => [
+                [
+                    'product' => 'product',
+                    'quantity' => 100,
+                    'amount' => 100,
+                    'currency' => 'currency',
+                    'warehouse' => 'warehouse',
+                    'owner' => 'owner',
+                    'previous_owner' => 'previous_owner',
+                    'date_time_of_purchasing_commodity' => '2023-02-21 09:30:00',
+                    'warehouse_or_vault_emirates' => 'dummy',
+                    'warehouse_or_vault_country' => 'dummy',
+                    'uom' => 'dummy',
+                ],
+            ],
+            'exchange_rate' => 10,
+            'auto_generate_financing_institution_certificate' => 0,
             'ptp_document' => UploadedFile::fake()->create('attachment.pdf', 10),
             'original_holding_certificate' => UploadedFile::fake()->create('attachment.pdf', 10),
             'financing_institution_certificate' => UploadedFile::fake()->create('attachment.pdf', 10),

@@ -225,4 +225,15 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     {
         return ! $this->canBeCompleted();
     }
+
+    public function canCreateTraderOrder()
+    {
+        $doesNotHaveInProgressOrder = ! $this->traderOrders()
+            ->where('status', TraderOrderStatus::InProgress)
+            ->exists();
+
+        $orderIsNotCompleted = $this->status->isNot(FinancingOrderStatus::Completed);
+
+        return $orderIsNotCompleted && $doesNotHaveInProgressOrder;
+    }
 }

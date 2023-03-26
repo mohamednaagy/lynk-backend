@@ -19,13 +19,13 @@ class OrderController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Manage, Action::Index])
+                perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Manage, Action::Index])
         )
             ->only('index');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Manage, Action::Show])
+                perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Manage, Action::Show])
         )
             ->only('show');
     }
@@ -89,8 +89,8 @@ class OrderController extends Controller
                 'is_approved',
                 'status_reason',
                 'can_be_completed',
+                'can_create_trader_order',
                 'is_updatable',
-                'creator',
                 'approver',
                 'trader_orders.id',
                 'trader_orders.reference',

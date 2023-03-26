@@ -1,8 +1,5 @@
 <?php
 
-// use App\Support\Wallets\WalletService;
-// use App\Models\Webhook;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,9 +10,3 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-use Illuminate\Support\Facades\Route;
-
-Route::get('/', function () {
-    App\Models\FinancingOrder::lockForUpdate()->find(76);
-});
