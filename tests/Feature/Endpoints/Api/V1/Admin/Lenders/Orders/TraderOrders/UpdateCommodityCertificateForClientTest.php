@@ -12,7 +12,6 @@ use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
@@ -38,7 +37,7 @@ class UpdateCommodityCertificateForClientTest extends TestCase
 
     private static CommittedOrder $financingOrder;
 
-    private static Builder|Model|TraderOrder $traderOrder;
+    private static Model|TraderOrder $traderOrder;
 
     private static string $endpoint;
 

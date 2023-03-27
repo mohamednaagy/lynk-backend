@@ -13,7 +13,6 @@ use App\Models\User;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Sms\Events\SmsSent;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
@@ -39,7 +38,7 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
     private static CommittedOrder $financingOrder;
 
-    private static Builder|Model|TraderOrder $traderOrder;
+    private static Model|TraderOrder $traderOrder;
 
     private static string $updateMurabhaCompleteDocumentUrl;
 
@@ -100,8 +99,7 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
     public function test_that_other_area_roles_of_not_super_admin_area_cant_update_murabha_complete_document(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
-            Response::HTTP_FORBIDDEN,
-            [
+            Response::HTTP_FORBIDDEN, [
                 Area::SuperAdmin,
             ],
             function ($user, $role) {
@@ -136,11 +134,9 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
      */
     public function test_update_murabha_complete_document_not_follow_sequence($unsuitableTraderHistoryData): void
     {
-        self::$traderOrder->traderHistories()->create(
-            [
-                'action' => $unsuitableTraderHistoryData,
-            ]
-        );
+        self::$traderOrder->traderHistories()->create([
+            'action' => $unsuitableTraderHistoryData,
+        ]);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
@@ -169,7 +165,7 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
     /**
      * @return void
      */
-    public function test_update_murabha_complete_document_is_successful_and_order_status_will_not_be_updated(): void
+    public function test_update_murabha_complete_document_is_successful(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
@@ -178,5 +174,8 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertJsonStructure(['data']);
+
+        $freshTraderOrderStatus = self::$traderOrder->fresh()->status;
+        $this->assertTrue($freshTraderOrderStatus->is(TraderOrderStatus::Completed));
     }
 }

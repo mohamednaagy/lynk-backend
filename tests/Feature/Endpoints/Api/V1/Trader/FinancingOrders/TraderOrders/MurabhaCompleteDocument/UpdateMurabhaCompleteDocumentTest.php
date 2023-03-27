@@ -130,7 +130,6 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertJsonStructure(['data']);
 
-        $freshOrderStatus = self::$financingOrder->fresh()->status;
         $this->assertTrue(self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted));
 
         $freshTraderOrderStatus = self::$traderOrder->fresh()->status;
