@@ -50,7 +50,7 @@ class LenderSettingsTransformer extends TransformerAbstract
         return $this->primitive($settings->default_company_status_created_by_operation);
     }
 
-    public function includeOrderCreatedNotifyEnabled(Settings $settings): Primitive
+    public function includeNotifyAdminsAboutNewOrders(Settings $settings): Primitive
     {
         return $this->primitive($settings->notify_admins_about_new_orders);
     }

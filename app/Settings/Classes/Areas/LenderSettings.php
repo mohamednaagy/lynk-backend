@@ -2,7 +2,7 @@
 
 namespace App\Settings\Classes\Areas;
 
-use App\Enums\FinancingOrderNotificationSettingStatusCast;
+use App\Casts\GlobalNewOrderNotificationForAdminStatusCast;
 use Spatie\LaravelSettings\Settings;
 
 class LenderSettings extends Settings
@@ -27,7 +27,7 @@ class LenderSettings extends Settings
     public static function casts(): array
     {
         return [
-            'notify_admins_about_new_orders' => FinancingOrderNotificationSettingStatusCast::class,
+            'notify_admins_about_new_orders' => GlobalNewOrderNotificationForAdminStatusCast::class,
         ];
     }
 }

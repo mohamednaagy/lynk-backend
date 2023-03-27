@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
-use App\Enums\FinancingOrderNotificationStatus;
 use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\Wallets\Traits\HasWallet;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,7 +31,7 @@ class Company extends BaseTenant
         'webhook_secret_key' => 'encrypted',
         'order_cost' => MoneyStringCast::class.':order_cost_currency',
         'type' => CompanyType::class,
-        'notify_admins_about_new_orders' => FinancingOrderNotificationStatus::class,
+        'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::class,
     ];
 
     public static function getCustomColumns(): array

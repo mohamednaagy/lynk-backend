@@ -5,7 +5,7 @@ namespace App\Jobs\FinancingOrders;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\FinancingOrderNotificationSettingStatus;
+use App\Enums\GlobalNewOrderNotificationForAdminStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\FinancingOrder;
@@ -71,7 +71,7 @@ class NotifyAdminsAboutOrderCreated implements ShouldQueue
 
         $isNotificationSettingBasedOnCompany = $setting
             ->notify_admins_about_new_orders
-            ->is(FinancingOrderNotificationSettingStatus::BasedOnCompanySettings);
+            ->is(GlobalNewOrderNotificationForAdminStatus::BasedOnCompanySettings);
 
         if ($isNotificationSettingBasedOnCompany) {
             return (bool) $this
@@ -83,7 +83,7 @@ class NotifyAdminsAboutOrderCreated implements ShouldQueue
 
         return $setting
             ->notify_admins_about_new_orders
-            ->is(FinancingOrderNotificationSettingStatus::On)
+            ->is(GlobalNewOrderNotificationForAdminStatus::On)
             ? true
             : false;
     }
