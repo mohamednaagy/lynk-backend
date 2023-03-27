@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('personal_access_tokens', function (Blueprint $table) {
-            $table->softDeletes()->after('last_used_at');
+        Schema::table('media', function (Blueprint $table) {
+            $table->softDeletes()->after('order_column');
         });
     }
 
@@ -25,7 +25,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('personal_access_tokens', function (Blueprint $table) {
+        Schema::table('media', function (Blueprint $table) {
             $table->dropSoftDeletes();
         });
     }
