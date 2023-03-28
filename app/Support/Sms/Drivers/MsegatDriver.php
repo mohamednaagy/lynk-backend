@@ -43,7 +43,7 @@ class MsegatDriver implements SmsDriverInterface
             'numbers' => $phoneNumber,
             'userSender' => config('sms.msegat.sender_name'),
             'apiKey' => $this->apiKey,
-            'msg' => $message.'\n\n'.Str::radom(6),
+            'msg' => $message.'\n\n'.Str::random(6),
         ];
 
         $response = Http::post($this->baseUrl, $body);
