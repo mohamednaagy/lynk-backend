@@ -30,7 +30,7 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, BelongsToTenant;
 
-    const DIRECTORY_SEPARATOR = '@@@';
+    const DELETED_MODEL_EMAIL_AND_STRING_SEPARATOR = '@@@';
 
     /**
      * The attributes that are mass assignable.
@@ -173,7 +173,7 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
     public function getEmailForSoftDeleting()
     {
         if ($this->deleted_at === null) {
-            return Str::random(10).self::DIRECTORY_SEPARATOR.$this->email;
+            return Str::random(10).self::DELETED_MODEL_EMAIL_AND_STRING_SEPARATOR.$this->email;
         }
 
         return $this->email;
