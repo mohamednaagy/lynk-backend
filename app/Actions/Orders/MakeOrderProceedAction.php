@@ -4,6 +4,7 @@ namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala;
 use App\Actions\Contracts\Orders\MakeOrderProceed;
+use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -109,6 +110,10 @@ class MakeOrderProceedAction implements MakeOrderProceed
         }
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
+
+        if (! $traderOrder->hasMedia(TraderOrderMediaCollection::ClientWakala)) {
+            app()->make(GenerateClientWakala::class)->handle($traderOrder);
+        }
 
         return [];
     }

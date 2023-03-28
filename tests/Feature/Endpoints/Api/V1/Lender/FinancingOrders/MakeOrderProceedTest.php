@@ -305,6 +305,8 @@ class MakeOrderProceedTest extends TestCase
             ->assertJsonStructure([
                 'data',
             ]);
+
+        $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::ClientWakala));
     }
 
     public function test_make_order_cannot_reprocessed_on_contract_signed(): void
