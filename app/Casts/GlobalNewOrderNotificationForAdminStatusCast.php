@@ -19,10 +19,10 @@ class GlobalNewOrderNotificationForAdminStatusCast implements SettingsCast
 
     public function set($payload)
     {
-        if ($payload instanceof Enum) {
-            return $payload->value;
+        if (! $payload instanceof Enum) {
+            $payload = GlobalNewOrderNotificationForAdminStatus::fromValue($payload);
         }
 
-        return $payload;
+        return GlobalNewOrderNotificationForAdminStatus::serializeDatabase($payload);
     }
 }

@@ -74,15 +74,13 @@ class NotifyAdminsAboutOrderCreated implements ShouldQueue
             ->is(GlobalNewOrderNotificationForAdminStatus::BasedOnCompanySettings);
 
         if ($isNotificationSettingBasedOnCompany) {
-            return (bool) $this
-                ->financingOrder
+            return (bool) $this->financingOrder
                 ->company
                 ->notify_admins_about_new_orders
                 ->value;
         }
 
-        return $setting
-            ->notify_admins_about_new_orders
+        return $setting->notify_admins_about_new_orders
             ->is(GlobalNewOrderNotificationForAdminStatus::On)
             ? true
             : false;
