@@ -64,7 +64,6 @@ class MsegatDriver implements SmsDriverInterface
             '1060' => new BalanceIsNotEnoughException(),
             '1061' => new MSGDuplicatedException(),
             '1120' => new MobileNumbersIsNotCorrectException(),
-            default => new \ErrorException('Error found'),
         };
     }
 
