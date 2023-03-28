@@ -67,7 +67,7 @@ class LenderOrderControllerShowTest extends TestCase
             'phone_number' => '+966500112233',
             'amount' => 200,
             'selling_price' => 220,
-            'status' => FinancingOrderStatus::WaitingClientWakala,
+            'status' => FinancingOrderStatus::InProgress,
             'is_verification_required' => true,
         ]);
         self::$endpoint = 'api/v1/admin/orders/';
@@ -103,6 +103,7 @@ class LenderOrderControllerShowTest extends TestCase
                         'is_approved',
                         'status_reason',
                         'can_be_completed',
+                        'can_create_trader_order',
                         'is_updatable',
                         'approver',
                         'trader_orders.id',

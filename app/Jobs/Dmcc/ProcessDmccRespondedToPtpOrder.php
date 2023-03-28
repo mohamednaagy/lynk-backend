@@ -3,9 +3,8 @@
 namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
@@ -20,16 +19,16 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
-    protected mixed $financingOrder;
+    protected mixed $traderOrder;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($financingOrder)
+    public function __construct($traderOrder)
     {
-        $this->financingOrder = $financingOrder;
+        $this->traderOrder = $traderOrder;
     }
 
     /**
@@ -43,65 +42,57 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
     {
         // to unify
         DB::transaction(function () {
-            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-            $lastTraderOrder = $financingOrder->activeTraderOrder()
-                ->whereIn('provider', ['dmcc', 'fake'])->first();
+            $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
 
-            if (! $lastTraderOrder) {
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::RespondPtp)) {
                 return;
             }
 
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::PtpDocumentRetrieved)) {
-                return;
-            }
-
-            $trader = Trader::driver($lastTraderOrder->provider);
+            $trader = Trader::driver($traderOrder->provider);
 
             $ptpDocument = $trader->getDocumentByTypeAndTransaction(
-                $lastTraderOrder->reference,
+                $traderOrder->reference,
                 'Promise to Purchase'
             );
 
             $trader->createTraderOrderHistory(
-                $lastTraderOrder,
+                $traderOrder,
                 FinancingOrderHistory::GetPtpDocument
             );
 
             $this->attachDocumentToOrder(
-                $lastTraderOrder,
+                $traderOrder,
                 $ptpDocument,
                 TraderOrderMediaCollection::PromiseToPurchase,
                 'base64'
             );
 
             $trader->createTraderOrderHistory(
-                $lastTraderOrder,
+                $traderOrder,
                 FinancingOrderHistory::AttachPtpDocumentToOrder
             );
 
             $ttiDocument = $trader->getDocumentByTypeAndTransaction(
-                $lastTraderOrder->reference,
+                $traderOrder->reference,
                 'TTI - Holding certificate'
             );
 
             $trader->createTraderOrderHistory(
-                $lastTraderOrder,
+                $traderOrder,
                 FinancingOrderHistory::GetTtiHoldingCertificateDocument
             );
 
             $this->attachDocumentToOrder(
-                $lastTraderOrder,
+                $traderOrder,
                 $ttiDocument,
                 TraderOrderMediaCollection::TtiHoldingCertificate,
                 'base64'
             );
 
             $trader->createTraderOrderHistory(
-                $lastTraderOrder,
+                $traderOrder,
                 FinancingOrderHistory::AttachTtiHoldingCertificateDocument
             );
-
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::PtpDocumentRetrieved);
         });
     }
 
@@ -112,6 +103,6 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('financingOrder'.$this->financingOrder)];
+        return [new WithoutOverlapping('traderOrder'.$this->traderOrder)];
     }
 }

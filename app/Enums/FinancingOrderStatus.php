@@ -19,29 +19,9 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
 
     const Rejected = 5;
 
-    const CommodityPurchased = 6;
+    const InProgress = 6;
 
-    const CommoditySoldToCustomer = 7;
-
-    const MurabhaOfferIssued = 8;
-
-    const MurabahaSaleCompleted = 9;
-
-    const ContractSigned = 10;
-
-    const WaitingClientWakala = 11;
-
-    const WaitingPurchasingCommodity = 12;
-
-    const ClientWakalaCompleted = 13;
-
-    const RespondedToPtp = 14;
-
-    const PtpDocumentRetrieved = 15;
-
-    const PendingCancellation = 16;
-
-    const Expired = 17;
+    const PendingCancellation = 7;
 
     private static array $state = [
         self::Approved => [
@@ -50,62 +30,23 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         self::Rejected => [
             self::PendingApproval,
         ],
-        self::Completed => [
-            self::MurabahaSaleCompleted,
-        ],
+        self::Completed => [],
         self::Cancelled => [
             self::PendingCancellation,
         ],
         self::PendingCancellation => [
             self::Rejected,
             self::Approved,
-            self::RespondedToPtp,
             self::PendingApproval,
-            self::CommodityPurchased,
-            self::WaitingClientWakala,
-            self::PtpDocumentRetrieved,
-            self::ClientWakalaCompleted,
-            self::CommoditySoldToCustomer,
-            self::WaitingPurchasingCommodity,
+            self::InProgress,
         ],
-        self::ClientWakalaCompleted => [
-            self::WaitingClientWakala,
-            self::ContractSigned,
-        ],
-        self::WaitingPurchasingCommodity => [
+        self::InProgress => [
             self::Approved,
-            self::ClientWakalaCompleted,
-        ],
-        self::RespondedToPtp => [
-            self::WaitingPurchasingCommodity,
-        ],
-        self::PtpDocumentRetrieved => [
-            self::RespondedToPtp,
-        ],
-        self::CommodityPurchased => [
-            self::PtpDocumentRetrieved,
-        ],
-        self::ContractSigned => [
-            self::CommodityPurchased,
-        ],
-        self::CommoditySoldToCustomer => [
-            self::ClientWakalaCompleted,
-        ],
-        self::WaitingClientWakala => [
-            self::ContractSigned,
-        ],
-        self::MurabahaSaleCompleted => [
-            self::MurabhaOfferIssued,
-        ],
-        self::MurabhaOfferIssued => [
-            self::CommoditySoldToCustomer,
         ],
     ];
 
     public static array $requireActionStatuses = [
         self::PendingApproval,
-        self::CommodityPurchased,
-        self::MurabahaSaleCompleted,
     ];
 
     public static array $allowedToUpdateStatuses = [
@@ -115,56 +56,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
 
     public static array $nextStep = [
         self::PendingApproval => self::Approved,
-        self::Approved => self::WaitingPurchasingCommodity,
-        self::WaitingPurchasingCommodity => self::RespondedToPtp,
-        self::RespondedToPtp => self::PtpDocumentRetrieved,
-        self::PtpDocumentRetrieved => self::CommodityPurchased,
-        self::CommodityPurchased => self::ContractSigned,
-        self::ContractSigned => self::CommoditySoldToCustomer,
-        self::CommoditySoldToCustomer => self::WaitingClientWakala,
-        self::WaitingClientWakala => self::ClientWakalaCompleted,
-        self::ClientWakalaCompleted => self::MurabhaOfferIssued,
-        self::MurabhaOfferIssued => self::MurabahaSaleCompleted,
     ];
-
-    // Temporary map to handel backend status to end-user status
-    public static array $userInterfaceStepsToRealStepsMap = [
-        self::CommodityPurchased => [
-            self::Approved,
-            self::WaitingPurchasingCommodity,
-            self::RespondedToPtp,
-            self::PtpDocumentRetrieved,
-            self::CommodityPurchased,
-        ],
-        self::ContractSigned => [
-            self::ContractSigned,
-        ],
-        self::CommoditySoldToCustomer => [
-            self::CommoditySoldToCustomer,
-        ],
-        self::ClientWakalaCompleted => [
-            self::WaitingClientWakala,
-            self::ClientWakalaCompleted,
-        ],
-        self::MurabhaOfferIssued => [
-            self::MurabhaOfferIssued,
-        ],
-        self::MurabahaSaleCompleted => [
-            self::MurabahaSaleCompleted,
-        ],
-    ];
-
-    // Temporary map to handel backend status to end-user status
-    public static function getUserInterfaceStep($step): string
-    {
-        foreach (self::$userInterfaceStepsToRealStepsMap as $uiStep => $realSteps) {
-            if (in_array($step, $realSteps)) {
-                return FinancingOrderStatus::fromValue($uiStep)->description;
-            }
-        }
-
-        return FinancingOrderStatus::fromValue($step)->description;
-    }
 
     /**
      * @param  Status|int  $status

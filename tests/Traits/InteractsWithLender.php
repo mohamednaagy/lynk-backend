@@ -111,7 +111,7 @@ trait InteractsWithLender
             'phone_number' => '+966500112233',
             'amount' => 200,
             'selling_price' => 220,
-            'status' => FinancingOrderStatus::WaitingClientWakala,
+            'status' => FinancingOrderStatus::PendingApproval,
             'is_verification_required' => true,
         ], $data));
     }

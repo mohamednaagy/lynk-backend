@@ -202,49 +202,56 @@ class CancelOrderTest extends TestCase
             ->assertJsonPath('data', []);
     }
 
-    public function test_can_cancel_order_with_cancellable_statuses()
+    /**
+     * @dataProvider cancellableStatusesDataProvider
+     *
+     * @param $status
+     * @return void
+     */
+    public function test_can_cancel_order_with_cancellable_statuses($status)
     {
-        $statuses = [
-            FinancingOrderStatus::Rejected,
-            FinancingOrderStatus::Approved,
-            FinancingOrderStatus::RespondedToPtp,
-            FinancingOrderStatus::PendingApproval,
-            FinancingOrderStatus::CommodityPurchased,
-            FinancingOrderStatus::WaitingClientWakala,
-            FinancingOrderStatus::PtpDocumentRetrieved,
-            FinancingOrderStatus::ClientWakalaCompleted,
-            FinancingOrderStatus::CommoditySoldToCustomer,
-            FinancingOrderStatus::WaitingPurchasingCommodity,
-        ];
-        foreach ($statuses as $status) {
-            self::$financingOrder->update(['status' => $status]);
-            $this->actingAs(self::$userLender)
-                ->withHeader('X-Company', self::$company->id)
-                ->putJson(self::$orderCancledUrl)
-                ->assertStatus(Response::HTTP_OK)
-                ->assertJsonPath('data', []);
-        }
+        self::$financingOrder->update(['status' => $status]);
+        $this->actingAs(self::$userLender)
+            ->withHeader('X-Company', self::$company->id)
+            ->putJson(self::$orderCancledUrl)
+            ->assertStatus(Response::HTTP_OK)
+            ->assertJsonPath('data', []);
     }
 
-    public function test_cannot_cancel_order_with_not_cancellable_statuses()
+    /**
+     * @dataProvider notCancellableStatusesDataProvider
+     *
+     * @param $status
+     * @return void
+     */
+    public function test_cannot_cancel_order_with_not_cancellable_statuses($status)
     {
-        $statuses = [
-            FinancingOrderStatus::Cancelled,
-            FinancingOrderStatus::Completed,
-            FinancingOrderStatus::MurabhaOfferIssued,
-            FinancingOrderStatus::MurabahaSaleCompleted,
-            FinancingOrderStatus::ContractSigned,
-            FinancingOrderStatus::PendingCancellation,
+        self::$financingOrder->update(['status' => $status]);
+
+        $this->actingAs(self::$userLender)
+            ->withHeader('X-Company', self::$company->id)
+            ->putJson(self::$orderCancledUrl)->assertStatus(Response::HTTP_FORBIDDEN)
+            ->assertJsonFragment([
+                'message' => __('error.unable_to_cancel_order'),
+                'code' => 1010,
+            ]);
+    }
+
+    public function cancellableStatusesDataProvider()
+    {
+        return [
+            [FinancingOrderStatus::Rejected],
+            [FinancingOrderStatus::Approved],
+            [FinancingOrderStatus::PendingApproval],
         ];
-        foreach ($statuses as $status) {
-            self::$financingOrder->update(['status' => $status]);
-            $this->actingAs(self::$userLender)
-                ->withHeader('X-Company', self::$company->id)
-                ->putJson(self::$orderCancledUrl)->assertStatus(Response::HTTP_FORBIDDEN)
-                ->assertJsonFragment([
-                    'message' => __('error.unable_to_cancel_order'),
-                    'code' => 1010,
-                ]);
-        }
+    }
+
+    public function notCancellableStatusesDataProvider()
+    {
+        return [
+            [FinancingOrderStatus::Cancelled],
+            [FinancingOrderStatus::Completed],
+            [FinancingOrderStatus::PendingCancellation],
+        ];
     }
 }

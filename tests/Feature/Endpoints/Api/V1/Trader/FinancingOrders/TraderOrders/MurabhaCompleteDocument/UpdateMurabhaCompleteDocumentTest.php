@@ -5,7 +5,7 @@ namespace Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders\MurabhaCompleteDo
 use App\Enums\Area;
 use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\TraderOrder;
@@ -17,6 +17,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
@@ -36,7 +39,7 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
     private static Builder|Model $financingOrder;
 
-    private static TraderOrder $traderOrder;
+    private static Model|TraderOrder $traderOrder;
 
     private static string $updateMurabhaCompleteDocumentUrl;
 
@@ -62,21 +65,16 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
         ]);
         self::$traderAdminUser = $this->createTraderUser(self::$trader->id);
         self::$userLender = $this->createLenderUser(self::$lender->id);
-        self::$financingOrder = $this->createOrder(
-            self::$lender->id,
-            self::$userLender->id,
-            [
-                'is_verification_required' => true,
-                'status' => FinancingOrderStatus::MurabhaOfferIssued,
-            ]
-        );
+        self::$financingOrder = OrderScenario::inProgress()
+            ->lender(self::$lender)
+            ->creator(self::$userLender)
+            ->commit()
+            ->model();
 
         // create trader order
-        self::$traderOrder = self::$financingOrder->traderOrders()->create([
-            'provider' => self::$trader->driver,
-            'reference' => '123456789',
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder(self::$trader->driver);
+
+        TraderOrderScenario::of(self::$traderOrder)->moveToStep(MurabhaStep::MurabhaOfferIssued);
 
         self::$updateMurabhaCompleteDocumentUrl = self::BaseUrl.
             '/orders/'.
@@ -127,17 +125,13 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
      */
     public function test_proceed_murabha_complete_document_succeed(): void
     {
-        self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::AttachMpoDocument,
-        ]);
-
         $this->withHeader('X-Company', self::$trader->id)
             ->actingAs(self::$traderAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertJsonStructure(['data']);
 
         $freshOrderStatus = self::$financingOrder->fresh()->status;
-        $this->assertTrue($freshOrderStatus->is(FinancingOrderStatus::MurabahaSaleCompleted));
+        $this->assertTrue(self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted));
 
         $freshTraderOrderStatus = self::$traderOrder->fresh()->status;
         $this->assertTrue($freshTraderOrderStatus->is(TraderOrderStatus::Completed));
@@ -151,9 +145,9 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
      */
     public function test_update_murabha_complete_document_not_follow_sequence($unsuitableTraderHistoryData): void
     {
-        self::$traderOrder->traderHistories()->create([
-            'action' => $unsuitableTraderHistoryData,
-        ]);
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToHistory($unsuitableTraderHistoryData);
 
         $this->withHeader('X-Company', self::$trader->id)
             ->actingAs(self::$traderAdminUser)
@@ -170,7 +164,7 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
         return [
             'histories_that_doesnt_follow_sequence' => collect(FinancingOrderHistory::getValues())
                 ->reject(function ($item) {
-                    return $item == FinancingOrderHistory::$orderHistoryLastActionMap[FinancingOrderHistory::AttachMpoDocument];
+                    return in_array($item, [FinancingOrderHistory::AttachMpoDocument, FinancingOrderHistory::GetTtiId, FinancingOrderHistory::OrderCancelled, FinancingOrderHistory::Expired]);
                 })
                 ->toArray(),
         ];

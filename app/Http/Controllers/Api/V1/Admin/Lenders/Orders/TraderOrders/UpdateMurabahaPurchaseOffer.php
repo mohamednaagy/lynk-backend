@@ -6,7 +6,7 @@ use App\Actions\Contracts\Orders\GetOrderAndTraderOrderLockedForUpdate;
 use App\Actions\Contracts\Orders\TraderOrders\MurabahaPurchaseOffer\HandleIssuingMurabahaPurchaseOffer;
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabahaPurchaseOfferRequest;
@@ -36,9 +36,7 @@ class UpdateMurabahaPurchaseOffer extends Controller
         return DB::transaction(function () use ($request, $order, $traderOrder) {
             [$order, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
 
-            $traderOrder->ensureCanAccessStep(
-                FinancingOrderStatus::ClientWakalaCompleted
-            );
+            $traderOrder->ensureCanAccessStep(MurabhaStep::ClientWakala);
 
             app(HandleIssuingMurabahaPurchaseOffer::class)->handle($request, $order, $traderOrder);
 

@@ -3,14 +3,17 @@
 namespace Tests\Unit\Jobs\General;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Enums\Role;
-use App\Enums\TraderOrderStatus;
 use App\Jobs\Dmcc\ProcessDmccMpoSaleCompleteNotification;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
@@ -33,9 +36,11 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
 
         self::$company = $this->createCompanyWithoutWallet();
         self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
-        self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::MurabhaOfferIssued,
-        ]);
+        self::$order = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$lender)
+            ->commit()
+            ->model();
 
         $ttiId = 1;
 
@@ -56,61 +61,62 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
     {
         config()->set('trader.default', 'dmcc');
 
-        $traderOrderDmcc = self::$order->traderOrders()->create([
-            'provider' => 'dmcc',
-            'reference' => '1',
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        /** @var TraderOrder $traderOrderDmcc */
+        $traderOrderDmcc = InProgressOrder::of(self::$order)->createTraderOrder('dmcc', 1);
+
+        TraderOrderScenario::of($traderOrderDmcc)
+            ->reset()
+            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
 
         (new ProcessDmccMpoSaleCompleteNotification(self::$notification))->handle();
 
-        self::$order = self::$order->fresh();
-
-        $traderOrderHistory = $traderOrderDmcc->traderHistories()->where('action', FinancingOrderHistory::MurabahaSaleCompleted)->exists();
-
-        $this->assertTrue(self::$order->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
-        $this->assertTrue($traderOrderHistory);
+        $this->assertTrue($traderOrderDmcc->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted));
     }
 
     public function test_process_dmcc_mpo_sale_complete_notification_fake_driver_success()
     {
         config()->set('trader.default', 'fake');
 
-        $traderOrderFake = self::$order->traderOrders()->create([
-            'provider' => 'fake',
-            'reference' => '1',
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        /** @var TraderOrder $traderOrderFake */
+        $traderOrderFake = InProgressOrder::of(self::$order)->createTraderOrder('fake', 1);
+
+        TraderOrderScenario::of($traderOrderFake)
+            ->reset()
+            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
 
         (new ProcessDmccMpoSaleCompleteNotification(self::$notification))->handle();
 
         self::$order = self::$order->fresh();
 
-        $traderOrderHistory = $traderOrderFake->traderHistories()->where('action', FinancingOrderHistory::MurabahaSaleCompleted)->exists();
-
-        $this->assertTrue(self::$order->status->is(FinancingOrderStatus::MurabahaSaleCompleted));
-        $this->assertTrue($traderOrderHistory);
+        $this->assertTrue($traderOrderFake->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted));
     }
 
     public function test_process_dmcc_mpo_sale_complete_notification_with_invalid_status()
     {
-        self::$order->traderOrders()->create([
-            'provider' => 'fake',
-            'reference' => '1',
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        config()->set('trader.default', 'fake');
 
-        collect(FinancingOrderStatus::asSelectArray())
-            ->except([FinancingOrderStatus::MurabhaOfferIssued])
-            ->keys()
-            ->each(function ($status) {
-                self::$order->update(['status' => $status]);
+        /** @var TraderOrder $traderOrderFake */
+        $traderOrderFake = InProgressOrder::of(self::$order)->createTraderOrder('fake', 1);
 
-                (new ProcessDmccMpoSaleCompleteNotification(self::$notification))->handle();
+        $financeHistories = FinancingOrderHistory::asArray();
 
-                self::$order = self::$order->fresh();
+        foreach ($financeHistories as $financeHistory) {
+            if (in_array($financeHistory, [
+                FinancingOrderHistory::AttachMpoDocument,
+                FinancingOrderHistory::GetTtiId,
+                FinancingOrderHistory::OrderCancelled,
+                FinancingOrderHistory::Expired,
+            ])) {
+                continue;
+            }
 
-                $this->assertTrue(self::$order->status->is($status));
-            });
+            TraderOrderScenario::of($traderOrderFake)
+                ->reset()
+                ->moveToHistory($financeHistory);
+
+            (new ProcessDmccMpoSaleCompleteNotification(self::$notification))->handle();
+
+            $this->assertTrue($traderOrderFake->doesLastActionMatchWith($financeHistory));
+        }
     }
 }

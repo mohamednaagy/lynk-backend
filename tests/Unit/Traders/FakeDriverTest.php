@@ -2,9 +2,8 @@
 
 namespace Tests\Unit\Traders;
 
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\TraderOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Exceptions\TraderException;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -18,6 +17,9 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\Models\Activity;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\OrderScenario;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
@@ -34,35 +36,20 @@ class FakeDriverTest extends TestCase
 
     protected static Model|TraderOrder $traderOrder;
 
-    protected static Model|TraderOrder $anotherTraderOrder;
-
     protected function setUp(): void
     {
         parent::setUp();
 
         self::$company = $this->createCompanyWithoutWallet();
         self::$lender = $this->createLenderUser(self::$company->id);
-        self::$order = $this->createOrder(self::$company->id, self::$lender->id, [
-            'status' => FinancingOrderStatus::Approved,
-        ]);
-        self::$traderOrder = TraderOrder::query()->create([
-            'financing_order_id' => self::$order->id,
-            'reference' => 1,
-            'provider' => 'dmcc',
-            'status' => TraderOrderStatus::InProgress,
-            'amount' => 1,
-            'product' => 'product',
-            'quantity' => 1,
-            'warehouse' => 'warehouse',
-            'owner' => 'owner',
-        ]);
 
-        self::$anotherTraderOrder = TraderOrder::query()->create([
-            'financing_order_id' => self::$order->id,
-            'reference' => 1,
-            'provider' => 'wrong',
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        self::$order = OrderScenario::inProgress()
+            ->lender(self::$company)
+            ->creator(self::$lender)
+            ->commit()
+            ->model();
+
+        self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder();
     }
 
     /**
@@ -262,6 +249,11 @@ class FakeDriverTest extends TestCase
     {
         Storage::fake();
         UploadedFile::fake();
+
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::ContractSigned);
+
         (new FakeDriver())->getInventoryBasket(self::$traderOrder);
         self::$traderOrder->fresh();
         (new FakeDriver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
@@ -279,14 +271,11 @@ class FakeDriverTest extends TestCase
         Storage::fake();
         UploadedFile::fake();
 
-        (new FakeDriver())->getInventoryBasket(self::$anotherTraderOrder);
-        self::$anotherTraderOrder->fresh();
+        $this->expectException(TraderException::class);
 
-        (new FakeDriver())->createSellingCommodityToCustomerDocument(self::$anotherTraderOrder);
+        (new FakeDriver())->createSellingCommodityToCustomerDocument(new TraderOrder());
 
-        $sellingCommodityToCustomerMedia = self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer);
-
-        $this->assertEmpty($sellingCommodityToCustomerMedia);
+        $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
     }
 
     /**
@@ -315,13 +304,11 @@ class FakeDriverTest extends TestCase
         Storage::fake();
         UploadedFile::fake();
 
-        (new FakeDriver())->getInventoryBasket(self::$anotherTraderOrder);
-        self::$anotherTraderOrder->fresh();
+        $this->expectException(TraderException::class);
 
-        (new FakeDriver())->createTransferOwnershipToLenderDocument(self::$anotherTraderOrder);
+        (new FakeDriver())->createTransferOwnershipToLenderDocument(new TraderOrder());
 
-        $transferOwnershipToLenderMedia = self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender);
-        $this->assertEmpty($transferOwnershipToLenderMedia);
+        $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender));
     }
 
     /**

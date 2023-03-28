@@ -6,12 +6,14 @@ use App\Enums\Role;
 use App\Enums\RouteArea;
 use App\Models\Enquiry;
 use App\Models\FinancingOrder;
+use App\Models\PersonalAccessToken;
 use App\Policies\EnquiryPolicy;
 use App\Policies\FinancingOrderPolicy;
 use App\Policies\MediaPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Laravel\Sanctum\Sanctum;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AuthServiceProvider extends ServiceProvider
@@ -53,6 +55,8 @@ class AuthServiceProvider extends ServiceProvider
                 default => null
             };
         });
+
+        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
     }
 
     private function getAreaFromRequestPath()

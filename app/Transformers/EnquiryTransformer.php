@@ -21,6 +21,7 @@ class EnquiryTransformer extends TransformerAbstract
         'creator',
         'replies',
         'replySignature',
+        'company',
     ];
 
     public function transform(Enquiry $enquiry): array
@@ -69,6 +70,18 @@ class EnquiryTransformer extends TransformerAbstract
             'email' => $enquiry->email,
             'name' => $enquiry->name,
             'phone_number' => $enquiry->phone_number,
+        ]);
+    }
+
+    public function includeCompany(Enquiry $enquiry): Primitive
+    {
+        if (! $enquiry->user || ! $enquiry->user->company) {
+            return $this->primitive(null);
+        }
+
+        return $this->primitive([
+            'id' => $enquiry->user->company->id,
+            'name' => $enquiry->user->company->name,
         ]);
     }
 

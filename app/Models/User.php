@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\Grantify\Contracts\Grantifiable;
 use Modules\Otpify\Contracts\Otpifiable;
@@ -29,7 +30,7 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, BelongsToTenant;
 
-    const DELETED_MODEL_EMAIL_PREFIX = 'deleted@@@';
+    const DELETED_MODEL_EMAIL_AND_STRING_SEPARATOR = '@@@';
 
     /**
      * The attributes that are mass assignable.
@@ -172,7 +173,7 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
     public function getEmailForSoftDeleting()
     {
         if ($this->deleted_at === null) {
-            return self::DELETED_MODEL_EMAIL_PREFIX.$this->email;
+            return Str::random(10).self::DELETED_MODEL_EMAIL_AND_STRING_SEPARATOR.$this->email;
         }
 
         return $this->email;

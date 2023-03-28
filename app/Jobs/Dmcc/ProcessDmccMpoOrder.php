@@ -3,9 +3,8 @@
 namespace App\Jobs\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
@@ -20,16 +19,16 @@ class ProcessDmccMpoOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
-    protected mixed $financingOrder;
+    protected mixed $traderOrder;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($financingOrder)
+    public function __construct($traderOrder)
     {
-        $this->financingOrder = $financingOrder;
+        $this->traderOrder = $traderOrder;
     }
 
     /**
@@ -40,54 +39,45 @@ class ProcessDmccMpoOrder implements ShouldQueue
     public function handle(): void
     {
         DB::transaction(function () {
-            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-            $lastTraderOrder = $financingOrder->activeTraderOrder()
-                ->whereIn('provider', ['dmcc', 'fake'])
-                ->first();
+            $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
 
-            if (! $lastTraderOrder) {
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument)) {
                 return;
             }
 
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::MurabhaOfferIssued)) {
-                return;
-            }
+            $trader = Trader::driver($traderOrder->provider);
 
-            $trader = Trader::driver($lastTraderOrder->provider);
-
-            $versionNo = $trader->uploadTTIDocumentAndGetVersionNumber($lastTraderOrder->reference);
+            $versionNo = $trader->uploadTTIDocumentAndGetVersionNumber($traderOrder->reference);
 
             $trader->issueMurabahaPurchaseOffer(
-                $lastTraderOrder->reference,
+                $traderOrder->reference,
                 $versionNo
             );
 
             $trader->createTraderOrderHistory(
-                $lastTraderOrder,
+                $traderOrder,
                 FinancingOrderHistory::IssueMurabahaOffer
             );
 
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::MurabhaOfferIssued);
-
             $mpoDocument = $trader->getDocumentByTypeAndTransaction(
-                $lastTraderOrder->reference,
+                $traderOrder->reference,
                 'Murabaha Purchase Offer Document'
             );
 
             $trader->createTraderOrderHistory(
-                $lastTraderOrder,
+                $traderOrder,
                 FinancingOrderHistory::GetMurabahaPurchaseOfferDocument
             );
 
             $this->attachDocumentToOrder(
-                $lastTraderOrder,
+                $traderOrder,
                 $mpoDocument,
                 TraderOrderMediaCollection::MurabahaPurchaseOrder,
                 'base64'
             );
 
             $trader->createTraderOrderHistory(
-                $lastTraderOrder,
+                $traderOrder,
                 FinancingOrderHistory::AttachMpoDocument
             );
         });
@@ -100,6 +90,6 @@ class ProcessDmccMpoOrder implements ShouldQueue
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('financingOrder'.$this->financingOrder)];
+        return [new WithoutOverlapping('traderOrder'.$this->traderOrder)];
     }
 }
