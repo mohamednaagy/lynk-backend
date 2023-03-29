@@ -7,6 +7,7 @@ use App\Support\Traders\Events\ProcessNotification;
 use App\Support\Traders\TraderManager;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -39,6 +40,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (config('app.force_https', false)) {
+            URL::forceScheme('https');
+        }
+
         Response::macro('successResponse', function (
             array $data = [],
             int $statusCode = \Symfony\Component\HttpFoundation\Response::HTTP_OK

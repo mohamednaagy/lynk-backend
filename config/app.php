@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Facade;
 
 return [
+    'force_https' => env('FORCE_HTTPS', false),
 
     /*
     |--------------------------------------------------------------------------
