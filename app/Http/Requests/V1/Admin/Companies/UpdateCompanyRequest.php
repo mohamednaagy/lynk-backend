@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\V1\Admin\Companies;
 
+use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Rules\CompanyUniqueNameRule;
+use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -69,6 +71,12 @@ class UpdateCompanyRequest extends FormRequest
                 'string',
                 'max:255',
             ],
+            'notify_admins_about_new_orders' => [
+                'required',
+                'integer',
+                new EnumValue(CompanyNewOrderNotificationForAdminStatus::class, false),
+            ],
+
         ];
     }
 }

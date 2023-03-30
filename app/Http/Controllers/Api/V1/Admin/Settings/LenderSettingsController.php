@@ -18,12 +18,12 @@ class LenderSettingsController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::LenderAreaSettings, Action::Index, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::LenderAreaSettings, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::LenderAreaSettings, Action::Edit, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::LenderAreaSettings, Action::Edit, Action::Manage])
         )->only('update');
     }
 
@@ -42,6 +42,7 @@ class LenderSettingsController extends Controller
                 'default_does_order_require_approval',
                 'default_company_registration_status',
                 'default_company_status_created_by_operation',
+                'notify_admins_about_new_orders',
             ])
             ->respond();
     }

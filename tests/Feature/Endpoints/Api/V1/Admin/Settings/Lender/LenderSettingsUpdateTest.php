@@ -4,6 +4,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Settings\Lender;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
@@ -56,6 +57,7 @@ class LenderSettingsUpdateTest extends TestCase
         self::$lenderSettingsData = [
             'default_order_cost' => 150,
             'email_verification_enabled' => true,
+            'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::On,
             'default_does_order_require_approval' => false,
             'default_company_registration_status' => CompanyStatus::UnderReview,
             'default_company_status_created_by_operation' => CompanyStatus::UnderReview,
@@ -103,6 +105,25 @@ class LenderSettingsUpdateTest extends TestCase
                     ],
                 ],
             ]);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function test_update_lender_settings_notify_admins_about_new_orders_field_is_required(): void
+    {
+        $this->actingAs(self::$admin)
+            ->putJson(
+                self::BaseUrl,
+                Arr::except(
+                    self::$lenderSettingsData,
+                    ['notify_admins_about_new_orders']
+                )
+            )
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('notify_admins_about_new_orders');
     }
 
     /**
