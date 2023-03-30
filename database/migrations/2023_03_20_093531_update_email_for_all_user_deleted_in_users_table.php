@@ -16,7 +16,7 @@ return new class extends Migration
             ->orderBy('id')
             ->chunk(100, function ($users) {
                 foreach ($users as $user) {
-                    $user->update(['email' => User::DELETED_MODEL_EMAIL_PREFIX.$user->email]);
+                    $user->update(['email' => User::DELETED_MODEL_EMAIL_AND_STRING_SEPARATOR.$user->email]);
                 }
             });
     }
@@ -32,7 +32,7 @@ return new class extends Migration
             ->orderBy('id')
             ->chunk(100, function ($users) {
                 foreach ($users as $user) {
-                    $user->update(['email' => explode(User::DELETED_MODEL_EMAIL_PREFIX, $user->email)[1]]);
+                    $user->update(['email' => explode(User::DELETED_MODEL_EMAIL_AND_STRING_SEPARATOR, $user->email)[1]]);
                 }
             });
     }
