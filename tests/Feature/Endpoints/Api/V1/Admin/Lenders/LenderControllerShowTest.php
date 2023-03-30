@@ -81,6 +81,7 @@ class LenderControllerShowTest extends TestCase
                         'does_order_require_approval',
                         'order_cost',
                         'notifications_email',
+                        'notify_admins_about_new_orders',
                     ])
                     ->respond()
                     ->getData(true)
@@ -107,6 +108,7 @@ class LenderControllerShowTest extends TestCase
                         'does_order_require_approval',
                         'order_cost',
                         'notifications_email',
+                        'notify_admins_about_new_orders',
                     ])
                     ->respond()
                     ->getData(true)
