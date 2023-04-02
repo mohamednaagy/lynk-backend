@@ -30,8 +30,6 @@ class VerifyEmail extends Controller
             return $this->errorResponse(__('auth.failed'));
         }
 
-        logs()->debug('trusted', [$request->server->get('REMOTE_ADDR')]);
-
         $user->markEmailAsVerified();
 
         return $this->successResponse();
