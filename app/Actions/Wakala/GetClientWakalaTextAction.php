@@ -17,7 +17,6 @@ class GetClientWakalaTextAction implements GetClientWakalaText
         $commodityNumber = $traderOrder->reference;
         $commodity = collect($traderOrder->products)->pluck('product')->implode(' و ') ?? '';
         $commodityPrice = $financingOrder->amount->formatByDecimal();
-        $orderNumber = $financingOrder->id;
         $orderDate = $financingOrder->created_at->format('Y-m-d');
         $clientName = $financingOrder->customer_name;
         $clientNationalId = $financingOrder->national_id;
@@ -32,7 +31,6 @@ class GetClientWakalaTextAction implements GetClientWakalaText
                 '{{commodityPrice}}',
                 '{{clientName}}',
                 '{{clientNationalId}}',
-                '{{orderNumber}}',
                 '{{orderDate}}',
             ],
             [
@@ -44,7 +42,6 @@ class GetClientWakalaTextAction implements GetClientWakalaText
                 $commodityPrice,
                 $clientName,
                 $clientNationalId,
-                $orderNumber,
                 $orderDate,
             ],
             $clientTemplate
