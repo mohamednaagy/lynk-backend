@@ -111,6 +111,6 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeNotifyAdminsAboutNewOrders(Company $company)
     {
-        return $this->primitive('notify_admins_about_new_orders');
+        return $this->primitive($company->notify_admins_about_new_orders);
     }
 }
