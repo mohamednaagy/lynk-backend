@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
 use App\Support\Money\Casts\MoneyStringCast;
@@ -30,6 +31,7 @@ class Company extends BaseTenant
         'webhook_secret_key' => 'encrypted',
         'order_cost' => MoneyStringCast::class.':order_cost_currency',
         'type' => CompanyType::class,
+        'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::class,
     ];
 
     public static function getCustomColumns(): array
@@ -51,6 +53,7 @@ class Company extends BaseTenant
             'order_cost_currency',
             'type',
             'driver',
+            'notify_admins_about_new_orders',
             'deleted_at',
         ];
     }

@@ -41,6 +41,7 @@ class EnquiryController extends Controller
                 'status',
                 'creation_date',
                 'creator',
+                'company',
             ])
             ->respond();
     }

@@ -9,6 +9,7 @@ use App\Exceptions\MSGDuplicatedException;
 use App\Support\Sms\Events\SmsSent;
 use App\Support\Sms\SmsDriverInterface;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class MsegatDriver implements SmsDriverInterface
 {
@@ -42,7 +43,7 @@ class MsegatDriver implements SmsDriverInterface
             'numbers' => $phoneNumber,
             'userSender' => config('sms.msegat.sender_name'),
             'apiKey' => $this->apiKey,
-            'msg' => $message,
+            'msg' => $message."\n\n".Str::random(6),
         ];
 
         $response = Http::post($this->baseUrl, $body);
@@ -59,13 +60,19 @@ class MsegatDriver implements SmsDriverInterface
 
         $code = $response->object()->code;
 
-        throw match ($code) {
+        $match = match ($code) {
             '1020' => new InvalidLoginInfoException(),
             '1060' => new BalanceIsNotEnoughException(),
             '1061' => new MSGDuplicatedException(),
             '1120' => new MobileNumbersIsNotCorrectException(),
-            default => new \ErrorException('Error found'),
+            default => null,
         };
+
+        if ($match === null) {
+            return;
+        }
+
+        throw $match;
     }
 
     protected function url($path)

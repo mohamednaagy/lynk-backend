@@ -205,6 +205,8 @@ class MakeOrderProceedTest extends TestCase
             ->assertJsonStructure([
                 'data',
             ]);
+
+        $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::ClientWakala));
     }
 
     /**

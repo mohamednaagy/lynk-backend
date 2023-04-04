@@ -22,11 +22,11 @@ class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatu
     {
         $locale = app()->getLocale();
         $products = $traderOrder->products;
-        $sellingPrice = $financingOrder->selling_price ?? '';
+        $amount = $financingOrder->amount?->formatByDecimal() ?? '';
 
         return __(ClientMessage::MurabahaSaleCompleted, [
             'products' => $this->getProductsDescription($products),
-            'amount' => $sellingPrice,
+            'amount' => $amount,
             'company_name' => $financingOrder->company->name,
         ], $locale);
     }

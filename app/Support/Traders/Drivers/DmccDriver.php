@@ -283,7 +283,7 @@ class DmccDriver implements TraderInterface
                     'traderOrder' => $traderOrder,
                 ],
                 'responseBody' => $exception->getMessage(),
-            ]));
+            ]), $exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 

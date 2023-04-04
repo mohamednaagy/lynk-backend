@@ -63,6 +63,7 @@ class LenderControllerUpdateTest extends TestCase
             'company_cr' => '1234567891',
             'order_cost' => 20,
             'does_order_require_approval' => '1',
+            'notify_admins_about_new_orders' => '1',
             'webhook_secret_key' => Str::random(Config::get('webhook-server.secret_key_length', 40)),
         ];
         self::$endpoint = 'api/v1/admin/lenders/';
