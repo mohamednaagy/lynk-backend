@@ -719,7 +719,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             <p class="text-black">الوقت: {{ $time }}</p>
             <p class="text-xl text-center text-black">شهادة حيازة</p>
             <p class="text-center text-black">نؤكد نحن لينك أن السلع المشار لها في الموقع أدناه؛ في حيازتنا بالنيابة عن {{$company_name}} من
-                تاريخ وتوقيت هذه الشهادة، وقد تم شراؤها من {{$previous_owner}} مقابل مبلغ وقدره {{$amount}} ريال سعودي
+                تاريخ وتوقيت هذه الشهادة، وقد تم شراؤها من {{$previous_owner}} بناء على طلب الشركة مقابل مبلغ وقدره {{$amount}} ريال سعودي
             </p>
 
             <p class="text-lg font-semibold text-center text-black">بيانات السلع/ـة</p>
