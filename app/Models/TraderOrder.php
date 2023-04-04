@@ -148,10 +148,10 @@ class TraderOrder extends Model implements HasMedia
     {
         $lastAction = $this->traderHistories()->latest('id')->first();
 
-        $stepNode = app(StepHistoriesDictionary::class)->getStepByHistory($lastAction->action);
+        $stepNode = app(StepHistoriesDictionary::class)->getStepByHistory($lastAction?->action);
 
         return new Attribute(
-            get: fn () => $stepNode->step,
+            get: fn () => $stepNode?->step,
         );
     }
 
