@@ -11,6 +11,7 @@ use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\User;
 use App\Support\Traders\Drivers\FakeDriver;
+use Cknow\Money\Money;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -46,6 +47,7 @@ class FakeDriverTest extends TestCase
         self::$order = OrderScenario::inProgress()
             ->lender(self::$company)
             ->creator(self::$lender)
+            ->amount(Money::parseByDecimal(1000, 'SAR'))
             ->commit()
             ->model();
 
@@ -363,31 +365,13 @@ class FakeDriverTest extends TestCase
                 [
                     'product' => 'Yogurt',
                     'quantity' => '10',
-                    'amount' => '1000',
+                    'amount' => '1000.00',
                     'currency' => 'SAR',
                     'warehouse' => 'Warehouse',
                     'owner' => 'Owner 1',
                     'previous_owner' => 'Owner 0',
                     'new_owner' => 'Owner 1',
                     'date_time_of_purchasing_commodity' => '2023-01-01 00:00:00',
-                    'warehouse_or_vault_emirates' => 'Emirates',
-                    'warehouse_or_vault_country' => 'Saudi Arabia',
-                    'inventory_record_id' => '1000',
-                    'warrant_percentage' => '100',
-                    'warrant_no' => '658',
-                    'hs_code' => '#234',
-                    'uom' => 'Kilo',
-                ],
-                [
-                    'product' => 'Yogurt 2',
-                    'quantity' => '5',
-                    'amount' => '500',
-                    'currency' => 'SAR',
-                    'warehouse' => 'Warehouse',
-                    'owner' => 'Owner 1',
-                    'previous_owner' => 'Owner 2',
-                    'new_owner' => 'Owner 3',
-                    'date_time_of_purchasing_commodity' => '2023-02-01 00:00:00',
                     'warehouse_or_vault_emirates' => 'Emirates',
                     'warehouse_or_vault_country' => 'Saudi Arabia',
                     'inventory_record_id' => '1000',
