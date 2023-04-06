@@ -4,6 +4,7 @@ return [
     'default' => env('DEFAULT_TRADER', 'fake'),
     'providers' => [
         'dmcc' => [
+            'latest' => 'v2',
             'username' => env('DMCC_USERNAME', 'bim.interface.uat'),
             'password' => env('DMCC_PASSWORD', 'Dubai$2030'),
             'tti' => [
@@ -14,6 +15,7 @@ return [
             ],
         ],
         'fake' => [
+            'latest' => 'v1',
             'url' => env('FAKE_TRADER_URL', 'faker-dd.uselynk.com/api/'),
             'username' => env('FAKE_TRADER_USERNAME', 'lynk'),
             'password' => env('FAKE_TRADER_PASSWORD', '12345678'),
