@@ -4,6 +4,7 @@ namespace App\Actions\Orders\TraderOrders\PurchasingCommodity;
 
 use App\Actions\Contracts\Orders\TraderOrders\PurchasingCommodity\HandlePurchasingCommodity;
 use App\Actions\Contracts\Orders\UpdateTraderOrder;
+use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
@@ -42,6 +43,8 @@ class HandlePurchasingCommodityAction implements HandlePurchasingCommodity
         );
 
         $this->transferOwnershipToLender($request, $trader, $traderOrder);
+
+        app(GenerateClientWakala::class)->handle($traderOrder);
     }
 
     protected function transferOwnershipToLender($request, $trader, TraderOrder $traderOrder)
