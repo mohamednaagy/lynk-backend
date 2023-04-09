@@ -4,18 +4,14 @@ namespace App\Actions\Webhooks;
 
 use App\Actions\Contracts\Webhooks\GetPaginatedWebhooks;
 use App\Models\Webhook;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 class GetPaginatedWebhooksAction implements GetPaginatedWebhooks
 {
-    /**
-     * @param  int|null  $paginate
-     * @return LengthAwarePaginator
-     */
-    public function handle(int $paginate = null): LengthAwarePaginator
+    public function handle(): Collection
     {
         return Webhook::query()
             ->latest()
-            ->paginate($paginate);
+            ->get();
     }
 }

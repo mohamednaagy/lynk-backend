@@ -78,8 +78,8 @@ class WebhookControllerIndexTest extends TestCase
 
     public function test_lender_admin_can_index_webhooks_successfully()
     {
-        $webhooks = Webhook::where('company_id', self::$company->id)
-            ->paginate();
+        $webhooks = Webhook::where('company_id', self::$company->id)->get();
+
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
             ->getJson(self::$endpoint)
