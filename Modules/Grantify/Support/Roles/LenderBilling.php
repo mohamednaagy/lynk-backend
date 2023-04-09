@@ -22,5 +22,8 @@ class LenderBilling
         Subject::LenderTransactions => [
             Action::Index,
         ],
+        Subject::LenderEdaatInvoices => [
+            Action::Manage,
+        ],
     ];
 }
