@@ -15,7 +15,6 @@ class GetPaginatedWebhooksAction implements GetPaginatedWebhooks
     public function handle(int $paginate = null): LengthAwarePaginator
     {
         return Webhook::query()
-            ->with('company.webhooks')
             ->latest()
             ->paginate($paginate);
     }

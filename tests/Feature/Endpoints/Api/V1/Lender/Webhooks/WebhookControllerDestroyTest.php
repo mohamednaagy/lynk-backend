@@ -80,7 +80,7 @@ class WebhookControllerDestroyTest extends TestCase
         self::$endpoint = '/api/v1/lender/webhooks/';
     }
 
-    public function test_unauth_user_cant_delete_webhook_unsuccessfully()
+    public function test_unauth_user_cant_delete_webhook()
     {
         $this->withHeader('X-Company', self::$company->id)
             ->deleteJson(self::$endpoint.self::$webhook->id)
@@ -102,7 +102,7 @@ class WebhookControllerDestroyTest extends TestCase
         $this->assertEquals(1, $webhookCount - 1);
     }
 
-    public function test_lender_admin_not_verify_email_cant_delete_webhook_unsuccessfully()
+    public function test_lender_admin_not_verify_email_cant_delete_webhook()
     {
         $this->actingAs(self::$lenerAdminNotVerified)
             ->withHeader('X-Company', self::$company->id)
@@ -114,7 +114,7 @@ class WebhookControllerDestroyTest extends TestCase
             ]);
     }
 
-    public function test_lender_admin_cant_delete_webhook_when_company_not_active_unsuccessfully()
+    public function test_lender_admin_cant_delete_webhook_when_company_not_active()
     {
         $this->actingAs(self::$userLenderAdminBelongToCompanyNotActivated)
             ->withHeader('X-Company', self::$companyNotActivated->id)
@@ -126,7 +126,7 @@ class WebhookControllerDestroyTest extends TestCase
             ]);
     }
 
-    public function test_lender_billing_cant_delete_webhook_unsuccessfully()
+    public function test_lender_billing_cant_delete_webhook()
     {
         $this->actingAs(self::$lenderBilling)
             ->withHeader('X-Company', self::$company->id)
@@ -134,7 +134,7 @@ class WebhookControllerDestroyTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_lender_order_creator_cant_delete_webhook_unsuccessfully()
+    public function test_lender_order_creator_cant_delete_webhook()
     {
         $this->actingAs(self::$lenderCreator)
             ->withHeader('X-Company', self::$company->id)
@@ -142,7 +142,7 @@ class WebhookControllerDestroyTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_lender_supervisor_cant_delete_webhook_unsuccessfully()
+    public function test_lender_supervisor_cant_delete_webhook()
     {
         $this->actingAs(self::$lenderSuperVisor)
             ->withHeader('X-Company', self::$company->id)

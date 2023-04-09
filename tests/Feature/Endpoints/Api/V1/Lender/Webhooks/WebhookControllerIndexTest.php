@@ -96,7 +96,7 @@ class WebhookControllerIndexTest extends TestCase
             );
     }
 
-    public function test_unauth_user_cant_index_webhooks_unsuccessfully()
+    public function test_unauth_user_cant_index_webhooks()
     {
         $this->withHeader('X-Company', self::$company->id)
             ->getJson(self::$endpoint)
@@ -105,7 +105,7 @@ class WebhookControllerIndexTest extends TestCase
             ]);
     }
 
-    public function test_lender_admin_user_not_verify_email_cant_index_webhooks_unsuccessfully()
+    public function test_lender_admin_user_not_verify_email_cant_index_webhooks()
     {
         $this->actingAs(self::$lenerAdminNotVerified)
             ->withHeader('X-Company', self::$company->id)
@@ -117,7 +117,7 @@ class WebhookControllerIndexTest extends TestCase
             ]);
     }
 
-    public function test_lender_admin_user_cant_access_index_webhooks_when_company_not_active_unsuccessfully()
+    public function test_lender_admin_user_cant_access_index_webhooks_when_company_not_active()
     {
         $this->actingAs(self::$userLenderAdminBelongToCompanyNotActivated)
             ->withHeader('X-Company', self::$companyNotActivated->id)
@@ -128,7 +128,7 @@ class WebhookControllerIndexTest extends TestCase
             ]);
     }
 
-    public function test_lender_billing_cant_access_index_webhooks_unsuccessfully()
+    public function test_lender_billing_cant_access_index_webhooks()
     {
         $this->actingAs(self::$lenderBilling)
             ->withHeader('X-Company', self::$company->id)
@@ -136,7 +136,7 @@ class WebhookControllerIndexTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_lender_order_creator_cant_access_index_webhooks_unsuccessfully()
+    public function test_lender_order_creator_cant_access_index_webhooks()
     {
         $this->actingAs(self::$lenderCreator)
             ->withHeader('X-Company', self::$company->id)
@@ -144,7 +144,7 @@ class WebhookControllerIndexTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_lender_supervisor_cant_access_index_webhooks_unsuccessfully()
+    public function test_lender_supervisor_cant_access_index_webhooks()
     {
         $this->actingAs(self::$lenderSuperVisor)
             ->withHeader('X-Company', self::$company->id)
