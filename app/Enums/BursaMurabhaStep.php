@@ -16,8 +16,6 @@ final class BursaMurabhaStep extends Enum
 
     const ClientWakala = 'client_wakala';
 
-    const MurabhaOfferIssued = 'murabha_offer_issued';
-
     const MurabahaSaleCompleted = 'murabaha_sale_completed';
 
     public static function getStepsOfVersion($version)

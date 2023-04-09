@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Traders\Drivers;
+namespace App\Support\Traders\Drivers\Fake\Strategies;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -14,7 +14,7 @@ use Exception;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
-class FakeDriver implements TraderInterface
+class FakeV1Driver implements TraderInterface
 {
     use TraderHelperTrait;
 

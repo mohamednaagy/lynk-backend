@@ -26,11 +26,6 @@ return [
         BursaMurabhaStep::CommoditySoldToCustomer => [
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
         ],
-        BursaMurabhaStep::MurabhaOfferIssued => [
-            FinancingOrderHistory::IssueMurabahaOffer,
-            FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
-            FinancingOrderHistory::AttachMpoDocument,
-        ],
         BursaMurabhaStep::MurabahaSaleCompleted => [
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
             FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,

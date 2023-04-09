@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Traders\Drivers;
+namespace App\Support\Traders\Drivers\Dmcc\Strategies;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
 
-class DmccDriver implements TraderInterface
+class DmccV2Driver implements TraderInterface
 {
     use TraderHelperTrait;
 
@@ -283,7 +283,7 @@ class DmccDriver implements TraderInterface
                     'traderOrder' => $traderOrder,
                 ],
                 'responseBody' => $exception->getMessage(),
-            ]), $exception->getMessage(), $exception->getCode(), $exception);
+            ]));
         }
     }
 
