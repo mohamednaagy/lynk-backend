@@ -24,6 +24,7 @@ class CompanyTransformer extends TransformerAbstract
         'driver',
         'notifications_email',
         'orders_sum_amount',
+        'notify_admins_about_new_orders',
     ];
 
     public function transform(Company $company): array
@@ -106,5 +107,10 @@ class CompanyTransformer extends TransformerAbstract
         return $this->primitive(
             number_format($amount, 2)
         );
+    }
+
+    public function includeNotifyAdminsAboutNewOrders(Company $company)
+    {
+        return $this->primitive($company->notify_admins_about_new_orders);
     }
 }

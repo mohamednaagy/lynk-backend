@@ -27,6 +27,7 @@ class CompanyFactory extends Factory
             'does_order_require_approval' => $this->faker->boolean,
             'order_cost' => $this->faker->randomDigitNotNull,
             'notifications_email' => $this->faker->email,
+            'notify_admins_about_new_orders' => $this->faker->boolean,
         ];
     }
 }

@@ -21,7 +21,7 @@ class LenderSettingsAction implements SettingsInterface
         $settingInstance->default_does_order_require_approval = $data['default_does_order_require_approval'];
         $settingInstance->default_company_registration_status = $data['default_company_registration_status'];
         $settingInstance->default_company_status_created_by_operation = $data['default_company_status_created_by_operation'];
-
+        $settingInstance->notify_admins_about_new_orders = (int) $data['notify_admins_about_new_orders'];
         $settingInstance->save();
     }
 }
