@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Support\Traders\TradingStrategies\Bursam\Traits;
+namespace App\Support\Traders\Traits;
 
-use App\Enums\BursaMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
@@ -12,10 +12,10 @@ use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
-trait BursamTraderHelperTrait
+trait FakeTraderHelperTrait
 {
     public array $stepToHistoriesMap = [
-        BursaMurabhaStep::PurchasingCommodity => [
+        DmccMurabhaStep::PurchasingCommodity => [
             FinancingOrderHistory::RespondPtp => null,
             FinancingOrderHistory::GetPtpDocument => null,
             FinancingOrderHistory::GetTtiHoldingCertificateDocument => null,
@@ -28,11 +28,19 @@ trait BursamTraderHelperTrait
                 'file' => 'original_holding_certificate',
             ],
         ],
-        BursaMurabhaStep::ClientWakala => [
+        DmccMurabhaStep::ClientWakala => [
             FinancingOrderHistory::WaitingClientWakala => null,
             FinancingOrderHistory::ClientWakalaAccepted => null,
         ],
-        BursaMurabhaStep::MurabahaSaleCompleted => [
+        DmccMurabhaStep::MurabhaOfferIssued => [
+            FinancingOrderHistory::IssueMurabahaOffer => null,
+            FinancingOrderHistory::GetMurabahaPurchaseOfferDocument => null,
+            FinancingOrderHistory::AttachMpoDocument => [
+                'collection' => TraderOrderMediaCollection::MurabahaPurchaseOrder,
+                'file' => 'document',
+            ],
+        ],
+        DmccMurabhaStep::MurabahaSaleCompleted => [
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
             FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
                 'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
@@ -42,7 +50,7 @@ trait BursamTraderHelperTrait
         ],
     ];
 
-    public function createStepHistories(Request $request, $trader, TraderOrder $traderOrder, $step)
+    public function createStepHistories(Request $request, $trader, TraderOrder $traderOrder, $step): void
     {
         foreach ($this->stepToHistoriesMap[$step] as $history => $media) {
             if ($media && $request->has($media['file'])) {

@@ -4,18 +4,18 @@ namespace App\Actions\Orders\TraderOrders\PurchasingCommodity;
 
 use App\Actions\Contracts\Orders\TraderOrders\PurchasingCommodity\HandlePurchasingCommodity;
 use App\Actions\Contracts\Orders\UpdateTraderOrder;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\MurabhaStep;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\TraderHelperTrait;
+use App\Support\Traders\Traits\DmccTraderHelperTrait;
 use Illuminate\Http\Request;
 
 class HandlePurchasingCommodityAction implements HandlePurchasingCommodity
 {
-    use TraderHelperTrait;
+    use DmccTraderHelperTrait;
 
     /**
      * @param  Request  $request
@@ -32,20 +32,19 @@ class HandlePurchasingCommodityAction implements HandlePurchasingCommodity
     ): void {
         app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
 
-        $trader = Trader::driver($traderOrder->provider);
-
         $this->createStepHistories(
             $request,
-            $trader,
             $traderOrder,
-            MurabhaStep::PurchasingCommodity
+            DmccMurabhaStep::PurchasingCommodity
         );
 
-        $this->transferOwnershipToLender($request, $trader, $traderOrder);
+        $this->transferOwnershipToLender($request, $traderOrder);
     }
 
-    protected function transferOwnershipToLender($request, $trader, TraderOrder $traderOrder)
+    protected function transferOwnershipToLender($request, TraderOrder $traderOrder)
     {
+        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
+
         // this (if) is a special case doesn't exist in history map
         if ($request->auto_generate_financing_institution_certificate) {
             $trader->createTransferOwnershipToLenderDocument($traderOrder);

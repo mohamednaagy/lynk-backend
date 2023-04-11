@@ -8,7 +8,7 @@ use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Contracts\TraderInterface;
-use App\Support\Traders\TraderHelperTrait;
+use App\Support\Traders\Traits\BursamTraderHelperTrait;
 use Carbon\Carbon;
 use CodeDredd\Soap\Client\Response;
 use CodeDredd\Soap\Facades\Soap;
@@ -20,7 +20,9 @@ use RuntimeException;
 
 class BursamV1Driver implements TraderInterface
 {
-    use TraderHelperTrait;
+    use BursamTraderHelperTrait{
+        createTraderOrder as traitCreateTraderOrder;
+    }
 
     private SoapClient $soap;
 
@@ -51,12 +53,12 @@ class BursamV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function getTti(FinancingOrder $financingOrder): string
+    public function createTraderOrder(FinancingOrder $financingOrder): string
     {
-        $ttiId = $this->getTtiId($financingOrder);
+        $ttiId = $this->createTraderOrder($financingOrder);
 
         if (! blank($ttiId)) {
-            $traderOrder = $this->createTraderOrder($financingOrder, $ttiId, 'dmcc');
+            $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'bursam');
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
         }
 

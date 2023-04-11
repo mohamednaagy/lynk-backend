@@ -8,7 +8,7 @@ use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Contracts\TraderInterface;
-use App\Support\Traders\TraderHelperTrait;
+use App\Support\Traders\Traits\FakeTraderHelperTrait;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Client\Response;
@@ -16,7 +16,9 @@ use Illuminate\Support\Facades\Http;
 
 class FakeV1Driver implements TraderInterface
 {
-    use TraderHelperTrait;
+    use FakeTraderHelperTrait{
+        createTraderOrder as traitCreateTraderOrder;
+    }
 
     /**
      * @return bool
@@ -29,10 +31,10 @@ class FakeV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function getTti(FinancingOrder $financingOrder): string
+    public function createTraderOrder(FinancingOrder $financingOrder): string
     {
-        $ttiId = $this->getTtiId($financingOrder);
-        $traderOrder = $this->createTraderOrder($financingOrder, $ttiId, 'fake');
+        $ttiId = $this->createTraderOrder($financingOrder);
+        $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'fake');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $ttiId;

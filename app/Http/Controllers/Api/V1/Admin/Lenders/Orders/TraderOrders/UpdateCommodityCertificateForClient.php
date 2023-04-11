@@ -6,19 +6,19 @@ use App\Actions\Contracts\Orders\GetOrderAndTraderOrderLockedForUpdate;
 use App\Actions\Contracts\Orders\TraderOrders\SellingCommodityToCustomer\HandleSellingCommodityToCustomer;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\MurabhaStep;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdateSellingCommodityToClientRequest;
 use App\Models\Company;
-use App\Support\Traders\TraderHelperTrait;
+use App\Support\Traders\Traits\DmccTraderHelperTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class UpdateCommodityCertificateForClient extends Controller
 {
-    use TraderHelperTrait;
+    use DmccTraderHelperTrait;
 
     public function __construct()
     {
@@ -48,7 +48,7 @@ class UpdateCommodityCertificateForClient extends Controller
         return DB::transaction(function () use ($request, $order, $traderOrder) {
             [$order, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
 
-            $traderOrder->ensureCanAccessStep(MurabhaStep::ContractSigned);
+            $traderOrder->ensureCanAccessStep(DmccMurabhaStep::ContractSigned);
 
             app(HandleSellingCommodityToCustomer::class)->handle($request, $order, $traderOrder);
 

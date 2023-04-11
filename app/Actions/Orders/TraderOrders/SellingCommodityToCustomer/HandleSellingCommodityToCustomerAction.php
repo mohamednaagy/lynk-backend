@@ -8,13 +8,13 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\TraderHelperTrait;
+use App\Support\Traders\Traits\DmccTraderHelperTrait;
 use Exception;
 use Illuminate\Http\Request;
 
 class HandleSellingCommodityToCustomerAction implements HandleSellingCommodityToCustomer
 {
-    use TraderHelperTrait;
+    use DmccTraderHelperTrait;
 
     /**
      * @param  Request  $request

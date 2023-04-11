@@ -3,18 +3,17 @@
 namespace App\Actions\Orders\TraderOrders\MurabhaCompleteDocument;
 
 use App\Actions\Contracts\Orders\TraderOrders\MurabhaCompleteDocument\HandleMurabhaCompleteDocument;
-use App\Enums\MurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
-use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\TraderHelperTrait;
+use App\Support\Traders\Traits\DmccTraderHelperTrait;
 use Exception;
 use Illuminate\Http\Request;
 
 class HandleMurabhaCompleteDocumentAction implements HandleMurabhaCompleteDocument
 {
-    use TraderHelperTrait;
+    use DmccTraderHelperTrait;
 
     /**
      * @param  Request  $request
@@ -27,16 +26,13 @@ class HandleMurabhaCompleteDocumentAction implements HandleMurabhaCompleteDocume
     public function handle(Request $request, FinancingOrder $order, TraderOrder $traderOrder): void
     {
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
-            MurabhaStep::MurabahaSaleCompleted
+            DmccMurabhaStep::MurabahaSaleCompleted
         );
-
-        $trader = Trader::driver($traderOrder->provider);
 
         $this->createStepHistories(
             $request,
-            $trader,
             $traderOrder,
-            MurabhaStep::MurabahaSaleCompleted
+            DmccMurabhaStep::MurabahaSaleCompleted
         );
 
         if ($canUpdateOrderStatus) {

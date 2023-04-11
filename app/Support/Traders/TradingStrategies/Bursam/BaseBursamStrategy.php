@@ -8,8 +8,8 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\TradingStrategies\Bursam\Traits\BursamTraderHelperTrait;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
+use App\Support\Traders\Traits\BursamTraderHelperTrait;
 use Illuminate\Http\Request;
 
 abstract class BaseBursamStrategy implements TraderStrategyInterface
@@ -18,22 +18,23 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
 
     public function updatePurchasingCommodity(TraderOrder $traderOrder, Request $request)
     {
-        app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
+        $traderOrder->ensureCanAccessStep(BursaMurabhaStep::TraderOrderCreated);
 
-        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
+        app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
 
         $this->createStepHistories(
             $request,
-            $trader,
             $traderOrder,
             BursaMurabhaStep::PurchasingCommodity
         );
 
-        $this->transferOwnershipToLender($request, $trader, $traderOrder);
+        $this->transferOwnershipToLender($request, $traderOrder);
     }
 
-    protected function transferOwnershipToLender($request, $trader, TraderOrder $traderOrder)
+    protected function transferOwnershipToLender(TraderOrder $traderOrder, $request)
     {
+        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
+
         // this (if) is a special case doesn't exist in history map
         if ($request->auto_generate_financing_institution_certificate) {
             $trader->createTransferOwnershipToLenderDocument($traderOrder);

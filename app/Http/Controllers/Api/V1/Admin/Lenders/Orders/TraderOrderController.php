@@ -34,7 +34,12 @@ class TraderOrderController extends Controller
         int $order
     ): JsonResponse {
         return DB::transaction(function () use ($request, $createTraderOrder, $order) {
-            $createTraderOrder->handle($order, $request->validated());
+            $data = $request->validated();
+            if ($data['version'] == 'latest') {
+                $data['version'] = config('trader.providers.'.$data['trader'].'.latest');
+            }
+
+            $createTraderOrder->handle($order, $data);
 
             return $this->successResponse();
         });

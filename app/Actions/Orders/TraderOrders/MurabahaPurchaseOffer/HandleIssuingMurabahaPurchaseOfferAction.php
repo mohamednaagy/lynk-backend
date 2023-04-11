@@ -3,17 +3,15 @@
 namespace App\Actions\Orders\TraderOrders\MurabahaPurchaseOffer;
 
 use App\Actions\Contracts\Orders\TraderOrders\MurabahaPurchaseOffer\HandleIssuingMurabahaPurchaseOffer;
-use App\Enums\MurabhaStep;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
-use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\TraderHelperTrait;
+use App\Support\Traders\Traits\DmccTraderHelperTrait;
 use Exception;
 use Illuminate\Http\Request;
 
 class HandleIssuingMurabahaPurchaseOfferAction implements HandleIssuingMurabahaPurchaseOffer
 {
-    use TraderHelperTrait;
+    use DmccTraderHelperTrait;
 
     /**
      * @param  Request  $request
@@ -25,13 +23,5 @@ class HandleIssuingMurabahaPurchaseOfferAction implements HandleIssuingMurabahaP
      */
     public function handle(Request $request, FinancingOrder $order, TraderOrder $traderOrder): void
     {
-        $trader = Trader::driver($traderOrder->provider);
-
-        $this->createStepHistories(
-            $request,
-            $trader,
-            $traderOrder,
-            MurabhaStep::MurabhaOfferIssued
-        );
     }
 }

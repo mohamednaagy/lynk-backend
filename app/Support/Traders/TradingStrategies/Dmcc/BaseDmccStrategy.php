@@ -9,7 +9,7 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
-use App\Support\Traders\TradingStrategies\Dmcc\Traits\DmccTraderHelperTrait;
+use App\Support\Traders\Traits\DmccTraderHelperTrait;
 use Illuminate\Http\Request;
 
 abstract class BaseDmccStrategy implements TraderStrategyInterface
@@ -18,22 +18,23 @@ abstract class BaseDmccStrategy implements TraderStrategyInterface
 
     public function updatePurchasingCommodity(TraderOrder $traderOrder, Request $request)
     {
-        app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
+        $traderOrder->ensureCanAccessStep(DmccMurabhaStep::TraderOrderCreated);
 
-        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
+        app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
 
         $this->createStepHistories(
             $request,
-            $trader,
             $traderOrder,
             DmccMurabhaStep::PurchasingCommodity
         );
 
-        $this->transferOwnershipToLender($request, $trader, $traderOrder);
+        $this->transferOwnershipToLender($traderOrder, $request);
     }
 
-    protected function transferOwnershipToLender($request, $trader, TraderOrder $traderOrder)
+    protected function transferOwnershipToLender(TraderOrder $traderOrder, $request)
     {
+        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
+
         // this (if) is a special case doesn't exist in history map
         if ($request->auto_generate_financing_institution_certificate) {
             $trader->createTransferOwnershipToLenderDocument($traderOrder);
@@ -47,5 +48,16 @@ abstract class BaseDmccStrategy implements TraderStrategyInterface
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
         }
+    }
+
+    public function updateMurabahaPurchaseOffer(TraderOrder $traderOrder, Request $request)
+    {
+        $traderOrder->ensureCanAccessStep(DmccMurabhaStep::ClientWakala);
+
+        $this->createStepHistories(
+            $request,
+            $traderOrder,
+            DmccMurabhaStep::MurabhaOfferIssued
+        );
     }
 }

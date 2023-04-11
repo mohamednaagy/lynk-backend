@@ -8,7 +8,7 @@ interface TraderInterface
 {
     public function acceptAgreement();
 
-    public function getTti(FinancingOrder $financingOrder);
+    public function createTraderOrder(FinancingOrder $financingOrder);
 
     public function fetchNotifications(string $type);
 

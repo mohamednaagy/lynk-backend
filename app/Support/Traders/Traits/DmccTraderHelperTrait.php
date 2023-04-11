@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Traders\TradingStrategies\Dmcc\Traits;
+namespace App\Support\Traders\Traits;
 
 use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
@@ -50,7 +50,7 @@ trait DmccTraderHelperTrait
         ],
     ];
 
-    public function createStepHistories(Request $request, $trader, TraderOrder $traderOrder, $step)
+    public function createStepHistories(Request $request, TraderOrder $traderOrder, $step): void
     {
         foreach ($this->stepToHistoriesMap[$step] as $history => $media) {
             if ($media && $request->has($media['file'])) {
@@ -63,7 +63,7 @@ trait DmccTraderHelperTrait
             }
 
             if (! $traderOrder->checkOrderHistoryAction($history)) {
-                $trader->createTraderOrderHistory($traderOrder, $history);
+                $this->createTraderOrderHistory($traderOrder, $history);
             }
         }
     }
@@ -73,6 +73,7 @@ trait DmccTraderHelperTrait
         return $financingOrder->traderOrders()->create([
             'provider' => $provider,
             'reference' => $ttiId,
+            'version' => config('trader.providers.'.$provider.'.latest'),
             'status' => TraderOrderStatus::InProgress,
         ]);
     }
