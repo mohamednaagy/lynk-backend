@@ -29,7 +29,7 @@ return [
             'client_id' => env('BURSAM_CLIENT_ID'),
             'secret_code' => env('BURSAM_SECRET_CODE'),
             'response_type' => env('BURSAM_RESPONSE_TYPE'),
-            'redirect_uri' => env('BURSAM_REDIRECT_URI', 'https://'.env('BURSAM_CLIENT_ID').'.com.my/webservice/BsasRcv'),
+            'redirect_uri' => env('BURSAM_REDIRECT_URI'),
         ],
     ],
 ];
