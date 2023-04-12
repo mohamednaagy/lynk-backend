@@ -10,7 +10,6 @@ use App\Enums\Subject;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\User;
-use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
@@ -32,9 +31,9 @@ class CompleteOrderTest extends TestCase
 
     private static User $managerHasNoPermissionPermissions;
 
-    private static Builder|Model $financingOrder;
+    private static Model $financingOrder;
 
-    private static Builder|Model $traderOrder;
+    private static Model $traderOrder;
 
     private static string $apiUrl;
 

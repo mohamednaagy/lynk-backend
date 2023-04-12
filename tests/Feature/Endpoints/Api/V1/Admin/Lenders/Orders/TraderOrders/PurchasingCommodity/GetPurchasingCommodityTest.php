@@ -9,7 +9,6 @@ use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Tests\TestCase;
@@ -27,7 +26,7 @@ class GetPurchasingCommodityTest extends TestCase
 
     private static User $superAdminUser;
 
-    private static Builder|Model $financingOrder;
+    private static Model $financingOrder;
 
     private static TraderOrder $traderOrder;
 
