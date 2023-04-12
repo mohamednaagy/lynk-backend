@@ -89,7 +89,7 @@ class WalletServiceTest extends TestCase
 
     public function test_wallet_service_find_by_id_method_return_null_when_model_not_found()
     {
-        $wallet = self::$walletService->findById(404);
+        $wallet = self::$walletService->findById(8000000);
         $this->assertNull($wallet);
     }
 
