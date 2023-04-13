@@ -14,13 +14,17 @@ class BursamDriver extends DmccDriver implements TraderInterface
 
     public function __construct()
     {
-        // initialize access token to empty string
         $this->accessToken = '';
     }
 
     public function baseURL($path)
     {
-        return 'https://bsasapi.bursamalaysia.com';
+        return 'https://bsasapi.bursamalaysia.com/'.$path;
+    }
+
+    public function baseDevURL($path)
+    {
+        return 'https://bsasdevapi.bursamalaysia.com/'.$path;
     }
 
     /**
@@ -28,13 +32,12 @@ class BursamDriver extends DmccDriver implements TraderInterface
      */
     private function getAuth()
     {
-        $response = Http::get($this->baseURL('/svc/auth/authorize'), [
+        $response = Http::get($this->baseDevURL('api/process/svc/auth/token'), [
+            'grant_type' => config('trader.providers.bursam.grant_type'),
             'client_id' => config('trader.providers.bursam.client_id'),
-            'response_type' => config('trader.providers.bursam.response_type'),
-            'redirect_uri' => 'https://'.config('trader.providers.bursam.redirect_uri').'/webservice/BsasRcv',
+            'client_secret_code' => config('trader.providers.bursam.client_secret_code'),
         ]);
 
-        // parse the response and extract the authorization code
         $authCode = $this->parseAuthResponse($response->body());
 
         return $authCode;
@@ -58,14 +61,8 @@ class BursamDriver extends DmccDriver implements TraderInterface
         ]);
 
         // parse the response and extract the access token
-        $this->accessToken = $this->parseAccessToken($response->body());
-    }
+        $this->accessToken = $response->body();
 
-    // helper function to parse access token from response
-    private function parseAccessToken($response)
-    {
-        // TODO: implement parsing of access token from response
-        return '';
     }
 
     // 3. call new order API with access token
@@ -73,21 +70,21 @@ class BursamDriver extends DmccDriver implements TraderInterface
     {
         // check if access token is available
         if ($this->accessToken === '') {
-            $this->getAccessToken();
+            // token provider
         }
 
         // call new order API with access token
         $response = Http::withHeaders([
             'Authorization' => 'Bearer '.$this->accessToken,
             'Content-Type' => 'text/xml',
-        ])->post($this->baseURL('/svc/order'), $order);
+        ])->post($this->baseURL('svc/order'), $order);
 
         // parse the response and return the result
-        return $this->parseOrderResponse($response->body());
+        return $this->getTokenOrderResponse($response->body());
     }
 
     // helper function to parse order response
-    private function parseOrderResponse($response)
+    private function getTokenOrderResponse($response)
     {
         // TODO: implement parsing of order response
         return '';
