@@ -4,7 +4,6 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Auth;
 
 use App\Enums\Role;
 use App\Models\User;
-use App\Transformers\UserTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ValidateSignature;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,6 +16,8 @@ class CompleteAdminRegisterTest extends TestCase
 
     private static User $adminUser;
 
+    private static string $endpoint;
+
     /**
      * @return void
      */
@@ -25,9 +26,11 @@ class CompleteAdminRegisterTest extends TestCase
         parent::setUp();
 
         self::$adminUser = $this->createSuperAdminUser(Role::Admin, [
+            'email' => 'Admin@bim.com',
             'password' => null,
             'email_verified_at' => null,
         ]);
+        self::$endpoint = 'api/v1/admin/'.self::$adminUser->id.'/sign-up';
     }
 
     /**
@@ -39,7 +42,7 @@ class CompleteAdminRegisterTest extends TestCase
         $this->assertNull(self::$adminUser->password);
 
         $this->withoutMiddleware(ValidateSignature::class)
-            ->postJson('api/v1/admin/'.self::$adminUser->id.'/sign-up', [
+            ->postJson(self::$endpoint, [
                 'first_name' => self::$adminUser->first_name,
                 'last_name' => self::$adminUser->last_name,
                 'password' => '123456789Aa$$',
@@ -47,20 +50,14 @@ class CompleteAdminRegisterTest extends TestCase
                 'source' => 'test',
             ])
             ->assertStatus(Response::HTTP_OK)
-            ->assertExactJson(
-                fractal(self::$adminUser, new UserTransformer)
-                    ->parseIncludes([
-                        'id',
-                        'first_name',
-                        'last_name',
-                        'email',
-                        'phone_number',
-                        'phone_country_code',
-                        'formatted_phone_number',
-                    ])
-                    ->respond()
-                    ->getData(true)
-            );
+            ->assertJsonStructure([
+                'data' => [
+                    'company_id',
+                    'token',
+                    'type',
+                ],
+            ]);
+
         self::$adminUser = self::$adminUser->refresh();
         $this->assertTrue(self::$adminUser->hasVerifiedEmail());
         $this->assertNotNull(self::$adminUser->password);
@@ -71,7 +68,7 @@ class CompleteAdminRegisterTest extends TestCase
      */
     public function test_complete_register_fail_without_signature(): void
     {
-        $this->postJson('api/v1/admin/'.self::$adminUser->id.'/sign-up', [
+        $this->postJson(self::$endpoint, [
             'first_name' => self::$adminUser->first_name,
             'last_name' => self::$adminUser->last_name,
             'password' => '123456789Aa$$',
@@ -91,7 +88,7 @@ class CompleteAdminRegisterTest extends TestCase
     {
         $this->actingAs(self::$adminUser)
             ->withoutMiddleware(ValidateSignature::class)
-            ->postJson('api/v1/admin/'.self::$adminUser->id.'/sign-up', [
+            ->postJson(self::$endpoint, [
                 'first_name' => self::$adminUser->first_name,
                 'last_name' => self::$adminUser->last_name,
                 'password' => '123456789Aa$$',
@@ -108,7 +105,7 @@ class CompleteAdminRegisterTest extends TestCase
     public function test_complete_register_validation_rules(): void
     {
         $this->withoutMiddleware(ValidateSignature::class)
-            ->postJson('api/v1/admin/'.self::$adminUser->id.'/sign-up', [
+            ->postJson(self::$endpoint, [
                 'password' => '123456789Aa$$',
                 'password_confirmation' => '123456789Aa$$',
                 'source' => 'test',
@@ -118,7 +115,7 @@ class CompleteAdminRegisterTest extends TestCase
             ->assertJsonValidationErrorFor('last_name');
 
         $this->withoutMiddleware(ValidateSignature::class)
-            ->postJson('api/v1/admin/'.self::$adminUser->id.'/sign-up', [
+            ->postJson(self::$endpoint, [
                 'first_name' => self::$adminUser->first_name,
                 'last_name' => self::$adminUser->last_name,
                 'source' => 'test',
@@ -127,7 +124,7 @@ class CompleteAdminRegisterTest extends TestCase
             ->assertJsonValidationErrorFor('password');
 
         $this->withoutMiddleware(ValidateSignature::class)
-            ->postJson('api/v1/admin/'.self::$adminUser->id.'/sign-up', [
+            ->postJson(self::$endpoint, [
                 'first_name' => self::$adminUser->first_name,
                 'last_name' => self::$adminUser->last_name,
                 'password' => '123456789Aa$$',
