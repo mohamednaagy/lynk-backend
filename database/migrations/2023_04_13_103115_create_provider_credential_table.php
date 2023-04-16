@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('provider_credential', function (Blueprint $table) {
             $table->id();
+            $table->string('provider_name');
             $table->string('access_token');
             $table->timestamps();
         });

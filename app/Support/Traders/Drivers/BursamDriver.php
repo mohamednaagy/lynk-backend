@@ -3,13 +3,10 @@
 namespace App\Support\Traders\Drivers;
 
 use App\Support\Traders\Contracts\TraderInterface;
-use App\Support\Traders\TraderHelperTrait;
 use Illuminate\Support\Facades\Http;
 
 class BursamDriver extends DmccDriver implements TraderInterface
 {
-    use TraderHelperTrait;
-
     private string $accessToken;
 
     public function __construct()
@@ -62,7 +59,6 @@ class BursamDriver extends DmccDriver implements TraderInterface
 
         // parse the response and extract the access token
         $this->accessToken = $response->body();
-
     }
 
     // 3. call new order API with access token
