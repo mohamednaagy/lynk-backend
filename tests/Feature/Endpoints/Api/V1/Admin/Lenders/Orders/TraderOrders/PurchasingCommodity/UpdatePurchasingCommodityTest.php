@@ -89,28 +89,11 @@ class UpdatePurchasingCommodityTest extends TestCase
                     'uom' => 'dummy',
                 ],
             ],
-            'exchange_rate' => 10,
-            'auto_generate_financing_institution_certificate' => 0,
             'ptp_document' => UploadedFile::fake()->create('attachment.pdf', 10),
             'original_holding_certificate' => UploadedFile::fake()->create('attachment.pdf', 10),
             'financing_institution_certificate' => UploadedFile::fake()->create('attachment.pdf', 10),
             'auto_generate_financing_institution_certificate' => 0,
             'exchange_rate' => 10,
-            'products' => [
-                [
-                    'product' => 'product',
-                    'quantity' => 100,
-                    'amount' => 100,
-                    'currency' => 'currency',
-                    'warehouse' => 'warehouse',
-                    'owner' => 'owner',
-                    'previous_owner' => 'previous_owner',
-                    'date_time_of_purchasing_commodity' => '2023-02-21 09:30:00',
-                    'warehouse_or_vault_emirates' => 'dummy',
-                    'warehouse_or_vault_country' => 'dummy',
-                    'uom' => 'dummy',
-                ],
-            ],
         ];
     }
 
@@ -149,8 +132,7 @@ class UpdatePurchasingCommodityTest extends TestCase
     public function test_proceed_purchasing_commodity_is_successfull_and_order_status_will_be_updated(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
-            ->reset()
-            ->moveToStep(MurabhaStep::PurchasingCommodity);
+            ->reset();
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updatePurchasingCommodityUrl, self::$requestData)
@@ -159,6 +141,8 @@ class UpdatePurchasingCommodityTest extends TestCase
                     'purchasing_commodity_information',
                 ],
             ]);
+
+        $this->assertEquals(MurabhaStep::PurchasingCommodity, self::$traderOrder->append('step')->step);
     }
 
     public function test_update_purchasing_commodity_not_follow_sequence(): void
@@ -190,5 +174,7 @@ class UpdatePurchasingCommodityTest extends TestCase
                     'purchasing_commodity_information',
                 ],
             ]);
+
+        $this->assertEquals(MurabhaStep::PurchasingCommodity, self::$traderOrder->append('step')->step);
     }
 }

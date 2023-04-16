@@ -93,6 +93,6 @@ class EdaatInvoiceTransformer extends TransformerAbstract
 
     public function includeCreatedAt(EdaatInvoice $edaatInvoice): Primitive
     {
-        return $this->primitive($edaatInvoice->created_at->format('Y-m-d h:m A'));
+        return $this->primitive($edaatInvoice->created_at->format('Y-m-d h:i A'));
     }
 }

@@ -7,10 +7,10 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
+use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
@@ -31,7 +31,7 @@ class GetMurabhaCompleteDocumentTest extends TestCase
 
     private static User $superAdminUser;
 
-    private static Builder|Model $financingOrder;
+    private static Model|FinancingOrder $financingOrder;
 
     private static TraderOrder $traderOrder;
 

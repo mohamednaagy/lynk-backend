@@ -50,7 +50,9 @@ class Lender
             Action::Index,
         ],
         Subject::LenderWebhooks => [
+            Action::Index,
             Action::Create,
+            Action::Delete,
         ],
         Subject::LenderWebhookSecret => [
             Action::Refresh,

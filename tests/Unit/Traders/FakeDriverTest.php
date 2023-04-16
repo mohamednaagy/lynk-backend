@@ -11,6 +11,7 @@ use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\User;
 use App\Support\Traders\Drivers\FakeDriver;
+use Cknow\Money\Money;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -46,6 +47,7 @@ class FakeDriverTest extends TestCase
         self::$order = OrderScenario::inProgress()
             ->lender(self::$company)
             ->creator(self::$lender)
+            ->amount(Money::parseByDecimal(1000, 'SAR'))
             ->commit()
             ->model();
 
