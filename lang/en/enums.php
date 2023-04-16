@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Enums\CompanyStatus;
+use App\Enums\EdaatInvoiceStatus;
+use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
 
 return [
@@ -19,6 +21,7 @@ return [
         FinancingOrderStatus::Cancelled => 'Cancelled',
         FinancingOrderStatus::Completed => 'Completed',
         FinancingOrderStatus::Rejected => 'Rejected',
+        FinancingOrderStatus::InProgress => 'In Progress',
         //        FinancingOrderStatus::CommodityPurchased => 'Commodity Purchased',
         //        FinancingOrderStatus::CommoditySoldToCustomer => 'Commodity Sold To Customer',
         //        FinancingOrderStatus::MurabhaOfferIssued => 'Murabha Offer Issued',
@@ -30,6 +33,18 @@ return [
         //        FinancingOrderStatus::RespondedToPtp => 'Responded To Ptp',
         //        FinancingOrderStatus::PtpDocumentRetrieved => 'Ptp Document Retrieved',
         FinancingOrderStatus::PendingCancellation => 'Pending Cancellation',
+    ],
+
+    EnquiryStatus::class => [
+        EnquiryStatus::UnderReview => 'Under Review',
+        EnquiryStatus::Resolved => 'Resolved',
+        EnquiryStatus::Closed => 'Closed',
+    ],
+
+    EdaatInvoiceStatus::class => [
+        EdaatInvoiceStatus::Pending => 'Pending',
+        EdaatInvoiceStatus::Paid => 'Paid',
+        EdaatInvoiceStatus::Expired => 'Expired',
     ],
 
 ];
