@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Enums\CompanyStatus;
+use App\Enums\EdaatInvoiceStatus;
+use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
 
 return [
@@ -19,6 +21,7 @@ return [
         FinancingOrderStatus::Cancelled => 'تم الإلغاء',
         FinancingOrderStatus::Completed => 'مكتمل',
         FinancingOrderStatus::Rejected => 'تم الرفض',
+        FinancingOrderStatus::InProgress => 'قيد التنفيذ',
         //        FinancingOrderStatus::CommodityPurchased => 'تم شراء السلعة',
         //        FinancingOrderStatus::CommoditySoldToCustomer => 'تم بيع السلعة للعميل',
         //        FinancingOrderStatus::MurabhaOfferIssued => 'تم اصدار عرض المرابحة',
@@ -30,5 +33,17 @@ return [
         //        FinancingOrderStatus::RespondedToPtp => ' الرد بالوعد بالشراء',
         //        FinancingOrderStatus::PtpDocumentRetrieved => ' تم استرداد مستند الوعد بالشراء',
         FinancingOrderStatus::PendingCancellation => 'في انتظار الإلغاء',
+    ],
+
+    EnquiryStatus::class => [
+        EnquiryStatus::UnderReview => 'قيد المراجعة',
+        EnquiryStatus::Resolved => 'تم الحل',
+        EnquiryStatus::Closed => 'مغلق',
+    ],
+
+    EdaatInvoiceStatus::class => [
+        EdaatInvoiceStatus::Pending => 'قيد الانتظار',
+        EdaatInvoiceStatus::Paid => 'مدفوعة',
+        EdaatInvoiceStatus::Expired => 'منتهية الصلاحية',
     ],
 ];
