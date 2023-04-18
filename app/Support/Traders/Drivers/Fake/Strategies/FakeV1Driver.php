@@ -43,6 +43,14 @@ class FakeV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
+    public function fetchOrderResult(string $type): ?array
+    {
+        return $this->fetchNotifications($type);
+    }
+
+    /**
+     * @throws TraderException
+     */
     public function fetchNotifications(string $type): ?array
     {
         $response = Http::get($this->buildUrl('notifications?type='.$type));

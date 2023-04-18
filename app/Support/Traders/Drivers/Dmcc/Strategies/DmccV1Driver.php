@@ -14,7 +14,6 @@ use CodeDredd\Soap\Client\Response;
 use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
 use Exception;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -55,7 +54,7 @@ class DmccV1Driver implements TraderInterface
      */
     public function createTraderOrder(FinancingOrder $financingOrder): string
     {
-        $ttiId = $this->createTraderOrder($financingOrder);
+        $ttiId = $this->getTtiId($financingOrder);
 
         if (! blank($ttiId)) {
             $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'dmcc');
@@ -63,6 +62,14 @@ class DmccV1Driver implements TraderInterface
         }
 
         return $ttiId;
+    }
+
+    /**
+     * @throws TraderException
+     */
+    public function fetchOrderResult(string $type): ?array
+    {
+        return $this->fetchNotifications($type);
     }
 
     /**
@@ -128,17 +135,6 @@ class DmccV1Driver implements TraderInterface
      */
     public function getTtiId(FinancingOrder $financingOrder): mixed
     {
-        Log::debug('getTTiId2', [
-            'currency' => $financingOrder->currency,
-            'costPrice' => $financingOrder->amount->formatByDecimal(),
-            'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
-            'paymentTerms' => config('trader.providers.dmcc.tti.payment_terms'),
-            'unitOfDuration' => config('trader.providers.dmcc.tti.unit_of_duration'),
-            'product' => null,
-            'registeredMember' => config('trader.providers.dmcc.tti.registered_member'),
-            'client' => null,
-        ]);
-
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('getTTIIDForIssuePTP'))
             ->call('getTTIIDForIssuePTP', [
@@ -151,8 +147,6 @@ class DmccV1Driver implements TraderInterface
                 'registeredMember' => config('trader.providers.dmcc.tti.registered_member'),
                 'client' => null,
             ])->object();
-
-        Log::debug('getTTiId', [$response]);
 
         if (! isset($response->ttiId) || blank($response->ttiId)) {
             throw new TraderException(collect([
@@ -391,7 +385,7 @@ class DmccV1Driver implements TraderInterface
         $data = [];
 
         foreach ($inventoryDetails as $product) {
-            array_push($data, [
+            $data[] = [
                 'product' => $product->hsCodeDescription,
                 'quantity' => $product->quantity,
                 'amount' => $product->totalValue,
@@ -410,13 +404,11 @@ class DmccV1Driver implements TraderInterface
                 'inventory_record_id' => $product->inventoryRecordId,
                 'warrant_percentage' => $product->warrantPercentage,
                 'uom' => $product->uom,
-            ]);
+            ];
         }
 
         $products['products'] = $data;
         $products['exchange_rate'] = $response->object()->exchangeRate;
-
-        logs()->debug('test', [$products]);
 
         $traderOrder->update($products);
 

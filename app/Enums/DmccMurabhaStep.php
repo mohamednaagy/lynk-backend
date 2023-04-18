@@ -22,7 +22,7 @@ final class DmccMurabhaStep extends Enum
 
     public static function getStepsOfVersion($version = null)
     {
-        $version = $version ?? config('trader.providers.dmcc.latest');
+        $version = $version ?? getLatestVersionOfTrader('dmcc');
 
         return match ($version) {
             'v1' => config('dmcc-murabha-steps-versions.v1'),

@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\BursaMurabhaStep;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
@@ -103,12 +101,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function checkOrderStepComplete(string $step): bool
     {
-        $stepToHistoriesDictionary = match ($this->provider) {
-            'dmcc' => DmccMurabhaStep::getStepsOfVersion($this->version),
-            'fake' => BursaMurabhaStep::getStepsOfVersion($this->version),
-            'bursam' => BursaMurabhaStep::getStepsOfVersion($this->version),
-            default => throw new \InvalidArgumentException('Invalid trader')
-        };
+        $stepToHistoriesDictionary = getMurabhaStepsDictionary($this->provider, $this->version);
 
         if (! array_key_exists($step, $stepToHistoriesDictionary)) {
             throw new UnexpectedValueException('No mapping for this status');

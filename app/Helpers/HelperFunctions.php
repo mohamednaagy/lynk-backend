@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\BursaMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use Modules\Grantify\Facades\Grantify;
 
 if (! function_exists('validate_said')) {
@@ -70,8 +72,8 @@ if (! function_exists('get_host_from_url')) {
         $url = parse_url($url, PHP_URL_HOST) ?: explode('/', parse_url($url, PHP_URL_PATH), 2);
 
         return is_array($url) ?
-         array_shift($url)
-         : $url;
+            array_shift($url)
+            : $url;
     }
 }
 
@@ -83,5 +85,23 @@ if (! function_exists('get_file_url')) {
         }
 
         return null;
+    }
+}
+
+if (! function_exists('getMurabhaStepsDictionary')) {
+    function getMurabhaStepsDictionary($provider = 'fake', $version = null): array
+    {
+        return match ($provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::getStepsOfVersion($version),
+            'bursam' => BursaMurabhaStep::getStepsOfVersion($version),
+            default => throw new \InvalidArgumentException('Invalid trader')
+        };
+    }
+}
+
+if (! function_exists('getLatestVersionOfTrader')) {
+    function getLatestVersionOfTrader($provider): string
+    {
+        return config('trader.providers.'.$provider.'.latest');
     }
 }

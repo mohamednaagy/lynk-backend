@@ -12,9 +12,9 @@ class TraderStrategyContext
 {
     protected TraderStrategyInterface $strategy;
 
-    public function __construct(string $strategy, string $version)
+    public function __construct(string $provider, string $version)
     {
-        $strategy = $strategy.'.'.$version;
+        $strategy = $provider.'.'.$version;
 
         $this->strategy = match ($strategy) {
             'dmcc.v1' => app(DmccStrategyV1::class),

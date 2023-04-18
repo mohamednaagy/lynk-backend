@@ -18,9 +18,9 @@ final class BursaMurabhaStep extends Enum
 
     const MurabahaSaleCompleted = 'murabaha_sale_completed';
 
-    public static function getStepsOfVersion($version)
+    public static function getStepsOfVersion(?string $version = null)
     {
-        $version = $version ?? config('trader.providers.bursa.latest');
+        $version = $version ?? getLatestVersionOfTrader('bursa');
 
         return match ($version) {
             'v1' => config('bursa-murabha-steps-versions.v1'),

@@ -25,8 +25,10 @@ class TraderOrderController extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  StoreTradingRequest  $request
+     * @param  CreateTraderOrder  $createTraderOrder
+     * @param  int  $order
+     * @return JsonResponse
      */
     public function store(
         StoreTradingRequest $request,
@@ -36,7 +38,7 @@ class TraderOrderController extends Controller
         return DB::transaction(function () use ($request, $createTraderOrder, $order) {
             $data = $request->validated();
             if ($data['version'] == 'latest') {
-                $data['version'] = config('trader.providers.'.$data['trader'].'.latest');
+                $data['version'] = getMurabhaStepsDictionary($data['trader']);
             }
 
             $createTraderOrder->handle($order, $data);

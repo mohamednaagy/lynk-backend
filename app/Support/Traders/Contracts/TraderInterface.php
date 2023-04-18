@@ -6,11 +6,14 @@ use App\Models\FinancingOrder;
 
 interface TraderInterface
 {
-    public function acceptAgreement();
-
     public function createTraderOrder(FinancingOrder $financingOrder);
 
-    public function fetchNotifications(string $type);
+    public function fetchOrderResult(string $type);
+
+    // we need to decide the following commented methods should be in interface or not
+//    public function ownershipToCustomer(FinancingOrder $financingOrder);
+//
+//    public function sellingCommodity(FinancingOrder $financingOrder);
 
     public function cancelOrder(FinancingOrder $financingOrder): mixed;
 }
