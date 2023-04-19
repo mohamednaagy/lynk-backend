@@ -28,7 +28,7 @@ class ProcessFinancingOrders implements ShouldQueue
      */
     public function handle(): void
     {
-        $whiteListedProviders = ['dmcc', 'fake'];
+        $whiteListedProviders = ['dmcc', 'fake', 'bursam'];
 
         FinancingOrder::query()
             ->where('status', FinancingOrderStatus::Approved)

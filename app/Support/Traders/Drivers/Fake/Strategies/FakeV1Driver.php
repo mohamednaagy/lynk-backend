@@ -33,7 +33,7 @@ class FakeV1Driver implements TraderInterface
      */
     public function createTraderOrder(FinancingOrder $financingOrder): string
     {
-        $ttiId = $this->createTraderOrder($financingOrder);
+        $ttiId = $this->getTtiId($financingOrder);
         $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'fake');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
@@ -373,5 +373,15 @@ class FakeV1Driver implements TraderInterface
                 'responseBody' => $response->body(),
             ]));
         }
+    }
+
+    public function ownershipToCustomer(FinancingOrder $financingOrder)
+    {
+        // TODO: Implement ownershipToCustomer() method.
+    }
+
+    public function sellingCommodity(FinancingOrder $financingOrder)
+    {
+        // TODO: Implement sellingCommodity() method.
     }
 }

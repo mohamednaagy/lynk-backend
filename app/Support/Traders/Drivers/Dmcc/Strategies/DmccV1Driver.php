@@ -67,14 +67,6 @@ class DmccV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function fetchOrderResult(string $type): ?array
-    {
-        return $this->fetchNotifications($type);
-    }
-
-    /**
-     * @throws TraderException
-     */
     public function fetchNotifications(string $type): ?array
     {
         $response = $this->soap
@@ -470,5 +462,15 @@ class DmccV1Driver implements TraderInterface
                 'responseBody' => $response->body(),
             ]));
         }
+    }
+
+    public function ownershipToCustomer(FinancingOrder $financingOrder)
+    {
+        // TODO: Implement ownershipToCustomer() method.
+    }
+
+    public function sellingCommodity(FinancingOrder $financingOrder)
+    {
+        // TODO: Implement sellingCommodity() method.
     }
 }

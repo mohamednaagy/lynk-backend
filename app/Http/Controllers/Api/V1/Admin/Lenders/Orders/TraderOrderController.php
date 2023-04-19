@@ -38,7 +38,7 @@ class TraderOrderController extends Controller
         return DB::transaction(function () use ($request, $createTraderOrder, $order) {
             $data = $request->validated();
             if ($data['version'] == 'latest') {
-                $data['version'] = getMurabhaStepsDictionary($data['trader']);
+                $data['version'] = get_latest_version_of_trader($data['trader']);
             }
 
             $createTraderOrder->handle($order, $data);

@@ -88,8 +88,8 @@ if (! function_exists('get_file_url')) {
     }
 }
 
-if (! function_exists('getMurabhaStepsDictionary')) {
-    function getMurabhaStepsDictionary($provider = 'fake', $version = null): array
+if (! function_exists('get_murabha_steps_dictionary')) {
+    function get_murabha_steps_dictionary($provider = 'fake', $version = null): array
     {
         return match ($provider) {
             'dmcc', 'fake' => DmccMurabhaStep::getStepsOfVersion($version),
@@ -99,9 +99,16 @@ if (! function_exists('getMurabhaStepsDictionary')) {
     }
 }
 
-if (! function_exists('getLatestVersionOfTrader')) {
-    function getLatestVersionOfTrader($provider): string
+if (! function_exists('get_latest_version_of_trader')) {
+    function get_latest_version_of_trader($provider): string
     {
         return config('trader.providers.'.$provider.'.latest');
+    }
+}
+
+if (! function_exists('get_murabha_steps')) {
+    function get_murabha_steps($provider, ?string $version = null): array
+    {
+        return config('murabha-steps.'.$provider.'-versions.'.$version ?? get_latest_version_of_trader($provider));
     }
 }

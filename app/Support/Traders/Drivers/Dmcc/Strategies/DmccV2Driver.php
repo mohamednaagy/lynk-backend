@@ -9,20 +9,23 @@ class DmccV2Driver extends DmccV1Driver
     public function createTraderOrder(FinancingOrder $financingOrder): string
     {
         // TODO: Implement createTraderOrder() method.
+
+        return '';
     }
 
     public function fetchOrderResult(string $type): ?array
     {
         // TODO: Implement fetchNotifications() method.
+        return [];
     }
 
-    public function cancelOrder(FinancingOrder $financingOrder): object
+    public function ownershipToCustomer(FinancingOrder $financingOrder)
     {
-        // TODO: Implement cancelOrder() method.
+        // TODO: Implement ownershipToCustomer() method.
     }
 
-    public function SellingCommodity(string $type)
+    public function sellingCommodity(FinancingOrder $financingOrder)
     {
-        // TODO: Implement SellingCommodity() method.
+        // TODO: Implement sellingCommodity() method.
     }
 }

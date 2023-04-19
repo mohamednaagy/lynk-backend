@@ -8,12 +8,9 @@ interface TraderInterface
 {
     public function createTraderOrder(FinancingOrder $financingOrder);
 
-    public function fetchOrderResult(string $type);
+    public function ownershipToCustomer(FinancingOrder $financingOrder);
 
-    // we need to decide the following commented methods should be in interface or not
-//    public function ownershipToCustomer(FinancingOrder $financingOrder);
-//
-//    public function sellingCommodity(FinancingOrder $financingOrder);
+    public function sellingCommodity(FinancingOrder $financingOrder);
 
     public function cancelOrder(FinancingOrder $financingOrder): mixed;
 }

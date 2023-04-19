@@ -2,9 +2,10 @@
 
 namespace App\Enums;
 
+use App\Enums\Contracts\Murabha\MurabhaStepsInterface;
 use BenSampo\Enum\Enum;
 
-final class BursaMurabhaStep extends Enum
+final class BursaMurabhaStep extends Enum implements MurabhaStepsInterface
 {
     const TraderOrderCreated = 'trader_order_created';
 
@@ -20,11 +21,11 @@ final class BursaMurabhaStep extends Enum
 
     public static function getStepsOfVersion(?string $version = null)
     {
-        $version = $version ?? getLatestVersionOfTrader('bursa');
+        $version = $version ?? get_latest_version_of_trader('bursa');
 
         return match ($version) {
-            'v1' => config('bursa-murabha-steps-versions.v1'),
-            'v2' => config('bursa-murabha-steps-versions.v2'),
+            'v1' => get_murabha_steps('bursam', 'v1'),
+            'v2' => get_murabha_steps('bursam', 'v2'),
             default => throw new \InvalidArgumentException('Invalid version')
         };
     }
