@@ -15,20 +15,21 @@ class BursamDriver extends DmccDriver implements TraderInterface
 
     public function baseDevURL($path)
     {
-        return 'https://bsasdevapi.bursamalaysia.com/'.$path;
+        return 'http://traderdcthh-erfmbxcc1323421.uselynk.com/'.$path;
     }
 
     /**
      * @return string
      */
-    public function getProviderCredential(): void
+    public function updateProviderCredential(): void
     {
-        $response = Http::get($this->baseDevURL('api/process/svc/auth/token'), [
-            'grant_type' => config('trader.providers.bursam.grant_type'),
-            'client_id' => config('trader.providers.bursam.client_id'),
-            'client_secret_code' => config('trader.providers.bursam.client_secret_code'),
-        ]);
+        $response = Http::get($this->baseDevURL('api/process/svc/auth/token?'),
+            'grant_type='.config('trader.providers.bursam.grant_type').
+            '&client_id='.config('trader.providers.bursam.client_id').
+            '&client_secret='.config('trader.providers.bursam.client_secret')
+        );
 
+        dd($response->json());
         // store token with provider name
         ProviderCredential::updateOrCreate(
             ['provider_name' => 'bursam'],

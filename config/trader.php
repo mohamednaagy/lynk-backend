@@ -27,9 +27,8 @@ return [
 
         'bursam' => [
             'client_id' => env('BURSAM_CLIENT_ID', 'LYNK'),
-            'client_secret_code' => env('BURSAM_CLIENT_SECRET_CODE', 'B347B6AFEA16EFA062B6DA'),
-            'grant_type' => env('BURSAM_GRANT_TYPE', 'authorization_code'),
-            'redirect_uri' => env('BURSAM_REDIRECT_URI'),
+            'client_secret' => env('BURSAM_CLIENT_SECRET_CODE', 'B347B6AFEA16EFA062B6DA'),
+            'grant_type' => env('BURSAM_GRANT_TYPE', 'client_credentials'),
         ],
     ],
 ];
