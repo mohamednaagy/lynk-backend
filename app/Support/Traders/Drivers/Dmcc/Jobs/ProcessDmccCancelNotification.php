@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Jobs\Dmcc;
+namespace App\Support\Traders\Drivers\Dmcc\Jobs;
 
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
+use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -14,7 +16,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccExpiredOrderNotification implements ShouldQueue
+class ProcessDmccCancelNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -54,13 +56,21 @@ class ProcessDmccExpiredOrderNotification implements ShouldQueue
 
             $trader = Trader::driver($traderOrder->provider);
 
+            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
+
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::Cancelled)) {
+                return;
+            }
+
+            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::Cancelled);
+
             $trader->createTraderOrderHistory(
                 $traderOrder,
-                FinancingOrderHistory::Expired
+                FinancingOrderHistory::OrderCancelled
             );
 
             $traderOrder->update([
-                'status' => TraderOrderStatus::Expired,
+                'status' => TraderOrderStatus::Cancelled,
             ]);
         });
     }

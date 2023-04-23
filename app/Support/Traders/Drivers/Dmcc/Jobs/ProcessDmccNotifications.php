@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\Dmcc;
+namespace App\Support\Traders\Drivers\Dmcc\Jobs;
 
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;

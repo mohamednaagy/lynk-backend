@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\Dmcc;
+namespace App\Support\Traders\Drivers\Dmcc\Jobs;
 
 use App\Enums\FinancingOrderHistory;
 use App\Models\TraderOrder;

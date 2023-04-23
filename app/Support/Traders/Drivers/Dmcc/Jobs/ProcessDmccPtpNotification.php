@@ -1,11 +1,9 @@
 <?php
 
-namespace App\Jobs\Dmcc;
+namespace App\Support\Traders\Drivers\Dmcc\Jobs;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -16,7 +14,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccCancelNotification implements ShouldQueue
+class ProcessDmccPtpNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -54,24 +52,18 @@ class ProcessDmccCancelNotification implements ShouldQueue
                 return;
             }
 
-            $trader = Trader::driver($traderOrder->provider);
-
-            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($traderOrder->financing_order_id);
-
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::Cancelled)) {
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
                 return;
             }
 
-            $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::Cancelled);
+            $trader = Trader::driver($traderOrder->provider);
+
+            $trader->respondPtpService($this->ttiId);
 
             $trader->createTraderOrderHistory(
                 $traderOrder,
-                FinancingOrderHistory::OrderCancelled
+                FinancingOrderHistory::RespondPtp
             );
-
-            $traderOrder->update([
-                'status' => TraderOrderStatus::Cancelled,
-            ]);
         });
     }
 

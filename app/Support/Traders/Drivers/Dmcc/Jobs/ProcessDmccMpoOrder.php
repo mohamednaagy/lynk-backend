@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Jobs\Dmcc;
+namespace App\Support\Traders\Drivers\Dmcc\Jobs;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\TraderHelperTrait;
+use App\Support\Traders\Traits\DmccTraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessDmccMpoOrder implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, DmccTraderHelperTrait;
 
     protected mixed $traderOrder;
 
