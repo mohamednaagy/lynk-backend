@@ -280,8 +280,8 @@ class FakeDriver implements TraderInterface
                     'amount' => $amount,
                     'previous_owner' => $previous_owner,
                     'product_name' => $product_name,
-                    'date' => Carbon::now()->toDateString(),
-                    'time' => Carbon::now()->toTimeString(),
+                    'date' => Carbon::now('Asia/Riyadh')->toDateString(),
+                    'time' => Carbon::now('Asia/Riyadh')->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::TransferOwnershipToLender
