@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Traders\Drivers\Dmcc\Jobs;
+namespace App\Support\Traders\Drivers\Dmcc\Jobs\V1;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -15,7 +15,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccRespondedToPtpOrder implements ShouldQueue
+class ProcessDmccMpoOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, DmccTraderHelperTrait;
 
@@ -35,63 +35,50 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
      * Execute the job.
      *
      * @return void
-     *
-     * @throws \Throwable
      */
     public function handle(): void
     {
-        // to unify
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
 
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::RespondPtp)) {
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument)) {
                 return;
             }
 
             $trader = Trader::driver($traderOrder->provider);
 
-            $ptpDocument = $trader->getDocumentByTypeAndTransaction(
+            $versionNo = $trader->uploadTTIDocumentAndGetVersionNumber($traderOrder->reference);
+
+            $trader->issueMurabahaPurchaseOffer(
                 $traderOrder->reference,
-                'Promise to Purchase'
+                $versionNo
             );
 
             $trader->createTraderOrderHistory(
                 $traderOrder,
-                FinancingOrderHistory::GetPtpDocument
+                FinancingOrderHistory::IssueMurabahaOffer
+            );
+
+            $mpoDocument = $trader->getDocumentByTypeAndTransaction(
+                $traderOrder->reference,
+                'Murabaha Purchase Offer Document'
+            );
+
+            $trader->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::GetMurabahaPurchaseOfferDocument
             );
 
             $this->attachDocumentToOrder(
                 $traderOrder,
-                $ptpDocument,
-                TraderOrderMediaCollection::PromiseToPurchase,
+                $mpoDocument,
+                TraderOrderMediaCollection::MurabahaPurchaseOrder,
                 'base64'
             );
 
             $trader->createTraderOrderHistory(
                 $traderOrder,
-                FinancingOrderHistory::AttachPtpDocumentToOrder
-            );
-
-            $ttiDocument = $trader->getDocumentByTypeAndTransaction(
-                $traderOrder->reference,
-                'TTI - Holding certificate'
-            );
-
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::GetTtiHoldingCertificateDocument
-            );
-
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                $ttiDocument,
-                TraderOrderMediaCollection::TtiHoldingCertificate,
-                'base64'
-            );
-
-            $trader->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::AttachTtiHoldingCertificateDocument
+                FinancingOrderHistory::AttachMpoDocument
             );
         });
     }

@@ -2,10 +2,10 @@
 
 namespace App\Enums;
 
-use App\Enums\Contracts\Murabha\MurabhaStepsInterface;
+use App\Enums\Contracts\Murabha\TraderMurabhaStepInterface;
 use BenSampo\Enum\Enum;
 
-final class DmccMurabhaStep extends Enum implements MurabhaStepsInterface
+final class DmccMurabhaStep extends Enum implements TraderMurabhaStepInterface
 {
     const TraderOrderCreated = 'trader_order_created';
 
@@ -21,7 +21,7 @@ final class DmccMurabhaStep extends Enum implements MurabhaStepsInterface
 
     const MurabahaSaleCompleted = 'murabaha_sale_completed';
 
-    public static function getStepsOfVersion(?string $version = null)
+    public static function getStepsOfVersion(?string $version = null): array
     {
         $version = $version ?? get_latest_version_of_trader('dmcc');
 

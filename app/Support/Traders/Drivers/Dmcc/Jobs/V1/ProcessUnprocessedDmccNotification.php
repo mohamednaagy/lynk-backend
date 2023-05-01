@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Support\Traders\Drivers\Dmcc\Jobs;
+namespace App\Support\Traders\Drivers\Dmcc\Jobs\V1;
 
-use App\Enums\FinancingOrderHistory;
-use App\Enums\TraderOrderStatus;
+use App\Exceptions\TraderNotSupportedException;
 use App\Models\TraderOrder;
+use App\Support\Traders\Events\ProcessNotification;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,11 +14,13 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue
+class ProcessUnprocessedDmccNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected string $ttiId;
+
+    protected string $notificationId;
 
     protected mixed $notification;
 
@@ -30,6 +32,7 @@ class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue
     public function __construct($notification)
     {
         $this->notification = $notification;
+        $this->notificationId = $this->notification->notificationHeaderAndEntity->notificationId;
         $this->ttiId = $this->notification->notificationHeaderAndEntity->notificationEntityDetails->notificationEntity[0]->entityValue;
     }
 
@@ -38,30 +41,30 @@ class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue
      *
      * @return void
      *
-     * @throws \Throwable
+     * @throws TraderNotSupportedException
      */
     public function handle(): void
     {
-        DB::transaction(function () {
+        $driver = config('trader.default');
+
+        if (! in_array($driver, ['dmcc', 'fake'])) {
+            throw new TraderNotSupportedException;
+        }
+
+        DB::transaction(function () use ($driver) {
             $traderOrder = TraderOrder::query()
                 ->where('reference', $this->ttiId)
-                ->where('status', TraderOrderStatus::InProgress)
-                ->whereIn('provider', ['dmcc', 'fake'])
                 ->lockForUpdate()
                 ->first();
 
-            if (
-                ! $traderOrder
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)
-            ) {
+            if (! $traderOrder) {
                 return;
             }
 
-            $trader = Trader::driver($traderOrder->provider);
+            $trader = Trader::driver($driver);
+            $trader->processNotification($this->notificationId);
 
-            $trader->getInventoryBasket($traderOrder);
-
-            $trader->createTransferOwnershipToLenderDocument($traderOrder);
+            ProcessNotification::dispatch('trader', [], [], now());
         });
     }
 
@@ -72,6 +75,6 @@ class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('dmccTtiId'.$this->ttiId)];
+        return [new WithoutOverlapping('notificationId'.$this->notificationId)];
     }
 }

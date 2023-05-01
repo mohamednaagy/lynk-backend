@@ -5,15 +5,16 @@ namespace App\Actions\Orders;
 use App\Actions\Contracts\Clients\AcceptClientWakala;
 use App\Actions\Contracts\Orders\MakeOrderProceed;
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\MurabhaStep;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Traits\DmccTraderHelperTrait;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\UploadedFile;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
@@ -24,16 +25,13 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
     protected ?UploadedFile $signedClientWakala = null;
 
-    public function __construct(protected StepHistoriesDictionary $stepHistoriesDictionary)
-    {
-    }
-
     /**
      * @param  TraderOrder  $traderOrder
      * @param  string  $case
      * @param  bool  $forceToProceed
      * @return array
      *
+     * @throws BindingResolutionException
      * @throws FileDoesNotExist
      * @throws FileIsTooBig
      * @throws OrderStatusDoesNotFollowSequenceException
@@ -57,7 +55,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
      * @throws FileIsTooBig
      * @throws \Exception
      */
-    protected function handleClientWakalaAccepted(TraderOrder $traderOrder, bool $forceToProceed)
+    protected function handleClientWakalaAccepted(TraderOrder $traderOrder, bool $forceToProceed): array
     {
         $order = FinancingOrder::query()
             ->lockForUpdate()
@@ -81,16 +79,17 @@ class MakeOrderProceedAction implements MakeOrderProceed
         return [];
     }
 
-    protected function isPreviousStepOfClientWakalaNotCompleted(TraderOrder $traderOrder)
+    protected function isPreviousStepOfClientWakalaNotCompleted(TraderOrder $traderOrder): bool
     {
-        return ! $traderOrder->checkOrderStepComplete(
-            $this->stepHistoriesDictionary->getPreviousStepOf(MurabhaStep::ClientWakala)->step
-        );
+        $previousStep = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+            ->getPreviousStepOf(DmccMurabhaStep::ClientWakala)->step;
+
+        return ! $traderOrder->checkOrderStepComplete($previousStep);
     }
 
-    protected function isClientWakalaStepCompleted(TraderOrder $traderOrder)
+    protected function isClientWakalaStepCompleted(TraderOrder $traderOrder): bool
     {
-        return $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala);
+        return $traderOrder->checkOrderStepComplete(DmccMurabhaStep::ClientWakala);
     }
 
     /**
@@ -99,8 +98,9 @@ class MakeOrderProceedAction implements MakeOrderProceed
      * @return array
      *
      * @throws OrderStatusDoesNotFollowSequenceException
+     * @throws BindingResolutionException
      */
-    protected function handleContractSigned(TraderOrder $traderOrder, bool $forceToProceed)
+    protected function handleContractSigned(TraderOrder $traderOrder, bool $forceToProceed): array
     {
         if (
             $this->isPreviousStepOfContractSignedNotCompleted($traderOrder)
@@ -118,19 +118,24 @@ class MakeOrderProceedAction implements MakeOrderProceed
         return [];
     }
 
-    protected function isPreviousStepOfContractSignedNotCompleted(TraderOrder $traderOrder)
+    protected function isPreviousStepOfContractSignedNotCompleted(TraderOrder $traderOrder): bool
     {
         return ! $traderOrder->checkOrderStepComplete(
-            $this->stepHistoriesDictionary->getPreviousStepOf(MurabhaStep::ContractSigned)->step
+            (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+                ->getPreviousStepOf(DmccMurabhaStep::ContractSigned)->step
         );
     }
 
-    protected function isContractSignedStepCompleted(TraderOrder $traderOrder)
+    protected function isContractSignedStepCompleted(TraderOrder $traderOrder): bool
     {
-        return $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
+        return $traderOrder->checkOrderStepComplete(DmccMurabhaStep::ContractSigned);
     }
 
-    public function setSignedClientWakala(UploadedFile $signedClientWakala)
+    /**
+     * @param  UploadedFile  $signedClientWakala
+     * @return $this
+     */
+    public function setSignedClientWakala(UploadedFile $signedClientWakala): static
     {
         $this->signedClientWakala = $signedClientWakala;
 

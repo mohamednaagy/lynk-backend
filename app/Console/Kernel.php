@@ -3,7 +3,7 @@
 namespace App\Console;
 
 use App\Jobs\General\ProcessFinancingOrders;
-use App\Support\Traders\Drivers\Dmcc\Jobs\ProcessDmccNotifications;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccNotifications;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 

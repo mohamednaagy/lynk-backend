@@ -40,7 +40,6 @@ class MakeOrderProceed extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($request, $order, $makeOrderProceed) {
             $this->authorize('view', $order);
-
             $traderOrder = $order->activeTraderOrder()->lockForUpdate()->firstOrFail();
 
             if (

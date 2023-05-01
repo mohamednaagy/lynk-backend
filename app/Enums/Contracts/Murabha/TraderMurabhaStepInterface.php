@@ -2,7 +2,7 @@
 
 namespace App\Enums\Contracts\Murabha;
 
-interface MurabhaStepsInterface
+interface TraderMurabhaStepInterface
 {
     public static function getStepsOfVersion(?string $version = null);
 }

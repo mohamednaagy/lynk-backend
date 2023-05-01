@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Support\Traders\Drivers\Dmcc\Jobs;
+namespace App\Support\Traders\Drivers\Dmcc\Jobs\V1;
 
-use App\Enums\FinancingOrderHistory;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -41,9 +40,9 @@ class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
 
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted)) {
-                return;
-            }
+//            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted)) {
+//                return;
+//            }
 
             $trader = Trader::driver($traderOrder->provider);
 

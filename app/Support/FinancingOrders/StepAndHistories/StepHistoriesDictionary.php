@@ -2,9 +2,6 @@
 
 namespace App\Support\FinancingOrders\StepAndHistories;
 
-use App\Enums\BursaMurabhaStep;
-use App\Enums\DmccMurabhaStep;
-
 class StepHistoriesDictionary
 {
     public \SplDoublyLinkedList $dictionaryNodeList;
@@ -12,19 +9,11 @@ class StepHistoriesDictionary
     public function __construct($trader, $version = null)
     {
         $this->dictionaryNodeList = new \SplDoublyLinkedList();
+        $version = $version ?? get_latest_version_of_trader($trader);
 
-        foreach ($this->stepHistoriesContext($trader, $version) as $step => $histories) {
+        foreach (trader_step_histories($trader, $version) as $step => $histories) {
             $this->dictionaryNodeList->push(new StepHistoriesDictionaryNode($step, $histories));
         }
-    }
-
-    protected function stepHistoriesContext($trader, $version = null)
-    {
-        return  match ($trader) {
-            'dmcc' => DmccMurabhaStep::getStepsOfVersion($version),
-            'bursa' => BursaMurabhaStep::getStepsOfVersion($version),
-            default => throw new \InvalidArgumentException('Invalid trader')
-        };
     }
 
     public function getPreviousStepOf($step)

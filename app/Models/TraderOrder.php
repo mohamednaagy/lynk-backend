@@ -20,6 +20,8 @@ use UnexpectedValueException;
 /**
  * @property mixed $reference
  * @property mixed $order
+ * @property mixed $provider
+ * @property mixed $version
  * @property TraderOrderStatus $status
  * @property Collection $traderHistories
  * @property Carbon $created_at
@@ -101,10 +103,10 @@ class TraderOrder extends Model implements HasMedia
 
     public function checkOrderStepComplete(string $step): bool
     {
-        $stepToHistoriesDictionary = getMurabhaStepsDictionary($this->provider, $this->version);
+        $stepToHistoriesDictionary = trader_step_histories($this->provider, $this->version);
 
         if (! array_key_exists($step, $stepToHistoriesDictionary)) {
-            throw new UnexpectedValueException('No mapping for this status');
+            throw new UnexpectedValueException('No mapping for this step');
         }
 
         return (bool) $this->traderHistories()

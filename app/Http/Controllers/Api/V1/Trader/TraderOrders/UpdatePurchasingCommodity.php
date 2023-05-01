@@ -10,7 +10,7 @@ use App\Enums\MurabhaStep;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Trader\Orders\TraderOrders\UpdatePurchasingCommodityRequest;
-use App\Support\Traders\TraderHelperTrait;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use App\Transformers\TraderOrderTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;

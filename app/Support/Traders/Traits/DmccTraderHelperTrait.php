@@ -5,15 +5,11 @@ namespace App\Support\Traders\Traits;
 use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\TraderOrderStatus;
-use App\Models\FinancingOrder;
-use App\Models\TraderOrder;
-use App\Support\PdfGenerator\PdfGenerator;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 
 trait DmccTraderHelperTrait
 {
+    use TraderHelperTrait;
+
     public array $stepToHistoriesMap = [
         DmccMurabhaStep::PurchasingCommodity => [
             FinancingOrderHistory::RespondPtp => null,
@@ -49,78 +45,4 @@ trait DmccTraderHelperTrait
             FinancingOrderHistory::MurabahaSaleCompleted => null,
         ],
     ];
-
-    public function createStepHistories(Request $request, TraderOrder $traderOrder, $step): void
-    {
-        foreach ($this->stepToHistoriesMap[$step] as $history => $media) {
-            if ($media && $request->has($media['file'])) {
-                $this->attachDocumentToOrder(
-                    $traderOrder,
-                    base64_encode(file_get_contents($request->file($media['file']))),
-                    $media['collection'],
-                    'base64'
-                );
-            }
-
-            if (! $traderOrder->checkOrderHistoryAction($history)) {
-                $this->createTraderOrderHistory($traderOrder, $history);
-            }
-        }
-    }
-
-    public function createTraderOrder(FinancingOrder $financingOrder, string $ttiId, string $provider): Model|TraderOrder
-    {
-        return $financingOrder->traderOrders()->create([
-            'provider' => $provider,
-            'reference' => $ttiId,
-            'version' => config('trader.providers.'.$provider.'.latest'),
-            'status' => TraderOrderStatus::InProgress,
-        ]);
-    }
-
-    public function updateOrderStatus($order, $status): void
-    {
-        $order->update([
-            'status' => $status,
-        ]);
-    }
-
-    public function createTraderOrderHistory(TraderOrder $traderOrder, int $action): void
-    {
-        $traderOrder->traderHistories()->updateOrCreate(
-            [
-                'action' => $action,
-            ],
-            [
-                'updated_at' => now(),
-            ]
-        );
-    }
-
-    public function storeOrderDocumentAsPdf(string $view, array $data, TraderOrder $traderOrder, $mediaCollection): void
-    {
-        $html = view($view, $data)->render();
-
-        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($mediaCollection, $traderOrder) {
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                $fileResource,
-                $mediaCollection
-            );
-        });
-    }
-
-    public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
-    {
-        $fileName = $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
-        if (! is_null($type)) {
-            $traderOrder->addMediaFromBase64(
-                $document
-            )->usingFileName($fileName)->toMediaCollection($collectionName);
-        } else {
-            $traderOrder->addMediaFromStream(
-                $document
-            )->usingFileName($fileName)->toMediaCollection($collectionName);
-        }
-    }
 }

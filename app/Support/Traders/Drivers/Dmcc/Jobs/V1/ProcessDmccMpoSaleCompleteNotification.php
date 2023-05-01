@@ -1,11 +1,14 @@
 <?php
 
-namespace App\Support\Traders\Drivers\Dmcc\Jobs;
+namespace App\Support\Traders\Drivers\Dmcc\Jobs\V1;
 
+use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\DmccTraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -14,9 +17,9 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccPtpNotification implements ShouldQueue
+class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, DmccTraderHelperTrait;
 
     protected string $ttiId;
 
@@ -37,6 +40,8 @@ class ProcessDmccPtpNotification implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     *
+     * @throws \Throwable
      */
     public function handle(): void
     {
@@ -48,22 +53,49 @@ class ProcessDmccPtpNotification implements ShouldQueue
                 ->lockForUpdate()
                 ->first();
 
-            if (! $traderOrder) {
+            if (
+                ! $traderOrder
+                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachMpoDocument)
+            ) {
                 return;
             }
 
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
+            if (! $traderOrder->checkOrderStepComplete(DmccMurabhaStep::MurabhaOfferIssued)) {
                 return;
             }
 
             $trader = Trader::driver($traderOrder->provider);
 
-            $trader->respondPtpService($this->ttiId);
+            $warrantDocument = $trader->getDocumentByTypeAndTransaction(
+                $this->ttiId,
+                'Warrant Amendment Except Warrant No'
+            );
 
             $trader->createTraderOrderHistory(
                 $traderOrder,
-                FinancingOrderHistory::RespondPtp
+                FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument
             );
+
+            $this->attachDocumentToOrder(
+                $traderOrder,
+                $warrantDocument,
+                TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
+                'base64'
+            );
+
+            $trader->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument
+            );
+
+            $trader->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::MurabahaSaleCompleted
+            );
+
+            $traderOrder->update([
+                'status' => TraderOrderStatus::Completed,
+            ]);
         });
     }
 

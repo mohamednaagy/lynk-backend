@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Traders\Drivers\Dmcc\Jobs;
+namespace App\Support\Traders\Drivers\Dmcc\Jobs\V1;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
@@ -14,7 +14,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccExpiredOrderNotification implements ShouldQueue
+class ProcessDmccPtpNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -52,16 +52,18 @@ class ProcessDmccExpiredOrderNotification implements ShouldQueue
                 return;
             }
 
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
+                return;
+            }
+
             $trader = Trader::driver($traderOrder->provider);
+
+            $trader->respondPtpService($this->ttiId);
 
             $trader->createTraderOrderHistory(
                 $traderOrder,
-                FinancingOrderHistory::Expired
+                FinancingOrderHistory::RespondPtp
             );
-
-            $traderOrder->update([
-                'status' => TraderOrderStatus::Expired,
-            ]);
         });
     }
 

@@ -3,7 +3,7 @@
 namespace App\Support\Traders\TradingStrategies\Bursam;
 
 use App\Actions\Contracts\Orders\UpdateTraderOrder;
-use App\Enums\BursaMurabhaStep;
+use App\Enums\BursamMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\TraderOrder;
@@ -18,14 +18,14 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
 
     public function updatePurchasingCommodity(TraderOrder $traderOrder, Request $request)
     {
-        $traderOrder->ensureCanAccessStep(BursaMurabhaStep::TraderOrderCreated);
+        $traderOrder->ensureCanAccessStep(BursamMurabhaStep::TraderOrderCreated);
 
         app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
 
         $this->createStepHistories(
             $request,
             $traderOrder,
-            BursaMurabhaStep::PurchasingCommodity
+            BursamMurabhaStep::PurchasingCommodity
         );
 
         $this->transferOwnershipToLender($request, $traderOrder);

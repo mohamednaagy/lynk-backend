@@ -7,9 +7,10 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
-use App\Support\Traders\Drivers\Dmcc\Jobs\ProcessDmccMpoOrder;
-use App\Support\Traders\Drivers\Dmcc\Jobs\ProcessDmccRespondedToPtpOrder;
-use App\Support\Traders\Drivers\Dmcc\Jobs\ProcessDmccSellingCommodityToCustomerOrder;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoOrder;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccRespondedToPtpOrder;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccSellingCommodityToCustomerOrder;
+use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -52,7 +53,7 @@ class ProcessFinancingOrders implements ShouldQueue
                 TraderOrderStatus::InProgress,
             ])->chunk(10, function ($traderOrderCollection) {
                 $traderOrderCollection->each(function (TraderOrder $traderOrder) {
-                    $this->basedOnProvider($traderOrder);
+                    Trader::driver($traderOrder->provider, $traderOrder->version)->jobDispatch($traderOrder);
                 });
             });
     }

@@ -5,9 +5,13 @@ namespace App\Support\Traders\Drivers\Fake\Strategies;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Exceptions\TraderException;
+use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Contracts\TraderInterface;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoOrder;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccRespondedToPtpOrder;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccSellingCommodityToCustomerOrder;
 use App\Support\Traders\Traits\FakeTraderHelperTrait;
 use Carbon\Carbon;
 use Exception;
@@ -375,13 +379,24 @@ class FakeV1Driver implements TraderInterface
         }
     }
 
-    public function ownershipToCustomer(FinancingOrder $financingOrder)
+    public function transferOwnershipToCustomer(FinancingOrder $financingOrder)
     {
         // TODO: Implement ownershipToCustomer() method.
     }
 
-    public function sellingCommodity(FinancingOrder $financingOrder)
+    public function sellingCommodityToOpenMarket(FinancingOrder $financingOrder)
     {
         // TODO: Implement sellingCommodity() method.
+    }
+
+    public function jobDispatch(TraderOrder $traderOrder)
+    {
+        match ((int) $traderOrder->last_history_action) {
+            FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::dispatch($traderOrder->id),
+            FinancingOrderHistory::ContractSigned => ProcessAskClientForWakala::dispatch($traderOrder->id),
+            FinancingOrderHistory::ClientWakalaAccepted => ProcessDmccSellingCommodityToCustomerOrder::dispatch($traderOrder->id),
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::dispatch($traderOrder->id),
+            default => null,
+        };
     }
 }

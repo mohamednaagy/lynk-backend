@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Traders\Drivers\Dmcc\Jobs;
+namespace App\Support\Traders\Drivers\Dmcc\Jobs\V1;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;

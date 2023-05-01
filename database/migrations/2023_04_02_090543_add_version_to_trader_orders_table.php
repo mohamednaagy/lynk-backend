@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('trader_orders', function (Blueprint $table) {
-            $table->string('version')->nullable()->after('provider');
+            $table->string('version')->nullable()->default('v1')->after('provider');
         });
     }
 

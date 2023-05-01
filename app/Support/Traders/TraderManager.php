@@ -21,12 +21,6 @@ class TraderManager extends Manager
             $provider = $provider.ucfirst($version);
         }
 
-        if (is_null($provider)) {
-            throw new \InvalidArgumentException(sprintf(
-                'Unable to resolve NULL driver for [%s].', static::class
-            ));
-        }
-
         // If the given driver has not been created before, we will create the instances
         // here and cache it, so we can return it next time very quickly. If there is
         // already a driver created by this name, we'll just return that instance.

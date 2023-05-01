@@ -27,19 +27,6 @@ class StoreTradingRequest extends FormRequest
         return [
             'trader' => ['required', 'string', Rule::in(['fake', 'dmcc', 'bursam'])],
             'reference_number' => ['required', 'string', 'max:100'],
-            'version' => ['required'],
         ];
-    }
-
-    public function withValidator($validator)
-    {
-        $versions_arr = array_keys(config($this->trader.'-murabha-steps-versions'));
-        $versions_arr[] = 'latest';
-
-        $validator->after(function ($validator) use ($versions_arr) {
-            if (! in_array($validator->safe()->version, $versions_arr)) {
-                $validator->errors()->add('version', 'Invalid Trader Version.');
-            }
-        });
     }
 }
