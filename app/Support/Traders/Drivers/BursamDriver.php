@@ -38,7 +38,7 @@ class BursamDriver implements TraderInterface
         );
     }
 
-    public function createOrder(FinancingOrder $financingOrder, string $providerName): string
+    public function createTraderOrder(FinancingOrder $financingOrder, string $providerName): string
     {
         $traderOrder = TraderOrder::create([
             'financing_order_id' => $financingOrder,
@@ -48,18 +48,17 @@ class BursamDriver implements TraderInterface
         return $traderOrder->uuid;
     }
 
-    public function createTraderOrder(FinancingOrder $financingOrder)
+    public function createOrder(FinancingOrder $financingOrder)
     {
-        $uuid = $this->createOrder($financingOrder, 'bursam');
+        $traderOrder = $financingOrder->activeTraderOrder()->first();
 
-        $traderOrder = TraderOrder::where('uuid', $uuid)->first();
         $accessToken = ProviderCredential::where('provider_name', 'bursam')->value('access_token');
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer '.$accessToken,
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
-            'memberShortName' => 'LYNK',
+            'memberShortName' => config('trader.providers.bursam.client_id'),
             'uuid' => $traderOrder->uuid])
             ->post(
                 $this->baseURL('api/process/svc/order'),
