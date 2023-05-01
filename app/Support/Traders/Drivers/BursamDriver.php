@@ -2,11 +2,14 @@
 
 namespace App\Support\Traders\Drivers;
 
+use App\Models\FinancingOrder;
 use App\Models\ProviderCredential;
+use App\Models\TraderOrder;
 use App\Support\Traders\Contracts\TraderInterface;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
-class BursamDriver extends DmccDriver implements TraderInterface
+class BursamDriver implements TraderInterface
 {
     public function baseURL($path)
     {
@@ -34,5 +37,77 @@ class BursamDriver extends DmccDriver implements TraderInterface
             ['provider_name' => 'bursam'],
             ['access_token' => $response->json('access_token')],
         );
+    }
+
+    public function createOrder(FinancingOrder $financingOrder, string $providerName): string
+    {
+        $uuid = Str::uuid(); // generate a UUID
+
+        // create a new trader order with the generated UUID
+        $traderOrder = new TraderOrder([
+            'uuid' => $uuid,
+            'provider_name' => $providerName,
+            // other fields
+        ]);
+        $traderOrder->save();
+
+        // use the UUID to create an order with the provider
+
+        return $uuid;
+    }
+
+    public function createTraderOrder(FinancingOrder $financingOrder)
+    {
+        $uuid = $this->createOrder($financingOrder, 'bursam');
+
+        // retrieve the trader order with the UUID
+        $traderOrder = TraderOrder::where('uuid', $uuid)->first();
+        $accessToken = ProviderCredential::where('provider_name', 'bursam')->value('access_token');
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer '.$accessToken,
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'memberShortName' => 'LYNK',
+            'uuid' => $traderOrder->uuid])
+            ->post(
+                $this->baseURL('api/process/svc/order'),
+                [
+                    'serialNumber' => '1',
+                    'bidOption' => 'Y',
+                    'otcOption' => 'N',
+                    'stbOption' => 'N',
+                    'productCode' => 'CPO-MSIA-09',
+                    'purchaseType' => 'P',
+                    'clientName' => $financingOrder->customer_name,
+                    'currency' => 'SAR',
+                    'bidValue' => '87532497.52',
+                    'valueDate' => '20230411',
+                    'tenor' => '00035',
+                    'otcCounterParty' => 'ABC',
+                    'otcMurabaha' => '',
+                    'otcMurabahaValue' => '88532497.72',
+                    'eCertNo' => '',
+                ]
+            );
+
+        return $traderOrder;
+    }
+
+    public function acceptAgreement()
+    {
+    }
+
+    public function getTti(FinancingOrder $financingOrder)
+    {
+    }
+
+    public function fetchNotifications(string $type)
+    {
+    }
+
+    public function cancelOrder(FinancingOrder $financingOrder): mixed
+    {
+        return '';
     }
 }
