@@ -38,20 +38,19 @@ class BursamDriver implements TraderInterface
         );
     }
 
-    public function createTraderOrder(FinancingOrder $financingOrder, string $providerName): string
+    public function createTraderOrder(FinancingOrder $financingOrder, string $providerName)
     {
-        $traderOrder = TraderOrder::create([
-            'financing_order_id' => $financingOrder,
-            'provider_name' => $providerName,
+        $traderOrder = new TraderOrder([
+            'financing_order_id' => $financingOrder->id,
+            'provider' => $providerName,
         ]);
 
-        return $traderOrder->uuid;
+        return $traderOrder;
     }
 
     public function createOrder(FinancingOrder $financingOrder)
     {
-        $traderOrder = $financingOrder->activeTraderOrder()->first();
-
+        $traderOrder = $this->createTraderOrder($financingOrder, 'bursam');
         $accessToken = ProviderCredential::where('provider_name', 'bursam')->value('access_token');
 
         $response = Http::withHeaders([
@@ -61,7 +60,7 @@ class BursamDriver implements TraderInterface
             'memberShortName' => config('trader.providers.bursam.client_id'),
             'uuid' => $traderOrder->uuid])
             ->post(
-                $this->baseDevURL('api/process/svc/order'),
+                $this->baseDevURL('api/process/svc/bsas/order.json'),
                 [
                     'serialNumber' => '1',
                     'bidOption' => 'Y',
@@ -81,7 +80,21 @@ class BursamDriver implements TraderInterface
                 ]
             );
 
-        return $response;
+        return response()->json([
+            'header' => [
+                'memberShortName' => config('trader.providers.bursam.client_id'),
+                'uuid' => $traderOrder->uuid,
+                'errorCode' => '',
+                'errorMsg' => '',
+            ],
+            'body' => [
+                [
+                    'serialNumber' => 1,
+                    'statusCode' => 0,
+                    'statusMessage' => '',
+                ],
+            ],
+        ], 200);
     }
 
     public function acceptAgreement()
