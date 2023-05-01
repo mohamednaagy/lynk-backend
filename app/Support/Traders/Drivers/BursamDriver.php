@@ -41,17 +41,15 @@ class BursamDriver implements TraderInterface
 
     public function createOrder(FinancingOrder $financingOrder, string $providerName): string
     {
-        $uuid = Str::uuid(); // generate a UUID
+        $uuid = Str::orderedUuid();
+        $custom_uuid = Str::padRight($uuid, 50, '0');
 
-        // create a new trader order with the generated UUID
-        $traderOrder = new TraderOrder([
-            'uuid' => $uuid,
+        $traderOrder = TraderOrder::create([
+            'uuid' => $custom_uuid,
+            'financing_order_id' => $financingOrder,
             'provider_name' => $providerName,
-            // other fields
         ]);
         $traderOrder->save();
-
-        // use the UUID to create an order with the provider
 
         return $uuid;
     }
@@ -60,7 +58,6 @@ class BursamDriver implements TraderInterface
     {
         $uuid = $this->createOrder($financingOrder, 'bursam');
 
-        // retrieve the trader order with the UUID
         $traderOrder = TraderOrder::where('uuid', $uuid)->first();
         $accessToken = ProviderCredential::where('provider_name', 'bursam')->value('access_token');
 
