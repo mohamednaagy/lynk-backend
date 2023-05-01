@@ -61,7 +61,7 @@ class BursamDriver implements TraderInterface
             'memberShortName' => config('trader.providers.bursam.client_id'),
             'uuid' => $traderOrder->uuid])
             ->post(
-                $this->baseURL('api/process/svc/order'),
+                $this->baseDevURL('api/process/svc/order'),
                 [
                     'serialNumber' => '1',
                     'bidOption' => 'Y',
