@@ -7,7 +7,6 @@ use App\Models\ProviderCredential;
 use App\Models\TraderOrder;
 use App\Support\Traders\Contracts\TraderInterface;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 
 class BursamDriver implements TraderInterface
 {
@@ -41,17 +40,12 @@ class BursamDriver implements TraderInterface
 
     public function createOrder(FinancingOrder $financingOrder, string $providerName): string
     {
-        $uuid = Str::orderedUuid();
-        $custom_uuid = Str::padRight($uuid, 50, '0');
-
         $traderOrder = TraderOrder::create([
-            'uuid' => $custom_uuid,
             'financing_order_id' => $financingOrder,
             'provider_name' => $providerName,
         ]);
-        $traderOrder->save();
 
-        return $uuid;
+        return $traderOrder->uuid;
     }
 
     public function createTraderOrder(FinancingOrder $financingOrder)
@@ -88,7 +82,7 @@ class BursamDriver implements TraderInterface
                 ]
             );
 
-        return $traderOrder;
+        return $response;
     }
 
     public function acceptAgreement()

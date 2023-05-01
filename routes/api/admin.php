@@ -44,8 +44,6 @@ use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
 use App\Http\Controllers\Api\V1\Admin\Traders\UpdateTraderStatus;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
-use App\Models\FinancingOrder;
-use App\Support\Traders\Drivers\BursamDriver;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -58,11 +56,6 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::get('bursam', function () {
-    $order = new FinancingOrder();
-    $bursam = new BursamDriver();
-    $bursam->createUuid($order->id);
-});
 
 Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
     Route::middleware(['auth:sanctum', 'role:'.implode('|', [Role::Admin, Role::Manager])])->group(function () {

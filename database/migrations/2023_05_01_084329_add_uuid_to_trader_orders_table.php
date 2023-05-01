@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('trader_orders', function (Blueprint $table) {
-            $table->uuid()->nullable()->after('id');
+            $table->uuid('uuid')->length(50)->nullable()->after('id');
         });
     }
 
