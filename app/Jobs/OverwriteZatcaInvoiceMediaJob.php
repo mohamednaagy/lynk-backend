@@ -53,13 +53,13 @@ class OverwriteZatcaInvoiceMediaJob implements ShouldQueue
             ->orderBy('id')
             ->chunk(100, function ($orders) use ($seller) {
                 $orders->map(function ($financingOrder) use ($seller) {
-                    $media = $financingOrder->getFirstMedia(FinancingOrderMediaCollection::ZatcaInvoice);
-
                     $creationFeeTransaction = $financingOrder->creationFeeTransactions?->first();
 
                     if (blank($creationFeeTransaction)) {
                         return;
                     }
+
+                    $media = $financingOrder->getFirstMedia(FinancingOrderMediaCollection::ZatcaInvoice);
 
                     if ($media) {
                         $financingOrder->clearMediaCollection(FinancingOrderMediaCollection::ZatcaInvoice);
