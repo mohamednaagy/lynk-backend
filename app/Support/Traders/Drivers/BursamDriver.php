@@ -79,22 +79,20 @@ class BursamDriver implements TraderInterface
                     'bidOption' => 'Y',
                     'otcOption' => 'N',
                     'stbOption' => 'N',
-                    'productCode' => 'CPO-MSIA-09', // get it from request
+                    'productCode' => 'CPO-MSIA-09', // get it from requ
                     'purchaseType' => 'P',
-                    'clientName' => $financingOrder->customer_name,
+                    'clientName' => '',
                     'currency' => 'SAR',
-                    'bidValue' => '87532497.52',   // get it from request // $financingOrder->amount
-                    'valueDate' => '20230411',   // get it from request
-                    'tenor' => '00035',
-                    'otcCounterParty' => 'ABC',
+                    'bidValue' => $financingOrder->amount->formatByDecimal(),
+                    'valueDate' => $financingOrder->created_at->format('Ymd'),
+                    'tenor' => '00090',
+                    'otcCounterParty' => $financingOrder->customer_name,
                     'otcMurabaha' => '',
-                    'otcMurabahaValue' => '88532497.72',  // get it from request // $financingOrder->selling_price
+                    'otcMurabahaValue' => $financingOrder->selling_price->formatByDecimal(),
                     'eCertNo' => '',
                 ],
             ]
         );
-
-        $response->json();
     }
 
     public function fetchOrderResult(FinancingOrder $financingOrder)
@@ -118,7 +116,9 @@ class BursamDriver implements TraderInterface
             ]
         );
 
-        dd($response->json()); // continue implement that
+        $financingOrder->activeTraderOrder()->update([
+            'data' => $response->json(),
+        ]);
     }
 
     public function acceptAgreement()
