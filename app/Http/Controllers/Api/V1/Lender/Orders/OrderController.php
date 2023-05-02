@@ -111,6 +111,8 @@ class OrderController extends Controller
                 'status_reason',
                 'creator',
                 'approver',
+                'trader_orders.provider',
+                'trader_orders.version',
                 'history',
             ])->respond();
     }

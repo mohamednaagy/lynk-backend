@@ -19,6 +19,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'financing_order_id',
         'reference',
         'provider',
+        'version',
         'purchasing_commodity_information',
         'status',
         'is_cancellable',
@@ -49,6 +50,11 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeProvider(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive($traderOrder->provider);
+    }
+
+    public function includeVersion(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->version);
     }
 
     public function includeIsCancellable(TraderOrder $traderOrder): Primitive

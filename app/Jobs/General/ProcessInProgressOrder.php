@@ -54,7 +54,7 @@ class ProcessInProgressOrder implements ShouldQueue
                 return;
             }
 
-            $trader->getTti($financingOrder);
+            $trader->createTraderOrder($financingOrder);
 
             $financingOrder->update([
                 'status' => FinancingOrderStatus::InProgress,

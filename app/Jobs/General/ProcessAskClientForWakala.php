@@ -5,7 +5,7 @@ namespace App\Jobs\General;
 use App\Actions\Contracts\Clients\AskClientWakala;
 use App\Enums\FinancingOrderHistory;
 use App\Models\TraderOrder;
-use App\Support\Traders\TraderHelperTrait;
+use App\Support\Traders\Traits\DmccTraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
 
 class ProcessAskClientForWakala implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, DmccTraderHelperTrait;
 
     protected mixed $traderOrder;
 

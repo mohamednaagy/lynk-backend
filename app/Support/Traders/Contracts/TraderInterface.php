@@ -6,11 +6,11 @@ use App\Models\FinancingOrder;
 
 interface TraderInterface
 {
-    public function acceptAgreement();
+    public function createTraderOrder(FinancingOrder $financingOrder);
 
-    public function getTti(FinancingOrder $financingOrder);
+    public function transferOwnershipToCustomer(FinancingOrder $financingOrder);
 
-    public function fetchNotifications(string $type);
+    public function sellingCommodityToOpenMarket(FinancingOrder $financingOrder);
 
     public function cancelOrder(FinancingOrder $financingOrder): mixed;
 }
