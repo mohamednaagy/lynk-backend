@@ -4,8 +4,10 @@ namespace App\Support\Traders\TradingStrategies\Bursam;
 
 use App\Actions\Contracts\Orders\UpdateTraderOrder;
 use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
@@ -28,7 +30,7 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
             BursamMurabhaStep::PurchasingCommodity
         );
 
-        $this->transferOwnershipToLender($request, $traderOrder);
+        $this->transferOwnershipToLender($traderOrder, $request);
     }
 
     protected function transferOwnershipToLender(TraderOrder $traderOrder, $request)
@@ -47,6 +49,50 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
             );
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+        }
+    }
+
+    public function updateMurabahaPurchaseOffer(TraderOrder $traderOrder, $request)
+    {
+    }
+
+    public function UpdateCommodityCertificateForClient(TraderOrder $traderOrder, Request $request)
+    {
+        $traderOrder->ensureCanAccessStep(BursamMurabhaStep::ContractSigned);
+
+        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
+
+        if ($request->boolean('automatically_generate_file')) {
+            $trader->createSellingCommodityToCustomerDocument($traderOrder);
+        } else {
+            $traderOrder->addMediaFromBase64(
+                base64_encode(file_get_contents($request->file('document')))
+            )
+                ->usingFileName("client-certificate-{$traderOrder->id}.pdf")
+                ->toMediaCollection(TraderOrderMediaCollection::SellingCommodityToCustomer);
+
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
+        }
+    }
+
+    public function UpdateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
+    {
+        $traderOrder->ensureCanAccessStep(BursamMurabhaStep::CommoditySoldToCustomer);
+
+        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
+            DmccMurabhaStep::MurabahaSaleCompleted
+        );
+
+        $this->createStepHistories(
+            $request,
+            $traderOrder,
+            DmccMurabhaStep::MurabahaSaleCompleted
+        );
+
+        if ($canUpdateOrderStatus) {
+            $traderOrder->update([
+                'status' => TraderOrderStatus::Completed,
+            ]);
         }
     }
 }

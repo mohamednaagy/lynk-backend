@@ -32,32 +32,4 @@ return [
             FinancingOrderHistory::MurabahaSaleCompleted,
         ],
     ],
-    'v2' => [
-        BursamMurabhaStep::TraderOrderCreated => [
-            FinancingOrderHistory::GetTtiId,
-        ],
-        BursamMurabhaStep::PurchasingCommodity => [
-            FinancingOrderHistory::RespondPtp,
-            FinancingOrderHistory::GetPtpDocument,
-            FinancingOrderHistory::AttachPtpDocumentToOrder,
-            FinancingOrderHistory::GetTtiHoldingCertificateDocument,
-            FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-        ],
-        BursamMurabhaStep::ClientWakala => [
-            FinancingOrderHistory::WaitingClientWakala,
-            FinancingOrderHistory::ClientWakalaAccepted,
-        ],
-        BursamMurabhaStep::ContractSigned => [
-            FinancingOrderHistory::ContractSigned,
-        ],
-        BursamMurabhaStep::CommoditySoldToCustomer => [
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-        ],
-        BursamMurabhaStep::MurabahaSaleCompleted => [
-            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
-            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
-            FinancingOrderHistory::MurabahaSaleCompleted,
-        ],
-    ],
 ];

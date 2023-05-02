@@ -6,6 +6,7 @@ use App\Actions\Contracts\Orders\UpdateTraderOrder;
 use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
@@ -59,5 +60,45 @@ abstract class BaseDmccStrategy implements TraderStrategyInterface
             $traderOrder,
             DmccMurabhaStep::MurabhaOfferIssued
         );
+    }
+
+    public function UpdateCommodityCertificateForClient(TraderOrder $traderOrder, Request $request)
+    {
+        $traderOrder->ensureCanAccessStep(DmccMurabhaStep::ContractSigned);
+
+        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
+
+        if ($request->boolean('automatically_generate_file')) {
+            $trader->createSellingCommodityToCustomerDocument($traderOrder);
+        } else {
+            $traderOrder->addMediaFromBase64(
+                base64_encode(file_get_contents($request->file('document')))
+            )
+                ->usingFileName("client-certificate-{$traderOrder->id}.pdf")
+                ->toMediaCollection(TraderOrderMediaCollection::SellingCommodityToCustomer);
+
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
+        }
+    }
+
+    public function UpdateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
+    {
+        $traderOrder->ensureCanAccessStep(DmccMurabhaStep::MurabhaOfferIssued);
+
+        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
+            DmccMurabhaStep::MurabahaSaleCompleted
+        );
+
+        $this->createStepHistories(
+            $request,
+            $traderOrder,
+            DmccMurabhaStep::MurabahaSaleCompleted
+        );
+
+        if ($canUpdateOrderStatus) {
+            $traderOrder->update([
+                'status' => TraderOrderStatus::Completed,
+            ]);
+        }
     }
 }
