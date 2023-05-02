@@ -14,7 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('trader_orders', function (Blueprint $table) {
-            $table->uuid('uuid')->length(50)->nullable()->after('id');
+            $table->uuid()->nullable()->after('id');
+            $table->string('reference')->nullable()->change();
         });
     }
 
@@ -27,6 +28,7 @@ return new class extends Migration
     {
         Schema::table('trader_orders', function (Blueprint $table) {
             $table->dropColumn('uuid');
+            $table->string('reference')->change();
         });
     }
 };
