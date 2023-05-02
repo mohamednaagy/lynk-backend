@@ -50,18 +50,19 @@ class OverwriteZatcaInvoiceMediaJob implements ShouldQueue
         $seller = app(GetProjectSettings::class)->handle();
 
         FinancingOrder::query()
-            ->orderBy('id')->chunk(100, function ($orders) use ($seller) {
+            ->orderBy('id')
+            ->chunk(100, function ($orders) use ($seller) {
                 $orders->map(function ($financingOrder) use ($seller) {
                     $media = $financingOrder->getFirstMedia(FinancingOrderMediaCollection::ZatcaInvoice);
-
-                    if ($media) {
-                        $media->delete();
-                    }
 
                     $creationFeeTransaction = $financingOrder->creationFeeTransactions?->first();
 
                     if (blank($creationFeeTransaction)) {
                         return;
+                    }
+
+                    if ($media) {
+                        $financingOrder->clearMediaCollection(FinancingOrderMediaCollection::ZatcaInvoice);
                     }
 
                     DB::transaction(function () use ($financingOrder, $seller, $creationFeeTransaction) {
