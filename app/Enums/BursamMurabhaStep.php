@@ -25,7 +25,6 @@ final class BursamMurabhaStep extends Enum implements TraderMurabhaStepInterface
 
         return match ($version) {
             'v1' => get_murabha_steps('bursam', 'v1'),
-            'v2' => get_murabha_steps('bursam', 'v2'),
             default => throw new \InvalidArgumentException('Invalid version')
         };
     }

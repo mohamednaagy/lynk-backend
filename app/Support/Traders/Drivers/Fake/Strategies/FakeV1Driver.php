@@ -389,7 +389,7 @@ class FakeV1Driver implements TraderInterface
         // TODO: Implement sellingCommodity() method.
     }
 
-    public function jobDispatch(TraderOrder $traderOrder)
+    public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder)
     {
         match ((int) $traderOrder->last_history_action) {
             FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::dispatch($traderOrder->id),

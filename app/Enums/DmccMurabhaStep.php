@@ -27,7 +27,6 @@ final class DmccMurabhaStep extends Enum implements TraderMurabhaStepInterface
 
         return match ($version) {
             'v1' => get_murabha_steps('dmcc', 'v1'),
-            'v2' => get_murabha_steps('dmcc', 'v2'),
             default => throw new \InvalidArgumentException('Invalid version')
         };
     }

@@ -56,7 +56,7 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
     {
     }
 
-    public function UpdateCommodityCertificateForClient(TraderOrder $traderOrder, Request $request)
+    public function updateCommodityCertificateForClient(TraderOrder $traderOrder, Request $request)
     {
         $traderOrder->ensureCanAccessStep(BursamMurabhaStep::ContractSigned);
 
@@ -75,7 +75,7 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
         }
     }
 
-    public function UpdateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
+    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
     {
         $traderOrder->ensureCanAccessStep(BursamMurabhaStep::CommoditySoldToCustomer);
 

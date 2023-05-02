@@ -6,7 +6,6 @@ use App\Models\TraderOrder;
 use App\Support\Traders\TradingStrategies\Bursam\BursamStrategyV1;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
 use App\Support\Traders\TradingStrategies\Dmcc\DmccStrategyV1;
-use App\Support\Traders\TradingStrategies\Dmcc\DmccStrategyV2;
 use Illuminate\Http\Request;
 
 class TraderStrategyContext
@@ -19,7 +18,6 @@ class TraderStrategyContext
 
         $this->strategy = match ($strategy) {
             'dmcc.v1' => app(DmccStrategyV1::class),
-            'dmcc.v2' => app(DmccStrategyV2::class),
             'bursam.v1' => app(BursamStrategyV1::class),
             default => throw new \InvalidArgumentException('Invalid Trader Or Version')
         };
@@ -35,13 +33,13 @@ class TraderStrategyContext
         $this->strategy->updateMurabahaPurchaseOffer($traderOrder, $request);
     }
 
-    public function UpdateCommodityCertificateForClient(TraderOrder $traderOrder, Request $request): void
+    public function updateCommodityCertificateForClient(TraderOrder $traderOrder, Request $request): void
     {
-        $this->strategy->UpdateCommodityCertificateForClient($traderOrder, $request);
+        $this->strategy->updateCommodityCertificateForClient($traderOrder, $request);
     }
 
-    public function UpdateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request): void
+    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request): void
     {
-        $this->strategy->UpdateMurabhaCompleteDocument($traderOrder, $request);
+        $this->strategy->updateMurabhaCompleteDocument($traderOrder, $request);
     }
 }

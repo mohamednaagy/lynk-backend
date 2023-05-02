@@ -56,7 +56,7 @@ class ProcessDmccPtpNotification implements ShouldQueue
                 return;
             }
 
-            $trader = Trader::driver($traderOrder->provider);
+            $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
 
             $trader->respondPtpService($this->ttiId);
 

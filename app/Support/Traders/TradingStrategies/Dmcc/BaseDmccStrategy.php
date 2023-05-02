@@ -62,7 +62,7 @@ abstract class BaseDmccStrategy implements TraderStrategyInterface
         );
     }
 
-    public function UpdateCommodityCertificateForClient(TraderOrder $traderOrder, Request $request)
+    public function updateCommodityCertificateForClient(TraderOrder $traderOrder, Request $request)
     {
         $traderOrder->ensureCanAccessStep(DmccMurabhaStep::ContractSigned);
 
@@ -81,7 +81,7 @@ abstract class BaseDmccStrategy implements TraderStrategyInterface
         }
     }
 
-    public function UpdateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
+    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
     {
         $traderOrder->ensureCanAccessStep(DmccMurabhaStep::MurabhaOfferIssued);
 

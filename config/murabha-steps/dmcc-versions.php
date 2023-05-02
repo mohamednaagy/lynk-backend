@@ -16,39 +16,6 @@ return [
             FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ],
-        DmccMurabhaStep::ContractSigned => [
-            FinancingOrderHistory::ContractSigned,
-        ],
-        DmccMurabhaStep::ClientWakala => [
-            FinancingOrderHistory::WaitingClientWakala,
-            FinancingOrderHistory::ClientWakalaAccepted,
-        ],
-        DmccMurabhaStep::CommoditySoldToCustomer => [
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-        ],
-        DmccMurabhaStep::MurabhaOfferIssued => [
-            FinancingOrderHistory::IssueMurabahaOffer,
-            FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
-            FinancingOrderHistory::AttachMpoDocument,
-        ],
-        DmccMurabhaStep::MurabahaSaleCompleted => [
-            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
-            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
-            FinancingOrderHistory::MurabahaSaleCompleted,
-        ],
-    ],
-    'v2' => [
-        DmccMurabhaStep::TraderOrderCreated => [
-            FinancingOrderHistory::GetTtiId,
-        ],
-        DmccMurabhaStep::PurchasingCommodity => [
-            FinancingOrderHistory::RespondPtp,
-            FinancingOrderHistory::GetPtpDocument,
-            FinancingOrderHistory::AttachPtpDocumentToOrder,
-            FinancingOrderHistory::GetTtiHoldingCertificateDocument,
-            FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-        ],
         DmccMurabhaStep::ClientWakala => [
             FinancingOrderHistory::WaitingClientWakala,
             FinancingOrderHistory::ClientWakalaAccepted,
@@ -70,4 +37,5 @@ return [
             FinancingOrderHistory::MurabahaSaleCompleted,
         ],
     ],
+    'v2' => [],
 ];

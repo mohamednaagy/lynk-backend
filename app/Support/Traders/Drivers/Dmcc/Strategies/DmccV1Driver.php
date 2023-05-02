@@ -478,12 +478,12 @@ class DmccV1Driver implements TraderInterface
         // TODO: Implement sellingCommodity() method.
     }
 
-    public function jobDispatch(TraderOrder $traderOrder)
+    public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder)
     {
         match ((int) $traderOrder->last_history_action) {
             FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::dispatch($traderOrder->id),
-            FinancingOrderHistory::ContractSigned => ProcessAskClientForWakala::dispatch($traderOrder->id),
-            FinancingOrderHistory::ClientWakalaAccepted => ProcessDmccSellingCommodityToCustomerOrder::dispatch($traderOrder->id),
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAskClientForWakala::dispatch($traderOrder->id),
+            FinancingOrderHistory::ContractSigned => ProcessDmccSellingCommodityToCustomerOrder::dispatch($traderOrder->id),
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::dispatch($traderOrder->id),
             default => null,
         };

@@ -2,14 +2,10 @@
 
 namespace App\Jobs\General;
 
-use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
-use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoOrder;
-use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccRespondedToPtpOrder;
-use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccSellingCommodityToCustomerOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -53,25 +49,9 @@ class ProcessFinancingOrders implements ShouldQueue
                 TraderOrderStatus::InProgress,
             ])->chunk(10, function ($traderOrderCollection) {
                 $traderOrderCollection->each(function (TraderOrder $traderOrder) {
-                    Trader::driver($traderOrder->provider, $traderOrder->version)->jobDispatch($traderOrder);
+                    Trader::driver($traderOrder->provider, $traderOrder->version)
+                        ->dispatchJobForTransitioningFlow($traderOrder);
                 });
             });
-    }
-
-    public function basedOnProvider($traderOrder)
-    {
-        match ($traderOrder->provider) {
-            'dmcc' => match ((int) $traderOrder->last_history_action) {
-                FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::dispatch($traderOrder->id),
-                FinancingOrderHistory::ContractSigned => ProcessAskClientForWakala::dispatch($traderOrder->id),
-                FinancingOrderHistory::ClientWakalaAccepted => ProcessDmccSellingCommodityToCustomerOrder::dispatch($traderOrder->id),
-                FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::dispatch($traderOrder->id),
-                default => null,
-            },
-            'buram' => match ((int) $traderOrder->last_history_action) {
-                FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::dispatch($traderOrder->id),
-                default => null,
-            }
-        };
     }
 }

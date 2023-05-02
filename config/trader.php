@@ -4,7 +4,7 @@ return [
     'default' => env('DEFAULT_TRADER', 'fake'),
     'providers' => [
         'dmcc' => [
-            'latest' => 'v2',
+            'latest' => 'v1',
             'username' => env('DMCC_USERNAME', 'bim.interface.uat'),
             'password' => env('DMCC_PASSWORD', 'Dubai$2030'),
             'tti' => [
