@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Dmcc\Jobs\V1;
 
+use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\TraderOrder;
@@ -93,6 +94,8 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue
                 $traderOrder,
                 FinancingOrderHistory::AttachTtiHoldingCertificateDocument
             );
+
+            app(GenerateClientWakala::class)->handle($traderOrder);
         });
     }
 

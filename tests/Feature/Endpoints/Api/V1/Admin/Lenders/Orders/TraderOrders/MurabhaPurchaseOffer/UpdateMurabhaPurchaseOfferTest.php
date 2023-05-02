@@ -9,7 +9,6 @@ use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
@@ -35,7 +34,7 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
 
     private static CommittedOrder $financingOrder;
 
-    private static Builder|Model|TraderOrder $traderOrder;
+    private static Model|TraderOrder $traderOrder;
 
     private static string $updateMurabhaPurchaseOfferUrl;
 
@@ -104,7 +103,7 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
     /**
      * @return void
      */
-    public function test_proceed_murabha_purchase_offer_document_is_successfull_and_order_status_will_be_updated(): void
+    public function test_proceed_murabha_purchase_offer_document_is_successfull(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
@@ -113,6 +112,8 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaPurchaseOfferUrl, self::$requestData)
             ->assertJsonStructure(['data']);
+
+        $this->assertEquals(MurabhaStep::MurabhaOfferIssued, self::$traderOrder->append('step')->step);
     }
 
     /**
@@ -145,5 +146,7 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaPurchaseOfferUrl, self::$requestData)
             ->assertJsonStructure(['data']);
+
+        $this->assertEquals(MurabhaStep::MurabhaOfferIssued, self::$traderOrder->append('step')->step);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Enums;
 
+use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
 
 /**
@@ -9,7 +10,7 @@ use BenSampo\Enum\Enum;
  * @method static static Paid()
  * @method static static Expired()
  */
-final class EdaatInvoiceStatus extends Enum
+final class EdaatInvoiceStatus extends Enum implements LocalizedEnum
 {
     const Pending = 1;
 

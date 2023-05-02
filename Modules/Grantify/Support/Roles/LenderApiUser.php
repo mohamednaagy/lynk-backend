@@ -26,6 +26,8 @@ class LenderApiUser
         ],
         Subject::LenderWebhooks => [
             Action::Create,
+            Action::Index,
+            Action::Delete,
         ],
         Subject::LenderWallet => [
             Action::Manage,

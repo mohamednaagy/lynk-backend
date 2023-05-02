@@ -49,7 +49,7 @@ class EnquiryTransformer extends TransformerAbstract
 
     public function includeCreationDate(Enquiry $enquiry): Primitive
     {
-        return $this->primitive($enquiry->created_at->format('Y-m-d h:m A'));
+        return $this->primitive($enquiry->created_at->format('Y-m-d h:i A'));
     }
 
     public function includeBody(Enquiry $enquiry): Primitive
