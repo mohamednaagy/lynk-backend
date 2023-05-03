@@ -5,6 +5,7 @@ namespace App\Support\Traders\Drivers;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\ProviderCredential;
+use App\Models\TraderOrder;
 use App\Support\Traders\Contracts\TraderInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
@@ -125,70 +126,39 @@ class BursamDriver implements TraderInterface
 
     //Selling commodity to open market
 
-public function sellingCommodityToOpenMarket(FinancingOrder $financingOrder)
+public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
 {
-    $traderOrder = $this->initiateTraderOrder($financingOrder);
     $traderOrder->update(['uuid' => Str::uuid()]);
 
     Http::withHeaders([
         'Authorization' => 'Bearer '.$this->accessToken,
         'Content-Type' => 'application/json',
     ])->post(
-         $this->baseDevURL('api/process/svc/bsas/order.json'),
-         [
-             'header' => [
-                 'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                 'uuid' => $traderOrder->uuid,
-             ],
-             'request' => [
-                 'serialNumber' => '1',
-                 'bidOption' => 'N',
-                 'otcOption' => 'Y',
-                 'stbOption' => 'Y',
-                 'productCode' => 'CPO-MSIA-09', // get it from settings
-                 'purchaseType' => 'P',
-                 'clientName' => '',
-                 'currency' => 'SAR',
-                 'bidValue' => $financingOrder->amount->formatByDecimal(),
-                 'valueDate' => $financingOrder->created_at->format('Ymd'),
-                 'tenor' => '00090',
-                 'otcCounterParty' => $financingOrder->customer_name,
-                 'otcMurabaha' => '',
-                 'otcMurabahaValue' => $financingOrder->selling_price->formatByDecimal(),
-                 'eCertNo' => '',
-             ],
-         ]
-     );
-}
-
-//Selling commodity to open market Result
-
-public function sellingCommodityToOpenMarketResult(FinancingOrder $financingOrder)
-{
-    $traderOrder = $financingOrder->activeTraderOrder()->first();
-
-    $response = Http::withHeaders([
-        'Authorization' => 'Bearer '.$this->accessToken,
-        'Content-Type' => 'application/json',
-    ])->post(
-        $this->baseDevURL('api/process/svc/bsas/orderResult.json'),
+        $this->baseDevURL('api/process/svc/bsas/order.json'),
         [
             'header' => [
                 'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                'uuid' => $traderOrder?->uuid,
+                'uuid' => $traderOrder->uuid,
             ],
             'request' => [
                 'serialNumber' => '1',
-                'forceYN' => 'Y',
-                'maxWaitTime' => '10',
-                'waitAllDoneYN' => 'Y',
+                'bidOption' => 'N',
+                'otcOption' => 'Y',
+                'stbOption' => 'Y',
+                'productCode' => 'CPO-MSIA-09', // get it from settings
+                'purchaseType' => 'P',
+                'clientName' => '',
+                'currency' => 'SAR',
+                'bidValue' => $traderOrder->order->amount->formatByDecimal(),
+                'valueDate' => $traderOrder->order->created_at->format('Ymd'),
+                'tenor' => '00090',
+                'otcCounterParty' => $traderOrder->order->customer_name,
+                'otcMurabaha' => '',
+                'otcMurabahaValue' => $traderOrder->order->selling_price->formatByDecimal(),
+                'eCertNo' => $traderOrder->ecertNo,
             ],
         ]
     );
-
-    $traderOrder->update([
-        'data' => $response->json('body.0'),
-    ]);
 }
 
     public function acceptAgreement()
