@@ -4,6 +4,7 @@ namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\ChargeLenderBalanceManually;
 use App\Actions\Contracts\Wallets\CreateTransactions;
+use App\Actions\Contracts\Wallets\GenerateVoucherInvoice;
 use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
@@ -13,8 +14,10 @@ use Illuminate\Support\Arr;
 
 class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
 {
-    public function __construct(protected CreateTransactions $createTransactions)
-    {
+    public function __construct(
+        protected CreateTransactions $createTransactions,
+        protected GenerateVoucherInvoice $generateVoucherInvoice,
+    ) {
     }
 
     public function handle(Company $company, array $data)
@@ -30,6 +33,8 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
 
         $transaction->addMedia(Arr::get($data, 'attachment'))
             ->toMediaCollection(TransactionMediaCollection::Attachments);
+
+        $this->generateVoucherInvoice->handle($transaction);
 
         return $transaction;
     }
