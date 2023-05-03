@@ -160,7 +160,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCreatedAt(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->created_at->format('Y-m-d h:mA'));
+        return $this->primitive($financingOrder->created_at->format('Y-m-d h:i A'));
     }
 
     public function includeHistory(FinancingOrder $financingOrder): Primitive|Collection

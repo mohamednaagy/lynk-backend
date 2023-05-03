@@ -2,17 +2,16 @@
 
 namespace App\Support\FinancingOrders\StepAndHistories;
 
-use App\Enums\MurabhaStep;
-
 class StepHistoriesDictionary
 {
     public \SplDoublyLinkedList $dictionaryNodeList;
 
-    public function __construct()
+    public function __construct($trader, $version = null)
     {
         $this->dictionaryNodeList = new \SplDoublyLinkedList();
+        $version = $version ?? get_latest_version_of_trader($trader);
 
-        foreach (MurabhaStep::$stepToHistoriesDictionary as $step => $histories) {
+        foreach (trader_step_histories($trader, $version) as $step => $histories) {
             $this->dictionaryNodeList->push(new StepHistoriesDictionaryNode($step, $histories));
         }
     }

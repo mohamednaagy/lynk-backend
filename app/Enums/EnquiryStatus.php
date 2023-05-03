@@ -2,9 +2,10 @@
 
 namespace App\Enums;
 
+use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
 
-final class EnquiryStatus extends Enum
+final class EnquiryStatus extends Enum implements LocalizedEnum
 {
     const UnderReview = 1;
 

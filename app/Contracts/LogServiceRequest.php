@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * This interface will used by any event to when a job/driver comminucates with third party.
+ * This interface will be used by any event to when a job/driver communicates with third party.
  * The request/response from the third party will be fired using the event that implements
  * this interface to be utilized in the application.
  */

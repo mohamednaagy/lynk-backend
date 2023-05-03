@@ -4,10 +4,11 @@ namespace App\Models;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,6 +22,8 @@ use UnexpectedValueException;
 /**
  * @property mixed $reference
  * @property mixed $order
+ * @property mixed $provider
+ * @property mixed $version
  * @property TraderOrderStatus $status
  * @property Collection $traderHistories
  * @property Carbon $created_at
@@ -40,6 +43,7 @@ class TraderOrder extends Model implements HasMedia
             'financing_order_id',
             'uuid',
             'provider',
+            'version',
             'status',
             'data',
             'reference',
@@ -103,12 +107,14 @@ class TraderOrder extends Model implements HasMedia
 
     public function checkOrderStepComplete(string $step): bool
     {
-        if (! array_key_exists($step, MurabhaStep::$stepToHistoriesDictionary)) {
-            throw new UnexpectedValueException('No mapping for this status');
+        $stepToHistoriesDictionary = trader_step_histories($this->provider, $this->version);
+
+        if (! array_key_exists($step, $stepToHistoriesDictionary)) {
+            throw new UnexpectedValueException('No mapping for this step');
         }
 
         return (bool) $this->traderHistories()
-            ->where('action', end(MurabhaStep::$stepToHistoriesDictionary[$step]))
+            ->where('action', end($stepToHistoriesDictionary[$step]))
             ->first();
     }
 
@@ -142,6 +148,17 @@ class TraderOrder extends Model implements HasMedia
                 ->latest('id')
                 ->take(1),
         ]);
+    }
+
+    protected function step(): Attribute
+    {
+        $lastAction = $this->traderHistories()->latest('id')->first();
+
+        $stepNode = app(StepHistoriesDictionary::class)->getStepByHistory($lastAction?->action);
+
+        return new Attribute(
+            get: fn () => $stepNode?->step,
+        );
     }
 
     /**

@@ -34,7 +34,7 @@ class EnquiryReplyTransformer extends TransformerAbstract
 
     public function includeCreationDate(EnquiryReply $enquiryReply): Primitive
     {
-        return $this->primitive($enquiryReply->created_at->format('Y-m-d h:m A'));
+        return $this->primitive($enquiryReply->created_at->format('Y-m-d h:i A'));
     }
 
     public function includeCreator(EnquiryReply $enquiryReply): Primitive

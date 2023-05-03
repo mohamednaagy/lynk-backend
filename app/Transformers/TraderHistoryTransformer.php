@@ -57,10 +57,6 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
                 'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
-                'wakala_document' => [
-                    'url' => $wakalaMedia?->file_url,
-                    'date' => optional($wakalaMedia)->created_at?->format('Y-m-d h:i:s A'),
-                ],
                 'signed_wakala_document' => [
                     'url' => $signedWakalaMedia?->file_url,
                     'date' => optional($signedWakalaMedia)->created_at?->format('Y-m-d h:i:s A'),
@@ -86,6 +82,10 @@ class TraderHistoryTransformer extends TransformerAbstract
             ],
             FinancingOrderHistory::ContractSigned => [
                 'step' => 'contract_signed',
+                'wakala_document' => [
+                    'url' => $wakalaMedia?->file_url,
+                    'date' => optional($wakalaMedia)->created_at?->format('Y-m-d h:i:s A'),
+                ],
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
                 'duration' => $this->getDurationForHistoryStep(FinancingOrderHistory::ContractSigned),
@@ -131,7 +131,7 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     public function getDurationForHistoryStep($history)
     {
-        $financingOrderStatus = app(StepHistoriesDictionary::class)
+        $financingOrderStatus = (new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version))
             ->getStepByHistory($history)
             ?->step;
 
@@ -161,7 +161,7 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     private function getLatestTraderHistoryForPreviousStatusOfStatus($status)
     {
-        $previousStepActions = app(StepHistoriesDictionary::class)
+        $previousStepActions = (new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version))
             ->getPreviousStepOf($status)
             ?->histories;
 
@@ -174,7 +174,7 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     private function getLatestTraderHistoryForStatus($status)
     {
-        $stepActions = app(StepHistoriesDictionary::class)
+        $stepActions = (new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version))
             ->getStepOf($status)
             ?->histories
             ?? [];

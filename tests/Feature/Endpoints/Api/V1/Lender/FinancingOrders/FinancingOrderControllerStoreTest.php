@@ -53,7 +53,9 @@ class FinancingOrderControllerStoreTest extends TestCase
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000');
+        [self::$company, self::$wallet] = $this->createCompany('2000', data: [
+            'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::On,
+        ]);
         self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor);
         self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);

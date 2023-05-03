@@ -4,6 +4,7 @@ return [
     'default' => env('DEFAULT_TRADER', 'fake'),
     'providers' => [
         'dmcc' => [
+            'latest' => 'v1',
             'username' => env('DMCC_USERNAME', 'bim.interface.uat'),
             'password' => env('DMCC_PASSWORD', 'Dubai$2030'),
             'tti' => [
@@ -14,6 +15,7 @@ return [
             ],
         ],
         'fake' => [
+            'latest' => 'v1',
             'url' => env('FAKE_TRADER_URL', 'faker-dd.uselynk.com/api/'),
             'username' => env('FAKE_TRADER_USERNAME', 'lynk'),
             'password' => env('FAKE_TRADER_PASSWORD', '12345678'),
@@ -24,8 +26,8 @@ return [
                 'registered_member' => env('FAKE_TRADER_TTI_REGISTERED_MEMBER', 'BOLFT'),
             ],
         ],
-
         'bursam' => [
+            'latest' => 'v1',
             'base_prod_url' => env('BASE_PROD_URL', 'bsasapi.bursamalaysia.com'), // change this to production
             'base_dev_url' => env('BASE_DEV_URL', 'traderdcthh-erfmbxcc1323421.uselynk.com'),
             'member_short_name' => env('BURSAM_MEMBER_SHORT_NAME', 'LYNK'),
