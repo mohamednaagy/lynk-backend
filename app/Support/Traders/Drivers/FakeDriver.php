@@ -268,7 +268,7 @@ class FakeDriver implements TraderInterface
 
             $previous_owner = $products->pluck('previous_owner')->implode($separator);
             $product_name = $products->pluck('product')->implode($separator);
-
+            $date = Carbon::now('Asia/Riyadh');
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
@@ -280,12 +280,14 @@ class FakeDriver implements TraderInterface
                     'amount' => $amount,
                     'previous_owner' => $previous_owner,
                     'product_name' => $product_name,
-                    'date' => Carbon::now('Asia/Riyadh')->toDateString(),
-                    'time' => Carbon::now('Asia/Riyadh')->toTimeString(),
+                    'date' => $date->toDateString(),
+                    'time' => $date->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::TransferOwnershipToLender
             );
+
+            $this->historyUpdatedAt = $date;
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
         } catch (Exception $exception) {

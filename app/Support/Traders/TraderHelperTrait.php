@@ -9,11 +9,14 @@ use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\PdfGenerator\PdfGenerator;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 trait TraderHelperTrait
 {
+    public ?Carbon $historyUpdatedAt = null;
+
     public array $stepToHistoriesMap = [
         MurabhaStep::PurchasingCommodity => [
             FinancingOrderHistory::RespondPtp => null,
@@ -86,12 +89,16 @@ trait TraderHelperTrait
 
     public function createTraderOrderHistory(TraderOrder $traderOrder, int $action): void
     {
+        $updatedAt = ! blank($this->historyUpdatedAt) ?
+            $this->historyUpdatedAt->toDateTimeString()
+            : now();
+
         $traderOrder->traderHistories()->updateOrCreate(
             [
                 'action' => $action,
             ],
             [
-                'updated_at' => now(),
+                'updated_at' => $updatedAt,
             ]
         );
     }
