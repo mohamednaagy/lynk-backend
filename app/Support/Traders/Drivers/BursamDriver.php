@@ -56,7 +56,7 @@ class BursamDriver implements TraderInterface
         return $financingOrder->traderOrders()->create([
             'uuid' => Str::uuid(),
             'provider' => 'bursam',
-            'status' => TraderOrderStatus::InProgress,
+            'status' => TraderOrderStatus::Initiated,
         ]);
     }
 
@@ -64,7 +64,7 @@ class BursamDriver implements TraderInterface
     {
         $traderOrder = $this->initiateTraderOrder($financingOrder);
 
-        $response = Http::withHeaders([
+        Http::withHeaders([
             'Authorization' => 'Bearer '.$this->accessToken,
             'Content-Type' => 'application/json',
         ])->post(
@@ -79,7 +79,7 @@ class BursamDriver implements TraderInterface
                     'bidOption' => 'Y',
                     'otcOption' => 'N',
                     'stbOption' => 'N',
-                    'productCode' => 'CPO-MSIA-09', // get it from requ
+                    'productCode' => 'CPO-MSIA-09', // get it from settings
                     'purchaseType' => 'P',
                     'clientName' => '',
                     'currency' => 'SAR',
@@ -97,6 +97,8 @@ class BursamDriver implements TraderInterface
 
     public function fetchOrderResult(FinancingOrder $financingOrder)
     {
+        $traderOrder = $financingOrder->activeTraderOrder()->first();
+
         $response = Http::withHeaders([
             'Authorization' => 'Bearer '.$this->accessToken,
             'Content-Type' => 'application/json',
@@ -105,7 +107,7 @@ class BursamDriver implements TraderInterface
             [
                 'header' => [
                     'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                    'uuid' => $financingOrder->activeTraderOrder()->first()?->uuid,
+                    'uuid' => $traderOrder?->uuid,
                 ],
                 'request' => [
                     'serialNumber' => '1',
@@ -116,7 +118,7 @@ class BursamDriver implements TraderInterface
             ]
         );
 
-        $financingOrder->activeTraderOrder()->update([
+        $traderOrder->update([
             'data' => $response->json(),
         ]);
     }

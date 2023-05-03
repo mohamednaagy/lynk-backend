@@ -7,6 +7,8 @@ use BenSampo\Enum\Enum;
 
 final class TraderOrderStatus extends Enum implements LocalizedEnum
 {
+    const Initiated = 0;
+
     const InProgress = 1;
 
     const Completed = 2;
