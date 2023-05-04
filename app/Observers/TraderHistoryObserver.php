@@ -26,53 +26,53 @@ class TraderHistoryObserver
      */
     public function created(TraderHistory $traderHistory)
     {
-        $timeout = app(GeneralSettings::class)->trader_order_timeout;
-
-        // some Order at last step so no next step I think  another mail content needed
-        $currentStepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderHistory->action);
-
-        if (! $currentStepNode) {
-            return;
-        }
-
-        $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($currentStepNode->step);
-
-        if ($nextStepNode) {
-            NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $traderHistory->action)
-                ->delay(now()->addMinutes($timeout));
-        }
-
-        if ($traderHistory->traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
-            return;
-        }
-
-        $stepNode = app(StepHistoriesDictionary::class)->getCompletedStepByHistory($traderHistory->action);
-
-        $financingOrder = $traderHistory->traderOrder->order;
-
-        if ($stepNode?->step === MurabhaStep::MurabhaOfferIssued) {
-            app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)->handle($financingOrder);
-
-            return;
-        }
-
-        if (empty($traderHistory->traderOrder->products)) {
-            return;
-        }
-
-        $actions = match ($stepNode?->step) {
-            MurabhaStep::CommoditySoldToCustomer => [
-                SendSmsWhenStatusIsCommoditySoldToCustomer::class,
-                FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
-            ],
-            MurabhaStep::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
-            MurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
-            default => []
-        };
-
-        foreach ($actions as $action) {
-            app($action)->handle($financingOrder, $traderHistory->traderOrder);
-        }
+//        $timeout = app(GeneralSettings::class)->trader_order_timeout;
+//
+//        // some Order at last step so no next step I think  another mail content needed
+//        $currentStepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderHistory->action);
+//
+//        if (! $currentStepNode) {
+//            return;
+//        }
+//
+//        $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($currentStepNode->step);
+//
+//        if ($nextStepNode) {
+//            NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $traderHistory->action)
+//                ->delay(now()->addMinutes($timeout));
+//        }
+//
+//        if ($traderHistory->traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+//            return;
+//        }
+//
+//        $stepNode = app(StepHistoriesDictionary::class)->getCompletedStepByHistory($traderHistory->action);
+//
+//        $financingOrder = $traderHistory->traderOrder->order;
+//
+//        if ($stepNode?->step === MurabhaStep::MurabhaOfferIssued) {
+//            app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)->handle($financingOrder);
+//
+//            return;
+//        }
+//
+//        if (empty($traderHistory->traderOrder->products)) {
+//            return;
+//        }
+//
+//        $actions = match ($stepNode?->step) {
+//            MurabhaStep::CommoditySoldToCustomer => [
+//                SendSmsWhenStatusIsCommoditySoldToCustomer::class,
+//                FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
+//            ],
+//            MurabhaStep::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
+//            MurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
+//            default => []
+//        };
+//
+//        foreach ($actions as $action) {
+//            app($action)->handle($financingOrder, $traderHistory->traderOrder);
+//        }
     }
 
     /**
