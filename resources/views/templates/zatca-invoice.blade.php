@@ -813,7 +813,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </div>
 
                 <div class="w-2/12">
-                    <div>{{ $item->getLineTotalWithoutVat()->formatByDecimal() }}</div>
+                    <div>{{ $item->getLineTotal()->formatByDecimal() }}</div>
                 </div>
             </div>
         @endforeach
@@ -834,11 +834,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             </div>
             <div class="w-1/2">
                 <div class="grid grid-cols-2 gap-4 py-3">
-                    <div>{{ __('zatca/e-invoice.subtotal') }}</div>
-                    <div>
-                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getSubtotal()->formatByDecimal()]) }}
-                    </div>
-
                     @if ($order->getTotalDiscount()->getAmount() > 0)
                         <div>{{ __('zatca/e-invoice.total_discount') }}</div>
                         <div>

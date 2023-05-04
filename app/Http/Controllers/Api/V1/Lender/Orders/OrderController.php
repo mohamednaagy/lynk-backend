@@ -168,12 +168,11 @@ class OrderController extends Controller
 
                 // deduct the cost from the wallet
                 $creationFeeTransaction = $deductOrderCreationFee->handle($financingOrder);
-                $vatPercentageTransaction = $deductVatPercentage->handle($financingOrder, $creationFeeTransaction, $company);
+                $deductVatPercentage->handle($financingOrder, $creationFeeTransaction, $company);
 
                 $generateFatoura->handel(
                     $financingOrder,
-                    creationFeeTransaction: $creationFeeTransaction,
-                    vatPercentageTransaction: $vatPercentageTransaction
+                    creationFeeTransaction: $creationFeeTransaction
                 );
 
                 dispatch(new NotifyAdminsAboutOrderCreated($financingOrder, $user));
