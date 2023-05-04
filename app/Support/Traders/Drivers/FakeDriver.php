@@ -187,16 +187,15 @@ class FakeDriver implements TraderInterface
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
         try {
-            $separator = ' و ';
             $dateTime = $traderOrder->traderHistories()
                 ->where('action', FinancingOrderHistory::ContractSigned)
                 ->first()
-                ?->created_at;
+                ->created_at;
 
+            $separator = ' و ';
+            $dateTime = convert_date_timezone($dateTime, 'Asia/Riyadh');
             $products = collect($traderOrder->products);
-
             $amount = $traderOrder->order->selling_price->formatByDecimal();
-
             $customerName = $traderOrder->order->customer_name;
             $productName = $products->pluck('product')->implode($separator);
 
@@ -287,9 +286,7 @@ class FakeDriver implements TraderInterface
                 TraderOrderMediaCollection::TransferOwnershipToLender
             );
 
-            $data['updated_at'] = $date->toDateString();
-
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument, $data);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
         } catch (Exception $exception) {
             throw new TraderException(collect([
                 'driver' => 'fake',

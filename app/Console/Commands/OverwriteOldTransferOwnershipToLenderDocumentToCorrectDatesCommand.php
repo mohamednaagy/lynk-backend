@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\OverwriteOldSellingCommodityToCustomerDocumentToCorrectDates;
 use App\Jobs\OverwriteOldTransferOwnershipToLenderDocumentToCorrectDates;
 use Illuminate\Console\Command;
 
@@ -29,6 +30,7 @@ class OverwriteOldTransferOwnershipToLenderDocumentToCorrectDatesCommand extends
     public function handle()
     {
         dispatch(new OverwriteOldTransferOwnershipToLenderDocumentToCorrectDates);
+        dispatch(new OverwriteOldSellingCommodityToCustomerDocumentToCorrectDates);
 
         return Command::SUCCESS;
     }

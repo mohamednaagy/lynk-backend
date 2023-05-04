@@ -12,7 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class OverwriteOldTransferOwnershipToLenderDocumentToCorrectDates implements ShouldQueue
+class OverwriteOldSellingCommodityToCustomerDocumentToCorrectDates implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -39,12 +39,17 @@ class OverwriteOldTransferOwnershipToLenderDocumentToCorrectDates implements Sho
             ->chunk(100, function ($traderOrders) {
                 $traderOrders->each(function ($traderOrder) {
                     $products = collect($traderOrder->products);
-                    if (blank($products)) {
+                    $date = $traderOrder->traderHistories
+                        ->where('action', FinancingOrderHistory::ContractSigned)
+                        ->first()
+                        ?->created_at;
+
+                    if (blank($products) || blank($date)) {
                         return;
                     }
 
-                    if ($traderOrder->hasMedia(TraderOrderMediaCollection::TransferOwnershipToLender)) {
-                        $traderOrder->clearMediaCollection(TraderOrderMediaCollection::TransferOwnershipToLender);
+                    if ($traderOrder->hasMedia(TraderOrderMediaCollection::SellingCommodityToCustomer)) {
+                        $traderOrder->clearMediaCollection(TraderOrderMediaCollection::SellingCommodityToCustomer);
                     }
 
                     $trader = Trader::driver($traderOrder->provider);
@@ -52,15 +57,10 @@ class OverwriteOldTransferOwnershipToLenderDocumentToCorrectDates implements Sho
                     $amount = $traderOrder->order->amount->formatByDecimal();
                     $previousOwner = $products->pluck('previous_owner')->implode($separator);
                     $productName = $products->pluck('product')->implode($separator);
-                    $date = $traderOrder->traderHistories
-                        ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
-                        ->first()
-                        ->created_at;
-
                     $date = convert_date_timezone($date, 'Asia/Riyadh');
 
                     $trader->storeOrderDocumentAsPdf(
-                        'transfer-ownership-to-lender',
+                        'selling-commodity-to-customer',
                         [
                             'order_id' => $traderOrder->order->id,
                             'products' => $traderOrder->products,
@@ -74,7 +74,7 @@ class OverwriteOldTransferOwnershipToLenderDocumentToCorrectDates implements Sho
                             'time' => $date->toTimeString(),
                         ],
                         $traderOrder,
-                        TraderOrderMediaCollection::TransferOwnershipToLender
+                        TraderOrderMediaCollection::SellingCommodityToCustomer
                     );
                 });
             });

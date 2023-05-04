@@ -34,6 +34,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
         $seller = $this->getProjectSettings->handle();
 
         DB::transaction(function () use ($financingOrder, $seller, $creationFeeTransaction) {
+            $invoiceDate = convert_date_timezone($financingOrder->created_at, 'Asia/Riyadh');
             $displayQRCodeAsBase64 = GenerateQrCode::fromArray([
                 new Seller($seller->getCompanyName(Config::get('app.locale', 'en'))),
                 new TaxNumber($seller->getVatId()),
@@ -55,7 +56,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
                             $seller->getVatRateInPercentage()
                         ),
                     ],
-                    $financingOrder->created_at,
+                    $invoiceDate,
                     $financingOrder
                 ),
                 'qr_code' => $displayQRCodeAsBase64,

@@ -244,16 +244,15 @@ class DmccDriver implements TraderInterface
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
         try {
-            $separator = ' و ';
             $dateTime = $traderOrder->traderHistories()
                 ->where('action', FinancingOrderHistory::ContractSigned)
                 ->first()
-                ?->created_at;
+                ->created_at;
 
+            $dateTime = convert_date_timezone($dateTime, 'Asia/Riyadh');
+            $separator = ' و ';
             $products = collect($traderOrder->products);
-
             $amount = $traderOrder->order->selling_price->formatByDecimal();
-
             $customerName = $traderOrder->order->customer_name;
             $productName = $products->pluck('product')->implode($separator);
 
@@ -350,8 +349,7 @@ class DmccDriver implements TraderInterface
                 TraderOrderMediaCollection::TransferOwnershipToLender
             );
 
-            $data['updated_at'] = $date->toDateTimeString();
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument, $data);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
         } catch (Exception $exception) {
             logs()->debug('test', [$exception]);
             throw new TraderException(collect([

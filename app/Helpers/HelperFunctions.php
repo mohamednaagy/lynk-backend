@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Carbon;
 use Modules\Grantify\Facades\Grantify;
 
 if (! function_exists('validate_said')) {
@@ -70,8 +71,8 @@ if (! function_exists('get_host_from_url')) {
         $url = parse_url($url, PHP_URL_HOST) ?: explode('/', parse_url($url, PHP_URL_PATH), 2);
 
         return is_array($url) ?
-         array_shift($url)
-         : $url;
+            array_shift($url)
+            : $url;
     }
 }
 
@@ -83,5 +84,12 @@ if (! function_exists('get_file_url')) {
         }
 
         return null;
+    }
+}
+
+if (! function_exists('convert_date_timezone')) {
+    function convert_date_timezone($date, $timezone, $old_timezone = 'UTC'): Carbon
+    {
+        return Carbon::parse($date, $old_timezone)->setTimezone($timezone);
     }
 }
