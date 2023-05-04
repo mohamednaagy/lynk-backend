@@ -45,7 +45,7 @@ class Transaction extends Model implements HasMedia
         $this->addMediaCollection(TransactionMediaCollection::Attachments)
             ->singleFile();
 
-        $this->addMediaCollection(TransactionMediaCollection::VoucherInvoice)
+        $this->addMediaCollection(TransactionMediaCollection::VoucherReceipt)
             ->singleFile();
     }
 

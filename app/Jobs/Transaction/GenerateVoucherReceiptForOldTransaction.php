@@ -2,7 +2,7 @@
 
 namespace App\Jobs\Transaction;
 
-use App\Actions\Contracts\Wallets\GenerateVoucherInvoice;
+use App\Actions\Contracts\Wallets\GenerateVoucherReceipt;
 use App\Enums\TransactionReason;
 use App\Models\Transaction;
 use Illuminate\Bus\Queueable;
@@ -11,7 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class GenerateVoucherInvoiceForOldTransaction implements ShouldQueue
+class GenerateVoucherReceiptForOldTransaction implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -37,7 +37,7 @@ class GenerateVoucherInvoiceForOldTransaction implements ShouldQueue
             ->orderBy('created_at')
             ->chunk(100, function ($transactions) {
                 $transactions->each(function ($transaction) {
-                    app(GenerateVoucherInvoice::class)->handle($transaction);
+                    app(GenerateVoucherReceipt::class)->handle($transaction);
                 });
             });
     }

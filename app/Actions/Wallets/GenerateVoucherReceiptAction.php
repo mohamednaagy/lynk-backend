@@ -2,35 +2,30 @@
 
 namespace App\Actions\Wallets;
 
-use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
-use App\Actions\Contracts\Wallets\GenerateVoucherInvoice;
+use App\Actions\Contracts\Wallets\GenerateVoucherReceipt;
 use App\Enums\MediaCollections\TransactionMediaCollection;
-use App\Models\Company;
 use App\Models\Transaction;
 use App\Support\PdfGenerator\PdfGenerator;
-use Money\Money;
 
-class GenerateVoucherInvoiceAction implements GenerateVoucherInvoice
+class GenerateVoucherReceiptAction implements GenerateVoucherReceipt
 {
     protected string $template = 'templates.voucher-invoice';
 
-    protected string $collectionName = TransactionMediaCollection::VoucherInvoice;
+    protected string $collectionName = TransactionMediaCollection::VoucherReceipt;
 
     public function handle(Transaction $transaction)
     {
+        app()->setLocale('ar');
         $company = $transaction->wallet->holder;
-        $availableOrdersCount = $this->getAvailableOrdersCount($company, $transaction);
-
-        $content = __('invoice/voucher.content', [
+        $content = __('invoices/voucher-receipt.content', [
             'amount' => $transaction->amount->formatByDecimal(),
             'company_name' => $company->name,
-            'number' => $availableOrdersCount,
         ]);
 
         $html = view($this->getTemplate(), [
-            'day' => $transaction->created_at->isoFormat('dddd'),
-            'date' => $transaction->created_at->toDateString(),
-            'time' => $transaction->created_at->toTimeString(),
+            'day' => $transaction->created_at->tz('Asia/Riyadh')->locale('ar')->dayName,
+            'date' => $transaction->created_at->tz('Asia/Riyadh')->toDateString(),
+            'time' => $transaction->created_at->tz('Asia/Riyadh')->toTimeString(),
             'content' => $content,
         ])->render();
 
@@ -47,14 +42,6 @@ class GenerateVoucherInvoiceAction implements GenerateVoucherInvoice
                     ->toMediaCollection($this->getCollectionName());
             }
         );
-    }
-
-    private function getAvailableOrdersCount(Company $company, Transaction $transaction)
-    {
-        $vatRate = app(GetProjectSettings::class)->handle()->getVatRate();
-        $orderCost = $company->order_cost->multiply(($vatRate) + 1)->getAmount();
-
-        return $transaction->amount->divide($orderCost, Money::ROUND_DOWN)->getAmount();
     }
 
     public function getTemplate()

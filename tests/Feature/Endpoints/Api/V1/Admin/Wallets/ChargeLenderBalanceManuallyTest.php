@@ -137,7 +137,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
 
         $response = $this->getJson('api/v1/admin/lenders/'.self::$lender->id.'/transactions');
 
-        $this->assertTrue(Transaction::find($response->json('data.1.id'))->hasMedia(TransactionMediaCollection::VoucherInvoice));
+        $this->assertTrue(Transaction::find($response->json('data.1.id'))->hasMedia(TransactionMediaCollection::VoucherReceipt));
     }
 
     public function test_charge_lender_balance_manually_admin_can_access()

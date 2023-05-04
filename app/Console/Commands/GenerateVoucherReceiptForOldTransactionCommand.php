@@ -2,24 +2,24 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\Transaction\GenerateVoucherInvoiceForOldTransaction;
+use App\Jobs\Transaction\GenerateVoucherReceiptForOldTransaction;
 use Illuminate\Console\Command;
 
-class GenerateVoucherInvoiceForOldTransactionCommand extends Command
+class GenerateVoucherReceiptForOldTransactionCommand extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'voucher-invoice:generate';
+    protected $signature = 'voucher-receipt:generate';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Generate voucher invoice for old transactions';
+    protected $description = 'Generate voucher receipt for old transactions';
 
     /**
      * Execute the console command.
@@ -28,7 +28,7 @@ class GenerateVoucherInvoiceForOldTransactionCommand extends Command
      */
     public function handle()
     {
-        dispatch(new GenerateVoucherInvoiceForOldTransaction);
+        dispatch(new GenerateVoucherReceiptForOldTransaction);
 
         return Command::SUCCESS;
     }

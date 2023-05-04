@@ -4,7 +4,7 @@ namespace App\Actions\Contracts\Wallets;
 
 use App\Models\Transaction;
 
-interface GenerateVoucherInvoice
+interface GenerateVoucherReceipt
 {
     public function handle(Transaction $transaction);
 }

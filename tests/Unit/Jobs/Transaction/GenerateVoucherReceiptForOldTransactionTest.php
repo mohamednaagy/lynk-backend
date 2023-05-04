@@ -7,7 +7,7 @@ use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
-use App\Jobs\Transaction\GenerateVoucherInvoiceForOldTransaction;
+use App\Jobs\Transaction\GenerateVoucherReceiptForOldTransaction;
 use App\Models\Company;
 use App\Models\Transaction;
 use Cknow\Money\Money;
@@ -16,7 +16,7 @@ use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 
-class GenerateVoucherInvoiceForOldTransactionTest extends TestCase
+class GenerateVoucherReceiptForOldTransactionTest extends TestCase
 {
     use RefreshDatabase, InteractsWithCompany;
 
@@ -41,7 +41,7 @@ class GenerateVoucherInvoiceForOldTransactionTest extends TestCase
 
         app(ChargeLenderBalanceManually::class)->handle(self::$lender, $data);
 
-        (new GenerateVoucherInvoiceForOldTransaction)->handle();
+        (new GenerateVoucherReceiptForOldTransaction)->handle();
 
         $transactions = Transaction::query()
             ->whereIn('reason', [
@@ -51,7 +51,7 @@ class GenerateVoucherInvoiceForOldTransactionTest extends TestCase
             ->get();
 
         foreach ($transactions as $transaction) {
-            $this->assertTrue($transaction->hasMedia(TransactionMediaCollection::VoucherInvoice));
+            $this->assertTrue($transaction->hasMedia(TransactionMediaCollection::VoucherReceipt));
         }
     }
 
@@ -63,7 +63,7 @@ class GenerateVoucherInvoiceForOldTransactionTest extends TestCase
         app(CreateTransactions::class)->handle($wallet, TransactionReason::OrderCreationFee, $amount, []);
         app(CreateTransactions::class)->handle($wallet, TransactionReason::VatPercentageFee, $amount, []);
 
-        (new GenerateVoucherInvoiceForOldTransaction)->handle();
+        (new GenerateVoucherReceiptForOldTransaction)->handle();
 
         $transactions = Transaction::query()
             ->whereNotIn('reason', [
@@ -73,7 +73,7 @@ class GenerateVoucherInvoiceForOldTransactionTest extends TestCase
             ->get();
 
         foreach ($transactions as $transaction) {
-            $this->assertFalse($transaction->hasMedia(TransactionMediaCollection::VoucherInvoice));
+            $this->assertFalse($transaction->hasMedia(TransactionMediaCollection::VoucherReceipt));
         }
     }
 }
