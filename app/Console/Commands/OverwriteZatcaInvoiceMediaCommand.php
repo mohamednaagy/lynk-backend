@@ -28,7 +28,7 @@ class OverwriteZatcaInvoiceMediaCommand extends Command
      */
     public function handle()
     {
-        dispatch(new OverwriteZatcaInvoiceMediaJob);
+        dispatch_sync(new OverwriteZatcaInvoiceMediaJob);
 
         return Command::SUCCESS;
     }
