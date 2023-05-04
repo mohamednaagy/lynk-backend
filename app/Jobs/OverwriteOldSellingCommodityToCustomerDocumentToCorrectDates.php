@@ -54,26 +54,26 @@ class OverwriteOldSellingCommodityToCustomerDocumentToCorrectDates implements Sh
 
                     $trader = Trader::driver($traderOrder->provider);
                     $separator = ' و ';
-                    $amount = $traderOrder->order->amount->formatByDecimal();
-                    $previousOwner = $products->pluck('previous_owner')->implode($separator);
+                    $products = collect($traderOrder->products);
+                    $amount = $traderOrder->order->selling_price->formatByDecimal();
+                    $customerName = $traderOrder->order->customer_name;
                     $productName = $products->pluck('product')->implode($separator);
 
                     $trader->storeOrderDocumentAsPdf(
                         'selling-commodity-to-customer',
                         [
-                            'order_id' => $traderOrder->order->id,
-                            'products' => $traderOrder->products,
                             'reference_number' => $traderOrder->id,
-                            'company_name' => $traderOrder->order->company()->withTrashed()->first()?->name,
+                            'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                             'order_number' => $traderOrder->financing_order_id,
+                            'products' => $traderOrder->products,
                             'amount' => $amount,
-                            'previous_owner' => $previousOwner,
                             'product_name' => $productName,
-                            'date' => $date->tz('Asia/Riyadh')->toDateString(),
-                            'time' => $date->tz('Asia/Riyadh')->toTimeString(),
+                            'customer_name' => $customerName,
+                            'contract_signed_date' => $date->tz('Asia/Riyadh')->toDateString(),
+                            'contract_signed_time' => $date->tz('Asia/Riyadh')->toTimeString(),
                         ],
                         $traderOrder,
-                        TraderOrderMediaCollection::SellingCommodityToCustomer
+                        TraderOrderMediaCollection::SellingCommodityToCustomer,
                     );
                 });
             });

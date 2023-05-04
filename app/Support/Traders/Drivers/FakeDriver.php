@@ -197,7 +197,7 @@ class FakeDriver implements TraderInterface
             $amount = $traderOrder->order->selling_price->formatByDecimal();
             $customerName = $traderOrder->order->customer_name;
             $productName = $products->pluck('product')->implode($separator);
-            $data['created_at'] = $dateTime->toDateTimeString();
+            $data['created_at'] = $dateTime;
 
             $this->storeOrderDocumentAsPdf(
                 'selling-commodity-to-customer',
@@ -268,7 +268,7 @@ class FakeDriver implements TraderInterface
             $previous_owner = $products->pluck('previous_owner')->implode($separator);
             $product_name = $products->pluck('product')->implode($separator);
             $date = Carbon::now();
-            $data['created_at'] = $date->toDateTimeString();
+            $data['created_at'] = $date;
 
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
