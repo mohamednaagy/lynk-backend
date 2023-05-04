@@ -57,8 +57,6 @@ class OverwriteOldTransferOwnershipToLenderDocumentToCorrectDates implements Sho
                         ->first()
                         ->created_at;
 
-                    $date = convert_date_timezone($date, 'Asia/Riyadh');
-
                     $trader->storeOrderDocumentAsPdf(
                         'transfer-ownership-to-lender',
                         [
@@ -70,8 +68,8 @@ class OverwriteOldTransferOwnershipToLenderDocumentToCorrectDates implements Sho
                             'amount' => $amount,
                             'previous_owner' => $previousOwner,
                             'product_name' => $productName,
-                            'date' => $date->toDateString(),
-                            'time' => $date->toTimeString(),
+                            'date' => $date->tz('Asia/Riyadh')->toDateString(),
+                            'time' => $date->tz('Asia/Riyadh')->toTimeString(),
                         ],
                         $traderOrder,
                         TraderOrderMediaCollection::TransferOwnershipToLender

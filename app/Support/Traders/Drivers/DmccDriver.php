@@ -249,7 +249,6 @@ class DmccDriver implements TraderInterface
                 ->first()
                 ->created_at;
 
-            $riyadhDate = convert_date_timezone($dateTime, 'Asia/Riyadh');
             $data['created_at'] = $dateTime->toDateTimeString();
             $separator = ' و ';
             $products = collect($traderOrder->products);
@@ -267,8 +266,8 @@ class DmccDriver implements TraderInterface
                     'amount' => $amount,
                     'product_name' => $productName,
                     'customer_name' => $customerName,
-                    'contract_signed_date' => $riyadhDate->toDateString(),
-                    'contract_signed_time' => $riyadhDate->toTimeString(),
+                    'contract_signed_date' => $dateTime->tz('Asia/Riyadh')->toDateString(),
+                    'contract_signed_time' => $dateTime->tz('Asia/Riyadh')->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::SellingCommodityToCustomer,
@@ -330,7 +329,6 @@ class DmccDriver implements TraderInterface
             $previous_owner = $products->pluck('previous_owner')->implode($separator);
             $product_name = $products->pluck('product')->implode($separator);
             $date = Carbon::now();
-            $riyadhDate = convert_date_timezone($date, 'Asia/Riyadh');
             $data['created_at'] = $date->toDateTimeString();
 
             $this->storeOrderDocumentAsPdf(
@@ -344,8 +342,8 @@ class DmccDriver implements TraderInterface
                     'amount' => $amount,
                     'previous_owner' => $previous_owner,
                     'product_name' => $product_name,
-                    'date' => $riyadhDate->toDateString(),
-                    'time' => $riyadhDate->toTimeString(),
+                    'date' => $date->tz('Asia/Riyadh')->toDateString(),
+                    'time' => $date->tz('Asia/Riyadh')->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::TransferOwnershipToLender

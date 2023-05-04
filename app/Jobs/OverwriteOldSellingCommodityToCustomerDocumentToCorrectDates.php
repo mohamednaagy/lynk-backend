@@ -57,7 +57,6 @@ class OverwriteOldSellingCommodityToCustomerDocumentToCorrectDates implements Sh
                     $amount = $traderOrder->order->amount->formatByDecimal();
                     $previousOwner = $products->pluck('previous_owner')->implode($separator);
                     $productName = $products->pluck('product')->implode($separator);
-                    $date = convert_date_timezone($date, 'Asia/Riyadh');
 
                     $trader->storeOrderDocumentAsPdf(
                         'selling-commodity-to-customer',
@@ -70,8 +69,8 @@ class OverwriteOldSellingCommodityToCustomerDocumentToCorrectDates implements Sh
                             'amount' => $amount,
                             'previous_owner' => $previousOwner,
                             'product_name' => $productName,
-                            'date' => $date->toDateString(),
-                            'time' => $date->toTimeString(),
+                            'date' => $date->tz('Asia/Riyadh')->toDateString(),
+                            'time' => $date->tz('Asia/Riyadh')->toTimeString(),
                         ],
                         $traderOrder,
                         TraderOrderMediaCollection::SellingCommodityToCustomer

@@ -193,7 +193,6 @@ class FakeDriver implements TraderInterface
                 ->created_at;
 
             $separator = ' و ';
-            $riyadhDateTime = convert_date_timezone($dateTime, 'Asia/Riyadh');
             $products = collect($traderOrder->products);
             $amount = $traderOrder->order->selling_price->formatByDecimal();
             $customerName = $traderOrder->order->customer_name;
@@ -210,8 +209,8 @@ class FakeDriver implements TraderInterface
                     'amount' => $amount,
                     'product_name' => $productName,
                     'customer_name' => $customerName,
-                    'contract_signed_date' => $riyadhDateTime->toDateString(),
-                    'contract_signed_time' => $riyadhDateTime->toTimeString(),
+                    'contract_signed_date' => $dateTime->tz('Asia/Riyadh')->toDateString(),
+                    'contract_signed_time' => $dateTime->tz('Asia/Riyadh')->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::SellingCommodityToCustomer,
@@ -269,7 +268,6 @@ class FakeDriver implements TraderInterface
             $previous_owner = $products->pluck('previous_owner')->implode($separator);
             $product_name = $products->pluck('product')->implode($separator);
             $date = Carbon::now();
-            $riyadhDate = convert_date_timezone($date, 'Asia/Riyadh');
             $data['created_at'] = $date->toDateTimeString();
 
             $this->storeOrderDocumentAsPdf(
@@ -283,8 +281,8 @@ class FakeDriver implements TraderInterface
                     'amount' => $amount,
                     'previous_owner' => $previous_owner,
                     'product_name' => $product_name,
-                    'date' => $riyadhDate->toDateString(),
-                    'time' => $riyadhDate->toTimeString(),
+                    'date' => $date->tz('Asia/Riyadh')->toDateString(),
+                    'time' => $date->tz('Asia/Riyadh')->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::TransferOwnershipToLender
