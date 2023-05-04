@@ -350,8 +350,8 @@ class DmccDriver implements TraderInterface
                 TraderOrderMediaCollection::TransferOwnershipToLender
             );
 
-            $this->historyUpdatedAt = $date;
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+            $data['updated_at'] = $date->toDateTimeString();
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument, $data);
         } catch (Exception $exception) {
             logs()->debug('test', [$exception]);
             throw new TraderException(collect([

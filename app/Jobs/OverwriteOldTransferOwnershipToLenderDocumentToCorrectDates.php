@@ -55,7 +55,7 @@ class OverwriteOldTransferOwnershipToLenderDocumentToCorrectDates implements Sho
                     $date = $traderOrder->traderHistories
                         ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
                         ->first()
-                        ->updated_at;
+                        ->created_at;
 
                     $trader->storeOrderDocumentAsPdf(
                         'transfer-ownership-to-lender',

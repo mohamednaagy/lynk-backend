@@ -287,9 +287,9 @@ class FakeDriver implements TraderInterface
                 TraderOrderMediaCollection::TransferOwnershipToLender
             );
 
-            $this->historyUpdatedAt = $date;
+            $data['updated_at'] = $date->toDateString();
 
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument, $data);
         } catch (Exception $exception) {
             throw new TraderException(collect([
                 'driver' => 'fake',
