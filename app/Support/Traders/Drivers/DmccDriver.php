@@ -249,7 +249,8 @@ class DmccDriver implements TraderInterface
                 ->first()
                 ->created_at;
 
-            $dateTime = convert_date_timezone($dateTime, 'Asia/Riyadh');
+            $riyadhDate = convert_date_timezone($dateTime, 'Asia/Riyadh');
+            $data['created_at'] = $dateTime->toDateTimeString();
             $separator = ' و ';
             $products = collect($traderOrder->products);
             $amount = $traderOrder->order->selling_price->formatByDecimal();
@@ -266,14 +267,14 @@ class DmccDriver implements TraderInterface
                     'amount' => $amount,
                     'product_name' => $productName,
                     'customer_name' => $customerName,
-                    'contract_signed_date' => $dateTime->toDateString(),
-                    'contract_signed_time' => $dateTime->toTimeString(),
+                    'contract_signed_date' => $riyadhDate->toDateString(),
+                    'contract_signed_time' => $riyadhDate->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::SellingCommodityToCustomer,
             );
 
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument, $data);
         } catch (Exception $exception) {
             throw new TraderException(collect([
                 'driver' => 'dmcc',
@@ -326,10 +327,11 @@ class DmccDriver implements TraderInterface
             $separator = ' و ';
             $products = collect($traderOrder->products);
             $amount = $traderOrder->order->amount->formatByDecimal();
-
             $previous_owner = $products->pluck('previous_owner')->implode($separator);
             $product_name = $products->pluck('product')->implode($separator);
-            $date = Carbon::now('Asia/Riyadh');
+            $date = Carbon::now();
+            $riyadhDate = convert_date_timezone($date, 'Asia/Riyadh');
+            $data['created_at'] = $date->toDateTimeString();
 
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
@@ -342,14 +344,14 @@ class DmccDriver implements TraderInterface
                     'amount' => $amount,
                     'previous_owner' => $previous_owner,
                     'product_name' => $product_name,
-                    'date' => $date->toDateString(),
-                    'time' => $date->toTimeString(),
+                    'date' => $riyadhDate->toDateString(),
+                    'time' => $riyadhDate->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::TransferOwnershipToLender
             );
 
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument, $data);
         } catch (Exception $exception) {
             logs()->debug('test', [$exception]);
             throw new TraderException(collect([
