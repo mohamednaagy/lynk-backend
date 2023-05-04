@@ -44,9 +44,9 @@ class ProcessAskClientForWakala implements ShouldQueue
         /** @var TraderOrder $traderOrder */
         $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
 
-        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
-            return;
-        }
+//        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
+//            return;
+//        }
 
         $financingOrder = $traderOrder->order;
 

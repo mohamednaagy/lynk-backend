@@ -15,6 +15,7 @@ use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Jobs\ProcessBursamBidCertificate;
 use App\Support\Traders\Drivers\Bursam\Jobs\ProcessBursamOrderResult;
 use App\Support\Traders\Drivers\Bursam\Jobs\ProcessBursamSellingCommodityToOpenMarket;
+use App\Support\Traders\Drivers\Bursam\Jobs\ProcessBursamTransferOwnershipToLender;
 use App\Support\Traders\Traits\BursamTraderHelperTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -259,33 +260,7 @@ class BursamV1Driver implements TraderInterface
                 ],
             ]
         );
-
-        $otcTemplate = view('transfer-ownership-to-lender', [
-            'ecertno' => $response->json('ECERTNO'),
-            'buyer' => $response->json('BUYER'),
-            'owner' => $response->json('OWNER'),
-            'bidno' => $response->json('BIDNO'),
-            'totalvalue' => $response->json('TOTALVALUE'),
-            'currency' => $response->json('CURRENCY'),
-            'price' => $response->json('PRICE'),
-            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
-            'purchase_timedate' => $response->json('PURCHASETIMEDATE'),
-            'valuedate' => $response->json('VALUEDATE'),
-            'pname' => $response->json('PNAME'),
-            'pvolume' => $response->json('PVOLUME'),
-            'line' => $response->json('LINE'),
-        ])->render();
-
-        $financingOrder = $traderOrder->order;
-        PdfGenerator::outputFromHtml(
-            $otcTemplate,
-            function ($fileResource) use ($financingOrder, $traderOrder) {
-                return $traderOrder
-                    ->addMediaFromStream($fileResource)
-                    ->usingFileName($financingOrder->getNationalId().'.pdf')
-                    ->toMediaCollection(TraderOrderMediaCollection::TtiHoldingCertificate);
-            }
-        );
+        dd($response->json());
     }
 
     public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
@@ -293,7 +268,7 @@ class BursamV1Driver implements TraderInterface
         $traderOrder->update(['uuid' => Str::uuid()]);
         $financingOrder = $traderOrder->order;
 
-        Http::withHeaders([
+        $response = Http::withHeaders([
             'Authorization' => 'Bearer '.$this->accessToken,
             'Content-Type' => 'application/json',
         ])->post(
@@ -322,6 +297,8 @@ class BursamV1Driver implements TraderInterface
                 ],
             ]
         );
+
+        dd($response->json());
     }
 
     public function cancelOrder(FinancingOrder $financingOrder): mixed
@@ -339,7 +316,8 @@ class BursamV1Driver implements TraderInterface
         match ((int) $traderOrder->last_history_action) {
             FinancingOrderHistory::GetTtiId => ProcessBursamOrderResult::dispatch($traderOrder),
             FinancingOrderHistory::GetTtiHoldingCertificateDocument => ProcessBursamBidCertificate::dispatch($traderOrder),
-            FinancingOrderHistory::AttachTtiHoldingCertificateDocument => ProcessAskClientForWakala::dispatch($traderOrder),
+            FinancingOrderHistory::AttachTtiHoldingCertificateDocument => ProcessBursamTransferOwnershipToLender::dispatch($traderOrder),
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAskClientForWakala::dispatch($traderOrder->id),
             FinancingOrderHistory::ClientWakalaAccepted => ProcessBursamSellingCommodityToOpenMarket::dispatch($traderOrder),
             default => null,
         };
