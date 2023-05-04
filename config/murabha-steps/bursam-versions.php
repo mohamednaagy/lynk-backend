@@ -9,9 +9,6 @@ return [
             FinancingOrderHistory::GetTtiId,
         ],
         BursamMurabhaStep::PurchasingCommodity => [
-            FinancingOrderHistory::RespondPtp,
-            FinancingOrderHistory::GetPtpDocument,
-            FinancingOrderHistory::AttachPtpDocumentToOrder,
             FinancingOrderHistory::GetTtiHoldingCertificateDocument,
             FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,

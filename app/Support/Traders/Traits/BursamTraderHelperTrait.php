@@ -12,13 +12,7 @@ trait BursamTraderHelperTrait
 
     public array $stepToHistoriesMap = [
         BursamMurabhaStep::PurchasingCommodity => [
-            FinancingOrderHistory::RespondPtp => null,
-            FinancingOrderHistory::GetPtpDocument => null,
             FinancingOrderHistory::GetTtiHoldingCertificateDocument => null,
-            FinancingOrderHistory::AttachPtpDocumentToOrder => [
-                'collection' => TraderOrderMediaCollection::PromiseToPurchase,
-                'file' => 'ptp_document',
-            ],
             FinancingOrderHistory::AttachTtiHoldingCertificateDocument => [
                 'collection' => TraderOrderMediaCollection::TtiHoldingCertificate,
                 'file' => 'original_holding_certificate',

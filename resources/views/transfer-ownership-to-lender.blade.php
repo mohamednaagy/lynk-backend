@@ -605,19 +605,19 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             gap: 0px;
         }
 
-        .space-y-6> :not([hidden])~ :not([hidden]) {
+        .space-y-6 > :not([hidden]) ~ :not([hidden]) {
             --tw-space-y-reverse: 0;
             margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
             margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
         }
 
-        .divide-y> :not([hidden])~ :not([hidden]) {
+        .divide-y > :not([hidden]) ~ :not([hidden]) {
             --tw-divide-y-reverse: 0;
             border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
             border-bottom-width: calc(1px * var(--tw-divide-y-reverse));
         }
 
-        .divide-gray-300\/50> :not([hidden])~ :not([hidden]) {
+        .divide-gray-300\/50 > :not([hidden]) ~ :not([hidden]) {
             border-color: rgb(209 213 219 / 0.5);
         }
 
@@ -710,58 +710,84 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 </head>
 
 <body dir="rtl">
-    <div class="flex justify-end">
-        <img class="h-20" src="{{ asset('color-logo.svg') }}" alt="">
-    </div>
-    <div class="divide-y divide-gray-300/50">
-        <div class="py-8 space-y-6 text-base leading-7">
-            <p class="text-black">التاريخ: {{ $date }}</p>
-            <p class="text-black">الوقت: {{ $time }}</p>
-            <p class="text-xl text-center text-black">شهادة حيازة</p>
-            <p class="text-center text-black">نؤكد نحن لينك أن السلع المشار لها في الموقع أدناه؛ في حيازتنا بالنيابة عن {{$company_name}} من
-                تاريخ وتوقيت هذه الشهادة، وقد تم شراؤها من {{$previous_owner}} بناء على طلب الشركة مقابل مبلغ وقدره {{$amount}} ريال سعودي
-            </p>
+<div class="flex justify-end">
+    <img class="h-20" src="{{ asset('color-logo.svg') }}" alt="">
+</div>
+<div class="divide-y divide-gray-300/50">
+    <div class="py-8 space-y-6 text-base leading-7">
+        <p class="text-black">التاريخ: {{ $date ?? '' }}</p>
+        <p class="text-black">الوقت: {{ $time ?? '' }}</p>
+        <p class="text-xl text-center text-black">شهادة حيازة</p>
+        <p class="text-center text-black">نؤكد نحن لينك أن السلع المشار لها في الموقع أدناه؛ في حيازتنا بالنيابة
+            عن {{$company_name}} من
+            تاريخ وتوقيت هذه الشهادة، وقد تم شراؤها من {{$previous_owner}} بناء على طلب الشركة مقابل مبلغ
+            وقدره {{$amount}} ريال سعودي
+        </p>
 
-            <p class="text-lg font-semibold text-center text-black">بيانات السلع/ـة</p>
-            @foreach($products as $product)
-
+        <p class="text-lg font-semibold text-center text-black">بيانات السلع/ـة</p>
+        @foreach($products ?? [] as $product)
             <table class="min-w-full mt-4">
                 <tbody>
-                    <tr>
-                        <td class="w-1/2 px-4 text-right border border-black">نوع السلعة</td>
-                        <td class="w-1/2 border border-black">{{$product['product']}}</td>
-                    </tr>
-                    <tr>
-                        <td class="w-1/2 px-4 text-right border border-black">الكمية</td>
-                        <td class="w-1/2 border border-black">{{$product['quantity']}} {{$product['uom']}}</td>
-                    </tr>
-                    <tr>
-                        <td class="w-1/2 px-4 text-right border border-black">قيمة السلعة</td>
-                        <td class="w-1/2 border border-black">{{number_format($product['amount'], 2)}} ريال سعودي</td>
-                    </tr>
-                    <tr>
-                        <td class="w-1/2 px-4 text-right border border-black">موقع السلعة</td>
-                        <td class="w-1/2 border border-black">{{$product['warehouse']}}</td>
-                    </tr>
+                <tr>
+                    <td class="w-1/2 px-4 text-right border border-black">نوع السلعة</td>
+                    <td class="w-1/2 border border-black">{{$product['product']}}</td>
+                </tr>
+                <tr>
+                    <td class="w-1/2 px-4 text-right border border-black">الكمية</td>
+                    <td class="w-1/2 border border-black">{{$product['quantity']}} {{$product['uom']}}</td>
+                </tr>
+                <tr>
+                    <td class="w-1/2 px-4 text-right border border-black">قيمة السلعة</td>
+                    <td class="w-1/2 border border-black">{{number_format($product['amount'], 2)}} ريال سعودي</td>
+                </tr>
+                <tr>
+                    <td class="w-1/2 px-4 text-right border border-black">موقع السلعة</td>
+                    <td class="w-1/2 border border-black">{{$product['warehouse']}}</td>
+                </tr>
                 </tbody>
             </table>
-            @endforeach
+        @endforeach
 
-            <p class="text-lg text-center text-black">سيتم حفظ السلعة بالموقع المشار له أعلاه، بالنيابة عن {{$company_name}} إلى أن يتم إشعارنا بالتصرف.</p>
-            <p class="text-lg text-center text-black">{{$company_name}} سيكون مسؤولًا عن رسوم التخزين والحفظ إذا تم الاحتفاظ بـ\{{$product_name}} لأكثر من يوم عمل</p>
-            <p class="pt-2 text-center text-black">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
-        </div>
-        <div class="flex flex-row justify-between pt-8 font-semibold">
-            <p class="text-right text-[11px] text-cyan-900">www.lynk.sa</p>
-            <p class="text-right text-[11px] text-cyan-900">الرمز البريدي 13522</p>
-            <div class="flex flex-row-reverse gap-0.5">
-                <p class="text-right text-[11px] text-cyan-900">,3504</p>
-                <p class="text-right text-[11px] text-cyan-900">طريق الامام سعود بن فيصل ، حي الملقا ، 6418</p>
-            </div>
-            <p class="text-right text-[11px] text-cyan-900">السجل التجاري 1010828018</p>
-            <p class="text-right text-[11px] text-cyan-600">شركة تقنيات صلة المالية</p>
-        </div>
+        @if(isset($unit))
+            <table class="min-w-full mt-4">
+                <tbody>
+                <tr>
+                    <td class="w-1/2 px-4 text-right border border-black">نوع السلعة</td>
+                    <td class="w-1/2 border border-black">{{$product_name}}</td>
+                </tr>
+                <tr>
+                    <td class="w-1/2 px-4 text-right border border-black">الكمية</td>
+                    <td class="w-1/2 border border-black">{{$unit}}</td>
+                </tr>
+                <tr>
+                    <td class="w-1/2 px-4 text-right border border-black">قيمة السلعة</td>
+                    <td class="w-1/2 border border-black">{{number_format($bidValue, 2)}} ريال سعودي</td>
+                </tr>
+                <tr>
+                    <td class="w-1/2 px-4 text-right border border-black">موقع السلعة</td>
+                    <td class="w-1/2 border border-black">'??'</td>
+                </tr>
+                </tbody>
+            </table>
+        @endif
+
+        <p class="text-lg text-center text-black">سيتم حفظ السلعة بالموقع المشار له أعلاه، بالنيابة عن {{$company_name}}
+            إلى أن يتم إشعارنا بالتصرف.</p>
+        <p class="text-lg text-center text-black">{{$company_name}} سيكون مسؤولًا عن رسوم التخزين والحفظ إذا تم الاحتفاظ
+            بـ\{{$product_name}} لأكثر من يوم عمل</p>
+        <p class="pt-2 text-center text-black">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
     </div>
+    <div class="flex flex-row justify-between pt-8 font-semibold">
+        <p class="text-right text-[11px] text-cyan-900">www.lynk.sa</p>
+        <p class="text-right text-[11px] text-cyan-900">الرمز البريدي 13522</p>
+        <div class="flex flex-row-reverse gap-0.5">
+            <p class="text-right text-[11px] text-cyan-900">,3504</p>
+            <p class="text-right text-[11px] text-cyan-900">طريق الامام سعود بن فيصل ، حي الملقا ، 6418</p>
+        </div>
+        <p class="text-right text-[11px] text-cyan-900">السجل التجاري 1010828018</p>
+        <p class="text-right text-[11px] text-cyan-600">شركة تقنيات صلة المالية</p>
+    </div>
+</div>
 
 </body>
 

@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs;
 
+use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -9,7 +10,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ProcessBursamCredential implements ShouldQueue
+class ProcessBursamBidCertificate implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -18,7 +19,7 @@ class ProcessBursamCredential implements ShouldQueue
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(protected TraderOrder $traderOrder)
     {
         //
     }
@@ -30,6 +31,6 @@ class ProcessBursamCredential implements ShouldQueue
      */
     public function handle()
     {
-        Trader::driver('bursam')->updateProviderCredential();
+        Trader::driver('bursam')->getBidCertificateDetails($this->traderOrder);
     }
 }

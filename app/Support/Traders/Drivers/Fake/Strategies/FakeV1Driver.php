@@ -379,12 +379,12 @@ class FakeV1Driver implements TraderInterface
         }
     }
 
-    public function transferOwnershipToCustomer(FinancingOrder $financingOrder)
+    public function transferOwnershipToCustomer(TraderOrder $traderOrder)
     {
         // TODO: Implement ownershipToCustomer() method.
     }
 
-    public function sellingCommodityToOpenMarket(FinancingOrder $financingOrder)
+    public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
     {
         // TODO: Implement sellingCommodity() method.
     }
