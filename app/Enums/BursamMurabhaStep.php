@@ -15,7 +15,11 @@ final class BursamMurabhaStep extends Enum implements TraderMurabhaStepInterface
 
     const CommoditySoldToCustomer = 'commodity_sold_to_customer';
 
+    const TransferOwnershipToLender = 'transfer_ownership_to_lender';
+
     const ClientWakala = 'client_wakala';
+
+    const MurabhaOfferIssued = 'murabha_offer_issued';
 
     const MurabahaSaleCompleted = 'murabaha_sale_completed';
 
@@ -25,6 +29,7 @@ final class BursamMurabhaStep extends Enum implements TraderMurabhaStepInterface
 
         return match ($version) {
             'v1' => get_murabha_steps('bursam', 'v1'),
+            'v2' => get_murabha_steps('bursam', 'v2'),
             default => throw new \InvalidArgumentException('Invalid version')
         };
     }

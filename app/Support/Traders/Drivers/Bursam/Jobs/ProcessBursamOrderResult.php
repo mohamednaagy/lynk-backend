@@ -31,6 +31,6 @@ class ProcessBursamOrderResult implements ShouldQueue
      */
     public function handle()
     {
-        Trader::driver('bursam')->fetchOrderResult($this->traderOrder);
+        Trader::driver('bursam', $this->traderOrder->version)->fetchOrderResult($this->traderOrder);
     }
 }

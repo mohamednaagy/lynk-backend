@@ -31,6 +31,6 @@ class ProcessBursamBidCertificate implements ShouldQueue
      */
     public function handle()
     {
-        Trader::driver('bursam')->getBidCertificateDetails($this->traderOrder);
+        Trader::driver('bursam', $this->traderOrder->version)->getBidCertificateDetails($this->traderOrder);
     }
 }

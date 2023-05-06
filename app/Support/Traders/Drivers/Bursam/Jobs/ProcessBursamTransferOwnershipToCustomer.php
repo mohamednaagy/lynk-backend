@@ -10,7 +10,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ProcessBursamTransferOwnershipToLender implements ShouldQueue
+class ProcessBursamTransferOwnershipToCustomer implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -31,6 +31,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
      */
     public function handle()
     {
-        Trader::driver('bursam', $this->traderOrder->version)->transferOwnershipToLender($this->traderOrder);
+        Trader::driver('bursam', $this->traderOrder->version)->transferOwnershipToCustomer($this->traderOrder);
     }
 }

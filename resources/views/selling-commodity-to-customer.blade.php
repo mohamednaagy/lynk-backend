@@ -785,6 +785,28 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     </table>
                 @endforeach
 
+                @if(isset($unit))
+                    <table class="min-w-full mt-4">
+                        <tbody>
+                        <tr>
+                            <td class="w-1/2 px-4 text-right border border-black">نوع السلعة</td>
+                            <td class="w-1/2 border border-black">{{$product_name}}</td>
+                        </tr>
+                        <tr>
+                            <td class="w-1/2 px-4 text-right border border-black">الكمية</td>
+                            <td class="w-1/2 border border-black">{{$unit}}</td>
+                        </tr>
+                        <tr>
+                            <td class="w-1/2 px-4 text-right border border-black">قيمة السلعة</td>
+                            <td class="w-1/2 border border-black">{{number_format($bidValue, 2)}} ريال سعودي</td>
+                        </tr>
+                        <tr>
+                            <td class="w-1/2 px-4 text-right border border-black">موقع السلعة</td>
+                            <td class="w-1/2 border border-black">'??'</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                @endif
                 <p class="text-center text-black pt-7">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
                 <hr class="mx-auto mt-10 h-[2px] w-48 bg-gray-700" />
             </div>
