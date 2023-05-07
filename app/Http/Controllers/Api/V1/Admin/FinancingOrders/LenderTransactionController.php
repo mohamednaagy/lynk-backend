@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Admin\FinancingOrders;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
@@ -27,7 +28,11 @@ class LenderTransactionController extends Controller
      */
     public function index(Company $lender): JsonResponse
     {
-        $transactions = $lender->transactions(WalletType::CompanyWallet)->paginate();
+        $transactions = $lender->transactions(WalletType::CompanyWallet)
+            ->with([
+                'media' => fn ($query) => $query->where('collection_name', TransactionMediaCollection::VoucherReceipt),
+            ])
+            ->paginate();
 
         tap($transactions)->loadZatcaInvoicesMedia();
 
