@@ -55,7 +55,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
                             $seller->getVatRateInPercentage()
                         ),
                     ],
-                    $financingOrder->created_at,
+                    $financingOrder->created_at->clone()->tz('Asia/Riyadh'),
                     $financingOrder
                 ),
                 'qr_code' => $displayQRCodeAsBase64,
