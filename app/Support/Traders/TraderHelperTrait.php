@@ -86,17 +86,11 @@ trait TraderHelperTrait
 
     public function createTraderOrderHistory(TraderOrder $traderOrder, int $action, array $data = []): void
     {
-        $createdAt = isset($data['created_at'])
-            ? $data['created_at']
-            : now();
-
         $traderOrder->traderHistories()->updateOrCreate(
             [
                 'action' => $action,
             ],
-            [
-                'created_at' => $createdAt,
-            ]
+            $data
         );
     }
 

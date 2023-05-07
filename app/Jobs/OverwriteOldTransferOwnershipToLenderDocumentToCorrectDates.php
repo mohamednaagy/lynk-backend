@@ -39,7 +39,13 @@ class OverwriteOldTransferOwnershipToLenderDocumentToCorrectDates implements Sho
             ->chunk(100, function ($traderOrders) {
                 $traderOrders->each(function ($traderOrder) {
                     $products = collect($traderOrder->products);
-                    if (blank($products)) {
+                    $date = $traderOrder->traderHistories
+                        ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
+                        ->first()
+                        ?->created_at
+                        ?->toImmutable();
+
+                    if (blank($products) || blank($date)) {
                         return;
                     }
 
@@ -47,16 +53,12 @@ class OverwriteOldTransferOwnershipToLenderDocumentToCorrectDates implements Sho
                         $traderOrder->clearMediaCollection(TraderOrderMediaCollection::TransferOwnershipToLender);
                     }
 
-                    $trader = Trader::driver($traderOrder->provider);
                     $separator = ' و ';
                     $amount = $traderOrder->order->amount->formatByDecimal();
                     $previousOwner = $products->pluck('previous_owner')->implode($separator);
                     $productName = $products->pluck('product')->implode($separator);
-                    $date = $traderOrder->traderHistories
-                        ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
-                        ->first()
-                        ->created_at;
 
+                    $trader = Trader::driver($traderOrder->provider);
                     $trader->storeOrderDocumentAsPdf(
                         'transfer-ownership-to-lender',
                         [

@@ -42,7 +42,8 @@ class OverwriteOldSellingCommodityToCustomerDocumentToCorrectDates implements Sh
                     $date = $traderOrder->traderHistories
                         ->where('action', FinancingOrderHistory::ContractSigned)
                         ->first()
-                        ?->created_at;
+                        ?->created_at
+                        ?->toImmutable();
 
                     if (blank($products) || blank($date)) {
                         return;
@@ -52,13 +53,13 @@ class OverwriteOldSellingCommodityToCustomerDocumentToCorrectDates implements Sh
                         $traderOrder->clearMediaCollection(TraderOrderMediaCollection::SellingCommodityToCustomer);
                     }
 
-                    $trader = Trader::driver($traderOrder->provider);
                     $separator = ' و ';
                     $products = collect($traderOrder->products);
                     $amount = $traderOrder->order->selling_price->formatByDecimal();
                     $customerName = $traderOrder->order->customer_name;
                     $productName = $products->pluck('product')->implode($separator);
 
+                    $trader = Trader::driver($traderOrder->provider);
                     $trader->storeOrderDocumentAsPdf(
                         'selling-commodity-to-customer',
                         [

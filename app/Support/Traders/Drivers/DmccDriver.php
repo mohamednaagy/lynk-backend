@@ -10,6 +10,7 @@ use App\Models\TraderOrder;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\TraderHelperTrait;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use CodeDredd\Soap\Client\Response;
 use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
@@ -247,9 +248,10 @@ class DmccDriver implements TraderInterface
             $dateTime = $traderOrder->traderHistories()
                 ->where('action', FinancingOrderHistory::ContractSigned)
                 ->first()
-                ->created_at;
+                ->created_at
+                ->toImmutable();
 
-            $data['created_at'] = $dateTime;
+            $data['created_at'] = $dateTime->clone();
             $separator = ' و ';
             $products = collect($traderOrder->products);
             $amount = $traderOrder->order->selling_price->formatByDecimal();
@@ -326,10 +328,10 @@ class DmccDriver implements TraderInterface
             $separator = ' و ';
             $products = collect($traderOrder->products);
             $amount = $traderOrder->order->amount->formatByDecimal();
-            $previous_owner = $products->pluck('previous_owner')->implode($separator);
-            $product_name = $products->pluck('product')->implode($separator);
-            $date = Carbon::now();
-            $data['created_at'] = $date->toDateTimeString();
+            $previousOwner = $products->pluck('previous_owner')->implode($separator);
+            $productName = $products->pluck('product')->implode($separator);
+            $date = CarbonImmutable::now();
+            $data['created_at'] = $date->clone();
 
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
@@ -340,8 +342,8 @@ class DmccDriver implements TraderInterface
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
                     'amount' => $amount,
-                    'previous_owner' => $previous_owner,
-                    'product_name' => $product_name,
+                    'previous_owner' => $previousOwner,
+                    'product_name' => $productName,
                     'date' => $date->tz('Asia/Riyadh')->toDateString(),
                     'time' => $date->tz('Asia/Riyadh')->toTimeString(),
                 ],

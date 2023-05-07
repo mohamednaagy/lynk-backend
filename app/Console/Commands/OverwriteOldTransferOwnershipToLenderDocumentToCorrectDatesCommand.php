@@ -29,8 +29,8 @@ class OverwriteOldTransferOwnershipToLenderDocumentToCorrectDatesCommand extends
      */
     public function handle()
     {
-        dispatch(new OverwriteOldTransferOwnershipToLenderDocumentToCorrectDates);
-        dispatch(new OverwriteOldSellingCommodityToCustomerDocumentToCorrectDates);
+        dispatch_sync(new OverwriteOldTransferOwnershipToLenderDocumentToCorrectDates);
+        dispatch_sync(new OverwriteOldSellingCommodityToCustomerDocumentToCorrectDates);
 
         return Command::SUCCESS;
     }
