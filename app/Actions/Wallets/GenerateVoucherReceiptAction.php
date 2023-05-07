@@ -9,23 +9,25 @@ use App\Support\PdfGenerator\PdfGenerator;
 
 class GenerateVoucherReceiptAction implements GenerateVoucherReceipt
 {
+    protected string $timezone = 'Asia/Riyadh';
+
     protected string $template = 'templates.voucher-invoice';
 
     protected string $collectionName = TransactionMediaCollection::VoucherReceipt;
 
     public function handle(Transaction $transaction)
     {
-        app()->setLocale('ar');
         $company = $transaction->wallet->holder;
+
         $content = __('invoices/voucher-receipt.content', [
             'amount' => $transaction->amount->formatByDecimal(),
             'company_name' => $company->name,
-        ]);
+        ], 'ar');
 
         $html = view($this->getTemplate(), [
-            'day' => $transaction->created_at->tz('Asia/Riyadh')->locale('ar')->dayName,
-            'date' => $transaction->created_at->tz('Asia/Riyadh')->toDateString(),
-            'time' => $transaction->created_at->tz('Asia/Riyadh')->toTimeString(),
+            'day' => $transaction->created_at->tz($this->timezone)->locale('ar')->dayName,
+            'date' => $transaction->created_at->tz($this->timezone)->toDateString(),
+            'time' => $transaction->created_at->tz($this->timezone)->toTimeString(),
             'content' => $content,
         ])->render();
 
@@ -38,7 +40,7 @@ class GenerateVoucherReceiptAction implements GenerateVoucherReceipt
             $html,
             function ($fileResource) use ($transaction) {
                 return $transaction->addMediaFromStream($fileResource)
-                    ->usingFileName("voucher-{$transaction->getKey()}".'.pdf')
+                    ->usingFileName("voucher-receipt-{$transaction->getKey()}".'.pdf')
                     ->toMediaCollection($this->getCollectionName());
             }
         );

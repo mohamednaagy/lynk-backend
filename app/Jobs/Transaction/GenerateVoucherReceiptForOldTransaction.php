@@ -3,6 +3,7 @@
 namespace App\Jobs\Transaction;
 
 use App\Actions\Contracts\Wallets\GenerateVoucherReceipt;
+use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
 use App\Models\Transaction;
 use Illuminate\Bus\Queueable;
@@ -34,9 +35,13 @@ class GenerateVoucherReceiptForOldTransaction implements ShouldQueue
     {
         Transaction::query()
             ->whereIn('reason', [TransactionReason::DepositByEdaat, TransactionReason::ManualDeposit])
-            ->orderBy('created_at')
+            ->orderBy('id')
             ->chunk(100, function ($transactions) {
                 $transactions->each(function ($transaction) {
+                    if ($transaction->hasMedia(TransactionMediaCollection::VoucherReceipt)) {
+                        $transaction->clearMediaCollection(TransactionMediaCollection::VoucherReceipt);
+                    }
+
                     app(GenerateVoucherReceipt::class)->handle($transaction);
                 });
             });

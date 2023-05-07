@@ -28,7 +28,7 @@ class GenerateVoucherReceiptForOldTransactionCommand extends Command
      */
     public function handle()
     {
-        dispatch(new GenerateVoucherReceiptForOldTransaction);
+        dispatch_sync(new GenerateVoucherReceiptForOldTransaction);
 
         return Command::SUCCESS;
     }

@@ -709,7 +709,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
     </style>
 </head>
 
-<body dir="{{ App::getLocale() === 'en' ? 'ltr' : 'rtl' }}">
+<body dir="rtl">
     <div class="flex justify-end">
         <img class="h-20" src="{{ asset('color-logo.svg') }}" alt="">
     </div>
@@ -719,7 +719,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             <p class="text-black">{{__('invoices/voucher-receipt.date')}} : {{ $date }}</p>
             <p class="text-black">{{__('invoices/voucher-receipt.time')}} : {{ $time }}</p>
             <p class="text-xl text-center text-black">
-                {{__('invoices/voucher-receipt.title')}}
+                {{__('invoices/voucher-receipt.title', [], 'ar')}}
             </p>
             <p class="text-center text-black">
 
