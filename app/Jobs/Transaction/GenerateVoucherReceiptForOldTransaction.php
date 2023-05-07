@@ -35,6 +35,7 @@ class GenerateVoucherReceiptForOldTransaction implements ShouldQueue
     {
         Transaction::query()
             ->whereIn('reason', [TransactionReason::DepositByEdaat, TransactionReason::ManualDeposit])
+            ->whereHas('wallet.holder')
             ->orderBy('id')
             ->chunk(100, function ($transactions) {
                 $transactions->each(function ($transaction) {
