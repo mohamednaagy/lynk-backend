@@ -35,10 +35,13 @@ class GenerateVoucherReceiptForOldTransaction implements ShouldQueue
     {
         Transaction::query()
             ->whereIn('reason', [TransactionReason::DepositByEdaat, TransactionReason::ManualDeposit])
-            ->whereHas('wallet.holder')
             ->orderBy('id')
             ->chunk(100, function ($transactions) {
                 $transactions->each(function ($transaction) {
+                    if ($transaction->wallet->holder === null) {
+                        return;
+                    }
+
                     if ($transaction->hasMedia(TransactionMediaCollection::VoucherReceipt)) {
                         $transaction->clearMediaCollection(TransactionMediaCollection::VoucherReceipt);
                     }
