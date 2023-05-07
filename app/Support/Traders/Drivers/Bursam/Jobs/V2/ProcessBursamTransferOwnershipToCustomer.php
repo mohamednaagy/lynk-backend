@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Support\Traders\Drivers\Bursam\Jobs;
+namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
+use App\Enums\FinancingOrderHistory;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -10,7 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ProcessBursamBidCertificate implements ShouldQueue
+class ProcessBursamTransferOwnershipToCustomer implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -19,7 +20,7 @@ class ProcessBursamBidCertificate implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected TraderOrder $traderOrder)
+    public function __construct(protected int $traderOrder)
     {
         //
     }
@@ -31,6 +32,12 @@ class ProcessBursamBidCertificate implements ShouldQueue
      */
     public function handle()
     {
-        Trader::driver('bursam', $this->traderOrder->version)->getBidCertificateDetails($this->traderOrder);
+        $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
+
+        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
+            return;
+        }
+
+        Trader::driver('bursam', $traderOrder->version)->transferOwnershipToCustomer($traderOrder);
     }
 }

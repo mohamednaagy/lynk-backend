@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Traders\Drivers\Bursam\Jobs;
+namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;

@@ -3,7 +3,7 @@
 namespace App\Console;
 
 use App\Jobs\General\ProcessFinancingOrders;
-use App\Support\Traders\Drivers\Bursam\Jobs\ProcessBursamCredential;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamCredential;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccNotifications;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -42,29 +42,25 @@ class Kernel extends ConsoleKernel
 
     private function isBursamServiceAvailable()
     {
-        $now = now();
+        $timezone = 'Asia/Riyadh';
+        $now = now($timezone);
         $startTime = '19:30:00';
         $endTime = '18:30:00';
         $fridayRestStartTime = '08:15:00';
         $fridayRestEndTime = '08:45:00';
-        $timezone = 'Asia/Riyadh';
 
-        // Convert the start and end times to the specified timezone
-        $startTime = $now->setTimeFromTimeString($startTime)->setTimezone($timezone);
-        $endTime = $now->setTimeFromTimeString($endTime)->setTimezone($timezone);
-        $fridayRestStartTime = $now->setTimeFromTimeString($fridayRestStartTime)->setTimezone($timezone);
-        $fridayRestEndTime = $now->setTimeFromTimeString($fridayRestEndTime)->setTimezone($timezone);
+        $startDateTime = now($timezone)->setTimeFromTimeString($startTime)->subDay();
+        $endDateTime = now($timezone)->setTimeFromTimeString($endTime);
+        $fridayRestStartTime = now($timezone)->setTimeFromTimeString($fridayRestStartTime);
+        $fridayRestEndTime = now($timezone)->setTimeFromTimeString($fridayRestEndTime);
 
-        // Check if today is Friday and the current time is within the Friday rest time window
-        if ($now->isFriday() && $now->between($fridayRestStartTime, $fridayRestEndTime)) {
+        if (
+            $now->between($startDateTime, $endDateTime)
+            || ($now->isFriday()) && $now->between($fridayRestStartTime, $fridayRestEndTime)
+        ) {
             return false;
         }
 
-        // Check if the current time is within the available times
-        if ($now->between($startTime, $endTime)) {
-            return true;
-        } else {
-            return false;
-        }
+        return true;
     }
 }
