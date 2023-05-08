@@ -715,9 +715,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
     </div>
     <div class="divide-y divide-gray-300/50">
         <div class="py-8 space-y-6 text-base leading-7">
-            <p class="text-black">{{__('invoices/voucher-receipt.day')}} : {{ $day }}</p>
-            <p class="text-black">{{__('invoices/voucher-receipt.date')}} : {{ $date }}</p>
-            <p class="text-black">{{__('invoices/voucher-receipt.time')}} : {{ $time }}</p>
+            <p class="text-black">{{__('invoices/voucher-receipt.day', [], 'ar')}} : {{ $day }}</p>
+            <p class="text-black">{{__('invoices/voucher-receipt.date', [], 'ar')}} : {{ $date }}</p>
+            <p class="text-black">{{__('invoices/voucher-receipt.time', [], 'ar')}} : {{ $time }}</p>
             <p class="text-xl text-center text-black">
                 {{__('invoices/voucher-receipt.title', [], 'ar')}}
             </p>
