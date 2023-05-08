@@ -84,15 +84,13 @@ trait TraderHelperTrait
         ]);
     }
 
-    public function createTraderOrderHistory(TraderOrder $traderOrder, int $action): void
+    public function createTraderOrderHistory(TraderOrder $traderOrder, int $action, array $data = []): void
     {
         $traderOrder->traderHistories()->updateOrCreate(
             [
                 'action' => $action,
             ],
-            [
-                'updated_at' => now(),
-            ]
+            $data
         );
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Transformers;
 
+use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
 use App\Models\Transaction;
 use App\Support\Wallets\Contracts\TransactionUtilInterface;
@@ -53,6 +54,10 @@ class TransactionTransformer extends TransformerAbstract
         if (in_array($transaction->reason, TransactionReason::$reasonsAssociatedWithZatcaInvoice)) {
             return $this->primitive(
                 $transaction->zatca_invoice_media?->file_url
+            );
+        } elseif (in_array($transaction->reason, [TransactionReason::DepositByEdaat, TransactionReason::ManualDeposit])) {
+            return $this->primitive(
+                $transaction->getFirstMedia(TransactionMediaCollection::VoucherReceipt)?->file_url
             );
         }
 

@@ -2,11 +2,10 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Selling to Customer</title>
-
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Ownership</title>
     <style>
         /* ! tailwindcss v3.2.4 | MIT License | https://tailwindcss.com */
 
@@ -468,6 +467,53 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-backdrop-sepia: ;
         }
 
+        ::-webkit-backdrop {
+            --tw-border-spacing-x: 0;
+            --tw-border-spacing-y: 0;
+            --tw-translate-x: 0;
+            --tw-translate-y: 0;
+            --tw-rotate: 0;
+            --tw-skew-x: 0;
+            --tw-skew-y: 0;
+            --tw-scale-x: 1;
+            --tw-scale-y: 1;
+            --tw-pan-x: ;
+            --tw-pan-y: ;
+            --tw-pinch-zoom: ;
+            --tw-scroll-snap-strictness: proximity;
+            --tw-ordinal: ;
+            --tw-slashed-zero: ;
+            --tw-numeric-figure: ;
+            --tw-numeric-spacing: ;
+            --tw-numeric-fraction: ;
+            --tw-ring-inset: ;
+            --tw-ring-offset-width: 0px;
+            --tw-ring-offset-color: #fff;
+            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-offset-shadow: 0 0 #0000;
+            --tw-ring-shadow: 0 0 #0000;
+            --tw-shadow: 0 0 #0000;
+            --tw-shadow-colored: 0 0 #0000;
+            --tw-blur: ;
+            --tw-brightness: ;
+            --tw-contrast: ;
+            --tw-grayscale: ;
+            --tw-hue-rotate: ;
+            --tw-invert: ;
+            --tw-saturate: ;
+            --tw-sepia: ;
+            --tw-drop-shadow: ;
+            --tw-backdrop-blur: ;
+            --tw-backdrop-brightness: ;
+            --tw-backdrop-contrast: ;
+            --tw-backdrop-grayscale: ;
+            --tw-backdrop-hue-rotate: ;
+            --tw-backdrop-invert: ;
+            --tw-backdrop-opacity: ;
+            --tw-backdrop-saturate: ;
+            --tw-backdrop-sepia: ;
+        }
+
         ::backdrop {
             --tw-border-spacing-x: 0;
             --tw-border-spacing-y: 0;
@@ -515,154 +561,109 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-backdrop-sepia: ;
         }
 
-        .col-span-3 {
-            grid-column: span 3 / span 3;
-        }
-
-        .col-span-9 {
-            grid-column: span 9 / span 9;
-        }
-
-        .mx-auto {
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .my-10 {
-            margin-top: 2.5rem;
-            margin-bottom: 2.5rem;
-        }
-
-        .mb-6 {
-            margin-bottom: 1.5rem;
-        }
-
-        .mb-1 {
-            margin-bottom: 0.25rem;
-        }
-
-        .mt-2 {
-            margin-top: 0.5rem;
-        }
-
         .flex {
             display: flex;
         }
 
-        .grid {
-            display: grid;
+        .table {
+            display: table;
         }
 
         .h-20 {
             height: 5rem;
         }
 
-        .h-px {
-            height: 1px;
-        }
-
-        .h-40 {
-            height: 10rem;
-        }
-
-        .w-auto {
-            width: auto;
-        }
-
-        .w-3\/12 {
-            width: 25%;
-        }
-
-        .w-2\/12 {
-            width: 16.666667%;
-        }
-
-        .w-1\/12 {
-            width: 8.333333%;
-        }
-
-        .w-full {
-            width: 100%;
-        }
-
-        .w-40 {
-            width: 10rem;
-        }
-
         .w-1\/2 {
             width: 50%;
         }
 
-        .flex-1 {
-            flex: 1 1 0%;
+        .min-w-full {
+            min-width: 100%;
         }
 
-        .grid-cols-12 {
-            grid-template-columns: repeat(12, minmax(0, 1fr));
+        .flex-row {
+            flex-direction: row;
         }
 
-        .grid-cols-2 {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+        .flex-row-reverse {
+            flex-direction: row-reverse;
         }
 
-        .items-center {
-            align-items: center;
+        .justify-end {
+            justify-content: flex-end;
         }
 
         .justify-between {
             justify-content: space-between;
         }
 
-        .gap-2 {
-            gap: 0.5rem;
+        .gap-0\.5 {
+            gap: 0.125rem;
         }
 
-        .gap-4 {
-            gap: 1rem;
+        .gap-0 {
+            gap: 0px;
         }
 
-        .space-x-8> :not([hidden])~ :not([hidden]) {
-            --tw-space-x-reverse: 0;
-            margin-right: calc(2rem * var(--tw-space-x-reverse));
-            margin-left: calc(2rem * calc(1 - var(--tw-space-x-reverse)));
+        .space-y-6> :not([hidden])~ :not([hidden]) {
+            --tw-space-y-reverse: 0;
+            margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
+            margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
         }
 
-        .bg-slate-600 {
-            --tw-bg-opacity: 1;
-            background-color: rgb(71 85 105 / var(--tw-bg-opacity));
+        .divide-y> :not([hidden])~ :not([hidden]) {
+            --tw-divide-y-reverse: 0;
+            border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
+            border-bottom-width: calc(1px * var(--tw-divide-y-reverse));
         }
 
-        .bg-slate-700 {
-            --tw-bg-opacity: 1;
-            background-color: rgb(51 65 85 / var(--tw-bg-opacity));
+        .divide-gray-300\/50> :not([hidden])~ :not([hidden]) {
+            border-color: rgb(209 213 219 / 0.5);
         }
 
-        .bg-slate-800 {
-            --tw-bg-opacity: 1;
-            background-color: rgb(30 41 59 / var(--tw-bg-opacity));
+        .border {
+            border-width: 1px;
         }
 
-        .p-2\.5 {
-            padding: 0.625rem;
+        .border-black {
+            --tw-border-opacity: 1;
+            border-color: rgb(0 0 0 / var(--tw-border-opacity));
         }
 
-        .p-2 {
-            padding: 0.5rem;
+        .py-8 {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
         }
 
-        .px-2 {
-            padding-left: 0.5rem;
-            padding-right: 0.5rem;
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
         }
 
-        .py-3 {
-            padding-top: 0.75rem;
-            padding-bottom: 0.75rem;
+        .pt-2 {
+            padding-top: 0.5rem;
         }
 
-        .text-2xl {
-            font-size: 1.5rem;
-            line-height: 2rem;
+        .pt-8 {
+            padding-top: 2rem;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-base {
+            font-size: 1rem;
+            line-height: 1.5rem;
+        }
+
+        .text-xl {
+            font-size: 1.25rem;
+            line-height: 1.75rem;
         }
 
         .text-lg {
@@ -670,14 +671,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             line-height: 1.75rem;
         }
 
-        .text-sm {
-            font-size: 0.875rem;
-            line-height: 1.25rem;
-        }
-
-        .text-xs {
-            font-size: 0.75rem;
-            line-height: 1rem;
+        .text-\[11px\] {
+            font-size: 11px;
         }
 
         .font-bold {
@@ -688,218 +683,52 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             font-weight: 600;
         }
 
-        .text-gray-600 {
-            --tw-text-opacity: 1;
-            color: rgb(75 85 99 / var(--tw-text-opacity));
+        .leading-7 {
+            line-height: 1.75rem;
         }
 
-        .text-gray-500 {
+        .text-black {
             --tw-text-opacity: 1;
-            color: rgb(107 114 128 / var(--tw-text-opacity));
+            color: rgb(0 0 0 / var(--tw-text-opacity));
         }
 
-        .text-white {
+        .text-cyan-900 {
             --tw-text-opacity: 1;
-            color: rgb(255 255 255 / var(--tw-text-opacity));
+            color: rgb(22 78 99 / var(--tw-text-opacity));
         }
 
-        .text-gray-800 {
+        .text-cyan-600 {
             --tw-text-opacity: 1;
-            color: rgb(31 41 55 / var(--tw-text-opacity));
+            color: rgb(8 145 178 / var(--tw-text-opacity));
         }
 
-        [dir="rtl"] .rtl\:space-x-reverse> :not([hidden])~ :not([hidden]) {
-            --tw-space-x-reverse: 1;
+        .mt-4 {
+            margin-top: 1rem;
         }
+
     </style>
 </head>
 
-<body>
-    <div dir="{{ App::getLocale() === 'en' ? 'ltr' : 'rtl' }}">
-        <div class="mb-6 flex items-center justify-between">
-            <div>
-                <img class="mx-auto h-20 w-auto"
-                    src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" />
-            </div>
-            <div>
-                <h2 class="text-2xl font-bold">{{ __('zatca/e-invoice.tax_invoice') }}</h2>
-                <p class="text-lg">
-                    {{ __('zatca/e-invoice.invoice_number', ['number' => $creation_fee_transaction->id]) }}
-                </p>
-            </div>
-        </div>
+<body dir="rtl">
+    <div class="flex justify-end">
+        <img class="h-20" src="{{ asset('color-logo.svg') }}" alt="">
+    </div>
+    <div class="divide-y divide-gray-300/50">
+        <div class="py-8 space-y-6 text-base leading-7">
+            <p class="text-black">{{__('invoices/voucher-receipt.day', [], 'ar')}} : {{ $day }}</p>
+            <p class="text-black">{{__('invoices/voucher-receipt.date', [], 'ar')}} : {{ $date }}</p>
+            <p class="text-black">{{__('invoices/voucher-receipt.time', [], 'ar')}} : {{ $time }}</p>
+            <p class="text-xl text-center text-black">
+                {{__('invoices/voucher-receipt.title', [], 'ar')}}
+            </p>
+            <p class="text-center text-black">
 
-        <div class="my-10 flex space-x-8 rtl:space-x-reverse">
-            <div class="w-3/12">
-                <div class="mb-1">
-                    <h2 class="text-sm text-gray-600">{{ __('zatca/e-invoice.bill_from') }}</h2>
-                </div>
-                <h2 class="mb-1 font-semibold">{{ $seller->getCompanyName(Config::get('app.locale', 'en')) }}</h2>
-                <ul class="text-xs text-gray-500">
-                    <li>{{ $seller->getCompanyAddress()->getAddressLineOne(Config::get('app.locale', 'en')) }}</li>
-                    <li>{{ $seller->getCompanyAddress()->getAddressLineTwo(Config::get('app.locale', 'en')) }}</li>
-                    <li>{{ __('zatca/e-invoice.vat_number') }}: {{ $seller->getVatId() }}</li>
-                    <li>{{ __('zatca/e-invoice.cr_number') }}: {{ $seller->getCompanyCr() }}</li>
-                </ul>
-            </div>
+                {{$content}}
 
-            <div class="w-3/12">
-                <div class="mb-1">
-                    <h2 class="text-sm text-gray-600">{{ __('zatca/e-invoice.bill_to') }}</h2>
-                </div>
-                <h2 class="mb-1 font-semibold">{{ $buyer->name }}</h2>
-                <ul class="text-xs text-gray-500">
-                    {{--                <li>{{ __('zatca/e-invoice.contact_number') }}: {{ $buyer->mobile_dialing_phone_number }}</li> --}}
-                </ul>
-            </div>
-
-            <div class="flex-1">
-                <div class="mb-1">
-                    <h2 class="text-sm text-gray-600">{{ __('zatca/e-invoice.order_details') }}</h2>
-                </div>
-                <div class="grid grid-cols-12 gap-2 text-xs text-gray-500">
-                    <div class="col-span-3">{{ __('zatca/e-invoice.issue_date') }}</div>
-                    <div class="col-span-9">{{ $order->getInvoiceDate() }}</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-slate-600 flex px-2 py-3 text-white">
-            <div class="w-3/12">
-                <div>{{ __('zatca/e-invoice.item') }}</div>
-            </div>
-
-            <div class="w-2/12">
-                <div>{{ __('zatca/e-invoice.qty') }}</div>
-            </div>
-
-            <div class="w-2/12">
-                <div>{{ __('zatca/e-invoice.unit_price') }}</div>
-            </div>
-
-            <div class="w-2/12">
-                <div>{{ __('zatca/e-invoice.discount') }}</div>
-            </div>
-
-            <div class="w-1/12">
-                <div>{{ __('zatca/e-invoice.vat_symbol') }}</div>
-            </div>
-
-            <div class="w-2/12">
-                <div>{{ __('zatca/e-invoice.total_price') }}</div>
-            </div>
-        </div>
-
-        @foreach ($order->getItems() as $item)
-            <div class="flex px-2 py-3 text-gray-600">
-                <div class="w-3/12">
-                    <div>{{ $item->getName() }}</div>
-                </div>
-
-                <div class="w-2/12">
-                    <div>{{ $item->getQuantity() }}</div>
-                </div>
-
-                <div class="w-2/12">
-                    <div>{{ $item->getItemPrice()->formatByDecimal() }}</div>
-                </div>
-
-                <div class="w-2/12">
-                    <div>{{ $item->getDiscountPercentage() ?? 0 }}%</div>
-                </div>
-
-                <div class="w-1/12">
-                    <div>{{ $item->getVatPercentage() === null ? 'N' : 'V' }}</div>
-                </div>
-
-                <div class="w-2/12">
-                    <div>{{ $item->getLineTotal()->formatByDecimal() }}</div>
-                </div>
-            </div>
-        @endforeach
-        <div class="bg-slate-700 h-px w-full"></div>
-
-        <div class="flex items-center justify-between">
-            <div class="flex">
-                <img class="h-40 w-40" src="{{ $qr_code }}" />
-                <div class="p-2.5">
-                    <h2 class="text-lg font-bold">{{ __('zatca/e-invoice.tax_rates') }}</h2>
-                    <ul class="mt-2 text-sm">
-                        <li>"V"
-                            {{ __('zatca/e-invoice.vat_symbol_v', ['percentage' => collect($order->getItems())->filter(fn($item) => $item->getVatPercentage() !== null)->first()->getVatPercentage()]) }}
-                        </li>
-                        <li>"N" {{ __('zatca/e-invoice.vat_symbol_n') }}</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="w-1/2">
-                <div class="grid grid-cols-2 gap-4 py-3">
-                    @if ($order->getTotalDiscount()->getAmount() > 0)
-                        <div>{{ __('zatca/e-invoice.total_discount') }}</div>
-                        <div>
-                            {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalDiscount()->formatByDecimal()]) }}
-                        </div>
-                    @endif
-
-                    <div>{{ __('zatca/e-invoice.total_before_vat') }}</div>
-                    <div>
-                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalWithoutVat()->formatByDecimal()]) }}
-                    </div>
-
-                    <div>{{ __('zatca/e-invoice.vat_total') }}</div>
-                    <div>
-                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalVat()->formatByDecimal()]) }}
-                    </div>
-
-                    <div>{{ __('zatca/e-invoice.total') }}</div>
-                    <div class="font-bold text-gray-800">
-                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalAmount()->formatByDecimal()]) }}
-                    </div>
-                </div>
-                <div class="bg-slate-800 h-px w-full"></div>
-            </div>
+            </p>
         </div>
     </div>
 
-    <!-- Code injected by live-server -->
-    <script>
-        // <![CDATA[  <-- For SVG support
-        if ('WebSocket' in window) {
-            (function() {
-                function refreshCSS() {
-                    var sheets = [].slice.call(document.getElementsByTagName("link"));
-                    var head = document.getElementsByTagName("head")[0];
-                    for (var i = 0; i < sheets.length; ++i) {
-                        var elem = sheets[i];
-                        var parent = elem.parentElement || head;
-                        parent.removeChild(elem);
-                        var rel = elem.rel;
-                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() ==
-                            "stylesheet") {
-                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
-                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date()
-                                .valueOf());
-                        }
-                        parent.appendChild(elem);
-                    }
-                }
-                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
-                var address = protocol + window.location.host + window.location.pathname + '/ws';
-                var socket = new WebSocket(address);
-                socket.onmessage = function(msg) {
-                    if (msg.data == 'reload') window.location.reload();
-                    else if (msg.data == 'refreshcss') refreshCSS();
-                };
-                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
-                    console.log('Live reload enabled.');
-                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
-                }
-            })();
-        } else {
-            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
-        }
-        // ]]>
-    </script>
 </body>
 
 </html>

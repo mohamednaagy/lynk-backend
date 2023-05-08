@@ -93,7 +93,7 @@ class Order
      */
     public function getTotalWithoutVat(): Money
     {
-        return $this->getSubtotal()->subtract($this->getTotalVat());
+        return $this->getSubtotal();
     }
 
     /**
