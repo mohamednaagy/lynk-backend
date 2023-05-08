@@ -11,7 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ProcessBursamOrderResult implements ShouldQueue
+class ProcessBursamOrderResultYNN implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -38,6 +38,6 @@ class ProcessBursamOrderResult implements ShouldQueue
             return;
         }
 
-        Trader::driver('bursam', $traderOrder->version)->fetchOrderResult($traderOrder);
+        Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
     }
 }

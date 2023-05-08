@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class BursamV1Driver implements TraderInterface
@@ -30,7 +31,8 @@ class BursamV1Driver implements TraderInterface
 
     public function __construct()
     {
-        $this->accessToken = ProviderCredential::where('provider_name', 'bursam')->value('access_token');
+        $this->accessToken = ProviderCredential::where('provider_name', 'bursam')
+            ->value('access_token');
     }
 
     public function baseUrl($path)
@@ -49,7 +51,6 @@ class BursamV1Driver implements TraderInterface
             'client_secret' => config('trader.providers.bursam.client_secret_key'),
         ]);
 
-        // store token with provider name
         ProviderCredential::updateOrCreate(
             ['provider_name' => 'bursam'],
             ['access_token' => $response->json('access_token')],
@@ -58,13 +59,16 @@ class BursamV1Driver implements TraderInterface
 
     public function getOrInitiateTraderOrder(FinancingOrder $financingOrder): ?Model
     {
-        if ($financingOrder->initiateTraderOrder()->exists()) {
-            return $financingOrder->initiateTraderOrder()->first();
+        if ($financingOrder->initiatedTraderOrder()->exists()) {
+            return $financingOrder->initiatedTraderOrder()->first();
         }
 
         return $financingOrder->traderOrders()->create([
-            'uuid' => Str::uuid(),
+            'data' => [
+                'uuid_one' => Str::uuid(),
+            ],
             'provider' => 'bursam',
+            'reference' => 'I\'m a dummy reference',
             'status' => TraderOrderStatus::Initiated,
             'version' => 'v1',
         ]);
@@ -82,7 +86,7 @@ class BursamV1Driver implements TraderInterface
             [
                 'header' => [
                     'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                    'uuid' => $traderOrder->uuid,
+                    'uuid' => $traderOrder->uuid_one,
                 ],
                 'request' => [
                     'serialNumber' => '1',
@@ -124,7 +128,7 @@ class BursamV1Driver implements TraderInterface
         return $response->json();
     }
 
-    public function fetchOrderResult(TraderOrder $traderOrder)
+    public function fetchOrderResultYNN(TraderOrder $traderOrder)
     {
         $response = Http::withHeaders([
             'Authorization' => 'Bearer '.$this->accessToken,
@@ -134,7 +138,7 @@ class BursamV1Driver implements TraderInterface
             [
                 'header' => [
                     'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                    'uuid' => $traderOrder->uuid,
+                    'uuid' => $traderOrder->uuid_one,
                 ],
                 'request' => [
                     'serialNumber' => '1',
@@ -145,7 +149,6 @@ class BursamV1Driver implements TraderInterface
             ]
         );
 
-        // i think it's better to check on  ("bidMsg" => "OK")
         if ($response->json('status.processingCount') == 0 && ! empty($response->json('body.0.ecertNo'))) {
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiHoldingCertificateDocument);
             $traderOrder->update([
@@ -153,6 +156,13 @@ class BursamV1Driver implements TraderInterface
                     'products' => $response->json('body.0'),
                 ],
                 'reference' => $response->json('body.0.ecertNo'),
+            ]);
+        } elseif ($response->json('body.0.bidErrNo') != '999' && $response->json('status.processingCount') == 0) {
+            Log::error('bursam_provider', [
+                'provider' => $traderOrder->provider,
+                'version' => $traderOrder->version,
+                'uuid_one' => $traderOrder->uuid_one,
+                'fetchOrderResultYNN' => $response->json(),
             ]);
         }
 
@@ -305,6 +315,104 @@ class BursamV1Driver implements TraderInterface
         }
     }
 
+    public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
+    {
+        if (! $traderOrder->uuid_two) {
+            $traderOrder->update([
+                'data' => [
+                    'uuid_two' => Str::uuid(),
+                ],
+            ]);
+        }
+
+        $financingOrder = $traderOrder->order;
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer '.$this->accessToken,
+            'Content-Type' => 'application/json',
+        ])->post(
+            $this->baseUrl('api/process/svc/bsas/order.json'),
+            [
+                'header' => [
+                    'memberShortName' => config('trader.providers.bursam.member_short_name'),
+                    'uuid' => $traderOrder->uuid_two,
+                ],
+                'request' => [
+                    'serialNumber' => '1',
+                    'bidOption' => 'N',
+                    'otcOption' => 'Y',
+                    'stbOption' => 'Y',
+                    'productCode' => 'CPO-MSIA-09', // get it from settings
+                    'purchaseType' => 'P',
+                    'clientName' => '',
+                    'currency' => 'SAR',
+                    'bidValue' => $financingOrder->amount->formatByDecimal(),
+                    'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
+                    'tenor' => '00090',
+                    'otcCounterParty' => $financingOrder->customer_name,
+                    'otcMurabaha' => '',
+                    'otcMurabahaValue' => $financingOrder->selling_price->formatByDecimal(),
+                    'eCertNo' => $traderOrder->reference,
+                ],
+            ]
+        );
+
+        if (! empty($response->json('header.errorCode')) || $response->json('body.0.statusCode') != 0) {
+            throw new TraderException(collect([
+                'driver' => 'bursam',
+                'step' => 'sellingCommodityToOpenMarket',
+                'responseBody' => $response->json(),
+            ]));
+        }
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
+    }
+
+    public function fetchOrderResultNYY(TraderOrder $traderOrder)
+    {
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer '.$this->accessToken,
+            'Content-Type' => 'application/json',
+        ])->post(
+            $this->baseUrl('api/process/svc/bsas/orderResult.json'),
+            [
+                'header' => [
+                    'memberShortName' => config('trader.providers.bursam.member_short_name'),
+                    'uuid' => $traderOrder->uuid_two,
+                ],
+                'request' => [
+                    'serialNumber' => '1',
+                    'forceYN' => 'Y',
+                    'maxWaitTime' => '10',
+                    'waitAllDoneYN' => 'Y',
+                ],
+            ]
+        );
+
+        if ($response->json('status.processingCount') == 0
+            && $response->json('body.0.otcErrNo') == '999'
+            && $response->json('body.0.stbErrNo') == '999'
+        ) {
+            $this->createStepHistories(request(), $traderOrder, BursamMurabhaStep::MurabahaSaleCompleted);
+            $traderOrder->update([
+                'status' => TraderOrderStatus::Completed,
+            ]);
+
+            $traderOrder->order->update([
+                'status' => FinancingOrderStatus::Completed,
+            ]);
+        } else {
+            Log::error('bursam_provider', [
+                'provider' => $traderOrder->provider,
+                'version' => $traderOrder->version,
+                'uuid_two' => $traderOrder->uuid_two,
+                'fetchOrderResultNYY' => $response->json(),
+            ]);
+        }
+
+        return $response->json();
+    }
+
     public function getOtcCertificateDetails(TraderOrder $traderOrder)
     {
         $response = Http::withHeaders([
@@ -374,11 +482,6 @@ class BursamV1Driver implements TraderInterface
         );
 
         if ($response->json('SUCCESSYN') == 'N') {
-            $traderOrder->traderHistories()
-                ->where('action', FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)
-                ->first()
-                ?->delete();
-
             throw new TraderException(collect([
                 'driver' => 'bursam',
                 'step' => 'getStbCertificateDetails',
@@ -411,65 +514,6 @@ class BursamV1Driver implements TraderInterface
                     ->toMediaCollection(TraderOrderMediaCollection::TtiHoldingCertificate);
             }
         );
-
-        $this->createStepHistories(request(), $traderOrder, BursamMurabhaStep::MurabahaSaleCompleted);
-        $traderOrder->update([
-            'status' => TraderOrderStatus::Completed,
-        ]);
-    }
-
-    public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
-    {
-        if (! $traderOrder->old_uuid) {
-            $traderOrder->update([
-                'data' => [
-                    'old_uuid' => $traderOrder->uuid,
-                ],
-                'uuid' => Str::uuid(),
-            ]);
-        }
-
-        $financingOrder = $traderOrder->order;
-
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.$this->accessToken,
-            'Content-Type' => 'application/json',
-        ])->post(
-            $this->baseUrl('api/process/svc/bsas/order.json'),
-            [
-                'header' => [
-                    'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                    'uuid' => $traderOrder->uuid,
-                ],
-                'request' => [
-                    'serialNumber' => '1',
-                    'bidOption' => 'N',
-                    'otcOption' => 'Y',
-                    'stbOption' => 'Y',
-                    'productCode' => 'CPO-MSIA-09', // get it from settings
-                    'purchaseType' => 'P',
-                    'clientName' => '',
-                    'currency' => 'SAR',
-                    'bidValue' => $financingOrder->amount->formatByDecimal(),
-                    'valueDate' => now()->format('Ymd'),
-                    'tenor' => '00090',
-                    'otcCounterParty' => $financingOrder->customer_name,
-                    'otcMurabaha' => '',
-                    'otcMurabahaValue' => $financingOrder->selling_price->formatByDecimal(),
-                    'eCertNo' => $traderOrder->reference,
-                ],
-            ]
-        );
-
-        if (! empty($response->json('header.errorCode')) || $response->json('body.0.statusCode') != 0) {
-            throw new TraderException(collect([
-                'driver' => 'bursam',
-                'step' => 'sellingCommodityToOpenMarket',
-                'responseBody' => $response->json(),
-            ]));
-        }
-
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
     }
 
     public function cancelOrder(FinancingOrder $financingOrder): mixed

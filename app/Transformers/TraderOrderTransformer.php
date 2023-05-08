@@ -71,8 +71,7 @@ class TraderOrderTransformer extends TransformerAbstract
 
         $filteredMurabhaSteps = $murabhaSteps->except(
             [DmccMurabhaStep::TraderOrderCreated, BursamMurabhaStep::TraderOrderCreated]
-        )
-            ->keys();
+        )->values()->flatten();
 
         return $this->collection($filteredMurabhaSteps, new TraderHistoryTransformer($traderOrder));
     }

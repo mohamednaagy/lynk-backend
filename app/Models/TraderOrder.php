@@ -41,7 +41,6 @@ class TraderOrder extends Model implements HasMedia
         return [
             'id',
             'financing_order_id',
-            'uuid',
             'data',
             'provider',
             'version',
