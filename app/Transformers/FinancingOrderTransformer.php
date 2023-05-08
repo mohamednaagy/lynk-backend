@@ -2,7 +2,8 @@
 
 namespace App\Transformers;
 
-use App\Enums\FinancingOrderHistory;
+use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
@@ -178,14 +179,16 @@ class FinancingOrderTransformer extends TransformerAbstract
             return $this->primitive(null);
         }
 
-        return $this->collection(collect([
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-            FinancingOrderHistory::ContractSigned,
-            FinancingOrderHistory::ClientWakalaAccepted,
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-            FinancingOrderHistory::IssueMurabahaOffer,
-            FinancingOrderHistory::MurabahaSaleCompleted,
-        ]), new TraderHistoryTransformer($activeTraderOrder));
+        $murabhaSteps = collect(
+            get_murabha_steps($activeTraderOrder->provider, $activeTraderOrder->version)
+        );
+
+        $filteredMurabhaSteps = $murabhaSteps->except(
+            [DmccMurabhaStep::TraderOrderCreated, BursamMurabhaStep::TraderOrderCreated]
+        )
+            ->keys();
+
+        return $this->collection($filteredMurabhaSteps, new TraderHistoryTransformer($activeTraderOrder));
     }
 
     public function includeTraderOrders(FinancingOrder $financingOrder): Collection
