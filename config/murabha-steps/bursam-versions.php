@@ -56,6 +56,7 @@ return [
             FinancingOrderHistory::ClientWakalaAccepted,
         ],
         BursamMurabhaStep::MurabahaSaleCompleted => [
+            FinancingOrderHistory::GetSellingToBursaCertificate,
             FinancingOrderHistory::MurabahaSaleCompleted,
         ],
     ],

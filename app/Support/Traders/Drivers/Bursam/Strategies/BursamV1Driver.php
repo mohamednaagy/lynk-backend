@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
+use App\Enums\BursamMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -133,7 +134,7 @@ class BursamV1Driver implements TraderInterface
             [
                 'header' => [
                     'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                    'uuid' => $traderOrder?->uuid,
+                    'uuid' => $traderOrder->uuid,
                 ],
                 'request' => [
                     'serialNumber' => '1',
@@ -148,7 +149,9 @@ class BursamV1Driver implements TraderInterface
         if ($response->json('status.processingCount') == 0 && ! empty($response->json('body.0.ecertNo'))) {
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiHoldingCertificateDocument);
             $traderOrder->update([
-                'data' => $response->json('body.0'),
+                'data' => [
+                    'products' => $response->json('body.0'),
+                ],
                 'reference' => $response->json('body.0.ecertNo'),
             ]);
         }
@@ -166,7 +169,7 @@ class BursamV1Driver implements TraderInterface
             [
                 'input' => [
                     'membershortname' => config('trader.providers.bursam.member_short_name'),
-                    'ecertno' => $traderOrder->ecertNo,
+                    'ecertno' => $traderOrder->reference,
                 ],
             ]
         );
@@ -218,15 +221,21 @@ class BursamV1Driver implements TraderInterface
                 'transfer-ownership-to-lender',
                 [
                     'order_id' => $traderOrder->order->id,
-                    'products' => $traderOrder->products,
+                    'products' => [
+                        [
+                            'product' => $traderOrder->products['productCode'],
+                            'quantity' => $traderOrder->products['unit'],
+                            'uom' => '',
+                            'amount' => $traderOrder->products['bidValue'],
+                            'warehouse' => '-',
+                        ],
+                    ],
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
                     'amount' => $amount,
                     'previous_owner' => 'LYNK',
-                    'product_name' => $traderOrder->productCode,
-                    'unit' => $traderOrder->unit,
-                    'bidValue' => $traderOrder->bidValue,
+                    'product_name' => $traderOrder->products['productCode'],
                     'date' => Carbon::now()->toDateString(),
                     'time' => Carbon::now()->toTimeString(),
                 ],
@@ -267,10 +276,10 @@ class BursamV1Driver implements TraderInterface
                     'order_number' => $traderOrder->financing_order_id,
                     'products' => [
                         [
-                            'product' => $traderOrder->productCode,
-                            'quantity' => $traderOrder->unit,
+                            'product' => $traderOrder->products['productCode'],
+                            'quantity' => $traderOrder->products['unit'],
                             'uom' => '',
-                            'amount' => $traderOrder->bidValue,
+                            'amount' => $traderOrder->products['bidValue'],
                             'warehouse' => '-',
                         ],
                     ],
@@ -298,7 +307,6 @@ class BursamV1Driver implements TraderInterface
 
     public function getOtcCertificateDetails(TraderOrder $traderOrder)
     {
-        // this can be done after n,y,y. so we can generate it internally then get
         $response = Http::withHeaders([
             'Authorization' => 'Bearer '.$this->accessToken,
             'Content-Type' => 'application/json',
@@ -307,7 +315,7 @@ class BursamV1Driver implements TraderInterface
             [
                 'input' => [
                     'membershortname' => config('trader.providers.bursam.member_short_name'),
-                    'ecertno' => $traderOrder->ecertNo,
+                    'ecertno' => $traderOrder->reference,
                 ],
             ]
         );
@@ -346,6 +354,8 @@ class BursamV1Driver implements TraderInterface
                     ->toMediaCollection(TraderOrderMediaCollection::TtiHoldingCertificate);
             }
         );
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetOwnershipToCustomerCertificate);
     }
 
     public function getStbCertificateDetails(TraderOrder $traderOrder)
@@ -358,15 +368,20 @@ class BursamV1Driver implements TraderInterface
             [
                 'input' => [
                     'membershortname' => config('trader.providers.bursam.member_short_name'),
-                    'ecertno' => $traderOrder->ecertNo,
+                    'ecertno' => $traderOrder->reference,
                 ],
             ]
         );
 
         if ($response->json('SUCCESSYN') == 'N') {
+            $traderOrder->traderHistories()
+                ->where('action', FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)
+                ->first()
+                ?->delete();
+
             throw new TraderException(collect([
                 'driver' => 'bursam',
-                'step' => 'getOtcCertificateDetails',
+                'step' => 'getStbCertificateDetails',
                 'responseBody' => $response->json(),
             ]));
         }
@@ -396,11 +411,24 @@ class BursamV1Driver implements TraderInterface
                     ->toMediaCollection(TraderOrderMediaCollection::TtiHoldingCertificate);
             }
         );
+
+        $this->createStepHistories(request(), $traderOrder, BursamMurabhaStep::MurabahaSaleCompleted);
+        $traderOrder->update([
+            'status' => TraderOrderStatus::Completed,
+        ]);
     }
 
     public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
     {
-        $traderOrder->update(['uuid' => Str::uuid()]);
+        if (! $traderOrder->old_uuid) {
+            $traderOrder->update([
+                'data' => [
+                    'old_uuid' => $traderOrder->uuid,
+                ],
+                'uuid' => Str::uuid(),
+            ]);
+        }
+
         $financingOrder = $traderOrder->order;
 
         $response = Http::withHeaders([
@@ -428,12 +456,12 @@ class BursamV1Driver implements TraderInterface
                     'otcCounterParty' => $financingOrder->customer_name,
                     'otcMurabaha' => '',
                     'otcMurabahaValue' => $financingOrder->selling_price->formatByDecimal(),
-                    'eCertNo' => $traderOrder->ecertNo,
+                    'eCertNo' => $traderOrder->reference,
                 ],
             ]
         );
 
-        if (! empty($response->json('errorCode'))) {
+        if (! empty($response->json('header.errorCode')) || $response->json('body.0.statusCode') != 0) {
             throw new TraderException(collect([
                 'driver' => 'bursam',
                 'step' => 'sellingCommodityToOpenMarket',
@@ -441,10 +469,7 @@ class BursamV1Driver implements TraderInterface
             ]));
         }
 
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::MurabahaSaleCompleted);
-        $traderOrder->update([
-            'status' => TraderOrderStatus::Completed,
-        ]);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
     }
 
     public function cancelOrder(FinancingOrder $financingOrder): mixed
