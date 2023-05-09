@@ -56,7 +56,7 @@ class Kernel extends ConsoleKernel
 
         if (
             ! $now->between($startDateTime, $endDateTime)
-            || ($now->isFriday()) && $now->between($fridayRestStartTime, $fridayRestEndTime)
+            || ($now->isFriday() && $now->between($fridayRestStartTime, $fridayRestEndTime))
         ) {
             return false;
         }

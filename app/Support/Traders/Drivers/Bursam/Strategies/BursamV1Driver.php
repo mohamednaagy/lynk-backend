@@ -164,6 +164,27 @@ class BursamV1Driver implements TraderInterface
                 'uuid_one' => $traderOrder->uuid_one,
                 'fetchOrderResultYNN' => $response->json(),
             ]);
+
+            throw new TraderException(collect([
+                'driver' => 'bursam',
+                'step' => 'fetchOrderResultYNN',
+                'cause' => 'body.0.bidErrNo   != 999',
+                'responseBody' => $response->json(),
+            ]));
+        } elseif ($response->json('status.processingCount') > 0) {
+            Log::error('bursam_provider', [
+                'provider' => $traderOrder->provider,
+                'version' => $traderOrder->version,
+                'uuid_one' => $traderOrder->uuid_one,
+                'fetchOrderResultYNN' => $response->json(),
+            ]);
+
+            throw new TraderException(collect([
+                'driver' => 'bursam',
+                'step' => 'fetchOrderResultYNN',
+                'cause' => 'processingCount  >  0',
+                'responseBody' => $response->json(),
+            ]));
         }
 
         return $response->json();
