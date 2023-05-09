@@ -9,7 +9,7 @@ interface TraderInterface
 {
     public function createTraderOrder(FinancingOrder $financingOrder);
 
-    public function transferOwnershipToCustomer(TraderOrder $traderOrder);
+    public function createSellingCommodityToCustomerDocument(TraderOrder $traderOrder);
 
     public function sellingCommodityToOpenMarket(TraderOrder $traderOrder);
 

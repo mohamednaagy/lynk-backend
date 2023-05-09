@@ -272,7 +272,7 @@ class BursamV1Driver implements TraderInterface
         }
     }
 
-    public function transferOwnershipToCustomer(TraderOrder $traderOrder)
+    public function createSellingCommodityToCustomerDocument(TraderOrder $traderOrder)
     {
         try {
             $dateTime = $traderOrder->traderHistories()
@@ -284,21 +284,26 @@ class BursamV1Driver implements TraderInterface
 
             $customerName = $traderOrder->order->customer_name;
 
+            $products = [];
+            if (in_array('productCode', $traderOrder->products)) {
+                $products['product'] = $traderOrder->products['productCode'];
+            }
+            if (in_array('unit', $traderOrder->products)) {
+                $products['quantity'] = $traderOrder->products['unit'];
+            }
+            if (in_array('bidValue', $traderOrder->products)) {
+                $products['amount'] = $traderOrder->products['bidValue'];
+                $products['uom'] = '';
+                $products['warehouse'] = '-';
+            }
+
             $this->storeOrderDocumentAsPdf(
                 'selling-commodity-to-customer',
                 [
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'products' => [
-                        [
-                            'product' => $traderOrder->products['productCode'],
-                            'quantity' => $traderOrder->products['unit'],
-                            'uom' => '',
-                            'amount' => $traderOrder->products['bidValue'],
-                            'warehouse' => '-',
-                        ],
-                    ],
+                    'products' => count($products) == 0 ? $traderOrder->products : $products,
                     'amount' => $amount,
                     'customer_name' => $customerName,
                     'contract_signed_date' => $dateTime->toDateString(),
