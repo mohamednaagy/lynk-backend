@@ -38,6 +38,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
             return;
         }
 
-        Trader::driver('bursam', $traderOrder->version)->transferOwnershipToLender($traderOrder);
+        Trader::driver('bursam', $traderOrder->version)->createTransferOwnershipToLenderDocument($traderOrder);
     }
 }
