@@ -125,7 +125,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                 ],
                 'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
             ],
-            default => null,
+            default => [],
         };
     }
 

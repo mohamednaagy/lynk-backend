@@ -5,6 +5,7 @@ namespace App\Jobs\General;
 use App\Actions\Contracts\Clients\AskClientWakala;
 use App\Enums\FinancingOrderHistory;
 use App\Models\TraderOrder;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Traits\DmccTraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -44,7 +45,12 @@ class ProcessAskClientForWakala implements ShouldQueue
         /** @var TraderOrder $traderOrder */
         $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
 
-        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
+        $dict = new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version);
+        $currentStep = $dict->getStepByHistory(FinancingOrderHistory::WaitingClientWakala);
+        $previousStep = $dict->getPreviousStepOf($currentStep->step);
+        $history = end($previousStep->histories);
+
+        if (! $traderOrder->doesLastActionMatchWith($history)) {
             return;
         }
 

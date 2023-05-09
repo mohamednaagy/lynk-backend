@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('provider_credential', function (Blueprint $table) {
+        Schema::create('provider_credentials', function (Blueprint $table) {
             $table->id();
             $table->string('provider_name');
             $table->string('access_token');
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('provider_credential');
+        Schema::dropIfExists('provider_credentials');
     }
 };

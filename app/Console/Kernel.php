@@ -3,7 +3,7 @@
 namespace App\Console;
 
 use App\Jobs\General\ProcessFinancingOrders;
-use App\Support\Traders\Drivers\Bursam\Jobs\ProcessBursamCredential;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamCredential;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccNotifications;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -18,10 +18,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->job(new ProcessFinancingOrders())->everyMinute()->withoutOverlapping();
-        $schedule->job(new ProcessDmccNotifications())->everyMinute()->withoutOverlapping();
+        if ($this->isBursamServiceAvailable()) {
+            $schedule->job(new ProcessFinancingOrders())->everyMinute()->withoutOverlapping();
+            $schedule->job(new ProcessDmccNotifications())->everyMinute()->withoutOverlapping();
+        }
 
-        $schedule->job(new ProcessBursamCredential())->everySixHours()->withoutOverlapping();
+        $schedule->job(new ProcessBursamCredential())->dailyAt('19:20')
+            ->timezone('Asia/Riyadh')
+            ->withoutOverlapping();
     }
 
     /**
@@ -34,5 +38,29 @@ class Kernel extends ConsoleKernel
         $this->load(__DIR__.'/Commands');
 
         require base_path('routes/console.php');
+    }
+
+    private function isBursamServiceAvailable()
+    {
+        $timezone = 'Asia/Riyadh';
+        $now = now($timezone);
+        $startTime = '19:30:00';
+        $endTime = '18:30:00';
+        $fridayRestStartTime = '08:15:00';
+        $fridayRestEndTime = '08:45:00';
+
+        $startDateTime = now($timezone)->setTimeFromTimeString($startTime)->subDay();
+        $endDateTime = now($timezone)->setTimeFromTimeString($endTime);
+        $fridayRestStartTime = now($timezone)->setTimeFromTimeString($fridayRestStartTime);
+        $fridayRestEndTime = now($timezone)->setTimeFromTimeString($fridayRestEndTime);
+
+        if (
+            $now->between($startDateTime, $endDateTime)
+            || ($now->isFriday()) && $now->between($fridayRestStartTime, $fridayRestEndTime)
+        ) {
+            return false;
+        }
+
+        return true;
     }
 }

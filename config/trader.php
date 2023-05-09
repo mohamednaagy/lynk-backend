@@ -27,9 +27,8 @@ return [
             ],
         ],
         'bursam' => [
-            'latest' => 'v1',
-            'base_prod_url' => env('BASE_PROD_URL', 'bsasapi.bursamalaysia.com'), // change this to production
-            'base_dev_url' => env('BASE_DEV_URL', 'traderdcthh-erfmbxcc1323421.uselynk.com'),
+            'latest' => 'v2',
+            'base_url' => env('BURSAM_BASE_URL', 'traderdcthh-erfmbxcc1323421.uselynk.com'),
             'member_short_name' => env('BURSAM_MEMBER_SHORT_NAME', 'LYNK'),
             'client_secret_key' => env('BURSAM_CLIENT_SECRET_KEY', 'B347B6AFEA16EFA062B6DA'),
             'grant_type' => env('BURSAM_GRANT_TYPE', 'client_credentials'),

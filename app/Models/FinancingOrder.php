@@ -223,7 +223,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->latest();
     }
 
-    public function initiateTraderOrder(): HasMany
+    public function initiatedTraderOrder(): HasMany
     {
         return $this->traderOrders()
             ->where('status', TraderOrderStatus::Initiated)

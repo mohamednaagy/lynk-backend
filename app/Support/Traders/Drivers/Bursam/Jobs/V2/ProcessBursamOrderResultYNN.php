@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
+
+use App\Enums\FinancingOrderHistory;
+use App\Models\TraderOrder;
+use App\Support\Traders\Facades\Trader;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+
+class ProcessBursamOrderResultYNN implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public int $tries = 3;
+
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct(protected int $traderOrder)
+    {
+        //
+    }
+
+    public function backoff(): int
+    {
+        // Wait 30 minutes between retries
+        return 30 * 60;
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+        $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
+
+        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
+            return;
+        }
+
+        Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
+    }
+}

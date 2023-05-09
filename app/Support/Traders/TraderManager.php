@@ -4,6 +4,7 @@ namespace App\Support\Traders;
 
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Strategies\BursamV1Driver;
+use App\Support\Traders\Drivers\Bursam\Strategies\BursamV2Driver;
 use App\Support\Traders\Drivers\Dmcc\Strategies\DmccV1Driver;
 use App\Support\Traders\Drivers\Fake\Strategies\FakeV1Driver;
 use Illuminate\Support\Manager;
@@ -38,6 +39,11 @@ class TraderManager extends Manager
     public function createBursamV1Driver(): TraderInterface
     {
         return new BursamV1Driver();
+    }
+
+    public function createBursamV2Driver(): TraderInterface
+    {
+        return new BursamV2Driver();
     }
 
     public function createDmccV1Driver(): TraderInterface
