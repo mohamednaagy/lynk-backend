@@ -15,6 +15,8 @@ class ProcessBursamOrderResultYNN implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 3;
+
     /**
      * Create a new job instance.
      *
@@ -23,6 +25,12 @@ class ProcessBursamOrderResultYNN implements ShouldQueue
     public function __construct(protected int $traderOrder)
     {
         //
+    }
+
+    public function backoff(): int
+    {
+        // Wait 30 minutes between retries
+        return 30 * 60;
     }
 
     /**
