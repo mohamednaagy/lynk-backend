@@ -468,11 +468,6 @@ class DmccV1Driver implements TraderInterface
         }
     }
 
-    public function transferOwnershipToCustomer(TraderOrder $traderOrder)
-    {
-        // TODO: Implement ownershipToCustomer() method.
-    }
-
     public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
     {
         // TODO: Implement sellingCommodity() method.

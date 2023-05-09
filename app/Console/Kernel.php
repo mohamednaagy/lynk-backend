@@ -19,11 +19,6 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         if ($this->isBursamServiceAvailable()) {
-            echo 'true';
-        } else {
-            echo 'false';
-        }
-        if ($this->isBursamServiceAvailable()) {
             $schedule->job(new ProcessFinancingOrders())->everyMinute()->withoutOverlapping();
             $schedule->job(new ProcessDmccNotifications())->everyMinute()->withoutOverlapping();
         }
