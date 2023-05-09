@@ -19,6 +19,11 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         if ($this->isBursamServiceAvailable()) {
+            echo 'true';
+        } else {
+            echo 'false';
+        }
+        if ($this->isBursamServiceAvailable()) {
             $schedule->job(new ProcessFinancingOrders())->everyMinute()->withoutOverlapping();
             $schedule->job(new ProcessDmccNotifications())->everyMinute()->withoutOverlapping();
         }
@@ -55,7 +60,7 @@ class Kernel extends ConsoleKernel
         $fridayRestEndTime = now($timezone)->setTimeFromTimeString($fridayRestEndTime);
 
         if (
-            $now->between($startDateTime, $endDateTime)
+            ! $now->between($startDateTime, $endDateTime)
             || ($now->isFriday()) && $now->between($fridayRestStartTime, $fridayRestEndTime)
         ) {
             return false;

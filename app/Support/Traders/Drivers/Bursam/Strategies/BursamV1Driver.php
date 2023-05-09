@@ -222,30 +222,36 @@ class BursamV1Driver implements TraderInterface
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
     }
 
-    public function transferOwnershipToLender($traderOrder): void
+    public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
         try {
             $amount = $traderOrder->order->amount->formatByDecimal();
+
+            $products = [];
+            if (in_array('productCode', $traderOrder->products)) {
+                $products['product'] = $traderOrder->products['productCode'];
+            }
+            if (in_array('unit', $traderOrder->products)) {
+                $products['quantity'] = $traderOrder->products['unit'];
+            }
+            if (in_array('bidValue', $traderOrder->products)) {
+                $products['amount'] = $traderOrder->products['bidValue'];
+                $products['uom'] = '';
+                $products['warehouse'] = '-';
+            }
 
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
                     'order_id' => $traderOrder->order->id,
-                    'products' => [
-                        [
-                            'product' => $traderOrder->products['productCode'],
-                            'quantity' => $traderOrder->products['unit'],
-                            'uom' => '',
-                            'amount' => $traderOrder->products['bidValue'],
-                            'warehouse' => '-',
-                        ],
-                    ],
+                    'products' => count($products) == 0 ? $traderOrder->products : $products,
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
                     'amount' => $amount,
                     'previous_owner' => 'LYNK',
-                    'product_name' => $traderOrder->products['productCode'],
+                    'product_name' => (in_array('productCode', $traderOrder->products)) ?
+                        $traderOrder->products['productCode'] : $traderOrder->products[0]['product'],
                     'date' => Carbon::now()->toDateString(),
                     'time' => Carbon::now()->toTimeString(),
                 ],
