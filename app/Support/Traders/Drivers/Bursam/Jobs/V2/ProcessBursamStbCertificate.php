@@ -40,7 +40,7 @@ class ProcessBursamStbCertificate implements ShouldQueue, ShouldBeUnique
         DB::transaction(function () {
             $this->traderOrder = TraderOrder::query()
                 ->lockForUpdate()
-                ->findOrFail($this->traderOrder);
+                ->findOrFail($this->traderOrderId);
 
             if (! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)) {
                 return;

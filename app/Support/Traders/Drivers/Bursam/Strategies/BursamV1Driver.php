@@ -430,12 +430,9 @@ class BursamV1Driver implements TraderInterface
             && $response->json('body.0.stbErrNo') == '999'
         ) {
             $this->createStepHistories(request(), $traderOrder, BursamMurabhaStep::MurabahaSaleCompleted);
+
             $traderOrder->update([
                 'status' => TraderOrderStatus::Completed,
-            ]);
-
-            $traderOrder->order->update([
-                'status' => FinancingOrderStatus::Completed,
             ]);
         } else {
             throw new TraderException(
