@@ -28,7 +28,7 @@ class TraderHistoryObserver
     public function created(TraderHistory $traderHistory)
     {
         Trader::driver($traderHistory->traderOrder->provider, $traderHistory->traderOrder->version)
-            ->dispatchJobForTransitioningFlow($traderOrder);
+            ->dispatchJobForTransitioningFlow($traderHistory->traderOrder);
 //        $timeout = app(GeneralSettings::class)->trader_order_timeout;
 //
 //        // some Order at last step so no next step I think  another mail content needed
