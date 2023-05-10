@@ -58,6 +58,6 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldQueue, ShouldBe
 
     public function uniqueId(): string
     {
-        return __CLASS__.'_'.$this->traderOrder;
+        return __CLASS__.'_'.$this->traderOrderId;
     }
 }
