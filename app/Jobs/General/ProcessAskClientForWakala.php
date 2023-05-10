@@ -48,9 +48,9 @@ class ProcessAskClientForWakala implements ShouldQueue
         $dict = new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version);
         $currentStep = $dict->getStepByHistory(FinancingOrderHistory::WaitingClientWakala);
         $previousStep = $dict->getPreviousStepOf($currentStep->step);
-        $history = end($previousStep->histories);
+        $lastHistoryOfPreviousStep = end($previousStep->histories);
 
-        if (! $traderOrder->doesLastActionMatchWith($history)) {
+        if (! $traderOrder->doesLastActionMatchWith($lastHistoryOfPreviousStep)) {
             return;
         }
 
