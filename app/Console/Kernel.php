@@ -51,8 +51,8 @@ class Kernel extends ConsoleKernel
 
         $marketOpeningStartDateTime = now($timezone)->setTimeFromTimeString($marketOpeningStartTime)->subDay();
         $marketOpeningEndDateTime = now($timezone)->setTimeFromTimeString($marketOpeningEndTime);
-        $fridayBreakStartDateTime = now($timezone)->setTimeFromTimeString($fridayRestStartTime);
-        $fridayBreakEndDateTime = now($timezone)->setTimeFromTimeString($fridayRestEndTime);
+        $fridayBreakStartDateTime = now($timezone)->setTimeFromTimeString($fridayBreakStartTime);
+        $fridayBreakEndDateTime = now($timezone)->setTimeFromTimeString($fridayBreakStartTime);
 
         if (
             ! $now->between($marketOpeningStartDateTime, $marketOpeningEndDateTime)
