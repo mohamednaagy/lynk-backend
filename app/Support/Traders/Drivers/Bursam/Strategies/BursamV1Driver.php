@@ -19,7 +19,6 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class BursamV1Driver implements TraderInterface
@@ -229,18 +228,16 @@ class BursamV1Driver implements TraderInterface
         }
 
         $traderOrder->update([
-            'data' => [
-                'products' => [
-                    (new CommodityProductDto(
-                        product: $response->json('PNAME'),
-                        quantity: $response->json('PVOLUME'),
-                        amount: (float) $response->json('TOTALVALUE'),
-                        previous_owner: $response->json('OWNER'),
-                        date_time_of_purchasing_commodity: $response->json('PURCHASETIMEDATE'),
-                        uom: collect($traderOrder->original_data)->get('unit'),
-                        currency: $response->json('CURRENCY')
-                    ))->toArray(),
-                ],
+            'products' => [
+                (new CommodityProductDto(
+                    product: $response->json('PNAME'),
+                    quantity: $response->json('PVOLUME'),
+                    amount: (float) $response->json('TOTALVALUE'),
+                    previous_owner: $response->json('OWNER'),
+                    date_time_of_purchasing_commodity: $response->json('PURCHASETIMEDATE'),
+                    uom: collect($traderOrder->original_data)->get('unit'),
+                    currency: $response->json('CURRENCY')
+                ))->toArray(),
             ],
         ]);
         $bidOwnerShipTemplate = view('bursam-templates.bid-certificate-template', [
@@ -354,9 +351,7 @@ class BursamV1Driver implements TraderInterface
     {
         if (! $traderOrder->uuid_two) {
             $traderOrder->update([
-                'data' => [
-                    'uuid_two' => Str::uuid(),
-                ],
+                'uuid_two' => Str::uuid(),
             ]);
         }
 
@@ -415,7 +410,7 @@ class BursamV1Driver implements TraderInterface
             'Content-Type' => 'application/json',
         ])->post(
             $this->baseUrl('api/process/svc/bsas/orderResult.json'),
-            [
+            $requestBody = [
                 'header' => [
                     'memberShortName' => config('trader.providers.bursam.member_short_name'),
                     'uuid' => $traderOrder->uuid_two,
@@ -443,13 +438,16 @@ class BursamV1Driver implements TraderInterface
                 'status' => FinancingOrderStatus::Completed,
             ]);
         } else {
-            // TODO: should we throw exception here?
-            Log::error('bursam_provider', [
-                'provider' => $traderOrder->provider,
-                'version' => $traderOrder->version,
-                'uuid_two' => $traderOrder->uuid_two,
-                'fetchOrderResultNYY' => $response->json(),
-            ]);
+            throw new TraderException(
+                'Failed to fetch order result NYY',
+                [
+                    'provider' => $traderOrder->provider,
+                    'version' => $traderOrder->version,
+                    'uuid_two' => $traderOrder->uuid_two,
+                    'provider_request_body' => $requestBody,
+                    'provider_response_body' => $response->json(),
+                ]
+            );
         }
 
         return $response->json();
