@@ -20,8 +20,8 @@ class BursamV2Driver extends BursamV1Driver
 {
     public function getOrInitiateTraderOrder(FinancingOrder $financingOrder): ?Model
     {
-        if ($financingOrder->initiatedTraderOrder()->exists()) {
-            return $financingOrder->initiatedTraderOrder()->first();
+        if ($financingOrder->initiatedTraderOrders()->exists()) {
+            return $financingOrder->initiatedTraderOrders()->first();
         }
 
         return $financingOrder->traderOrders()->create([

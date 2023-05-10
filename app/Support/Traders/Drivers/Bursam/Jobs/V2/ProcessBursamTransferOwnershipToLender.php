@@ -25,6 +25,11 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
         //
     }
 
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->traderOrder;
+    }
+
     /**
      * Execute the job.
      *
