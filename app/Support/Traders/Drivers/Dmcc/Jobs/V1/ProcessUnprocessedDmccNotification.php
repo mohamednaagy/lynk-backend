@@ -6,7 +6,9 @@ use App\Exceptions\TraderNotSupportedException;
 use App\Models\TraderOrder;
 use App\Support\Traders\Events\ProcessNotification;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -14,15 +16,17 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessUnprocessedDmccNotification implements ShouldQueue
+class ProcessUnprocessedDmccNotification implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
     protected string $ttiId;
 
     protected string $notificationId;
 
     protected mixed $notification;
+
+    protected $traderOrder;
 
     /**
      * Create a new job instance.
@@ -52,12 +56,12 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
         }
 
         DB::transaction(function () use ($driver) {
-            $traderOrder = TraderOrder::query()
+            $this->traderOrder = TraderOrder::query()
                 ->where('reference', $this->ttiId)
                 ->lockForUpdate()
                 ->first();
 
-            if (! $traderOrder) {
+            if (! $this->traderOrder) {
                 return;
             }
 
@@ -75,6 +79,11 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('notificationId'.$this->notificationId)];
+        return [new WithoutOverlapping($this->uniqueId())];
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->notificationId;
     }
 }

@@ -6,7 +6,9 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -14,9 +16,11 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue
+class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
+
+    protected $traderOrder;
 
     protected string $ttiId;
 
@@ -43,7 +47,7 @@ class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue
     public function handle(): void
     {
         DB::transaction(function () {
-            $traderOrder = TraderOrder::query()
+            $this->traderOrder = TraderOrder::query()
                 ->where('reference', $this->ttiId)
                 ->where('status', TraderOrderStatus::InProgress)
                 ->whereIn('provider', ['dmcc', 'fake'])
@@ -51,17 +55,17 @@ class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue
                 ->first();
 
             if (
-                ! $traderOrder
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)
+                ! $this->traderOrder
+                || ! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)
             ) {
                 return;
             }
 
-            $trader = Trader::driver($traderOrder->provider);
+            $trader = Trader::driver($this->traderOrder->provider);
 
-            $trader->getInventoryBasket($traderOrder);
+            $trader->getInventoryBasket($this->traderOrder);
 
-            $trader->createTransferOwnershipToLenderDocument($traderOrder);
+            $trader->createTransferOwnershipToLenderDocument($this->traderOrder);
         });
     }
 
@@ -72,6 +76,11 @@ class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('dmccTtiId'.$this->ttiId)];
+        return [new WithoutOverlapping($this->uniqueId())];
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->ttiId;
     }
 }

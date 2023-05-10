@@ -7,6 +7,7 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\DmccTraderHelperTrait;
+use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,23 +19,17 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessDmccMpoOrder implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, DmccTraderHelperTrait;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, DmccTraderHelperTrait, StopsTraderOrderOnJobFailure;
 
-    protected mixed $traderOrder;
+    protected $traderOrder;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($traderOrder)
+    public function __construct(protected $traderOrderId)
     {
-        $this->traderOrder = $traderOrder;
-    }
-
-    public function uniqueId(): string
-    {
-        return __CLASS__.'_'.$this->traderOrder;
     }
 
     /**
@@ -45,45 +40,45 @@ class ProcessDmccMpoOrder implements ShouldQueue, ShouldBeUnique
     public function handle(): void
     {
         DB::transaction(function () {
-            $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
+            $this->traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrderId);
 
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument)) {
+            if (! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument)) {
                 return;
             }
 
-            $trader = Trader::driver($traderOrder->provider);
+            $trader = Trader::driver($this->traderOrder->provider);
 
-            $versionNo = $trader->uploadTTIDocumentAndGetVersionNumber($traderOrder->reference);
+            $versionNo = $trader->uploadTTIDocumentAndGetVersionNumber($this->traderOrder->reference);
 
             $trader->issueMurabahaPurchaseOffer(
-                $traderOrder->reference,
+                $this->traderOrder->reference,
                 $versionNo
             );
 
             $trader->createTraderOrderHistory(
-                $traderOrder,
+                $this->traderOrder,
                 FinancingOrderHistory::IssueMurabahaOffer
             );
 
             $mpoDocument = $trader->getDocumentByTypeAndTransaction(
-                $traderOrder->reference,
+                $this->traderOrder->reference,
                 'Murabaha Purchase Offer Document'
             );
 
             $trader->createTraderOrderHistory(
-                $traderOrder,
+                $this->traderOrder,
                 FinancingOrderHistory::GetMurabahaPurchaseOfferDocument
             );
 
             $this->attachDocumentToOrder(
-                $traderOrder,
+                $this->traderOrder,
                 $mpoDocument,
                 TraderOrderMediaCollection::MurabahaPurchaseOrder,
                 'base64'
             );
 
             $trader->createTraderOrderHistory(
-                $traderOrder,
+                $this->traderOrder,
                 FinancingOrderHistory::AttachMpoDocument
             );
         });
@@ -96,6 +91,11 @@ class ProcessDmccMpoOrder implements ShouldQueue, ShouldBeUnique
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('traderOrder'.$this->traderOrder)];
+        return [new WithoutOverlapping($this->uniqueId())];
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->traderOrderId;
     }
 }

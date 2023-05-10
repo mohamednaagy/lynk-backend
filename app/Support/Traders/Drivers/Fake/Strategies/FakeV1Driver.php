@@ -20,7 +20,11 @@ use Illuminate\Support\Facades\Http;
 
 class FakeV1Driver implements TraderInterface
 {
-    use FakeTraderHelperTrait{
+    protected $provider = 'fake';
+
+    protected $version = 'v1';
+
+    use FakeTraderHelperTrait {
         createTraderOrder as traitCreateTraderOrder;
     }
 
@@ -60,14 +64,15 @@ class FakeV1Driver implements TraderInterface
         $response = Http::get($this->buildUrl('notifications?type='.$type));
 
         if (! $response->successful()) {
-            throw new TraderException(collect([
-                'driver' => 'fake',
-                'step' => 'fetchNotifications',
-                'requestBody' => [
-                    'type' => $type,
-                ],
-                'responseBody' => $response->body(),
-            ]));
+            throw new TraderException(
+                'Failed to fetch notifications',
+                [
+                    'provider' => $this->provider,
+                    'version' => $this->version,
+                    'notification_type' => $type,
+                    'provider_response_body' => $response->body(),
+                ]
+            );
         }
 
         $data = collect($response->json())->map(function ($notification) {
@@ -97,14 +102,14 @@ class FakeV1Driver implements TraderInterface
         $response = Http::get($this->buildUrl('processNotification/'.$notificationId));
 
         if (! $this->isSuccess($response)) {
-            throw new TraderException(collect([
-                'driver' => 'fake',
-                'step' => 'processNotification',
-                'requestBody' => [
-                    'notificationId' => $notificationId,
-                ],
-                'responseBody' => $response->body(),
-            ]));
+            throw new TraderException(
+                'Failed to process notifications',
+                [
+                    'provider' => $this->provider,
+                    'version' => $this->version,
+                    'provider_response_body' => $response->body(),
+                ]
+            );
         }
     }
 
@@ -123,7 +128,7 @@ class FakeV1Driver implements TraderInterface
      */
     public function getTtiId(FinancingOrder $financingOrder): mixed
     {
-        $response = Http::post($this->buildUrl('getTTIIdForIssuePTP'), [
+        $response = Http::post($this->buildUrl('getTTIIdForIssuePTP'), $requestBody = [
             'currency' => $financingOrder->currency,
             'costPrice' => $financingOrder->amount->formatByDecimal(),
             'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
@@ -135,22 +140,16 @@ class FakeV1Driver implements TraderInterface
         ]);
 
         if (! $this->isSuccess($response)) {
-            throw new TraderException(collect([
-                'driver' => 'fake',
-                'step' => 'getTtiId',
-                'requestBody' => [
-                    'currency' => $financingOrder->currency,
-                    'costPrice' => $financingOrder->amount->formatByDecimal(),
-                    'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
-                    'paymentTerms' => config('trader.providers.fake.tti.payment_terms'),
-                    'unitOfDuration' => config('trader.providers.fake.tti.unit_of_duration'),
-                    'product' => null,
-                    'registeredMember' => config('trader.providers.fake.tti.registered_member'),
-                    'client' => null,
-                ],
-                'responseBody' => $response->body(),
-                'financingOrderId' => $financingOrder->id,
-            ]));
+            throw new TraderException(
+                'Failed to get TTID',
+                [
+                    'provider' => $this->provider,
+                    'version' => $this->version,
+                    'financing_order_id' => $financingOrder->id,
+                    'provider_request_body' => $requestBody,
+                    'provider_response_body' => $response->body(),
+                ]
+            );
         }
 
         return $response->json('data.ttiId');
@@ -170,23 +169,23 @@ class FakeV1Driver implements TraderInterface
      */
     public function respondPtpService(string $ttiId)
     {
-        $response = Http::post($this->buildUrl('respondPTPService'), [
+        $response = Http::post($this->buildUrl('respondPTPService'), $requestBody = [
             'ttiId' => $ttiId,
             'comments' => 'create PTP',
             'submitAction' => 'true',
         ]);
 
         if (! $this->isSuccess($response)) {
-            throw new TraderException(collect([
-                'driver' => 'fake',
-                'step' => 'respondPtpService',
-                'requestBody' => [
-                    'ttiId' => $ttiId,
-                    'comments' => 'create PTP',
-                    'submitAction' => 'true',
-                ],
-                'responseBody' => $response->body(),
-            ]));
+            throw new TraderException(
+                'Failed to respond to PTP service',
+                [
+                    'provider' => $this->provider,
+                    'version' => $this->version,
+                    'tti_id' => $ttiId,
+                    'provider_request_body' => $requestBody,
+                    'provider_response_body' => $response->body(),
+                ]
+            );
         }
 
         return $response->object();
@@ -233,14 +232,14 @@ class FakeV1Driver implements TraderInterface
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument, $data);
         } catch (Exception $exception) {
-            throw new TraderException(collect([
-                'driver' => 'fake',
-                'step' => 'createSellingCommodityToCustomerDocument',
-                'requestBody' => [
-                    'traderOrder' => $traderOrder,
+            throw new TraderException(
+                'Failed to create customer ownership document',
+                [
+                    'provider' => $traderOrder->provider,
+                    'version' => $traderOrder->version,
                 ],
-                'responseBody' => $exception->getMessage(),
-            ]));
+                $exception
+            );
         }
     }
 
@@ -250,21 +249,21 @@ class FakeV1Driver implements TraderInterface
     public function getDocumentByTypeAndTransaction(string $ttiId, string $documentType): mixed
     {
         // request PTP document
-        $response = Http::post($this->buildUrl('getDoumentByType'), [
+        $response = Http::post($this->buildUrl('getDoumentByType'), $requestBody = [
             'ttiId' => $ttiId,
             'type' => $documentType,
         ]);
 
         if (! $this->isSuccess($response)) {
-            throw new TraderException(collect([
-                'driver' => 'fake',
-                'step' => 'getDocumentByTypeAndTransaction',
-                'requestBody' => [
-                    'ttiId' => $ttiId,
-                    'type' => $documentType,
-                ],
-                'responseBody' => $response->body(),
-            ]));
+            throw new TraderException(
+                'Failed to get document by type and transaction',
+                [
+                    'provider' => $this->provider,
+                    'version' => $this->version,
+                    'provider_request_body' => $requestBody,
+                    'provider_response_body' => $response->body(),
+                ]
+            );
         }
 
         return $response->json('data.fileContent');
@@ -305,14 +304,14 @@ class FakeV1Driver implements TraderInterface
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument, $data);
         } catch (Exception $exception) {
-            throw new TraderException(collect([
-                'driver' => 'fake',
-                'step' => 'createTransferOwnershipToLenderDocument',
-                'requestBody' => [
-                    'traderOrder' => $traderOrder,
+            throw new TraderException(
+                'Failed to create lender ownership certificate',
+                [
+                    'provider' => $traderOrder->provider,
+                    'version' => $traderOrder->version,
                 ],
-                'responseBody' => $exception->getMessage(),
-            ]));
+                $exception
+            );
         }
     }
 
@@ -361,23 +360,21 @@ class FakeV1Driver implements TraderInterface
      */
     public function issueMurabahaPurchaseOffer(string $ttiId, string $versionNo): void
     {
-        $response = Http::post($this->buildUrl('issueMurabahaPurchaseOffer'), [
+        $response = Http::post($this->buildUrl('issueMurabahaPurchaseOffer'), $requestBody = [
             'ttiId' => $ttiId,
             'comments' => 'create MPO',
             'ttiDocumentVersionNo' => $versionNo,
         ]);
 
         if (! $this->isSuccess($response)) {
-            throw new TraderException(collect([
-                'driver' => 'fake',
-                'step' => 'issueMurabahaPurchaseOffer',
-                'requestBody' => [
-                    'ttiId' => $ttiId,
-                    'comments' => 'create MPO',
-                    'ttiDocumentVersionNo' => $versionNo,
-                ],
-                'responseBody' => $response->body(),
-            ]));
+            throw new TraderException(
+                'Failed to issue murabaha purchase offer',
+                [
+                    'tti_id' => $ttiId,
+                    'provider_request_body' => $requestBody,
+                    'provider_response_body' => $response->body(),
+                ]
+            );
         }
     }
 
@@ -394,11 +391,15 @@ class FakeV1Driver implements TraderInterface
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder)
     {
         match ((int) $traderOrder->last_history_action) {
-            FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::dispatch($traderOrder->id),
-            FinancingOrderHistory::ContractSigned => ProcessAskClientForWakala::dispatch($traderOrder->id),
-            FinancingOrderHistory::ClientWakalaAccepted => ProcessDmccSellingCommodityToCustomerOrder::dispatch($traderOrder->id),
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::dispatch($traderOrder->id),
+            FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::class,
+            FinancingOrderHistory::ContractSigned => ProcessAskClientForWakala::class,
+            FinancingOrderHistory::ClientWakalaAccepted => ProcessDmccSellingCommodityToCustomerOrder::class,
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::class,
             default => null,
         };
+
+        if ($dispatchableJob) {
+            $dispatchableJob::class;
+        }
     }
 }

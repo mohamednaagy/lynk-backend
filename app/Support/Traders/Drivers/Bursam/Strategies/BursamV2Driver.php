@@ -18,6 +18,8 @@ use Illuminate\Support\Str;
 
 class BursamV2Driver extends BursamV1Driver
 {
+    protected $version = 'v2';
+
     public function getOrInitiateTraderOrder(FinancingOrder $financingOrder): ?Model
     {
         if ($financingOrder->initiatedTraderOrders()->exists()) {
@@ -25,13 +27,11 @@ class BursamV2Driver extends BursamV1Driver
         }
 
         return $financingOrder->traderOrders()->create([
-            'data' => [
-                'uuid_one' => Str::uuid(),
-            ],
-            'provider' => 'bursam',
-            'reference' => 'I\'m a dummy reference',
+            'uuid_one' => Str::uuid(),
+            'provider' => $this->provider,
+            'reference' => '',
             'status' => TraderOrderStatus::Initiated,
-            'version' => 'v2',
+            'version' => $this->version,
         ]);
     }
 
@@ -41,15 +41,19 @@ class BursamV2Driver extends BursamV1Driver
      */
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
     {
-        match ((int) $traderOrder->last_history_action) {
-            FinancingOrderHistory::GetTtiId => ProcessBursamOrderResultYNN::dispatch($traderOrder->id),
-            FinancingOrderHistory::GetTtiHoldingCertificateDocument => ProcessBursamBidCertificate::dispatch($traderOrder->id),
-            FinancingOrderHistory::AttachTtiHoldingCertificateDocument => ProcessBursamTransferOwnershipToLender::dispatch($traderOrder->id),
-            FinancingOrderHistory::ContractSigned => ProcessBursamTransferOwnershipToCustomer::dispatch($traderOrder->id),
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessAskClientForWakala::dispatch($traderOrder->id),
-            FinancingOrderHistory::ClientWakalaAccepted => ProcessBursamSellingCommodityToOpenMarket::dispatch($traderOrder->id),
-            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => ProcessBursamOrderResultNYY::dispatch($traderOrder->id),
+        $dispatchableJob = match ((int) $traderOrder->last_history_action) {
+            FinancingOrderHistory::GetTtiId => ProcessBursamOrderResultYNN::class,
+            FinancingOrderHistory::GetTtiHoldingCertificateDocument => ProcessBursamBidCertificate::class,
+            FinancingOrderHistory::AttachTtiHoldingCertificateDocument => ProcessBursamTransferOwnershipToLender::class,
+            FinancingOrderHistory::ContractSigned => ProcessBursamTransferOwnershipToCustomer::class,
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessAskClientForWakala::class,
+            FinancingOrderHistory::ClientWakalaAccepted => ProcessBursamSellingCommodityToOpenMarket::class,
+            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => ProcessBursamOrderResultNYY::class,
             default => null,
         };
+
+        if ($dispatchableJob) {
+            $dispatchableJob::dispatch($traderOrder->id);
+        }
     }
 }

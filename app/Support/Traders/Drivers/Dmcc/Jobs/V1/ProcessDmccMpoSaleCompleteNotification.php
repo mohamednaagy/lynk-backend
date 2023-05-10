@@ -9,7 +9,9 @@ use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\DmccTraderHelperTrait;
+use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -17,9 +19,11 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
+class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, DmccTraderHelperTrait;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, DmccTraderHelperTrait, StopsTraderOrderOnJobFailure;
+
+    protected $traderOrder;
 
     protected string $ttiId;
 
@@ -46,7 +50,7 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
     public function handle(): void
     {
         DB::transaction(function () {
-            $traderOrder = TraderOrder::query()
+            $this->traderOrder = TraderOrder::query()
                 ->where('reference', $this->ttiId)
                 ->where('status', TraderOrderStatus::InProgress)
                 ->whereIn('provider', ['dmcc', 'fake'])
@@ -54,17 +58,17 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
                 ->first();
 
             if (
-                ! $traderOrder
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachMpoDocument)
+                ! $this->traderOrder
+                || ! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachMpoDocument)
             ) {
                 return;
             }
 
-            if (! $traderOrder->checkOrderStepComplete(DmccMurabhaStep::MurabhaOfferIssued)) {
+            if (! $this->traderOrder->checkOrderStepComplete(DmccMurabhaStep::MurabhaOfferIssued)) {
                 return;
             }
 
-            $trader = Trader::driver($traderOrder->provider);
+            $trader = Trader::driver($this->traderOrder->provider);
 
             $warrantDocument = $trader->getDocumentByTypeAndTransaction(
                 $this->ttiId,
@@ -72,28 +76,28 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
             );
 
             $trader->createTraderOrderHistory(
-                $traderOrder,
+                $this->traderOrder,
                 FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument
             );
 
             $this->attachDocumentToOrder(
-                $traderOrder,
+                $this->traderOrder,
                 $warrantDocument,
                 TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
                 'base64'
             );
 
             $trader->createTraderOrderHistory(
-                $traderOrder,
+                $this->traderOrder,
                 FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument
             );
 
             $trader->createTraderOrderHistory(
-                $traderOrder,
+                $this->traderOrder,
                 FinancingOrderHistory::MurabahaSaleCompleted
             );
 
-            $traderOrder->update([
+            $this->traderOrder->update([
                 'status' => TraderOrderStatus::Completed,
             ]);
         });
@@ -106,6 +110,11 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('dmccTtiId'.$this->ttiId)];
+        return [new WithoutOverlapping($this->uniqueId())];
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->ttiId;
     }
 }
