@@ -9,25 +9,22 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 
 class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    protected $traderOrder;
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(protected int $traderOrder)
+    public function __construct(protected int $traderOrderId)
     {
-        //
-    }
-
-    public function uniqueId(): string
-    {
-        return __CLASS__.'_'.$this->traderOrder;
     }
 
     /**
@@ -37,12 +34,24 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
      */
     public function handle()
     {
-        $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
+        $this->traderOrder = TraderOrder::query()
+            ->lockForUpdate()
+            ->findOrFail($this->traderOrderId);
 
-        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)) {
+        if (! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)) {
             return;
         }
 
-        Trader::driver('bursam', $traderOrder->version)->createTransferOwnershipToLenderDocument($traderOrder);
+        Trader::driver('bursam', $this->traderOrder->version)->createTransferOwnershipToLenderDocument($this->traderOrder);
+    }
+
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping($this->uniqueId())];
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->traderOrderId;
     }
 }

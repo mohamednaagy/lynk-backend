@@ -6,7 +6,9 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -14,9 +16,11 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccPtpNotification implements ShouldQueue
+class ProcessDmccPtpNotification implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
+
+    protected $traderOrder;
 
     protected string $ttiId;
 
@@ -41,27 +45,27 @@ class ProcessDmccPtpNotification implements ShouldQueue
     public function handle(): void
     {
         DB::transaction(function () {
-            $traderOrder = TraderOrder::query()
+            $this->traderOrder = TraderOrder::query()
                 ->where('reference', $this->ttiId)
                 ->where('status', TraderOrderStatus::InProgress)
                 ->whereIn('provider', ['dmcc', 'fake'])
                 ->lockForUpdate()
                 ->first();
 
-            if (! $traderOrder) {
+            if (! $this->traderOrder) {
                 return;
             }
 
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
+            if (! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
                 return;
             }
 
-            $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
+            $trader = Trader::driver($this->traderOrder->provider, $this->traderOrder->version);
 
             $trader->respondPtpService($this->ttiId);
 
             $trader->createTraderOrderHistory(
-                $traderOrder,
+                $this->traderOrder,
                 FinancingOrderHistory::RespondPtp
             );
         });
@@ -74,6 +78,11 @@ class ProcessDmccPtpNotification implements ShouldQueue
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('dmccTtiId'.$this->ttiId)];
+        return [new WithoutOverlapping($this->uniqueId())];
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->ttiId;
     }
 }

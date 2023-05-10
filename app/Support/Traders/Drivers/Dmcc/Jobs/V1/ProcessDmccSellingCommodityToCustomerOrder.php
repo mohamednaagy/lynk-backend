@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers\Dmcc\Jobs\V1;
 
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -15,23 +16,17 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
-    protected mixed $traderOrder;
+    protected $traderOrder;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($traderOrder)
+    public function __construct(protected $traderOrderId)
     {
-        $this->traderOrder = $traderOrder;
-    }
-
-    public function uniqueId(): string
-    {
-        return __CLASS__.'_'.$this->traderOrder;
     }
 
     /**
@@ -44,15 +39,17 @@ class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue, ShouldB
     public function handle(): void
     {
         DB::transaction(function () {
-            $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
+            $this->traderOrder = TraderOrder::query()
+                ->lockForUpdate()
+                ->findOrFail($this->traderOrderId);
 
-//            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted)) {
-//                return;
-//            }
+            //            if (! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted)) {
+            //                return;
+            //            }
 
-            $trader = Trader::driver($traderOrder->provider);
+            $trader = Trader::driver($this->traderOrder->provider);
 
-            $trader->createSellingCommodityToCustomerDocument($traderOrder);
+            $trader->createSellingCommodityToCustomerDocument($this->traderOrder);
         });
     }
 
@@ -63,6 +60,11 @@ class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue, ShouldB
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('traderOrder'.$this->traderOrder)];
+        return [new WithoutOverlapping($this->uniqueId())];
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->traderOrderId;
     }
 }

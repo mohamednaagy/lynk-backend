@@ -21,7 +21,7 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, DmccTraderHelperTrait;
 
-    protected mixed $traderOrder;
+    protected $traderOrder;
 
     /**
      * Create a new job instance.
@@ -31,11 +31,6 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue, ShouldBeUnique
     public function __construct($traderOrder)
     {
         $this->traderOrder = $traderOrder;
-    }
-
-    public function uniqueId(): string
-    {
-        return __CLASS__.'_'.$this->traderOrder;
     }
 
     /**
@@ -112,6 +107,11 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue, ShouldBeUnique
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('traderOrder'.$this->traderOrder)];
+        return [new WithoutOverlapping($this->uniqueId())];
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->traderOrder;
     }
 }

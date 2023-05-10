@@ -5,30 +5,29 @@ namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 use App\Enums\FinancingOrderHistory;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 
 class ProcessBursamTransferOwnershipToCustomer implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
+
+    protected $traderOrder;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(protected int $traderOrder)
+    public function __construct(protected int $traderOrderId)
     {
-        //
-    }
-
-    public function uniqueId(): string
-    {
-        return __CLASS__.'_'.$this->traderOrder;
     }
 
     /**
@@ -38,12 +37,26 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldQueue, ShouldBeU
      */
     public function handle()
     {
-        $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
+        DB::transaction(function () {
+            $this->traderOrder = TraderOrder::query()
+                ->lockForUpdate()
+                ->findOrFail($this->traderOrderId);
 
-        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
-            return;
-        }
+            if (! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
+                return;
+            }
 
-        Trader::driver('bursam', $traderOrder->version)->createSellingCommodityToCustomerDocument($traderOrder);
+            Trader::driver('bursam', $this->traderOrder->version)->createSellingCommodityToCustomerDocument($this->traderOrder);
+        });
+    }
+
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping($this->uniqueId())];
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->traderOrderId;
     }
 }
