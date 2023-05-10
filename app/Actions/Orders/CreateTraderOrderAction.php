@@ -46,6 +46,10 @@ class CreateTraderOrderAction implements CreateTraderOrder
             'action' => FinancingOrderHistory::GetTtiId,
         ]);
 
+        $financingOrder->update([
+            'status' => FinancingOrderStatus::InProgress,
+        ]);
+
         return $traderOrder;
     }
 }

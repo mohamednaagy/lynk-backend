@@ -4,10 +4,12 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Wallets;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Models\Company;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use Cknow\Money\Money;
@@ -69,26 +71,13 @@ class ChargeLenderBalanceManuallyTest extends TestCase
         $this->actingAs(self::$admin)
             ->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit')
             ->assertStatus(422)
-            ->assertJsonFragment([
-                'message' => 'The amount field is required. (and 3 more errors)',
-                'errors' => [
-                    'amount' => [
-                        0 => 'The amount field is required.',
-                    ],
-                    'description_en' => [
-                        0 => 'The description en field is required.',
-                    ],
-                    'description_ar' => [
-                        0 => 'The description ar field is required.',
-                    ],
-                    'attachment' => [
-                        0 => 'The attachment field is required.',
-                    ],
-                ],
-            ]);
+            ->assertJsonValidationErrorFor('amount')
+            ->assertJsonValidationErrorFor('description_en')
+            ->assertJsonValidationErrorFor('description_ar')
+            ->assertJsonValidationErrorFor('attachment');
     }
 
-    public function test_charge_lender_balance_manually_controller_successed()
+    public function test_charge_lender_balance_manually_controller_succeeded()
     {
         $this->actingAs(self::$admin)
             ->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit', [
@@ -133,6 +122,22 @@ class ChargeLenderBalanceManuallyTest extends TestCase
 
         $balanceAfterDeposit = self::$lender->balance(WalletType::CompanyWallet);
         $this->assertTrue($balance->add(Money::parseByDecimal(50, 'SAR'))->equals($balanceAfterDeposit));
+    }
+
+    public function test_charge_lender_balance_manually_voucher_invoice_generated_successfully()
+    {
+        $this->actingAs(self::$admin)
+            ->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit', [
+                'amount' => 50,
+                'description_en' => 'deposit some money',
+                'description_ar' => 'deposit some money',
+                'attachment' => UploadedFile::fake()
+                    ->create('attachment.pdf'),
+            ]);
+
+        $response = $this->getJson('api/v1/admin/lenders/'.self::$lender->id.'/transactions');
+
+        $this->assertTrue(Transaction::find($response->json('data.1.id'))->hasMedia(TransactionMediaCollection::VoucherReceipt));
     }
 
     public function test_charge_lender_balance_manually_admin_can_access()

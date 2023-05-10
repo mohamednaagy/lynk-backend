@@ -14,6 +14,7 @@ use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccRespondedToPtpOrder;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccSellingCommodityToCustomerOrder;
 use App\Support\Traders\Traits\DmccTraderHelperTrait;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use CodeDredd\Soap\Client\Response;
 use CodeDredd\Soap\Facades\Soap;
 use CodeDredd\Soap\SoapClient;
@@ -236,16 +237,16 @@ class DmccV1Driver implements TraderInterface
     public function createSellingCommodityToCustomerDocument($traderOrder): void
     {
         try {
-            $separator = ' و ';
             $dateTime = $traderOrder->traderHistories()
                 ->where('action', FinancingOrderHistory::ContractSigned)
                 ->first()
-                ?->created_at;
+                ->created_at
+                ->toImmutable();
 
+            $data['created_at'] = $dateTime->clone();
+            $separator = ' و ';
             $products = collect($traderOrder->products);
-
             $amount = $traderOrder->order->selling_price->formatByDecimal();
-
             $customerName = $traderOrder->order->customer_name;
             $productName = $products->pluck('product')->implode($separator);
 
@@ -259,14 +260,14 @@ class DmccV1Driver implements TraderInterface
                     'amount' => $amount,
                     'product_name' => $productName,
                     'customer_name' => $customerName,
-                    'contract_signed_date' => $dateTime->toDateString(),
-                    'contract_signed_time' => $dateTime->toTimeString(),
+                    'contract_signed_date' => $dateTime->tz('Asia/Riyadh')->toDateString(),
+                    'contract_signed_time' => $dateTime->tz('Asia/Riyadh')->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::SellingCommodityToCustomer,
             );
 
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument, $data);
         } catch (Exception $exception) {
             throw new TraderException(collect([
                 'driver' => 'dmcc',
@@ -319,9 +320,10 @@ class DmccV1Driver implements TraderInterface
             $separator = ' و ';
             $products = collect($traderOrder->products);
             $amount = $traderOrder->order->amount->formatByDecimal();
-
-            $previous_owner = $products->pluck('previous_owner')->implode($separator);
-            $product_name = $products->pluck('product')->implode($separator);
+            $previousOwner = $products->pluck('previous_owner')->implode($separator);
+            $productName = $products->pluck('product')->implode($separator);
+            $date = CarbonImmutable::now();
+            $data['created_at'] = $date->clone();
 
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
@@ -332,16 +334,16 @@ class DmccV1Driver implements TraderInterface
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
                     'amount' => $amount,
-                    'previous_owner' => $previous_owner,
-                    'product_name' => $product_name,
-                    'date' => Carbon::now()->toDateString(),
-                    'time' => Carbon::now()->toTimeString(),
+                    'previous_owner' => $previousOwner,
+                    'product_name' => $productName,
+                    'date' => $date->tz('Asia/Riyadh')->toDateString(),
+                    'time' => $date->tz('Asia/Riyadh')->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::TransferOwnershipToLender
             );
 
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument, $data);
         } catch (Exception $exception) {
             logs()->debug('test', [$exception]);
             throw new TraderException(collect([
