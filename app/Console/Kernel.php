@@ -44,19 +44,19 @@ class Kernel extends ConsoleKernel
     {
         $timezone = 'Asia/Riyadh';
         $now = now($timezone);
-        $startTime = '19:30:00';
-        $endTime = '18:30:00';
-        $fridayRestStartTime = '08:15:00';
-        $fridayRestEndTime = '08:45:00';
+        $marketOpeningStartTime = '19:30:00';
+        $marketOpeningEndTime = '18:30:00';
+        $fridayBreakStartTime = '08:15:00';
+        $fridayBreakEndTime = '08:45:00';
 
-        $startDateTime = now($timezone)->setTimeFromTimeString($startTime)->subDay();
-        $endDateTime = now($timezone)->setTimeFromTimeString($endTime);
-        $fridayRestStartTime = now($timezone)->setTimeFromTimeString($fridayRestStartTime);
-        $fridayRestEndTime = now($timezone)->setTimeFromTimeString($fridayRestEndTime);
+        $marketOpeningStartDateTime = now($timezone)->setTimeFromTimeString($marketOpeningStartTime)->subDay();
+        $marketOpeningEndDateTime = now($timezone)->setTimeFromTimeString($marketOpeningEndTime);
+        $fridayBreakStartDateTime = now($timezone)->setTimeFromTimeString($fridayRestStartTime);
+        $fridayBreakEndDateTime = now($timezone)->setTimeFromTimeString($fridayRestEndTime);
 
         if (
-            ! $now->between($startDateTime, $endDateTime)
-            || ($now->isFriday() && $now->between($fridayRestStartTime, $fridayRestEndTime))
+            ! $now->between($marketOpeningStartDateTime, $marketOpeningEndDateTime)
+            || ($now->isFriday() && $now->between($fridayBreakStartDateTime, $fridayBreakEndDateTime))
         ) {
             return false;
         }
