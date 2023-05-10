@@ -13,6 +13,7 @@ use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
 use App\Models\TraderHistory;
 use App\Settings\Classes\GeneralSettings;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\Facades\Trader;
 
 class TraderHistoryObserver
 {
@@ -26,6 +27,8 @@ class TraderHistoryObserver
      */
     public function created(TraderHistory $traderHistory)
     {
+        Trader::driver($traderHistory->traderOrder->provider, $traderHistory->traderOrder->version)
+            ->dispatchJobForTransitioningFlow($traderOrder);
 //        $timeout = app(GeneralSettings::class)->trader_order_timeout;
 //
 //        // some Order at last step so no next step I think  another mail content needed
