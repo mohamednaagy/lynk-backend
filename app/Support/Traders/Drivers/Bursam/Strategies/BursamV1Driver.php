@@ -11,6 +11,7 @@ use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\ProviderCredential;
 use App\Models\TraderOrder;
+use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Traits\BursamTraderHelperTrait;
@@ -227,6 +228,21 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
+        $traderOrder->update([
+            'data' => [
+                'products' => [
+                    (new CommodityProductDto(
+                        product: $response->json('PNAME'),
+                        quantity: $response->json('PVOLUME'),
+                        amount: (float) $response->json('TOTALVALUE'),
+                        previous_owner: $response->json('OWNER'),
+                        date_time_of_purchasing_commodity: $response->json('PURCHASETIMEDATE'),
+                        uom: collect($traderOrder->original_data)->get('unit'),
+                        currency: $response->json('CURRENCY')
+                    ))->toArray(),
+                ],
+            ],
+        ]);
         $bidOwnerShipTemplate = view('bursam-templates.bid-certificate-template', [
             'ecertno' => $response->json('ECERTNO'),
             'buyer' => $response->json('BUYER'),
@@ -262,31 +278,17 @@ class BursamV1Driver implements TraderInterface
         try {
             $amount = $traderOrder->order->amount->formatByDecimal();
 
-            $products = [];
-            if (in_array('productCode', $traderOrder->products)) {
-                $products['product'] = $traderOrder->products['productCode'];
-            }
-            if (in_array('unit', $traderOrder->products)) {
-                $products['quantity'] = $traderOrder->products['unit'];
-            }
-            if (in_array('bidValue', $traderOrder->products)) {
-                $products['amount'] = $traderOrder->products['bidValue'];
-                $products['uom'] = '';
-                $products['warehouse'] = '-';
-            }
-
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
                     'order_id' => $traderOrder->order->id,
-                    'products' => count($products) == 0 ? $traderOrder->products : $products,
+                    'products' => $traderOrder->products,
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
                     'amount' => $amount,
-                    'previous_owner' => 'LYNK',
-                    'product_name' => (in_array('productCode', $traderOrder->products)) ?
-                        $traderOrder->products['productCode'] : $traderOrder->products[0]['product'],
+                    'previous_owner' => CommodityProductDto::fromArray($traderOrder->products[0])->getPreviousOwner(),
+                    'product_name' => CommodityProductDto::fromArray($traderOrder->products[0])->getProduct(),
                     'date' => Carbon::now()->toDateString(),
                     'time' => Carbon::now()->toTimeString(),
                 ],
@@ -319,26 +321,13 @@ class BursamV1Driver implements TraderInterface
 
             $customerName = $traderOrder->order->customer_name;
 
-            $products = [];
-            if (in_array('productCode', $traderOrder->products)) {
-                $products['product'] = $traderOrder->products['productCode'];
-            }
-            if (in_array('unit', $traderOrder->products)) {
-                $products['quantity'] = $traderOrder->products['unit'];
-            }
-            if (in_array('bidValue', $traderOrder->products)) {
-                $products['amount'] = $traderOrder->products['bidValue'];
-                $products['uom'] = '';
-                $products['warehouse'] = '-';
-            }
-
             $this->storeOrderDocumentAsPdf(
                 'selling-commodity-to-customer',
                 [
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'products' => count($products) == 0 ? $traderOrder->products : $products,
+                    'products' => $traderOrder->products,
                     'amount' => $amount,
                     'customer_name' => $customerName,
                     'contract_signed_date' => $dateTime->toDateString(),
