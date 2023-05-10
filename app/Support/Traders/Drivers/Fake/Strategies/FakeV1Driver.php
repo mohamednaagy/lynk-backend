@@ -399,7 +399,7 @@ class FakeV1Driver implements TraderInterface
         };
 
         if ($dispatchableJob) {
-            $dispatchableJob::class;
+            $dispatchableJob::dispatch($traderOrder->id);
         }
     }
 }
