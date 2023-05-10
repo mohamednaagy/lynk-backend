@@ -39,7 +39,7 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
     public function backoff(): int
     {
         // Wait 30 minutes between retries
-        return 1;
+        return config('trader.providers.bursam.purchasing_commodity_job_backoff_time');
     }
 
     /**
