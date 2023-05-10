@@ -6,12 +6,13 @@ use App\Enums\FinancingOrderHistory;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ProcessBursamStbCertificate implements ShouldQueue
+class ProcessBursamStbCertificate implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -23,6 +24,11 @@ class ProcessBursamStbCertificate implements ShouldQueue
     public function __construct(protected int $traderOrder)
     {
         //
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->traderOrder;
     }
 
     /**

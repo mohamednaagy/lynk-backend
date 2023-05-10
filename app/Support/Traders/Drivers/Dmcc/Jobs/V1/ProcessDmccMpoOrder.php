@@ -8,6 +8,7 @@ use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\DmccTraderHelperTrait;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -15,7 +16,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccMpoOrder implements ShouldQueue
+class ProcessDmccMpoOrder implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, DmccTraderHelperTrait;
 
@@ -29,6 +30,11 @@ class ProcessDmccMpoOrder implements ShouldQueue
     public function __construct($traderOrder)
     {
         $this->traderOrder = $traderOrder;
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->traderOrder;
     }
 
     /**

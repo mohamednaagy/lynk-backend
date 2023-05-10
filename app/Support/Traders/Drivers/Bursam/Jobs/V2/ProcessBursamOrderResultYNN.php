@@ -8,13 +8,14 @@ use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessBursamOrderResultYNN implements ShouldQueue
+class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -30,10 +31,15 @@ class ProcessBursamOrderResultYNN implements ShouldQueue
         //
     }
 
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->traderOrder;
+    }
+
     public function backoff(): int
     {
         // Wait 30 minutes between retries
-        return 30 * 60;
+        return 1;
     }
 
     /**
