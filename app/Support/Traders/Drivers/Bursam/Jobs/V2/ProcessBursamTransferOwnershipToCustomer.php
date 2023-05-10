@@ -44,6 +44,6 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldQueue, ShouldBeU
             return;
         }
 
-        Trader::driver('bursam', $traderOrder->version)->transferOwnershipToCustomer($traderOrder);
+        Trader::driver('bursam', $traderOrder->version)->createSellingCommodityToCustomerDocument($traderOrder);
     }
 }
