@@ -7,7 +7,6 @@ use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsMurabhaOfferIssued;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
-use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
 use App\Models\TraderHistory;
@@ -27,8 +26,6 @@ class TraderHistoryObserver
      */
     public function created(TraderHistory $traderHistory)
     {
-        Trader::driver($traderHistory->traderOrder->provider, $traderHistory->traderOrder->version)
-            ->dispatchJobForTransitioningFlow($traderHistory->traderOrder);
 //        $timeout = app(GeneralSettings::class)->trader_order_timeout;
 //
 //        // some Order at last step so no next step I think  another mail content needed
