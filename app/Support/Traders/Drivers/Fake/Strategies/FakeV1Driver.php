@@ -390,7 +390,7 @@ class FakeV1Driver implements TraderInterface
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder)
     {
-        match ((int) $traderOrder->last_history_action) {
+        $dispatchableJob = match ((int) $traderOrder->last_history_action) {
             FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::class,
             FinancingOrderHistory::ContractSigned => ProcessAskClientForWakala::class,
             FinancingOrderHistory::ClientWakalaAccepted => ProcessDmccSellingCommodityToCustomerOrder::class,
