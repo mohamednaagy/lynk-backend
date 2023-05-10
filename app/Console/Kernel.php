@@ -49,7 +49,7 @@ class Kernel extends ConsoleKernel
         $fridayBreakStartTime = '08:15:00';
         $fridayBreakEndTime = '08:45:00';
 
-        $marketOpeningStartDateTime = now($timezone)->setTimeFromTimeString($marketOpeningStartTime)->subDay();
+        $marketOpeningStartDateTime = now($timezone)->setTimeFromTimeString($marketOpeningStartTime);
         $marketOpeningEndDateTime = now($timezone)->setTimeFromTimeString($marketOpeningEndTime);
         $fridayBreakStartDateTime = now($timezone)->setTimeFromTimeString($fridayBreakStartTime);
         $fridayBreakEndDateTime = now($timezone)->setTimeFromTimeString($fridayBreakEndTime);
