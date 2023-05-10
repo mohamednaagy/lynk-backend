@@ -45,7 +45,7 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeReference(TraderOrder $traderOrder): Primitive
     {
-        return $this->primitive($traderOrder->reference);
+        return $this->primitive($traderOrder->reference ?: $traderOrder->id);
     }
 
     public function includeProvider(TraderOrder $traderOrder): Primitive
