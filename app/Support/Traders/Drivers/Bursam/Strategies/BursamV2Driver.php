@@ -29,7 +29,7 @@ class BursamV2Driver extends BursamV1Driver
                 'uuid_one' => Str::uuid(),
             ],
             'provider' => 'bursam',
-            'reference' => 'I\'m a dummy reference',
+            'reference' => ' waiting reference...',
             'status' => TraderOrderStatus::Initiated,
             'version' => 'v2',
         ]);
