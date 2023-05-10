@@ -41,7 +41,7 @@ class ProcessBursamOrderResultNYY implements ShouldQueue, ShouldBeUnique
         DB::transaction(function () {
             $this->traderOrder = TraderOrder::query()
                 ->lockForUpdate()
-                ->findOrFail($this->traderOtraderOrderIdrder);
+                ->findOrFail($this->traderOrderId);
 
             if (! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)) {
                 return;
