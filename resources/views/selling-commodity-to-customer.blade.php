@@ -784,7 +784,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                         </tbody>
                     </table>
                 @endforeach
-
                 <p class="text-center text-black pt-7">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
                 <hr class="mx-auto mt-10 h-[2px] w-48 bg-gray-700" />
             </div>

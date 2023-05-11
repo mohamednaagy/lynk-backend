@@ -95,6 +95,7 @@ class OrderController extends Controller
                 'trader_orders.id',
                 'trader_orders.reference',
                 'trader_orders.provider',
+                'trader_orders.version',
                 'trader_orders.is_cancellable',
                 'trader_orders.history',
                 'trader_orders.status',
