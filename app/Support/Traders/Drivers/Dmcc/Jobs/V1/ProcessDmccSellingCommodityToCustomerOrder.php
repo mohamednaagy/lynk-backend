@@ -18,8 +18,6 @@ class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue, ShouldB
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
-    protected $traderOrder;
-
     /**
      * Create a new job instance.
      *
@@ -39,7 +37,7 @@ class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue, ShouldB
     public function handle(): void
     {
         DB::transaction(function () {
-            $this->traderOrder = TraderOrder::query()
+            $traderOrder = TraderOrder::query()
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
@@ -47,17 +45,12 @@ class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue, ShouldB
             //                return;
             //            }
 
-            $trader = Trader::driver($this->traderOrder->provider);
+            $trader = Trader::driver($traderOrder->provider);
 
-            $trader->createSellingCommodityToCustomerDocument($this->traderOrder);
+            $trader->createSellingCommodityToCustomerDocument($traderOrder);
         });
     }
 
-    /**
-     * Get the middleware the job should pass through.
-     *
-     * @return array
-     */
     public function middleware(): array
     {
         return [new WithoutOverlapping($this->uniqueId())];

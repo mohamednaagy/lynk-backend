@@ -16,8 +16,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $traderOrder;
-
     /**
      * Create a new job instance.
      *
@@ -34,15 +32,15 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
      */
     public function handle()
     {
-        $this->traderOrder = TraderOrder::query()
+        $traderOrder = TraderOrder::query()
             ->lockForUpdate()
             ->findOrFail($this->traderOrderId);
 
-        if (! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)) {
+        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)) {
             return;
         }
 
-        Trader::driver('bursam', $this->traderOrder->version)->createTransferOwnershipToLenderDocument($this->traderOrder);
+        Trader::driver('bursam', $traderOrder->version)->createTransferOwnershipToLenderDocument($traderOrder);
     }
 
     public function middleware(): array

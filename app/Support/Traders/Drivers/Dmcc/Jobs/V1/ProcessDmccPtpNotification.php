@@ -71,11 +71,6 @@ class ProcessDmccPtpNotification implements ShouldQueue, ShouldBeUnique
         });
     }
 
-    /**
-     * Get the middleware the job should pass through.
-     *
-     * @return array
-     */
     public function middleware(): array
     {
         return [new WithoutOverlapping($this->uniqueId())];
@@ -84,5 +79,14 @@ class ProcessDmccPtpNotification implements ShouldQueue, ShouldBeUnique
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->ttiId;
+    }
+
+    public function getTraderOrder()
+    {
+        return TraderOrder::query()
+            ->where('reference', $this->ttiId)
+            ->where('status', TraderOrderStatus::InProgress)
+            ->whereIn('provider', ['dmcc', 'fake'])
+            ->first();
     }
 }

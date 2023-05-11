@@ -21,16 +21,13 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, DmccTraderHelperTrait;
 
-    protected $traderOrder;
-
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($traderOrder)
+    public function __construct(protected $traderOrderId)
     {
-        $this->traderOrder = $traderOrder;
     }
 
     /**
@@ -44,7 +41,7 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue, ShouldBeUnique
     {
         // to unify
         DB::transaction(function () {
-            $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrder);
+            $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrderId);
 
             if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::RespondPtp)) {
                 return;
@@ -100,11 +97,6 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue, ShouldBeUnique
         });
     }
 
-    /**
-     * Get the middleware the job should pass through.
-     *
-     * @return array
-     */
     public function middleware(): array
     {
         return [new WithoutOverlapping($this->uniqueId())];
@@ -112,6 +104,6 @@ class ProcessDmccRespondedToPtpOrder implements ShouldQueue, ShouldBeUnique
 
     public function uniqueId(): string
     {
-        return __CLASS__.'_'.$this->traderOrder;
+        return __CLASS__.'_'.$this->traderOrderId;
     }
 }
