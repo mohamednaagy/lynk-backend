@@ -26,7 +26,6 @@ class CreateTraderOrderAction implements CreateTraderOrder
         if ($financingOrder->status->is(FinancingOrderStatus::Completed)) {
             throw new OrderIsAlreadyCompletedException;
         }
-
         $doesInProgressTraderOrderExists = $financingOrder
             ->traderOrders()
             ->where('status', TraderOrderStatus::InProgress)
@@ -39,6 +38,7 @@ class CreateTraderOrderAction implements CreateTraderOrder
         $traderOrder = $financingOrder->traderOrders()->create([
             'provider' => Arr::get($data, 'trader'),
             'reference' => Arr::get($data, 'reference_number'),
+            'version' => Arr::get($data, 'version'),
             'status' => TraderOrderStatus::InProgress,
         ]);
 

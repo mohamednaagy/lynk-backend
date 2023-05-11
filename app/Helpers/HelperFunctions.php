@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use Modules\Grantify\Facades\Grantify;
 
 if (! function_exists('validate_said')) {
@@ -83,5 +85,41 @@ if (! function_exists('get_file_url')) {
         }
 
         return null;
+    }
+}
+
+if (! function_exists('get_murabha_steps_dictionary')) {
+    function get_murabha_steps_dictionary($provider = 'fake', $version = null): array
+    {
+        return match ($provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::getStepsOfVersion($version),
+            'bursam' => BursamMurabhaStep::getStepsOfVersion($version),
+            default => throw new \InvalidArgumentException('Invalid trader')
+        };
+    }
+}
+
+if (! function_exists('get_latest_version_of_trader')) {
+    function get_latest_version_of_trader($provider): string
+    {
+        return config('trader.providers.'.$provider.'.latest');
+    }
+}
+
+if (! function_exists('get_murabha_steps')) {
+    function get_murabha_steps($provider, ?string $version = null): array
+    {
+        return config('murabha-steps.'.$provider.'-versions.'.$version ?? get_latest_version_of_trader($provider));
+    }
+}
+
+if (! function_exists('trader_step_histories')) {
+    function trader_step_histories(string $provider, string $version): array
+    {
+        return match ($provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::getStepsOfVersion($version),
+            'bursam' => BursamMurabhaStep::getStepsOfVersion($version),
+            default => throw new \InvalidArgumentException('Invalid trader')
+        };
     }
 }

@@ -11,6 +11,7 @@ use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Modules\Otpify\Contracts\Otpifiable;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
@@ -215,10 +216,17 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         );
     }
 
-    public function activeTraderOrder()
+    public function activeTraderOrder(): HasMany
     {
         return $this->traderOrders()
             ->where('status', TraderOrderStatus::InProgress)
+            ->latest();
+    }
+
+    public function initiatedTraderOrders(): HasMany
+    {
+        return $this->traderOrders()
+            ->where('status', TraderOrderStatus::Initiated)
             ->latest();
     }
 

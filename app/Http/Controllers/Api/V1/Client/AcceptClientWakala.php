@@ -9,7 +9,7 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Client\AcceptClientWakalaRequest;
 use App\Models\FinancingOrder;
-use App\Support\Traders\TraderHelperTrait;
+use App\Support\Traders\Traits\DmccTraderHelperTrait;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AcceptClientWakala extends Controller
 {
-    use TraderHelperTrait;
+    use DmccTraderHelperTrait;
 
     /**
      * Handle the incoming request.

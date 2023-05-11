@@ -2,7 +2,8 @@
 
 namespace App\Transformers;
 
-use App\Enums\FinancingOrderHistory;
+use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
@@ -19,6 +20,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'financing_order_id',
         'reference',
         'provider',
+        'version',
         'purchasing_commodity_information',
         'status',
         'is_cancellable',
@@ -43,12 +45,17 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeReference(TraderOrder $traderOrder): Primitive
     {
-        return $this->primitive($traderOrder->reference);
+        return $this->primitive($traderOrder->reference ?: $traderOrder->id);
     }
 
     public function includeProvider(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive($traderOrder->provider);
+    }
+
+    public function includeVersion(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->version);
     }
 
     public function includeIsCancellable(TraderOrder $traderOrder): Primitive
@@ -58,14 +65,15 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeHistory(TraderOrder $traderOrder): Collection
     {
-        return $this->collection(collect([
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-            FinancingOrderHistory::ContractSigned,
-            FinancingOrderHistory::ClientWakalaAccepted,
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-            FinancingOrderHistory::IssueMurabahaOffer,
-            FinancingOrderHistory::MurabahaSaleCompleted,
-        ]), new TraderHistoryTransformer($traderOrder));
+        $murabhaSteps = collect(
+            get_murabha_steps($traderOrder->provider, $traderOrder->version)
+        );
+
+        $filteredMurabhaSteps = $murabhaSteps->except(
+            [DmccMurabhaStep::TraderOrderCreated, BursamMurabhaStep::TraderOrderCreated]
+        )->values()->flatten();
+
+        return $this->collection($filteredMurabhaSteps, new TraderHistoryTransformer($traderOrder));
     }
 
     public function includeStatus(TraderOrder $traderOrder): Primitive

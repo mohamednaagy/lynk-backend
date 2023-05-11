@@ -125,13 +125,13 @@ class TraderHistoryTransformer extends TransformerAbstract
                 ],
                 'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
             ],
-            default => null,
+            default => [],
         };
     }
 
     public function getDurationForHistoryStep($history)
     {
-        $financingOrderStatus = app(StepHistoriesDictionary::class)
+        $financingOrderStatus = (new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version))
             ->getStepByHistory($history)
             ?->step;
 
@@ -161,7 +161,7 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     private function getLatestTraderHistoryForPreviousStatusOfStatus($status)
     {
-        $previousStepActions = app(StepHistoriesDictionary::class)
+        $previousStepActions = (new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version))
             ->getPreviousStepOf($status)
             ?->histories;
 
@@ -174,7 +174,7 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     private function getLatestTraderHistoryForStatus($status)
     {
-        $stepActions = app(StepHistoriesDictionary::class)
+        $stepActions = (new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version))
             ->getStepOf($status)
             ?->histories
             ?? [];

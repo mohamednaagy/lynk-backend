@@ -3,23 +3,34 @@
 namespace App\Exceptions;
 
 use Exception;
-use Illuminate\Support\Collection;
 use Throwable;
 
 class TraderException extends Exception
 {
-    public function __construct(Collection $exceptionData, string $message = '', int $code = 0, ?Throwable $previous = null)
+    public function __construct(
+        string $message = '',
+        protected $context = [],
+        ?Throwable $previous = null
+    ) {
+        $message = $this->formatMessage($message, $context);
+
+        parent::__construct($message, 0, $previous);
+    }
+
+    public function formatMessage($message, $context)
     {
-        activity()
-            ->withProperties($exceptionData)
-            ->log($exceptionData->get('driver'));
+        $messageParts = array_filter([
+            'TRADER_ERROR',
+            ($context['provider'] ?? null),
+            $context['version'] ?? null,
+            $message,
+        ]);
 
-        parent::__construct($exceptionData->map(function ($value, $key) {
-            if (is_array($value) || is_object($value)) {
-                $value = json_encode($value);
-            }
+        return implode(' | ', $messageParts);
+    }
 
-            return $key.' : '.$value;
-        })->join(PHP_EOL), $code, $previous);
+    public function context()
+    {
+        return $this->context;
     }
 }

@@ -2,14 +2,11 @@
 
 namespace App\Jobs\General;
 
-use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
-use App\Jobs\Dmcc\ProcessDmccMpoOrder;
-use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
-use App\Jobs\Dmcc\ProcessDmccSellingCommodityToCustomerOrder;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -28,7 +25,7 @@ class ProcessFinancingOrders implements ShouldQueue
      */
     public function handle(): void
     {
-        $whiteListedProviders = ['dmcc', 'fake'];
+        $whiteListedProviders = ['dmcc', 'fake', 'bursam'];
 
         FinancingOrder::query()
             ->where('status', FinancingOrderStatus::Approved)
@@ -52,13 +49,8 @@ class ProcessFinancingOrders implements ShouldQueue
                 TraderOrderStatus::InProgress,
             ])->chunk(10, function ($traderOrderCollection) {
                 $traderOrderCollection->each(function (TraderOrder $traderOrder) {
-                    match ((int) $traderOrder->last_history_action) {
-                        FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::dispatch($traderOrder->id),
-                        FinancingOrderHistory::ContractSigned => ProcessAskClientForWakala::dispatch($traderOrder->id),
-                        FinancingOrderHistory::ClientWakalaAccepted => ProcessDmccSellingCommodityToCustomerOrder::dispatch($traderOrder->id),
-                        FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::dispatch($traderOrder->id),
-                        default => null,
-                    };
+                    Trader::driver($traderOrder->provider, $traderOrder->version)
+                        ->dispatchJobForTransitioningFlow($traderOrder);
                 });
             });
     }

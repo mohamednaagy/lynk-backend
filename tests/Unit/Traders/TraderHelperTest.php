@@ -10,7 +10,7 @@ use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
 use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\TraderHelperTrait;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;

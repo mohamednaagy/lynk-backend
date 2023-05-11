@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -23,6 +22,8 @@ use UnexpectedValueException;
 /**
  * @property mixed $reference
  * @property mixed $order
+ * @property mixed $provider
+ * @property mixed $version
  * @property TraderOrderStatus $status
  * @property Collection $traderHistories
  * @property Carbon $created_at
@@ -40,7 +41,9 @@ class TraderOrder extends Model implements HasMedia
         return [
             'id',
             'financing_order_id',
+            'data',
             'provider',
+            'version',
             'status',
             'reference',
             'updated_at',
@@ -103,12 +106,14 @@ class TraderOrder extends Model implements HasMedia
 
     public function checkOrderStepComplete(string $step): bool
     {
-        if (! array_key_exists($step, MurabhaStep::$stepToHistoriesDictionary)) {
-            throw new UnexpectedValueException('No mapping for this status');
+        $stepToHistoriesDictionary = trader_step_histories($this->provider, $this->version);
+
+        if (! array_key_exists($step, $stepToHistoriesDictionary)) {
+            throw new UnexpectedValueException('No mapping for this step');
         }
 
         return (bool) $this->traderHistories()
-            ->where('action', end(MurabhaStep::$stepToHistoriesDictionary[$step]))
+            ->where('action', end($stepToHistoriesDictionary[$step]))
             ->first();
     }
 
@@ -148,7 +153,7 @@ class TraderOrder extends Model implements HasMedia
     {
         $lastAction = $this->traderHistories()->latest('id')->first();
 
-        $stepNode = app(StepHistoriesDictionary::class)->getStepByHistory($lastAction?->action);
+        $stepNode = (new StepHistoriesDictionary($this->provider, $this->version))->getStepByHistory($lastAction?->action);
 
         return new Attribute(
             get: fn () => $stepNode?->step,
