@@ -7,7 +7,6 @@ use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsMurabhaOfferIssued;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
-use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
 use App\Models\TraderHistory;
@@ -30,18 +29,10 @@ class TraderHistoryObserver
 
     public function created(TraderHistory $traderHistory)
     {
-        $traderOrder = TraderOrder::query()->findOrFail($traderHistory->traderOrder->id);
-        $provider = $traderOrder->provider;
-        $trader = Trader::driver($provider, $traderOrder->version);
-        if ($provider == 'bursam') {
-            if ($traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)) {
-                $trader->getBidCertificateDetails($traderOrder);
-            }
+        $traderOrder = $traderHistory->traderOrder->withLastHistoryAction()->first();
 
-            if ($traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)) {
-                $trader->createTransferOwnershipToLenderDocument($traderOrder);
-            }
-        }
+        Trader::driver($traderOrder->provider, $traderOrder->version)
+            ->dispatchJobForTransitioningFlow($traderOrder);
 
 //        $timeout = app(GeneralSettings::class)->trader_order_timeout;
 //
