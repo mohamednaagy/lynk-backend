@@ -23,8 +23,9 @@ class Kernel extends ConsoleKernel
             $schedule->job(new ProcessDmccNotifications())->everyMinute()->withoutOverlapping();
         }
 
-        $schedule->job(new ProcessBursamCredential())->dailyAt('19:20')
+        $schedule->job(new ProcessBursamCredential())
             ->timezone('Asia/Riyadh')
+            ->dailyAt('19:20')
             ->withoutOverlapping();
     }
 

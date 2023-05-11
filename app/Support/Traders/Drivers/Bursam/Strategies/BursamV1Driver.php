@@ -160,26 +160,8 @@ class BursamV1Driver implements TraderInterface
         if ($response->json('status.processingCount') == 0 && ! empty($response->json('body.0.ecertNo'))) {
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiHoldingCertificateDocument);
 
-            $products = [
-                [
-                    'product' => $response->json('body.0.productCode'),
-                    'quantity' => $response->json('body.0.bidValue') / $response->json('body.0.price'),
-                    'amount' => $response->json('body.0.bidValue'),
-                    'currency' => $response->json('body.0.currency'),
-                    'warehouse' => '--',
-                    'owner' => 'LYNK',
-                    'previous_owner' => 'LYNK',
-                    'date_time_of_purchasing_commodity' => $response->json('body.0.purchaseTime'),
-                    'warehouse_or_vault_emirates' => '--',
-                    'warehouse_or_vault_country' => '--',
-                    'uom' => $response->json('body.0.unit'),
-                    'exchange_rate' => '1',
-                ],
-            ];
-
             $traderOrder->update([
                 'original_data' => $response->json('body.0'),
-                'products' => $products,
                 'reference' => $response->json('body.0.ecertNo'),
             ]);
         } elseif (
