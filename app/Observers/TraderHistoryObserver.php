@@ -7,9 +7,11 @@ use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsMurabhaOfferIssued;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
 use App\Models\TraderHistory;
+use App\Models\TraderOrder;
 use App\Settings\Classes\GeneralSettings;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
@@ -24,8 +26,23 @@ class TraderHistoryObserver
      *
      * @throws \Exception
      */
+    public bool $afterCommit = true;
+
     public function created(TraderHistory $traderHistory)
     {
+        $traderOrder = TraderOrder::query()->findOrFail($traderHistory->traderOrder->id);
+        $provider = $traderOrder->provider;
+        $trader = Trader::driver($provider, $traderOrder->version);
+        if ($provider == 'bursam') {
+            if ($traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)) {
+                $trader->getBidCertificateDetails($traderOrder);
+            }
+
+            if ($traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)) {
+                $trader->createTransferOwnershipToLenderDocument($traderOrder);
+            }
+        }
+
 //        $timeout = app(GeneralSettings::class)->trader_order_timeout;
 //
 //        // some Order at last step so no next step I think  another mail content needed
