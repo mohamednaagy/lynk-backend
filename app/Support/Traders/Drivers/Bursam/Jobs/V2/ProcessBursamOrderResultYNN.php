@@ -23,8 +23,6 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 
     public int $tries = 3;
 
-    protected $traderOrder;
-
     /**
      * Create a new job instance.
      *
@@ -32,7 +30,6 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
      */
     public function __construct(protected int $traderOrderId)
     {
-        //
     }
 
     /**
@@ -43,26 +40,34 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
     public function handle()
     {
         DB::transaction(function () {
-            $this->traderOrder = TraderOrder::query()
+            $traderOrder = TraderOrder::query()
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
-            if (! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
                 return;
             }
 
-            Trader::driver('bursam', $this->traderOrder->version)->fetchOrderResultYNN($this->traderOrder);
+            Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
         });
     }
 
     public function failed($exception)
     {
         DB::transaction(function () {
-            $this->traderOrder->order->update([
+            $traderOrder = TraderOrder::query()
+                ->lockForUpdate()
+                ->find($this->traderOrderId);
+
+            if ($traderOrder === null) {
+                return;
+            }
+
+            $traderOrder->order->update([
                 'status' => FinancingOrderStatus::PendingApproval,
             ]);
 
-            $this->traderOrder->update([
+            $traderOrder->update([
                 'status' => TraderOrderStatus::PurchasingFailure,
             ]);
         });

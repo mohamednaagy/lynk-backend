@@ -20,8 +20,6 @@ class ProcessBursamOrderResultNYY implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
-    protected $traderOrder;
-
     /**
      * Create a new job instance.
      *
@@ -39,15 +37,15 @@ class ProcessBursamOrderResultNYY implements ShouldQueue, ShouldBeUnique
     public function handle()
     {
         DB::transaction(function () {
-            $this->traderOrder = TraderOrder::query()
+            $traderOrder = TraderOrder::query()
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
-            if (! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)) {
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)) {
                 return;
             }
 
-            Trader::driver('bursam', $this->traderOrder->version)->fetchOrderResultNYY($this->traderOrder);
+            Trader::driver('bursam', $traderOrder->version)->fetchOrderResultNYY($traderOrder);
         });
     }
 

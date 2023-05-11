@@ -26,8 +26,6 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue, ShouldBeUnique
 
     protected mixed $notification;
 
-    protected $traderOrder;
-
     /**
      * Create a new job instance.
      *
@@ -56,12 +54,12 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue, ShouldBeUnique
         }
 
         DB::transaction(function () use ($driver) {
-            $this->traderOrder = TraderOrder::query()
+            $traderOrder = TraderOrder::query()
                 ->where('reference', $this->ttiId)
                 ->lockForUpdate()
                 ->first();
 
-            if (! $this->traderOrder) {
+            if (! $traderOrder) {
                 return;
             }
 
@@ -72,11 +70,6 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue, ShouldBeUnique
         });
     }
 
-    /**
-     * Get the middleware the job should pass through.
-     *
-     * @return array
-     */
     public function middleware(): array
     {
         return [new WithoutOverlapping($this->uniqueId())];
@@ -85,5 +78,13 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue, ShouldBeUnique
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->notificationId;
+    }
+
+    public function getTraderOrder()
+    {
+        return TraderOrder::query()
+            ->where('reference', $this->ttiId)
+            ->whereIn('provider', ['dmcc', 'fake'])
+            ->first();
     }
 }

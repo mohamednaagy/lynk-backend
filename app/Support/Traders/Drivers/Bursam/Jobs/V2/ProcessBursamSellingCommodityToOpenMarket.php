@@ -19,8 +19,6 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldQueue, ShouldBe
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
-    protected $traderOrder;
-
     /**
      * Create a new job instance.
      *
@@ -38,16 +36,16 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldQueue, ShouldBe
     public function handle()
     {
         DB::transaction(function () {
-            $this->traderOrder = TraderOrder::query()
+            $traderOrder = TraderOrder::query()
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
-            if (! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted)) {
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted)) {
                 return;
             }
 
-            Trader::driver('bursam', $this->traderOrder->version)
-                ->sellingCommodityToOpenMarket($this->traderOrder);
+            Trader::driver('bursam', $traderOrder->version)
+                ->sellingCommodityToOpenMarket($traderOrder);
         });
     }
 

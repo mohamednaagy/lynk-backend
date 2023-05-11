@@ -84,11 +84,6 @@ class ProcessDmccMpoOrder implements ShouldQueue, ShouldBeUnique
         });
     }
 
-    /**
-     * Get the middleware the job should pass through.
-     *
-     * @return array
-     */
     public function middleware(): array
     {
         return [new WithoutOverlapping($this->uniqueId())];

@@ -19,8 +19,6 @@ class ProcessBursamBidCertificate implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
-    protected $traderOrder;
-
     /**
      * Create a new job instance.
      *
@@ -38,14 +36,14 @@ class ProcessBursamBidCertificate implements ShouldQueue, ShouldBeUnique
     public function handle()
     {
         DB::transaction(function () {
-            $this->traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrderId);
+            $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrderId);
 
-            if (! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)) {
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)) {
                 return;
             }
 
-            Trader::driver('bursam', $this->traderOrder->version)
-                ->getBidCertificateDetails($this->traderOrder);
+            Trader::driver('bursam', $traderOrder->version)
+                ->getBidCertificateDetails($traderOrder);
         });
     }
 

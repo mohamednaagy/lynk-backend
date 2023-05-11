@@ -19,8 +19,6 @@ class ProcessBursamOtcCertificate implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
-    protected $traderOrder;
-
     /**
      * Create a new job instance.
      *
@@ -38,15 +36,15 @@ class ProcessBursamOtcCertificate implements ShouldQueue, ShouldBeUnique
     public function handle()
     {
         DB::transaction(function () {
-            $this->traderOrder = TraderOrder::query()
+            $traderOrder = TraderOrder::query()
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
-            if (! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted)) {
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted)) {
                 return;
             }
 
-            Trader::driver('bursam', $this->traderOrder->version)->getOtcCertificateDetails($this->traderOrder);
+            Trader::driver('bursam', $traderOrder->version)->getOtcCertificateDetails($traderOrder);
         });
     }
 

@@ -9,7 +9,13 @@ trait StopsTraderOrderOnJobFailure
 {
     public function failed($exception)
     {
-        $traderOrder = TraderOrder::query()->find($this->traderOrderId);
+        $traderOrder = null;
+
+        if (method_exists($this, 'getTraderOrder')) {
+            $traderOrder = $this->getTraderOrder();
+        } elseif (property_exists($this, 'traderOrderId')) {
+            $traderOrder = TraderOrder::query()->find($this->traderOrderId);
+        }
 
         if (! $traderOrder) {
             return;

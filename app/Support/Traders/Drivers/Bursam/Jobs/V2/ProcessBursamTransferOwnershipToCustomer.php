@@ -19,8 +19,6 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldQueue, ShouldBeU
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
-    protected $traderOrder;
-
     /**
      * Create a new job instance.
      *
@@ -38,15 +36,15 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldQueue, ShouldBeU
     public function handle()
     {
         DB::transaction(function () {
-            $this->traderOrder = TraderOrder::query()
+            $traderOrder = TraderOrder::query()
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
-            if (! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
                 return;
             }
 
-            Trader::driver('bursam', $this->traderOrder->version)->createSellingCommodityToCustomerDocument($this->traderOrder);
+            Trader::driver('bursam', $traderOrder->version)->createSellingCommodityToCustomerDocument($traderOrder);
         });
     }
 
