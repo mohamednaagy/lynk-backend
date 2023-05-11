@@ -3,6 +3,7 @@
 namespace App\Actions\Wallets;
 
 use App\Actions\Contracts\Wallets\GetTransactions;
+use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\WalletType;
 
 class GetTransactionsAction implements GetTransactions
@@ -12,6 +13,10 @@ class GetTransactionsAction implements GetTransactions
      */
     public function handle(): mixed
     {
-        return tenant()->transactions(WalletType::CompanyWallet)->paginate();
+        return tenant()->transactions(WalletType::CompanyWallet)
+            ->with([
+                'media' => fn ($query) => $query->where('collection_name', TransactionMediaCollection::VoucherReceipt),
+            ])
+            ->paginate();
     }
 }

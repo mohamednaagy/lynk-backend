@@ -29,7 +29,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
     {
     }
 
-    public function handel(FinancingOrder $financingOrder, Transaction $creationFeeTransaction, Transaction $vatPercentageTransaction)
+    public function handel(FinancingOrder $financingOrder, Transaction $creationFeeTransaction)
     {
         $seller = $this->getProjectSettings->handle();
 
@@ -37,9 +37,9 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
             $displayQRCodeAsBase64 = GenerateQrCode::fromArray([
                 new Seller($seller->getCompanyName(Config::get('app.locale', 'en'))),
                 new TaxNumber($seller->getVatId()),
-                new InvoiceDate($financingOrder->created_at),
-                new InvoiceTotalAmount($financingOrder->amount->formatByDecimal()),
-                new InvoiceTaxAmount($financingOrder->amount->multiply($seller->getVatRate())->formatByDecimal()),
+                new InvoiceDate($financingOrder->created_at->timezone('Asia/Riyadh')->toDateTimeString()),
+                new InvoiceTotalAmount($financingOrder->company->order_cost->formatByDecimal()),
+                new InvoiceTaxAmount($financingOrder->company->order_cost->multiply($seller->getVatRate())->formatByDecimal()),
             ])->render();
 
             $html = view($this->getTemplate(), [
@@ -51,11 +51,11 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
                             __('zatca/e-invoice.create_order_cost', [
                                 'number' => $financingOrder->getKey(),
                             ]),
-                            tenant()->order_cost,
+                            $financingOrder->company->order_cost,
                             $seller->getVatRateInPercentage()
                         ),
                     ],
-                    $financingOrder->created_at,
+                    $financingOrder->created_at->clone()->tz('Asia/Riyadh'),
                     $financingOrder
                 ),
                 'qr_code' => $displayQRCodeAsBase64,

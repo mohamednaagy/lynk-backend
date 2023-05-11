@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Media;
 
-use App\Enums\Area;
 use App\Enums\ErrorCode;
 use App\Http\Controllers\Controller;
+use App\Models\Media;
 use Illuminate\Support\Facades\Storage;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\HttpFoundation\Response;
 
 class DownloadMediaFile extends Controller
@@ -20,8 +19,6 @@ class DownloadMediaFile extends Controller
     public function __invoke($media)
     {
         $media = Media::where('uuid', $media)->firstOrFail();
-
-        // $this->authorize('view', [$media, Area::Lender]);
 
         try {
             return Storage::disk($media->disk)->download($media->getPath());

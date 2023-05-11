@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
+use App\Enums\TransactionReason;
 use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -139,6 +140,12 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function traderOrders()
     {
         return $this->hasMany(TraderOrder::class, 'financing_order_id', 'id');
+    }
+
+    public function creationFeeTransactions()
+    {
+        return $this->hasMany(Transaction::class, 'meta->financing_order_id')
+            ->where('reason', TransactionReason::OrderCreationFee);
     }
 
     public function getPhoneNumber(): PhoneNumber

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Edaat;
 
 use App\Actions\Contracts\Wallets\CreateTransactions;
+use App\Actions\Contracts\Wallets\GenerateVoucherReceipt;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
@@ -17,7 +18,7 @@ class WebhookController extends Controller
     public function __invoke(
         Request $request,
         EdaatService $edaatService,
-        CreateTransactions $createTransactions,
+        CreateTransactions $createTransactions
     ) {
         Log::debug('test', [$request->all()]);
         foreach ($request->all() as $invoice) {
@@ -29,7 +30,7 @@ class WebhookController extends Controller
                 $wallet = $invoice->company->getWallet(WalletType::CompanyWallet);
                 $invoice->update(['status' => EdaatInvoiceStatus::Paid]);
 
-                $createTransactions->handle(
+                $transaction = $createTransactions->handle(
                     $wallet,
                     TransactionReason::DepositByEdaat,
                     $invoice->amount,
@@ -37,6 +38,8 @@ class WebhookController extends Controller
                         'invoice_number' => $invoice->invoice_number,
                     ]
                 );
+
+                app(GenerateVoucherReceipt::class)->handle($transaction);
             }
         }
     }
