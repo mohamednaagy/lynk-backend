@@ -117,7 +117,7 @@ if (! function_exists('trader_step_histories')) {
     function trader_step_histories(string $provider, string $version): array
     {
         return match ($provider) {
-            'dmcc' => DmccMurabhaStep::getStepsOfVersion($version),
+            'dmcc', 'fake' => DmccMurabhaStep::getStepsOfVersion($version),
             'bursam' => BursamMurabhaStep::getStepsOfVersion($version),
             default => throw new \InvalidArgumentException('Invalid trader')
         };

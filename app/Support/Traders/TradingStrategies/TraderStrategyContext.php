@@ -18,7 +18,7 @@ class TraderStrategyContext
         $strategy = $provider.'.'.$version;
 
         $this->strategy = match ($strategy) {
-            'dmcc.v1' => app(DmccStrategyV1::class),
+            'dmcc.v1', 'fake.v1' => app(DmccStrategyV1::class),
             'bursam.v1' => app(BursamStrategyV1::class),
             'bursam.v2' => app(BursamStrategyV2::class),
             default => throw new \InvalidArgumentException('Invalid Trader Or Version')
