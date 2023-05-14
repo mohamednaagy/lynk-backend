@@ -439,7 +439,7 @@ class BursamV1Driver implements TraderInterface
                 return $traderOrder
                     ->addMediaFromStream($fileResource)
                     ->usingFileName($financingOrder->getNationalId().'.pdf')
-                    ->toMediaCollection(TraderOrderMediaCollection::TtiHoldingCertificate);
+                    ->toMediaCollection(TraderOrderMediaCollection::BursamSellingCommodityToCustomer);
             }
         );
 
@@ -493,7 +493,7 @@ class BursamV1Driver implements TraderInterface
                 return $traderOrder
                     ->addMediaFromStream($fileResource)
                     ->usingFileName($financingOrder->getNationalId().'.pdf')
-                    ->toMediaCollection(TraderOrderMediaCollection::TtiHoldingCertificate);
+                    ->toMediaCollection(TraderOrderMediaCollection::BursamTtiHoldingCertificate);
             }
         );
     }
