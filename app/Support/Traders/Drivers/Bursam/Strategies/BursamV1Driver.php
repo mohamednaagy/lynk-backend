@@ -9,7 +9,6 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
-use App\Models\ProviderCredential;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
@@ -31,34 +30,9 @@ class BursamV1Driver implements TraderInterface
         createTraderOrder as traitCreateTraderOrder;
     }
 
-    private ?string $accessToken;
-
-    public function __construct()
-    {
-        $this->accessToken = ProviderCredential::where('provider_name', 'bursam')
-            ->value('access_token');
-    }
-
     public function baseUrl($path)
     {
         return 'http://'.config('trader.providers.bursam.base_url').'/'.$path;
-    }
-
-    /**
-     * @return void
-     */
-    public function updateProviderCredential(): void
-    {
-        $response = Http::get($this->baseUrl('api/process/svc/auth/token'), [
-            'grant_type' => config('trader.providers.bursam.grant_type'),
-            'client_id' => config('trader.providers.bursam.member_short_name'),
-            'client_secret' => config('trader.providers.bursam.client_secret_key'),
-        ]);
-
-        ProviderCredential::updateOrCreate(
-            ['provider_name' => 'bursam'],
-            ['access_token' => $response->json('access_token')],
-        );
     }
 
     public function getOrInitiateTraderOrder(FinancingOrder $financingOrder): ?Model
@@ -82,10 +56,7 @@ class BursamV1Driver implements TraderInterface
     {
         $traderOrder = $this->getOrInitiateTraderOrder($financingOrder);
 
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.$this->accessToken,
-            'Content-Type' => 'application/json',
-        ])->post(
+        $response = Http::bursam()->post(
             $this->baseUrl('api/process/svc/bsas/order.json'),
             $requestBody = [
                 'header' => [
@@ -138,10 +109,7 @@ class BursamV1Driver implements TraderInterface
 
     public function fetchOrderResultYNN(TraderOrder $traderOrder)
     {
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.$this->accessToken,
-            'Content-Type' => 'application/json',
-        ])->post(
+        $response = Http::bursam()->post(
             $this->baseUrl('api/process/svc/bsas/orderResult.json'),
             $requestBody = [
                 'header' => [
@@ -184,10 +152,7 @@ class BursamV1Driver implements TraderInterface
 
     public function getBidCertificateDetails(TraderOrder $traderOrder)
     {
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.$this->accessToken,
-            'Content-Type' => 'application/json',
-        ])->post(
+        $response = Http::bursam()->post(
             $this->baseUrl('api/process/svc/bsas/bidXML.json'),
             $requestBody = [
                 'input' => [
@@ -339,10 +304,7 @@ class BursamV1Driver implements TraderInterface
 
         $financingOrder = $traderOrder->order;
 
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.$this->accessToken,
-            'Content-Type' => 'application/json',
-        ])->post(
+        $response = Http::bursam()->post(
             $this->baseUrl('api/process/svc/bsas/order.json'),
             $requestBody = [
                 'header' => [
@@ -387,10 +349,7 @@ class BursamV1Driver implements TraderInterface
 
     public function fetchOrderResultNYY(TraderOrder $traderOrder)
     {
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.$this->accessToken,
-            'Content-Type' => 'application/json',
-        ])->post(
+        $response = Http::bursam()->post(
             $this->baseUrl('api/process/svc/bsas/orderResult.json'),
             $requestBody = [
                 'header' => [
@@ -434,10 +393,7 @@ class BursamV1Driver implements TraderInterface
 
     public function getOtcCertificateDetails(TraderOrder $traderOrder)
     {
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.$this->accessToken,
-            'Content-Type' => 'application/json',
-        ])->post(
+        $response = Http::bursam()->post(
             $this->baseUrl('api/process/svc/bsas/otcXML.json'),
             $requestBody = [
                 'input' => [
@@ -492,10 +448,7 @@ class BursamV1Driver implements TraderInterface
 
     public function getStbCertificateDetails(TraderOrder $traderOrder)
     {
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.$this->accessToken,
-            'Content-Type' => 'application/json',
-        ])->post(
+        $response = Http::bursam()->post(
             $this->baseUrl('api/process/svc/bsas/stbXML.json'),
             $requestBody = [
                 'input' => [
