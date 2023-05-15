@@ -471,7 +471,7 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
-        $stpOwnerShipTemplate = view('bursam-templates.stp-certificate-template', [
+        $stpOwnerShipTemplate = view('bursam-templates.stb-certificate-template', [
             'ecertno' => $response->json('ECERTNO'),
             'seller' => $response->json('SELLER'),
             'buyer' => $response->json('BUYER'),
@@ -504,10 +504,6 @@ class BursamV1Driver implements TraderInterface
         return '';
     }
 
-    /**
-     * @param  TraderOrder  $traderOrder
-     * @return void
-     */
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
     {
     }
