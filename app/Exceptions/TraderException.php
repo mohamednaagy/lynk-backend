@@ -33,4 +33,13 @@ class TraderException extends Exception
     {
         return $this->context;
     }
+
+    public function getContext($key = null)
+    {
+        if ($key) {
+            return $this->context[$key];
+        }
+
+        return $this->context;
+    }
 }

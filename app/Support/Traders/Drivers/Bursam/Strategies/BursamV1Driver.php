@@ -2,10 +2,12 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
+use App\Enums\BursamErrorCode;
 use App\Enums\BursamMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\TraderErrorCode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
@@ -17,7 +19,9 @@ use App\Support\Traders\Traits\BursamTraderHelperTrait;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class BursamV1Driver implements TraderInterface
@@ -55,6 +59,7 @@ class BursamV1Driver implements TraderInterface
     public function createTraderOrder(FinancingOrder $financingOrder)
     {
         $traderOrder = $this->getOrInitiateTraderOrder($financingOrder);
+        $productCode = $this->getUnusedProductCode();
 
         $response = Http::bursam()->post(
             $this->baseUrl('api/process/svc/bsas/order.json'),
@@ -68,7 +73,7 @@ class BursamV1Driver implements TraderInterface
                     'bidOption' => 'Y',
                     'otcOption' => 'N',
                     'stbOption' => 'N',
-                    'productCode' => 'CPO-MSIA-09',
+                    'productCode' => $productCode,
                     'purchaseType' => 'P',
                     'clientName' => '',
                     'currency' => 'SAR',
@@ -99,6 +104,7 @@ class BursamV1Driver implements TraderInterface
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
         $traderOrder->update([
             'status' => TraderOrderStatus::InProgress,
+            'product_code' => $productCode,
         ]);
         $financingOrder->update([
             'status' => FinancingOrderStatus::InProgress,
@@ -133,6 +139,26 @@ class BursamV1Driver implements TraderInterface
                 'reference' => $response->json('body.0.ecertNo'),
             ]);
         } elseif (
+            in_array($response->json('body.0.bidErrNo'), BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES)
+        ) {
+            $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
+            $unavailableProductCodes[] = $response->json('body.0.productCode');
+            Cache::put('bursam_unavailable_product_codes', $unavailableProductCodes, now()->addMinutes(300000));
+
+            Log::debug('bursam YNN', Cache::get('bursam_unavailable_product_codes'));
+
+            throw new TraderException(
+                'Failed to fetch order result YNN Insufficient Commodity',
+                [
+                    'provider' => $traderOrder->provider,
+                    'version' => $traderOrder->version,
+                    'provider_request_body' => $requestBody,
+                    'provider_response_body' => $response->json(),
+                    'failure_reason' => $response->json('body.0.bidMsg'),
+                    'failure_code' => TraderErrorCode::INSUFFICIENT_COMMODITY,
+                ]
+            );
+        } elseif (
             ($response->json('body.0.bidErrNo') != '999' && $response->json('status.processingCount') == 0)
             || $response->json('status.processingCount') > 0
         ) {
@@ -143,6 +169,8 @@ class BursamV1Driver implements TraderInterface
                     'version' => $traderOrder->version,
                     'provider_request_body' => $requestBody,
                     'provider_response_body' => $response->json(),
+                    'failure_reason' => $response->json('body.0.bidMsg'),
+                    'failure_code' => $response->json('body.0.bidErrNo'),
                 ]
             );
         }
