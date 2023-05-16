@@ -3,7 +3,6 @@
 namespace App\Console;
 
 use App\Jobs\General\ProcessFinancingOrders;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamCredential;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccNotifications;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -22,11 +21,6 @@ class Kernel extends ConsoleKernel
             $schedule->job(new ProcessFinancingOrders())->everyMinute()->withoutOverlapping();
             $schedule->job(new ProcessDmccNotifications())->everyMinute()->withoutOverlapping();
         }
-
-        $schedule->job(new ProcessBursamCredential())
-            ->timezone('Asia/Riyadh')
-            ->dailyAt('19:20')
-            ->withoutOverlapping();
     }
 
     /**

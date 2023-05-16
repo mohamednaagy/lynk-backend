@@ -21,6 +21,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'reference',
         'provider',
         'version',
+        'failure_reason',
         'purchasing_commodity_information',
         'status',
         'is_cancellable',
@@ -56,6 +57,11 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeVersion(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive($traderOrder->version);
+    }
+
+    public function includeFailureReason(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->failure_reason);
     }
 
     public function includeIsCancellable(TraderOrder $traderOrder): Primitive
