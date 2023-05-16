@@ -49,7 +49,7 @@ class TraderHistoryTransformer extends TransformerAbstract
 
         $wakalaMedia = $this->traderOrder->getFirstMedia(TraderOrderMediaCollection::ClientWakala);
 
-        $historyMurabhaSaleCompleted = $this->traderOrder->provider != 'bursam' ? FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument : FinancingOrderHistory::GetOwnershipToCustomerCertificate;
+        $historyMurabhaSaleCompleted = $this->traderOrder->provider != 'bursam' ? FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument : FinancingOrderHistory::MurabahaSaleCompleted;
 
         $mediaMurabhaSaleCompleted = $this->traderOrder->provider != 'bursam' ? TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo : TraderOrderMediaCollection::BursamSellingCommodityToCustomer;
 
