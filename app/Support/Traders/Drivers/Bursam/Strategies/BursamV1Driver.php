@@ -21,7 +21,6 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class BursamV1Driver implements TraderInterface
@@ -143,9 +142,7 @@ class BursamV1Driver implements TraderInterface
         ) {
             $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
             $unavailableProductCodes[] = $response->json('body.0.productCode');
-            Cache::put('bursam_unavailable_product_codes', $unavailableProductCodes, now()->addMinutes(300000));
-
-            Log::debug('bursam YNN', Cache::get('bursam_unavailable_product_codes'));
+            Cache::put('bursam_unavailable_product_codes', $unavailableProductCodes, now()->addMinutes(30));
 
             throw new TraderException(
                 'Failed to fetch order result YNN Insufficient Commodity',
