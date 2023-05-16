@@ -130,7 +130,7 @@ class BursamV1Driver implements TraderInterface
             ]
         );
 
-        if ($response->json('status.processingCount') == 0 && ! empty($response->json('body.0.ecertNo'))) {
+        if ($response->json('status.processingCount') == 0 && ($response->json('body.0.bidErrNo') == '999')) {
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiHoldingCertificateDocument);
 
             $traderOrder->update([
