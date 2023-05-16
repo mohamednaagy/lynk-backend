@@ -4,7 +4,9 @@ namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\TraderErrorCode;
 use App\Enums\TraderOrderStatus;
+use App\Exceptions\TraderException;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
@@ -48,13 +50,30 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
                 return;
             }
 
-            Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
+            try {
+                Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
+            } catch (TraderException $exception) {
+                if ($exception->getContext('failure_code') == TraderErrorCode::INSUFFICIENT_COMMODITY) {
+                    $traderOrder->order->update([
+                        'status' => FinancingOrderStatus::TradingFailure,
+                    ]);
+
+                    $traderOrder->update([
+                        'status' => TraderOrderStatus::PurchasingFailure,
+                        'failure_reason' => $exception->getContext('failure_reason'),
+                    ]);
+
+                    $this->delete();
+                } else {
+                    throw $exception;
+                }
+            }
         });
     }
 
     public function failed($exception)
     {
-        DB::transaction(function () {
+        DB::transaction(function () use ($exception) {
             $traderOrder = TraderOrder::query()
                 ->lockForUpdate()
                 ->find($this->traderOrderId);
@@ -64,11 +83,12 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
             }
 
             $traderOrder->order->update([
-                'status' => FinancingOrderStatus::PendingApproval,
+                'status' => FinancingOrderStatus::TradingFailure,
             ]);
 
             $traderOrder->update([
                 'status' => TraderOrderStatus::PurchasingFailure,
+                'failure_reason' => $exception->getContext('failure_reason'),
             ]);
         });
     }
