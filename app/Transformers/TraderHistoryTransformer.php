@@ -30,7 +30,7 @@ class TraderHistoryTransformer extends TransformerAbstract
     {
         $traderOrderHistoryExist = $this->traderHistories->where('action', $traderHistoryKey)->first();
 
-        $getPtpDocument = $this->traderHistories->where('action', FinancingOrderHistory::GetPtpDocument)->first();
+        $getPtpDocument = $this->traderHistories->where('action', FinancingOrderHistory::AttachTtiHoldingCertificateDocument)->first();
 
         $transferOwnershipToLender = $this->traderHistories
             ->where(
