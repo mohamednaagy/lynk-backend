@@ -49,9 +49,11 @@ class TraderHistoryTransformer extends TransformerAbstract
 
         $wakalaMedia = $this->traderOrder->getFirstMedia(TraderOrderMediaCollection::ClientWakala);
 
-        $historyMurabhaSaleCompleted = $this->traderOrder->provider != 'bursam' ? FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument : FinancingOrderHistory::MurabahaSaleCompleted;
+        $historyMurabhaSaleCompleted = $this->traderOrder->provider != 'bursam' ? FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument : FinancingOrderHistory::GetOwnershipToCustomerCertificate;
 
         $mediaMurabhaSaleCompleted = $this->traderOrder->provider != 'bursam' ? TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo : TraderOrderMediaCollection::BursamSellingCommodityToCustomer;
+
+        $historyStbCertificate = $this->traderHistories->where('action', FinancingOrderHistory::GetOwnershipToCustomerCertificate)->first();
 
         return match ($traderHistoryKey) {
             FinancingOrderHistory::ClientWakalaAccepted => [
@@ -123,7 +125,18 @@ class TraderHistoryTransformer extends TransformerAbstract
                     'url' => $this->traderOrder
                         ->getFirstMedia($mediaMurabhaSaleCompleted)
                         ?->file_url,
-                    'date' => optional($historyMurabhaSaleCompleted)->created_at?->format('Y-m-d h:i:s A'),
+                    'date' => optional($this->traderHistories
+                        ->where(
+                            'action',
+                            $historyMurabhaSaleCompleted
+                        )
+                        ->first())->created_at?->format('Y-m-d h:i:s A'),
+                ],
+                'warranty2_document' => [
+                    'url' => $this->traderOrder
+                        ->getFirstMedia(TraderOrderMediaCollection::BursamTtiHoldingCertificate)
+                        ?->file_url,
+                    'date' => optional($historyStbCertificate)->created_at?->format('Y-m-d h:i:s A'),
                 ],
 
                 'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
