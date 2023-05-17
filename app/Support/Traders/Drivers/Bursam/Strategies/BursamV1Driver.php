@@ -521,6 +521,8 @@ class BursamV1Driver implements TraderInterface
                     ->toMediaCollection(TraderOrderMediaCollection::BursamTtiHoldingCertificate);
             }
         );
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetSellingToBursaCertificate);
     }
 
     public function cancelOrder(FinancingOrder $financingOrder): mixed
