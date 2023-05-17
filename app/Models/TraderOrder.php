@@ -75,11 +75,15 @@ class TraderOrder extends Model implements HasMedia
         $this
             ->addMediaCollection(TraderOrderMediaCollection::SellingCommodityToCustomer)
             ->singleFile();
+        $this->addMediaCollection(TraderOrderMediaCollection::BursamSellingCommodityToCustomer)
+            ->singleFile();
         $this
             ->addMediaCollection(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
             ->singleFile();
         $this
             ->addMediaCollection(TraderOrderMediaCollection::TtiHoldingCertificate)
+            ->singleFile();
+        $this->addMediaCollection(TraderOrderMediaCollection::BursamTtiHoldingCertificate)
             ->singleFile();
     }
 

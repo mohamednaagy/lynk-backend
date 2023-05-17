@@ -79,7 +79,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Riyadh',
 
     /*
     |--------------------------------------------------------------------------
@@ -201,6 +201,7 @@ return [
         // sms provider
         App\Providers\SmsServiceProvider::class,
         App\Providers\EdaatServiceProvider::class,
+        App\Providers\BursamServiceProvider::class,
         App\Providers\PdfGeneratorServiceProvider::class,
         App\Providers\MobileVerifyServiceProvider::class,
         App\Providers\WalletServiceProvider::class,
