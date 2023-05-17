@@ -22,7 +22,9 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderStatuses;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderUserController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\CompleteOrder;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\RetryProceedOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrderController;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabhaCompleteDocument;
@@ -100,6 +102,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::prefix('orders/{order}')->group(function () {
             Route::post('trader-orders', [TraderOrderController::class, 'store']);
+            Route::post('retry', RetryProceedOrder::class);
             Route::post('complete', CompleteOrder::class);
             Route::put('payment-proof', UpdateOrderPaymentProof::class);
             Route::prefix('/trader-orders/{trader_order}')->group(function () {
@@ -122,6 +125,9 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::post('{trader}/users/{user}/resend-invitation', ResendInvitationToUser::class);
             Route::put('/{trader}/status', UpdateTraderStatus::class);
         });
+
+        Route::get('product-codes', [ProductCodeCacheController::class, 'index']);
+        Route::delete('product-codes', [ProductCodeCacheController::class, 'delete']);
 
         Route::apiResource('traders', TraderController::class)
             ->only(['index', 'store', 'show', 'update']);
