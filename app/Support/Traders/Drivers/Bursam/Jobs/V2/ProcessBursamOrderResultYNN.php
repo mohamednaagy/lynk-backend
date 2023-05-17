@@ -17,6 +17,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
@@ -103,8 +104,8 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
         return __CLASS__.'_'.$this->traderOrderId;
     }
 
-    public function backoff(): int
+    public function retryUntil(): Carbon
     {
-        return config('trader.providers.bursam.purchasing_commodity_job_backoff_time');
+        return now()->addMinutes(30);
     }
 }
