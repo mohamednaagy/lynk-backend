@@ -30,7 +30,8 @@ class TraderHistoryTransformer extends TransformerAbstract
     {
         $traderOrderHistoryExist = $this->traderHistories->where('action', $traderHistoryKey)->first();
 
-        $getPtpDocument = $this->traderHistories->where('action', FinancingOrderHistory::GetPtpDocument)->first();
+        $historyPurchaseCommodityDate = $this->traderOrder->provider != 'bursam' ? FinancingOrderHistory::GetPtpDocument : FinancingOrderHistory::AttachTtiHoldingCertificateDocument;
+        $purchaseCommodityDate = $this->traderHistories->where('action', $historyPurchaseCommodityDate)->first();
 
         $transferOwnershipToLender = $this->traderHistories
             ->where(
@@ -43,13 +44,19 @@ class TraderHistoryTransformer extends TransformerAbstract
             ->where('action', FinancingOrderHistory::GetMurabahaPurchaseOfferDocument)
             ->first();
 
-        $getWarrantAmendmentExceptWarrantNoDocument = $this->traderHistories
-            ->where('action', FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)
-            ->first();
-
         $signedWakalaMedia = $this->traderOrder->getFirstMedia(TraderOrderMediaCollection::SignedClientWakala);
 
         $wakalaMedia = $this->traderOrder->getFirstMedia(TraderOrderMediaCollection::ClientWakala);
+
+        $historyOtcMurabhaSaleCompleted = $this->traderOrder->provider != 'bursam' ?
+            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument :
+            FinancingOrderHistory::GetOwnershipToCustomerCertificate;
+        $mediaCollectionOtcMurabhaSaleCompleted = $this->traderOrder->provider != 'bursam' ?
+            TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo :
+            TraderOrderMediaCollection::BursamSellingCommodityToCustomer;
+
+        $historyOtcCertificate = $this->traderHistories->where('action', $historyOtcMurabhaSaleCompleted)->first();
+        $historyStbCertificate = $this->traderHistories->where('action', FinancingOrderHistory::GetSellingToBursaCertificate)->first();
 
         return match ($traderHistoryKey) {
             FinancingOrderHistory::ClientWakalaAccepted => [
@@ -70,7 +77,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                     'url' => $this->traderOrder
                         ->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)
                         ?->file_url,
-                    'date' => optional($getPtpDocument)->created_at?->format('Y-m-d h:i:s A'),
+                    'date' => optional($purchaseCommodityDate)->created_at?->format('Y-m-d h:i:s A'),
                 ],
                 'ownership_document' => [
                     'url' => $this->traderOrder
@@ -117,11 +124,11 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'step' => 'murabha_sale_completed',
                 'is_complete' => (bool) $traderOrderHistoryExist,
                 'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'warranty_document' => [
+                'warranty_document' => [ // otc
                     'url' => $this->traderOrder
-                        ->getFirstMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
+                        ->getFirstMedia(TraderOrderMediaCollection::BursamTtiHoldingCertificate)
                         ?->file_url,
-                    'date' => optional($getWarrantAmendmentExceptWarrantNoDocument)->created_at?->format('Y-m-d h:i:s A'),
+                    'date' => optional($historyStbCertificate)->created_at?->format('Y-m-d h:i:s A'),
                 ],
                 'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
             ],

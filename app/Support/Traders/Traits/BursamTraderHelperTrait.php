@@ -26,7 +26,6 @@ trait BursamTraderHelperTrait
             FinancingOrderHistory::ClientWakalaAccepted => null,
         ],
         BursamMurabhaStep::MurabahaSaleCompleted => [
-            FinancingOrderHistory::GetSellingToBursaCertificate => null,
             FinancingOrderHistory::MurabahaSaleCompleted => null,
         ],
     ];
