@@ -23,8 +23,6 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
-    public int $tries = 3;
-
     /**
      * Create a new job instance.
      *
@@ -101,6 +99,11 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->traderOrderId;
+    }
+
+    public function retryUntil()
+    {
+        return now()->addMinutes(30);
     }
 
     public function backoff(): int
