@@ -2,17 +2,18 @@
 
 namespace App\Transformers;
 
-use App\Enums\BursamMurabhaStep;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
+use App\Transformers\HelperTransformer\TransformerHelper;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
 class TraderOrderTransformer extends TransformerAbstract
 {
+    use TransformerHelper;
+
     protected array $defaultIncludes = [];
 
     protected array $availableIncludes = [
@@ -71,13 +72,7 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeHistory(TraderOrder $traderOrder): Collection
     {
-        $murabhaSteps = collect(
-            get_murabha_steps($traderOrder->provider, $traderOrder->version)
-        );
-
-        $filteredMurabhaSteps = $murabhaSteps->except(
-            [DmccMurabhaStep::TraderOrderCreated, BursamMurabhaStep::TraderOrderCreated]
-        )->values()->flatten();
+        $filteredMurabhaSteps = $this->getHistoriesUiSteps($traderOrder->provider, $traderOrder->version);
 
         return $this->collection($filteredMurabhaSteps, new TraderHistoryTransformer($traderOrder));
     }
