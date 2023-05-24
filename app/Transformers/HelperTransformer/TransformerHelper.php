@@ -4,7 +4,7 @@ namespace App\Transformers\HelperTransformer;
 
 use App\Enums\FinancingOrderHistory;
 
-trait TransformerHelper
+trait TransformerHelperTrait
 {
     public function getHistoriesUiSteps($provider, $version)
     {
@@ -12,14 +12,7 @@ trait TransformerHelper
         $historyKeys = $provider.'.'.$version;
 
         return match ($historyKeys) {
-            'dmcc.v1' => [
-                FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-                FinancingOrderHistory::ContractSigned,
-                FinancingOrderHistory::ClientWakalaAccepted,
-                FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-                FinancingOrderHistory::MurabahaSaleCompleted,
-            ],
-            'fake.v1' => [
+            'bursam.v1','fake.v1','dmcc.v1' => [
                 FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
                 FinancingOrderHistory::ContractSigned,
                 FinancingOrderHistory::ClientWakalaAccepted,
@@ -31,7 +24,6 @@ trait TransformerHelper
                 FinancingOrderHistory::ClientWakalaAccepted,
                 FinancingOrderHistory::ContractSigned,
                 FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-                FinancingOrderHistory::IssueMurabahaOffer,
                 FinancingOrderHistory::MurabahaSaleCompleted,
             ]
         };
