@@ -17,6 +17,7 @@ trait TransformerHelperTrait
                 FinancingOrderHistory::ContractSigned,
                 FinancingOrderHistory::ClientWakalaAccepted,
                 FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+                FinancingOrderHistory::IssueMurabahaOffer,
                 FinancingOrderHistory::MurabahaSaleCompleted,
             ],
             'bursam.v2' => [
