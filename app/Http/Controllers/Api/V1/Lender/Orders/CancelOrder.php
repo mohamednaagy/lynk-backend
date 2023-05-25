@@ -10,8 +10,10 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\CancelOrderRequest;
+use App\Jobs\FinancingOrders\NotifyAdminAndLenderAboutOrderCanceled;
 use App\Models\FinancingOrder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -21,7 +23,7 @@ class CancelOrder extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::FinancingOrders, Action::Manage, Action::Cancel])
+                perm(Area::Lender, [Subject::FinancingOrders, Action::Manage, Action::Cancel])
         );
     }
 
@@ -31,7 +33,6 @@ class CancelOrder extends Controller
      * @param  CancelOrderRequest  $cancelOrderRequest
      * @param  CancelOrderInterface  $cancelOrder ,
      * @param  FinancingOrder  $order
-     * @return JsonResponse
      *
      * @throws \Throwable
      */
@@ -56,6 +57,9 @@ class CancelOrder extends Controller
                 $request->user(),
                 $request->validated()
             );
+
+            $lender = Auth::user();
+            dispatch(new NotifyAdminAndLenderAboutOrderCanceled($order, $lender));
 
             return $this->successResponse();
         });
