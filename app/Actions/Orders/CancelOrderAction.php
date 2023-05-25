@@ -14,9 +14,10 @@ class CancelOrderAction implements CancelOrder
     {
         $traderOrder = $financingOrder->activeTraderOrder()->first();
 
-        $trader = Trader::driver($traderOrder->provider);
-
-        $trader->cancelOrder($financingOrder);
+        if ($traderOrder) {
+            $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
+            $trader->cancelOrder($financingOrder);
+        }
 
         $financingOrder->update([
             'status' => FinancingOrderStatus::PendingCancellation,

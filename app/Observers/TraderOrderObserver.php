@@ -29,7 +29,7 @@ class TraderOrderObserver
     public function updated(TraderOrder $traderOrder)
     {
         if ($traderOrder->provider == 'bursam') {
-            if ($traderOrder->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted)) {
+            if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::MurabahaSaleCompleted)) {
                 ProcessBursamOtcCertificate::dispatch($traderOrder->id);
                 ProcessBursamStbCertificate::dispatch($traderOrder->id);
             }
