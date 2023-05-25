@@ -777,10 +777,12 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                                     سعودي
                                 </td>
                             </tr>
+                            @if($product['warehouse'] != '--')
                             <tr>
                                 <td class="w-1/2 px-4 border border-black">موقع السلعة</td>
                                 <td class="w-1/2 border border-black">{{ $product['warehouse'] }}</td>
                             </tr>
+                            @endif
                         </tbody>
                     </table>
                 @endforeach

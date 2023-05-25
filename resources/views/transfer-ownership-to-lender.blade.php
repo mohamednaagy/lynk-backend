@@ -718,7 +718,14 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         <p class="text-black">التاريخ: {{ $date ?? '' }}</p>
         <p class="text-black">الوقت: {{ $time ?? '' }}</p>
         <p class="text-xl text-center text-black">شهادة حيازة</p>
-        <p class="text-center text-black">نؤكد نحن لينك أن السلع المشار لها في الموقع أدناه؛ في حيازتنا بالنيابة
+
+        <p class="text-center text-black">نؤكد نحن لينك أن السلع المشار لها
+            @foreach($products ?? [] as $product)
+            @if($product['warehouse'] != '--')
+            في الموقع أدناه
+            @endif
+            @endforeach
+            ؛ في حيازتنا بالنيابة
             عن {{$company_name}} من
             تاريخ وتوقيت هذه الشهادة، وقد تم شراؤها من {{$previous_owner}} بناء على طلب الشركة مقابل مبلغ
             وقدره {{$amount}} ريال سعودي
@@ -740,15 +747,23 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     <td class="w-1/2 px-4 text-right border border-black">قيمة السلعة</td>
                     <td class="w-1/2 border border-black">{{number_format($product['amount'], 2)}} ريال سعودي</td>
                 </tr>
+                @if($product['warehouse'] != '--')
                 <tr>
                     <td class="w-1/2 px-4 text-right border border-black">موقع السلعة</td>
                     <td class="w-1/2 border border-black">{{$product['warehouse']}}</td>
                 </tr>
+                @endif
                 </tbody>
             </table>
         @endforeach
 
-        <p class="text-lg text-center text-black">سيتم حفظ السلعة بالموقع المشار له أعلاه، بالنيابة عن {{$company_name}}
+        <p class="text-lg text-center text-black">سيتم حفظ السلعة
+            @foreach($products ?? [] as $product)
+            @if($product['warehouse'] != '--')
+            بالموقع المشار له أعلاه
+            @endif
+            @endforeach
+             ، بالنيابة عن {{$company_name}}
             إلى أن يتم إشعارنا بالتصرف.</p>
         <p class="text-lg text-center text-black">{{$company_name}} سيكون مسؤولًا عن رسوم التخزين والحفظ إذا تم الاحتفاظ
             بـ\{{$product_name}} لأكثر من يوم عمل</p>
