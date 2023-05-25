@@ -52,7 +52,6 @@ class NotifyAdminAndLenderAboutOrderCanceled implements ShouldQueue
             ->get();
 
         $lenderAdmins = User::query()
-            ->role(Role::Manager)
             ->whereHas('company', function ($query) use ($company) {
                 $query->where('id', $company->id);
             })->get();
