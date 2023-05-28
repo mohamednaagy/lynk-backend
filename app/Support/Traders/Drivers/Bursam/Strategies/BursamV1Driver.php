@@ -321,53 +321,8 @@ class BursamV1Driver implements TraderInterface
 
     public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
     {
-        if (! $traderOrder->uuid_two) {
-            $traderOrder->update([
-                'uuid_two' => Str::uuid(),
-            ]);
-        }
 
-        $financingOrder = $traderOrder->order;
-
-        $response = Http::bursam()->post(
-            $this->baseUrl('api/process/svc/bsas/order.json'),
-            $requestBody = [
-                'header' => [
-                    'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                    'uuid' => $traderOrder->uuid_two,
-                ],
-                'request' => [
-                    'serialNumber' => '1',
-                    'bidOption' => 'N',
-                    'otcOption' => 'Y',
-                    'stbOption' => 'Y',
-                    'productCode' => 'CPO-MSIA-09', // get it from settings
-                    'purchaseType' => 'P',
-                    'clientName' => '',
-                    'currency' => 'SAR',
-                    'bidValue' => $financingOrder->amount->formatByDecimal(),
-                    'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
-                    'tenor' => '00090',
-                    'otcCounterParty' => $financingOrder->customer_name,
-                    'otcMurabaha' => '',
-                    'otcMurabahaValue' => $financingOrder->selling_price->formatByDecimal(),
-                    'eCertNo' => $traderOrder->reference,
-                ],
-            ]
-        );
-
-        if (! empty($response->json('header.errorCode')) || $response->json('body.0.statusCode') != 0) {
-            throw new TraderException(
-                'Failed to sell commodity to market',
-                [
-                    'provider' => $traderOrder->provider,
-                    'version' => $traderOrder->version,
-                    'provider_response_body' => $response->json(),
-                    'provider_request_body' => $requestBody,
-
-                ]
-            );
-        }
+        $this->sendRequestToSellingCommodity($traderOrder);
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
     }
@@ -523,15 +478,26 @@ class BursamV1Driver implements TraderInterface
         );
     }
 
-    public function cancelOrder(FinancingOrder $financingOrder): object
+    public function cancelOrder(FinancingOrder $financingOrder): mixed
     {
-        $traderOrder = TraderOrder::where('financing_order_id', $financingOrder->id)->first();
+        $traderOrder = $financingOrder->activeTraderOrder()->first();
+        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId) && $traderOrder != null) {
+            return '';
+        }
+        $this->sendRequestToSellingCommodity($traderOrder);
+
+        $traderOrder->update(['status' => TraderOrderStatus::PendingCancellation]);
+
+    }
+
+    public function sendRequestToSellingCommodity(TraderOrder $traderOrder): object
+    {
+
         if (! $traderOrder->uuid_two) {
             $traderOrder->update([
                 'uuid_two' => Str::uuid(),
             ]);
         }
-
         $response = Http::bursam()->post(
             $this->baseUrl('api/process/svc/bsas/order.json'),
             $requestBody = [
@@ -548,12 +514,12 @@ class BursamV1Driver implements TraderInterface
                     'purchaseType' => 'P',
                     'clientName' => '',
                     'currency' => 'SAR',
-                    'bidValue' => $financingOrder->amount->formatByDecimal(),
+                    'bidValue' => $traderOrder->order->amount->formatByDecimal(),
                     'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
                     'tenor' => '00090',
-                    'otcCounterParty' => $financingOrder->customer_name,
+                    'otcCounterParty' => $traderOrder->order->customer_name,
                     'otcMurabaha' => '',
-                    'otcMurabahaValue' => $financingOrder->selling_price->formatByDecimal(),
+                    'otcMurabahaValue' => $traderOrder->order->selling_price->formatByDecimal(),
                     'eCertNo' => $traderOrder->reference,
                 ],
             ]
@@ -571,10 +537,8 @@ class BursamV1Driver implements TraderInterface
                 ]
             );
         }
-        $traderOrder->update(['status' => TraderOrderStatus::PendingCancellation]);
 
         return $response->object();
-
     }
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
