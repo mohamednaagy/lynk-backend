@@ -2,18 +2,16 @@
 
 namespace App\Transformers;
 
+use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
-use App\Transformers\HelperTransformer\TransformerHelperTrait;
-use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
 class TraderOrderTransformer extends TransformerAbstract
 {
-    use TransformerHelperTrait;
-
     protected array $defaultIncludes = [];
 
     protected array $availableIncludes = [
@@ -70,11 +68,19 @@ class TraderOrderTransformer extends TransformerAbstract
         return $this->primitive($traderOrder->isCancellable());
     }
 
-    public function includeHistory(TraderOrder $traderOrder): Collection
+    public function includeHistory(TraderOrder $traderOrder)
     {
-        $filteredMurabhaSteps = $this->getHistoriesUiSteps($traderOrder->provider, $traderOrder->version);
+        $traderMurabhaSteps = collect(get_murabha_steps($traderOrder->provider, $traderOrder->version))
+            ->except([
+                DmccMurabhaStep::TraderOrderCreated,
+                BursamMurabhaStep::TraderOrderCreated,
+                BursamMurabhaStep::TransferOwnershipToLender,
+            ])
+            ->keys()->flatten()->toArray();
 
-        return $this->collection($filteredMurabhaSteps, new TraderHistoryTransformer($traderOrder));
+        $histories = $traderOrder->traderHistories()->pluck('action')->toArray();
+
+        return $this->collection([$histories], new TraderHistoryTransformer($traderOrder, $traderMurabhaSteps));
     }
 
     public function includeStatus(TraderOrder $traderOrder): Primitive

@@ -2,23 +2,35 @@
 
 namespace App\Transformers;
 
+use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Exceptions\TraderNotSupportedException;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
 class TraderHistoryTransformer extends TransformerAbstract
 {
-    protected TraderOrder $traderOrder;
+    protected string $murabhaSteps;
+
+    protected StepHistoriesDictionary $traderStepHistories;
 
     protected Collection $traderHistories;
 
-    public function __construct(?TraderOrder $traderOrder)
+    public function __construct(protected ?TraderOrder $traderOrder, $HistorySteps)
     {
-        $this->traderOrder = $traderOrder;
+        $this->defaultIncludes = array_merge($this->defaultIncludes, $HistorySteps);
+        $this->murabhaSteps = match ($traderOrder->provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::class,
+            'bursam' => BursamMurabhaStep::class,
+            default => throw new TraderNotSupportedException()
+        };
+        $this->traderStepHistories = new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version);
         $this->traderHistories = $traderOrder->traderHistories ?? collect();
     }
 
@@ -26,171 +38,171 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     protected array $availableIncludes = [];
 
-    public function transform($hestory)
+    public function transform($history): array
     {
-        $fitlter = $this->traderOrder->provider.'.'.$this->traderOrder->version;
-
-        return match ($fitlter) {
-            'bursam.v1', 'fake.v1', 'dmcc.v1' => $this->getDmccV1MurabahaStep($hestory),
-            'bursam.v2' => $this->getBursamV2MurabahaStep($hestory),
-        };
+        return [];
     }
 
-    public function getBursamV2MurabahaStep($traderHistoryKey): array
+    public function includePurchasingCommodity($histories): Primitive
     {
-        $traderOrderHistoryExist = $this->getHistory($traderHistoryKey);
+        $stepHistoriesNode = $this->traderStepHistories->getStepOf($this->murabhaSteps::PurchasingCommodity);
+        $lastHistoryOfStepNode = end($stepHistoriesNode->histories);
+        $history = null;
 
-        return match ($traderHistoryKey) {
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => [
-                'step' => 'commodity_purchased',
-                'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'cert_document' => [
-                    'url' => $this->traderOrder
-                        ->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)
-                        ?->file_url,
-                    'date' => optional($this->getHistory(FinancingOrderHistory::AttachTtiHoldingCertificateDocument))->created_at?->format('Y-m-d h:i:s A'),
-                ],
-                'ownership_document' => [
-                    'url' => $this->traderOrder
-                        ->getFirstMedia(TraderOrderMediaCollection::TransferOwnershipToLender)
-                        ?->file_url,
-                    'date' => optional($this->getHistory(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument))->created_at?->format('Y-m-d h:i:s A'),
-                ],
-                'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
-            ],
-            FinancingOrderHistory::ClientWakalaAccepted => [
-                'step' => 'client_wakala',
-                'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
-                'signed_wakala_document' => [
-                    'url' => $this->getMedia(TraderOrderMediaCollection::SignedClientWakala)?->file_url,
-                    'date' => optional($this->getMedia(TraderOrderMediaCollection::SignedClientWakala))->created_at?->format('Y-m-d h:i:s A'),
-                ],
-            ],
-            FinancingOrderHistory::ContractSigned => [
-                'step' => 'contract_signed',
-                'wakala_document' => [
-                    'url' => $this->getMedia(TraderOrderMediaCollection::ClientWakala)?->file_url,
-                    'date' => optional($this->getMedia(TraderOrderMediaCollection::ClientWakala))->created_at?->format('Y-m-d h:i:s A'),
-                ],
-                'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'duration' => $this->getDurationForHistoryStep(FinancingOrderHistory::ContractSigned),
+        if (in_array($lastHistoryOfStepNode, $histories)) {
+            $history = $this->getHistory($lastHistoryOfStepNode);
+        }
 
-            ],
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => [
-                'step' => 'selling_commodity_to_customer',
-                'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
-                'document' => $this->traderOrder
-                    ->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer)
-                    ?->file_url,
-            ],
-            FinancingOrderHistory::MurabahaSaleCompleted => [
-                'step' => 'murabha_sale_completed',
-                'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'warranty_document' => [
-                    'url' => $this->traderOrder
-                        ->getFirstMedia(TraderOrderMediaCollection::BursamTtiHoldingCertificate)
-                        ?->file_url,
-                    'date' => optional($this->getHistory(FinancingOrderHistory::GetSellingToBursaCertificate))->created_at?->format('Y-m-d h:i:s A'),
-                ],
-                'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
-            ],
-            default => [],
+        $certDocumentHistory = match ($this->traderOrder->provider) {
+            'dmcc', 'fake' => FinancingOrderHistory::GetPtpDocument,
+            'bursam' => FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
         };
+
+        return $this->primitive([
+            'step' => 'commodity_purchased',
+            'is_complete' => (bool) $history,
+            'completed_at' => optional($history)->created_at?->format('Y-m-d h:i:s A'),
+            'cert_document' => [
+                'url' => $this->traderOrder
+                    ->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)
+                    ?->file_url,
+                'date' => optional($this->getHistory($certDocumentHistory))->created_at?->format('Y-m-d h:i:s A'),
+            ],
+            'ownership_document' => [
+                'url' => $this->traderOrder
+                    ->getFirstMedia(TraderOrderMediaCollection::TransferOwnershipToLender)
+                    ?->file_url,
+                'date' => optional($this->getHistory(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument))->created_at?->format('Y-m-d h:i:s A'),
+            ],
+            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+        ]);
     }
 
-    public function getDmccV1MurabahaStep($traderHistoryKey): array
+    public function includeClientWakala($histories): Primitive
     {
-        $traderOrderHistoryExist = $this->getHistory($traderHistoryKey);
+        $stepHistoriesNode = $this->traderStepHistories->getStepOf($this->murabhaSteps::ClientWakala);
+        $lastHistoryOfStepNode = end($stepHistoriesNode->histories);
+        $history = null;
 
-        return match ($traderHistoryKey) {
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => [
-                'step' => 'commodity_purchased',
-                'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'cert_document' => [
-                    'url' => $this->traderOrder
-                        ->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)
-                        ?->file_url,
-                    'date' => optional($this->getHistory(FinancingOrderHistory::GetPtpDocument))->created_at?->format('Y-m-d h:i:s A'),
-                ],
-                'ownership_document' => [
-                    'url' => $this->traderOrder
-                        ->getFirstMedia(TraderOrderMediaCollection::TransferOwnershipToLender)
-                        ?->file_url,
-                    'date' => optional($this->getHistory(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument))->created_at?->format('Y-m-d h:i:s A'),
-                ],
-                'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
-            ],
-            FinancingOrderHistory::ClientWakalaAccepted => [
-                'step' => 'client_wakala',
-                'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
-                'signed_wakala_document' => [
-                    'url' => $this->getMedia(TraderOrderMediaCollection::SignedClientWakala)?->file_url,
-                    'date' => optional($this->getMedia(TraderOrderMediaCollection::SignedClientWakala))->created_at?->format('Y-m-d h:i:s A'),
-                ],
-            ],
-            FinancingOrderHistory::ContractSigned => [
-                'step' => 'contract_signed',
-                'wakala_document' => [
-                    'url' => $this->getMedia(TraderOrderMediaCollection::ClientWakala)?->file_url,
-                    'date' => optional($this->getMedia(TraderOrderMediaCollection::ClientWakala))->created_at?->format('Y-m-d h:i:s A'),
-                ],
-                'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'duration' => $this->getDurationForHistoryStep(FinancingOrderHistory::ContractSigned),
+        if (in_array($lastHistoryOfStepNode, $histories)) {
+            $history = $this->getHistory($lastHistoryOfStepNode);
+        }
 
+        return $this->primitive([
+            'step' => 'client_wakala',
+            'is_complete' => (bool) $history,
+            'completed_at' => optional($history)->created_at?->format('Y-m-d h:i:s A'),
+            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+            'signed_wakala_document' => [
+                'url' => $this->getMedia(TraderOrderMediaCollection::SignedClientWakala)?->file_url,
+                'date' => optional($this->getMedia(TraderOrderMediaCollection::SignedClientWakala))->created_at?->format('Y-m-d h:i:s A'),
             ],
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => [
-                'step' => 'selling_commodity_to_customer',
-                'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
-                'document' => $this->traderOrder
-                    ->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer)
+        ]);
+    }
+
+    public function includeContractSigned($histories): Primitive
+    {
+        $stepHistoriesNode = $this->traderStepHistories->getStepOf($this->murabhaSteps::ContractSigned);
+        $lastHistoryOfStepNode = end($stepHistoriesNode->histories);
+        $history = null;
+
+        if (in_array($lastHistoryOfStepNode, $histories)) {
+            $history = $this->getHistory($lastHistoryOfStepNode);
+        }
+
+        return $this->primitive([
+            'step' => 'contract_signed',
+            'wakala_document' => [
+                'url' => $this->getMedia(TraderOrderMediaCollection::ClientWakala)?->file_url,
+                'date' => optional($this->getMedia(TraderOrderMediaCollection::ClientWakala))->created_at?->format('Y-m-d h:i:s A'),
+            ],
+            'is_complete' => (bool) $history,
+            'completed_at' => optional($history)->created_at?->format('Y-m-d h:i:s A'),
+            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+        ]);
+    }
+
+    public function includeCommoditySoldToCustomer($histories): Primitive
+    {
+        $stepHistoriesNode = $this->traderStepHistories->getStepOf($this->murabhaSteps::CommoditySoldToCustomer);
+        $lastHistoryOfStepNode = end($stepHistoriesNode->histories);
+        $history = null;
+
+        if (in_array($lastHistoryOfStepNode, $histories)) {
+            $history = $this->getHistory($lastHistoryOfStepNode);
+        }
+
+        return $this->primitive([
+            'step' => 'selling_commodity_to_customer',
+            'is_complete' => (bool) $history,
+            'completed_at' => optional($history)->created_at?->format('Y-m-d h:i:s A'),
+            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+            'document' => $this->traderOrder
+                ->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer)
+                ?->file_url,
+        ]);
+    }
+
+    public function includeMurabhaOfferIssued($histories): Primitive
+    {
+        $stepHistoriesNode = $this->traderStepHistories->getStepOf($this->murabhaSteps::MurabhaOfferIssued);
+        $lastHistoryOfStepNode = end($stepHistoriesNode->histories);
+        $history = null;
+
+        if (in_array($lastHistoryOfStepNode, $histories)) {
+            $history = $this->getHistory($lastHistoryOfStepNode);
+        }
+
+        return $this->primitive([
+            'step' => 'selling_commodity_to_open_market',
+            'is_complete' => (bool) $this->getHistory(FinancingOrderHistory::AttachMpoDocument),
+            'completed_at' => optional($history)->created_at?->format('Y-m-d h:i:s A'),
+            'mpo_document' => [
+                'url' => $this->traderOrder
+                    ->getFirstMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder)
                     ?->file_url,
+                'date' => optional($this->getHistory(FinancingOrderHistory::GetMurabahaPurchaseOfferDocument))->created_at?->format('Y-m-d h:i:s A'),
             ],
-            FinancingOrderHistory::IssueMurabahaOffer => [
-                'step' => 'selling_commodity_to_open_market',
-                'is_complete' => (bool) $this->traderHistories->where('action', FinancingOrderHistory::AttachMpoDocument)->first(),
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'mpo_document' => [
-                    'url' => $this->traderOrder
-                        ->getFirstMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder)
-                        ?->file_url,
-                    'date' => optional($this->getHistory(FinancingOrderHistory::GetMurabahaPurchaseOfferDocument))->created_at?->format('Y-m-d h:i:s A'),
-                ],
-                'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
+            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+        ]);
+    }
 
+    public function includeMurabahaSaleCompleted($histories): Primitive
+    {
+        $stepHistoriesNode = $this->traderStepHistories->getStepOf($this->murabhaSteps::MurabahaSaleCompleted);
+        $lastHistoryOfStepNode = end($stepHistoriesNode->histories);
+        $history = null;
+
+        if (in_array($lastHistoryOfStepNode, $histories)) {
+            $history = $this->getHistory($lastHistoryOfStepNode);
+        }
+
+        [$warrantyDocumentUrl, $warrantyDocumentDate] = match ($this->traderOrder->provider) {
+            'dmcc', 'fake' => [
+                $this->getMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo)?->file_url,
+                $this->getHistory(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)?->created_at?->format('Y-m-d h:i:s A'),
             ],
-            FinancingOrderHistory::MurabahaSaleCompleted => [
-                'step' => 'murabha_sale_completed',
-                'is_complete' => (bool) $traderOrderHistoryExist,
-                'completed_at' => optional($traderOrderHistoryExist)->created_at?->format('Y-m-d h:i:s A'),
-                'warranty_document' => [
-                    'url' => $this->traderOrder
-                        ->getFirstMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
-                        ?->file_url,
-                    'date' => optional($this->getHistory(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument))->created_at?->format('Y-m-d h:i:s A'),
-                ],
-                'duration' => $this->getDurationForHistoryStep($traderHistoryKey),
+            'bursam' => [
+                $this->getMedia(TraderOrderMediaCollection::BursamTtiHoldingCertificate)?->file_url,
+                $this->getHistory(FinancingOrderHistory::GetSellingToBursaCertificate)?->created_at?->format('Y-m-d h:i:s A'),
             ],
-            default => [],
         };
+
+        return $this->primitive([
+            'step' => 'murabha_sale_completed',
+            'is_complete' => (bool) $history,
+            'completed_at' => optional($history)->created_at?->format('Y-m-d h:i:s A'),
+            'warranty_document' => [
+                'url' => $warrantyDocumentUrl,
+                'date' => $warrantyDocumentDate,
+            ],
+            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+        ]);
     }
 
     public function getDurationForHistoryStep($history)
     {
-        $financingOrderStatus = (new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version))
-            ->getStepByHistory($history)
+        $financingOrderStatus = $this->traderStepHistories->getStepByHistory($history)
             ?->step;
 
         if (blank($financingOrderStatus)) {
@@ -219,8 +231,7 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     private function getLatestTraderHistoryForPreviousStatusOfStatus($status)
     {
-        $previousStepActions = (new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version))
-            ->getPreviousStepOf($status)
+        $previousStepActions = $this->traderStepHistories->getPreviousStepOf($status)
             ?->histories;
 
         return blank($previousStepActions)
