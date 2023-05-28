@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api\V1\Lender\Orders;
 use App\Actions\Contracts\Orders\CancelOrder as CancelOrderInterface;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\CancelOrderRequest;
 use App\Models\FinancingOrder;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,6 +43,7 @@ class CancelOrder extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($request, $cancelOrder, $order) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
+            $traderOrder = $order->activeTraderOrder()->first();
 
             if ($order->status->cantMoveTo(FinancingOrderStatus::PendingCancellation)) {
                 return $this->errorResponse(
@@ -47,6 +51,18 @@ class CancelOrder extends Controller
                     Response::HTTP_FORBIDDEN,
                     ErrorCode::UNABLE_TO_CANCEL_ORDER
                 );
+            }
+
+            if ($traderOrder) {
+                $lastContractSignedHistory = $this->getContractSignedLastHistory($traderOrder);
+
+                if ($traderOrder->checkOrderHistoryAction($lastContractSignedHistory)) {
+                    return $this->errorResponse(
+                        __('error.unable_to_cancel_order'),
+                        Response::HTTP_FORBIDDEN,
+                        ErrorCode::UNABLE_TO_CANCEL_ORDER
+                    );
+                }
             }
 
             $cancelOrder->handle(
@@ -57,5 +73,19 @@ class CancelOrder extends Controller
 
             return $this->successResponse();
         });
+    }
+
+    private function getContractSignedLastHistory($traderOrder)
+    {
+        $contractSignedStep = match ($traderOrder->provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::ContractSigned,
+            'bursam' => BursamMurabhaStep::ContractSigned,
+        };
+
+        $contractSignedHistories = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+            ->getStepOf($contractSignedStep)
+            ?->histories;
+
+        return end($contractSignedHistories);
     }
 }
