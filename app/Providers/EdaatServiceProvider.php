@@ -43,16 +43,10 @@ class EdaatServiceProvider extends ServiceProvider
                 return $response->json('access_token');
             });
 
-            $pendingRequest = $this->makePendingRequest()
+            return $this->makePendingRequest()
                 ->acceptJson()
                 ->asJson()
                 ->withToken($token);
-
-            if ($pendingRequest === false) {
-                $pendingRequest->withoutVerifying();
-            }
-
-            return $pendingRequest;
         });
     }
 
