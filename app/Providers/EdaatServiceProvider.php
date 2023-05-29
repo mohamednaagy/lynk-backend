@@ -31,9 +31,10 @@ class EdaatServiceProvider extends ServiceProvider
     private function bootEdaat()
     {
         Http::macro('edaat', function () {
-            $baseUrl = config('edaat.base_url');
             $token = Cache::remember('edaat_token', 604700, function () {
-                $response = Http::asForm()->post(config('edaat.base_url').'/auth', [
+                $pendingRequest = $this->makePendingRequest()->asForm();
+
+                $response = $pendingRequest->post('/auth', [
                     'grant_type' => 'password',
                     'username' => config('edaat.username'),
                     'password' => config('edaat.password'),
@@ -42,16 +43,30 @@ class EdaatServiceProvider extends ServiceProvider
                 return $response->json('access_token');
             });
 
-            $http = Http::acceptJson()
+            $pendingRequest = $this->makePendingRequest()
+                ->acceptJson()
                 ->asJson()
-                ->withToken($token)
-                ->baseUrl($baseUrl);
+                ->withToken($token);
 
-            if (config('edaat.verify_tls_certs') === false) {
-                $http->withoutVerifying();
+            if ($pendingRequest === false) {
+                $pendingRequest->withoutVerifying();
             }
 
-            return $http;
+            return $pendingRequest;
         });
+    }
+
+    public function makePendingRequest()
+    {
+        $baseUrl = config('edaat.base_url');
+        $shouldVerifyTlsCerts = config('edaat.verify_tls_certs');
+
+        $pendingRequest = Http::baseUrl($baseUrl);
+
+        if ($shouldVerifyTlsCerts === false) {
+            $pendingRequest->withoutVerifying();
+        }
+
+        return $pendingRequest;
     }
 }
