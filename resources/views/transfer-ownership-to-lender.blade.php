@@ -718,51 +718,42 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         <p class="text-black">التاريخ: {{ $date ?? '' }}</p>
         <p class="text-black">الوقت: {{ $time ?? '' }}</p>
         <p class="text-xl text-center text-black">شهادة حيازة</p>
-
         <p class="text-center text-black">نؤكد نحن لينك أن السلع المشار لها
-            @foreach($products ?? [] as $product)
-            @if($product['warehouse'] != '--')
+            @if($products->getWarehouse())
             في الموقع أدناه
-            @endif
-            @endforeach
+             @endif
             ؛ في حيازتنا بالنيابة
             عن {{$company_name}} من
             تاريخ وتوقيت هذه الشهادة، وقد تم شراؤها من {{$previous_owner}} بناء على طلب الشركة مقابل مبلغ
             وقدره {{$amount}} ريال سعودي
         </p>
-
         <p class="text-lg font-semibold text-center text-black">بيانات السلع/ـة</p>
-        @foreach($products ?? [] as $product)
             <table class="min-w-full mt-4">
                 <tbody>
                 <tr>
                     <td class="w-1/2 px-4 text-right border border-black">نوع السلعة</td>
-                    <td class="w-1/2 border border-black">{{$product['product']}}</td>
+                    <td class="w-1/2 border border-black">{{$products->getProduct()}}</td>
                 </tr>
                 <tr>
                     <td class="w-1/2 px-4 text-right border border-black">الكمية</td>
-                    <td class="w-1/2 border border-black">{{$product['quantity']}} {{$product['uom']}}</td>
+                    <td class="w-1/2 border border-black">{{$products->getQuantity()}} {{$products->getUom()}}</td>
                 </tr>
                 <tr>
                     <td class="w-1/2 px-4 text-right border border-black">قيمة السلعة</td>
-                    <td class="w-1/2 border border-black">{{number_format($product['amount'], 2)}} ريال سعودي</td>
+                    <td class="w-1/2 border border-black">{{number_format($products->getAmount(), 2)}} ريال سعودي</td>
                 </tr>
-                @if($product['warehouse'] != '--')
+                @if($products->getWarehouse())
                 <tr>
                     <td class="w-1/2 px-4 text-right border border-black">موقع السلعة</td>
-                    <td class="w-1/2 border border-black">{{$product['warehouse']}}</td>
+                    <td class="w-1/2 border border-black">{{$products->getWarehouse()}}</td>
                 </tr>
                 @endif
                 </tbody>
             </table>
-        @endforeach
-
         <p class="text-lg text-center text-black">سيتم حفظ السلعة
-            @foreach($products ?? [] as $product)
-            @if($product['warehouse'] != '--')
+            @if($products->getWarehouse())
             بالموقع المشار له أعلاه
             @endif
-            @endforeach
              ، بالنيابة عن {{$company_name}}
             إلى أن يتم إشعارنا بالتصرف.</p>
         <p class="text-lg text-center text-black">{{$company_name}} سيكون مسؤولًا عن رسوم التخزين والحفظ إذا تم الاحتفاظ

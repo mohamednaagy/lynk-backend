@@ -8,6 +8,7 @@ use App\Exceptions\TraderException;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoOrder;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccRespondedToPtpOrder;
@@ -233,9 +234,6 @@ class DmccV1Driver implements TraderInterface
     }
 
     /**
-     * @param $traderOrder
-     * @return void
-     *
      * @throws TraderException
      */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
@@ -260,7 +258,7 @@ class DmccV1Driver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'products' => $traderOrder->products,
+                    'products' => CommodityProductDto::fromArray($traderOrder->products[0]),
                     'amount' => $amount,
                     'product_name' => $productName,
                     'customer_name' => $customerName,
@@ -313,9 +311,6 @@ class DmccV1Driver implements TraderInterface
     }
 
     /**
-     * @param $traderOrder
-     * @return void
-     *
      * @throws TraderException
      */
     public function createTransferOwnershipToLenderDocument($traderOrder): void
@@ -333,7 +328,7 @@ class DmccV1Driver implements TraderInterface
                 'transfer-ownership-to-lender',
                 [
                     'order_id' => $traderOrder->order->id,
-                    'products' => $traderOrder->products,
+                    'products' => CommodityProductDto::fromArray($traderOrder->products[0]),
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,

@@ -246,20 +246,20 @@ class BursamV1Driver implements TraderInterface
     {
         try {
             $amount = $traderOrder->order->amount->formatByDecimal();
-
+            $currentTime = Carbon::now();
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
                     'order_id' => $traderOrder->order->id,
-                    'products' => $traderOrder->products,
+                    'products' => CommodityProductDto::fromArray($traderOrder->products[0]),
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
                     'amount' => $amount,
                     'previous_owner' => CommodityProductDto::fromArray($traderOrder->products[0])->getPreviousOwner(),
                     'product_name' => CommodityProductDto::fromArray($traderOrder->products[0])->getProduct(),
-                    'date' => Carbon::now()->toDateString(),
-                    'time' => Carbon::now()->toTimeString(),
+                    'date' => $currentTime->tz('Asia/Riyadh')->toDateString(),
+                    'time' => $currentTime->tz('Asia/Riyadh')->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::TransferOwnershipToLender
@@ -296,7 +296,7 @@ class BursamV1Driver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'products' => $traderOrder->products,
+                    'products' => CommodityProductDto::fromArray($traderOrder->products[0]),
                     'amount' => $amount,
                     'customer_name' => $customerName,
                     'contract_signed_date' => $dateTime->toDateString(),

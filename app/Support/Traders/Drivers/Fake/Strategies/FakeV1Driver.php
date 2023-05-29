@@ -8,6 +8,7 @@ use App\Exceptions\TraderException;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoOrder;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccRespondedToPtpOrder;
@@ -28,9 +29,6 @@ class FakeV1Driver implements TraderInterface
         createTraderOrder as traitCreateTraderOrder;
     }
 
-    /**
-     * @return bool
-     */
     public function acceptAgreement(): bool
     {
         return true;
@@ -155,10 +153,6 @@ class FakeV1Driver implements TraderInterface
         return $response->json('data.ttiId');
     }
 
-    /**
-     * @param  FinancingOrder  $financingOrder
-     * @return bool
-     */
     public function cancelOrder(FinancingOrder $financingOrder): bool
     {
         return true;
@@ -192,9 +186,6 @@ class FakeV1Driver implements TraderInterface
     }
 
     /**
-     * @param $traderOrder
-     * @return void
-     *
      * @throws TraderException
      */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
@@ -219,7 +210,7 @@ class FakeV1Driver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'products' => $traderOrder->products,
+                    'products' => CommodityProductDto::fromArray($traderOrder->products[0]),
                     'amount' => $amount,
                     'product_name' => $productName,
                     'customer_name' => $customerName,
@@ -288,7 +279,7 @@ class FakeV1Driver implements TraderInterface
                 'transfer-ownership-to-lender',
                 [
                     'order_id' => $traderOrder->order->id,
-                    'products' => $traderOrder->products,
+                    'products' => CommodityProductDto::fromArray($traderOrder->products[0]),
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()?->name,
                     'order_number' => $traderOrder->financing_order_id,

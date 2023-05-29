@@ -11,7 +11,7 @@ class CommodityProductDto
         protected string $previous_owner,
         protected string $date_time_of_purchasing_commodity,
         protected string $uom = '--',
-        protected string $warehouse = '--',
+        protected $warehouse = null,
         protected string $warehouse_or_vault_emirates = '--',
         protected string $warehouse_or_vault_country = '--',
         protected string $currency = 'SAR',
@@ -41,7 +41,11 @@ class CommodityProductDto
 
     public function getWarehouse(): string
     {
-        return $this->warehouse;
+        if ($this->warehouse != null) {
+            return $this->warehouse;
+        }
+
+        return '';
     }
 
     public function getPreviousOwner(): string
@@ -58,7 +62,7 @@ class CommodityProductDto
             $data['previous_owner'],
             $data['date_time_of_purchasing_commodity'],
             $data['uom'] ?? '--',
-            $data['warehouse'] ?? '--',
+            $data['warehouse'] ?? '',
             $data['warehouse_or_vault_emirates'] ?? '--',
             $data['warehouse_or_vault_country'] ?? '--',
             $data['currency'] ?? 'SAR',

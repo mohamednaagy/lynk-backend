@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\TraderOrder;
+use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -66,7 +67,7 @@ class OverwriteOldSellingCommodityToCustomerDocumentToCorrectDates implements Sh
                             'reference_number' => $traderOrder->id,
                             'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                             'order_number' => $traderOrder->financing_order_id,
-                            'products' => $traderOrder->products,
+                            'products' => CommodityProductDto::fromArray($traderOrder->products[0]),
                             'amount' => $amount,
                             'product_name' => $productName,
                             'customer_name' => $customerName,

@@ -757,35 +757,32 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                         المالك\ة الوحيد\ة من تاريخ و توقيت هذه الشهادة، وقد تم شراؤها من {{$company_name}} بناء على العقد المبرم بين الطرفين بتاريخ {{ $contract_signed_date }} مقابل مبلغ وقدره {{$amount}} ريال سعودي
                     </p>
                 </div>
-
                 <h5 class="py-3 font-extrabold text-center">بيانات السلع/ـة</h5>
-                @foreach ($products ?? [] as $product)
                     <table class="min-w-full mt-4">
                         <tbody>
                             <tr>
                                 <td class="w-1/2 px-4 border border-black">نوع السلعة</td>
-                                <td class="w-1/2 border border-black">{{ $product['product'] }}</td>
+                                <td class="w-1/2 border border-black">{{ $products->getProduct() }}</td>
                             </tr>
                             <tr>
                                 <td class="w-1/2 px-4 border border-black">الكمية</td>
-                                <td class="w-1/2 border border-black">{{ $product['quantity'] }} {{ $product['uom'] }}
+                                <td class="w-1/2 border border-black">{{ $products->getQuantity()}} {{ $products->getUom() }}
                                 </td>
                             </tr>
                             <tr>
                                 <td class="w-1/2 px-4 border border-black">قيمة السلعة</td>
-                                <td class="w-1/2 border border-black">{{ number_format($product['amount'], 2) }} ريال
+                                <td class="w-1/2 border border-black">{{ number_format($products->getAmount(), 2) }} ريال
                                     سعودي
                                 </td>
                             </tr>
-                            @if($product['warehouse'] != '--')
+                            @if($products->getWarehouse())
                             <tr>
                                 <td class="w-1/2 px-4 border border-black">موقع السلعة</td>
-                                <td class="w-1/2 border border-black">{{ $product['warehouse'] }}</td>
+                                <td class="w-1/2 border border-black">{{$products->getWarehouse()}}</td>
                             </tr>
                             @endif
                         </tbody>
                     </table>
-                @endforeach
                 <p class="text-center text-black pt-7">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
                 <hr class="mx-auto mt-10 h-[2px] w-48 bg-gray-700" />
             </div>
