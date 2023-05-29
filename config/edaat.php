@@ -10,4 +10,5 @@ return [
     'payment_url' => env('EDAAT_PAYMENT_URL'),
     'bill_url' => env('EDAAT_BILL_URL'),
     'reconcile_url' => env('EDAAT_RECONCILE_URL'),
+    'verify_tls_certs' => env('EDAAT_VERIFY_TLS_CERTS', true),
 ];

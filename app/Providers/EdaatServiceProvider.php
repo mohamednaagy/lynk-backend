@@ -42,10 +42,16 @@ class EdaatServiceProvider extends ServiceProvider
                 return $response->json('access_token');
             });
 
-            return Http::acceptJson()
+            $http = Http::acceptJson()
                 ->asJson()
                 ->withToken($token)
                 ->baseUrl($baseUrl);
+
+            if (config('edaat.verify_tls_certs') === false) {
+                $http->withoutVerifying();
+            }
+
+            return $http;
         });
     }
 }
