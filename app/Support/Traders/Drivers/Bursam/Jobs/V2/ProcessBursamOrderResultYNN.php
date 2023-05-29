@@ -17,13 +17,12 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
-
-    public int $tries = 3;
 
     /**
      * Create a new job instance.
@@ -101,6 +100,11 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->traderOrderId;
+    }
+
+    public function retryUntil(): Carbon
+    {
+        return now()->addMinutes(30);
     }
 
     public function backoff(): int

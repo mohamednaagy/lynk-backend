@@ -14,6 +14,7 @@ use App\Models\TraderOrder;
 use App\Settings\Classes\GeneralSettings;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
+use Illuminate\Support\Facades\Log;
 
 class TraderHistoryObserver
 {
@@ -30,7 +31,7 @@ class TraderHistoryObserver
     public function created(TraderHistory $traderHistory)
     {
         $traderOrder = $traderHistory->traderOrder->withLastHistoryAction()->first();
-
+        Log::debug('observer', [$traderOrder->last_history_action]);
         Trader::driver($traderOrder->provider, $traderOrder->version)
             ->dispatchJobForTransitioningFlow($traderOrder);
 
