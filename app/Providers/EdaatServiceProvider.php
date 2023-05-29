@@ -32,7 +32,7 @@ class EdaatServiceProvider extends ServiceProvider
     {
         Http::macro('edaat', function () {
             $token = Cache::remember('edaat_token', 604700, function () {
-                $pendingRequest = $this->makePendingRequest()->asForm();
+                $pendingRequest = EdaatServiceProvider::makePendingRequest()->asForm();
 
                 $response = $pendingRequest->post('/auth', [
                     'grant_type' => 'password',
@@ -43,14 +43,14 @@ class EdaatServiceProvider extends ServiceProvider
                 return $response->json('access_token');
             });
 
-            return $this->makePendingRequest()
+            return EdaatServiceProvider::makePendingRequest()
                 ->acceptJson()
                 ->asJson()
                 ->withToken($token);
         });
     }
 
-    public function makePendingRequest()
+    public static function makePendingRequest()
     {
         $baseUrl = config('edaat.base_url');
         $shouldVerifyTlsCerts = config('edaat.verify_tls_certs');
