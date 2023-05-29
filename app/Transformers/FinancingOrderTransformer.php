@@ -185,11 +185,13 @@ class FinancingOrderTransformer extends TransformerAbstract
                 BursamMurabhaStep::TraderOrderCreated,
                 BursamMurabhaStep::TransferOwnershipToLender,
             ])
-            ->keys()->flatten()->toArray();
+            ->keys()
+            ->flatten()
+            ->toArray();
 
-        $histories = $activeTraderOrder->traderHistories()->pluck('id')->toArray();
+        $historiesActions = $activeTraderOrder->traderHistories()->pluck('action')->toArray();
 
-        return $this->collection([$histories], new TraderHistoryTransformer($activeTraderOrder, $traderMurabhaSteps));
+        return $this->collection([$historiesActions], new TraderHistoryTransformer($activeTraderOrder, $traderMurabhaSteps));
     }
 
     public function includeTraderOrders(FinancingOrder $financingOrder): Collection

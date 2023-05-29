@@ -76,11 +76,13 @@ class TraderOrderTransformer extends TransformerAbstract
                 BursamMurabhaStep::TraderOrderCreated,
                 BursamMurabhaStep::TransferOwnershipToLender,
             ])
-            ->keys()->flatten()->toArray();
+            ->keys()
+            ->flatten()
+            ->toArray();
 
-        $histories = $traderOrder->traderHistories()->pluck('action')->toArray();
+        $historiesActions = $traderOrder->traderHistories()->pluck('action')->toArray();
 
-        return $this->collection([$histories], new TraderHistoryTransformer($traderOrder, $traderMurabhaSteps));
+        return $this->collection([$historiesActions], new TraderHistoryTransformer($traderOrder, $traderMurabhaSteps));
     }
 
     public function includeStatus(TraderOrder $traderOrder): Primitive
