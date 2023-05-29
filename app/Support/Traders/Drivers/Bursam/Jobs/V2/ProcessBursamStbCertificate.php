@@ -40,7 +40,7 @@ class ProcessBursamStbCertificate implements ShouldQueue, ShouldBeUnique
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetOwnershipToCustomerCertificate)) {
+            if (! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::MurabahaSaleCompleted)) {
                 return;
             }
 

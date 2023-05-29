@@ -179,15 +179,19 @@ class FinancingOrderTransformer extends TransformerAbstract
             return $this->primitive(null);
         }
 
-        $murabhaSteps = collect(
-            get_murabha_steps($activeTraderOrder->provider, $activeTraderOrder->version)
-        );
+        $traderMurabhaSteps = collect(get_murabha_steps($activeTraderOrder->provider, $activeTraderOrder->version))
+            ->except([
+                DmccMurabhaStep::TraderOrderCreated,
+                BursamMurabhaStep::TraderOrderCreated,
+                BursamMurabhaStep::TransferOwnershipToLender,
+            ])
+            ->keys()
+            ->flatten()
+            ->toArray();
 
-        $filteredMurabhaSteps = $murabhaSteps->except(
-            [DmccMurabhaStep::TraderOrderCreated, BursamMurabhaStep::TraderOrderCreated]
-        )->values()->flatten();
+        $historiesActions = $activeTraderOrder->traderHistories()->pluck('action')->toArray();
 
-        return $this->collection($filteredMurabhaSteps, new TraderHistoryTransformer($activeTraderOrder));
+        return $this->collection([$historiesActions], new TraderHistoryTransformer($activeTraderOrder, $traderMurabhaSteps));
     }
 
     public function includeTraderOrders(FinancingOrder $financingOrder): Collection

@@ -41,8 +41,6 @@ return [
         BursamMurabhaStep::PurchasingCommodity => [
             FinancingOrderHistory::GetTtiHoldingCertificateDocument,
             FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
-        ],
-        BursamMurabhaStep::TransferOwnershipToLender => [
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ],
         BursamMurabhaStep::ContractSigned => [
