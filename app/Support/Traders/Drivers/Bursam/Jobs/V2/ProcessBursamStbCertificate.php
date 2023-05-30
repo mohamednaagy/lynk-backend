@@ -19,6 +19,10 @@ class ProcessBursamStbCertificate implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
+    public $tries = 3;
+
+    public $backoff = 10;
+
     /**
      * Create a new job instance.
      *
@@ -40,12 +44,22 @@ class ProcessBursamStbCertificate implements ShouldQueue, ShouldBeUnique
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)) {
+            if (! $this->checkCanGetStb($traderOrder)) {
                 return;
             }
 
             Trader::driver('bursam', $traderOrder->version)->getStbCertificateDetails($traderOrder);
         });
+    }
+
+    public function checkCanGetStb($traderOrder)
+    {
+        if ($traderOrder->reference ||
+            $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)) {
+            return true;
+        }
+
+        return false;
     }
 
     public function middleware(): array

@@ -15,6 +15,7 @@ use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificate;
 use App\Support\Traders\Traits\BursamTraderHelperTrait;
 use Carbon\Carbon;
 use Exception;
@@ -535,6 +536,8 @@ class BursamV1Driver implements TraderInterface
                     ->toMediaCollection(TraderOrderMediaCollection::BursamTtiHoldingCertificate);
             }
         );
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetSellingToBursaCertificate);
     }
 
     /**
@@ -543,8 +546,9 @@ class BursamV1Driver implements TraderInterface
     public function cancelOrder(FinancingOrder $financingOrder): mixed
     {
         $traderOrder = $financingOrder->activeTraderOrder()->first();
+
         $this->sellingCommodityToBursam($traderOrder);
-        $this->getStbCertificateDetails($traderOrder);
+        ProcessBursamStbCertificate::dispatch($traderOrder->id);
 
         $traderOrder->update([
             'status' => TraderOrderStatus::Cancelled,
