@@ -319,10 +319,12 @@ class BursamV1Driver implements TraderInterface
         }
     }
 
+    /**
+     * @throws TraderException
+     */
     public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
     {
-
-        $this->sendRequestToSellingCommodity($traderOrder);
+        $this->sellingCommodityToBursam($traderOrder);
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
     }
@@ -451,7 +453,7 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
-        $stpOwnerShipTemplate = view('bursam-templates.stp-certificate-template', [
+        $stbOwnerShipTemplate = view('bursam-templates.stp-certificate-template', [
             'ecertno' => $response->json('ECERTNO'),
             'seller' => $response->json('SELLER'),
             'buyer' => $response->json('BUYER'),
@@ -468,7 +470,7 @@ class BursamV1Driver implements TraderInterface
 
         $financingOrder = $traderOrder->order;
         PdfGenerator::outputFromHtml(
-            $stpOwnerShipTemplate,
+            $stbOwnerShipTemplate,
             function ($fileResource) use ($financingOrder, $traderOrder) {
                 return $traderOrder
                     ->addMediaFromStream($fileResource)
@@ -478,26 +480,33 @@ class BursamV1Driver implements TraderInterface
         );
     }
 
+    /**
+     * @throws TraderException
+     */
     public function cancelOrder(FinancingOrder $financingOrder): mixed
     {
         $traderOrder = $financingOrder->activeTraderOrder()->first();
-        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId) && $traderOrder != null) {
-            return '';
-        }
-        $this->sendRequestToSellingCommodity($traderOrder);
+
+        $this->sellingCommodityToBursam($traderOrder);
+        $this->getStbCertificateDetails($traderOrder);
 
         $traderOrder->update(['status' => TraderOrderStatus::PendingCancellation]);
 
+        return true;
     }
 
-    public function sendRequestToSellingCommodity(TraderOrder $traderOrder): object
+    public function sellingCommodityToBursam(TraderOrder $traderOrder)
     {
+        if (! $traderOrder->reference) {
+            return false;
+        }
 
         if (! $traderOrder->uuid_two) {
             $traderOrder->update([
                 'uuid_two' => Str::uuid(),
             ]);
         }
+
         $response = Http::bursam()->post(
             $this->baseUrl('api/process/svc/bsas/order.json'),
             $requestBody = [
@@ -510,7 +519,7 @@ class BursamV1Driver implements TraderInterface
                     'bidOption' => 'N',
                     'otcOption' => 'Y',
                     'stbOption' => 'Y',
-                    'productCode' => 'CPO-MSIA-09', // get it from settings
+                    'productCode' => $traderOrder->product_code,
                     'purchaseType' => 'P',
                     'clientName' => '',
                     'currency' => 'SAR',
@@ -533,12 +542,11 @@ class BursamV1Driver implements TraderInterface
                     'version' => $traderOrder->version,
                     'provider_response_body' => $response->json(),
                     'provider_request_body' => $requestBody,
-
                 ]
             );
         }
 
-        return $response->object();
+        return $response;
     }
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void

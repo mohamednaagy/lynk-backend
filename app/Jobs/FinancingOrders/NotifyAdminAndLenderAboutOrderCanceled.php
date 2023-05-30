@@ -15,6 +15,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Notification;
+use Stancl\Tenancy\Database\TenantScope;
 
 class NotifyAdminAndLenderAboutOrderCanceled implements ShouldQueue
 {
@@ -36,13 +37,11 @@ class NotifyAdminAndLenderAboutOrderCanceled implements ShouldQueue
      */
     public function handle()
     {
-
-        $company = $this->financingOrder->company;
-
         $admins = User::query()
             ->withoutGlobalScope(TenantScope::class)
             ->role(Role::Admin)
             ->get();
+
         $managersHasPermissions = User::query()
             ->withoutGlobalScope(TenantScope::class)
             ->role(Role::Manager)
@@ -53,8 +52,8 @@ class NotifyAdminAndLenderAboutOrderCanceled implements ShouldQueue
 
         $lenderAdmins = User::query()
             ->role(Role::LenderAdmin)
-            ->whereHas('company', function ($query) use ($company) {
-                $query->where('id', $company->id);
+            ->whereHas('company', function ($query) {
+                $query->where('id', $this->financingOrder->company->id);
             })->get();
 
         $notifiables = $admins->merge([...$managersHasPermissions, ...$lenderAdmins]);

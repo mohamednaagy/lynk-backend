@@ -30,11 +30,10 @@ class CancelOrder extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  CancelOrderRequest  $cancelOrderRequest
+     * @param  CancelOrderRequest  $request
      * @param  CancelOrderInterface  $cancelOrder ,
-     * @param  FinancingOrder  $order
-     *
-     * @throws \Throwable
+     * @param  int  $order
+     * @return JsonResponse
      */
     public function __invoke(
         CancelOrderRequest $request,
