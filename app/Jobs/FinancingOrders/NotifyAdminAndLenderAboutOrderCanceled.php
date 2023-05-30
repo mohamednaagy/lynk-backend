@@ -37,26 +37,31 @@ class NotifyAdminAndLenderAboutOrderCanceled implements ShouldQueue
      */
     public function handle()
     {
-        $admins = User::query()
+        $company = $this->financingOrder->company;
+
+        $notifiables = User::query()
             ->withoutGlobalScope(TenantScope::class)
             ->role(Role::Admin)
+            ->where(function ($query) {
+                $query->where(function ($query) {
+                    $query->role(Role::Admin);
+                });
+            })
+            ->orWhere(function ($query) {
+                $query->where(function ($query) {
+                    $query->role(Role::Manager)
+                        ->permission(
+                            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Cancel])
+                        );
+                });
+            })
+            ->orWhere(function ($query) use ($company) {
+                $query->role(Role::LenderAdmin)
+                    ->whereHas('company', function ($query) use ($company) {
+                        $query->where('id', $company->id);
+                    });
+            })
             ->get();
-
-        $managersHasPermissions = User::query()
-            ->withoutGlobalScope(TenantScope::class)
-            ->role(Role::Manager)
-            ->permission(
-                perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit])
-            )
-            ->get();
-
-        $lenderAdmins = User::query()
-            ->role(Role::LenderAdmin)
-            ->whereHas('company', function ($query) {
-                $query->where('id', $this->financingOrder->company->id);
-            })->get();
-
-        $notifiables = $admins->merge([...$managersHasPermissions, ...$lenderAdmins]);
 
         Notification::send($notifiables, new OrderCanceled($this->financingOrder, $this->user));
     }
