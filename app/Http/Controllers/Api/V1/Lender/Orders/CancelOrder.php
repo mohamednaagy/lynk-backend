@@ -43,7 +43,6 @@ class CancelOrder extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($request, $cancelOrder, $order) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
-            $traderOrder = $order->activeTraderOrder()->first();
 
             if ($order->status->cantMoveTo(FinancingOrderStatus::PendingCancellation)) {
                 return $this->errorResponse(
@@ -53,10 +52,11 @@ class CancelOrder extends Controller
                 );
             }
 
+            $traderOrder = $order->activeTraderOrder()->first();
             if ($traderOrder) {
-                $lastContractSignedHistory = $this->getContractSignedLastHistory($traderOrder);
+                $lastHistoryOfContractSignedStep = $this->getContractSignedLastHistory($traderOrder);
 
-                if ($traderOrder->checkOrderHistoryAction($lastContractSignedHistory)) {
+                if ($traderOrder->checkOrderHistoryAction($lastHistoryOfContractSignedStep)) {
                     return $this->errorResponse(
                         __('error.unable_to_cancel_order'),
                         Response::HTTP_FORBIDDEN,

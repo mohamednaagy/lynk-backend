@@ -551,7 +551,7 @@ class BursamV1Driver implements TraderInterface
         ProcessBursamStbCertificate::dispatch($traderOrder->id);
 
         $traderOrder->update([
-            'status' => TraderOrderStatus::Cancelled,
+            'status' => TraderOrderStatus::PendingCancellation,
         ]);
 
         return true;
