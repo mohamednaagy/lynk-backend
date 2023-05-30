@@ -171,13 +171,19 @@ class FinancingOrderTransformer extends TransformerAbstract
     {
         $traderOrder = $financingOrder->activeTraderOrder()->withLastHistoryAction()->first();
         if (is_null($traderOrder)) {
-            return null;
+            return $this->primitive(null);
         }
 
         $currentStepNode = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
             ->getStepByHistory($traderOrder->last_history_action);
 
-        return $this->primitive($currentStepNode->step);
+        $MurabhaStepEnum = get_murabha_step_enum($traderOrder->provider);
+        $step = $MurabhaStepEnum::fromValue($currentStepNode->step);
+
+        return $this->primitive([
+            'value' => $step->value,
+            'description' => $step->description,
+        ]);
     }
 
     /**

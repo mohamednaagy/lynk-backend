@@ -18,7 +18,7 @@ class TraderOrderStepScope extends QueryScoper
     public function prepareData()
     {
         return [
-            'stage' => Request::query('stage'),
+            'step' => Request::query('step'),
         ];
     }
 
@@ -33,7 +33,7 @@ class TraderOrderStepScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'stage' => ['nullable', 'string'],
+                'step' => ['required', 'string'],
             ]
         );
     }
@@ -47,14 +47,22 @@ class TraderOrderStepScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data)
     {
-        if (isset($data['stage'])) {
-            return $builder->whereHas('activeTraderOrder', function ($query) use ($data) {
-                $query->whereHas('traderHistories', function ($query) use ($data) {
-                    $histories = (new StepHistoriesDictionary())
-                        ->getStepOf($data['stage'])
-                        ?->histories;
+        $allHistories = [];
 
-                    $query->whereIn('action', $histories ?? []);
+        foreach (config('trader.providers') as $trader => $value) {
+            foreach (config('murabha-steps.'.$trader.'-versions') as $version => $versionValue) {
+                $traderHistories = (new StepHistoriesDictionary($trader, $version))
+                    ->getStepOf($data['step'])
+                    ?->histories;
+            }
+
+            $allHistories = array_merge($allHistories, $traderHistories);
+        }
+
+        if (isset($data['step'])) {
+            return $builder->whereHas('activeTraderOrder', function ($query) use ($allHistories) {
+                $query->whereHas('traderHistories', function ($query) use ($allHistories) {
+                    $query->whereIn('action', $allHistories);
                 });
             });
         }
