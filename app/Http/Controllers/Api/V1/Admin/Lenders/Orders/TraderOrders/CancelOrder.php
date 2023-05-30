@@ -58,7 +58,6 @@ class CancelOrder extends Controller
             );
 
             $user = Auth::user();
-
             dispatch(new NotifyAdminAndLenderAboutOrderCanceled($order, $user));
 
             return $this->successResponse();
