@@ -11,6 +11,7 @@ use App\Support\QueryScoper\Scopes\FinancingOrders\OrderNeedActionScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderSearchScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderSortScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderStatusScope;
+use App\Support\QueryScoper\Scopes\FinancingOrders\TraderOrderStepScope;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Stancl\Tenancy\Database\TenantScope;
@@ -34,6 +35,7 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
             'status' => new OrderStatusScope(),
             'sort' => new OrderSortScope(),
             'amount' => new OrderAmountScope(),
+            'stage' => new TraderOrderStepScope(),
         ];
     }
 

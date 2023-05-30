@@ -76,6 +76,7 @@ class OrderController extends Controller
                 'amount',
                 'selling_price',
                 'status_reason',
+                'step',
             ])->respond();
     }
 

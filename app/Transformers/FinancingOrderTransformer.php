@@ -7,8 +7,10 @@ use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
+use App\Exceptions\TraderNotSupportedException;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Fractal\Resource\Primitive;
@@ -45,6 +47,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'phone_number',
         'phone_number_formatted',
         'created_at',
+        'step',
         'history',
         'active_trader',
         'trader_orders',
@@ -164,6 +167,22 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive($financingOrder->created_at->format('Y-m-d h:i A'));
     }
 
+    public function includeStep(FinancingOrder $financingOrder)
+    {
+        $traderOrder = $financingOrder->activeTraderOrder()->withLastHistoryAction()->first();
+        if (is_null($traderOrder)) {
+            return null;
+        }
+
+        $currentStepNode = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+            ->getStepByHistory($traderOrder->last_history_action);
+
+        return $this->primitive($currentStepNode->step);
+    }
+
+    /**
+     * @throws TraderNotSupportedException
+     */
     public function includeHistory(FinancingOrder $financingOrder): Primitive|Collection
     {
         // TODO: handle not expired + cancelled cases or show all trading requests
