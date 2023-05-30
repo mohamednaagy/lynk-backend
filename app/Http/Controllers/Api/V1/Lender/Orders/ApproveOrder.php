@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Orders\ApproveOrder as ApproveOrderInterface;
+use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
+use App\Actions\Contracts\Wallets\DeductVatPercentage;
+use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\ErrorCode;
@@ -27,15 +30,22 @@ class ApproveOrder extends Controller
 
     /**
      * Handle the incoming request.
-     *
-     * @param  Request  $request
-     * @param  ApproveOrderInterface  $approveOrder
-     * @param  int  $order
-     * @return JsonResponse
      */
-    public function __invoke(Request $request, ApproveOrderInterface $approveOrder, int $order): JsonResponse
+    public function __invoke(
+        Request $request,
+        ApproveOrderInterface $approveOrder,
+        int $order,
+        DeductOrderCreationFee $deductOrderCreationFee,
+        DeductVatPercentage $deductVatPercentage,
+        GenerateZatcaInvoice $generateFatoura): JsonResponse
     {
-        return DB::transaction(function () use ($request, $approveOrder, $order) {
+        return DB::transaction(function () use (
+            $request,
+            $approveOrder,
+            $order,
+            $deductOrderCreationFee,
+            $deductVatPercentage,
+            $generateFatoura) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
 
             if ($order->status->cantMoveTo(FinancingOrderStatus::Approved)) {
@@ -45,6 +55,15 @@ class ApproveOrder extends Controller
                     ErrorCode::ORDER_ALREADY_APPROVED
                 );
             }
+
+            // deduct the cost from the wallet
+            $creationFeeTransaction = $deductOrderCreationFee->handle($order);
+            $deductVatPercentage->handle($order, $creationFeeTransaction, tenant());
+
+            $generateFatoura->handel(
+                $order,
+                creationFeeTransaction: $creationFeeTransaction
+            );
 
             $approveOrder->handle($order, $request->user());
 
