@@ -322,7 +322,7 @@ class BursamV1Driver implements TraderInterface
     public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
     {
 
-        $this->sendRequestToSellingCommodity($traderOrder);
+        $this->sellingCommodityToBursam($traderOrder);
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
     }
@@ -481,16 +481,16 @@ class BursamV1Driver implements TraderInterface
     public function cancelOrder(FinancingOrder $financingOrder): mixed
     {
         $traderOrder = $financingOrder->activeTraderOrder()->first();
-        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId) && $traderOrder != null) {
+        if (! $traderOrder) {
             return '';
         }
-        $this->sendRequestToSellingCommodity($traderOrder);
-
+        $response = $this->sellingCommodityToBursam($traderOrder);
         $traderOrder->update(['status' => TraderOrderStatus::PendingCancellation]);
 
+        return $response;
     }
 
-    public function sendRequestToSellingCommodity(TraderOrder $traderOrder): object
+    public function sellingCommodityToBursam(TraderOrder $traderOrder)
     {
 
         if (! $traderOrder->uuid_two) {
@@ -538,7 +538,7 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
-        return $response->object();
+        return $response;
     }
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
