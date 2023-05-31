@@ -89,8 +89,10 @@ if (! function_exists('get_file_url')) {
 }
 
 if (! function_exists('get_murabha_step_enum')) {
-    function get_murabha_step_enum($provider = 'fake'): string
+    function get_murabha_step_enum($provider): string
     {
+        $provider = $provider ?? config('trader.default');
+
         return match ($provider) {
             'dmcc', 'fake' => DmccMurabhaStep::class,
             'bursam' => BursamMurabhaStep::class,

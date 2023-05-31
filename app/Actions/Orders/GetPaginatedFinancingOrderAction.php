@@ -35,7 +35,7 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
             'status' => new OrderStatusScope(),
             'sort' => new OrderSortScope(),
             'amount' => new OrderAmountScope(),
-            'stage' => new TraderOrderStepScope(),
+            'step' => new TraderOrderStepScope(),
         ];
     }
 
@@ -69,7 +69,10 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
         }
 
         if ($this->company?->type?->is(CompanyType::Lender)) {
-            $baseQuery->with('creator')
+            $baseQuery->with([
+                'creator',
+                'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
+            ])
                 ->where('company_id', $this->company->id);
         }
 

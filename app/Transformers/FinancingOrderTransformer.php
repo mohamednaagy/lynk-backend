@@ -169,7 +169,8 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeStep(FinancingOrder $financingOrder)
     {
-        $traderOrder = $financingOrder->activeTraderOrder()->withLastHistoryAction()->first();
+        $traderOrder = $financingOrder->activeTraderOrder->first();
+
         if (is_null($traderOrder)) {
             return $this->primitive(null);
         }
@@ -177,8 +178,8 @@ class FinancingOrderTransformer extends TransformerAbstract
         $currentStepNode = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
             ->getStepByHistory($traderOrder->last_history_action);
 
-        $MurabhaStepEnum = get_murabha_step_enum($traderOrder->provider);
-        $step = $MurabhaStepEnum::fromValue($currentStepNode->step);
+        $murabhaStepEnum = get_murabha_step_enum($traderOrder->provider);
+        $step = $murabhaStepEnum::fromValue($currentStepNode->step);
 
         return $this->primitive([
             'value' => $step->value,

@@ -47,26 +47,52 @@ class TraderOrderStepScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data)
     {
+        $allHistories = $this->getHistoriesOfAllTradersForStep($data['step']);
+
+        return $builder->whereHas('activeTraderOrder.traderHistories', function ($query) use ($allHistories) {
+            $query->whereIn('action', $allHistories);
+        });
+    }
+
+    public function getHistoriesOfAllTradersForStep($step)
+    {
         $allHistories = [];
 
-        foreach (config('trader.providers') as $trader => $value) {
-            foreach (config('murabha-steps.'.$trader.'-versions') as $version => $versionValue) {
-                $traderHistories = (new StepHistoriesDictionary($trader, $version))
-                    ->getStepOf($data['step'])
-                    ?->histories;
-            }
+        foreach ($this->getProviders() as $provider) {
+            $traderHistories = $this->getHistoriesOfProvider($provider, $step);
 
             $allHistories = array_merge($allHistories, $traderHistories);
         }
 
-        if (isset($data['step'])) {
-            return $builder->whereHas('activeTraderOrder', function ($query) use ($allHistories) {
-                $query->whereHas('traderHistories', function ($query) use ($allHistories) {
-                    $query->whereIn('action', $allHistories);
-                });
-            });
+        return $allHistories;
+    }
+
+    protected function getProviders()
+    {
+        return array_keys(config('trader.providers'));
+    }
+
+    protected function getHistoriesOfProvider($provider, $step)
+    {
+        $traderHistories = [];
+
+        foreach ($this->getProviderVersions($provider) as $version) {
+            $versionHistories = (new StepHistoriesDictionary($provider, $version))
+                ->getStepOf($step)
+                ?->histories;
+
+            if ($versionHistories === null) {
+                continue;
+            }
+
+            $traderHistories = array_merge($traderHistories, $versionHistories);
         }
 
-        return $builder;
+        return $traderHistories;
+    }
+
+    protected function getProviderVersions($provider)
+    {
+        return array_keys(config('murabha-steps.'.$provider.'-versions'));
     }
 }
