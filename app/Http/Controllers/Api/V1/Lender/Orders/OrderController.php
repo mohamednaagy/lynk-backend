@@ -52,11 +52,6 @@ class OrderController extends Controller
         )->only('update');
     }
 
-    /**
-     * @param  Request  $request
-     * @param  GetPaginatedFinancingOrder  $getPaginatedOrders
-     * @return JsonResponse
-     */
     public function index(Request $request, GetPaginatedFinancingOrder $getPaginatedOrders): JsonResponse
     {
         if ($request->user()->hasRole(Role::LenderOrderCreator)) {
@@ -76,14 +71,11 @@ class OrderController extends Controller
                 'amount',
                 'selling_price',
                 'status_reason',
-                'step',
+                'current_step',
             ])->respond();
     }
 
     /**
-     * @param  FinancingOrder  $order
-     * @return JsonResponse
-     *
      * @throws AuthorizationException
      */
     public function show(FinancingOrder $order): JsonResponse
@@ -120,14 +112,6 @@ class OrderController extends Controller
 
     /**
      * Handle the incoming request.
-     *
-     * @param  StoreOrderRequest  $request
-     * @param  CanCreateOrder  $canCreateOrder
-     * @param  CreateFinancingOrder  $createFinancingOrder
-     * @param  DeductOrderCreationFee  $deductOrderCreationFee
-     * @param  DeductVatPercentage  $deductVatPercentage
-     * @param  GenerateZatcaInvoice  $generateFatoura
-     * @return JsonResponse
      */
     public function store(
         StoreOrderRequest $request,
@@ -201,10 +185,6 @@ class OrderController extends Controller
     /**
      * Summary of update
      *
-     * @param  UpdateOrderRequest  $request
-     * @param  UpdateFinancingOrder  $updateFinancingOrder
-     * @param  FinancingOrder  $order
-     * @return JsonResponse
      *
      * @throws AuthorizationException
      */

@@ -47,7 +47,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'phone_number',
         'phone_number_formatted',
         'created_at',
-        'step',
+        'current_step',
         'history',
         'active_trader',
         'trader_orders',
@@ -167,7 +167,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive($financingOrder->created_at->format('Y-m-d h:i A'));
     }
 
-    public function includeStep(FinancingOrder $financingOrder)
+    public function includeCurrentStep(FinancingOrder $financingOrder)
     {
         $traderOrder = $financingOrder->activeTraderOrder->first();
 

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 
-class TraderOrderStepScope extends QueryScoper
+class TraderOrderCurrentStepScope extends QueryScoper
 {
     /**
      * Prepare data for vailation
@@ -18,7 +18,7 @@ class TraderOrderStepScope extends QueryScoper
     public function prepareData()
     {
         return [
-            'step' => Request::query('step'),
+            'current_step' => Request::query('current_step'),
         ];
     }
 
@@ -33,7 +33,7 @@ class TraderOrderStepScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'step' => ['required', 'string'],
+                'current_step' => ['required', 'string'],
             ]
         );
     }
@@ -47,19 +47,19 @@ class TraderOrderStepScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data)
     {
-        $allHistories = $this->getHistoriesOfAllTradersForStep($data['step']);
+        $allHistories = $this->getHistoriesOfAllTradersForStep($data['current_step']);
 
         return $builder->whereHas('activeTraderOrder.traderHistories', function ($query) use ($allHistories) {
             $query->whereIn('action', $allHistories);
         });
     }
 
-    public function getHistoriesOfAllTradersForStep($step)
+    public function getHistoriesOfAllTradersForStep($currentStep)
     {
         $allHistories = [];
 
         foreach ($this->getProviders() as $provider) {
-            $traderHistories = $this->getHistoriesOfProvider($provider, $step);
+            $traderHistories = $this->getHistoriesOfProvider($provider, $currentStep);
 
             $allHistories = array_merge($allHistories, $traderHistories);
         }
@@ -72,13 +72,13 @@ class TraderOrderStepScope extends QueryScoper
         return array_keys(config('trader.providers'));
     }
 
-    protected function getHistoriesOfProvider($provider, $step)
+    protected function getHistoriesOfProvider($provider, $currentStep)
     {
         $traderHistories = [];
 
         foreach ($this->getProviderVersions($provider) as $version) {
             $versionHistories = (new StepHistoriesDictionary($provider, $version))
-                ->getStepOf($step)
+                ->getStepOf($currentStep)
                 ?->histories;
 
             if ($versionHistories === null) {
