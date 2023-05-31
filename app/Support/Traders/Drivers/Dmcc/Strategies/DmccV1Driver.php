@@ -233,7 +233,10 @@ class DmccV1Driver implements TraderInterface
         return $response->object();
     }
 
-    /**
+     /**
+     * @param $traderOrder
+     * @return void
+     *
      * @throws TraderException
      */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
@@ -310,7 +313,10 @@ class DmccV1Driver implements TraderInterface
         return $response->object()->getdocument[0]->getDocumentByTypeResponse[0]->document;
     }
 
-    /**
+     /**
+     * @param $traderOrder
+     * @return void
+     *
      * @throws TraderException
      */
     public function createTransferOwnershipToLenderDocument($traderOrder): void
@@ -355,7 +361,7 @@ class DmccV1Driver implements TraderInterface
         }
     }
 
-    /**
+     /**
      * @throws TraderException
      */
     public function getInventoryBasket(TraderOrder $traderOrder): object
