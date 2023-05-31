@@ -545,7 +545,10 @@ class BursamV1Driver implements TraderInterface
 
         return $response;
     }
-
+     /**
+     * @param  TraderOrder  $traderOrder
+     * @return void
+     **/
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
     {
     }
