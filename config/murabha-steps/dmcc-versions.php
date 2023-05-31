@@ -37,5 +37,4 @@ return [
             FinancingOrderHistory::MurabahaSaleCompleted,
         ],
     ],
-    'v2' => [],
 ];
