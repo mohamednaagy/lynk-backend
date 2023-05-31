@@ -28,7 +28,9 @@ class FakeV1Driver implements TraderInterface
     use FakeTraderHelperTrait {
         createTraderOrder as traitCreateTraderOrder;
     }
-
+     /**
+     * @throws TraderException
+     */
     public function acceptAgreement(): bool
     {
         return true;
@@ -152,7 +154,11 @@ class FakeV1Driver implements TraderInterface
 
         return $response->json('data.ttiId');
     }
-
+    
+     /**
+     * @param  FinancingOrder  $financingOrder
+     * @return bool
+     */
     public function cancelOrder(FinancingOrder $financingOrder): bool
     {
         return true;
@@ -186,6 +192,9 @@ class FakeV1Driver implements TraderInterface
     }
 
     /**
+     * @param $traderOrder
+     * @return void
+     *
      * @throws TraderException
      */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
