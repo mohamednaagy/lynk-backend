@@ -104,10 +104,14 @@ class OrderController extends Controller
                 'status_reason',
                 'creator',
                 'approver',
-                'trader_orders.provider',
-                'trader_orders.version',
-                'history',
+                'trader_orders.id',
+                'trader_orders.reference',
+                'trader_orders.failure_reason',
+                'trader_orders.is_cancellable',
                 'trader_orders.history',
+                'trader_orders.status',
+                'trader_orders.created_at',
+                'history',
             ])->respond();
     }
 
