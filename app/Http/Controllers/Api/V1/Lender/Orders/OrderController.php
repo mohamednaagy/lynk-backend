@@ -107,6 +107,7 @@ class OrderController extends Controller
                 'trader_orders.provider',
                 'trader_orders.version',
                 'history',
+                'trader_orders.history',
             ])->respond();
     }
 
