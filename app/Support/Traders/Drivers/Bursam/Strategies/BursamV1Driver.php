@@ -3,7 +3,6 @@
 namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
 use App\Enums\BursamErrorCode;
-use App\Enums\BursamMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -15,6 +14,7 @@ use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Traits\BursamTraderHelperTrait;
 use Carbon\Carbon;
 use Exception;
@@ -319,8 +319,22 @@ class BursamV1Driver implements TraderInterface
         }
     }
 
+    /**
+     * @throws TraderException
+     */
     public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
     {
+        $response = $this->sellingCommodityToBursam($traderOrder);
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
+    }
+
+    public function sellingCommodityToBursam(TraderOrder $traderOrder)
+    {
+        if (! $traderOrder->reference) {
+            return false;
+        }
+
         if (! $traderOrder->uuid_two) {
             $traderOrder->update([
                 'uuid_two' => Str::uuid(),
@@ -341,7 +355,7 @@ class BursamV1Driver implements TraderInterface
                     'bidOption' => 'N',
                     'otcOption' => 'Y',
                     'stbOption' => 'Y',
-                    'productCode' => 'CPO-MSIA-09', // get it from settings
+                    'productCode' => $traderOrder->product_code,
                     'purchaseType' => 'P',
                     'clientName' => '',
                     'currency' => 'SAR',
@@ -369,7 +383,7 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
+        return $response;
     }
 
     public function fetchOrderResultNYY(TraderOrder $traderOrder)
@@ -395,11 +409,7 @@ class BursamV1Driver implements TraderInterface
             && $response->json('body.0.otcErrNo') == '999'
             && $response->json('body.0.stbErrNo') == '999'
         ) {
-            $this->createStepHistories(request(), $traderOrder, BursamMurabhaStep::MurabahaSaleCompleted);
-
-            $traderOrder->update([
-                'status' => TraderOrderStatus::Completed,
-            ]);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CommoditySoldToMarket);
         } else {
             throw new TraderException(
                 'Failed to fetch order result NYY',
@@ -496,7 +506,7 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
-        $stpOwnerShipTemplate = view('bursam-templates.stb-certificate-template', [
+        $stbOwnerShipTemplate = view('bursam-templates.stb-certificate-template', [
             'ecertno' => $response->json('ECERTNO'),
             'seller' => $response->json('SELLER'),
             'buyer' => $response->json('BUYER'),
@@ -513,7 +523,7 @@ class BursamV1Driver implements TraderInterface
 
         $financingOrder = $traderOrder->order;
         PdfGenerator::outputFromHtml(
-            $stpOwnerShipTemplate,
+            $stbOwnerShipTemplate,
             function ($fileResource) use ($financingOrder, $traderOrder) {
                 return $traderOrder
                     ->addMediaFromStream($fileResource)
@@ -522,13 +532,24 @@ class BursamV1Driver implements TraderInterface
             }
         );
 
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetSellingToBursaCertificate);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetSellingToMarketCertificate);
     }
 
+    /**
+     * @throws TraderException
+     */
     public function cancelOrder(FinancingOrder $financingOrder): mixed
     {
-        // TODO: Implement cancelOrder() method.
-        return '';
+        $traderOrder = $financingOrder->activeTraderOrder()->first();
+
+        $this->sellingCommodityToBursam($traderOrder);
+        ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id);
+
+        $traderOrder->update([
+            'status' => TraderOrderStatus::PendingCancellation,
+        ]);
+
+        return true;
     }
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void

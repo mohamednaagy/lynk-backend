@@ -10,5 +10,6 @@ class BursamErrorCode
         '520',
         '508',
         '203',
+        '115',
     ];
 }

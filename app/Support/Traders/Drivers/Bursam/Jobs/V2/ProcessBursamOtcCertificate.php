@@ -40,7 +40,7 @@ class ProcessBursamOtcCertificate implements ShouldQueue, ShouldBeUnique
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted)) {
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CommoditySoldToBursam)) {
                 return;
             }
 

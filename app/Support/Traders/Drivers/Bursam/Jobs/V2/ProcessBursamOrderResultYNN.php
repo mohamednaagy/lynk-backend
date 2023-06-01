@@ -24,8 +24,6 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
-    public int $tries = 3;
-
     /**
      * Create a new job instance.
      *
@@ -107,5 +105,10 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
     public function retryUntil(): Carbon
     {
         return now()->addMinutes(30);
+    }
+
+    public function backoff(): int
+    {
+        return config('trader.providers.bursam.purchasing_commodity_job_backoff_time');
     }
 }
