@@ -51,7 +51,7 @@ class BursamV2Driver extends BursamV1Driver
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessAskClientForWakala::class,
             FinancingOrderHistory::ClientWakalaAccepted => ProcessBursamSellingCommodityToOpenMarket::class,
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => ProcessBursamOrderResultNYY::class,
-            FinancingOrderHistory::CommoditySoldToBursam => ProcessBursamOtcCertificate::class,
+            FinancingOrderHistory::CommoditySoldToMarket => ProcessBursamOtcCertificate::class,
             FinancingOrderHistory::GetOwnershipToCustomerCertificate => ProcessBursamStbCertificate::class,
             default => null,
         };

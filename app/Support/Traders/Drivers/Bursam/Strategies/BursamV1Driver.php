@@ -14,7 +14,7 @@ use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancelation;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Traits\BursamTraderHelperTrait;
 use Carbon\Carbon;
 use Exception;
@@ -409,7 +409,7 @@ class BursamV1Driver implements TraderInterface
             && $response->json('body.0.otcErrNo') == '999'
             && $response->json('body.0.stbErrNo') == '999'
         ) {
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CommoditySoldToBursam);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CommoditySoldToMarket);
         } else {
             throw new TraderException(
                 'Failed to fetch order result NYY',
@@ -532,7 +532,7 @@ class BursamV1Driver implements TraderInterface
             }
         );
 
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetSellingToBursaCertificate);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetSellingToMarketCertificate);
     }
 
     /**
@@ -543,7 +543,7 @@ class BursamV1Driver implements TraderInterface
         $traderOrder = $financingOrder->activeTraderOrder()->first();
 
         $this->sellingCommodityToBursam($traderOrder);
-        ProcessBursamStbCertificateAfterCancelation::dispatch($traderOrder->id);
+        ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id);
 
         $traderOrder->update([
             'status' => TraderOrderStatus::PendingCancellation,

@@ -16,7 +16,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessBursamStbCertificateAfterCancelation implements ShouldQueue, ShouldBeUnique
+class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, BursamTraderHelperTrait, StopsTraderOrderOnJobFailure;
 
