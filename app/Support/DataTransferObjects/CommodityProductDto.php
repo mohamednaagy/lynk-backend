@@ -11,7 +11,7 @@ class CommodityProductDto
         protected string $previous_owner,
         protected string $date_time_of_purchasing_commodity,
         protected string $uom = '--',
-        protected $warehouse = null,
+        protected string|null $warehouse = null,
         protected string $warehouse_or_vault_emirates = '--',
         protected string $warehouse_or_vault_country = '--',
         protected string $currency = 'SAR',
@@ -41,7 +41,7 @@ class CommodityProductDto
 
     public function getWarehouse(): string
     {
-        if ($this->warehouse != null) {
+        if ($this->warehouse) {
             return $this->warehouse;
         }
 

@@ -708,6 +708,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
     </style>
 </head>
+@php
+    $arrayProducts[] = $products
+@endphp
 
 <body dir="rtl">
 <div class="flex justify-end">
@@ -728,28 +731,30 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             وقدره {{$amount}} ريال سعودي
         </p>
         <p class="text-lg font-semibold text-center text-black">بيانات السلع/ـة</p>
+        @foreach ($arrayProducts ?? [] as $product)
             <table class="min-w-full mt-4">
                 <tbody>
                 <tr>
                     <td class="w-1/2 px-4 text-right border border-black">نوع السلعة</td>
-                    <td class="w-1/2 border border-black">{{$products->getProduct()}}</td>
+                    <td class="w-1/2 border border-black">{{$product->getProduct()}}</td>
                 </tr>
                 <tr>
                     <td class="w-1/2 px-4 text-right border border-black">الكمية</td>
-                    <td class="w-1/2 border border-black">{{$products->getQuantity()}} {{$products->getUom()}}</td>
+                    <td class="w-1/2 border border-black">{{$product->getQuantity()}} {{$product->getUom()}}</td>
                 </tr>
                 <tr>
                     <td class="w-1/2 px-4 text-right border border-black">قيمة السلعة</td>
-                    <td class="w-1/2 border border-black">{{number_format($products->getAmount(), 2)}} ريال سعودي</td>
+                    <td class="w-1/2 border border-black">{{number_format($product->getAmount(), 2)}} ريال سعودي</td>
                 </tr>
-                @if($products->getWarehouse())
+                @if($product->getWarehouse())
                 <tr>
                     <td class="w-1/2 px-4 text-right border border-black">موقع السلعة</td>
-                    <td class="w-1/2 border border-black">{{$products->getWarehouse()}}</td>
+                    <td class="w-1/2 border border-black">{{$product->getWarehouse()}}</td>
                 </tr>
                 @endif
                 </tbody>
             </table>
+        @endforeach
         <p class="text-lg text-center text-black">سيتم حفظ السلعة
             @if($products->getWarehouse())
             بالموقع المشار له أعلاه

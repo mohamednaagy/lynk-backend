@@ -16,7 +16,7 @@ use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Traits\BursamTraderHelperTrait;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -246,7 +246,8 @@ class BursamV1Driver implements TraderInterface
     {
         try {
             $amount = $traderOrder->order->amount->formatByDecimal();
-            $currentTime = Carbon::now();
+            $currentTimeInUtcTz = CarbonImmutable::now();
+            $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
@@ -258,8 +259,8 @@ class BursamV1Driver implements TraderInterface
                     'amount' => $amount,
                     'previous_owner' => CommodityProductDto::fromArray($traderOrder->products[0])->getPreviousOwner(),
                     'product_name' => CommodityProductDto::fromArray($traderOrder->products[0])->getProduct(),
-                    'date' => $currentTime->tz('Asia/Riyadh')->toDateString(),
-                    'time' => $currentTime->tz('Asia/Riyadh')->toTimeString(),
+                    'date' => $currentTimeInRiyadhTz->toDateString(),
+                    'time' => $currentTimeInRiyadhTz->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::TransferOwnershipToLender
@@ -285,7 +286,8 @@ class BursamV1Driver implements TraderInterface
                 ->where('action', FinancingOrderHistory::ContractSigned)
                 ->first()
                 ?->created_at;
-
+            $currentTimeInUtcTz = CarbonImmutable::parse($dateTime);
+            $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
             $amount = $traderOrder->order->selling_price->formatByDecimal();
 
             $customerName = $traderOrder->order->customer_name;
@@ -299,8 +301,8 @@ class BursamV1Driver implements TraderInterface
                     'products' => CommodityProductDto::fromArray($traderOrder->products[0]),
                     'amount' => $amount,
                     'customer_name' => $customerName,
-                    'contract_signed_date' => $dateTime->toDateString(),
-                    'contract_signed_time' => $dateTime->toTimeString(),
+                    'contract_signed_date' => $currentTimeInRiyadhTz->toDateString(),
+                    'contract_signed_time' => $currentTimeInRiyadhTz->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::SellingCommodityToCustomer,
