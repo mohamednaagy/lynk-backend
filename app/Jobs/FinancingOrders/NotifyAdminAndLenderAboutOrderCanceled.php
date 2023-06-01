@@ -8,7 +8,7 @@ use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\FinancingOrder;
 use App\Models\User;
-use App\Notifications\FinancingOrders\OrderCanceled;
+use App\Notifications\FinancingOrders\OrderCancelled;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -17,7 +17,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Notification;
 use Stancl\Tenancy\Database\TenantScope;
 
-class NotifyAdminAndLenderAboutOrderCanceled implements ShouldQueue
+class NotifyAdminAndLenderAboutOrderCancelled implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -26,7 +26,7 @@ class NotifyAdminAndLenderAboutOrderCanceled implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(private FinancingOrder $financingOrder, private User $user)
+    public function __construct(private FinancingOrder $financingOrder, private User $canceller)
     {
     }
 
@@ -42,18 +42,11 @@ class NotifyAdminAndLenderAboutOrderCanceled implements ShouldQueue
         $notifiables = User::query()
             ->withoutGlobalScope(TenantScope::class)
             ->role(Role::Admin)
-            ->where(function ($query) {
-                $query->where(function ($query) {
-                    $query->role(Role::Admin);
-                });
-            })
             ->orWhere(function ($query) {
-                $query->where(function ($query) {
-                    $query->role(Role::Manager)
-                        ->permission(
-                            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Cancel])
-                        );
-                });
+                $query->role(Role::Manager)
+                    ->permission(
+                        perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Cancel])
+                    );
             })
             ->orWhere(function ($query) use ($company) {
                 $query->role(Role::LenderAdmin)
@@ -63,6 +56,6 @@ class NotifyAdminAndLenderAboutOrderCanceled implements ShouldQueue
             })
             ->get();
 
-        Notification::send($notifiables, new OrderCanceled($this->financingOrder, $this->user));
+        Notification::send($notifiables, new OrderCancelled($this->financingOrder, $this->canceller));
     }
 }

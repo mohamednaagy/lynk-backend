@@ -10,10 +10,9 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\CancelOrderRequest;
-use App\Jobs\FinancingOrders\NotifyAdminAndLenderAboutOrderCanceled;
+use App\Jobs\FinancingOrders\NotifyAdminAndLenderAboutOrderCancelled;
 use App\Models\FinancingOrder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -30,10 +29,7 @@ class CancelOrder extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  CancelOrderRequest  $request
      * @param  CancelOrderInterface  $cancelOrder ,
-     * @param  int  $order
-     * @return JsonResponse
      */
     public function __invoke(
         CancelOrderRequest $request,
@@ -51,14 +47,14 @@ class CancelOrder extends Controller
                 );
             }
 
+            $canceller = $request->user();
+
             $cancelOrder->handle(
                 $order,
-                $request->user(),
+                $canceller,
                 $request->validated()
             );
-
-            $user = Auth::user();
-            dispatch(new NotifyAdminAndLenderAboutOrderCanceled($order, $user));
+            dispatch(new NotifyAdminAndLenderAboutOrderCancelled($order, $canceller));
 
             return $this->successResponse();
         });

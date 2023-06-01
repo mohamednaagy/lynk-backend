@@ -9,7 +9,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Config;
 
-class OrderCanceled extends Notification
+class OrderCancelled extends Notification
 {
     use Queueable;
 
@@ -45,13 +45,13 @@ class OrderCanceled extends Notification
         $url = Config::get('front-end.prod.base_url').'/orders/'.$this->financingOrder->id;
 
         return (new MailMessage)
-            ->subject(__('emails/order-canceled.subject', [
+            ->subject(__('emails/order-cancelled.subject', [
                 'order_id' => $this->financingOrder->id,
             ]))
-            ->line(__('emails/order-canceled.body', [
+            ->line(__('emails/order-cancelled.body', [
                 'order_id' => $this->financingOrder->id,
             ]))
-            ->action(__('emails/order-canceled.action'), $url);
+            ->action(__('emails/order-cancelled.action'), $url);
     }
 
     /**

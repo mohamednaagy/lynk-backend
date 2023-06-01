@@ -1,5 +1,6 @@
 <x-mail::message>
-    {{ __('Dear :name', 'Admin') }},<br>
+
+    {{ __('Dear Admin') }},<br>
 
     <x-mail::panel>
         {{$notification->order_id}} order Canceled
