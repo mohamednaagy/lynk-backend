@@ -20,7 +20,7 @@ class CancelOrderAction implements CancelOrder
         }
 
         $financingOrder->update([
-            'status' => FinancingOrderStatus::PendingCancellation,
+            'status' => FinancingOrderStatus::PendingApproval,
             'status_reason' => $data['status_reason'] ?? null,
         ]);
     }

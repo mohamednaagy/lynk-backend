@@ -55,9 +55,9 @@ return [
         ],
         BursamMurabhaStep::MurabahaSaleCompleted => [
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
-            FinancingOrderHistory::CommoditySoldToBursam,
+            FinancingOrderHistory::CommoditySoldToMarket,
             FinancingOrderHistory::GetOwnershipToCustomerCertificate,
-            FinancingOrderHistory::GetSellingToBursaCertificate,
+            FinancingOrderHistory::GetSellingToMarketCertificate,
             FinancingOrderHistory::MurabahaSaleCompleted,
         ],
     ],
