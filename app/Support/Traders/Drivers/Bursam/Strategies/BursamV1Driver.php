@@ -3,7 +3,6 @@
 namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
 use App\Enums\BursamErrorCode;
-use App\Enums\BursamMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -15,7 +14,7 @@ use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificate;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Traits\BursamTraderHelperTrait;
 use Carbon\Carbon;
 use Exception;
@@ -320,14 +319,64 @@ class BursamV1Driver implements TraderInterface
         }
     }
 
-    /**
-     * @throws TraderException
-     */
     public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
     {
-        $this->sellingCommodityToBursam($traderOrder);
+        $response = $this->sellingCommodityToBursam($traderOrder);
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
+    }
+
+    public function sellingCommodityToBursam(TraderOrder $traderOrder)
+    {
+        if (! $traderOrder->uuid_two) {
+            $traderOrder->update([
+                'uuid_two' => Str::uuid(),
+            ]);
+        }
+
+        $financingOrder = $traderOrder->order;
+
+        $response = Http::bursam()->post(
+            $this->baseUrl('api/process/svc/bsas/order.json'),
+            $requestBody = [
+                'header' => [
+                    'memberShortName' => config('trader.providers.bursam.member_short_name'),
+                    'uuid' => $traderOrder->uuid_two,
+                ],
+                'request' => [
+                    'serialNumber' => '1',
+                    'bidOption' => 'N',
+                    'otcOption' => 'Y',
+                    'stbOption' => 'Y',
+                    'productCode' => $traderOrder->product_code,
+                    'purchaseType' => 'P',
+                    'clientName' => '',
+                    'currency' => 'SAR',
+                    'bidValue' => $financingOrder->amount->formatByDecimal(),
+                    'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
+                    'tenor' => '00090',
+                    'otcCounterParty' => $financingOrder->customer_name,
+                    'otcMurabaha' => '',
+                    'otcMurabahaValue' => $financingOrder->selling_price->formatByDecimal(),
+                    'eCertNo' => $traderOrder->reference,
+                ],
+            ]
+        );
+
+        if (! empty($response->json('header.errorCode')) || $response->json('body.0.statusCode') != 0) {
+            throw new TraderException(
+                'Failed to sell commodity to market',
+                [
+                    'provider' => $traderOrder->provider,
+                    'version' => $traderOrder->version,
+                    'provider_response_body' => $response->json(),
+                    'provider_request_body' => $requestBody,
+
+                ]
+            );
+        }
+
+        return $response;
     }
 
     public function fetchOrderResultNYY(TraderOrder $traderOrder)
@@ -353,11 +402,7 @@ class BursamV1Driver implements TraderInterface
             && $response->json('body.0.otcErrNo') == '999'
             && $response->json('body.0.stbErrNo') == '999'
         ) {
-            $this->createStepHistories(request(), $traderOrder, BursamMurabhaStep::MurabahaSaleCompleted);
-
-            $traderOrder->update([
-                'status' => TraderOrderStatus::Completed,
-            ]);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CommoditySoldToMarket);
         } else {
             throw new TraderException(
                 'Failed to fetch order result NYY',
@@ -454,7 +499,7 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
-        $stbOwnerShipTemplate = view('bursam-templates.stp-certificate-template', [
+        $stbOwnerShipTemplate = view('bursam-templates.stb-certificate-template', [
             'ecertno' => $response->json('ECERTNO'),
             'seller' => $response->json('SELLER'),
             'buyer' => $response->json('BUYER'),
@@ -479,6 +524,8 @@ class BursamV1Driver implements TraderInterface
                     ->toMediaCollection(TraderOrderMediaCollection::BursamTtiHoldingCertificate);
             }
         );
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetSellingToMarketCertificate);
     }
 
     /**
@@ -489,66 +536,15 @@ class BursamV1Driver implements TraderInterface
         $traderOrder = $financingOrder->activeTraderOrder()->first();
 
         $this->sellingCommodityToBursam($traderOrder);
-        ProcessBursamStbCertificate::dispatch($traderOrder->id);
+        ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id);
 
-        $traderOrder->update(['status' => TraderOrderStatus::PendingCancellation]);
+        $traderOrder->update([
+            'status' => TraderOrderStatus::PendingCancellation,
+        ]);
 
         return true;
     }
 
-    public function sellingCommodityToBursam(TraderOrder $traderOrder)
-    {
-        if (! $traderOrder->uuid_two) {
-            $traderOrder->update([
-                'uuid_two' => Str::uuid(),
-            ]);
-        }
-
-        $response = Http::bursam()->post(
-            $this->baseUrl('api/process/svc/bsas/order.json'),
-            $requestBody = [
-                'header' => [
-                    'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                    'uuid' => $traderOrder->uuid_two,
-                ],
-                'request' => [
-                    'serialNumber' => '1',
-                    'bidOption' => 'N',
-                    'otcOption' => 'Y',
-                    'stbOption' => 'Y',
-                    'productCode' => $traderOrder->product_code,
-                    'purchaseType' => 'P',
-                    'clientName' => '',
-                    'currency' => 'SAR',
-                    'bidValue' => $traderOrder->order->amount->formatByDecimal(),
-                    'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
-                    'tenor' => '00090',
-                    'otcCounterParty' => $traderOrder->order->customer_name,
-                    'otcMurabaha' => '',
-                    'otcMurabahaValue' => $traderOrder->order->selling_price->formatByDecimal(),
-                    'eCertNo' => $traderOrder->reference,
-                ],
-            ]
-        );
-
-        if (! empty($response->json('header.errorCode')) || $response->json('body.0.statusCode') != 0) {
-            throw new TraderException(
-                'Failed to sell commodity to market',
-                [
-                    'provider' => $traderOrder->provider,
-                    'version' => $traderOrder->version,
-                    'provider_response_body' => $response->json(),
-                    'provider_request_body' => $requestBody,
-                ]
-            );
-        }
-
-        return $response;
-    }
-     /**
-     * @param  TraderOrder  $traderOrder
-     * @return void
-     **/
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
     {
     }

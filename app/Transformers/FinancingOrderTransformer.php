@@ -7,8 +7,10 @@ use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
+use App\Exceptions\TraderNotSupportedException;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Fractal\Resource\Primitive;
@@ -45,6 +47,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'phone_number',
         'phone_number_formatted',
         'created_at',
+        'current_step',
         'history',
         'active_trader',
         'trader_orders',
@@ -164,6 +167,29 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive($financingOrder->created_at->format('Y-m-d h:i A'));
     }
 
+    public function includeCurrentStep(FinancingOrder $financingOrder)
+    {
+        $traderOrder = $financingOrder->activeTraderOrder->first();
+
+        if (is_null($traderOrder)) {
+            return $this->primitive(null);
+        }
+
+        $currentStepNode = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+            ->getStepByHistory($traderOrder->last_history_action);
+
+        $murabhaStepEnum = get_murabha_step_enum($traderOrder->provider);
+        $step = $murabhaStepEnum::fromValue($currentStepNode->step);
+
+        return $this->primitive([
+            'value' => $step->value,
+            'description' => $step->description,
+        ]);
+    }
+
+    /**
+     * @throws TraderNotSupportedException
+     */
     public function includeHistory(FinancingOrder $financingOrder): Primitive|Collection
     {
         // TODO: handle not expired + cancelled cases or show all trading requests
@@ -179,15 +205,19 @@ class FinancingOrderTransformer extends TransformerAbstract
             return $this->primitive(null);
         }
 
-        $murabhaSteps = collect(
-            get_murabha_steps($activeTraderOrder->provider, $activeTraderOrder->version)
-        );
+        $traderMurabhaSteps = collect(get_murabha_steps($activeTraderOrder->provider, $activeTraderOrder->version))
+            ->except([
+                DmccMurabhaStep::TraderOrderCreated,
+                BursamMurabhaStep::TraderOrderCreated,
+                BursamMurabhaStep::TransferOwnershipToLender,
+            ])
+            ->keys()
+            ->flatten()
+            ->toArray();
 
-        $filteredMurabhaSteps = $murabhaSteps->except(
-            [DmccMurabhaStep::TraderOrderCreated, BursamMurabhaStep::TraderOrderCreated]
-        )->values()->flatten();
+        $historiesActions = $activeTraderOrder->traderHistories()->pluck('action')->toArray();
 
-        return $this->collection($filteredMurabhaSteps, new TraderHistoryTransformer($activeTraderOrder));
+        return $this->collection([$historiesActions], new TraderHistoryTransformer($activeTraderOrder, $traderMurabhaSteps));
     }
 
     public function includeTraderOrders(FinancingOrder $financingOrder): Collection

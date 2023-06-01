@@ -56,7 +56,7 @@ class ProcessBursamOrderResultNYY implements ShouldQueue, ShouldBeUnique
 
     public function retryUntil(): Carbon
     {
-        return now()->addMinutes(15);
+        return now()->addMinutes(30);
     }
 
     public function uniqueId(): string
