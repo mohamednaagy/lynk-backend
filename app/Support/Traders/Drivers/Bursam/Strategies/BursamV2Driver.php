@@ -10,7 +10,9 @@ use App\Models\TraderOrder;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamBidCertificate;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultNYY;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultYNN;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOtcCertificate;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamSellingCommodityToOpenMarket;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificate;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamTransferOwnershipToCustomer;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamTransferOwnershipToLender;
 use Illuminate\Database\Eloquent\Model;
@@ -49,6 +51,8 @@ class BursamV2Driver extends BursamV1Driver
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessAskClientForWakala::class,
             FinancingOrderHistory::ClientWakalaAccepted => ProcessBursamSellingCommodityToOpenMarket::class,
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => ProcessBursamOrderResultNYY::class,
+            FinancingOrderHistory::CommoditySoldToMarket => ProcessBursamOtcCertificate::class,
+            FinancingOrderHistory::GetOwnershipToCustomerCertificate => ProcessBursamStbCertificate::class,
             default => null,
         };
 
