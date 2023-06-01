@@ -252,7 +252,7 @@ class BursamV1Driver implements TraderInterface
                 'transfer-ownership-to-lender',
                 [
                     'order_id' => $traderOrder->order->id,
-                    'products' => CommodityProductDto::fromArray($traderOrder->products[0]),
+                    'products' => $this->getCommodityProductsDTO($traderOrder->products),
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
@@ -298,7 +298,7 @@ class BursamV1Driver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'products' => CommodityProductDto::fromArray($traderOrder->products[0]),
+                    'products' => $this->getCommodityProductsDTO($traderOrder->products),
                     'amount' => $amount,
                     'customer_name' => $customerName,
                     'contract_signed_date' => $currentTimeInRiyadhTz->toDateString(),

@@ -708,10 +708,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
     </style>
 </head>
-@php
-    $arrayProducts[] = $products
-@endphp
-
 <body dir="rtl">
 <div class="flex justify-end">
     <img class="h-20" src="{{ asset('color-logo.svg') }}" alt="">
@@ -722,16 +718,16 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         <p class="text-black">الوقت: {{ $time ?? '' }}</p>
         <p class="text-xl text-center text-black">شهادة حيازة</p>
         <p class="text-center text-black">نؤكد نحن لينك أن السلع المشار لها
-            @if($products->getWarehouse())
+            @if ($products[0]->getWarehouse())
             في الموقع أدناه
-             @endif
+            @endif
             ؛ في حيازتنا بالنيابة
             عن {{$company_name}} من
             تاريخ وتوقيت هذه الشهادة، وقد تم شراؤها من {{$previous_owner}} بناء على طلب الشركة مقابل مبلغ
             وقدره {{$amount}} ريال سعودي
         </p>
         <p class="text-lg font-semibold text-center text-black">بيانات السلع/ـة</p>
-        @foreach ($arrayProducts ?? [] as $product)
+        @foreach ($products ?? [] as $product)
             <table class="min-w-full mt-4">
                 <tbody>
                 <tr>
@@ -746,7 +742,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     <td class="w-1/2 px-4 text-right border border-black">قيمة السلعة</td>
                     <td class="w-1/2 border border-black">{{number_format($product->getAmount(), 2)}} ريال سعودي</td>
                 </tr>
-                @if($product->getWarehouse())
+                @if( $product->getWarehouse())
                 <tr>
                     <td class="w-1/2 px-4 text-right border border-black">موقع السلعة</td>
                     <td class="w-1/2 border border-black">{{$product->getWarehouse()}}</td>
@@ -756,8 +752,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             </table>
         @endforeach
         <p class="text-lg text-center text-black">سيتم حفظ السلعة
-            @if($products->getWarehouse())
-            بالموقع المشار له أعلاه
+            @if ($products[0]->getWarehouse())
+                بالموقع المشار له أعلاه
             @endif
              ، بالنيابة عن {{$company_name}}
             إلى أن يتم إشعارنا بالتصرف.</p>

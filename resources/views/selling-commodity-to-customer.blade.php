@@ -738,9 +738,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         }
     </style>
 </head>
-@php
-    $arrayProducts[] = $products
-@endphp
 <body>
     <div class="flex justify-end">
         <img class="h-20" src="{{ asset('color-logo.svg') }}" alt="" />
@@ -760,7 +757,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     </p>
                 </div>
                 <h5 class="py-3 font-extrabold text-center">بيانات السلع/ـة</h5>
-                @foreach ($arrayProducts ?? [] as $product)
+                @foreach ($products ?? [] as $product)
                 <table class="min-w-full mt-4">
                     <tbody>
                     <tr>
