@@ -3,7 +3,6 @@
 namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
 use App\Enums\BursamErrorCode;
-use App\Enums\BursamMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -15,7 +14,7 @@ use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificate;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancelation;
 use App\Support\Traders\Traits\BursamTraderHelperTrait;
 use Carbon\Carbon;
 use Exception;
@@ -410,11 +409,7 @@ class BursamV1Driver implements TraderInterface
             && $response->json('body.0.otcErrNo') == '999'
             && $response->json('body.0.stbErrNo') == '999'
         ) {
-            $this->createStepHistories(request(), $traderOrder, BursamMurabhaStep::MurabahaSaleCompleted);
-
-            $traderOrder->update([
-                'status' => TraderOrderStatus::Completed,
-            ]);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CommoditySoldToBursam);
         } else {
             throw new TraderException(
                 'Failed to fetch order result NYY',
@@ -548,7 +543,7 @@ class BursamV1Driver implements TraderInterface
         $traderOrder = $financingOrder->activeTraderOrder()->first();
 
         $this->sellingCommodityToBursam($traderOrder);
-        ProcessBursamStbCertificate::dispatch($traderOrder->id);
+        ProcessBursamStbCertificateAfterCancelation::dispatch($traderOrder->id);
 
         $traderOrder->update([
             'status' => TraderOrderStatus::PendingCancellation,

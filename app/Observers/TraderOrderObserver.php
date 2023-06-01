@@ -2,10 +2,7 @@
 
 namespace App\Observers;
 
-use App\Enums\FinancingOrderHistory;
 use App\Models\TraderOrder;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOtcCertificate;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificate;
 
 class TraderOrderObserver
 {
@@ -28,12 +25,6 @@ class TraderOrderObserver
      */
     public function updated(TraderOrder $traderOrder)
     {
-        if ($traderOrder->provider == 'bursam') {
-            if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::MurabahaSaleCompleted)) {
-                ProcessBursamOtcCertificate::dispatch($traderOrder->id);
-                ProcessBursamStbCertificate::dispatch($traderOrder->id);
-            }
-        }
     }
 
     /**

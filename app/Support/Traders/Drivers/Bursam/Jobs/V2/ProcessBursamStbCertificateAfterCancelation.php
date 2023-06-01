@@ -3,7 +3,6 @@
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\BursamTraderHelperTrait;
@@ -17,7 +16,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessBursamStbCertificate implements ShouldQueue, ShouldBeUnique
+class ProcessBursamStbCertificateAfterCancelation implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, BursamTraderHelperTrait, StopsTraderOrderOnJobFailure;
 
@@ -46,16 +45,11 @@ class ProcessBursamStbCertificate implements ShouldQueue, ShouldBeUnique
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetOwnershipToCustomerCertificate)) {
+            if (! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::GetTtiHoldingCertificateDocument)) {
                 return;
             }
 
             Trader::driver('bursam', $traderOrder->version)->getStbCertificateDetails($traderOrder);
-
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::MurabahaSaleCompleted);
-            $traderOrder->update([
-                'status' => TraderOrderStatus::Completed,
-            ]);
         });
     }
 
