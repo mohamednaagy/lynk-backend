@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Jobs\General\ProcessDailySellingPendingCommodity;
 use App\Jobs\General\ProcessFinancingOrders;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccNotifications;
 use Illuminate\Console\Scheduling\Schedule;
@@ -20,6 +21,10 @@ class Kernel extends ConsoleKernel
         if ($this->isBursamServiceAvailable()) {
             $schedule->job(new ProcessFinancingOrders())->everyMinute()->withoutOverlapping();
             $schedule->job(new ProcessDmccNotifications())->everyMinute()->withoutOverlapping();
+
+            $schedule->job(new ProcessDailySellingPendingCommodity())
+                ->dailyAt('18:20')
+                ->timezone('Asia/Riyadh');
         }
     }
 
