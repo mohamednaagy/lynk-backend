@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
+use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -9,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 
 class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
 {
@@ -21,19 +23,6 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
      */
     public function __construct()
     {
-        $activeFinancingOrders = FinancingOrder::query()
-            ->whereHas('activeTraderOrder', function ($query) {
-                return $query->where('provider', 'bursam')
-                    ->where('version', 'v2');
-            })
-            ->get();
-
-        $activeFinancingOrders->each(function ($financingOrder) {
-            $financingOrder->activeTraderOrder->each(function ($activeTraderOrder) use ($financingOrder) {
-                Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)
-                    ->cancelOrder($financingOrder);
-            });
-        });
     }
 
     /**
@@ -43,6 +32,24 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
      */
     public function handle()
     {
-        //
+        DB::transaction(function () {
+            $activeFinancingOrders = FinancingOrder::query()
+                ->whereHas('activeTraderOrder', function ($query) {
+                    return $query->where('provider', 'bursam')
+                        ->where('version', 'v2');
+                })
+                ->get();
+
+            $activeFinancingOrders->each(function ($financingOrder) {
+                $financingOrder->activeTraderOrder->each(function ($activeTraderOrder) use ($financingOrder) {
+                    Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)
+                        ->cancelOrder($financingOrder);
+                });
+
+                $financingOrder->update([
+                    'status' => FinancingOrderStatus::PendingApproval,
+                ]);
+            });
+        });
     }
 }
