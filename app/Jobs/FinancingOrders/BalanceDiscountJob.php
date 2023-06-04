@@ -2,7 +2,6 @@
 
 namespace App\Jobs\FinancingOrders;
 
-use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Actions\Contracts\Wallets\DeductVatPercentage;
 use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
@@ -36,7 +35,6 @@ class BalanceDiscountJob implements ShouldQueue
         DeductOrderCreationFee $deductOrderCreationFee,
         DeductVatPercentage $deductVatPercentage,
         GenerateZatcaInvoice $generateFatoura,
-        CanCreateOrder $canCreateOrder,
     ) {
         // deduct the cost from the wallet
         $creationFeeTransaction = $deductOrderCreationFee->handle($this->financingOrder);

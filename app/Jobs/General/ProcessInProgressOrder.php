@@ -2,6 +2,7 @@
 
 namespace App\Jobs\General;
 
+use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
@@ -49,10 +50,11 @@ class ProcessInProgressOrder implements ShouldQueue
             ])->count() > 0) {
                 return;
             }
-
             if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::InProgress)) {
                 return;
             }
+
+            app(CanCreateOrder::class)->handle($financingOrder->company);
 
             $trader->createTraderOrder($financingOrder);
 
