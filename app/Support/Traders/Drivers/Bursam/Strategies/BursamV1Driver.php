@@ -319,9 +319,6 @@ class BursamV1Driver implements TraderInterface
         }
     }
 
-    /**
-     * @throws TraderException
-     */
     public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
     {
         $response = $this->sellingCommodityToBursam($traderOrder);

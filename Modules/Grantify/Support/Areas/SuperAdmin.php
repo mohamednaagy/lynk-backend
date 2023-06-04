@@ -42,6 +42,7 @@ class SuperAdmin
             Action::Edit,
             Action::Show,
             Action::Delete,
+            Action::Cancel,
         ],
         Subject::LenderEdaatInvoices => [
             Action::Index,
