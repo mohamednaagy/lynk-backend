@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\TraderOrderStatus;
 use App\Jobs\FinancingOrders\BalanceDiscountJob;
 use App\Models\TraderOrder;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOtcCertificate;
@@ -18,7 +17,7 @@ class TraderOrderObserver
      */
     public function created(TraderOrder $traderOrder)
     {
-        //
+        dispatch(new BalanceDiscountJob($traderOrder->order));
     }
 
     /**
@@ -34,9 +33,7 @@ class TraderOrderObserver
                 ProcessBursamStbCertificate::dispatch($traderOrder->id);
             }
         }
-        if ($traderOrder->status->is(TraderOrderStatus::InProgress)) {
-            dispatch(new BalanceDiscountJob($traderOrder->order));
-        }
+
     }
 
     /**
