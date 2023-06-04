@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Enums\FinancingOrderHistory;
+use App\Jobs\FinancingOrders\BalanceDiscountJob;
 use App\Models\TraderOrder;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOtcCertificate;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificate;
@@ -12,18 +13,16 @@ class TraderOrderObserver
     /**
      * Handle the TraderOrder "created" event.
      *
-     * @param  \App\Models\TraderOrder  $traderOrder
      * @return void
      */
     public function created(TraderOrder $traderOrder)
     {
-        //
+        dispatch(new BalanceDiscountJob($traderOrder->order));
     }
 
     /**
      * Handle the TraderOrder "updated" event.
      *
-     * @param  \App\Models\TraderOrder  $traderOrder
      * @return void
      */
     public function updated(TraderOrder $traderOrder)
@@ -39,7 +38,6 @@ class TraderOrderObserver
     /**
      * Handle the TraderOrder "deleted" event.
      *
-     * @param  \App\Models\TraderOrder  $traderOrder
      * @return void
      */
     public function deleted(TraderOrder $traderOrder)
@@ -50,7 +48,6 @@ class TraderOrderObserver
     /**
      * Handle the TraderOrder "restored" event.
      *
-     * @param  \App\Models\TraderOrder  $traderOrder
      * @return void
      */
     public function restored(TraderOrder $traderOrder)
@@ -61,7 +58,6 @@ class TraderOrderObserver
     /**
      * Handle the TraderOrder "force deleted" event.
      *
-     * @param  \App\Models\TraderOrder  $traderOrder
      * @return void
      */
     public function forceDeleted(TraderOrder $traderOrder)

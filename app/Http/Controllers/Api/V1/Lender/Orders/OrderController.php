@@ -112,10 +112,14 @@ class OrderController extends Controller
     public function store(
         StoreOrderRequest $request,
         CanCreateOrder $canCreateOrder,
-        CreateFinancingOrder $createFinancingOrder,
+        CreateFinancingOrder $createFinancingOrder
     ): JsonResponse {
         return DB::multipleTransaction(
-            function () use ($request, $createFinancingOrder, $canCreateOrder) {
+            function () use (
+                $request,
+                $createFinancingOrder,
+                $canCreateOrder
+            ) {
                 $company = tenant();
                 // throw exception is balance not enough
                 $canCreateOrder->handle($company);
