@@ -3,6 +3,7 @@
 namespace App\Jobs\General;
 
 use App\Actions\Contracts\Orders\CanCreateOrder;
+use App\Actions\Contracts\Orders\OrderBalanceDiscount;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
@@ -55,6 +56,7 @@ class ProcessInProgressOrder implements ShouldQueue
             }
 
             app(CanCreateOrder::class)->handle($financingOrder->company);
+            app(OrderBalanceDiscount::class)->handle($financingOrder);
 
             $trader->createTraderOrder($financingOrder);
 
