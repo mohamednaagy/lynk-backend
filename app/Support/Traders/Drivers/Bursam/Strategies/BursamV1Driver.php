@@ -331,10 +331,6 @@ class BursamV1Driver implements TraderInterface
 
     public function sellingCommodityToBursam(TraderOrder $traderOrder)
     {
-        if (! $traderOrder->reference) {
-            return false;
-        }
-
         if (! $traderOrder->uuid_two) {
             $traderOrder->update([
                 'uuid_two' => Str::uuid(),
