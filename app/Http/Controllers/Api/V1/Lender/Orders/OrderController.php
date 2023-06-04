@@ -6,9 +6,6 @@ use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
-use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
-use App\Actions\Contracts\Wallets\DeductVatPercentage;
-use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\ErrorCode;
@@ -121,19 +118,13 @@ class OrderController extends Controller
     public function store(
         StoreOrderRequest $request,
         CanCreateOrder $canCreateOrder,
-        CreateFinancingOrder $createFinancingOrder,
-        DeductOrderCreationFee $deductOrderCreationFee,
-        DeductVatPercentage $deductVatPercentage,
-        GenerateZatcaInvoice $generateFatoura
+        CreateFinancingOrder $createFinancingOrder
     ): JsonResponse {
         return DB::multipleTransaction(
             function () use (
                 $request,
                 $createFinancingOrder,
-                $deductOrderCreationFee,
-                $canCreateOrder,
-                $deductVatPercentage,
-                $generateFatoura
+                $canCreateOrder
             ) {
                 $company = tenant();
                 // throw exception is balance not enough
@@ -156,15 +147,6 @@ class OrderController extends Controller
                             'approved_at' => $status === FinancingOrderStatus::Approved ? now() : null,
                         ]
                     )
-                );
-
-                // deduct the cost from the wallet
-                $creationFeeTransaction = $deductOrderCreationFee->handle($financingOrder);
-                $deductVatPercentage->handle($financingOrder, $creationFeeTransaction, $company);
-
-                $generateFatoura->handel(
-                    $financingOrder,
-                    creationFeeTransaction: $creationFeeTransaction
                 );
 
                 dispatch(new NotifyAdminsAboutOrderCreated($financingOrder, $user));
