@@ -233,9 +233,6 @@ class DmccV1Driver implements TraderInterface
     }
 
     /**
-     * @param $traderOrder
-     * @return void
-     *
      * @throws TraderException
      */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
@@ -260,7 +257,7 @@ class DmccV1Driver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'products' => $traderOrder->products,
+                    'products' => $this->getCommodityProductsDTO($traderOrder->products),
                     'amount' => $amount,
                     'product_name' => $productName,
                     'customer_name' => $customerName,
@@ -313,9 +310,6 @@ class DmccV1Driver implements TraderInterface
     }
 
     /**
-     * @param $traderOrder
-     * @return void
-     *
      * @throws TraderException
      */
     public function createTransferOwnershipToLenderDocument($traderOrder): void
@@ -333,7 +327,7 @@ class DmccV1Driver implements TraderInterface
                 'transfer-ownership-to-lender',
                 [
                     'order_id' => $traderOrder->order->id,
-                    'products' => $traderOrder->products,
+                    'products' => $this->getCommodityProductsDTO($traderOrder->products),
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,

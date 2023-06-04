@@ -16,7 +16,7 @@ use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Traits\BursamTraderHelperTrait;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -212,19 +212,20 @@ class BursamV1Driver implements TraderInterface
                 ))->toArray(),
             ],
         ]);
+
         $bidOwnerShipTemplate = view('bursam-templates.bid-certificate-template', [
-            'ecertno' => $response->json('ECERTNO'),
+            'e_cert_no' => $response->json('ECERTNO'),
             'buyer' => $response->json('BUYER'),
             'owner' => $response->json('OWNER'),
-            'bidno' => $response->json('BIDNO'),
-            'totalvalue' => $response->json('TOTALVALUE'),
+            'bid_no' => $response->json('BIDNO'),
+            'total_value' => $response->json('TOTALVALUE'),
             'currency' => $response->json('CURRENCY'),
             'price' => $response->json('PRICE'),
             'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
-            'purchase_timedate' => $response->json('PURCHASETIMEDATE'),
-            'valuedate' => $response->json('VALUEDATE'),
-            'pname' => $response->json('PNAME'),
-            'pvolume' => $response->json('PVOLUME'),
+            'purchase_time_date' => $response->json('PURCHASETIMEDATE'),
+            'value_date' => $response->json('VALUEDATE'),
+            'p_name' => $response->json('PNAME'),
+            'p_volume' => $response->json('PVOLUME'),
             'line' => $response->json('LINE'),
         ])->render();
 
@@ -242,24 +243,25 @@ class BursamV1Driver implements TraderInterface
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
     }
 
-    public function createTransferOwnershipToLenderDocument($traderOrder): void
+    public function createTransferOwnershipToLenderDocument($traderOrder)
     {
         try {
             $amount = $traderOrder->order->amount->formatByDecimal();
-
+            $currentTimeInUtcTz = CarbonImmutable::now();
+            $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
                     'order_id' => $traderOrder->order->id,
-                    'products' => $traderOrder->products,
+                    'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
                     'amount' => $amount,
                     'previous_owner' => CommodityProductDto::fromArray($traderOrder->products[0])->getPreviousOwner(),
                     'product_name' => CommodityProductDto::fromArray($traderOrder->products[0])->getProduct(),
-                    'date' => Carbon::now()->toDateString(),
-                    'time' => Carbon::now()->toTimeString(),
+                    'date' => $currentTimeInRiyadhTz->toDateString(),
+                    'time' => $currentTimeInRiyadhTz->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::TransferOwnershipToLender
@@ -285,7 +287,8 @@ class BursamV1Driver implements TraderInterface
                 ->where('action', FinancingOrderHistory::ContractSigned)
                 ->first()
                 ?->created_at;
-
+            $currentTimeInUtcTz = CarbonImmutable::parse($dateTime);
+            $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
             $amount = $traderOrder->order->selling_price->formatByDecimal();
 
             $customerName = $traderOrder->order->customer_name;
@@ -296,11 +299,11 @@ class BursamV1Driver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'products' => $traderOrder->products,
+                    'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
                     'amount' => $amount,
                     'customer_name' => $customerName,
-                    'contract_signed_date' => $dateTime->toDateString(),
-                    'contract_signed_time' => $dateTime->toTimeString(),
+                    'contract_signed_date' => $currentTimeInRiyadhTz->toDateString(),
+                    'contract_signed_time' => $currentTimeInRiyadhTz->toTimeString(),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::SellingCommodityToCustomer,
@@ -445,7 +448,7 @@ class BursamV1Driver implements TraderInterface
         }
 
         $otcOwnerShipTemplate = view('bursam-templates.otc-certificate-template', [
-            'ecertno' => $response->json('ECERTNO'),
+            'e_cert_no' => $response->json('ECERTNO'),
             'seller' => $response->json('SELLER'),
             'buyer' => $response->json('BUYER'),
             'murabaha_value' => $response->json('MURABAHAVALUE'),
@@ -500,7 +503,7 @@ class BursamV1Driver implements TraderInterface
         }
 
         $stbOwnerShipTemplate = view('bursam-templates.stb-certificate-template', [
-            'ecertno' => $response->json('ECERTNO'),
+            'e_cert_no' => $response->json('ECERTNO'),
             'seller' => $response->json('SELLER'),
             'buyer' => $response->json('BUYER'),
             'total_value' => $response->json('TOTALVALUE'),

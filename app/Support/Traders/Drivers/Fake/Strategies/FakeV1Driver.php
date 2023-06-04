@@ -29,7 +29,7 @@ class FakeV1Driver implements TraderInterface
     }
 
     /**
-     * @return bool
+     * @throws TraderException
      */
     public function acceptAgreement(): bool
     {
@@ -155,10 +155,6 @@ class FakeV1Driver implements TraderInterface
         return $response->json('data.ttiId');
     }
 
-    /**
-     * @param  FinancingOrder  $financingOrder
-     * @return bool
-     */
     public function cancelOrder(FinancingOrder $financingOrder): bool
     {
         return true;
@@ -192,9 +188,6 @@ class FakeV1Driver implements TraderInterface
     }
 
     /**
-     * @param $traderOrder
-     * @return void
-     *
      * @throws TraderException
      */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
@@ -219,7 +212,7 @@ class FakeV1Driver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'products' => $traderOrder->products,
+                    'products' => $this->getCommodityProductsDTO($traderOrder->products),
                     'amount' => $amount,
                     'product_name' => $productName,
                     'customer_name' => $customerName,
@@ -288,7 +281,7 @@ class FakeV1Driver implements TraderInterface
                 'transfer-ownership-to-lender',
                 [
                     'order_id' => $traderOrder->order->id,
-                    'products' => $traderOrder->products,
+                    'products' => $this->getCommodityProductsDTO($traderOrder->products),
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()?->name,
                     'order_number' => $traderOrder->financing_order_id,

@@ -9,6 +9,7 @@ use App\Enums\Role;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Database\Eloquent\Model;
@@ -166,7 +167,7 @@ class TraderHelperTest extends TestCase
                 'reference_number' => self::$traderOrder->id,
                 'company_name' => self::$traderOrder->order->company->name,
                 'order_number' => self::$traderOrder->financing_order_id,
-                'products' => self::$traderOrder->products,
+                'products' => CommodityProductDto::fromArray(self::$traderOrder->products[0]),
                 'amount' => $amount,
                 'product_name' => $productName,
                 'customer_name' => $customerName,

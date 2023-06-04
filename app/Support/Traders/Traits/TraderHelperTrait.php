@@ -5,9 +5,11 @@ namespace App\Support\Traders\Traits;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 trait TraderHelperTrait
 {
@@ -80,5 +82,24 @@ trait TraderHelperTrait
                 $document
             )->usingFileName($fileName)->toMediaCollection($collectionName);
         }
+    }
+
+    /**
+     * @param $products
+     * @return Collection
+     */
+    public function transformProductsToCommodityProductsDTO($products): Collection
+    {
+        return collect($products)->map(function ($product) {
+            return CommodityProductDto::fromArray([
+                'product' => $product['product'],
+                'quantity' => $product['quantity'],
+                'uom' => $product['uom'],
+                'amount' => $product['amount'],
+                'warehouse' => $product['warehouse'],
+                'previous_owner' => $product['previous_owner'],
+                'date_time_of_purchasing_commodity' => $product['date_time_of_purchasing_commodity'],
+            ]);
+        });
     }
 }
