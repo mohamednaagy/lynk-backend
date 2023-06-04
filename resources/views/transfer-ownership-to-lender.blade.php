@@ -718,7 +718,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         <p class="text-black">الوقت: {{ $time ?? '' }}</p>
         <p class="text-xl text-center text-black">شهادة حيازة</p>
         <p class="text-center text-black">نؤكد نحن لينك أن السلع المشار لها
-            @if ($products[0]->getWarehouse())
+            @if ($products->first()?->getWarehouse())
             في الموقع أدناه
             @endif
             ؛ في حيازتنا بالنيابة
@@ -752,7 +752,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             </table>
         @endforeach
         <p class="text-lg text-center text-black">سيتم حفظ السلعة
-            @if ($products[0]->getWarehouse())
+            @if ($products->first()?->getWarehouse())
                 بالموقع المشار له أعلاه
             @endif
              ، بالنيابة عن {{$company_name}}

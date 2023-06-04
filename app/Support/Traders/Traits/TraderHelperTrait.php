@@ -9,6 +9,7 @@ use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 trait TraderHelperTrait
 {
@@ -83,11 +84,14 @@ trait TraderHelperTrait
         }
     }
 
-    public function getCommodityProductsDTO($products): array
+    /**
+     * @param $products
+     * @return Collection
+     */
+    public function transformProductsToCommodityProductsDTO($products): Collection
     {
-        $newProduct = [];
-        foreach ($products as $product) {
-            $productDto = CommodityProductDto::fromArray([
+        return collect($products)->map(function ($product) {
+            return CommodityProductDto::fromArray([
                 'product' => $product['product'],
                 'quantity' => $product['quantity'],
                 'uom' => $product['uom'],
@@ -96,9 +100,6 @@ trait TraderHelperTrait
                 'previous_owner' => $product['previous_owner'],
                 'date_time_of_purchasing_commodity' => $product['date_time_of_purchasing_commodity'],
             ]);
-            $newProduct[] = $productDto;
-        }
-
-        return $newProduct;
+        });
     }
 }

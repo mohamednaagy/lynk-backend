@@ -212,19 +212,20 @@ class BursamV1Driver implements TraderInterface
                 ))->toArray(),
             ],
         ]);
+
         $bidOwnerShipTemplate = view('bursam-templates.bid-certificate-template', [
-            'ecertno' => $response->json('ECERTNO'),
+            'e_cert_no' => $response->json('ECERTNO'),
             'buyer' => $response->json('BUYER'),
             'owner' => $response->json('OWNER'),
-            'bidno' => $response->json('BIDNO'),
-            'totalvalue' => $response->json('TOTALVALUE'),
+            'bid_no' => $response->json('BIDNO'),
+            'total_value' => $response->json('TOTALVALUE'),
             'currency' => $response->json('CURRENCY'),
             'price' => $response->json('PRICE'),
             'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
-            'purchase_timedate' => $response->json('PURCHASETIMEDATE'),
-            'valuedate' => $response->json('VALUEDATE'),
-            'pname' => $response->json('PNAME'),
-            'pvolume' => $response->json('PVOLUME'),
+            'purchase_time_date' => $response->json('PURCHASETIMEDATE'),
+            'value_date' => $response->json('VALUEDATE'),
+            'p_name' => $response->json('PNAME'),
+            'p_volume' => $response->json('PVOLUME'),
             'line' => $response->json('LINE'),
         ])->render();
 
@@ -242,7 +243,7 @@ class BursamV1Driver implements TraderInterface
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
     }
 
-    public function createTransferOwnershipToLenderDocument($traderOrder): void
+    public function createTransferOwnershipToLenderDocument($traderOrder)
     {
         try {
             $amount = $traderOrder->order->amount->formatByDecimal();
@@ -252,7 +253,7 @@ class BursamV1Driver implements TraderInterface
                 'transfer-ownership-to-lender',
                 [
                     'order_id' => $traderOrder->order->id,
-                    'products' => $this->getCommodityProductsDTO($traderOrder->products),
+                    'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
@@ -298,7 +299,7 @@ class BursamV1Driver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'products' => $this->getCommodityProductsDTO($traderOrder->products),
+                    'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
                     'amount' => $amount,
                     'customer_name' => $customerName,
                     'contract_signed_date' => $currentTimeInRiyadhTz->toDateString(),
@@ -444,7 +445,7 @@ class BursamV1Driver implements TraderInterface
         }
 
         $otcOwnerShipTemplate = view('bursam-templates.otc-certificate-template', [
-            'ecertno' => $response->json('ECERTNO'),
+            'e_cert_no' => $response->json('ECERTNO'),
             'seller' => $response->json('SELLER'),
             'buyer' => $response->json('BUYER'),
             'murabaha_value' => $response->json('MURABAHAVALUE'),
@@ -499,7 +500,7 @@ class BursamV1Driver implements TraderInterface
         }
 
         $stpOwnerShipTemplate = view('bursam-templates.stb-certificate-template', [
-            'ecertno' => $response->json('ECERTNO'),
+            'e_cert_no' => $response->json('ECERTNO'),
             'seller' => $response->json('SELLER'),
             'buyer' => $response->json('BUYER'),
             'total_value' => $response->json('TOTALVALUE'),
