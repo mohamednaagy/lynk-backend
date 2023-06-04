@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders;
+namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders;
 
 use App\Actions\Contracts\Orders\CancelOrder as CancelOrderInterface;
 use App\Enums\Action;
@@ -57,6 +57,11 @@ class CancelOrder extends Controller
                 $canceller,
                 $request->validated()
             );
+
+            $order->update([
+                'status' => FinancingOrderStatus::PendingCancellation,
+                'status_reason' => $data['status_reason'] ?? null,
+            ]);
 
             dispatch(new NotifyAdminAndLenderAboutOrderCancelled($order, $canceller));
 
