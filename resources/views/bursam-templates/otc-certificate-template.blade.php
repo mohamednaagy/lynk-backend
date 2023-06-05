@@ -69,7 +69,7 @@
 <body>
 <div class="container">
     <div class="header">
-        <img src="logo.png" alt="Logo" width="100">
+        <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('logo.png'))) }}" alt="Logo" width="150">
         <div class="title">Ownership Certificate</div>
         <div class="subtitle">Certificate No: {{$e_cert_no}}</div>
         <p>This is to certify that the following transaction has been executed through the BURSA Suq Al-Sila' in
