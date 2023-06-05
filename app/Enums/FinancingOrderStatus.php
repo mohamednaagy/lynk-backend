@@ -25,6 +25,8 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
 
     const TradingFailure = 8;
 
+    const PendingTraderOrder = 9;
+
     private static array $state = [
         self::Approved => [
             self::PendingApproval,
