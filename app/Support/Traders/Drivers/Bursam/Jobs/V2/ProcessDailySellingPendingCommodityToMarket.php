@@ -32,24 +32,25 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
      */
     public function handle()
     {
-        DB::transaction(function () {
-            $activeFinancingOrders = FinancingOrder::query()
-                ->whereHas('activeTraderOrder', function ($query) {
-                    return $query->where('provider', 'bursam')
-                        ->where('version', 'v2');
-                })
-                ->get();
+        FinancingOrder::query()
+            ->whereHas('activeTraderOrder', function ($query) {
+                return $query->where('provider', 'bursam')
+                    ->where('version', 'v2');
+            })
+            ->select('id')
+            ->lazyById()
+            ->each(function (FinancingOrder $financingOrder) {
+                DB::transaction(function () use ($financingOrder) {
+                    $lockedFinancingOrder = FinancingOrder::query()->lockForUpdate($financingOrder->id);
+                    $lockedFinancingOrder->activeTraderOrder->each(function ($activeTraderOrder) use ($financingOrder) {
+                        Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)
+                            ->cancelOrder($financingOrder);
+                    });
 
-            $activeFinancingOrders->each(function ($financingOrder) {
-                $financingOrder->activeTraderOrder->each(function ($activeTraderOrder) use ($financingOrder) {
-                    Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)
-                        ->cancelOrder($financingOrder);
+                    $lockedFinancingOrder->update([
+                        'status' => FinancingOrderStatus::PendingTraderOrder,
+                    ]);
                 });
-
-                $financingOrder->update([
-                    'status' => FinancingOrderStatus::PendingApproval,
-                ]);
             });
-        });
     }
 }
