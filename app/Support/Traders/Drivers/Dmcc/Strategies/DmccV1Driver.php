@@ -257,7 +257,7 @@ class DmccV1Driver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'products' => $this->getCommodityProductsDTO($traderOrder->products),
+                    'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
                     'amount' => $amount,
                     'product_name' => $productName,
                     'customer_name' => $customerName,
@@ -327,7 +327,7 @@ class DmccV1Driver implements TraderInterface
                 'transfer-ownership-to-lender',
                 [
                     'order_id' => $traderOrder->order->id,
-                    'products' => $this->getCommodityProductsDTO($traderOrder->products),
+                    'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
