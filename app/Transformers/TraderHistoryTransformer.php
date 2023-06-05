@@ -101,7 +101,7 @@ class TraderHistoryTransformer extends TransformerAbstract
     public function includeContractSigned($historiesActions): Primitive
     {
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
-            $historiesActions, $this->murabhaSteps::ClientWakala
+            $historiesActions, $this->murabhaSteps::ContractSigned
         );
 
         $wakalaDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::ClientWakala);
