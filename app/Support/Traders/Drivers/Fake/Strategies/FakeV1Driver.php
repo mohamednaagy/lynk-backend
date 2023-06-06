@@ -160,6 +160,11 @@ class FakeV1Driver implements TraderInterface
         return true;
     }
 
+    public function cancelTraderOrder(TraderOrder $traderOrder): bool
+    {
+        return true;
+    }
+
     /**
      * @throws TraderException
      */
@@ -376,7 +381,7 @@ class FakeV1Driver implements TraderInterface
         // TODO: Implement ownershipToCustomer() method.
     }
 
-    public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
+    public function sellCommodityToOpenMarket(TraderOrder $traderOrder)
     {
         // TODO: Implement sellingCommodity() method.
     }

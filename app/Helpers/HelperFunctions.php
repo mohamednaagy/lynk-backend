@@ -2,6 +2,7 @@
 
 use App\Enums\BursamMurabhaStep;
 use App\Enums\DmccMurabhaStep;
+use Illuminate\Support\Collection;
 use Modules\Grantify\Facades\Grantify;
 
 if (! function_exists('validate_said')) {
@@ -125,3 +126,9 @@ if (! function_exists('trader_step_histories')) {
         };
     }
 }
+
+// if (! function_exists('format_products')) {
+//     function format_products(Collection $products, $separator = '،'): array
+//     {
+//     }
+// }

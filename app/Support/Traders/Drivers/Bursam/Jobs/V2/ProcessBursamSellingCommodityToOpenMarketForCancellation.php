@@ -2,11 +2,11 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
-use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -16,7 +16,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessBursamTransferOwnershipToCustomer implements ShouldQueue, ShouldBeUnique
+class ProcessBursamSellingCommodityToOpenMarketForCancellation implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
@@ -38,17 +38,23 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldQueue, ShouldBeU
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::InProgress)
+                ->where('status', TraderOrderStatus::PendingCancellation)
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
-                return;
-            }
-
             Trader::driver('bursam', $traderOrder->version)
-                ->createSellingCommodityToCustomerDocument($traderOrder);
+                ->sellCommodityToOpenMarket($traderOrder);
         });
+    }
+
+    public function backoff()
+    {
+        return [120, 240, 300];
+    }
+
+    public function retryUntil(): Carbon
+    {
+        return now()->addMinutes(30);
     }
 
     public function middleware(): array

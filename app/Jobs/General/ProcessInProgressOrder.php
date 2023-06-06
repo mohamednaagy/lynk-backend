@@ -3,7 +3,7 @@
 namespace App\Jobs\General;
 
 use App\Actions\Contracts\Orders\CanCreateOrder;
-use App\Actions\Contracts\Orders\OrderBalanceDiscount;
+use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
@@ -44,7 +44,7 @@ class ProcessInProgressOrder implements ShouldQueue
     {
         $driver = config('trader.default');
         $trader = Trader::driver($driver, get_latest_version_of_trader($driver));
-        DB::transaction(function () use ($trader) {
+        DB::multipleTransaction(function () use ($trader) {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             if ($financingOrder->traderOrders()->whereIn('status', [
                 TraderOrderStatus::InProgress,
@@ -56,7 +56,7 @@ class ProcessInProgressOrder implements ShouldQueue
             }
 
             app(CanCreateOrder::class)->handle($financingOrder->company);
-            app(OrderBalanceDiscount::class)->handle($financingOrder);
+            app(DeductBalanceForNewOrder::class)->handle($financingOrder);
 
             $trader->createTraderOrder($financingOrder);
 

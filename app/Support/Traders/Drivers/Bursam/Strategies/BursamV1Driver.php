@@ -14,11 +14,13 @@ use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamSellingCommodityToOpenMarketForCancellation;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Traits\BursamTraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -45,9 +47,7 @@ class BursamV1Driver implements TraderInterface
         }
 
         return $financingOrder->traderOrders()->create([
-            'data' => [
-                'uuid_one' => Str::uuid(),
-            ],
+            'uuid_one' => Str::uuid(),
             'provider' => $this->provider,
             'reference' => '',
             'status' => TraderOrderStatus::Initiated,
@@ -101,10 +101,12 @@ class BursamV1Driver implements TraderInterface
         }
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+
         $traderOrder->update([
             'status' => TraderOrderStatus::InProgress,
             'product_code' => $productCode,
         ]);
+
         $financingOrder->update([
             'status' => FinancingOrderStatus::InProgress,
         ]);
@@ -199,6 +201,8 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
+        $currentTimeInUtcTz = CarbonImmutable::now();
+
         $traderOrder->update([
             'products' => [
                 (new CommodityProductDto(
@@ -229,13 +233,12 @@ class BursamV1Driver implements TraderInterface
             'line' => $response->json('LINE'),
         ])->render();
 
-        $financingOrder = $traderOrder->order;
         PdfGenerator::outputFromHtml(
             $bidOwnerShipTemplate,
-            function ($fileResource) use ($financingOrder, $traderOrder) {
+            function ($fileResource) use ($traderOrder, $currentTimeInUtcTz) {
                 return $traderOrder
                     ->addMediaFromStream($fileResource)
-                    ->usingFileName($financingOrder->getNationalId().'.pdf')
+                    ->usingFileName("holding-cert-{$traderOrder->reference}-{$currentTimeInUtcTz->toDateTimeString()}.pdf")
                     ->toMediaCollection(TraderOrderMediaCollection::TtiHoldingCertificate);
             }
         );
@@ -249,6 +252,8 @@ class BursamV1Driver implements TraderInterface
             $amount = $traderOrder->order->amount->formatByDecimal();
             $currentTimeInUtcTz = CarbonImmutable::now();
             $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
+            $products = collect($traderOrder->products)->map(fn ($product) => CommodityProductDto::fromArray($product));
+
             $this->storeOrderDocumentAsPdf(
                 'transfer-ownership-to-lender',
                 [
@@ -258,8 +263,8 @@ class BursamV1Driver implements TraderInterface
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
                     'amount' => $amount,
-                    'previous_owner' => CommodityProductDto::fromArray($traderOrder->products[0])->getPreviousOwner(),
-                    'product_name' => CommodityProductDto::fromArray($traderOrder->products[0])->getProduct(),
+                    'previous_owner' => $products->implode(fn ($item) => $item->getPreviousOwner(), '،'),
+                    'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
                     'date' => $currentTimeInRiyadhTz->toDateString(),
                     'time' => $currentTimeInRiyadhTz->toTimeString(),
                 ],
@@ -267,7 +272,13 @@ class BursamV1Driver implements TraderInterface
                 TraderOrderMediaCollection::TransferOwnershipToLender
             );
 
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+            $this->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
+                [
+                    'created_at' => $currentTimeInUtcTz,
+                ]
+            );
         } catch (\Throwable $exception) {
             throw new TraderException(
                 'Failed to create lender ownership certificate',
@@ -309,7 +320,13 @@ class BursamV1Driver implements TraderInterface
                 TraderOrderMediaCollection::SellingCommodityToCustomer,
             );
 
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
+            $this->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+                [
+                    'created_at' => $currentTimeInUtcTz,
+                ]
+            );
         } catch (Exception $exception) {
             throw new TraderException(
                 'Failed to create customer ownership document',
@@ -322,14 +339,15 @@ class BursamV1Driver implements TraderInterface
         }
     }
 
-    public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
+    public function sellCommodityToOpenMarket(TraderOrder $traderOrder)
     {
-        $response = $this->sellingCommodityToBursam($traderOrder);
+        $this->sellCommodityToBursam($traderOrder);
 
+        // TODO:: the history needs discussion
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
     }
 
-    public function sellingCommodityToBursam(TraderOrder $traderOrder)
+    public function sellCommodityToBursam(TraderOrder $traderOrder)
     {
         if (! $traderOrder->uuid_two) {
             $traderOrder->update([
@@ -447,6 +465,8 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
+        $currentTimeInUtcTz = CarbonImmutable::now();
+
         $otcOwnerShipTemplate = view('bursam-templates.otc-certificate-template', [
             'e_cert_no' => $response->json('ECERTNO'),
             'seller' => $response->json('SELLER'),
@@ -463,18 +483,23 @@ class BursamV1Driver implements TraderInterface
             'line' => $response->json('LINE'),
         ])->render();
 
-        $financingOrder = $traderOrder->order;
         PdfGenerator::outputFromHtml(
             $otcOwnerShipTemplate,
-            function ($fileResource) use ($financingOrder, $traderOrder) {
+            function ($fileResource) use ($traderOrder, $currentTimeInUtcTz) {
                 return $traderOrder
                     ->addMediaFromStream($fileResource)
-                    ->usingFileName($financingOrder->getNationalId().'.pdf')
+                    ->usingFileName("otc-cert-{$traderOrder->reference}-{$currentTimeInUtcTz->toDateTimeString()}.pdf")
                     ->toMediaCollection(TraderOrderMediaCollection::BursamSellingCommodityToCustomer);
             }
         );
 
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetOwnershipToCustomerCertificate);
+        $this->createTraderOrderHistory(
+            $traderOrder,
+            FinancingOrderHistory::GetOwnershipToCustomerCertificate,
+            [
+                'created_at' => $currentTimeInUtcTz,
+            ]
+        );
     }
 
     public function getStbCertificateDetails(TraderOrder $traderOrder)
@@ -502,6 +527,8 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
+        $currentTimeInUtcTz = CarbonImmutable::now();
+
         $stbOwnerShipTemplate = view('bursam-templates.stb-certificate-template', [
             'e_cert_no' => $response->json('ECERTNO'),
             'seller' => $response->json('SELLER'),
@@ -517,18 +544,23 @@ class BursamV1Driver implements TraderInterface
             'line' => $response->json('LINE'),
         ])->render();
 
-        $financingOrder = $traderOrder->order;
         PdfGenerator::outputFromHtml(
             $stbOwnerShipTemplate,
-            function ($fileResource) use ($financingOrder, $traderOrder) {
+            function ($fileResource) use ($traderOrder, $currentTimeInUtcTz) {
                 return $traderOrder
                     ->addMediaFromStream($fileResource)
-                    ->usingFileName($financingOrder->getNationalId().'.pdf')
+                    ->usingFileName("stb-cert-{$traderOrder->reference}-{$currentTimeInUtcTz->toDateTimeString()}.pdf")
                     ->toMediaCollection(TraderOrderMediaCollection::BursamTtiHoldingCertificate);
             }
         );
 
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetSellingToMarketCertificate);
+        $this->createTraderOrderHistory(
+            $traderOrder,
+            FinancingOrderHistory::GetSellingToMarketCertificate,
+            [
+                'created_at' => $currentTimeInUtcTz,
+            ]
+        );
     }
 
     /**
@@ -538,12 +570,47 @@ class BursamV1Driver implements TraderInterface
     {
         $traderOrder = $financingOrder->activeTraderOrder()->first();
 
-        $this->sellingCommodityToBursam($traderOrder);
+        $this->sellCommodityToBursam($traderOrder);
         ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id);
 
         $traderOrder->update([
             'status' => TraderOrderStatus::PendingCancellation,
         ]);
+
+        return true;
+    }
+
+    /**
+     * @throws TraderException
+     */
+    public function cancelTraderOrder(TraderOrder $traderOrder): mixed
+    {
+        if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket)) {
+            $traderOrder->update([
+                'status' => TraderOrderStatus::Cancelled,
+            ]);
+
+            return true;
+        }
+
+        if ($traderOrder->doesLastActionMatchWith([
+            FinancingOrderHistory::GetTtiId, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+        ])) {
+            throw new Exception('Trader order cannot be cancelled now');
+        }
+
+        $traderOrder->update([
+            'status' => TraderOrderStatus::PendingCancellation,
+        ]);
+
+        if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::GetTtiHoldingCertificateDocument)) {
+            $this->sellCommodityToBursam($traderOrder);
+        }
+
+        Bus::chain([
+            new ProcessBursamSellingCommodityToOpenMarketForCancellation($traderOrder->id),
+            new ProcessBursamStbCertificateAfterCancellation($traderOrder->id),
+        ])->dispatch();
 
         return true;
     }

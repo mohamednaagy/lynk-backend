@@ -42,6 +42,7 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
+                ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::Initiated])
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 

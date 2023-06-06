@@ -3,6 +3,7 @@
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Enums\FinancingOrderHistory;
+use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
@@ -38,6 +39,7 @@ class ProcessBursamOrderResultNYY implements ShouldQueue, ShouldBeUnique
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
+                ->where('status', TraderOrderStatus::InProgress)
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 

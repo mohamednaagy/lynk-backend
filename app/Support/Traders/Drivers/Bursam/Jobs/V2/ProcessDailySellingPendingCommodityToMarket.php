@@ -42,9 +42,10 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
             ->each(function (FinancingOrder $financingOrder) {
                 DB::transaction(function () use ($financingOrder) {
                     $lockedFinancingOrder = FinancingOrder::query()->lockForUpdate($financingOrder->id);
-                    $lockedFinancingOrder->activeTraderOrder->each(function ($activeTraderOrder) use ($financingOrder) {
+
+                    $lockedFinancingOrder->activeTraderOrder->each(function ($activeTraderOrder) {
                         Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)
-                            ->cancelOrder($financingOrder);
+                            ->cancelTraderOrder($activeTraderOrder);
                     });
 
                     $lockedFinancingOrder->update([
