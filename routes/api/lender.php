@@ -12,7 +12,7 @@ use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryReplyController;
 use App\Http\Controllers\Api\V1\Lender\Media\DownloadMediaFile;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
-use App\Http\Controllers\Api\V1\Lender\Orders\CancelOrder;
+use App\Http\Controllers\Api\V1\Lender\Orders\CancelTraderOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CompleteOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CreateOrderWithoutVerification;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersStats;
@@ -67,7 +67,7 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                     Route::post('orders/{order}/proceed', MakeOrderProceed::class);
                     Route::put('orders/{order}/approve', ApproveOrder::class);
                     Route::put('orders/{order}/reject', RejectOrder::class);
-                    Route::put('orders/{order}/cancel', CancelOrder::class);
+                    Route::put('orders/{order}/{trader_order}/cancel', CancelTraderOrder::class);
                     Route::post('orders/{order}/complete', CompleteOrder::class);
                     Route::put('orders/{order}/payment-proof', UpdateOrderPaymentProof::class);
                     Route::post('orders/no-verification', CreateOrderWithoutVerification::class);

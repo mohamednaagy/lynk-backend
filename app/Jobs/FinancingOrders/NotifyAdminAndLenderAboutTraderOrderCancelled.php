@@ -8,7 +8,7 @@ use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\TraderOrder;
 use App\Models\User;
-use App\Notifications\FinancingOrders\OrderCancelled;
+use App\Notifications\FinancingOrders\TraderOrderCancelled;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -17,7 +17,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Notification;
 use Stancl\Tenancy\Database\TenantScope;
 
-class NotifyAdminAndLenderAboutOrderCancelled implements ShouldQueue
+class NotifyAdminAndLenderAboutTraderOrderCancelled implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -26,7 +26,7 @@ class NotifyAdminAndLenderAboutOrderCancelled implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(private TraderOrder $financingOrder, private User $canceller)
+    public function __construct(private TraderOrder $traderOrder, private User $canceller)
     {
     }
 
@@ -37,7 +37,7 @@ class NotifyAdminAndLenderAboutOrderCancelled implements ShouldQueue
      */
     public function handle()
     {
-        $company = $this->financingOrder->company;
+        $company = $this->traderOrder->order->company;
 
         $notifiables = User::query()
             ->withoutGlobalScope(TenantScope::class)
@@ -56,6 +56,6 @@ class NotifyAdminAndLenderAboutOrderCancelled implements ShouldQueue
             })
             ->get();
 
-        Notification::send($notifiables, new OrderCancelled($this->financingOrder, $this->canceller));
+        Notification::send($notifiables, new TraderOrderCancelled($this->traderOrder, $this->canceller));
     }
 }

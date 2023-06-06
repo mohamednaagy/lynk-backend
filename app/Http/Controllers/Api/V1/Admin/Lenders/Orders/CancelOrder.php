@@ -58,11 +58,6 @@ class CancelOrder extends Controller
                 $request->validated()
             );
 
-            $order->update([
-                'status' => FinancingOrderStatus::PendingCancellation,
-                'status_reason' => $data['status_reason'] ?? null,
-            ]);
-
             dispatch(new NotifyAdminAndLenderAboutOrderCancelled($order, $canceller));
 
             return $this->successResponse();

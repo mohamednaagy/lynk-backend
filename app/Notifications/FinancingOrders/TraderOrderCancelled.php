@@ -2,13 +2,13 @@
 
 namespace App\Notifications\FinancingOrders;
 
-use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class OrderCancelled extends Notification
+class TraderOrderCancelled extends Notification
 {
     use Queueable;
 
@@ -17,7 +17,7 @@ class OrderCancelled extends Notification
      *
      * @return void
      */
-    public function __construct(private FinancingOrder $financingOrder, private User $user)
+    public function __construct(private TraderOrder $traderOrder, private User $user)
     {
         //
     }
@@ -42,11 +42,13 @@ class OrderCancelled extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->subject(__('emails/order-cancelled.subject', [
-                'order_id' => $this->financingOrder->id,
+            ->subject(__('emails/trader-order-cancelled.subject', [
+                'trader_order_id' => $this->traderOrder->id,
+                'order_id' => $this->traderOrder->financing_order_id,
             ]))
-            ->line(__('emails/order-cancelled.body', [
-                'order_id' => $this->financingOrder->id,
+            ->line(__('emails/trader-order-cancelled.body', [
+                'trader_order_id' => $this->traderOrder->id,
+                'order_id' => $this->traderOrder->financing_order_id,
             ]));
     }
 
@@ -59,9 +61,10 @@ class OrderCancelled extends Notification
     public function toArray($notifiable)
     {
         return [
-            'order_id' => $this->financingOrder->id,
-            'amount' => $this->financingOrder->amount,
-            'selling_price' => $this->financingOrder->selling_price,
+            'trader_order_id' => $this->traderOrder->id,
+            'order_id' => $this->traderOrder->financing_order_id,
+            'amount' => $this->traderOrder->order->amount,
+            'selling_price' => $this->traderOrder->order->selling_price,
             'user_id' => $this->user->id,
             'user_name' => $this->user->fullName,
         ];

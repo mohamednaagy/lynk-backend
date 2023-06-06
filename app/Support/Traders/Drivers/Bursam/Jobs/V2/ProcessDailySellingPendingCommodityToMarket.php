@@ -2,7 +2,6 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
-use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -47,10 +46,6 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
                         Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)
                             ->cancelTraderOrder($activeTraderOrder);
                     });
-
-                    $lockedFinancingOrder->update([
-                        'status' => FinancingOrderStatus::PendingTraderOrder,
-                    ]);
                 });
             });
     }

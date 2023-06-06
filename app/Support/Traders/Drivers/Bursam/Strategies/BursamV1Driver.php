@@ -603,13 +603,32 @@ class BursamV1Driver implements TraderInterface
             'status' => TraderOrderStatus::PendingCancellation,
         ]);
 
-        if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::GetTtiHoldingCertificateDocument)) {
-            $this->sellCommodityToBursam($traderOrder);
-        }
-
         Bus::chain([
             new ProcessBursamSellingCommodityToOpenMarketForCancellation($traderOrder->id),
             new ProcessBursamStbCertificateAfterCancellation($traderOrder->id),
+            function () use ($traderOrder) {
+                $activeTraderOrdersCount = TraderOrder::where('status', TraderOrderStatus::InProgress)
+                    ->where('financing_order_id', $traderOrder->id)
+                    ->count();
+
+                if ($activeTraderOrdersCount !== 0) {
+                    return;
+                }
+
+                $order = $traderOrder->order()->first();
+
+                if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
+                    $order->update([
+                        'status' => FinancingOrderStatus::Cancelled,
+                    ]);
+                }
+
+                if ($order->status->is(FinancingOrderStatus::InProgress)) {
+                    $order->update([
+                        'status' => FinancingOrderStatus::PendingTraderOrder,
+                    ]);
+                }
+            },
         ])->dispatch();
 
         return true;
