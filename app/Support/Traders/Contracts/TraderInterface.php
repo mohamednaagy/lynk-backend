@@ -15,5 +15,5 @@ interface TraderInterface
 
     public function cancelOrder(FinancingOrder $financingOrder): mixed;
 
-    public function isTraderOrderCancellable(TraderOrder $traderOrder);
+    public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area);
 }

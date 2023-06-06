@@ -98,14 +98,14 @@ class TraderOrder extends Model implements HasMedia
         return $this->hasMany(TraderHistory::class, 'trader_order_id', 'id');
     }
 
-    public function isCancellable(): bool
+    public function isCancellable(?string $area): bool
     {
         if ($this->status->isNot(TraderOrderStatus::InProgress)) {
             return false;
         }
 
         return Trader::driver($this->provider, $this->version)
-            ->isTraderOrderCancellable($this);
+            ->isTraderOrderCancellable($this, $area);
     }
 
     public function checkOrderStepComplete(string $step): bool

@@ -552,7 +552,7 @@ class BursamV1Driver implements TraderInterface
     {
     }
 
-    public function isTraderOrderCancellable(TraderOrder $traderOrder)
+    public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
         return true;
     }
