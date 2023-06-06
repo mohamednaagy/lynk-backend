@@ -3,6 +3,7 @@
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Enums\FinancingOrderHistory;
+use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\BursamTraderHelperTrait;
@@ -50,6 +51,10 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, Shoul
             }
 
             Trader::driver('bursam', $traderOrder->version)->getStbCertificateDetails($traderOrder);
+
+            $traderOrder->update([
+                'status' => TraderOrderStatus::Cancelled,
+            ]);
         });
     }
 

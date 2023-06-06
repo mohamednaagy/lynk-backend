@@ -105,7 +105,11 @@ class TraderOrder extends Model implements HasMedia
 
         $traderHistoryActions = $this->traderHistories->pluck('action')->toArray();
 
-        return ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions));
+        return match ($this->provider) {
+            'bursam' => true,
+            'dmcc', 'fake' => ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions)),
+            default => false
+        };
     }
 
     public function checkOrderStepComplete(string $step): bool
