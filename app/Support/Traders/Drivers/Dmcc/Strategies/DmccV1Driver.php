@@ -27,6 +27,17 @@ class DmccV1Driver implements TraderInterface
 
     protected $version = 'v1';
 
+    const notCancellableActions = [
+        FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+        FinancingOrderHistory::AttachMpoDocument,
+        FinancingOrderHistory::IssueMurabahaOffer,
+        FinancingOrderHistory::MurabahaSaleCompleted,
+        FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+        FinancingOrderHistory::ContractSigned,
+        FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
+        FinancingOrderHistory::OrderCancelled,
+    ];
+
     use DmccTraderHelperTrait {
         createTraderOrder as traitCreateTraderOrder;
     }
@@ -481,5 +492,12 @@ class DmccV1Driver implements TraderInterface
         if ($dispatchableJob) {
             $dispatchableJob::dispatch($traderOrder->id);
         }
+    }
+
+    public function isTraderOrderCancellable(TraderOrder $traderOrder)
+    {
+        $traderHistoryActions = $traderOrder->traderHistories->pluck('action')->toArray();
+
+        return empty(array_intersect(self::notCancellableActions, $traderHistoryActions));
     }
 }

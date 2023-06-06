@@ -551,4 +551,9 @@ class BursamV1Driver implements TraderInterface
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
     {
     }
+
+    public function isTraderOrderCancellable(TraderOrder $traderOrder)
+    {
+        return true;
+    }
 }

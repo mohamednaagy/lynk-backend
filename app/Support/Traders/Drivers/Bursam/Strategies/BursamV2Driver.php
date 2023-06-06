@@ -60,4 +60,12 @@ class BursamV2Driver extends BursamV1Driver
             $dispatchableJob::dispatch($traderOrder->id);
         }
     }
+
+    public function isTraderOrderCancellable(TraderOrder $traderOrder)
+    {
+        $traderHistoryActions = $traderOrder->traderHistories->pluck('action')->toArray();
+
+        return $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)
+            || $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
+    }
 }

@@ -7,6 +7,7 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\Facades\Trader;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -103,13 +104,8 @@ class TraderOrder extends Model implements HasMedia
             return false;
         }
 
-        $traderHistoryActions = $this->traderHistories->pluck('action')->toArray();
-
-        return match ($this->provider) {
-            'bursam' => true,
-            'dmcc', 'fake' => ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions)),
-            default => false
-        };
+        return Trader::driver($this->provider, $this->version)
+            ->isTraderOrderCancellable($this);
     }
 
     public function checkOrderStepComplete(string $step): bool
