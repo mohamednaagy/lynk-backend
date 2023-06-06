@@ -494,7 +494,7 @@ class DmccV1Driver implements TraderInterface
         }
     }
 
-    public function isTraderOrderCancellable(TraderOrder $traderOrder)
+    public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
         $traderHistoryActions = $traderOrder->traderHistories->pluck('action')->toArray();
 

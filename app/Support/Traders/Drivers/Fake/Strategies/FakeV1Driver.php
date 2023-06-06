@@ -407,7 +407,7 @@ class FakeV1Driver implements TraderInterface
         }
     }
 
-    public function isTraderOrderCancellable(TraderOrder $traderOrder)
+    public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area): bool
     {
         $traderHistoryActions = $traderOrder->traderHistories->pluck('action')->toArray();
 
