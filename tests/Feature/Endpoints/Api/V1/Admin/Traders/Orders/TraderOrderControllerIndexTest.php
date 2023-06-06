@@ -87,7 +87,7 @@ class TraderOrderControllerIndexTest extends TestCase
             ->getJson(self::$baseURL)
             ->assertOk()
             ->assertExactJson(
-                fractal(FinancingOrder::paginate(), new FinancingOrderTransformer(self::$traderCompany))
+                fractal(FinancingOrder::paginate(), (new FinancingOrderTransformer())->setArea(Area::Trader))
                     ->parseIncludes([
                         'id',
                         'status',

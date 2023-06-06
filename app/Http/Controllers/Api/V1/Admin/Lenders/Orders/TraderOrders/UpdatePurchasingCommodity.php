@@ -33,7 +33,7 @@ class UpdatePurchasingCommodity extends Controller
 
             (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))->updatePurchasingCommodity($traderOrder, $request);
 
-            return fractal($traderOrder, new TraderOrderTransformer())
+            return fractal($traderOrder, (new TraderOrderTransformer())->setArea(Area::SuperAdmin))
                 ->parseIncludes(
                     'purchasing_commodity_information',
                 )

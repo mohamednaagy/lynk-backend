@@ -74,7 +74,7 @@ class OrderController extends Controller
             'traderOrders.traderHistories',
         ]);
 
-        return fractal($order, new FinancingOrderTransformer())
+        return fractal($order, (new FinancingOrderTransformer())->setArea(Area::SuperAdmin))
             ->parseIncludes([
                 'id',
                 'status',

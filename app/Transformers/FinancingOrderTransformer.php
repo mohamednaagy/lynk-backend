@@ -20,6 +20,8 @@ class FinancingOrderTransformer extends TransformerAbstract
 {
     protected ?Company $company;
 
+    protected $area = null;
+
     public function __construct(Company $company = null)
     {
         $this->company = $company;
@@ -222,7 +224,10 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeTraderOrders(FinancingOrder $financingOrder): Collection
     {
-        return $this->collection($financingOrder->traderOrders, new TraderOrderTransformer());
+        return $this->collection(
+            $financingOrder->traderOrders,
+            (new TraderOrderTransformer())->setArea($this->area)
+        );
     }
 
     public function includeActiveTrader(FinancingOrder $financingOrder): Primitive|Item
@@ -231,7 +236,10 @@ class FinancingOrderTransformer extends TransformerAbstract
             return $this->primitive(null);
         }
 
-        return $this->item($financingOrder->activeTraderOrder->first(), new TraderOrderTransformer());
+        return $this->item(
+            $financingOrder->activeTraderOrder->first(),
+            (new TraderOrderTransformer())->setArea($this->area)
+        );
     }
 
     public function includeTraderOrderHistory(FinancingOrder $financingOrder): Primitive
@@ -254,5 +262,12 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeCanCreateTraderOrder(FinancingOrder $financingOrder): Primitive
     {
         return $this->primitive($financingOrder->canCreateTraderOrder());
+    }
+
+    public function setArea($area)
+    {
+        $this->area = $area;
+
+        return $this;
     }
 }

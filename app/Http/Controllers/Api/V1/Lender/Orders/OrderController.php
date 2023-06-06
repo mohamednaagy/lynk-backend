@@ -81,7 +81,7 @@ class OrderController extends Controller
 
         $order->load('creator', 'approver');
 
-        return fractal($order, new FinancingOrderTransformer())
+        return fractal($order, (new FinancingOrderTransformer())->setArea(Area::Lender))
             ->parseIncludes([
                 'id',
                 'status',
