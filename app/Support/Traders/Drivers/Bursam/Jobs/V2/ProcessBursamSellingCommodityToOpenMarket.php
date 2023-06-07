@@ -3,9 +3,11 @@
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Enums\FinancingOrderHistory;
+use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -37,6 +39,7 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldQueue, ShouldBe
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
+                ->where('status', TraderOrderStatus::InProgress)
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
@@ -45,8 +48,18 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldQueue, ShouldBe
             }
 
             Trader::driver('bursam', $traderOrder->version)
-                ->sellingCommodityToOpenMarket($traderOrder);
+                ->sellCommodityToOpenMarket($traderOrder);
         });
+    }
+
+    public function backoff()
+    {
+        return [120, 240, 300];
+    }
+
+    public function retryUntil(): Carbon
+    {
+        return now()->addMinutes(30);
     }
 
     public function middleware(): array

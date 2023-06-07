@@ -21,7 +21,7 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, Shoul
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, BursamTraderHelperTrait, StopsTraderOrderOnJobFailure;
 
-    public $tries = 3;
+    public $tries = 8;
 
     public $backoff = 60;
 
@@ -43,14 +43,13 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, Shoul
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
+                ->where('status', TraderOrderStatus::PendingCancellation)
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
-            if (! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::GetTtiHoldingCertificateDocument)) {
-                return;
+            if (! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::GetSellingToMarketCertificate)) {
+                Trader::driver('bursam', $traderOrder->version)->getStbCertificateDetails($traderOrder);
             }
-
-            Trader::driver('bursam', $traderOrder->version)->getStbCertificateDetails($traderOrder);
 
             $traderOrder->update([
                 'status' => TraderOrderStatus::Cancelled,

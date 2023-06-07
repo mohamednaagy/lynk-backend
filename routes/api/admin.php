@@ -25,7 +25,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\CancelOrder as CancelFinanc
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\CompleteOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\RetryProceedOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrderController;
-use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\CancelOrder as CancelTraderOrder;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\CancelTraderOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabahaPurchaseOffer;

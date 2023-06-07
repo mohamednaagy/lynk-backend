@@ -2,13 +2,13 @@
 
 namespace App\Actions\Orders;
 
-use App\Actions\Contracts\Orders\OrderBalanceDiscount;
+use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Actions\Contracts\Wallets\DeductVatPercentage;
 use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
 use App\Models\FinancingOrder;
 
-class OrderBalanceDiscountAction implements OrderBalanceDiscount
+class DeductBalanceForNewOrderAction implements DeductBalanceForNewOrder
 {
     public function handle(FinancingOrder $financingOrder): void
     {

@@ -10,14 +10,26 @@ use App\Support\Traders\Facades\Trader;
 
 class CancelOrderAction implements CancelOrder
 {
-    public function handle(FinancingOrder $financingOrder, User $user, array $data): void
-    {
-        $traderOrder = $financingOrder->activeTraderOrder()->first();
+    public function handle(
+        FinancingOrder $financingOrder,
+        User $user,
+        array $data
+    ): void {
+        $activeTraderOrders = $financingOrder->activeTraderOrder()->lockForUpdate()->get();
 
-        if ($traderOrder) {
-            Trader::driver($traderOrder->provider, $traderOrder->version)
-                ->cancelOrder($financingOrder);
+        if ($activeTraderOrders->count() === 0) {
+            $financingOrder->update([
+                'status' => FinancingOrderStatus::Cancelled,
+                'status_reason' => $data['status_reason'] ?? null,
+            ]);
+
+            return;
         }
+
+        $activeTraderOrders->each(function ($traderOrder) {
+            Trader::driver($traderOrder->provider, $traderOrder->version)
+                ->cancelTraderOrder($traderOrder);
+        });
 
         $financingOrder->update([
             'status' => FinancingOrderStatus::PendingCancellation,

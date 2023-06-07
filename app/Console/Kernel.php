@@ -23,7 +23,7 @@ class Kernel extends ConsoleKernel
             $schedule->job(new ProcessDmccNotifications())->everyMinute()->withoutOverlapping();
 
             $schedule->job(new ProcessDailySellingPendingCommodityToMarket())
-                ->dailyAt('18:20')
+                ->between('18:00', '18:30')
                 ->timezone('Asia/Riyadh');
         }
     }

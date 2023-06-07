@@ -43,6 +43,7 @@ class ProcessBursamStbCertificate implements ShouldQueue, ShouldBeUnique
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
+                ->where('status', TraderOrderStatus::InProgress)
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
@@ -53,6 +54,7 @@ class ProcessBursamStbCertificate implements ShouldQueue, ShouldBeUnique
             Trader::driver('bursam', $traderOrder->version)->getStbCertificateDetails($traderOrder);
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::MurabahaSaleCompleted);
+
             $traderOrder->update([
                 'status' => TraderOrderStatus::Completed,
             ]);

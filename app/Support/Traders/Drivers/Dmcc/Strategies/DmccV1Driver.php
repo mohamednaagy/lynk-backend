@@ -217,6 +217,35 @@ class DmccV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
+    public function cancelTraderOrder(TraderOrder $traderOrder): object
+    {
+        $response = $this->soap
+            ->baseWsdl($this->prefixUrl('cancelTTI'))
+            ->call('cancelTTI', $requestBody = [
+                'ttiId' => $traderOrder->reference,
+                'comments' => 'Cancel Order',
+                'confirmAction' => 'true',
+            ]);
+
+        if (! $this->isSuccess($response)) {
+            throw new TraderException(
+                'Failed to get cancel order',
+                [
+                    'provider' => $this->provider,
+                    'version' => $this->version,
+                    'trader_order_id' => $traderOrder->id,
+                    'provider_request_body' => $requestBody,
+                    'provider_response_body' => $response->body(),
+                ]
+            );
+        }
+
+        return $response->object();
+    }
+
+    /**
+     * @throws TraderException
+     */
     public function respondPtpService(string $ttiId): object
     {
         $response = $this->soap
@@ -475,7 +504,7 @@ class DmccV1Driver implements TraderInterface
         }
     }
 
-    public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
+    public function sellCommodityToOpenMarket(TraderOrder $traderOrder)
     {
     }
 

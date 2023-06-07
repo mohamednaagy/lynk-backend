@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\Lender\Enquiries\EnquiryReplyController;
 use App\Http\Controllers\Api\V1\Lender\Media\DownloadMediaFile;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CancelOrder;
+use App\Http\Controllers\Api\V1\Lender\Orders\CancelTraderOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CompleteOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CreateOrderWithoutVerification;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersStats;
@@ -62,23 +63,25 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                 Route::middleware('checkCompanyStatus')->group(function () {
                     Route::put('auth/profile', UpdateMyProfile::class);
                     Route::apiResource('edaat-invoices', EdaatInvoiceController::class)->only('index', 'store');
-
                     Route::get('orders/volume', GetOrdersVolume::class);
                     Route::get('orders/stats', GetOrdersStats::class);
                     Route::post('orders/no-verification', CreateOrderWithoutVerification::class);
                     Route::get('orders/statuses', GetOrderStatus::class);
+                    Route::post('orders/{order}/proceed', MakeOrderProceed::class);
+                    Route::put('orders/{order}/approve', ApproveOrder::class);
+                    Route::put('orders/{order}/reject', RejectOrder::class);
+                    Route::post('orders/{order}/complete', CompleteOrder::class);
+                    Route::put('orders/{order}/payment-proof', UpdateOrderPaymentProof::class);
+                    Route::put('orders/{order}/cancel', CancelOrder::class);
+                    Route::put('orders/{order}/{trader_order}/cancel', CancelTraderOrder::class);
                     Route::prefix('orders/{order}')->group(function () {
                         Route::post('/proceed', MakeOrderProceed::class);
                         Route::put('/approve', ApproveOrder::class);
                         Route::put('/reject', RejectOrder::class);
                         Route::post('/complete', CompleteOrder::class);
                         Route::put('/payment-proof', UpdateOrderPaymentProof::class);
-                        Route::prefix('/trader-orders/{trader_order}')->group(function () {
-                            Route::put('/cancel', CancelOrder::class);
-                        });
                     });
                     Route::apiResource('orders', OrderController::class);
-
                     Route::post('users/{user}/resend-invitation', ResendInvitation::class);
                     Route::apiResource('users', UserController::class);
 

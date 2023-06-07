@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders;
 
-use App\Actions\Contracts\Orders\CancelOrder as CancelOrderInterface;
+use App\Actions\Contracts\Orders\CancelTraderOrder as CancelTraderOrderInterface;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\ErrorCode;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
+use App\Enums\TraderOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\CancelOrderRequest;
-use App\Jobs\FinancingOrders\NotifyAdminAndLenderAboutOrderCancelled;
-use App\Models\FinancingOrder;
+use App\Jobs\FinancingOrders\NotifyAdminAndLenderAboutTraderOrderCancelled;
+use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
-class CancelOrder extends Controller
+class CancelTraderOrder extends Controller
 {
     public function __construct()
     {
@@ -30,19 +30,20 @@ class CancelOrder extends Controller
      * Handle the incoming request.
      *
      * @param  CancelOrderRequest  $request
-     * @param  CancelOrderInterface  $cancelOrder ,
+     * @param  CancelTraderOrderInterface  $cancelTraderOrder ,
      * @param  int  $order
      * @return JsonResponse
      */
     public function __invoke(
         CancelOrderRequest $request,
-        CancelOrderInterface $cancelOrder,
-        int $order
+        CancelTraderOrderInterface $cancelTraderOrder,
+        int $order,
+        int $traderOrder
     ): JsonResponse {
-        return DB::transaction(function () use ($request, $cancelOrder, $order) {
-            $order = FinancingOrder::lockForUpdate()->findOrFail($order);
+        return DB::transaction(function () use ($request, $cancelTraderOrder, $traderOrder) {
+            $traderOrder = TraderOrder::lockForUpdate()->findOrFail($traderOrder);
 
-            if ($order->status->cantMoveTo(FinancingOrderStatus::PendingCancellation)) {
+            if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
                 return $this->errorResponse(
                     __('error.unable_to_cancel_order'),
                     Response::HTTP_FORBIDDEN,
@@ -52,13 +53,13 @@ class CancelOrder extends Controller
 
             $canceller = $request->user();
 
-            $cancelOrder->handle(
-                $order,
+            $cancelTraderOrder->handle(
+                $traderOrder,
                 $canceller,
                 $request->validated()
             );
 
-            dispatch(new NotifyAdminAndLenderAboutOrderCancelled($order, $canceller));
+            dispatch(new NotifyAdminAndLenderAboutTraderOrderCancelled($traderOrder, $canceller));
 
             return $this->successResponse();
         });
