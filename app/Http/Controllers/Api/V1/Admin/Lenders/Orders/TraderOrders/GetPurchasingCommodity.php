@@ -27,7 +27,7 @@ class GetPurchasingCommodity extends Controller
         FinancingOrder $order,
         TraderOrder $trader_order
     ): JsonResponse {
-        return fractal($trader_order, new TraderOrderTransformer())
+        return fractal($trader_order, (new TraderOrderTransformer())->setArea(Area::SuperAdmin))
             ->parseIncludes(
                 'purchasing_commodity_information',
             )

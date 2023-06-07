@@ -39,7 +39,7 @@ class UpdatePurchasingCommodity extends Controller
 
             app(HandlePurchasingCommodity::class)->handle($request, $financingOrder, $traderOrder);
 
-            return fractal($traderOrder, new TraderOrderTransformer())
+            return fractal($traderOrder, (new TraderOrderTransformer())->setArea(Area::Trader))
                 ->parseIncludes(
                     'purchasing_commodity_information',
                 )

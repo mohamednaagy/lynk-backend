@@ -12,6 +12,8 @@ use League\Fractal\TransformerAbstract;
 
 class TraderOrderTransformer extends TransformerAbstract
 {
+    protected $area = null;
+
     protected array $defaultIncludes = [];
 
     protected array $availableIncludes = [
@@ -65,7 +67,7 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeIsCancellable(TraderOrder $traderOrder): Primitive
     {
-        return $this->primitive($traderOrder->isCancellable());
+        return $this->primitive($traderOrder->isCancellable($this->area));
     }
 
     public function includeHistory(TraderOrder $traderOrder)
@@ -108,5 +110,12 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeCreatedAt(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive($traderOrder->created_at?->toDateTimeString());
+    }
+
+    public function setArea($area)
+    {
+        $this->area = $area;
+
+        return $this;
     }
 }

@@ -92,7 +92,7 @@ class OrderControllerIndexTest extends TestCase
             ->getJson('api/v1/admin/orders')
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(FinancingOrder::paginate(), new FinancingOrderTransformer())
+                fractal(FinancingOrder::paginate(), (new FinancingOrderTransformer())->setArea(Area::SuperAdmin))
                     ->parseIncludes([
                         'id',
                         'status',

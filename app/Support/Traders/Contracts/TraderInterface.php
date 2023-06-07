@@ -14,4 +14,6 @@ interface TraderInterface
     public function sellingCommodityToOpenMarket(TraderOrder $traderOrder);
 
     public function cancelOrder(FinancingOrder $financingOrder): mixed;
+
+    public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area);
 }

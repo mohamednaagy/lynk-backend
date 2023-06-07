@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
+use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\General\ProcessAskClientForWakala;
@@ -59,5 +60,23 @@ class BursamV2Driver extends BursamV1Driver
         if ($dispatchableJob) {
             $dispatchableJob::dispatch($traderOrder->id);
         }
+    }
+
+    public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
+    {
+        return $this->isNotInTransitionStateForSellingOrBuying($traderOrder)
+            && $this->isNotInContractSignedForLenderArea($traderOrder, $area);
+    }
+
+    protected function isNotInTransitionStateForSellingOrBuying(TraderOrder $traderOrder)
+    {
+        return ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)
+            && ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
+    }
+
+    protected function isNotInContractSignedForLenderArea(TraderOrder $traderOrder, $area)
+    {
+        return $area !== Area::Lender
+            || ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::ContractSigned);
     }
 }
