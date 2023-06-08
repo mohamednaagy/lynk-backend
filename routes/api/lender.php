@@ -73,7 +73,7 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                     Route::post('orders/{order}/complete', CompleteOrder::class);
                     Route::put('orders/{order}/payment-proof', UpdateOrderPaymentProof::class);
                     Route::put('orders/{order}/cancel', CancelOrder::class);
-                    Route::put('orders/{order}/{trader_order}/cancel', CancelTraderOrder::class);
+                    Route::put('orders/{order}/trader-orders/{trader_order}/cancel', CancelTraderOrder::class);
                     Route::prefix('orders/{order}')->group(function () {
                         Route::post('/proceed', MakeOrderProceed::class);
                         Route::put('/approve', ApproveOrder::class);
