@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Dmcc\Jobs\V1;
 
+use App\Enums\FinancingOrderHistory;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
@@ -41,13 +42,12 @@ class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue, ShouldB
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
-            //            if (! $this->traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted)) {
-            //                return;
-            //            }
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
+                return;
+            }
 
-            $trader = Trader::driver($traderOrder->provider);
-
-            $trader->createSellingCommodityToCustomerDocument($traderOrder);
+            Trader::driver($traderOrder->provider, $traderOrder->version)
+                ->createSellingCommodityToCustomerDocument($traderOrder);
         });
     }
 
