@@ -401,8 +401,8 @@ class FakeV1Driver implements TraderInterface
     {
         $dispatchableJob = match ((int) $traderOrder->last_history_action) {
             FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::class,
-            FinancingOrderHistory::ContractSigned => ProcessAskClientForWakala::class,
-            FinancingOrderHistory::ClientWakalaAccepted => ProcessDmccSellingCommodityToCustomerOrder::class,
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAskClientForWakala::class,
+            FinancingOrderHistory::ContractSigned => ProcessDmccSellingCommodityToCustomerOrder::class,
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::class,
             default => null,
         };
