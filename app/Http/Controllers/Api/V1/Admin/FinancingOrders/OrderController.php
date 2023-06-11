@@ -54,6 +54,7 @@ class OrderController extends Controller
                 'amount',
                 'selling_price',
                 'status_reason',
+                'current_step',
                 'creator',
                 'created_at',
             ])

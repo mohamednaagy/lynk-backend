@@ -6,7 +6,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
-use App\Models\TraderOrder;
+use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Notifications\FinancingOrders\OrderCancelled;
 use Illuminate\Bus\Queueable;
@@ -26,7 +26,7 @@ class NotifyAdminAndLenderAboutOrderCancelled implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(private TraderOrder $financingOrder, private User $canceller)
+    public function __construct(private FinancingOrder $financingOrder, private User $canceller)
     {
     }
 
