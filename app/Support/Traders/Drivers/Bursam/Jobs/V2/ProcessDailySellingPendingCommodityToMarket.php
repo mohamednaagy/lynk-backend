@@ -40,7 +40,7 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
             ->lazyById()
             ->each(function (FinancingOrder $financingOrder) {
                 DB::transaction(function () use ($financingOrder) {
-                    $lockedFinancingOrder = FinancingOrder::query()->lockForUpdate($financingOrder->id);
+                    $lockedFinancingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($financingOrder->id);
 
                     $lockedFinancingOrder->activeTraderOrder->each(function ($activeTraderOrder) {
                         Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)
