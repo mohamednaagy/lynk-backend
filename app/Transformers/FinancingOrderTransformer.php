@@ -41,6 +41,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'selling_price',
         'is_verification_required',
         'is_updatable',
+        'is_cancellable',
         'is_approved',
         'status_reason',
         'creator',
@@ -147,6 +148,11 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeIsUpdatable(FinancingOrder $financingOrder)
     {
         return $this->primitive($financingOrder->status->is(FinancingOrderStatus::PendingApproval));
+    }
+
+    public function includeIsCancellable(FinancingOrder $financingOrder): Primitive
+    {
+        return $this->primitive($financingOrder->status->canMoveTo(FinancingOrderStatus::PendingCancellation));
     }
 
     public function includeIsVerificationRequired(FinancingOrder $financingOrder)
