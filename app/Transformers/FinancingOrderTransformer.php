@@ -171,7 +171,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCurrentStep(FinancingOrder $financingOrder)
     {
-        $traderOrder = $financingOrder->activeTraderOrder->first();
+        $traderOrder = $financingOrder->activeTraderOrder()->withLastHistoryAction()->first();
 
         if (is_null($traderOrder)) {
             return $this->primitive(null);
