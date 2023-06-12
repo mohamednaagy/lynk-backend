@@ -2,6 +2,8 @@
 
 namespace App\Support\DataTransferObjects;
 
+use App\Enums\BursamProductCode;
+
 class CommodityProductDto
 {
     public function __construct(
@@ -21,7 +23,9 @@ class CommodityProductDto
 
     public function getProduct(): string
     {
-        return $this->product;
+        return in_array($this->product, BursamProductCode::getValues())
+             ? BursamProductCode::fromValue($this->product)->description
+             : $this->product;
     }
 
     public function getQuantity(): string

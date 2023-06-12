@@ -8,11 +8,15 @@ final class BursamProductCode extends Enum
 {
     const CrudePalmOil = 'CPO-MSIA-09';
 
-    const WaterMelon = 'PR-B-MSIA14';
+    const PlasticResinB = 'PR-B-MSIA14';
 
-    const FoolSodany = 'OLN-MSIA-12';
+    const PlasticResinA = 'PR-A-MSIA14';
 
-    const HeadMeat = 'PB-LEAD- 19';
+    const PlumbumLead = 'PB-LEAD-19';
 
-    const Kaware3 = 'PR -A-MY-14';
+    const RbdPalmOlein = 'OLN-MSIA-12';
+
+    const TimberHardwood = 'TBH-MSIA-12';
+
+    const TimberSoftwood = 'TBS-MSIA-12';
 }

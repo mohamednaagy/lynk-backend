@@ -3,6 +3,7 @@
 namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
 use App\Enums\BursamErrorCode;
+use App\Enums\BursamProductCode;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -217,6 +218,7 @@ class BursamV1Driver implements TraderInterface
             ],
         ]);
 
+        $productName = $response->json('PNAME');
         $bidOwnerShipTemplate = view('bursam-templates.bid-certificate-template', [
             'e_cert_no' => $response->json('ECERTNO'),
             'buyer' => $response->json('BUYER'),
@@ -226,9 +228,11 @@ class BursamV1Driver implements TraderInterface
             'currency' => $response->json('CURRENCY'),
             'price' => $response->json('PRICE'),
             'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
-            'purchase_time_date' => $response->json('PURCHASETIMEDATE'),
-            'value_date' => $response->json('VALUEDATE'),
-            'p_name' => $response->json('PNAME'),
+            'purchase_time_date' => $response->json('PURCHASETIMEDATE').'  Malaysia Time (MYT)',
+            'value_date' => $response->json('VALUEDATE').'  Malaysia Time (MYT)',
+            'p_name' => in_array($productName, BursamProductCode::getValues())
+                ? BursamProductCode::fromValue($productName)->description
+                : $productName,
             'p_volume' => $response->json('PVOLUME'),
             'line' => $response->json('LINE'),
         ])->render();
@@ -466,7 +470,7 @@ class BursamV1Driver implements TraderInterface
         }
 
         $currentTimeInUtcTz = CarbonImmutable::now();
-
+        $productName = $response->json('PNAME');
         $otcOwnerShipTemplate = view('bursam-templates.otc-certificate-template', [
             'e_cert_no' => $response->json('ECERTNO'),
             'seller' => $response->json('SELLER'),
@@ -476,9 +480,11 @@ class BursamV1Driver implements TraderInterface
             'currency' => $response->json('CURRENCY'),
             'price' => $response->json('PRICE'),
             'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
-            'reporting_time_date' => $response->json('REPORTINGTIMEDATE'),
-            'value_date' => $response->json('VALUEDATE'),
-            'p_name' => $response->json('PNAME'),
+            'reporting_time_date' => $response->json('REPORTINGTIMEDATE').'  Malaysia Time (MYT)',
+            'value_date' => $response->json('VALUEDATE').'  Malaysia Time (MYT)',
+            'p_name' => in_array($productName, BursamProductCode::getValues())
+                ? BursamProductCode::fromValue($productName)->description
+                : $productName,
             'p_volume' => $response->json('PVOLUME'),
             'line' => $response->json('LINE'),
         ])->render();
@@ -528,7 +534,7 @@ class BursamV1Driver implements TraderInterface
         }
 
         $currentTimeInUtcTz = CarbonImmutable::now();
-
+        $productName = $response->json('PNAME');
         $stbOwnerShipTemplate = view('bursam-templates.stb-certificate-template', [
             'e_cert_no' => $response->json('ECERTNO'),
             'seller' => $response->json('SELLER'),
@@ -537,9 +543,11 @@ class BursamV1Driver implements TraderInterface
             'currency' => $response->json('CURRENCY'),
             'price' => $response->json('PRICE'),
             'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
-            'selling_time_date' => $response->json('SELLINGTIMEDATE'),
-            'value_date' => $response->json('VALUEDATE'),
-            'p_name' => $response->json('PNAME'),
+            'selling_time_date' => $response->json('SELLINGTIMEDATE').'  Malaysia Time (MYT)',
+            'value_date' => $response->json('VALUEDATE').'  Malaysia Time (MYT)',
+            'p_name' => in_array($productName, BursamProductCode::getValues())
+                ? BursamProductCode::fromValue($productName)->description
+                : $productName,
             'p_volume' => $response->json('PVOLUME'),
             'line' => $response->json('LINE'),
         ])->render();
