@@ -43,7 +43,7 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
                 ->findOrFail($this->traderOrderId);
 
             Trader::driver('bursam', $traderOrder->version)
-                ->sellCommodityToOpenMarket($traderOrder);
+                ->sellCommodityToBursam($traderOrder);
         });
     }
 
