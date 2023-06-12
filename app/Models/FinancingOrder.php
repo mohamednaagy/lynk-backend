@@ -263,7 +263,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             return false;
         }
 
-        return $this->activeTraderOrder
-            ->contains(fn ($traderOrder) => $traderOrder->isCancellable($area) === false);
+        return $this->activeTraderOrder->every(fn ($traderOrder) => $traderOrder->isCancellable($area));
     }
 }
