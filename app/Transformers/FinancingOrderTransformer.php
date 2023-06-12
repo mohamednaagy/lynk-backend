@@ -152,13 +152,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeIsCancellable(FinancingOrder $financingOrder): Primitive
     {
-        $isFinancingOrderCancellable = $financingOrder->status->canMoveTo(FinancingOrderStatus::PendingCancellation);
-        $isTraderOrderCancellable = ! $financingOrder->activeTraderOrder->map(function ($traderOrder) {
-            return $traderOrder->isCancellable($this->area);
-        })
-            ->contains(false);
-
-        return $this->primitive($isFinancingOrderCancellable && $isTraderOrderCancellable);
+        return $this->primitive($financingOrder->isCancellable($this->area));
     }
 
     public function includeIsVerificationRequired(FinancingOrder $financingOrder)
@@ -273,10 +267,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCanCreateTraderOrder(FinancingOrder $financingOrder): Primitive
     {
-        $financingOrderIsNotCancelled = $financingOrder->status->isNot(FinancingOrderStatus::Cancelled);
-        $financingOrderIsNotPendingCancelled = $financingOrder->status->isNot(FinancingOrderStatus::PendingCancellation);
-
-        return $this->primitive($financingOrder->canCreateTraderOrder() && ($financingOrderIsNotCancelled && $financingOrderIsNotPendingCancelled));
+        return $this->primitive($financingOrder->canCreateTraderOrder());
     }
 
     public function setArea($area)
