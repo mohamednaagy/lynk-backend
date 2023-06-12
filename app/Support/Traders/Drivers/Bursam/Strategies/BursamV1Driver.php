@@ -544,7 +544,7 @@ class BursamV1Driver implements TraderInterface
             'price' => $response->json('PRICE'),
             'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
             'selling_time_date' => $response->json('SELLINGTIMEDATE').'  Malaysia Time (MYT)',
-            'value_date' => $response->json('VALUEDATE').'  Malaysia Time (MYT)',
+            'value_date' => $response->json('VALUEDATE').'  Malaysia Date (MYT)',
             'p_name' => in_array($productName, BursamProductCode::getValues())
                 ? BursamProductCode::fromValue($productName)->description
                 : $productName,
