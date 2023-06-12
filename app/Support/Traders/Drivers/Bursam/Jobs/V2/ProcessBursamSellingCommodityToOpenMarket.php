@@ -48,7 +48,7 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldQueue, ShouldBe
             }
 
             Trader::driver('bursam', $traderOrder->version)
-                ->sellCommodityToBursam($traderOrder);
+                ->sellCommodityToOpenMarket($traderOrder);
         });
     }
 
