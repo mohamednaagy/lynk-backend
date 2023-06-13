@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
@@ -197,5 +199,15 @@ class TraderOrder extends Model implements HasMedia
     public function scopeCompleted($query)
     {
         return $query->where('status', TraderOrderStatus::Completed);
+    }
+
+    public function checkIsCommodityPurchased(): bool
+    {
+        $purchasingStepAccordingToTrader = match ($this->provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::PurchasingCommodity,
+            'bursam' => BursamMurabhaStep::PurchasingCommodity,
+        };
+
+        return $this->step == $purchasingStepAccordingToTrader;
     }
 }

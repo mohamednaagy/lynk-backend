@@ -30,6 +30,7 @@ class DeductVatPercentageAction implements DeductVatPercentage
             $vatPercentageFee,
             [
                 'financing_order_id' => $financingOrder->id,
+                'trader_order_id' => $financingOrder->activeTraderOrder()->first()?->id,
                 'reference_number' => $transaction->reference_number,
                 'transaction_id' => $transaction->id,
                 'vat_rate' => $vatRate,

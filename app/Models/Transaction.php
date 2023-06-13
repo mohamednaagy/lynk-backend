@@ -58,4 +58,9 @@ class Transaction extends Model implements HasMedia
     {
         return new TransactionCollection($models);
     }
+
+    public function scopeWithTraderOrder($query, $financingOrderId)
+    {
+        return $query->whereJsonContains('meta->trader_order_id', $financingOrderId);
+    }
 }

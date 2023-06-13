@@ -25,6 +25,7 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
             $company->order_cost,
             [
                 'financing_order_id' => $financingOrder->id,
+                'trader_order_id' => $financingOrder->activeTraderOrder()->first()?->id,
                 'reference_number ' => $financingOrder->reference_number,
                 'amount' => $financingOrder->amount,
                 'order_cost' => $company->order_cost,

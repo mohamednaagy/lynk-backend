@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders;
 
 use App\Actions\Contracts\Orders\CancelOrder as CancelOrderInterface;
+use App\Actions\Contracts\Orders\DepositBalance;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\ErrorCode;
@@ -41,6 +42,7 @@ class CancelOrder extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($request, $cancelOrder, $order) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
+            $traderOrder = $order->activeTraderOrder->first();
 
             if ($order->status->cantMoveTo(FinancingOrderStatus::PendingCancellation)) {
                 return $this->errorResponse(
@@ -50,8 +52,11 @@ class CancelOrder extends Controller
                 );
             }
 
-            $canceller = $request->user();
+            if ($traderOrder->checkIsCommodityPurchased()) {
+                app(DepositBalance::class)->handle($traderOrder->order);
+            }
 
+            $canceller = $request->user();
             $cancelOrder->handle(
                 $order,
                 $canceller,

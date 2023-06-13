@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders;
 
 use App\Actions\Contracts\Orders\CancelTraderOrder as CancelTraderOrderInterface;
+use App\Actions\Contracts\Orders\DepositBalance;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\ErrorCode;
@@ -51,8 +52,11 @@ class CancelTraderOrder extends Controller
                 );
             }
 
-            $canceller = $request->user();
+            if ($traderOrder->checkIsCommodityPurchased()) {
+                app(DepositBalance::class)->handle($traderOrder->order);
+            }
 
+            $canceller = $request->user();
             $cancelTraderOrder->handle(
                 $traderOrder,
                 $canceller,
