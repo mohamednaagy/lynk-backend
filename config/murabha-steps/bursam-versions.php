@@ -41,8 +41,6 @@ return [
         BursamMurabhaStep::PurchasingCommodity => [
             FinancingOrderHistory::GetTtiHoldingCertificateDocument,
             FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
-        ],
-        BursamMurabhaStep::TransferOwnershipToLender => [
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ],
         BursamMurabhaStep::ContractSigned => [
@@ -56,7 +54,10 @@ return [
             FinancingOrderHistory::ClientWakalaAccepted,
         ],
         BursamMurabhaStep::MurabahaSaleCompleted => [
-            FinancingOrderHistory::GetSellingToBursaCertificate,
+            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+            FinancingOrderHistory::CommoditySoldToMarket,
+            FinancingOrderHistory::GetOwnershipToCustomerCertificate,
+            FinancingOrderHistory::GetSellingToMarketCertificate,
             FinancingOrderHistory::MurabahaSaleCompleted,
         ],
     ],

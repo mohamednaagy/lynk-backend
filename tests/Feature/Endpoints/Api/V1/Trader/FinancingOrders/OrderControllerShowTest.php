@@ -91,7 +91,10 @@ class OrderControllerShowTest extends TestCase
             ->getJson(self::$endpoint.self::$order->id)
             ->assertOk()
             ->assertExactJson(
-                fractal((new GetOrderAction())->setCompany(tenant())->handle(self::$order->id), new FinancingOrderTransformer())
+                fractal(
+                    (new GetOrderAction())->setCompany(tenant())->handle(self::$order->id),
+                    (new FinancingOrderTransformer())->setArea(Area::Trader)
+                )
                     ->parseIncludes([
                         'id',
                         'amount',

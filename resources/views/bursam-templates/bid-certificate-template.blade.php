@@ -69,9 +69,9 @@
 <body>
 <div class="container">
     <div class="header">
-        <img src="logo.png" alt="Logo" width="100">
+        <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('logo.png'))) }}" alt="Logo" width="150">
         <div class="title">Ownership Certificate</div>
-        <div class="subtitle">Certificate No: CPO03MAY23-0000040-000</div>
+        <div class="subtitle">Certificate No: {{$e_cert_no}}</div>
         <p>This is to certify that the following transaction has been executed through the BURSA Suq Al-Sila' in
             accordance with the Rules of Bursa Malaysia Islamic Services Sdn. Bhd.</p>
     </div>
@@ -89,11 +89,11 @@
             </tr>
             <tr>
                 <td>Bid No:</td>
-                <td>{{ $bidno }}</td>
+                <td>{{ $bid_no }}</td>
             </tr>
             <tr>
                 <td>Total Value:</td>
-                <td>{{ $totalvalue }} {{ $currency }}</td>
+                <td>{{ $total_value }} {{ $currency }}</td>
             </tr>
             <tr>
                 <td>Price:</td>
@@ -105,19 +105,19 @@
             </tr>
             <tr>
                 <td>Purchase Time/Date:</td>
-                <td>{{ $purchase_timedate }}</td>
+                <td>{{ $purchase_time_date }}</td>
             </tr>
             <tr>
                 <td>Value Date:</td>
-                <td>{{ $valuedate }}</td>
+                <td>{{ $value_date }}</td>
             </tr>
             <tr>
                 <td>Product Name:</td>
-                <td>{{ $pname }}</td>
+                <td>{{ $p_name }}</td>
             </tr>
             <tr>
                 <td>Product Volume:</td>
-                <td>{{ $pvolume }}</td>
+                <td>{{ $p_volume }}</td>
             </tr>
             <tr>
                 <td>Line:</td>
@@ -138,11 +138,6 @@
             </tr>
             </tbody>
         </table>
-        <p>This certificate is non-transferable and must be presented upon request.</p>
-    </div>
-    <div class="footer">
-        <p>Issued on 03 May 2023 by XYZ Company</p>
-        <p>For inquiries, please contact us at info@xyzcompany.com</p>
     </div>
 </div>
 </body>

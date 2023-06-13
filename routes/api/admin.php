@@ -21,9 +21,11 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderSetting;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderStatuses;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderUserController;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\CancelOrder as CancelFinancingOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\CompleteOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\RetryProceedOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrderController;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\CancelTraderOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabahaPurchaseOffer;
@@ -104,6 +106,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::post('trader-orders', [TraderOrderController::class, 'store']);
             Route::post('retry', RetryProceedOrder::class);
             Route::post('complete', CompleteOrder::class);
+            Route::put('/cancel', CancelFinancingOrder::class);
             Route::put('payment-proof', UpdateOrderPaymentProof::class);
             Route::prefix('/trader-orders/{trader_order}')->group(function () {
                 Route::post('/proceed', MakeOrderProceed::class);
@@ -115,6 +118,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                 Route::post('/selling-commodity-to-client', UpdateCommodityCertificateForClient::class);
                 Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
                 Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
+                Route::put('/cancel', CancelTraderOrder::class);
             });
         });
 

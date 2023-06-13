@@ -3,6 +3,7 @@
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Enums\FinancingOrderHistory;
+use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
@@ -37,6 +38,7 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldQueue, ShouldBeU
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
+                ->where('status', TraderOrderStatus::InProgress)
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
@@ -44,7 +46,8 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldQueue, ShouldBeU
                 return;
             }
 
-            Trader::driver('bursam', $traderOrder->version)->createSellingCommodityToCustomerDocument($traderOrder);
+            Trader::driver('bursam', $traderOrder->version)
+                ->createSellingCommodityToCustomerDocument($traderOrder);
         });
     }
 

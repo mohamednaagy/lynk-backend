@@ -30,7 +30,6 @@ class TraderHistoryObserver
     public function created(TraderHistory $traderHistory)
     {
         $traderOrder = $traderHistory->traderOrder()->withLastHistoryAction()->first();
-
         Trader::driver($traderOrder->provider, $traderOrder->version)
             ->dispatchJobForTransitioningFlow($traderOrder);
 

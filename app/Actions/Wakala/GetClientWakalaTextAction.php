@@ -3,6 +3,7 @@
 namespace App\Actions\Wakala;
 
 use App\Actions\Contracts\Wakala\GetClientWakalaText;
+use App\Enums\BursamProductCode;
 use App\Models\TraderOrder;
 
 class GetClientWakalaTextAction implements GetClientWakalaText
@@ -40,7 +41,9 @@ class GetClientWakalaTextAction implements GetClientWakalaText
                 $time,
                 $commodityNumber,
                 $amount,
-                $commodity,
+                in_array($commodity, BursamProductCode::getValues())
+                    ? BursamProductCode::fromValue($commodity)->description
+                    : $commodity,
                 $commodityPrice,
                 $clientName,
                 $clientNationalId,

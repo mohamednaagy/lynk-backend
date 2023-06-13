@@ -7,6 +7,7 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\Facades\Trader;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -97,15 +98,14 @@ class TraderOrder extends Model implements HasMedia
         return $this->hasMany(TraderHistory::class, 'trader_order_id', 'id');
     }
 
-    public function isCancellable(): bool
+    public function isCancellable(?string $area): bool
     {
         if ($this->status->isNot(TraderOrderStatus::InProgress)) {
             return false;
         }
 
-        $traderHistoryActions = $this->traderHistories->pluck('action')->toArray();
-
-        return ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions));
+        return Trader::driver($this->provider, $this->version)
+            ->isTraderOrderCancellable($this, $area);
     }
 
     public function checkOrderStepComplete(string $step): bool
@@ -121,15 +121,21 @@ class TraderOrder extends Model implements HasMedia
             ->first();
     }
 
-    public function doesLastActionMatchWith($action): bool
+    public function doesLastActionMatchWith($actions): bool
     {
-        if (! in_array($action, FinancingOrderHistory::getValues())) {
-            throw new UnexpectedValueException('invalid Action');
+        if (! is_array($actions)) {
+            $actions = [$actions];
+        }
+
+        foreach ($actions as $action) {
+            if (! in_array($action, FinancingOrderHistory::getValues())) {
+                throw new UnexpectedValueException('invalid Action');
+            }
         }
 
         $lastAction = $this->traderHistories()->latest('id')->first();
 
-        return $lastAction->action == $action;
+        return in_array($lastAction->action, $actions);
     }
 
     public function checkOrderHistoryAction($action): bool

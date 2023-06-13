@@ -2,6 +2,8 @@
 
 namespace App\Jobs\General;
 
+use App\Actions\Contracts\Orders\CanCreateOrder;
+use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
@@ -42,17 +44,19 @@ class ProcessInProgressOrder implements ShouldQueue
     {
         $driver = config('trader.default');
         $trader = Trader::driver($driver, get_latest_version_of_trader($driver));
-        DB::transaction(function () use ($trader) {
+        DB::multipleTransaction(function () use ($trader) {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
             if ($financingOrder->traderOrders()->whereIn('status', [
                 TraderOrderStatus::InProgress,
             ])->count() > 0) {
                 return;
             }
-
             if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::InProgress)) {
                 return;
             }
+
+            app(CanCreateOrder::class)->handle($financingOrder->company);
+            app(DeductBalanceForNewOrder::class)->handle($financingOrder);
 
             $trader->createTraderOrder($financingOrder);
 

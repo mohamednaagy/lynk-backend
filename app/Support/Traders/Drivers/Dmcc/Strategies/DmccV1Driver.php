@@ -27,6 +27,17 @@ class DmccV1Driver implements TraderInterface
 
     protected $version = 'v1';
 
+    const notCancellableActions = [
+        FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+        FinancingOrderHistory::AttachMpoDocument,
+        FinancingOrderHistory::IssueMurabahaOffer,
+        FinancingOrderHistory::MurabahaSaleCompleted,
+        FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+        FinancingOrderHistory::ContractSigned,
+        FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
+        FinancingOrderHistory::OrderCancelled,
+    ];
+
     use DmccTraderHelperTrait {
         createTraderOrder as traitCreateTraderOrder;
     }
@@ -206,6 +217,35 @@ class DmccV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
+    public function cancelTraderOrder(TraderOrder $traderOrder): object
+    {
+        $response = $this->soap
+            ->baseWsdl($this->prefixUrl('cancelTTI'))
+            ->call('cancelTTI', $requestBody = [
+                'ttiId' => $traderOrder->reference,
+                'comments' => 'Cancel Order',
+                'confirmAction' => 'true',
+            ]);
+
+        if (! $this->isSuccess($response)) {
+            throw new TraderException(
+                'Failed to get cancel order',
+                [
+                    'provider' => $this->provider,
+                    'version' => $this->version,
+                    'trader_order_id' => $traderOrder->id,
+                    'provider_request_body' => $requestBody,
+                    'provider_response_body' => $response->body(),
+                ]
+            );
+        }
+
+        return $response->object();
+    }
+
+    /**
+     * @throws TraderException
+     */
     public function respondPtpService(string $ttiId): object
     {
         $response = $this->soap
@@ -233,9 +273,6 @@ class DmccV1Driver implements TraderInterface
     }
 
     /**
-     * @param $traderOrder
-     * @return void
-     *
      * @throws TraderException
      */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
@@ -260,7 +297,7 @@ class DmccV1Driver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'products' => $traderOrder->products,
+                    'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
                     'amount' => $amount,
                     'product_name' => $productName,
                     'customer_name' => $customerName,
@@ -313,9 +350,6 @@ class DmccV1Driver implements TraderInterface
     }
 
     /**
-     * @param $traderOrder
-     * @return void
-     *
      * @throws TraderException
      */
     public function createTransferOwnershipToLenderDocument($traderOrder): void
@@ -333,7 +367,7 @@ class DmccV1Driver implements TraderInterface
                 'transfer-ownership-to-lender',
                 [
                     'order_id' => $traderOrder->order->id,
-                    'products' => $traderOrder->products,
+                    'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
@@ -470,7 +504,7 @@ class DmccV1Driver implements TraderInterface
         }
     }
 
-    public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
+    public function sellCommodityToOpenMarket(TraderOrder $traderOrder)
     {
     }
 
@@ -487,5 +521,12 @@ class DmccV1Driver implements TraderInterface
         if ($dispatchableJob) {
             $dispatchableJob::dispatch($traderOrder->id);
         }
+    }
+
+    public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
+    {
+        $traderHistoryActions = $traderOrder->traderHistories->pluck('action')->toArray();
+
+        return empty(array_intersect(self::notCancellableActions, $traderHistoryActions));
     }
 }

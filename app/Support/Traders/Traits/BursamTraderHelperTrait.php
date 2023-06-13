@@ -26,6 +26,14 @@ trait BursamTraderHelperTrait
             FinancingOrderHistory::ClientWakalaAccepted => null,
         ],
         BursamMurabhaStep::MurabahaSaleCompleted => [
+            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
+            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
+                'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
+                'file' => 'document',
+            ],
+            FinancingOrderHistory::CommoditySoldToMarket => null,
+            FinancingOrderHistory::GetOwnershipToCustomerCertificate => null,
+            FinancingOrderHistory::GetSellingToMarketCertificate => null,
             FinancingOrderHistory::MurabahaSaleCompleted => null,
         ],
     ];

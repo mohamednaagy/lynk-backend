@@ -2,6 +2,8 @@
 
 namespace App\Support\DataTransferObjects;
 
+use App\Enums\BursamProductCode;
+
 class CommodityProductDto
 {
     public function __construct(
@@ -11,7 +13,7 @@ class CommodityProductDto
         protected string $previous_owner,
         protected string $date_time_of_purchasing_commodity,
         protected string $uom = '--',
-        protected string $warehouse = '--',
+        protected string|null $warehouse = null,
         protected string $warehouse_or_vault_emirates = '--',
         protected string $warehouse_or_vault_country = '--',
         protected string $currency = 'SAR',
@@ -21,7 +23,9 @@ class CommodityProductDto
 
     public function getProduct(): string
     {
-        return $this->product;
+        return in_array($this->product, BursamProductCode::getValues())
+             ? BursamProductCode::fromValue($this->product)->description
+             : $this->product;
     }
 
     public function getQuantity(): string
@@ -41,7 +45,11 @@ class CommodityProductDto
 
     public function getWarehouse(): string
     {
-        return $this->warehouse;
+        if ($this->warehouse) {
+            return $this->warehouse;
+        }
+
+        return '';
     }
 
     public function getPreviousOwner(): string
@@ -58,7 +66,7 @@ class CommodityProductDto
             $data['previous_owner'],
             $data['date_time_of_purchasing_commodity'],
             $data['uom'] ?? '--',
-            $data['warehouse'] ?? '--',
+            $data['warehouse'] ?? '',
             $data['warehouse_or_vault_emirates'] ?? '--',
             $data['warehouse_or_vault_country'] ?? '--',
             $data['currency'] ?? 'SAR',

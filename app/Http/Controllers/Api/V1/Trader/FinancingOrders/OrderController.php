@@ -56,7 +56,7 @@ class OrderController extends Controller
             },
         ]);
 
-        return fractal($order, new FinancingOrderTransformer())
+        return fractal($order, (new FinancingOrderTransformer())->setArea(Area::Trader))
             ->parseIncludes([
                 'id',
                 'amount',

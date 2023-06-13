@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
+use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\General\ProcessAskClientForWakala;
@@ -10,7 +11,9 @@ use App\Models\TraderOrder;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamBidCertificate;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultNYY;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultYNN;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOtcCertificate;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamSellingCommodityToOpenMarket;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificate;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamTransferOwnershipToCustomer;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamTransferOwnershipToLender;
 use Illuminate\Database\Eloquent\Model;
@@ -49,11 +52,31 @@ class BursamV2Driver extends BursamV1Driver
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessAskClientForWakala::class,
             FinancingOrderHistory::ClientWakalaAccepted => ProcessBursamSellingCommodityToOpenMarket::class,
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => ProcessBursamOrderResultNYY::class,
+            FinancingOrderHistory::CommoditySoldToMarket => ProcessBursamOtcCertificate::class,
+            FinancingOrderHistory::GetOwnershipToCustomerCertificate => ProcessBursamStbCertificate::class,
             default => null,
         };
 
         if ($dispatchableJob) {
             $dispatchableJob::dispatch($traderOrder->id);
         }
+    }
+
+    public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
+    {
+        return $this->isNotInTransitionStateForSellingOrBuying($traderOrder)
+            && $this->isNotInContractSignedForLenderArea($traderOrder, $area);
+    }
+
+    protected function isNotInTransitionStateForSellingOrBuying(TraderOrder $traderOrder)
+    {
+        return ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)
+            && ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
+    }
+
+    protected function isNotInContractSignedForLenderArea(TraderOrder $traderOrder, $area)
+    {
+        return $area !== Area::Lender
+            || ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::ContractSigned);
     }
 }

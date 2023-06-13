@@ -54,6 +54,7 @@ class OrderController extends Controller
                 'amount',
                 'selling_price',
                 'status_reason',
+                'current_step',
                 'creator',
                 'created_at',
             ])
@@ -74,7 +75,7 @@ class OrderController extends Controller
             'traderOrders.traderHistories',
         ]);
 
-        return fractal($order, new FinancingOrderTransformer())
+        return fractal($order, (new FinancingOrderTransformer())->setArea(Area::SuperAdmin))
             ->parseIncludes([
                 'id',
                 'status',
@@ -91,6 +92,7 @@ class OrderController extends Controller
                 'can_be_completed',
                 'can_create_trader_order',
                 'is_updatable',
+                'is_cancellable',
                 'approver',
                 'trader_orders.id',
                 'trader_orders.reference',

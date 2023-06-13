@@ -2,6 +2,7 @@
 
 use App\Enums\BursamMurabhaStep;
 use App\Enums\DmccMurabhaStep;
+use Illuminate\Support\Collection;
 use Modules\Grantify\Facades\Grantify;
 
 if (! function_exists('validate_said')) {
@@ -88,12 +89,14 @@ if (! function_exists('get_file_url')) {
     }
 }
 
-if (! function_exists('get_murabha_steps_dictionary')) {
-    function get_murabha_steps_dictionary($provider = 'fake', $version = null): array
+if (! function_exists('get_murabha_step_enum')) {
+    function get_murabha_step_enum($provider): string
     {
+        $provider = $provider ?? config('trader.default');
+
         return match ($provider) {
-            'dmcc', 'fake' => DmccMurabhaStep::getStepsOfVersion($version),
-            'bursam' => BursamMurabhaStep::getStepsOfVersion($version),
+            'dmcc', 'fake' => DmccMurabhaStep::class,
+            'bursam' => BursamMurabhaStep::class,
             default => throw new \InvalidArgumentException('Invalid trader')
         };
     }
@@ -123,3 +126,9 @@ if (! function_exists('trader_step_histories')) {
         };
     }
 }
+
+// if (! function_exists('format_products')) {
+//     function format_products(Collection $products, $separator = '،'): array
+//     {
+//     }
+// }

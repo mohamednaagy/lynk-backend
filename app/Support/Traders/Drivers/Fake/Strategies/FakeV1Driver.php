@@ -24,12 +24,23 @@ class FakeV1Driver implements TraderInterface
 
     protected $version = 'v1';
 
+    const notCancellableActions = [
+        FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
+        FinancingOrderHistory::AttachMpoDocument,
+        FinancingOrderHistory::IssueMurabahaOffer,
+        FinancingOrderHistory::MurabahaSaleCompleted,
+        FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+        FinancingOrderHistory::ContractSigned,
+        FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
+        FinancingOrderHistory::OrderCancelled,
+    ];
+
     use FakeTraderHelperTrait {
         createTraderOrder as traitCreateTraderOrder;
     }
 
     /**
-     * @return bool
+     * @throws TraderException
      */
     public function acceptAgreement(): bool
     {
@@ -155,11 +166,12 @@ class FakeV1Driver implements TraderInterface
         return $response->json('data.ttiId');
     }
 
-    /**
-     * @param  FinancingOrder  $financingOrder
-     * @return bool
-     */
     public function cancelOrder(FinancingOrder $financingOrder): bool
+    {
+        return true;
+    }
+
+    public function cancelTraderOrder(TraderOrder $traderOrder): bool
     {
         return true;
     }
@@ -192,9 +204,6 @@ class FakeV1Driver implements TraderInterface
     }
 
     /**
-     * @param $traderOrder
-     * @return void
-     *
      * @throws TraderException
      */
     public function createSellingCommodityToCustomerDocument($traderOrder): void
@@ -219,7 +228,7 @@ class FakeV1Driver implements TraderInterface
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
-                    'products' => $traderOrder->products,
+                    'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
                     'amount' => $amount,
                     'product_name' => $productName,
                     'customer_name' => $customerName,
@@ -288,7 +297,7 @@ class FakeV1Driver implements TraderInterface
                 'transfer-ownership-to-lender',
                 [
                     'order_id' => $traderOrder->order->id,
-                    'products' => $traderOrder->products,
+                    'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
                     'reference_number' => $traderOrder->id,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()?->name,
                     'order_number' => $traderOrder->financing_order_id,
@@ -383,7 +392,7 @@ class FakeV1Driver implements TraderInterface
         // TODO: Implement ownershipToCustomer() method.
     }
 
-    public function sellingCommodityToOpenMarket(TraderOrder $traderOrder)
+    public function sellCommodityToOpenMarket(TraderOrder $traderOrder)
     {
         // TODO: Implement sellingCommodity() method.
     }
@@ -392,8 +401,8 @@ class FakeV1Driver implements TraderInterface
     {
         $dispatchableJob = match ((int) $traderOrder->last_history_action) {
             FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::class,
-            FinancingOrderHistory::ContractSigned => ProcessAskClientForWakala::class,
-            FinancingOrderHistory::ClientWakalaAccepted => ProcessDmccSellingCommodityToCustomerOrder::class,
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAskClientForWakala::class,
+            FinancingOrderHistory::ContractSigned => ProcessDmccSellingCommodityToCustomerOrder::class,
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::class,
             default => null,
         };
@@ -401,5 +410,12 @@ class FakeV1Driver implements TraderInterface
         if ($dispatchableJob) {
             $dispatchableJob::dispatch($traderOrder->id);
         }
+    }
+
+    public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area): bool
+    {
+        $traderHistoryActions = $traderOrder->traderHistories->pluck('action')->toArray();
+
+        return empty(array_intersect(self::notCancellableActions, $traderHistoryActions));
     }
 }

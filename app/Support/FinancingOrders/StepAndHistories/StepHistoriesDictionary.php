@@ -6,9 +6,10 @@ class StepHistoriesDictionary
 {
     public \SplDoublyLinkedList $dictionaryNodeList;
 
-    public function __construct($trader, $version = null)
+    public function __construct($trader = null, $version = null)
     {
         $this->dictionaryNodeList = new \SplDoublyLinkedList();
+        $trader = $trader ?? config('trader.default');
         $version = $version ?? get_latest_version_of_trader($trader);
 
         foreach (trader_step_histories($trader, $version) as $step => $histories) {

@@ -69,9 +69,9 @@
 <body>
 <div class="container">
     <div class="header">
-        <img src="logo.png" alt="Logo" width="100">
+        <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('logo.png'))) }}" alt="Logo" width="150">
         <div class="title">Ownership Certificate</div>
-        <div class="subtitle">Certificate No: CPO03MAY23-0000040-000</div>
+        <div class="subtitle">Certificate No: {{$e_cert_no}}</div>
         <p>This is to certify that the following transaction has been executed through the BURSA Suq Al-Sila' in
             accordance with the Rules of Bursa Malaysia Islamic Services Sdn. Bhd.</p>
     </div>
@@ -93,7 +93,7 @@
             </tr>
             <tr>
                 <td>Murabha Value:</td>
-                <td>{{ $murabaha_value }}</td>
+                <td>{{ $murabaha_value }} {{ $currency }}</td>
             </tr>
             <tr>
                 <td>Price:</td>
@@ -138,12 +138,7 @@
             </tr>
             </tbody>
         </table>
-        <p>This certificate is non-transferable and must be presented upon request.</p>
     </div>
-<div class="footer">
-    <p>Issued on 03 May 2023 by XYZ Company</p>
-    <p>For inquiries, please contact us at info@xyzcompany.com</p>
-</div>
 </div>
 </body>
 </html>

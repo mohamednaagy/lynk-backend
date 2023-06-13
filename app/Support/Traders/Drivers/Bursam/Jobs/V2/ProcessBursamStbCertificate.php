@@ -3,8 +3,10 @@
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Enums\FinancingOrderHistory;
+use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\BursamTraderHelperTrait;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -17,7 +19,11 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessBursamStbCertificate implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, BursamTraderHelperTrait, StopsTraderOrderOnJobFailure;
+
+    public $tries = 3;
+
+    public $backoff = 60;
 
     /**
      * Create a new job instance.
@@ -37,6 +43,7 @@ class ProcessBursamStbCertificate implements ShouldQueue, ShouldBeUnique
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
+                ->where('status', TraderOrderStatus::InProgress)
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
@@ -45,6 +52,12 @@ class ProcessBursamStbCertificate implements ShouldQueue, ShouldBeUnique
             }
 
             Trader::driver('bursam', $traderOrder->version)->getStbCertificateDetails($traderOrder);
+
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::MurabahaSaleCompleted);
+
+            $traderOrder->update([
+                'status' => TraderOrderStatus::Completed,
+            ]);
         });
     }
 
