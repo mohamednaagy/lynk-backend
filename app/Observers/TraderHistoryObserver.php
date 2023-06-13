@@ -2,23 +2,16 @@
 
 namespace App\Observers;
 
-use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommodityPurchased;
-use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommoditySoldToCustomer;
-use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsMurabhaOfferIssued;
-use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
-use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
-use App\Enums\BursamMurabhaStep;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\TraderOrderStatus;
-use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
 use App\Models\TraderHistory;
-use App\Settings\Classes\GeneralSettings;
+use App\Observers\Traits\ObserverHelper;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
-use Illuminate\Support\Facades\Log;
 
 class TraderHistoryObserver
 {
+    use ObserverHelper;
+
     /**
      * Handle the TraderHistory "created" event.
      *
@@ -32,84 +25,27 @@ class TraderHistoryObserver
     public function created(TraderHistory $traderHistory)
     {
         $traderOrder = $traderHistory->traderOrder()->withLastHistoryAction()->first();
-        Log::debug('observer', [$traderOrder->last_history_action]);
+
         Trader::driver($traderOrder->provider, $traderOrder->version)
             ->dispatchJobForTransitioningFlow($traderOrder);
 
-        $timeout = app(GeneralSettings::class)->trader_order_timeout;
-
-        // some Order at last step so no next step I think  another mail content needed
         $currentStepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderHistory->action);
-
-        if (! $currentStepNode) {
-            return;
-        }
-
-        $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($currentStepNode->step);
-
-        if ($nextStepNode) {
-            NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $traderHistory->action)
-                ->delay(now());
-        }
+        $this->notifyAdminsAboutOrderStopped($traderHistory, $currentStepNode);
 
         if ($traderHistory->traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
             return;
         }
 
-        $stepNode = app(StepHistoriesDictionary::class)->getCompletedStepByHistory($traderHistory->action);
+        $currentCompletedStepNode = app(StepHistoriesDictionary::class)->getCompletedStepByHistory($traderHistory->action);
+        $this->fireWebhookWhenStatusIsMurabhaOfferIssued($traderOrder, $currentCompletedStepNode);
 
-        $financingOrder = $traderHistory->traderOrder->order;
-
-        if ($stepNode?->step === $this->getStepMurabhaOfferIssuedOfProvider($traderOrder->provider)) {
-            app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)->handle($financingOrder);
-
+        if (is_null($traderHistory->traderOrder->products)) {
             return;
         }
 
-        if (empty($traderHistory->traderOrder->products)) {
-            return;
+        foreach ($this->getActionsOfProvider($traderOrder->provider, $currentCompletedStepNode) as $action) {
+            app($action)->handle($traderOrder->order, $traderHistory->traderOrder);
         }
-
-        foreach ($this->getActionsOfProvider($traderOrder->provider, $stepNode) as $action) {
-            app($action)->handle($financingOrder, $traderHistory->traderOrder);
-        }
-    }
-
-    private function getActionsOfProvider($provider, $stepNode): array
-    {
-        return match ($provider) {
-            'fake','dmcc' => match ($stepNode->step) {
-                DmccMurabhaStep::CommoditySoldToCustomer => [
-                    SendSmsWhenStatusIsCommoditySoldToCustomer::class,
-                    FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
-                ],
-                DmccMurabhaStep::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
-                DmccMurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
-                default => []
-            },
-            'bursam' => [
-                BursamMurabhaStep::CommoditySoldToCustomer => [
-                    SendSmsWhenStatusIsCommoditySoldToCustomer::class,
-                    FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
-                ],
-                BursamMurabhaStep::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
-                BursamMurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
-            ],
-            default => []
-        };
-    }
-
-    private function getStepMurabhaOfferIssuedOfProvider($provider)
-    {
-        return match ($provider) {
-            'fake','dmcc' => [
-                DmccMurabhaStep::MurabhaOfferIssued,
-            ],
-            'bursam' => [
-                BursamMurabhaStep::MurabhaOfferIssued,
-            ],
-            default => []
-        };
     }
 
     /**
