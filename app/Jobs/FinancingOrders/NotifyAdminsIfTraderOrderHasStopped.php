@@ -40,7 +40,7 @@ class NotifyAdminsIfTraderOrderHasStopped implements ShouldQueue
             ->withLastHistoryAction()
             ->first();
 
-        if ($traderOrder->last_history_action === $this->historyActionBeforeDispatching) {
+        if ($traderOrder->last_history_action != (string) $this->historyActionBeforeDispatching) {
             $admins = User::role([Role::Admin])->get();
             Notification::send($admins, new TraderOrderProgressStopped($this->traderOrder));
         }

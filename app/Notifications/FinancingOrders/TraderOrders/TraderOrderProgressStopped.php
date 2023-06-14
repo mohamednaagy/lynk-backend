@@ -31,24 +31,18 @@ class TraderOrderProgressStopped extends Notification
 
     /**
      * Get the notification's delivery channels.
-     *
-     * @param  mixed  $notifiable
-     * @return array
      */
     public function via(mixed $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     /**
      * Get the mail representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     * @return MailMessage
      */
     public function toMail(mixed $notifiable): MailMessage
     {
-        $traderOrder = $this->traderOrder->withLastHistoryAction()->first();
+        $traderOrder = $this->traderOrder->withLastHistoryAction()->latest()->first();
         $currentStepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderOrder->last_history_action);
         $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($currentStepNode->step);
 
@@ -71,7 +65,9 @@ class TraderOrderProgressStopped extends Notification
     public function toArray($notifiable)
     {
         return [
-            //
+            'order_id' => $this->traderOrder->id,
+            'time' => now(),
+
         ];
     }
 }
