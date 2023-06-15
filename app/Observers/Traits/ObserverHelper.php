@@ -28,9 +28,9 @@ trait ObserverHelper
 
         if ($nextStepNode) {
             if (($nextStepNode->step) && ($this->getStepIfPurchasingCommodityOrCommoditySoldToOpenMarket($nextStepNode->step))) {
-                $delayThreshold = 1;
+                $delayTime = app(GeneralSettings::class)->trader_order_delay_time;
                 NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $traderHistory->action, $nextStepNode->step)
-                    ->delay(now()->addMinutes($delayThreshold));
+                    ->delay(now()->addMinutes($delayTime));
             } else {
                 $timeout = app(GeneralSettings::class)->trader_order_timeout;
                 NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $traderHistory->action)
