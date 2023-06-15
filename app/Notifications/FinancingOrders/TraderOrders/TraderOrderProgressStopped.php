@@ -52,7 +52,7 @@ class TraderOrderProgressStopped extends Notification
             ]))
             ->line(__('emails/trader-order-stopped.body', [
                 'order_id' => $this->traderOrder->id,
-                'next_step' => $nextStepNode->step,
+                'next_step' => $nextStepNode?->step,
             ]));
     }
 

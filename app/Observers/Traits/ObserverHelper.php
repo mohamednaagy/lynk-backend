@@ -27,9 +27,15 @@ trait ObserverHelper
         $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($currentStepNode->step);
 
         if ($nextStepNode) {
-            $timeout = app(GeneralSettings::class)->trader_order_timeout;
-            NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $traderHistory->action)
-                ->delay(now()->addMinutes($timeout));
+            if (($nextStepNode->step) && ($this->getStepIfPurchasingCommodityOrCommoditySoldToOpenMarket($nextStepNode->step))) {
+                $delayThreshold = 1;
+                NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $traderHistory->action, $nextStepNode->step)
+                    ->delay(now()->addMinutes($delayThreshold));
+            } else {
+                $timeout = app(GeneralSettings::class)->trader_order_timeout;
+                NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $traderHistory->action)
+                    ->delay(now()->addMinutes($timeout));
+            }
         }
 
         return true;
@@ -84,6 +90,17 @@ trait ObserverHelper
                 default => []
             },
             default => []
+        };
+    }
+
+    private function getStepIfPurchasingCommodityOrCommoditySoldToOpenMarket($step)
+    {
+        return match ($step) {
+            BursamMurabhaStep::PurchasingCommodity,
+            BursamMurabhaStep::MurabahaSaleCompleted,
+            DmccMurabhaStep::PurchasingCommodity,
+            DmccMurabhaStep::MurabahaSaleCompleted => $step,
+            default => null,
         };
     }
 }
