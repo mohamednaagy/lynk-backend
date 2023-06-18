@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders;
 
+use App\Enums\TraderOrderType;
+use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -27,6 +29,7 @@ class StoreTradingRequest extends FormRequest
         return [
             'trader' => ['required', 'string', Rule::in(['fake', 'dmcc', 'bursam'])],
             'reference_number' => ['required', 'string', 'max:100'],
+            'type' => ['required', 'string', new EnumValue(TraderOrderType::class)],
         ];
     }
 }

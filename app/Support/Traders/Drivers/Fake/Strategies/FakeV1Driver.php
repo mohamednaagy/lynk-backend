@@ -12,7 +12,7 @@ use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoOrder;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccRespondedToPtpOrder;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccSellingCommodityToCustomerOrder;
-use App\Support\Traders\Traits\FakeTraderHelperTrait;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Http\Client\Response;
@@ -20,6 +20,10 @@ use Illuminate\Support\Facades\Http;
 
 class FakeV1Driver implements TraderInterface
 {
+    use TraderHelperTrait {
+        createTraderOrder as traitCreateTraderOrder;
+    }
+
     protected $provider = 'fake';
 
     protected $version = 'v1';
@@ -34,10 +38,6 @@ class FakeV1Driver implements TraderInterface
         FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
         FinancingOrderHistory::OrderCancelled,
     ];
-
-    use FakeTraderHelperTrait {
-        createTraderOrder as traitCreateTraderOrder;
-    }
 
     /**
      * @throws TraderException

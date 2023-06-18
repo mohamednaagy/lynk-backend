@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Traits;
 
+use App\Enums\BursamProductCode;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -9,7 +10,9 @@ use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 trait TraderHelperTrait
 {
@@ -101,5 +104,15 @@ trait TraderHelperTrait
                 'date_time_of_purchasing_commodity' => $product['date_time_of_purchasing_commodity'],
             ]);
         });
+    }
+
+    public function getUnusedProductCode()
+    {
+        $productCodes = BursamProductCode::getValues();
+        $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
+
+        $availableProductCodes = array_diff($productCodes, $unavailableProductCodes);
+
+        return Arr::first(empty($availableProductCodes) ? array_filter($productCodes) : $availableProductCodes);
     }
 }

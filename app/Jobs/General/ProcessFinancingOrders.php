@@ -4,6 +4,7 @@ namespace App\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
+use App\Enums\TraderOrderType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -18,7 +19,7 @@ class ProcessFinancingOrders implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $providersWithVersions = [
+    protected array $providersWithVersions = [
         [
             'provider' => 'dmcc',
             'versions' => ['v1'],
@@ -38,11 +39,10 @@ class ProcessFinancingOrders implements ShouldQueue
      */
     public function handle(): void
     {
-
         FinancingOrder::query()
             ->where('status', FinancingOrderStatus::Approved)
             ->withCount(['traderOrders' => function ($query) {
-                $query->where($this->scopeToProivdersWithVerisonsClosure())
+                $query->where($this->scopeToProvidersWithVersionsClosure())
                     ->whereIn('status', [
                         TraderOrderStatus::InProgress,
                     ]);
@@ -56,7 +56,8 @@ class ProcessFinancingOrders implements ShouldQueue
 
         TraderOrder::query()
             ->withLastHistoryAction()
-            ->where($this->scopeToProivdersWithVerisonsClosure())
+            ->type(TraderOrderType::Automatic)
+            ->where($this->scopeToProvidersWithVersionsClosure())
             ->whereIn('status', [
                 TraderOrderStatus::InProgress,
             ])->chunk(10, function ($traderOrderCollection) {
@@ -67,7 +68,7 @@ class ProcessFinancingOrders implements ShouldQueue
             });
     }
 
-    protected function scopeToProivdersWithVerisonsClosure()
+    protected function scopeToProvidersWithVersionsClosure(): \Closure
     {
         return function ($query) {
             $isFirstLoopComplete = false;
@@ -90,7 +91,7 @@ class ProcessFinancingOrders implements ShouldQueue
         };
     }
 
-    protected function scopeToProviderAndVersionsClosure($provider, $verions)
+    protected function scopeToProviderAndVersionsClosure($provider, $verions): \Closure
     {
         return fn ($query) => $query->where('provider', $provider)
             ->whereIn('version', $verions);

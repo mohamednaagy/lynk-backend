@@ -5,12 +5,12 @@ namespace App\Actions\Admins\Lenders\Orders;
 use App\Actions\Contracts\Admins\Lenders\Orders\ProceedSellingCommodity;
 use App\Enums\FinancingOrderHistory;
 use App\Models\FinancingOrder;
-use App\Support\Traders\Traits\DmccTraderHelperTrait;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Support\Facades\DB;
 
 class ProceedSellingCommodityAction implements ProceedSellingCommodity
 {
-    use DmccTraderHelperTrait;
+    use TraderHelperTrait;
 
     public function handle(FinancingOrder $financingOrder)
     {

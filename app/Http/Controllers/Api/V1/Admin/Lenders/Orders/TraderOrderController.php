@@ -39,11 +39,7 @@ class TraderOrderController extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($request, $createTraderOrder, $order) {
             $data = $request->validated();
-            if ($data['trader'] == 'bursam') {
-                $data['version'] = 'v1';
-            } else {
-                $data['version'] = get_latest_version_of_trader($data['trader']);
-            }
+            $data['version'] = get_latest_version_of_trader($data['trader']);
 
             DB::transaction(function () use ($data, $order, $createTraderOrder) {
                 $financingOrder = FinancingOrder::query()

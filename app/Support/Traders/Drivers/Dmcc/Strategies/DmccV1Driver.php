@@ -12,7 +12,7 @@ use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoOrder;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccRespondedToPtpOrder;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccSellingCommodityToCustomerOrder;
-use App\Support\Traders\Traits\DmccTraderHelperTrait;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use CodeDredd\Soap\Client\Response;
@@ -23,6 +23,10 @@ use Illuminate\Support\Str;
 
 class DmccV1Driver implements TraderInterface
 {
+    use TraderHelperTrait {
+        createTraderOrder as traitCreateTraderOrder;
+    }
+
     protected $provider = 'dmcc';
 
     protected $version = 'v1';
@@ -37,10 +41,6 @@ class DmccV1Driver implements TraderInterface
         FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
         FinancingOrderHistory::OrderCancelled,
     ];
-
-    use DmccTraderHelperTrait {
-        createTraderOrder as traitCreateTraderOrder;
-    }
 
     private SoapClient $soap;
 
