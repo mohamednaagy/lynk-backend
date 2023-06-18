@@ -2,6 +2,8 @@
 
 namespace App\Notifications\FinancingOrders\TraderOrders;
 
+use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -45,6 +47,8 @@ class TraderOrderProgressStopped extends Notification
         $traderOrder = $this->traderOrder->withLastHistoryAction()->latest()->first();
         $currentStepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderOrder->last_history_action);
         $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($currentStepNode->step);
+        $nextStepDescription = $nextStepNode ? $nextStepNode->step : null;
+        $nextStepEnum = $this->getDescriptionFromEnumMurabhaStep($nextStepDescription, BursamMurabhaStep::class, DmccMurabhaStep::class);
 
         return (new MailMessage)
             ->subject(__('emails/trader-order-stopped.subject', [
@@ -52,8 +56,20 @@ class TraderOrderProgressStopped extends Notification
             ]))
             ->line(__('emails/trader-order-stopped.body', [
                 'order_id' => $this->traderOrder->id,
-                'next_step' => $nextStepNode?->step,
+                'next_step' => $nextStepEnum,
             ]));
+    }
+
+    public function getDescriptionFromEnumMurabhaStep($description, ...$enumClasses)
+    {
+        foreach ($enumClasses as $enumClass) {
+            $enumValue = $enumClass::getDescriptionFromEnum($description);
+            if ($enumValue) {
+                return $enumValue;
+            }
+        }
+
+        return null;
     }
 
     /**
