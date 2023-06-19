@@ -21,6 +21,10 @@ class RefundOrderCreationFeesAction implements RefundOrderCreationFees
         $wallet = $company->getWallet(WalletType::CompanyWallet);
 
         $transactions = $wallet->transactions()
+            ->reason([
+                TransactionReason::OrderCreationFee,
+                TransactionReason::VatPercentageFee,
+            ])
             ->whereTraderOrderId($traderOrder->id)
             ->get();
 

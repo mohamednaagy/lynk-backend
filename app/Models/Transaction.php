@@ -63,4 +63,9 @@ class Transaction extends Model implements HasMedia
     {
         return $query->whereJsonContains('meta->trader_order_id', $traderOrderId);
     }
+
+    public function scopeReason($query, array $reasons)
+    {
+        return $query->whereIn('reason', $reasons);
+    }
 }
