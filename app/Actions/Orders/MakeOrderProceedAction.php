@@ -27,9 +27,6 @@ class MakeOrderProceedAction implements MakeOrderProceed
     protected ?UploadedFile $signedClientWakala = null;
 
     /**
-     * @param  TraderOrder  $traderOrder
-     * @param  string  $case
-     * @param  bool  $forceToProceed
      * @return array
      *
      * @throws BindingResolutionException
@@ -47,10 +44,6 @@ class MakeOrderProceedAction implements MakeOrderProceed
     }
 
     /**
-     * @param  TraderOrder  $traderOrder
-     * @param  bool  $forceToProceed
-     * @return array
-     *
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws FileDoesNotExist
      * @throws FileIsTooBig
@@ -99,10 +92,6 @@ class MakeOrderProceedAction implements MakeOrderProceed
     }
 
     /**
-     * @param  TraderOrder  $traderOrder
-     * @param  bool  $forceToProceed
-     * @return array
-     *
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws BindingResolutionException
      */
@@ -143,7 +132,6 @@ class MakeOrderProceedAction implements MakeOrderProceed
     }
 
     /**
-     * @param  UploadedFile  $signedClientWakala
      * @return $this
      */
     public function setSignedClientWakala(UploadedFile $signedClientWakala): static

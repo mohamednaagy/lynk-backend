@@ -7,7 +7,6 @@ use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
-use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
@@ -31,8 +30,6 @@ abstract class BaseDmccStrategy implements TraderStrategyInterface
         );
 
         $this->transferOwnershipToLender($traderOrder, $request);
-
-        ProcessAskClientForWakala::dispatch($traderOrder->id);
     }
 
     protected function transferOwnershipToLender(TraderOrder $traderOrder, $request)

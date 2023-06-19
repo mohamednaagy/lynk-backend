@@ -43,7 +43,7 @@ class BursamStrategyV2 extends BursamStrategyV1
     {
         $traderOrder->ensureCanAccessStep(BursamMurabhaStep::ContractSigned);
 
-        $this->sellingCommodityToCustomer($traderOrder, $request);
+        $this->sellCommodityToCustomer($traderOrder, $request);
     }
 
     public function updateMurabahaPurchaseOffer(TraderOrder $traderOrder, $request)

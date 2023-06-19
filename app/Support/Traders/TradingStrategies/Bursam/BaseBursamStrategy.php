@@ -8,7 +8,6 @@ use App\Enums\BursamMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
-use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
@@ -34,8 +33,6 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
         app(DeductBalanceForNewOrder::class)->handle($traderOrder->order);
 
         $this->transferOwnershipToLender($traderOrder, $request);
-
-        ProcessAskClientForWakala::dispatch($traderOrder->id);
     }
 
     protected function transferOwnershipToLender(TraderOrder $traderOrder, $request)
@@ -72,7 +69,7 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
     {
         $traderOrder->ensureCanAccessStep(BursamMurabhaStep::ClientWakala);
 
-        $this->sellingCommodityToCustomer($traderOrder, $request);
+        $this->sellCommodityToCustomer($traderOrder, $request);
     }
 
     public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
@@ -96,7 +93,7 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
         }
     }
 
-    protected function sellingCommodityToCustomer($traderOrder, $request)
+    protected function sellCommodityToCustomer($traderOrder, $request)
     {
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
 
