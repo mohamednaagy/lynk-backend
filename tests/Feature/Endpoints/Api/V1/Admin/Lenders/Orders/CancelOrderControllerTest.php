@@ -62,7 +62,6 @@ class CancelOrderControllerTest extends TestCase
         );
         self::$orderCancledUrl = self::$endpoint.self::$financingOrder->getRawOriginal('id').'/cancel';
 
-        // create trader order
         self::$financingOrder->traderOrders()->create([
             'provider' => 'fake',
             'reference' => '123456789',
@@ -102,7 +101,6 @@ class CancelOrderControllerTest extends TestCase
 
     public function test_admin_manager_without_permissions_cant_cancel_order(): void
     {
-
         $this->actingAs(self::$managerHasNoPermissionPermissions)
             ->putJson(self::$orderCancledUrl, [
                 'status_reason' => 'test reason',
@@ -128,7 +126,6 @@ class CancelOrderControllerTest extends TestCase
      */
     public function test_admin_cant_cancel_order_with_not_cancellable_statuses($status)
     {
-
         self::$financingOrder->update(['status' => $status]);
 
         $this->actingAs(self::$superAdminUser)
@@ -159,6 +156,7 @@ class CancelOrderControllerTest extends TestCase
             [FinancingOrderStatus::Rejected],
             [FinancingOrderStatus::Approved],
             [FinancingOrderStatus::PendingApproval],
+            [FinancingOrderStatus::PendingTraderOrder],
         ];
     }
 
