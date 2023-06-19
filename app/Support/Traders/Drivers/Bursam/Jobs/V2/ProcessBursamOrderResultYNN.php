@@ -6,6 +6,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderErrorCode;
 use App\Enums\TraderOrderStatus;
+use App\Events\OrderCancelled;
 use App\Exceptions\TraderException;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -63,6 +64,8 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
                         'failure_reason' => $exception->getContext('failure_reason'),
                     ]);
 
+                    OrderCancelled::dispatch($traderOrder);
+
                     $this->delete();
                 } else {
                     throw $exception;
@@ -90,6 +93,8 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
                 'status' => TraderOrderStatus::PurchasingFailure,
                 'failure_reason' => $exception->getContext('failure_reason'),
             ]);
+
+            OrderCancelled::dispatch($traderOrder);
         });
     }
 

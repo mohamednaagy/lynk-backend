@@ -201,7 +201,7 @@ class TraderOrder extends Model implements HasMedia
         return $query->where('status', TraderOrderStatus::Completed);
     }
 
-    public function checkIsCommodityPurchased(): bool
+    public function inCommodityPurchasingStep(): bool
     {
         $purchasingStepAccordingToTrader = match ($this->provider) {
             'dmcc', 'fake' => DmccMurabhaStep::PurchasingCommodity,
