@@ -39,6 +39,7 @@ class CreateTraderOrderAction implements CreateTraderOrder
             'provider' => Arr::get($data, 'trader'),
             'reference' => Arr::get($data, 'reference_number'),
             'version' => Arr::get($data, 'version'),
+            'type' => Arr::get($data, 'type'),
             'status' => TraderOrderStatus::InProgress,
         ]);
 

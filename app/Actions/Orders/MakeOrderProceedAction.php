@@ -5,6 +5,7 @@ namespace App\Actions\Orders;
 use App\Actions\Contracts\Clients\AcceptClientWakala;
 use App\Actions\Contracts\Orders\MakeOrderProceed;
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
+use App\Enums\BursamMurabhaStep;
 use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
@@ -13,7 +14,7 @@ use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
-use App\Support\Traders\Traits\DmccTraderHelperTrait;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\UploadedFile;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
@@ -21,14 +22,11 @@ use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
 class MakeOrderProceedAction implements MakeOrderProceed
 {
-    use DmccTraderHelperTrait;
+    use TraderHelperTrait;
 
     protected ?UploadedFile $signedClientWakala = null;
 
     /**
-     * @param  TraderOrder  $traderOrder
-     * @param  string  $case
-     * @param  bool  $forceToProceed
      * @return array
      *
      * @throws BindingResolutionException
@@ -46,10 +44,6 @@ class MakeOrderProceedAction implements MakeOrderProceed
     }
 
     /**
-     * @param  TraderOrder  $traderOrder
-     * @param  bool  $forceToProceed
-     * @return array
-     *
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws FileDoesNotExist
      * @throws FileIsTooBig
@@ -81,8 +75,13 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
     protected function isPreviousStepOfClientWakalaNotCompleted(TraderOrder $traderOrder): bool
     {
+        $clientWakala = match ($traderOrder->provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::ClientWakala,
+            'bursam' => BursamMurabhaStep::ClientWakala,
+        };
+
         $previousStep = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
-            ->getPreviousStepOf(DmccMurabhaStep::ClientWakala)->step;
+            ->getPreviousStepOf($clientWakala)->step;
 
         return ! $traderOrder->checkOrderStepComplete($previousStep);
     }
@@ -93,10 +92,6 @@ class MakeOrderProceedAction implements MakeOrderProceed
     }
 
     /**
-     * @param  TraderOrder  $traderOrder
-     * @param  bool  $forceToProceed
-     * @return array
-     *
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws BindingResolutionException
      */
@@ -120,9 +115,14 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
     protected function isPreviousStepOfContractSignedNotCompleted(TraderOrder $traderOrder): bool
     {
+        $contractSigned = match ($traderOrder->provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::ContractSigned,
+            'bursam' => BursamMurabhaStep::ContractSigned,
+        };
+
         return ! $traderOrder->checkOrderStepComplete(
             (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
-                ->getPreviousStepOf(DmccMurabhaStep::ContractSigned)->step
+                ->getPreviousStepOf($contractSigned)->step
         );
     }
 
@@ -132,7 +132,6 @@ class MakeOrderProceedAction implements MakeOrderProceed
     }
 
     /**
-     * @param  UploadedFile  $signedClientWakala
      * @return $this
      */
     public function setSignedClientWakala(UploadedFile $signedClientWakala): static
