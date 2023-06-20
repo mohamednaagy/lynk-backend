@@ -30,7 +30,7 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, Shoul
      *
      * @return void
      */
-    public function __construct(protected int $traderOrderId)
+    public function __construct(protected int $traderOrderId, protected int $cancelReason)
     {
     }
 
@@ -53,6 +53,7 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, Shoul
 
             $traderOrder->update([
                 'status' => TraderOrderStatus::Cancelled,
+                'cancel_reason' => $this->cancelReason,
             ]);
         });
     }
