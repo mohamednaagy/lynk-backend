@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers\Dmcc\Strategies;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\TraderOrderType;
 use App\Exceptions\TraderException;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\FinancingOrder;
@@ -510,17 +511,37 @@ class DmccV1Driver implements TraderInterface
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder)
     {
-        $dispatchableJob = match ((int) $traderOrder->last_history_action) {
-            FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::class,
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAskClientForWakala::class,
-            FinancingOrderHistory::ContractSigned => ProcessDmccSellingCommodityToCustomerOrder::class,
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::class,
+        $lastHistory = (int) $traderOrder->last_history_action;
+
+        $dispatchableJob = match ($traderOrder->type) {
+            TraderOrderType::Automatic => $this->automaticDispatch($lastHistory),
+            TraderOrderType::Manual => $this->manualDispatch($lastHistory),
             default => null,
         };
 
         if ($dispatchableJob) {
             $dispatchableJob::dispatch($traderOrder->id);
         }
+    }
+
+    protected function manualDispatch($last_history_action): ?string
+    {
+        return match ($last_history_action) {
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAskClientForWakala::class,
+            FinancingOrderHistory::ContractSigned => ProcessDmccSellingCommodityToCustomerOrder::class,
+            default => null,
+        };
+    }
+
+    protected function automaticDispatch($last_history_action): ?string
+    {
+        return match ($last_history_action) {
+            FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::class,
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAskClientForWakala::class,
+            FinancingOrderHistory::ContractSigned => ProcessDmccSellingCommodityToCustomerOrder::class,
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::class,
+            default => null,
+        };
     }
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)

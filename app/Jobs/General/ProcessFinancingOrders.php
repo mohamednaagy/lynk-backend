@@ -4,7 +4,6 @@ namespace App\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
-use App\Enums\TraderOrderType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -56,7 +55,6 @@ class ProcessFinancingOrders implements ShouldQueue
 
         TraderOrder::query()
             ->withLastHistoryAction()
-            ->type(TraderOrderType::Automatic)
             ->where($this->scopeToProvidersWithVersionsClosure())
             ->whereIn('status', [
                 TraderOrderStatus::InProgress,

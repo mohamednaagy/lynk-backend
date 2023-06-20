@@ -8,7 +8,6 @@ use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsMurabhaOfferIssued;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
 use App\Enums\TraderOrderStatus;
-use App\Enums\TraderOrderType;
 use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
@@ -32,13 +31,10 @@ class TraderHistoryObserver
     {
         $traderOrder = $traderHistory->traderOrder()
             ->withLastHistoryAction()
-            ->type(TraderOrderType::Automatic)
             ->first();
 
-        if ($traderOrder) {
-            Trader::driver($traderOrder->provider, $traderOrder->version)
-                ->dispatchJobForTransitioningFlow($traderOrder);
-        }
+        Trader::driver($traderOrder->provider, $traderOrder->version)
+            ->dispatchJobForTransitioningFlow($traderOrder);
 
 //        $timeout = app(GeneralSettings::class)->trader_order_timeout;
 //
