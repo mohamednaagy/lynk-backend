@@ -97,10 +97,10 @@
             </tr>
             <tr>
                 <td>Product Price:</td>
-                <td>{{ $price }} MYR</td>
+                <td>{{ $price }} {{ $currency }}</td>
             </tr>
             <tr>
-                <td>Price (MYR Equivalent):</td>
+                <td>Product Price (MYR Equivalent):</td>
                 <td>{{ $price_myr_equivalent }} MYR</td>
             </tr>
             <tr>
