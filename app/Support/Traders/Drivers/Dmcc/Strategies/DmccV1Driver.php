@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers\Dmcc\Strategies;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\TraderOrderCancelReason;
 use App\Exceptions\TraderException;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\FinancingOrder;
@@ -78,16 +79,15 @@ class DmccV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function createTraderOrder(FinancingOrder $financingOrder): string
+    public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
     {
         $ttiId = $this->getTtiId($financingOrder);
 
-        if (! blank($ttiId)) {
-            $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'dmcc');
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
-        }
+        $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'dmcc');
 
-        return $ttiId;
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+
+        return $traderOrder;
     }
 
     /**
@@ -217,8 +217,10 @@ class DmccV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function cancelTraderOrder(TraderOrder $traderOrder): object
-    {
+    public function cancelTraderOrder(
+        TraderOrder $traderOrder,
+        int $cancelReason = TraderOrderCancelReason::Manual
+    ): object {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('cancelTTI'))
             ->call('cancelTTI', $requestBody = [

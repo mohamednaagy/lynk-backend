@@ -8,6 +8,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderErrorCode;
+use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
@@ -56,7 +57,7 @@ class BursamV1Driver implements TraderInterface
         ]);
     }
 
-    public function createTraderOrder(FinancingOrder $financingOrder)
+    public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
     {
         $traderOrder = $this->getOrInitiateTraderOrder($financingOrder);
         $productCode = $this->getUnusedProductCode();
@@ -112,7 +113,7 @@ class BursamV1Driver implements TraderInterface
             'status' => FinancingOrderStatus::InProgress,
         ]);
 
-        return $response->json();
+        return $traderOrder;
     }
 
     public function fetchOrderResultYNN(TraderOrder $traderOrder)
@@ -579,11 +580,12 @@ class BursamV1Driver implements TraderInterface
         $traderOrder = $financingOrder->activeTraderOrder()->first();
 
         $this->sellCommodityToBursam($traderOrder);
-        ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id);
 
         $traderOrder->update([
             'status' => TraderOrderStatus::PendingCancellation,
         ]);
+
+        ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id);
 
         return true;
     }
@@ -591,8 +593,10 @@ class BursamV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function cancelTraderOrder(TraderOrder $traderOrder): mixed
-    {
+    public function cancelTraderOrder(
+        TraderOrder $traderOrder,
+        int $cancelReason = TraderOrderCancelReason::Manual
+    ): mixed {
         if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket)) {
             $traderOrder->update([
                 'status' => TraderOrderStatus::Cancelled,
@@ -613,7 +617,7 @@ class BursamV1Driver implements TraderInterface
 
         Bus::chain([
             new ProcessBursamSellingCommodityToOpenMarketForCancellation($traderOrder->id),
-            new ProcessBursamStbCertificateAfterCancellation($traderOrder->id),
+            new ProcessBursamStbCertificateAfterCancellation($traderOrder->id, $cancelReason),
             function () use ($traderOrder) {
                 $activeTraderOrdersCount = TraderOrder::where('status', TraderOrderStatus::InProgress)
                     ->where('financing_order_id', $traderOrder->id)

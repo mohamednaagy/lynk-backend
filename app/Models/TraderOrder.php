@@ -11,6 +11,7 @@ use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -86,7 +87,11 @@ class TraderOrder extends Model implements HasMedia
         $this
             ->addMediaCollection(TraderOrderMediaCollection::TtiHoldingCertificate)
             ->singleFile();
+
         $this->addMediaCollection(TraderOrderMediaCollection::BursamTtiHoldingCertificate)
+            ->singleFile();
+
+        $this->addMediaCollection(TraderOrderMediaCollection::ZatcaInvoice)
             ->singleFile();
     }
 
@@ -140,15 +145,17 @@ class TraderOrder extends Model implements HasMedia
         return in_array($lastAction->action, $actions);
     }
 
-    public function checkOrderHistoryAction($action): bool
+    public function checkOrderHistoryAction($actions): bool
     {
-        if (! in_array($action, FinancingOrderHistory::getValues())) {
-            throw new UnexpectedValueException('invalid Action');
+        foreach ($actions as $action) {
+            if (! in_array($action, FinancingOrderHistory::getValues())) {
+                throw new UnexpectedValueException(sprintf('Invalid action %s', $action));
+            }
         }
 
-        return (bool) $this->traderHistories
-            ->where('action', $action)
-            ->first();
+        return $this->traderHistories
+            ->whereIn('action', $actions)
+            ->exists();
     }
 
     public function scopeWithLastHistoryAction($query)
@@ -161,7 +168,7 @@ class TraderOrder extends Model implements HasMedia
         ]);
     }
 
-    protected function step(): Attribute
+    protected function currentStep(): Attribute
     {
         $lastAction = $this->traderHistories()->latest('id')->first();
 
@@ -201,13 +208,26 @@ class TraderOrder extends Model implements HasMedia
         return $query->where('status', TraderOrderStatus::Completed);
     }
 
-    public function inCommodityPurchasingStep(): bool
+    public function isCommodityPurchased(): bool
     {
         $purchasingStepAccordingToTrader = match ($this->provider) {
             'dmcc', 'fake' => DmccMurabhaStep::PurchasingCommodity,
             'bursam' => BursamMurabhaStep::PurchasingCommodity,
         };
 
-        return $this->step == $purchasingStepAccordingToTrader;
+        $histories = (new StepHistoriesDictionary($this->provider, $this->version))
+            ->getStepOf($purchasingStepAccordingToTrader)?->histories;
+
+        if (! $histories) {
+            throw new Exception(
+                sprintf(
+                    'No histories for the given step %s of trader order #%s',
+                    $purchasingStepAccordingToTrader,
+                    $this->id
+                )
+            );
+        }
+
+        return $this->checkOrderHistoryAction($histories);
     }
 }

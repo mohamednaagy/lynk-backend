@@ -2,9 +2,9 @@
 
 namespace App\Actions\Contracts\Wallets;
 
-use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 
 interface DeductOrderCreationFee
 {
-    public function handle(FinancingOrder $financingOrder);
+    public function handle(TraderOrder $traderOrder);
 }

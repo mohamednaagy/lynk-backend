@@ -8,7 +8,7 @@ use App\Actions\Contracts\Wallets\DeductVatPercentage;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Models\Company;
-use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Models\Transaction;
 
 class DeductVatPercentageAction implements DeductVatPercentage
@@ -19,8 +19,9 @@ class DeductVatPercentageAction implements DeductVatPercentage
     ) {
     }
 
-    public function handle(FinancingOrder $financingOrder, Transaction $transaction, Company $company)
+    public function handle(TraderOrder $traderOrder, Transaction $transaction, Company $company)
     {
+        $financingOrder = $traderOrder->order;
         $vatRate = $this->getProjectSettings->handle()->getVatRate();
         $vatPercentageFee = $company->order_cost->multiply($vatRate);
 
@@ -34,7 +35,8 @@ class DeductVatPercentageAction implements DeductVatPercentage
                 'reference_number' => $transaction->reference_number,
                 'transaction_id' => $transaction->id,
                 'vat_rate' => $vatRate,
-            ]
+            ],
+            $transaction->reference_number
         );
     }
 }

@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers\Fake\Strategies;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\TraderOrderCancelReason;
 use App\Exceptions\TraderException;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\FinancingOrder;
@@ -50,13 +51,13 @@ class FakeV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function createTraderOrder(FinancingOrder $financingOrder): string
+    public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
     {
         $ttiId = $this->getTtiId($financingOrder);
         $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'fake');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
-        return $ttiId;
+        return $traderOrder;
     }
 
     /**
@@ -171,8 +172,10 @@ class FakeV1Driver implements TraderInterface
         return true;
     }
 
-    public function cancelTraderOrder(TraderOrder $traderOrder): bool
-    {
+    public function cancelTraderOrder(
+        TraderOrder $traderOrder,
+        int $cancelReason = TraderOrderCancelReason::Manual
+    ): bool {
         return true;
     }
 

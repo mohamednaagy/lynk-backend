@@ -14,8 +14,13 @@ class ManualDepositType implements TransactionTypeHandlerInterface
         return __('transaction-description.manual_deposit', [], $locale);
     }
 
-    public function process(Wallet $wallet, Money $amount, int $reason, array $meta): Transaction
-    {
-        return $wallet->deposit($amount, $reason, $meta);
+    public function process(
+        Wallet $wallet,
+        Money $amount,
+        int $reason,
+        ?string $referenceNumber,
+        array $meta
+    ): Transaction {
+        return $wallet->deposit($amount, $reason, $referenceNumber, $meta);
     }
 }

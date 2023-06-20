@@ -5,8 +5,8 @@ namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderErrorCode;
+use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
-use App\Events\OrderCancelled;
 use App\Exceptions\TraderException;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -60,11 +60,10 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
                     ]);
 
                     $traderOrder->update([
-                        'status' => TraderOrderStatus::PurchasingFailure,
+                        'status' => TraderOrderStatus::Cancelled,
                         'failure_reason' => $exception->getContext('failure_reason'),
+                        'cancel_reason' => TraderOrderCancelReason::FailureToPurchase,
                     ]);
-
-                    OrderCancelled::dispatch($traderOrder);
 
                     $this->delete();
                 } else {
@@ -90,11 +89,10 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
             ]);
 
             $traderOrder->update([
-                'status' => TraderOrderStatus::PurchasingFailure,
+                'status' => TraderOrderStatus::Cancelled,
                 'failure_reason' => $exception->getContext('failure_reason'),
+                'cancel_reason' => TraderOrderCancelReason::FailureToPurchase,
             ]);
-
-            OrderCancelled::dispatch($traderOrder);
         });
     }
 

@@ -37,7 +37,7 @@ class NotifyAdminAndLenderAboutTraderOrderCancelled implements ShouldQueue
      */
     public function handle()
     {
-        $company = $this->traderOrder->order->company;
+        $company = $this->traderOrder->order->company()->withTrashed()->first();
 
         $notifiables = User::query()
             ->withoutGlobalScope(TenantScope::class)

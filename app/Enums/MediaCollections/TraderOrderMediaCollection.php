@@ -27,4 +27,6 @@ final class TraderOrderMediaCollection extends Enum
     const TtiHoldingCertificate = 'tti_holding_certificate';
 
     const BursamTtiHoldingCertificate = 'bursam_tti_holding_certificate';
+
+    const ZatcaInvoice = 'trader_order_zatca_invoice';
 }

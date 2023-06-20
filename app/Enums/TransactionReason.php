@@ -14,7 +14,9 @@ final class TransactionReason extends Enum
 
     const VatPercentageFee = 4;
 
-    const RefundAfterCancellation = 5;
+    const RefundOrderCreationFee = 5;
+
+    const RefundVatPercentageFee = 6;
 
     public static array $reasonsAssociatedWithZatcaInvoice = [
         TransactionReason::OrderCreationFee,

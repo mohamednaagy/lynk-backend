@@ -10,19 +10,19 @@ use Cknow\Money\Money;
 
 class CreateTransactionsAction implements CreateTransactions
 {
-    /**
-     * @param  Wallet  $wallet
-     * @param  int  $transactionReason
-     * @param  Money  $amount
-     * @param  array  $meta
-     * @return Transaction
-     */
     public function handle(
         Wallet $wallet,
         int $transactionReason,
         Money $amount,
-        array $meta
+        array $meta,
+        string $referenceNumber = null
     ): Transaction {
-        return app(TransactionUtilInterface::class)->process($wallet, $amount, $transactionReason, $meta);
+        return app(TransactionUtilInterface::class)->process(
+            $wallet,
+            $amount,
+            $transactionReason,
+            $referenceNumber,
+            $meta
+        );
     }
 }

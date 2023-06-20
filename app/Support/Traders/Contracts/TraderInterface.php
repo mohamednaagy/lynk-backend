@@ -2,12 +2,13 @@
 
 namespace App\Support\Traders\Contracts;
 
+use App\Enums\TraderOrderCancelReason;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 
 interface TraderInterface
 {
-    public function createTraderOrder(FinancingOrder $financingOrder);
+    public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder;
 
     public function createSellingCommodityToCustomerDocument(TraderOrder $traderOrder);
 
@@ -17,5 +18,8 @@ interface TraderInterface
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area);
 
-    public function cancelTraderOrder(TraderOrder $traderOrder): mixed;
+    public function cancelTraderOrder(
+        TraderOrder $traderOrder,
+        int $cancelReason = TraderOrderCancelReason::Manual
+    ): mixed;
 }

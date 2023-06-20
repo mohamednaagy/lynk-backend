@@ -3,8 +3,9 @@
 namespace App\Listeners;
 
 use App\Actions\Contracts\Orders\RefundOrderCreationFees;
-use App\Enums\TraderOrderStatus;
 use App\Events\OrderCancelled;
+use App\Models\TraderOrder;
+use Illuminate\Support\Facades\DB;
 
 class RefundOrderCost
 {
@@ -21,15 +22,16 @@ class RefundOrderCost
     /**
      * Handle the event.
      *
-     * @param  \App\Events\OrderCancelled  $event
      * @return void
      */
     public function handle(OrderCancelled $event)
     {
-        $traderOrder = $event->traderOrder;
+        DB::multipleTransaction(function () use ($event) {
+            $traderOrder = TraderOrder::lockForUpdate()->findOrFail($event->traderOrder);
 
-        if ($traderOrder->inCommodityPurchasingStep() === false && $traderOrder->status->is(TraderOrderStatus::PurchasingFailure)) {
-            app(RefundOrderCreationFees::class)->handle($traderOrder);
-        }
+            if ($traderOrder->isCommodityPurchased() === false) {
+                app(RefundOrderCreationFees::class)->handle($traderOrder);
+            }
+        });
     }
 }
