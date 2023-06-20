@@ -27,15 +27,13 @@ trait ObserverHelper
         $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($currentStepNode->step);
 
         if ($nextStepNode) {
-            if (($nextStepNode->step) && ($this->getStepIfPurchasingCommodityOrCommoditySoldToOpenMarket($nextStepNode->step))) {
-                $delayTime = app(GeneralSettings::class)->trader_order_delay_time;
-                NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $traderHistory->action, $nextStepNode->step)
-                    ->delay(now()->addMinutes($delayTime));
-            } else {
-                $timeout = app(GeneralSettings::class)->trader_order_timeout;
-                NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $traderHistory->action)
-                    ->delay(now()->addMinutes($timeout));
+            $delayTime = app(GeneralSettings::class)->trader_order_timeout;
+            if ($this->isPurchasingOrSellingCommodity($nextStepNode->step)) {
+                $delayTime = 1;
             }
+
+            NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $traderHistory->action)
+                ->delay(now()->addMinutes($delayTime));
         }
 
         return true;
@@ -93,14 +91,13 @@ trait ObserverHelper
         };
     }
 
-    private function getStepIfPurchasingCommodityOrCommoditySoldToOpenMarket($step)
+    private function isPurchasingOrSellingCommodity($step): bool
     {
-        return match ($step) {
+        return in_array($step, [
             BursamMurabhaStep::PurchasingCommodity,
             BursamMurabhaStep::MurabahaSaleCompleted,
             DmccMurabhaStep::PurchasingCommodity,
-            DmccMurabhaStep::MurabahaSaleCompleted => $step,
-            default => null,
-        };
+            DmccMurabhaStep::MurabahaSaleCompleted,
+        ]);
     }
 }

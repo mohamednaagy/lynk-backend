@@ -31,19 +31,4 @@ final class DmccMurabhaStep extends Enum implements TraderMurabhaStepInterface, 
             default => throw new \InvalidArgumentException('Invalid version')
         };
     }
-
-    public static function getDescriptionFromEnum(string $description): ?string
-    {
-        $mapping = [
-            'trader_order_created' => self::TraderOrderCreated()->description,
-            'purchasing_commodity' => self::PurchasingCommodity()->description,
-            'contract_signed' => self::ContractSigned()->description,
-            'commodity_sold_to_customer' => self::CommoditySoldToCustomer()->description,
-            'client_wakala' => self::ClientWakala()->description,
-            'murabha_offer_issued' => self::MurabhaOfferIssued()->description,
-            'murabaha_sale_completed' => self::MurabahaSaleCompleted()->description,
-        ];
-
-        return $mapping[$description] ?? null;
-    }
 }

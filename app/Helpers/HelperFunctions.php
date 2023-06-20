@@ -2,7 +2,6 @@
 
 use App\Enums\BursamMurabhaStep;
 use App\Enums\DmccMurabhaStep;
-use Illuminate\Support\Collection;
 use Modules\Grantify\Facades\Grantify;
 
 if (! function_exists('validate_said')) {
@@ -90,7 +89,7 @@ if (! function_exists('get_file_url')) {
 }
 
 if (! function_exists('get_murabha_step_enum')) {
-    function get_murabha_step_enum($provider): string
+    function get_murabha_step_enum(?string $provider = null): string
     {
         $provider = $provider ?? config('trader.default');
 
@@ -126,9 +125,3 @@ if (! function_exists('trader_step_histories')) {
         };
     }
 }
-
-// if (! function_exists('format_products')) {
-//     function format_products(Collection $products, $separator = '،'): array
-//     {
-//     }
-// }

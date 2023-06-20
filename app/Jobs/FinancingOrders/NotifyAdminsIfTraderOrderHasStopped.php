@@ -11,7 +11,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Stancl\Tenancy\Database\TenantScope;
 
@@ -35,15 +34,15 @@ class NotifyAdminsIfTraderOrderHasStopped implements ShouldQueue
      */
     public function handle()
     {
-        $traderOrder = $this->traderOrder
-            ->query()
+        $traderOrder = TraderOrder::query()
+            ->where('id', $this->traderOrder->id)
             ->withoutGlobalScope(TenantScope::class)
             ->withLastHistoryAction()
             ->first();
-        Log::debug('line 42', [$traderOrder->last_history_action == $this->historyActionBeforeDispatching, $traderOrder->last_history_action, $this->historyActionBeforeDispatching]);
+
         if ($traderOrder->last_history_action == $this->historyActionBeforeDispatching) {
             $admins = User::role([Role::Admin])->get();
-            Notification::send($admins, new TraderOrderProgressStopped($this->traderOrder));
+            Notification::send($admins, new TraderOrderProgressStopped($traderOrder));
         }
     }
 }
