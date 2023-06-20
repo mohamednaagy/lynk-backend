@@ -15,7 +15,7 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
      * @param  mixed  $data
      * @return mixed
      */
-    public function update(FinancingOrder $financingOrder, array $data): FinancingOrder
+    public function handle(FinancingOrder $financingOrder, array $data): FinancingOrder
     {
         $data['phone_number'] = PhoneNumber::make($data['phone_number'], $data['phone_country_code']);
 
@@ -28,12 +28,16 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
         }
 
         if ($financingOrder->status->is(FinancingOrderStatus::Rejected)) {
-            $status = $financingOrder->company()->withTrashed()->first()->does_order_require_approval
+            $data['status'] = $financingOrder->company()->withTrashed()->first()->does_order_require_approval
                 ? FinancingOrderStatus::PendingApproval
                 : FinancingOrderStatus::PendingTraderOrder;
-
-            $data['status'] = $status;
         }
+
+        if ($data['status'] !== FinancingOrderStatus::PendingApproval) {
+            $financingOrder->approved_at = now();
+        }
+
+        $data['status_reason'] = null;
 
         $financingOrder->update(
             Arr::only(
@@ -45,6 +49,7 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
                     'amount',
                     'selling_price',
                     'status',
+                    'status_reason',
                 ]
             )
         );
