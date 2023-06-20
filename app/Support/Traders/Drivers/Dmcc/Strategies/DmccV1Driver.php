@@ -514,8 +514,8 @@ class DmccV1Driver implements TraderInterface
         $lastHistory = (int) $traderOrder->last_history_action;
 
         $dispatchableJob = match ($traderOrder->type) {
-            TraderOrderType::Automatic => $this->automaticDispatch($lastHistory),
-            TraderOrderType::Manual => $this->manualDispatch($lastHistory),
+            TraderOrderType::Automatic => $this->transitionFlowInAutomaticMode($lastHistory),
+            TraderOrderType::Manual => $this->transitionFlowInManualMode($lastHistory),
             default => null,
         };
 
@@ -524,18 +524,18 @@ class DmccV1Driver implements TraderInterface
         }
     }
 
-    protected function manualDispatch($last_history_action): ?string
+    protected function transitionFlowInManualMode($lastHistoryAction): ?string
     {
-        return match ($last_history_action) {
+        return match ($lastHistoryAction) {
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAskClientForWakala::class,
             FinancingOrderHistory::ContractSigned => ProcessDmccSellingCommodityToCustomerOrder::class,
             default => null,
         };
     }
 
-    protected function automaticDispatch($last_history_action): ?string
+    protected function transitionFlowInAutomaticMode($lastHistoryAction): ?string
     {
-        return match ($last_history_action) {
+        return match ($lastHistoryAction) {
             FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::class,
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAskClientForWakala::class,
             FinancingOrderHistory::ContractSigned => ProcessDmccSellingCommodityToCustomerOrder::class,

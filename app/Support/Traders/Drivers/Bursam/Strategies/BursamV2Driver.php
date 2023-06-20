@@ -39,17 +39,13 @@ class BursamV2Driver extends BursamV1Driver
         ]);
     }
 
-    /**
-     * @param  TraderOrder  $traderOrder
-     * @return void
-     */
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
     {
         $lastHistory = (int) $traderOrder->last_history_action;
 
         $dispatchableJob = match ($traderOrder->type) {
-            TraderOrderType::Automatic => $this->automaticDispatch($lastHistory),
-            TraderOrderType::Manual => $this->manualDispatch($lastHistory),
+            TraderOrderType::Automatic => $this->transitionFlowInAutomaticMode($lastHistory),
+            TraderOrderType::Manual => $this->transitionFlowInManualMode($lastHistory),
             default => null,
         };
 
@@ -58,18 +54,18 @@ class BursamV2Driver extends BursamV1Driver
         }
     }
 
-    protected function manualDispatch($last_history_action): ?string
+    protected function transitionFlowInManualMode($lastHistoryAction): ?string
     {
-        return match ($last_history_action) {
+        return match ($lastHistoryAction) {
             FinancingOrderHistory::ContractSigned => ProcessBursamTransferOwnershipToCustomer::class,
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessAskClientForWakala::class,
             default => null,
         };
     }
 
-    protected function automaticDispatch($last_history_action): ?string
+    protected function transitionFlowInAutomaticMode($lastHistoryAction): ?string
     {
-        return match ($last_history_action) {
+        return match ($lastHistoryAction) {
             FinancingOrderHistory::GetTtiId => ProcessBursamOrderResultYNN::class,
             FinancingOrderHistory::GetTtiHoldingCertificateDocument => ProcessBursamBidCertificate::class,
             FinancingOrderHistory::AttachTtiHoldingCertificateDocument => ProcessBursamTransferOwnershipToLender::class,
