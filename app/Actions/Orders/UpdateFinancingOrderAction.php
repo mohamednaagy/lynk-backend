@@ -12,7 +12,6 @@ use Propaganistas\LaravelPhone\PhoneNumber;
 class UpdateFinancingOrderAction implements UpdateFinancingOrder
 {
     /**
-     * @param  \App\Models\FinancingOrder  $financingOrder
      * @param  mixed  $data
      * @return mixed
      */
@@ -29,9 +28,10 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
         }
 
         if ($financingOrder->status->is(FinancingOrderStatus::Rejected)) {
-            $status = $financingOrder->company->does_order_require_approval
+            $status = $financingOrder->company()->withTrashed()->first()->does_order_require_approval
                 ? FinancingOrderStatus::PendingApproval
                 : FinancingOrderStatus::PendingTraderOrder;
+
             $data['status'] = $status;
         }
 

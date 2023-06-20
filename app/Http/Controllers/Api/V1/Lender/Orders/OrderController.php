@@ -131,9 +131,9 @@ class OrderController extends Controller
                 // throw exception is balance not enough
                 $canCreateOrder->handle($company);
 
-                $status = tenant()->does_order_require_approval
+                $status = $company->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval
-                    : FinancingOrderStatus::Approved;
+                    : FinancingOrderStatus::PendingTraderOrder;
 
                 $user = $request->user();
 
