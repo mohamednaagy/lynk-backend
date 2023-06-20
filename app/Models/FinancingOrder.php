@@ -243,16 +243,18 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function canCreateTraderOrder()
     {
-        $doesNotHaveInProgressOrder = ! $this->traderOrders()
+        $doesNotHaveInProgressOrder = $this->traderOrders()
             ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::PendingCancellation])
-            ->exists();
+            ->doesntExist();
 
         $orderIsNotCompleted = $this->status->isNot(FinancingOrderStatus::Completed);
         $financingOrderIsNotCancelled = $this->status->isNot(FinancingOrderStatus::Cancelled);
         $financingOrderIsNotPendingCancelled = $this->status->isNot(FinancingOrderStatus::PendingCancellation);
+        $orderIsPendingTraderOrder = $this->status->is(FinancingOrderStatus::PendingTraderOrder);
 
         return $orderIsNotCompleted && $doesNotHaveInProgressOrder
-            && $financingOrderIsNotCancelled && $financingOrderIsNotPendingCancelled;
+            && $financingOrderIsNotCancelled && $financingOrderIsNotPendingCancelled
+            || $orderIsPendingTraderOrder && $orderIsNotCompleted;
     }
 
     public function isCancellable($area)

@@ -31,5 +31,6 @@ return [
     'trader_not_supported' => 'هذه الشركة غير مدعومة',
     'order_is_already_completed' => 'الطلب مكتمل مسبقا',
     'order_already_has_active_trader_order' => 'هناك طلب قيد التنفيذ بالفعل',
+    'stock_market_is_unavailable' => 'البورصة غير متاحة فى الوقت الحالى.',
 
 ];
