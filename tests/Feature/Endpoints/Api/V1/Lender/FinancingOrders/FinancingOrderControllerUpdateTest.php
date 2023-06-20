@@ -51,7 +51,7 @@ class FinancingOrderControllerUpdateTest extends TestCase
         self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor);
         self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
         self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
-        self::$order = $this->createOrder(self::$company->id, self::$userLenderAdmin->id, ['status' => FinancingOrderStatus::PendingApproval]);
+        self::$order = $this->createOrder(self::$company->id, self::$userLenderAdmin->id, ['status' => FinancingOrderStatus::Rejected]);
         self::$orderOwnedByOrderCreator = $this->createOrder(self::$company->id, self::$userLenderOrderCreator->id, ['status' => FinancingOrderStatus::PendingApproval]);
         self::$updatedOrderDetails = [
             'national_id' => '2553451234',
@@ -278,5 +278,28 @@ class FinancingOrderControllerUpdateTest extends TestCase
                     ->respond()
                     ->getData(true)
             );
+    }
+
+    /**
+     * @return void
+     */
+    public function test_rejected_order_status_will_be_pending_approval_when_required_otherwise_pending_trader_order(): void
+    {
+        // Require approval case
+        self::$company->update(['does_order_require_approval' => true]);
+        $this->actingAs(self::$userLenderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->putJson('api/v1/lender/orders/'.self::$order->id, self::$updatedOrderDetails)
+            ->assertStatus(Response::HTTP_OK);
+        $this->assertTrue(self::$order->refresh()->status->is(FinancingOrderStatus::PendingApproval));
+
+        // Approval not Require  case
+        self::$company->update(['does_order_require_approval' => false]);
+        self::$order->update(['status' => FinancingOrderStatus::Rejected]);
+        $this->actingAs(self::$userLenderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->putJson('api/v1/lender/orders/'.self::$order->id, self::$updatedOrderDetails)
+            ->assertStatus(Response::HTTP_OK);
+        $this->assertTrue(self::$order->refresh()->status->is(FinancingOrderStatus::PendingTraderOrder));
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
+use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use Cknow\Money\Money;
 use Illuminate\Support\Arr;
@@ -11,7 +12,6 @@ use Propaganistas\LaravelPhone\PhoneNumber;
 class UpdateFinancingOrderAction implements UpdateFinancingOrder
 {
     /**
-     * @param  \App\Models\FinancingOrder  $financingOrder
      * @param  mixed  $data
      * @return mixed
      */
@@ -27,6 +27,14 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
             $data['selling_price'] = Money::parseByDecimal($data['selling_price'], $financingOrder->currency);
         }
 
+        if ($financingOrder->status->is(FinancingOrderStatus::Rejected)) {
+            $status = $financingOrder->company()->withTrashed()->first()->does_order_require_approval
+                ? FinancingOrderStatus::PendingApproval
+                : FinancingOrderStatus::PendingTraderOrder;
+
+            $data['status'] = $status;
+        }
+
         $financingOrder->update(
             Arr::only(
                 $data,
@@ -36,6 +44,7 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
                     'phone_number',
                     'amount',
                     'selling_price',
+                    'status',
                 ]
             )
         );
