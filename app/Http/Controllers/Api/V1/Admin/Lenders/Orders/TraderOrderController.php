@@ -47,7 +47,7 @@ class TraderOrderController extends Controller
             $data['version'] = get_latest_version_of_trader($data['trader']);
 
             if (! $this->isModeAvailableForTrader($data['trader'], $data['mode'])) {
-                return $this->errorResponse('This Mode Not Available For'.$data['trader'].' Trader.');
+                return $this->errorResponse(__('error.trader_mode_not_supported'));
             }
 
             DB::transaction(function () use ($data, $order, $createTraderOrder) {
@@ -80,7 +80,7 @@ class TraderOrderController extends Controller
                 ->findOrFail($traderOrder);
 
             if (! $this->isModeAvailableForTrader($traderOrder->provider, $data['mode'])) {
-                return $this->errorResponse("This Mode Not Available For $traderOrder->provider Trader.");
+                return $this->errorResponse(__('error.trader_mode_not_supported'));
             }
 
             if ($data['mode'] == TraderOrderMode::Automatic) {

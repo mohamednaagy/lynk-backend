@@ -36,6 +36,7 @@ class BursamV2Driver extends BursamV1Driver
             'reference' => '',
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
+            'mode' => TraderOrderMode::Automatic,
         ]);
     }
 
