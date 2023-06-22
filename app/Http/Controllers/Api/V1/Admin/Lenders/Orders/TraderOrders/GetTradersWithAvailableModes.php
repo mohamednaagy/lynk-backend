@@ -8,7 +8,7 @@ use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 
-class GetAvailableModesForTraders extends Controller
+class GetTradersWithAvailableModes extends Controller
 {
     public function __construct()
     {
@@ -21,9 +21,13 @@ class GetAvailableModesForTraders extends Controller
     public function __invoke(): JsonResponse
     {
         $availableModes = collect(config('trader.providers', []))
-            ->transform(function ($trader) {
-                return $trader['modes'];
+            ->map(function ($traderData, $traderName) {
+                return [
+                    'trader' => $traderName,
+                    'modes' => $traderData['modes'],
+                ];
             })
+            ->values()
             ->toArray();
 
         return $this->successResponse($availableModes);
