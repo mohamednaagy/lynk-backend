@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\TraderOrderMode;
+
 return [
     'default' => env('DEFAULT_TRADER', 'fake'),
     'providers' => [
@@ -13,6 +15,11 @@ return [
                 'product' => env('DMCC_TTI_PRODUCT', 'rice'),
                 'registered_member' => env('DMCC_TTI_REGISTERED_MEMBER', 'BOLFT'),
             ],
+            'modes' => [
+                'v1' => [
+                    TraderOrderMode::Manual,
+                ],
+            ],
         ],
         'fake' => [
             'latest' => 'v1',
@@ -25,6 +32,11 @@ return [
                 'product' => env('FAKE_TRADER_TTI_PRODUCT', 'rice'),
                 'registered_member' => env('FAKE_TRADER_TTI_REGISTERED_MEMBER', 'BOLFT'),
             ],
+            'modes' => [
+                'v1' => [
+                    TraderOrderMode::Manual,
+                ],
+            ],
         ],
         'bursam' => [
             'latest' => 'v2',
@@ -33,6 +45,15 @@ return [
             'client_secret_key' => env('BURSAM_CLIENT_SECRET_KEY', 'B347B6AFEA16EFA062B6DA'),
             'grant_type' => env('BURSAM_GRANT_TYPE', 'client_credentials'),
             'purchasing_commodity_job_backoff_time' => env('BURSAM_PURCHASING_COMMODITY_JOB_BACKOFF_TIME', 120),
+            'modes' => [
+                'v1' => [
+                    TraderOrderMode::Manual,
+                ],
+                'v2' => [
+                    TraderOrderMode::Automatic,
+                    TraderOrderMode::Manual,
+                ],
+            ],
         ],
     ],
 ];

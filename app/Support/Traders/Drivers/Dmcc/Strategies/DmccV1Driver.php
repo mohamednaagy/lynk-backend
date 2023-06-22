@@ -4,7 +4,7 @@ namespace App\Support\Traders\Drivers\Dmcc\Strategies;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\TraderOrderType;
+use App\Enums\TraderOrderMode;
 use App\Exceptions\TraderException;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\FinancingOrder;
@@ -514,8 +514,8 @@ class DmccV1Driver implements TraderInterface
         $lastHistory = (int) $traderOrder->last_history_action;
 
         $dispatchableJob = match ($traderOrder->type) {
-            TraderOrderType::Automatic => $this->transitionFlowInAutomaticMode($lastHistory),
-            TraderOrderType::Manual => $this->transitionFlowInManualMode($lastHistory),
+            TraderOrderMode::Automatic => $this->transitionFlowInAutomaticMode($lastHistory),
+            TraderOrderMode::Manual => $this->transitionFlowInManualMode($lastHistory),
             default => null,
         };
 

@@ -8,6 +8,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderErrorCode;
+use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
@@ -53,6 +54,7 @@ class BursamV1Driver implements TraderInterface
             'reference' => '',
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
+            'mode' => TraderOrderMode::Automatic,
         ]);
     }
 
