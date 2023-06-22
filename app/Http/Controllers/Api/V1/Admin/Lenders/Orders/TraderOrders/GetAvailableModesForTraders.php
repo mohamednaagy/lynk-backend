@@ -18,12 +18,14 @@ class GetAvailableModesForTraders extends Controller
         );
     }
 
-    public function __invoke(
-    ): JsonResponse {
-        $availableModes = collect(config('trader.providers', []))->transform(function ($trader) {
-            return $trader['modes'];
-        });
+    public function __invoke(): JsonResponse
+    {
+        $availableModes = collect(config('trader.providers', []))
+            ->transform(function ($trader) {
+                return $trader['modes'];
+            })
+            ->toArray();
 
-        return $this->successResponse($availableModes->toArray());
+        return $this->successResponse($availableModes);
     }
 }
