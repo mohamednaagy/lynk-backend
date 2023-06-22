@@ -56,5 +56,5 @@ class ErrorCode
 
     public const ORDER_ALREADY_HAS_ACTIVE_TRADER_ORDER = 1025;
 
-    public const STOCK_MARKET_IS_UNAVAILABLE = 1026;
+    public const COMMODITY_MARKET_IS_UNAVAILABLE = 1026;
 }

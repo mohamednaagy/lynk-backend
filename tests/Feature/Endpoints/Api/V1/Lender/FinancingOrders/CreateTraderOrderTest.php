@@ -78,11 +78,12 @@ class CreateTraderOrderTest extends TestCase
             ->assertStatus(Response::HTTP_BAD_REQUEST);
     }
 
-    public function test_create_trader_order_fails_when_stock_market_unavailable()
+    public function test_create_trader_order_fails_when_commodity_market_unavailable()
     {
+        $timezone = Config::get('services.bursam.timezone');
         Config::set('trader.default', 'bursam');
-        date_default_timezone_set(Config::get('bursam-services.timezone'));
-        Config::set('bursam-services.market_opening_start_time', Carbon::now()->addHour()->format('H:i:s'));
+        date_default_timezone_set(Config::get('services.bursam.timezone'));
+        Config::set('services.bursam.market_opening_end_time', Carbon::now($timezone)->subHour()->format('H:i:s'));
 
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->id)

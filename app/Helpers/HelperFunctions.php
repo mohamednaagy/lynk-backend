@@ -127,15 +127,15 @@ if (! function_exists('trader_step_histories')) {
     }
 }
 
-if (! function_exists('isBursamServiceAvailable')) {
-    function isBursamServiceAvailable(): bool
+if (! function_exists('is_bursam_service_available')) {
+    function is_bursam_service_available(): bool
     {
-        $timezone = Config::get('bursam-services.timezone');
+        $timezone = Config::get('services.bursam.timezone');
         $now = now($timezone);
-        $marketOpeningStartTime = Config::get('bursam-services.market_opening_start_time');
-        $marketOpeningEndTime = Config::get('bursam-services.market_opening_end_time');
-        $fridayBreakStartTime = Config::get('bursam-services.friday_break_start_time');
-        $fridayBreakEndTime = Config::get('bursam-services.friday_break_end_time');
+        $marketOpeningStartTime = Config::get('services.bursam.market_opening_start_time');
+        $marketOpeningEndTime = Config::get('services.bursam.market_opening_end_time');
+        $fridayBreakStartTime = Config::get('services.bursam.friday_break_start_time');
+        $fridayBreakEndTime = Config::get('services.bursam.friday_break_end_time');
 
         $marketOpeningStartDateTime = now($timezone)->setTimeFromTimeString($marketOpeningStartTime);
         $marketOpeningEndDateTime = now($timezone)->setTimeFromTimeString($marketOpeningEndTime);

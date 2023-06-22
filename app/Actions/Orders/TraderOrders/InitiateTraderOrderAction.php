@@ -3,8 +3,8 @@
 namespace App\Actions\Orders\TraderOrders;
 
 use App\Actions\Contracts\Orders\TraderOrders\InitiateTraderOrder;
+use App\Exceptions\CommodityMarketIsUnavailableException;
 use App\Exceptions\OrderAlreadyHasActiveTraderOrderException;
-use App\Exceptions\StockMarketIsUnavailableException;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
 
@@ -20,13 +20,12 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
             throw new OrderAlreadyHasActiveTraderOrderException;
         }
 
-        $driver = config('trader.default');
-        $trader = Trader::driver($driver, get_latest_version_of_trader($driver));
-
-        if ($driver == 'bursam' && ! isBursamServiceAvailable()) {
-            throw new StockMarketIsUnavailableException;
+        if (! $financingOrder->isBursamTraderServiceAvailable()) {
+            throw new CommodityMarketIsUnavailableException;
         }
 
+        $driver = config('trader.default');
+        $trader = Trader::driver($driver, get_latest_version_of_trader($driver));
         $trader->createTraderOrder($financingOrder);
     }
 }
