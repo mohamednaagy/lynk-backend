@@ -109,7 +109,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::put('/cancel', CancelFinancingOrder::class);
             Route::put('payment-proof', UpdateOrderPaymentProof::class);
             Route::prefix('/trader-orders/{trader_order}')->group(function () {
-                Route::put('/', [TraderOrderController::class, 'update']);
                 Route::post('/proceed', MakeOrderProceed::class);
                 Route::post('/purchasing-commodity', UpdatePurchasingCommodity::class);
                 Route::get('/purchasing-commodity', GetPurchasingCommodity::class);

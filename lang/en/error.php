@@ -31,5 +31,5 @@ return [
     'trader_not_supported' => 'Trader Not Supported',
     'order_is_already_completed' => 'Order is already completed',
     'order_is_already_has_active_trader_order' => 'Order already has active trading request',
-    'trader_mode_not_supported' => 'Trader Mode Not Supported For This Trader',
+    'trader_mode_not_supported' => 'Selected mode is not available for this trader',
 ];
