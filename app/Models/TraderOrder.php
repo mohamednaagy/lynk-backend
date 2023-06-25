@@ -147,13 +147,17 @@ class TraderOrder extends Model implements HasMedia
 
     public function checkOrderHistoryAction($actions): bool
     {
+        if (! is_array($actions)) {
+            $actions = [$actions];
+        }
+
         foreach ($actions as $action) {
             if (! in_array($action, FinancingOrderHistory::getValues())) {
                 throw new UnexpectedValueException(sprintf('Invalid action %s', $action));
             }
         }
 
-        return $this->traderHistories
+        return $this->traderHistories()
             ->whereIn('action', $actions)
             ->exists();
     }

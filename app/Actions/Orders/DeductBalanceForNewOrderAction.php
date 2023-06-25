@@ -12,13 +12,15 @@ class DeductBalanceForNewOrderAction implements DeductBalanceForNewOrder
 {
     public function handle(TraderOrder $traderOrder): void
     {
+        $financingOrder = $traderOrder->order;
+
         // deduct the cost from the wallet
         $creationFeeTransaction = app(DeductOrderCreationFee::class)->handle($traderOrder);
 
         app(DeductVatPercentage::class)->handle(
             $traderOrder,
             $creationFeeTransaction,
-            $traderOrder->company()->withTrashed()->first()
+            $financingOrder->company()->withTrashed()->first()
         );
 
         app(GenerateZatcaInvoice::class)->handel(
