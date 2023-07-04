@@ -46,7 +46,7 @@ class CreateTraderOrderAction implements CreateTraderOrder
                 $trader = Trader::driver($data['trader'], $data['version']);
                 $trader->createTraderOrder($financingOrder);
 
-                return $trader->getOrInitiateTraderOrder($financingOrder);
+                return $financingOrder->initiatedTraderOrders()->first();
             },
         };
 
