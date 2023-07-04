@@ -28,7 +28,7 @@ class StoreTradingRequest extends FormRequest
     {
         return [
             'trader' => ['required', 'string', Rule::in(['fake', 'dmcc', 'bursam'])],
-            'reference_number' => ['required_if:mode,'.TraderOrderMode::Manual, 'string', 'max:100'],
+            'reference_number' => ['nullable', 'required_if:mode,'.TraderOrderMode::Manual, 'string', 'max:100'],
             'mode' => ['required', 'string', new EnumValue(TraderOrderMode::class)],
         ];
     }
