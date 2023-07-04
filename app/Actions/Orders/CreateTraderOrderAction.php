@@ -11,7 +11,6 @@ use App\Exceptions\OrderAlreadyHasActiveTraderOrderException;
 use App\Exceptions\OrderIsAlreadyCompletedException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
-use App\Support\Traders\Drivers\Bursam\Strategies\BursamV1Driver;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -42,9 +41,7 @@ class CreateTraderOrderAction implements CreateTraderOrder
         $traderOrder = match ($data['mode']) {
             TraderOrderMode::Manual => $this->createTraderOrder($financingOrder, $data),
             TraderOrderMode::Automatic => function () use ($data, $financingOrder) {
-                /** @var BursamV1Driver $trader */
-                $trader = Trader::driver($data['trader'], $data['version']);
-                $trader->createTraderOrder($financingOrder);
+                Trader::driver($data['trader'], $data['version'])->createTraderOrder($financingOrder);
 
                 return $financingOrder->initiatedTraderOrders()->first();
             },
