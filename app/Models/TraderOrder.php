@@ -42,7 +42,7 @@ class TraderOrder extends Model implements HasMedia
         return [
             'id',
             'financing_order_id',
-            'type',
+            'mode',
             'data',
             'provider',
             'version',
@@ -198,10 +198,5 @@ class TraderOrder extends Model implements HasMedia
     public function scopeCompleted($query)
     {
         return $query->where('status', TraderOrderStatus::Completed);
-    }
-
-    public function scopeType($query, $traderOrderType)
-    {
-        return $query->where('type', $traderOrderType);
     }
 }

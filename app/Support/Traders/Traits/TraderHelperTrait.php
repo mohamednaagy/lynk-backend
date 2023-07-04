@@ -3,6 +3,7 @@
 namespace App\Support\Traders\Traits;
 
 use App\Enums\BursamProductCode;
+use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -40,6 +41,8 @@ trait TraderHelperTrait
             'provider' => $provider,
             'reference' => $ttiId,
             'status' => TraderOrderStatus::InProgress,
+            'mode' => TraderOrderMode::Automatic,
+            'version' => get_latest_version_of_trader($provider),
         ]);
     }
 

@@ -31,6 +31,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetCommodityCe
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabhaCompleteDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetPurchasingCommodity;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetTradersWithAvailableModes;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabhaCompleteDocument;
@@ -129,6 +130,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::post('{trader}/users/{user}/resend-invitation', ResendInvitationToUser::class);
             Route::put('/{trader}/status', UpdateTraderStatus::class);
         });
+
+        Route::get('/traders-with-modes', GetTradersWithAvailableModes::class);
 
         Route::get('product-codes', [ProductCodeCacheController::class, 'index']);
         Route::delete('product-codes', [ProductCodeCacheController::class, 'delete']);

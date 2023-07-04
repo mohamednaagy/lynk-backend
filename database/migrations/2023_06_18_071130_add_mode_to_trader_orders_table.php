@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\TraderOrderType;
+use App\Enums\TraderOrderMode;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,8 +15,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('trader_orders', function (Blueprint $table) {
-            $table->string('type')
-                ->default(TraderOrderType::Automatic)
+            $table->string('mode')
+                ->default(TraderOrderMode::Automatic)
                 ->after('financing_order_id');
         });
     }
@@ -29,7 +29,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('trader_orders', function (Blueprint $table) {
-            $table->dropColumn('type');
+            $table->dropColumn('mode');
         });
     }
 };

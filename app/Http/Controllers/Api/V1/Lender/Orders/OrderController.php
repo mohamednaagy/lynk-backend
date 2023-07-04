@@ -145,7 +145,7 @@ class OrderController extends Controller
                             'status' => $status,
                             'creator_id' => $user->id,
                             'creator_type' => $user->getMorphClass(),
-                            'approved_at' => $status === FinancingOrderStatus::Approved ? now() : null,
+                            'approved_at' => $status === FinancingOrderStatus::PendingApproval ? null : now(),
                         ]
                     )
                 );
@@ -189,7 +189,7 @@ class OrderController extends Controller
                 ErrorCode::ORDER_NOT_UPDATABLE
             );
         }
-        $financingOrder = $updateFinancingOrder->update($order, $request->validated());
+        $financingOrder = $updateFinancingOrder->handle($order, $request->validated());
 
         return fractal($financingOrder, new FinancingOrderTransformer())
             ->parseIncludes([

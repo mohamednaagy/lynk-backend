@@ -4,8 +4,8 @@ namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
-use App\Enums\TraderOrderType;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -36,6 +36,7 @@ class BursamV2Driver extends BursamV1Driver
             'reference' => '',
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
+            'mode' => TraderOrderMode::Automatic,
         ]);
     }
 
@@ -44,8 +45,8 @@ class BursamV2Driver extends BursamV1Driver
         $lastHistory = (int) $traderOrder->last_history_action;
 
         $dispatchableJob = match ($traderOrder->type) {
-            TraderOrderType::Automatic => $this->transitionFlowInAutomaticMode($lastHistory),
-            TraderOrderType::Manual => $this->transitionFlowInManualMode($lastHistory),
+            TraderOrderMode::Automatic => $this->transitionFlowInAutomaticMode($lastHistory),
+            TraderOrderMode::Manual => $this->transitionFlowInManualMode($lastHistory),
             default => null,
         };
 
