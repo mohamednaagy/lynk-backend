@@ -40,11 +40,11 @@ class CreateTraderOrderAction implements CreateTraderOrder
 
         $traderOrder = match ($data['mode']) {
             TraderOrderMode::Manual => $this->createTraderOrder($financingOrder, $data),
-            TraderOrderMode::Automatic => function () use ($data, $financingOrder) {
+            TraderOrderMode::Automatic => (function () use ($data, $financingOrder) {
                 Trader::driver($data['trader'], $data['version'])->createTraderOrder($financingOrder);
 
                 return $financingOrder->initiatedTraderOrders()->first();
-            },
+            })(),
         };
 
         $financingOrder->update([
