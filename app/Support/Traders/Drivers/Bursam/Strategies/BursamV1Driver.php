@@ -58,7 +58,10 @@ class BursamV1Driver implements TraderInterface
         ]);
     }
 
-    public function createTraderOrder(FinancingOrder $financingOrder)
+    /**
+     * @throws TraderException
+     */
+    public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
     {
         $traderOrder = $this->getOrInitiateTraderOrder($financingOrder);
         $productCode = $this->getUnusedProductCode();
@@ -114,7 +117,7 @@ class BursamV1Driver implements TraderInterface
             'status' => FinancingOrderStatus::InProgress,
         ]);
 
-        return $response->json();
+        return $traderOrder;
     }
 
     public function fetchOrderResultYNN(TraderOrder $traderOrder)
