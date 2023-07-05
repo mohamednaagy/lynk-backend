@@ -59,6 +59,9 @@ class BursamV1Driver implements TraderInterface
         ]);
     }
 
+    /**
+     * @throws TraderException
+     */
     public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
     {
         $traderOrder = $this->getOrInitiateTraderOrder($financingOrder);

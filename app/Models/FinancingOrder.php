@@ -243,16 +243,33 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function canCreateTraderOrder()
     {
-        $doesNotHaveInProgressOrder = ! $this->traderOrders()
+        $doesNotHaveInProgressOrder = $this->traderOrders()
             ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::PendingCancellation])
-            ->exists();
+            ->doesntExist();
 
         $orderIsNotCompleted = $this->status->isNot(FinancingOrderStatus::Completed);
         $financingOrderIsNotCancelled = $this->status->isNot(FinancingOrderStatus::Cancelled);
         $financingOrderIsNotPendingCancelled = $this->status->isNot(FinancingOrderStatus::PendingCancellation);
+        $orderIsPendingTraderOrder = $this->status->is(FinancingOrderStatus::PendingTraderOrder);
+        $bursamTraderServiceAvailability = $this->isBursamTraderServiceAvailable();
 
-        return $orderIsNotCompleted && $doesNotHaveInProgressOrder
-            && $financingOrderIsNotCancelled && $financingOrderIsNotPendingCancelled;
+        return ($orderIsNotCompleted && $doesNotHaveInProgressOrder
+            && $financingOrderIsNotCancelled && $financingOrderIsNotPendingCancelled
+            && $bursamTraderServiceAvailability)
+            || ($orderIsPendingTraderOrder && $orderIsNotCompleted && $bursamTraderServiceAvailability);
+    }
+
+    /**
+     * Check if the Bursam trader service is available when the current trader is set to Bursam.
+     * Otherwise, return true.
+     *
+     * @return bool
+     */
+    public function isBursamTraderServiceAvailable()
+    {
+        return config('trader.default') != 'bursam'
+            ? true
+            : is_bursam_service_available();
     }
 
     public function isCancellable($area)

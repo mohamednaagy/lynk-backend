@@ -182,7 +182,7 @@ class FinancingOrderTransformer extends TransformerAbstract
     {
         $traderOrder = $financingOrder->activeTraderOrder()->withLastHistoryAction()->first();
 
-        if (is_null($traderOrder)) {
+        if (is_null($traderOrder) || is_null($traderOrder->last_history_action)) {
             return $this->primitive(null);
         }
 

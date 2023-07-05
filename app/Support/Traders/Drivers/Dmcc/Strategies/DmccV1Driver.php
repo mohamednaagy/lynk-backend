@@ -84,8 +84,18 @@ class DmccV1Driver implements TraderInterface
     {
         $ttiId = $this->getTtiId($financingOrder);
 
-        $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'dmcc');
+        if (blank($ttiId)) {
+            throw new TraderException(
+                'Failed to create trader order',
+                [
+                    'provider' => $this->provider,
+                    'version' => $this->version,
+                    'financing_order_id' => $financingOrder->id,
+                ]
+            );
+        }
 
+        $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'dmcc');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $traderOrder;
