@@ -131,9 +131,9 @@ class OrderController extends Controller
                 // throw exception is balance not enough
                 $canCreateOrder->handle($company);
 
-                $status = tenant()->does_order_require_approval
+                $status = $company->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval
-                    : FinancingOrderStatus::Approved;
+                    : FinancingOrderStatus::PendingTraderOrder;
 
                 $user = $request->user();
 
@@ -145,7 +145,7 @@ class OrderController extends Controller
                             'status' => $status,
                             'creator_id' => $user->id,
                             'creator_type' => $user->getMorphClass(),
-                            'approved_at' => $status === FinancingOrderStatus::Approved ? now() : null,
+                            'approved_at' => $status === FinancingOrderStatus::PendingApproval ? null : now(),
                         ]
                     )
                 );
@@ -189,7 +189,7 @@ class OrderController extends Controller
                 ErrorCode::ORDER_NOT_UPDATABLE
             );
         }
-        $financingOrder = $updateFinancingOrder->update($order, $request->validated());
+        $financingOrder = $updateFinancingOrder->handle($order, $request->validated());
 
         return fractal($financingOrder, new FinancingOrderTransformer())
             ->parseIncludes([

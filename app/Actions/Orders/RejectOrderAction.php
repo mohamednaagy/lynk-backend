@@ -13,6 +13,7 @@ class RejectOrderAction implements RejectOrder
     {
         $financingOrder->status = FinancingOrderStatus::Rejected;
         $financingOrder->status_reason = $data['status_reason'] ?? null;
+        $financingOrder->approved_at = null;
         $financingOrder->save();
     }
 }

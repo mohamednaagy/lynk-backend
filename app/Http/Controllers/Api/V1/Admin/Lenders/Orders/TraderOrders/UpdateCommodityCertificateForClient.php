@@ -11,14 +11,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdateSellingCommodityToClientRequest;
 use App\Models\Company;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
-use App\Support\Traders\Traits\DmccTraderHelperTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class UpdateCommodityCertificateForClient extends Controller
 {
-    use DmccTraderHelperTrait;
-
     public function __construct()
     {
         $this->middleware(

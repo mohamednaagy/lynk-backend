@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\FinancingOrder;
@@ -35,16 +36,37 @@ class BursamV2Driver extends BursamV1Driver
             'reference' => '',
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
+            'mode' => TraderOrderMode::Automatic,
         ]);
     }
 
-    /**
-     * @param  TraderOrder  $traderOrder
-     * @return void
-     */
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
     {
-        $dispatchableJob = match ((int) $traderOrder->last_history_action) {
+        $lastHistory = (int) $traderOrder->last_history_action;
+
+        $dispatchableJob = match ($traderOrder->type) {
+            TraderOrderMode::Automatic => $this->transitionFlowInAutomaticMode($lastHistory),
+            TraderOrderMode::Manual => $this->transitionFlowInManualMode($lastHistory),
+            default => null,
+        };
+
+        if ($dispatchableJob) {
+            $dispatchableJob::dispatch($traderOrder->id);
+        }
+    }
+
+    protected function transitionFlowInManualMode($lastHistoryAction): ?string
+    {
+        return match ($lastHistoryAction) {
+            FinancingOrderHistory::ContractSigned => ProcessBursamTransferOwnershipToCustomer::class,
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessAskClientForWakala::class,
+            default => null,
+        };
+    }
+
+    protected function transitionFlowInAutomaticMode($lastHistoryAction): ?string
+    {
+        return match ($lastHistoryAction) {
             FinancingOrderHistory::GetTtiId => ProcessBursamOrderResultYNN::class,
             FinancingOrderHistory::GetTtiHoldingCertificateDocument => ProcessBursamBidCertificate::class,
             FinancingOrderHistory::AttachTtiHoldingCertificateDocument => ProcessBursamTransferOwnershipToLender::class,
@@ -56,10 +78,6 @@ class BursamV2Driver extends BursamV1Driver
             FinancingOrderHistory::GetOwnershipToCustomerCertificate => ProcessBursamStbCertificate::class,
             default => null,
         };
-
-        if ($dispatchableJob) {
-            $dispatchableJob::dispatch($traderOrder->id);
-        }
     }
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)

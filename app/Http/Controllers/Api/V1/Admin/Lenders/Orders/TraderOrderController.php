@@ -26,11 +26,6 @@ class TraderOrderController extends Controller
 
     /**
      * Handle the incoming request.
-     *
-     * @param  StoreTradingRequest  $request
-     * @param  CreateTraderOrder  $createTraderOrder
-     * @param  int  $order
-     * @return JsonResponse
      */
     public function store(
         StoreTradingRequest $request,
@@ -39,10 +34,10 @@ class TraderOrderController extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($request, $createTraderOrder, $order) {
             $data = $request->validated();
-            if ($data['trader'] == 'bursam') {
-                $data['version'] = 'v1';
-            } else {
-                $data['version'] = get_latest_version_of_trader($data['trader']);
+            $data['version'] = get_latest_version_of_trader($data['trader']);
+
+            if (! $this->isModeAvailableForTrader($data['trader'], $data['mode'], $data['version'])) {
+                return $this->errorResponse(__('error.trader_mode_not_supported'));
             }
 
             DB::transaction(function () use ($data, $order, $createTraderOrder) {
@@ -59,5 +54,12 @@ class TraderOrderController extends Controller
 
             return $this->successResponse();
         });
+    }
+
+    private function isModeAvailableForTrader($trader, $mode, $version): bool
+    {
+        $availableModes = config("trader.providers.{$trader}.modes.{$version}", []);
+
+        return in_array($mode, $availableModes);
     }
 }

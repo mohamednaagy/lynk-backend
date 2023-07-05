@@ -9,6 +9,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderErrorCode;
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
@@ -18,7 +19,7 @@ use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamSellingCommodityToOpenMarketForCancellation;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
-use App\Support\Traders\Traits\BursamTraderHelperTrait;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
@@ -29,13 +30,13 @@ use Illuminate\Support\Str;
 
 class BursamV1Driver implements TraderInterface
 {
+    use TraderHelperTrait {
+        createTraderOrder as traitCreateTraderOrder;
+    }
+
     protected $provider = 'bursam';
 
     protected $version = 'v1';
-
-    use BursamTraderHelperTrait {
-        createTraderOrder as traitCreateTraderOrder;
-    }
 
     public function baseUrl($path)
     {
@@ -54,6 +55,7 @@ class BursamV1Driver implements TraderInterface
             'reference' => '',
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
+            'mode' => TraderOrderMode::Automatic,
         ]);
     }
 

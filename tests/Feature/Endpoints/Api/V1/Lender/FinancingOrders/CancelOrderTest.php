@@ -243,6 +243,7 @@ class CancelOrderTest extends TestCase
             [FinancingOrderStatus::Rejected],
             [FinancingOrderStatus::Approved],
             [FinancingOrderStatus::PendingApproval],
+            [FinancingOrderStatus::PendingTraderOrder],
         ];
     }
 
