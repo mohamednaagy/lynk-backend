@@ -15,7 +15,7 @@ class CreateTraderOrder extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::Lender, [Subject::FinancingOrders, Action::Reject, Action::Manage])
+                perm(Area::Lender, [Subject::FinancingOrders, Action::Edit, Action::Manage])
         );
     }
 
