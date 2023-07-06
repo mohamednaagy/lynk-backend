@@ -9,6 +9,7 @@ use App\Enums\BursamMurabhaStep;
 use App\Enums\DmccMurabhaStep;
 use App\Enums\ErrorCode;
 use App\Enums\Subject;
+use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\CancelOrderRequest;
@@ -31,10 +32,7 @@ class CancelTraderOrder extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  CancelOrderRequest  $request
      * @param  CancelTraderOrderInterface  $cancelTraderOrder ,
-     * @param  int  $order
-     * @return JsonResponse
      *
      * @throws \Throwable
      */
@@ -68,7 +66,8 @@ class CancelTraderOrder extends Controller
             $cancelTraderOrder->handle(
                 $traderOrder,
                 $request->user(),
-                $request->validated()
+                $request->validated(),
+                TraderOrderCancelReason::Manual
             );
 
             return $this->successResponse();

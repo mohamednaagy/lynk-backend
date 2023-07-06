@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
+use App\Enums\TraderOrderCancelReason;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -44,7 +45,7 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
 
                     $lockedFinancingOrder->activeTraderOrder->each(function ($activeTraderOrder) {
                         Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)
-                            ->cancelTraderOrder($activeTraderOrder);
+                            ->cancelTraderOrder($activeTraderOrder, TraderOrderCancelReason::MurabhaTimeout);
                     });
                 });
             });

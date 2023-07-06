@@ -6,7 +6,7 @@ use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
-use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 
 class DeductOrderCreationFeeAction implements DeductOrderCreationFee
 {
@@ -14,9 +14,10 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
     {
     }
 
-    public function handle(FinancingOrder $financingOrder)
+    public function handle(TraderOrder $traderOrder)
     {
-        $company = $financingOrder->company;
+        $financingOrder = $traderOrder->order;
+        $company = $financingOrder->company()->withTrashed()->first();
         $wallet = $company->getWallet(WalletType::CompanyWallet);
 
         return $this->createTransactions->handle(
@@ -25,6 +26,7 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
             $company->order_cost,
             [
                 'financing_order_id' => $financingOrder->id,
+                'trader_order_id' => $traderOrder->id,
                 'reference_number ' => $financingOrder->reference_number,
                 'amount' => $financingOrder->amount,
                 'order_cost' => $company->order_cost,

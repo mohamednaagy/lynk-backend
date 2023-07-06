@@ -2,9 +2,9 @@
 
 namespace App\Actions\Contracts\Orders;
 
-use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 
 interface DeductBalanceForNewOrder
 {
-    public function handle(FinancingOrder $financingOrder): void;
+    public function handle(TraderOrder $traderOrder): void;
 }

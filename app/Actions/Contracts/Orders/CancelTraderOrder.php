@@ -10,6 +10,7 @@ interface CancelTraderOrder
     public function handle(
         TraderOrder $traderOrder,
         User $user,
-        array $data
+        array $data,
+        int $cancelReason
     ): void;
 }
