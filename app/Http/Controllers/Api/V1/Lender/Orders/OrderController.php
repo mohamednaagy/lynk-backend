@@ -98,6 +98,7 @@ class OrderController extends Controller
                 'is_approved',
                 'is_cancellable',
                 'can_be_completed',
+                'can_create_trader_order',
                 'payment_proof_url',
                 'status_reason',
                 'creator',
