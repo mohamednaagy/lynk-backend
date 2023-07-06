@@ -43,6 +43,7 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
             self::Approved,
             self::PendingApproval,
             self::InProgress,
+            self::PendingTraderOrder,
         ],
         self::InProgress => [
             self::Approved,

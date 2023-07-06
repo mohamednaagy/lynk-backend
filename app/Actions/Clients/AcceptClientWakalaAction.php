@@ -3,16 +3,16 @@
 namespace App\Actions\Clients;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala;
-use App\Enums\DmccMurabhaStep;
+use App\Enums\FinancingOrderHistory;
 use App\Models\TraderOrder;
-use App\Support\Traders\Traits\DmccTraderHelperTrait;
+use App\Support\Traders\Traits\TraderHelperTrait;
 
 class AcceptClientWakalaAction implements AcceptClientWakala
 {
-    use DmccTraderHelperTrait;
+    use TraderHelperTrait;
 
     public function handle(TraderOrder $traderOrder): void
     {
-        $this->createStepHistories(request: request(), traderOrder: $traderOrder, step: DmccMurabhaStep::ClientWakala);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ClientWakalaAccepted);
     }
 }

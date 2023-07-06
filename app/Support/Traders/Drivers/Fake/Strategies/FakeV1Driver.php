@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers\Fake\Strategies;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\TraderOrderMode;
 use App\Exceptions\TraderException;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\FinancingOrder;
@@ -12,7 +13,7 @@ use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoOrder;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccRespondedToPtpOrder;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccSellingCommodityToCustomerOrder;
-use App\Support\Traders\Traits\FakeTraderHelperTrait;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Http\Client\Response;
@@ -20,6 +21,10 @@ use Illuminate\Support\Facades\Http;
 
 class FakeV1Driver implements TraderInterface
 {
+    use TraderHelperTrait {
+        createTraderOrder as traitCreateTraderOrder;
+    }
+
     protected $provider = 'fake';
 
     protected $version = 'v1';
@@ -35,10 +40,6 @@ class FakeV1Driver implements TraderInterface
         FinancingOrderHistory::OrderCancelled,
     ];
 
-    use FakeTraderHelperTrait {
-        createTraderOrder as traitCreateTraderOrder;
-    }
-
     /**
      * @throws TraderException
      */
@@ -50,13 +51,13 @@ class FakeV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function createTraderOrder(FinancingOrder $financingOrder): string
+    public function createTraderOrder(FinancingOrder $financingOrder): ?TraderOrder
     {
         $ttiId = $this->getTtiId($financingOrder);
         $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'fake');
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
-        return $ttiId;
+        return $traderOrder;
     }
 
     /**
@@ -399,17 +400,37 @@ class FakeV1Driver implements TraderInterface
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder)
     {
-        $dispatchableJob = match ((int) $traderOrder->last_history_action) {
-            FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::class,
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAskClientForWakala::class,
-            FinancingOrderHistory::ContractSigned => ProcessDmccSellingCommodityToCustomerOrder::class,
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::class,
+        $lastHistory = (int) $traderOrder->last_history_action;
+
+        $dispatchableJob = match ($traderOrder->type) {
+            TraderOrderMode::Automatic => $this->transitionFlowInAutomaticMode($lastHistory),
+            TraderOrderMode::Manual => $this->transitionFlowInManualMode($lastHistory),
             default => null,
         };
 
         if ($dispatchableJob) {
             $dispatchableJob::dispatch($traderOrder->id);
         }
+    }
+
+    protected function transitionFlowInManualMode($lastHistoryAction): ?string
+    {
+        return match ($lastHistoryAction) {
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAskClientForWakala::class,
+            FinancingOrderHistory::ContractSigned => ProcessDmccSellingCommodityToCustomerOrder::class,
+            default => null,
+        };
+    }
+
+    protected function transitionFlowInAutomaticMode($lastHistoryAction): ?string
+    {
+        return match ($lastHistoryAction) {
+            FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::class,
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAskClientForWakala::class,
+            FinancingOrderHistory::ContractSigned => ProcessDmccSellingCommodityToCustomerOrder::class,
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::class,
+            default => null,
+        };
     }
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area): bool

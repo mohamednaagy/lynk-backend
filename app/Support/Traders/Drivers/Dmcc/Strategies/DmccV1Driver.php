@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers\Dmcc\Strategies;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\TraderOrderMode;
 use App\Exceptions\TraderException;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\FinancingOrder;
@@ -12,7 +13,7 @@ use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoOrder;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccRespondedToPtpOrder;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccSellingCommodityToCustomerOrder;
-use App\Support\Traders\Traits\DmccTraderHelperTrait;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use CodeDredd\Soap\Client\Response;
@@ -23,6 +24,10 @@ use Illuminate\Support\Str;
 
 class DmccV1Driver implements TraderInterface
 {
+    use TraderHelperTrait {
+        createTraderOrder as traitCreateTraderOrder;
+    }
+
     protected $provider = 'dmcc';
 
     protected $version = 'v1';
@@ -37,10 +42,6 @@ class DmccV1Driver implements TraderInterface
         FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
         FinancingOrderHistory::OrderCancelled,
     ];
-
-    use DmccTraderHelperTrait {
-        createTraderOrder as traitCreateTraderOrder;
-    }
 
     private SoapClient $soap;
 
@@ -78,16 +79,25 @@ class DmccV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function createTraderOrder(FinancingOrder $financingOrder): string
+    public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
     {
         $ttiId = $this->getTtiId($financingOrder);
 
-        if (! blank($ttiId)) {
-            $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'dmcc');
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+        if (blank($ttiId)) {
+            throw new TraderException(
+                'Failed to create trader order',
+                [
+                    'provider' => $this->provider,
+                    'version' => $this->version,
+                    'financing_order_id' => $financingOrder->id,
+                ]
+            );
         }
 
-        return $ttiId;
+        $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'dmcc');
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+
+        return $traderOrder;
     }
 
     /**
@@ -510,17 +520,37 @@ class DmccV1Driver implements TraderInterface
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder)
     {
-        $dispatchableJob = match ((int) $traderOrder->last_history_action) {
-            FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::class,
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAskClientForWakala::class,
-            FinancingOrderHistory::ContractSigned => ProcessDmccSellingCommodityToCustomerOrder::class,
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::class,
+        $lastHistory = (int) $traderOrder->last_history_action;
+
+        $dispatchableJob = match ($traderOrder->type) {
+            TraderOrderMode::Automatic => $this->transitionFlowInAutomaticMode($lastHistory),
+            TraderOrderMode::Manual => $this->transitionFlowInManualMode($lastHistory),
             default => null,
         };
 
         if ($dispatchableJob) {
             $dispatchableJob::dispatch($traderOrder->id);
         }
+    }
+
+    protected function transitionFlowInManualMode($lastHistoryAction): ?string
+    {
+        return match ($lastHistoryAction) {
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAskClientForWakala::class,
+            FinancingOrderHistory::ContractSigned => ProcessDmccSellingCommodityToCustomerOrder::class,
+            default => null,
+        };
+    }
+
+    protected function transitionFlowInAutomaticMode($lastHistoryAction): ?string
+    {
+        return match ($lastHistoryAction) {
+            FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::class,
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAskClientForWakala::class,
+            FinancingOrderHistory::ContractSigned => ProcessDmccSellingCommodityToCustomerOrder::class,
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::class,
+            default => null,
+        };
     }
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)

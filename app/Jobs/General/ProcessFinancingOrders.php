@@ -18,19 +18,30 @@ class ProcessFinancingOrders implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    protected array $providersWithVersions = [
+        [
+            'provider' => 'dmcc',
+            'versions' => ['v1'],
+        ],
+        [
+            'provider' => 'fake',
+            'versions' => ['v1'],
+        ],
+        [
+            'provider' => 'bursam',
+            'versions' => ['v2'],
+        ],
+    ];
+
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
-        $whiteListedProviders = ['dmcc', 'fake', 'bursam'];
-
         FinancingOrder::query()
             ->where('status', FinancingOrderStatus::Approved)
-            ->withCount(['traderOrders' => function ($query) use ($whiteListedProviders) {
-                $query->whereIn('provider', $whiteListedProviders)
+            ->withCount(['traderOrders' => function ($query) {
+                $query->where($this->scopeToProvidersWithVersionsClosure())
                     ->whereIn('status', [
                         TraderOrderStatus::InProgress,
                     ]);
@@ -44,7 +55,7 @@ class ProcessFinancingOrders implements ShouldQueue
 
         TraderOrder::query()
             ->withLastHistoryAction()
-            ->whereIn('provider', $whiteListedProviders)
+            ->where($this->scopeToProvidersWithVersionsClosure())
             ->whereIn('status', [
                 TraderOrderStatus::InProgress,
             ])->chunk(10, function ($traderOrderCollection) {
@@ -53,5 +64,34 @@ class ProcessFinancingOrders implements ShouldQueue
                         ->dispatchJobForTransitioningFlow($traderOrder);
                 });
             });
+    }
+
+    protected function scopeToProvidersWithVersionsClosure(): \Closure
+    {
+        return function ($query) {
+            $isFirstLoopComplete = false;
+
+            foreach ($this->providersWithVersions as $providerWithVersions) {
+                $whereClosure = $this->scopeToProviderAndVersionsClosure(
+                    $providerWithVersions['provider'],
+                    $providerWithVersions['versions']
+                );
+
+                if ($isFirstLoopComplete) {
+                    $query->orWhere($whereClosure);
+                } else {
+                    $query->where($whereClosure);
+                    $isFirstLoopComplete = true;
+                }
+            }
+
+            return $query;
+        };
+    }
+
+    protected function scopeToProviderAndVersionsClosure($provider, $verions): \Closure
+    {
+        return fn ($query) => $query->where('provider', $provider)
+            ->whereIn('version', $verions);
     }
 }

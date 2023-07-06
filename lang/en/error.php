@@ -31,4 +31,6 @@ return [
     'trader_not_supported' => 'Trader Not Supported',
     'order_is_already_completed' => 'Order is already completed',
     'order_is_already_has_active_trader_order' => 'Order already has active trading request',
+    'commodity_market_is_unavailable' => 'The commodity market service is currently unavailable.',
+    'trader_mode_not_supported' => 'Selected mode is not available for this trader',
 ];
