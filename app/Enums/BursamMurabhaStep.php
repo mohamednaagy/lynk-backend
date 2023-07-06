@@ -3,9 +3,10 @@
 namespace App\Enums;
 
 use App\Enums\Contracts\Murabha\TraderMurabhaStepInterface;
+use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
 
-final class BursamMurabhaStep extends Enum implements TraderMurabhaStepInterface
+final class BursamMurabhaStep extends Enum implements TraderMurabhaStepInterface, LocalizedEnum
 {
     const TraderOrderCreated = 'trader_order_created';
 

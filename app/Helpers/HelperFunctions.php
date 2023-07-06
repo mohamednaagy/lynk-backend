@@ -90,7 +90,7 @@ if (! function_exists('get_file_url')) {
 }
 
 if (! function_exists('get_murabha_step_enum')) {
-    function get_murabha_step_enum($provider): string
+    function get_murabha_step_enum(?string $provider = null): string
     {
         $provider = $provider ?? config('trader.default');
 
