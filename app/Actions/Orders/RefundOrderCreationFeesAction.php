@@ -34,7 +34,6 @@ class RefundOrderCreationFeesAction implements RefundOrderCreationFees
         $reference = $this->referenceGenerator->generate();
         $transactions->each(function ($transaction) use ($wallet, $financingOrder, $traderOrder, $reference) {
             $wallet->deposit(
-                $wallet,
                 $transaction->amount,
                 $this->getTransactionReasonForRefund($transaction),
                 $reference,
