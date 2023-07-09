@@ -11,7 +11,6 @@ use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -220,19 +219,6 @@ class TraderOrder extends Model implements HasMedia
             'bursam' => BursamMurabhaStep::PurchasingCommodity,
         };
 
-        $histories = (new StepHistoriesDictionary($this->provider, $this->version))
-            ->getStepOf($purchasingStepAccordingToTrader)?->histories;
-
-        if (! $histories) {
-            throw new Exception(
-                sprintf(
-                    'No histories for the given step %s of trader order #%s',
-                    $purchasingStepAccordingToTrader,
-                    $this->id
-                )
-            );
-        }
-
-        return $this->checkOrderHistoryAction($histories);
+        return $this->checkOrderStepComplete($purchasingStepAccordingToTrader);
     }
 }
