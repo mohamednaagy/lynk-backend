@@ -233,8 +233,8 @@ class BursamV1Driver implements TraderInterface
             'total_value' => $response->json('TOTALVALUE'),
             'total_value_myr_equivalent' => (float) $response->json('PRICE_MYR_EQUIVALENT') * (float) $response->json('PVOLUME'),
             'currency' => $response->json('CURRENCY'),
-            //            'price' => $response->json('PRICE'),
-            //            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
+            'price' => $response->json('PRICE'),
+            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
             'purchase_time_date' => $response->json('PURCHASETIMEDATE').'  Malaysia Time (MYT)',
             'value_date' => $response->json('VALUEDATE').'  Malaysia Time (MYT)',
             'p_name' => in_array($productName, BursamProductCode::getValues())
@@ -486,8 +486,8 @@ class BursamV1Driver implements TraderInterface
             'total_value' => $response->json('TOTALVALUE'),
             'total_value_myr_equivalent' => (float) $response->json('PRICE_MYR_EQUIVALENT') * (float) $response->json('PVOLUME'),
             'currency' => $response->json('CURRENCY'),
-            //            'price' => $response->json('PRICE'),
-            //            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
+            'price' => $response->json('PRICE'),
+            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
             'reporting_time_date' => $response->json('REPORTINGTIMEDATE').'  Malaysia Time (MYT)',
             'value_date' => $response->json('VALUEDATE').'  Malaysia Time (MYT)',
             'p_name' => in_array($productName, BursamProductCode::getValues())
@@ -550,8 +550,8 @@ class BursamV1Driver implements TraderInterface
             'total_value' => $response->json('TOTALVALUE'),
             'total_value_myr_equivalent' => (float) $response->json('PRICE_MYR_EQUIVALENT') * (float) $response->json('PVOLUME'),
             'currency' => $response->json('CURRENCY'),
-            //            'price' => $response->json('PRICE'),
-            //            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
+            'price' => $response->json('PRICE'),
+            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
             'selling_time_date' => $response->json('SELLINGTIMEDATE').'  Malaysia Time (MYT)',
             'value_date' => $response->json('VALUEDATE').'  Malaysia Date (MYT)',
             'p_name' => in_array($productName, BursamProductCode::getValues())

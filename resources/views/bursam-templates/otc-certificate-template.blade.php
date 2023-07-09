@@ -99,14 +99,14 @@
                 <td>Murabha Value:</td>
                 <td>{{ $murabaha_value }} {{ $currency }}</td>
             </tr>
-{{--            <tr>--}}
-{{--                <td>Product Price:</td>--}}
-{{--                <td>{{ $price }} {{ $currency }}</td>--}}
-{{--            </tr>--}}
-{{--            <tr>--}}
-{{--                <td>Product Price (MYR Equivalent):</td>--}}
-{{--                <td>{{ $price_myr_equivalent }} MYR</td>--}}
-{{--            </tr>--}}
+            <tr>
+                <td>Product Price:</td>
+                <td>{{ $price }} {{ $currency }}</td>
+            </tr>
+            <tr>
+                <td>Product Price (MYR Equivalent):</td>
+                <td>{{ $price_myr_equivalent }} MYR</td>
+            </tr>
             <tr>
                 <td>Reporting Time/Date:</td>
                 <td>{{ $reporting_time_date }}</td>

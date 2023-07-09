@@ -95,14 +95,14 @@
                 <td>Total Value (in MYR):</td>
                 <td>{{ $total_value_myr_equivalent }}</td>
             </tr>
-{{--            <tr>--}}
-{{--                <td>Product Price:</td>--}}
-{{--                <td>{{ $price }} {{ $currency }}</td>--}}
-{{--            </tr>--}}
-{{--            <tr>--}}
-{{--                <td>Product Price (MYR Equivalent):</td>--}}
-{{--                <td>{{ $price_myr_equivalent }} MYR</td>--}}
-{{--            </tr>--}}
+            <tr>
+                <td>Product Price:</td>
+                <td>{{ $price }} {{ $currency }}</td>
+            </tr>
+            <tr>
+                <td>Product Price (MYR Equivalent):</td>
+                <td>{{ $price_myr_equivalent }} MYR</td>
+            </tr>
             <tr>
                 <td>Selling Time/Date:</td>
                 <td>{{ $selling_time_date }}</td>
