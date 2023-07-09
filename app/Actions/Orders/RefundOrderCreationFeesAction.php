@@ -3,6 +3,7 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\RefundOrderCreationFees;
+use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Models\TraderOrder;
@@ -13,6 +14,7 @@ class RefundOrderCreationFeesAction implements RefundOrderCreationFees
 {
     public function __construct(
         protected TransactionServiceInterface $transactionService,
+        protected CreateTransactions $createTransactions,
         protected ReferenceNumberGeneratorInterface $referenceGenerator
     ) {
     }
@@ -33,22 +35,23 @@ class RefundOrderCreationFeesAction implements RefundOrderCreationFees
 
         $reference = $this->referenceGenerator->generate();
         $transactions->each(function ($transaction) use ($wallet, $financingOrder, $traderOrder, $reference) {
-            $wallet->deposit(
-                $transaction->amount,
+            $this->createTransactions->handle(
+                $wallet,
                 $this->getTransactionReasonForRefund($transaction),
-                $reference,
+                $transaction->amount,
                 [
                     'financing_order_id' => $financingOrder->id,
                     'trader_order_id' => $traderOrder->id,
                     'refunded_transaction_id' => $transaction->id,
-                ]
+                ],
+                $reference
             );
         });
     }
 
-    protected function getTransactionReasonForRefund($refunedTransaction)
+    protected function getTransactionReasonForRefund($refundTransaction): int
     {
-        return match ($refunedTransaction->reason) {
+        return match ($refundTransaction->reason) {
             TransactionReason::OrderCreationFee => TransactionReason::RefundOrderCreationFee,
             TransactionReason::VatPercentageFee => TransactionReason::RefundVatPercentageFee,
         };
