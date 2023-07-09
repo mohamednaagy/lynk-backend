@@ -27,7 +27,7 @@ class RefundOrderCost
     public function handle(OrderCancelled $event)
     {
         DB::multipleTransaction(function () use ($event) {
-            $traderOrder = TraderOrder::lockForUpdate()->findOrFail($event->traderOrder);
+            $traderOrder = TraderOrder::lockForUpdate()->findOrFail($event->traderOrder->id);
 
             if ($traderOrder->isCommodityPurchased() === false) {
                 app(RefundOrderCreationFees::class)->handle($traderOrder);
