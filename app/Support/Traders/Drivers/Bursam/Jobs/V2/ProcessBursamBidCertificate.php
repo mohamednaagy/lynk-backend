@@ -44,8 +44,7 @@ class ProcessBursamBidCertificate implements ShouldQueue, ShouldBeUnique
                 ->lockForUpdate()
                 ->findOrFail($this->traderOrderId);
 
-            sleep(60);
-
+            sleep(15);
             if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)) {
                 return;
             }
