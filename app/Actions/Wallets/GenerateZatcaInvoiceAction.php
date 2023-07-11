@@ -39,12 +39,14 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
 
         $company = $financingOrder->company()->withTrashed()->first();
 
+        $vatAmount = $company->order_cost->multiply($seller->getVatRate());
+
         $displayQRCodeAsBase64 = GenerateQrCode::fromArray([
             new Seller($seller->getCompanyName(Config::get('app.locale', 'en'))),
             new TaxNumber($seller->getVatId()),
             new InvoiceDate($traderOrder->created_at->timezone('Asia/Riyadh')->toDateTimeString()),
-            new InvoiceTotalAmount($company->order_cost->formatByDecimal()),
-            new InvoiceTaxAmount($company->order_cost->multiply($seller->getVatRate())->formatByDecimal()),
+            new InvoiceTotalAmount($company->order_cost->add($vatAmount)->formatByDecimal()),
+            new InvoiceTaxAmount($vatAmount->formatByDecimal()),
         ])->render();
 
         $html = view($this->getTemplate(), [
