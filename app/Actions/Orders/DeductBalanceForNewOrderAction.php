@@ -10,20 +10,27 @@ use App\Models\TraderOrder;
 
 class DeductBalanceForNewOrderAction implements DeductBalanceForNewOrder
 {
+    public function __construct(
+        protected DeductOrderCreationFee $deductOrderCreationFee,
+        protected DeductVatPercentage $deductVatPercentage,
+        protected GenerateZatcaInvoice $generateZatcaInvoice
+    ) {
+    }
+
     public function handle(TraderOrder $traderOrder): void
     {
         $financingOrder = $traderOrder->order;
 
         // deduct the cost from the wallet
-        $creationFeeTransaction = app(DeductOrderCreationFee::class)->handle($traderOrder);
+        $creationFeeTransaction = $this->deductOrderCreationFee->handle($traderOrder);
 
-        app(DeductVatPercentage::class)->handle(
+        $this->deductVatPercentage->handle(
             $traderOrder,
             $creationFeeTransaction,
             $financingOrder->company()->withTrashed()->first()
         );
 
-        app(GenerateZatcaInvoice::class)->handel(
+        $this->generateZatcaInvoice->handel(
             $traderOrder,
             creationFeeTransaction: $creationFeeTransaction
         );
