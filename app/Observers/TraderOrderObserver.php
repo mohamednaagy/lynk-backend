@@ -31,7 +31,7 @@ class TraderOrderObserver
 
     protected function takeActionsIfStatusWasChanged(TraderOrder $traderOrder)
     {
-        $dispatchables = match ($traderOrder->status) {
+        $dispatchables = match ($traderOrder->status->value) {
             TraderOrderStatus::Cancelled => [
                 OrderCancelled::class,
             ],

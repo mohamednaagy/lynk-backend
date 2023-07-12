@@ -158,3 +158,10 @@ if (! function_exists('is_bursam_service_available')) {
         return true;
     }
 }
+
+if (! function_exists('parse_number')) {
+    function parse_number($number): float
+    {
+        return (float) preg_replace('/[^\d.]/', '', $number);
+    }
+}

@@ -161,9 +161,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     /**
      * Check if this user requires verifying by OTP based on role.
-     *
-     * @param  Request  $request
-     * @return bool
      */
     public function doesRequireVerifyingByOtp(Request $request): bool
     {
@@ -243,8 +240,8 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function canCreateTraderOrder()
     {
-        $doesNotHaveInProgressOrder = $this->traderOrders()
-            ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::PendingCancellation])
+        $doesNotHaveInActiveOrder = $this->traderOrders()
+            ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::PendingCancellation, TraderOrderStatus::Completed])
             ->doesntExist();
 
         $orderIsNotCompleted = $this->status->isNot(FinancingOrderStatus::Completed);
@@ -253,7 +250,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         $orderIsPendingTraderOrder = $this->status->is(FinancingOrderStatus::PendingTraderOrder);
         $bursamTraderServiceAvailability = $this->isBursamTraderServiceAvailable();
 
-        return ($orderIsNotCompleted && $doesNotHaveInProgressOrder
+        return ($orderIsNotCompleted && $doesNotHaveInActiveOrder
             && $financingOrderIsNotCancelled && $financingOrderIsNotPendingCancelled
             && $bursamTraderServiceAvailability)
             || ($orderIsPendingTraderOrder && $orderIsNotCompleted && $bursamTraderServiceAvailability);
