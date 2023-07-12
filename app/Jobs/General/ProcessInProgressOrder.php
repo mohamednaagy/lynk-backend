@@ -36,7 +36,6 @@ class ProcessInProgressOrder implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
      *
      * @throws Throwable
      */
@@ -56,9 +55,12 @@ class ProcessInProgressOrder implements ShouldQueue
             }
 
             app(CanCreateOrder::class)->handle($financingOrder->company);
-            app(DeductBalanceForNewOrder::class)->handle($financingOrder);
 
-            $trader->createTraderOrder($financingOrder);
+            $traderOrder = $trader->createTraderOrder($financingOrder);
+
+            // keep below action after createTraderOrder()
+            // to be sure we have a trader order and store his data in transaction meta
+            app(DeductBalanceForNewOrder::class)->handle($traderOrder);
 
             $financingOrder->update([
                 'status' => FinancingOrderStatus::InProgress,
@@ -68,8 +70,6 @@ class ProcessInProgressOrder implements ShouldQueue
 
     /**
      * Get the middleware the job should pass through.
-     *
-     * @return array
      */
     public function middleware(): array
     {

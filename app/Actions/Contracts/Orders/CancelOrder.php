@@ -10,6 +10,7 @@ interface CancelOrder
     public function handle(
         FinancingOrder $financingOrder,
         User $user,
-        array $data
+        array $data,
+        int $cancelReason
     ): void;
 }

@@ -62,7 +62,6 @@ class CancelOrderControllerTest extends TestCase
         );
         self::$orderCancledUrl = self::$endpoint.self::$financingOrder->getRawOriginal('id').'/cancel';
 
-        // create trader order
         self::$financingOrder->traderOrders()->create([
             'provider' => 'fake',
             'reference' => '123456789',
@@ -157,6 +156,7 @@ class CancelOrderControllerTest extends TestCase
             [FinancingOrderStatus::Rejected],
             [FinancingOrderStatus::Approved],
             [FinancingOrderStatus::PendingApproval],
+            [FinancingOrderStatus::PendingTraderOrder],
         ];
     }
 

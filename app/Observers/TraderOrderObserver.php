@@ -2,6 +2,8 @@
 
 namespace App\Observers;
 
+use App\Enums\TraderOrderStatus;
+use App\Events\OrderCancelled;
 use App\Models\TraderOrder;
 
 class TraderOrderObserver
@@ -22,6 +24,23 @@ class TraderOrderObserver
      */
     public function updated(TraderOrder $traderOrder)
     {
+        if ($traderOrder->wasChanged(['status'])) {
+            $this->takeActionsIfStatusWasChanged($traderOrder);
+        }
+    }
+
+    protected function takeActionsIfStatusWasChanged(TraderOrder $traderOrder)
+    {
+        $dispatchables = match ($traderOrder->status->value) {
+            TraderOrderStatus::Cancelled => [
+                OrderCancelled::class,
+            ],
+            default => []
+        };
+
+        foreach ($dispatchables as $dispatchable) {
+            $dispatchable::dispatch($traderOrder);
+        }
     }
 
     /**

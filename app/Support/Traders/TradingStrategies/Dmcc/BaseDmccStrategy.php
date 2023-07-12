@@ -10,12 +10,12 @@ use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
-use App\Support\Traders\Traits\DmccTraderHelperTrait;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Http\Request;
 
 abstract class BaseDmccStrategy implements TraderStrategyInterface
 {
-    use DmccTraderHelperTrait;
+    use TraderHelperTrait;
 
     public function updatePurchasingCommodity(TraderOrder $traderOrder, Request $request)
     {

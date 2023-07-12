@@ -4,6 +4,7 @@ namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\CancelOrder;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\TraderOrderCancelReason;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Support\Traders\Facades\Trader;
@@ -13,7 +14,8 @@ class CancelOrderAction implements CancelOrder
     public function handle(
         FinancingOrder $financingOrder,
         User $user,
-        array $data
+        array $data,
+        int $cancelReason = TraderOrderCancelReason::Manual
     ): void {
         $activeTraderOrders = $financingOrder->activeTraderOrder()->lockForUpdate()->get();
 
@@ -26,14 +28,14 @@ class CancelOrderAction implements CancelOrder
             return;
         }
 
-        $activeTraderOrders->each(function ($traderOrder) {
-            Trader::driver($traderOrder->provider, $traderOrder->version)
-                ->cancelTraderOrder($traderOrder);
-        });
-
         $financingOrder->update([
             'status' => FinancingOrderStatus::PendingCancellation,
             'status_reason' => $data['status_reason'] ?? null,
         ]);
+
+        $activeTraderOrders->each(function ($traderOrder) use ($cancelReason) {
+            Trader::driver($traderOrder->provider, $traderOrder->version)
+                ->cancelTraderOrder($traderOrder, $cancelReason);
+        });
     }
 }

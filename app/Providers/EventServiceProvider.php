@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Events\OrderCancelled;
+use App\Listeners\RefundOrderCost;
 use App\Models\FinancingOrder;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
@@ -22,6 +24,9 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+        OrderCancelled::class => [
+            RefundOrderCost::class,
         ],
     ];
 

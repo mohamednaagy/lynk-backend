@@ -33,7 +33,7 @@ class StoreOrderRequest extends FormRequest
             'national_id' => ['required', 'string', 'size:10', new ValidateSAID()],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'string', 'phone:phone_country_code,mobile'],
-            'amount' => ['required', 'numeric', 'gt:0'],
+            'amount' => ['required', 'numeric', 'gte:1'],
             'selling_price' => ['required', 'numeric', 'gte:amount'],
             'is_verification_required' => ['required', 'boolean'],
         ];

@@ -41,6 +41,7 @@ class CancelOrder extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($request, $cancelOrder, $order) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
+            $traderOrder = $order->activeTraderOrder->first();
 
             if ($order->status->cantMoveTo(FinancingOrderStatus::PendingCancellation)) {
                 return $this->errorResponse(
@@ -51,7 +52,6 @@ class CancelOrder extends Controller
             }
 
             $canceller = $request->user();
-
             $cancelOrder->handle(
                 $order,
                 $canceller,

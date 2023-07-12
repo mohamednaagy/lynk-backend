@@ -10,12 +10,12 @@ interface CreateTransactions
 {
     /**
      * Summary of handle
-     *
-     * @param  Wallet  $wallet
-     * @param  int  $transactionReason
-     * @param  Money  $amount
-     * @param  array  $meta
-     * @return Transaction
      */
-    public function handle(Wallet $wallet, int $transactionReason, Money $amount, array $meta): Transaction;
+    public function handle(
+        Wallet $wallet,
+        int $transactionReason,
+        Money $amount,
+        array $meta,
+        ?string $referenceNumber = null
+    ): Transaction;
 }

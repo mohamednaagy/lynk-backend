@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
@@ -42,6 +44,7 @@ class TraderOrder extends Model implements HasMedia
         return [
             'id',
             'financing_order_id',
+            'mode',
             'data',
             'provider',
             'version',
@@ -84,7 +87,11 @@ class TraderOrder extends Model implements HasMedia
         $this
             ->addMediaCollection(TraderOrderMediaCollection::TtiHoldingCertificate)
             ->singleFile();
+
         $this->addMediaCollection(TraderOrderMediaCollection::BursamTtiHoldingCertificate)
+            ->singleFile();
+
+        $this->addMediaCollection(TraderOrderMediaCollection::ZatcaInvoice)
             ->singleFile();
     }
 
@@ -138,15 +145,21 @@ class TraderOrder extends Model implements HasMedia
         return in_array($lastAction->action, $actions);
     }
 
-    public function checkOrderHistoryAction($action): bool
+    public function checkOrderHistoryAction($actions): bool
     {
-        if (! in_array($action, FinancingOrderHistory::getValues())) {
-            throw new UnexpectedValueException('invalid Action');
+        if (! is_array($actions)) {
+            $actions = [$actions];
         }
 
-        return (bool) $this->traderHistories
-            ->where('action', $action)
-            ->first();
+        foreach ($actions as $action) {
+            if (! in_array($action, FinancingOrderHistory::getValues())) {
+                throw new UnexpectedValueException(sprintf('Invalid action %s', $action));
+            }
+        }
+
+        return $this->traderHistories()
+            ->whereIn('action', $actions)
+            ->exists();
     }
 
     public function scopeWithLastHistoryAction($query)
@@ -159,7 +172,7 @@ class TraderOrder extends Model implements HasMedia
         ]);
     }
 
-    protected function step(): Attribute
+    protected function currentStep(): Attribute
     {
         $lastAction = $this->traderHistories()->latest('id')->first();
 
@@ -197,5 +210,15 @@ class TraderOrder extends Model implements HasMedia
     public function scopeCompleted($query)
     {
         return $query->where('status', TraderOrderStatus::Completed);
+    }
+
+    public function isCommodityPurchased(): bool
+    {
+        $purchasingStepAccordingToTrader = match ($this->provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::PurchasingCommodity,
+            'bursam' => BursamMurabhaStep::PurchasingCommodity,
+        };
+
+        return $this->checkOrderStepComplete($purchasingStepAccordingToTrader);
     }
 }

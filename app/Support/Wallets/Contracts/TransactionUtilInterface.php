@@ -13,5 +13,11 @@ interface TransactionUtilInterface
 
     public function resolveHandler(int $reason): DefaultGenerator|TransactionTypeHandlerInterface;
 
-    public function process(Wallet $wallet, Money $amount, int $reason, array $meta): Transaction;
+    public function process(
+        Wallet $wallet,
+        Money $amount,
+        int $reason,
+        ?string $referenceNumber,
+        array $meta
+    ): Transaction;
 }

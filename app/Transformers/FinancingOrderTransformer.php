@@ -147,7 +147,10 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeIsUpdatable(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->status->is(FinancingOrderStatus::PendingApproval));
+        return $this->primitive(
+            $financingOrder->status->is(FinancingOrderStatus::PendingApproval)
+            || $financingOrder->status->is(FinancingOrderStatus::Rejected)
+        );
     }
 
     public function includeIsCancellable(FinancingOrder $financingOrder): Primitive
@@ -179,7 +182,7 @@ class FinancingOrderTransformer extends TransformerAbstract
     {
         $traderOrder = $financingOrder->activeTraderOrder()->withLastHistoryAction()->first();
 
-        if (is_null($traderOrder)) {
+        if (is_null($traderOrder) || is_null($traderOrder->last_history_action)) {
             return $this->primitive(null);
         }
 

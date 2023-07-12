@@ -6,8 +6,8 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\Traits\BursamTraderHelperTrait;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, BursamTraderHelperTrait, StopsTraderOrderOnJobFailure;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait, StopsTraderOrderOnJobFailure;
 
     public $tries = 8;
 
@@ -30,7 +30,7 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, Shoul
      *
      * @return void
      */
-    public function __construct(protected int $traderOrderId)
+    public function __construct(protected int $traderOrderId, protected int $cancelReason)
     {
     }
 
@@ -53,6 +53,7 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, Shoul
 
             $traderOrder->update([
                 'status' => TraderOrderStatus::Cancelled,
+                'cancel_reason' => $this->cancelReason,
             ]);
         });
     }

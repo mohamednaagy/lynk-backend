@@ -130,7 +130,7 @@ class TraderHistoryTransformer extends TransformerAbstract
             'step' => 'selling_commodity_to_customer',
             'is_complete' => (bool) $history,
             'completed_at' => $history?->created_at?->format('Y-m-d h:i:s A'),
-            'document' => [
+            'borrower_document' => [
                 'url' => $documentMediaFile?->file_url,
                 'date' => $documentMediaFile?->created_at?->format('Y-m-d h:i:s A'),
             ],

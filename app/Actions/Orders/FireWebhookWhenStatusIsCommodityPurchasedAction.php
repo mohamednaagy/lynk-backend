@@ -29,10 +29,10 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
         $products = $traderOrder->products;
         $data = [];
         foreach ($products as $product) {
-            array_push($data, [
+            $data[] = [
                 'commodity_description' => $product['product'],
                 'quantity' => $product['quantity'],
-            ]);
+            ];
         }
 
         return $data;
