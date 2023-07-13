@@ -30,7 +30,7 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
             BursamMurabhaStep::PurchasingCommodity
         );
 
-        app(DeductBalanceForNewOrder::class)->handle($traderOrder->order);
+        app(DeductBalanceForNewOrder::class)->handle($traderOrder);
 
         $this->transferOwnershipToLender($traderOrder, $request);
     }
