@@ -44,7 +44,7 @@ class BursamV2Driver extends BursamV1Driver
     {
         $lastHistory = (int) $traderOrder->last_history_action;
 
-        $dispatchableJob = match ($traderOrder->type) {
+        $dispatchableJob = match ($traderOrder->mode) {
             TraderOrderMode::Automatic => $this->transitionFlowInAutomaticMode($lastHistory),
             TraderOrderMode::Manual => $this->transitionFlowInManualMode($lastHistory),
             default => null,
