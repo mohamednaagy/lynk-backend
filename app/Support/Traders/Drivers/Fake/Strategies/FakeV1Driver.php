@@ -405,7 +405,7 @@ class FakeV1Driver implements TraderInterface
     {
         $lastHistory = (int) $traderOrder->last_history_action;
 
-        $dispatchableJob = match ($traderOrder->type) {
+        $dispatchableJob = match ($traderOrder->mode) {
             TraderOrderMode::Automatic => $this->transitionFlowInAutomaticMode($lastHistory),
             TraderOrderMode::Manual => $this->transitionFlowInManualMode($lastHistory),
             default => null,
