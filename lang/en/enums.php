@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\BursamMurabhaStep;
+use App\Enums\BursamProductCode;
 use App\Enums\CompanyStatus;
 use App\Enums\DmccMurabhaStep;
 use App\Enums\EdaatInvoiceStatus;
@@ -68,5 +69,14 @@ return [
         DmccMurabhaStep::ClientWakala => 'Client Wakala',
         DmccMurabhaStep::MurabhaOfferIssued => 'Murabha Offer Issued',
         DmccMurabhaStep::MurabahaSaleCompleted => 'Murabaha Sale Completed',
+    ],
+    BursamProductCode::class => [
+        BursamProductCode::CrudePalmOil => 'Crude Palm Oil',
+        BursamProductCode::PlasticResinA => 'Plastic Resin A',
+        BursamProductCode::PlasticResinB => 'Plastic Resin B',
+        BursamProductCode::PlumbumLead => 'Lead',
+        BursamProductCode::RbdPalmOlein => 'Olein Oil',
+        BursamProductCode::TimberHardwood => 'Timber Hardwood',
+        BursamProductCode::TimberSoftwood => 'Timber Softwood',
     ],
 ];
