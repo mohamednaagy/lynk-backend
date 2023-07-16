@@ -257,7 +257,7 @@ class BursamV1Driver implements TraderInterface
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
     }
 
-    public function createTransferOwnershipToLenderDocument($traderOrder)
+    public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
     {
         try {
             $amount = $traderOrder->order->amount->formatByDecimal();
@@ -271,6 +271,7 @@ class BursamV1Driver implements TraderInterface
                     'order_id' => $traderOrder->order->id,
                     'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
                     'reference_number' => $traderOrder->id,
+                    'trader_order_reference' => $traderOrder->reference,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
                     'amount' => $amount,
@@ -319,6 +320,7 @@ class BursamV1Driver implements TraderInterface
                 'selling-commodity-to-customer',
                 [
                     'reference_number' => $traderOrder->id,
+                    'trader_order_reference' => $traderOrder->reference,
                     'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                     'order_number' => $traderOrder->financing_order_id,
                     'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
