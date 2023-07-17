@@ -27,12 +27,14 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Illuminate\Support\Traits\Localizable;
 
 class BursamV1Driver implements TraderInterface
 {
     use TraderHelperTrait {
         createTraderOrder as traitCreateTraderOrder;
     }
+    use Localizable;
 
     protected $provider = 'bursam';
 
@@ -260,37 +262,39 @@ class BursamV1Driver implements TraderInterface
     public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
     {
         try {
-            $amount = $traderOrder->order->amount->formatByDecimal();
-            $currentTimeInUtcTz = CarbonImmutable::now();
-            $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
-            $products = collect($traderOrder->products)->map(fn ($product) => CommodityProductDto::fromArray($product));
+            $this->withLocale('ar', function () use ($traderOrder) {
+                $amount = $traderOrder->order->amount->formatByDecimal();
+                $currentTimeInUtcTz = CarbonImmutable::now();
+                $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
+                $products = collect($traderOrder->products)->map(fn ($product) => CommodityProductDto::fromArray($product));
 
-            $this->storeOrderDocumentAsPdf(
-                'transfer-ownership-to-lender',
-                [
-                    'order_id' => $traderOrder->order->id,
-                    'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
-                    'reference_number' => $traderOrder->id,
-                    'trader_order_reference' => $traderOrder->reference,
-                    'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-                    'order_number' => $traderOrder->financing_order_id,
-                    'amount' => $amount,
-                    'previous_owner' => $products->implode(fn ($item) => $item->getPreviousOwner(), '،'),
-                    'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
-                    'date' => $currentTimeInRiyadhTz->toDateString(),
-                    'time' => $currentTimeInRiyadhTz->toTimeString(),
-                ],
-                $traderOrder,
-                TraderOrderMediaCollection::TransferOwnershipToLender
-            );
+                $this->storeOrderDocumentAsPdf(
+                    'transfer-ownership-to-lender',
+                    [
+                        'order_id' => $traderOrder->order->id,
+                        'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
+                        'reference_number' => $traderOrder->id,
+                        'trader_order_reference' => $traderOrder->reference,
+                        'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
+                        'order_number' => $traderOrder->financing_order_id,
+                        'amount' => $amount,
+                        'previous_owner' => $products->implode(fn ($item) => $item->getPreviousOwner(), '،'),
+                        'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
+                        'date' => $currentTimeInRiyadhTz->toDateString(),
+                        'time' => $currentTimeInRiyadhTz->toTimeString(),
+                    ],
+                    $traderOrder,
+                    TraderOrderMediaCollection::TransferOwnershipToLender
+                );
 
-            $this->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-                [
-                    'created_at' => $currentTimeInUtcTz,
-                ]
-            );
+                $this->createTraderOrderHistory(
+                    $traderOrder,
+                    FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
+                    [
+                        'created_at' => $currentTimeInUtcTz,
+                    ]
+                );
+            });
         } catch (\Throwable $exception) {
             throw new TraderException(
                 'Failed to create lender ownership certificate',
@@ -306,40 +310,42 @@ class BursamV1Driver implements TraderInterface
     public function createSellingCommodityToCustomerDocument(TraderOrder $traderOrder)
     {
         try {
-            $dateTime = $traderOrder->traderHistories()
-                ->where('action', FinancingOrderHistory::ContractSigned)
-                ->first()
-                ?->created_at;
-            $currentTimeInUtcTz = CarbonImmutable::parse($dateTime);
-            $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
-            $amount = $traderOrder->order->selling_price->formatByDecimal();
+            $this->withLocale('ar', function () use ($traderOrder) {
+                $dateTime = $traderOrder->traderHistories()
+                    ->where('action', FinancingOrderHistory::ContractSigned)
+                    ->first()
+                    ?->created_at;
+                $currentTimeInUtcTz = CarbonImmutable::parse($dateTime);
+                $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
+                $amount = $traderOrder->order->selling_price->formatByDecimal();
 
-            $customerName = $traderOrder->order->customer_name;
+                $customerName = $traderOrder->order->customer_name;
 
-            $this->storeOrderDocumentAsPdf(
-                'selling-commodity-to-customer',
-                [
-                    'reference_number' => $traderOrder->id,
-                    'trader_order_reference' => $traderOrder->reference,
-                    'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-                    'order_number' => $traderOrder->financing_order_id,
-                    'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
-                    'amount' => $amount,
-                    'customer_name' => $customerName,
-                    'contract_signed_date' => $currentTimeInRiyadhTz->toDateString(),
-                    'contract_signed_time' => $currentTimeInRiyadhTz->toTimeString(),
-                ],
-                $traderOrder,
-                TraderOrderMediaCollection::SellingCommodityToCustomer,
-            );
+                $this->storeOrderDocumentAsPdf(
+                    'selling-commodity-to-customer',
+                    [
+                        'reference_number' => $traderOrder->id,
+                        'trader_order_reference' => $traderOrder->reference,
+                        'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
+                        'order_number' => $traderOrder->financing_order_id,
+                        'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
+                        'amount' => $amount,
+                        'customer_name' => $customerName,
+                        'contract_signed_date' => $currentTimeInRiyadhTz->toDateString(),
+                        'contract_signed_time' => $currentTimeInRiyadhTz->toTimeString(),
+                    ],
+                    $traderOrder,
+                    TraderOrderMediaCollection::SellingCommodityToCustomer,
+                );
 
-            $this->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-                [
-                    'created_at' => $currentTimeInUtcTz,
-                ]
-            );
+                $this->createTraderOrderHistory(
+                    $traderOrder,
+                    FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+                    [
+                        'created_at' => $currentTimeInUtcTz,
+                    ]
+                );
+            });
         } catch (Exception $exception) {
             throw new TraderException(
                 'Failed to create customer ownership document',
