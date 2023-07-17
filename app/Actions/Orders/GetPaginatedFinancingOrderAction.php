@@ -7,6 +7,7 @@ use App\Enums\CompanyType;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderAmountScope;
+use App\Support\QueryScoper\Scopes\FinancingOrders\OrderFilterScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderNeedActionScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderSearchScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderSortScope;
@@ -36,6 +37,7 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
             'sort' => new OrderSortScope(),
             'amount' => new OrderAmountScope(),
             'current_step' => new TraderOrderCurrentStepScope(),
+            'filter' => new OrderFilterScope(),
         ];
     }
 
