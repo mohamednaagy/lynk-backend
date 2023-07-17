@@ -4,6 +4,7 @@ namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\GetPaginatedCompanies;
 use App\Models\Company;
+use App\Support\QueryScoper\Scopes\Company\CompanySearchScope;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class GetPaginatedCompaniesAction implements GetPaginatedCompanies
@@ -16,11 +17,19 @@ class GetPaginatedCompaniesAction implements GetPaginatedCompanies
             ->when($this->type, function ($query) {
                 $query->type($this->type);
             })
+            ->toScopes($this->scopes())
             ->withCount('orders')
             ->paginate();
     }
 
-    public function setType(string $type)
+    private function scopes(): array
+    {
+        return [
+            'search' => new CompanySearchScope(),
+        ];
+    }
+
+    public function setType(string $type): static
     {
         $this->type = $type;
 
