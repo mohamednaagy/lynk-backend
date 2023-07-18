@@ -95,7 +95,11 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCompanyName(FinancingOrder $financingOrder): Primitive
     {
-        return $this->primitive($this->company->name);
+        if ($this->company) {
+            return $this->primitive($this->company->name);
+        }
+
+        return $this->primitive($financingOrder->company->name);
     }
 
     public function includeReferenceNumber(FinancingOrder $financingOrder)

@@ -30,11 +30,6 @@ class OrderController extends Controller
             ->only('show');
     }
 
-    /**
-     * @param  GetPaginatedFinancingOrder  $getPaginatedOrders
-     * @param  Request  $request
-     * @return JsonResponse
-     */
     public function index(Request $request, GetPaginatedFinancingOrder $getPaginatedOrders): JsonResponse
     {
         $company = Company::find($request->input('company'));
@@ -43,7 +38,7 @@ class OrderController extends Controller
             $getPaginatedOrders = $getPaginatedOrders->setCompany($company);
         }
 
-        $orders = $getPaginatedOrders->handle();
+        $orders = $getPaginatedOrders->setRelations(['company', 'creator'])->handle();
 
         return fractal($orders, new FinancingOrderTransformer())
             ->parseIncludes([
@@ -56,15 +51,12 @@ class OrderController extends Controller
                 'status_reason',
                 'current_step',
                 'creator',
+                'company_name',
                 'created_at',
             ])
             ->respond();
     }
 
-    /**
-     * @param  FinancingOrder  $order
-     * @return JsonResponse
-     */
     public function show(FinancingOrder $order): JsonResponse
     {
         $order->load([

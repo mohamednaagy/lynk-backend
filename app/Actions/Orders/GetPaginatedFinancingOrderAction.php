@@ -23,9 +23,11 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
 
     protected ?Company $company = null;
 
+    private ?array $relations;
+
     public function handle($perPage = null): LengthAwarePaginator
     {
-        return $this->baseQuery()->toScopes($this->scopes())->paginate($perPage);
+        return $this->baseQuery()->with($this->relations)->toScopes($this->scopes())->paginate($perPage);
     }
 
     private function scopes(): array
@@ -51,6 +53,13 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
     public function setCompany(Company $company): static
     {
         $this->company = $company;
+
+        return $this;
+    }
+
+    public function setRelations(array $relations): static
+    {
+        $this->relations = $relations;
 
         return $this;
     }

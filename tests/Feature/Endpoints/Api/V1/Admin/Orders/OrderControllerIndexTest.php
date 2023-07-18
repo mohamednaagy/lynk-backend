@@ -36,8 +36,6 @@ class OrderControllerIndexTest extends TestCase
     private static User $managerHasPermissionToIndexMethod;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -101,7 +99,9 @@ class OrderControllerIndexTest extends TestCase
                         'amount',
                         'selling_price',
                         'status_reason',
+                        'current_step',
                         'creator',
+                        'company_name',
                         'created_at',
                     ])
                     ->respond()

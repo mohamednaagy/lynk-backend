@@ -6,6 +6,7 @@ use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
 use App\Support\Money\Casts\MoneyStringCast;
+use App\Support\QueryScoper\HasScopes;
 use App\Support\Wallets\Traits\HasWallet;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -17,7 +18,7 @@ use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
 class Company extends BaseTenant
 {
-    use HasFactory, HasScopedValidationRules, SoftDeletes, HasWallet, LogsActivity;
+    use HasFactory, HasScopedValidationRules, SoftDeletes, HasWallet, LogsActivity, HasScopes;
 
     protected $table = 'companies';
 
