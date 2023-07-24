@@ -66,10 +66,12 @@ class ProcessProceedOrderAll implements ShouldQueue
             'bursam' => BursamMurabhaStep::ContractSigned,
         };
 
-        match ($nextStepNode->step) {
-            $clientWakala => $makeOrderProceed->handle($traderOrder, FinancingOrderProceedCase::ClientWakalaAccepted, false),
-            $contractSigned => $makeOrderProceed->handle($traderOrder, FinancingOrderProceedCase::ContractSigned, false),
+        $proceedAction = match ($nextStepNode->step) {
+            $clientWakala => FinancingOrderProceedCase::ClientWakalaAccepted,
+            $contractSigned => FinancingOrderProceedCase::ContractSigned,
         };
+
+        $makeOrderProceed->handle($traderOrder, $proceedAction, false);
 
         if (! $traderOrder->checkOrderStepComplete($contractSigned) || ! $traderOrder->checkOrderStepComplete($clientWakala)) {
             throw new Exception('Order not completed');
