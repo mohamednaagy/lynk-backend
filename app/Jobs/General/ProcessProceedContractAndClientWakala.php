@@ -70,9 +70,12 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
             $proceedAction = match ($nextStepNode->step) {
                 $clientWakala => FinancingOrderProceedCase::ClientWakalaAccepted,
                 $contractSigned => FinancingOrderProceedCase::ContractSigned,
+                default => null,
             };
 
-            $makeOrderProceed->handle($traderOrder, $proceedAction, false);
+            if ($proceedAction) {
+                $makeOrderProceed->handle($traderOrder, $proceedAction, false);
+            }
 
             if (! $traderOrder->checkOrderStepComplete($contractSigned) || ! $traderOrder->checkOrderStepComplete($clientWakala)) {
                 self::dispatch($this->traderOrderId)->delay(now()->addSeconds(30));

@@ -10,6 +10,7 @@ use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Exceptions\OrderRequiresClientVerification;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
@@ -153,8 +154,26 @@ class MakeOrderProceedAction implements MakeOrderProceed
         return $this;
     }
 
-    protected function handleProceedContractAndClientWakala(TraderOrder $traderOrder)
+    /**
+     * @throws OrderStatusDoesNotFollowSequenceException
+     * @throws OrderRequiresClientVerification
+     */
+    protected function handleProceedContractAndClientWakala(TraderOrder $traderOrder): array
     {
+        $order = FinancingOrder::query()
+            ->lockForUpdate()
+            ->findOrFail($traderOrder->financing_order_id);
+
+        if ($order->is_verification_required) {
+            throw new OrderRequiresClientVerification;
+        }
+
+        $lastHistory = $traderOrder->traderHistories()->latest('id')->first();
+
+        if (is_null($lastHistory)) {
+            throw new OrderStatusDoesNotFollowSequenceException;
+        }
+
         ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
 
         return [];
