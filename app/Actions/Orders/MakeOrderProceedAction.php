@@ -11,6 +11,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
+use App\Jobs\General\ProcessProceedOrderAll;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -39,6 +40,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
         return match ($case) {
             FinancingOrderProceedCase::ClientWakalaAccepted => $this->handleClientWakalaAccepted($traderOrder, $forceToProceed),
             FinancingOrderProceedCase::ContractSigned => $this->handleContractSigned($traderOrder, $forceToProceed),
+            FinancingOrderProceedCase::ProceedAll => $this->handleProceedAll($traderOrder),
             default => []
         };
     }
@@ -88,7 +90,12 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
     protected function isClientWakalaStepCompleted(TraderOrder $traderOrder): bool
     {
-        return $traderOrder->checkOrderStepComplete(DmccMurabhaStep::ClientWakala);
+        $clientWakala = match ($traderOrder->provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::ClientWakala,
+            'bursam' => BursamMurabhaStep::ClientWakala,
+        };
+
+        return $traderOrder->checkOrderStepComplete($clientWakala);
     }
 
     /**
@@ -128,7 +135,12 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
     protected function isContractSignedStepCompleted(TraderOrder $traderOrder): bool
     {
-        return $traderOrder->checkOrderStepComplete(DmccMurabhaStep::ContractSigned);
+        $contractSigned = match ($traderOrder->provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::ContractSigned,
+            'bursam' => BursamMurabhaStep::ContractSigned,
+        };
+
+        return $traderOrder->checkOrderStepComplete($contractSigned);
     }
 
     /**
@@ -139,5 +151,12 @@ class MakeOrderProceedAction implements MakeOrderProceed
         $this->signedClientWakala = $signedClientWakala;
 
         return $this;
+    }
+
+    protected function handleProceedAll(TraderOrder $traderOrder)
+    {
+        ProcessProceedOrderAll::dispatch($traderOrder->id);
+
+        return [];
     }
 }

@@ -10,4 +10,6 @@ final class FinancingOrderProceedCase extends Enum implements LocalizedEnum
     const ClientWakalaAccepted = 'CLIENT_WAKALA_ACCEPTED';
 
     const ContractSigned = 'CONTRACT_SIGNED';
+
+    const ProceedAll = 'PROCEED_ALL';
 }
