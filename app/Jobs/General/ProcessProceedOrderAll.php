@@ -32,7 +32,7 @@ class ProcessProceedOrderAll implements ShouldQueue
      * @return void
      */
     public function __construct(
-        protected int $traderOrder,
+        protected int $traderOrderId,
     ) {
     }
 
@@ -45,37 +45,39 @@ class ProcessProceedOrderAll implements ShouldQueue
      */
     public function handle(MakeOrderProceed $makeOrderProceed): void
     {
-        /** @var TraderOrder $traderOrder */
-        $traderOrder = TraderOrder::query()->withLastHistoryAction()->lockForUpdate()->findOrFail($this->traderOrder);
+        \DB::transaction(function () use ($makeOrderProceed) {
+            /** @var TraderOrder $traderOrder */
+            $traderOrder = TraderOrder::query()->withLastHistoryAction()->lockForUpdate()->findOrFail($this->traderOrderId);
 
-        if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
-            return;
-        }
+            if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+                return;
+            }
 
-        $traderDictionary = new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version);
-        $currentStepNode = $traderDictionary->getCompletedStepByHistory($traderOrder->last_history_action);
-        $nextStepNode = $traderDictionary->getNextStepOf($currentStepNode->step);
+            $traderDictionary = new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version);
+            $currentStepNode = $traderDictionary->getCompletedStepByHistory($traderOrder->last_history_action);
+            $nextStepNode = $traderDictionary->getNextStepOf($currentStepNode->step);
 
-        $clientWakala = match ($traderOrder->provider) {
-            'dmcc', 'fake' => DmccMurabhaStep::ClientWakala,
-            'bursam' => BursamMurabhaStep::ClientWakala,
-        };
+            $clientWakala = match ($traderOrder->provider) {
+                'dmcc', 'fake' => DmccMurabhaStep::ClientWakala,
+                'bursam' => BursamMurabhaStep::ClientWakala,
+            };
 
-        $contractSigned = match ($traderOrder->provider) {
-            'dmcc', 'fake' => DmccMurabhaStep::ContractSigned,
-            'bursam' => BursamMurabhaStep::ContractSigned,
-        };
+            $contractSigned = match ($traderOrder->provider) {
+                'dmcc', 'fake' => DmccMurabhaStep::ContractSigned,
+                'bursam' => BursamMurabhaStep::ContractSigned,
+            };
 
-        $proceedAction = match ($nextStepNode->step) {
-            $clientWakala => FinancingOrderProceedCase::ClientWakalaAccepted,
-            $contractSigned => FinancingOrderProceedCase::ContractSigned,
-        };
+            $proceedAction = match ($nextStepNode->step) {
+                $clientWakala => FinancingOrderProceedCase::ClientWakalaAccepted,
+                $contractSigned => FinancingOrderProceedCase::ContractSigned,
+            };
 
-        $makeOrderProceed->handle($traderOrder, $proceedAction, false);
+            $makeOrderProceed->handle($traderOrder, $proceedAction, false);
 
-        if (! $traderOrder->checkOrderStepComplete($contractSigned) || ! $traderOrder->checkOrderStepComplete($clientWakala)) {
-            throw new Exception('Order not completed');
-        }
+            if (! $traderOrder->checkOrderStepComplete($contractSigned) || ! $traderOrder->checkOrderStepComplete($clientWakala)) {
+                self::dispatch($this->traderOrderId)->delay(now()->addSeconds(30));
+            }
+        });
     }
 
     public function middleware(): array
@@ -85,7 +87,7 @@ class ProcessProceedOrderAll implements ShouldQueue
 
     public function uniqueId(): string
     {
-        return __CLASS__.'_'.$this->traderOrder;
+        return __CLASS__.'_'.$this->traderOrderId;
     }
 
     public function retryUntil(): Carbon

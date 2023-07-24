@@ -40,7 +40,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
         return match ($case) {
             FinancingOrderProceedCase::ClientWakalaAccepted => $this->handleClientWakalaAccepted($traderOrder, $forceToProceed),
             FinancingOrderProceedCase::ContractSigned => $this->handleContractSigned($traderOrder, $forceToProceed),
-            FinancingOrderProceedCase::ProceedAll => $this->handleProceedAll($traderOrder),
+            FinancingOrderProceedCase::ContractAndClientWakalaCompleted => $this->handleProceedContractAndClientWakala($traderOrder),
             default => []
         };
     }
@@ -153,7 +153,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
         return $this;
     }
 
-    protected function handleProceedAll(TraderOrder $traderOrder)
+    protected function handleProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
         ProcessProceedOrderAll::dispatch($traderOrder->id);
 
