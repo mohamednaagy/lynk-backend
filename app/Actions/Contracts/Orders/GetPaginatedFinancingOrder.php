@@ -13,4 +13,6 @@ interface GetPaginatedFinancingOrder
     public function setCreator(Model $creator);
 
     public function setCompany(Company $company);
+
+    public function setRelations(array $relations);
 }

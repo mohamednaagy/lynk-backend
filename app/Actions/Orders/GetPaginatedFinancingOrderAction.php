@@ -7,6 +7,7 @@ use App\Enums\CompanyType;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderAmountScope;
+use App\Support\QueryScoper\Scopes\FinancingOrders\OrderFilterScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderNeedActionScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderSearchScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderSortScope;
@@ -22,9 +23,11 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
 
     protected ?Company $company = null;
 
+    private ?array $relations = [];
+
     public function handle($perPage = null): LengthAwarePaginator
     {
-        return $this->baseQuery()->toScopes($this->scopes())->paginate($perPage);
+        return $this->baseQuery()->with($this->relations)->toScopes($this->scopes())->paginate($perPage);
     }
 
     private function scopes(): array
@@ -36,6 +39,7 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
             'sort' => new OrderSortScope(),
             'amount' => new OrderAmountScope(),
             'current_step' => new TraderOrderCurrentStepScope(),
+            'filter' => new OrderFilterScope(),
         ];
     }
 
@@ -49,6 +53,13 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
     public function setCompany(Company $company): static
     {
         $this->company = $company;
+
+        return $this;
+    }
+
+    public function setRelations(array $relations): static
+    {
+        $this->relations = $relations;
 
         return $this;
     }
