@@ -20,7 +20,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 
-class ProcessProceedOrderAll implements ShouldQueue
+class ProcessProceedContractAndClientWakala implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 

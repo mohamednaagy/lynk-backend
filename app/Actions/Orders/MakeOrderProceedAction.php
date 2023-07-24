@@ -11,7 +11,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
-use App\Jobs\General\ProcessProceedOrderAll;
+use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -155,7 +155,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
     protected function handleProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
-        ProcessProceedOrderAll::dispatch($traderOrder->id);
+        ProcessProceedContractAndClientWakala::dispatch($traderOrder->id);
 
         return [];
     }
