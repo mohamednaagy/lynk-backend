@@ -153,8 +153,23 @@ class MakeOrderProceedAction implements MakeOrderProceed
         return $this;
     }
 
-    protected function handleProceedContractAndClientWakala(TraderOrder $traderOrder)
+    /**
+     * @throws OrderStatusDoesNotFollowSequenceException
+     */
+    protected function handleProceedContractAndClientWakala(TraderOrder $traderOrder): array
     {
+        $lastHistory = $traderOrder->traderHistories()->latest('id')->first();
+
+        $order = FinancingOrder::query()
+            ->lockForUpdate()
+            ->findOrFail($traderOrder->financing_order_id);
+
+        if (
+            $order->is_verification_required || is_null($lastHistory)
+        ) {
+            throw new OrderStatusDoesNotFollowSequenceException;
+        }
+
         ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
 
         return [];
