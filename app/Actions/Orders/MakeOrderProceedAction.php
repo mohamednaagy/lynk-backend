@@ -155,7 +155,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
     protected function handleProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
-        ProcessProceedContractAndClientWakala::dispatch($traderOrder->id);
+        ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
 
         return [];
     }
