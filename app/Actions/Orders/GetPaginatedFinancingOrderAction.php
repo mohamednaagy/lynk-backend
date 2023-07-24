@@ -23,7 +23,7 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
 
     protected ?Company $company = null;
 
-    private ?array $relations;
+    private ?array $relations = [];
 
     public function handle($perPage = null): LengthAwarePaginator
     {
