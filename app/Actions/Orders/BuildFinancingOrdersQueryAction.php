@@ -23,7 +23,7 @@ class BuildFinancingOrdersQueryAction implements BuildFinancingOrdersQuery
 
     protected ?Company $company = null;
 
-    private ?array $relations;
+    private ?array $relations = [];
 
     public function handle(): Builder
     {

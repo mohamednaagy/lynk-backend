@@ -10,7 +10,6 @@ use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderNotSupportedException;
 use App\Models\Company;
 use App\Models\FinancingOrder;
-use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Fractal\Resource\Primitive;
@@ -153,7 +152,7 @@ class FinancingOrderTransformer extends TransformerAbstract
     {
         return $this->primitive(
             $financingOrder->status->is(FinancingOrderStatus::PendingApproval)
-            || $financingOrder->status->is(FinancingOrderStatus::Rejected)
+                || $financingOrder->status->is(FinancingOrderStatus::Rejected)
         );
     }
 
@@ -184,22 +183,12 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCurrentStep(FinancingOrder $financingOrder)
     {
-        $traderOrder = $financingOrder->activeTraderOrder()->withLastHistoryAction()->first();
+        $step = $financingOrder->current_step;
 
-        if (is_null($traderOrder) || is_null($traderOrder->last_history_action)) {
-            return $this->primitive(null);
-        }
-
-        $currentStepNode = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
-            ->getStepByHistory($traderOrder->last_history_action);
-
-        $murabhaStepEnum = get_murabha_step_enum($traderOrder->provider);
-        $step = $murabhaStepEnum::fromValue($currentStepNode->step);
-
-        return $this->primitive([
+        return $this->primitive($step ? [
             'value' => $step->value,
             'description' => $step->description,
-        ]);
+        ] : null);
     }
 
     /**
