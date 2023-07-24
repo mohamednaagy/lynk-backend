@@ -54,7 +54,7 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
             }
 
             $traderDictionary = new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version);
-            $currentStepNode = $traderDictionary->getCompletedStepByHistory($traderOrder->last_history_action);
+            $currentStepNode = $traderDictionary->getCompletedStepOrPreviousByHistory($traderOrder->last_history_action);
             $nextStepNode = $traderDictionary->getNextStepOf($currentStepNode->step);
 
             $clientWakala = match ($traderOrder->provider) {
