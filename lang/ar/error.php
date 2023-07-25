@@ -19,6 +19,7 @@ return [
     'invalid_operator_tcn' => 'معامل TCN غير صحيح',
     'no_enough_balance' => 'لا يوجد رصيد كافي',
     'order_status_doesnt_follow_sequence' => 'حالة الطلب التمويلي لا يمكن تغييرها لأنها لا تتبع التسلسل الصحيح',
+    'order_require_client_verification' => 'لا يمكنك المتابعة لأن الطلب يتطلب التحقق من العميل',
     'order_cannot_be_updated' => 'لا يمكن تعديل الطلب إذا كانت الحالة '.FinancingOrderStatus::joinDescription(FinancingOrderStatus::$allowedToUpdateStatuses),
     'webhook_type_not_supported' => 'هذا النوع غير مدعوم',
     'must_verify_email' => 'يجب عليك التحقق من البريد الإلكتروني',

@@ -10,7 +10,9 @@ use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Exceptions\OrderRequiresClientVerification;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
+use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -39,6 +41,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
         return match ($case) {
             FinancingOrderProceedCase::ClientWakalaAccepted => $this->handleClientWakalaAccepted($traderOrder, $forceToProceed),
             FinancingOrderProceedCase::ContractSigned => $this->handleContractSigned($traderOrder, $forceToProceed),
+            FinancingOrderProceedCase::ContractAndClientWakalaCompleted => $this->handleProceedContractAndClientWakala($traderOrder),
             default => []
         };
     }
@@ -88,7 +91,12 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
     protected function isClientWakalaStepCompleted(TraderOrder $traderOrder): bool
     {
-        return $traderOrder->checkOrderStepComplete(DmccMurabhaStep::ClientWakala);
+        $clientWakala = match ($traderOrder->provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::ClientWakala,
+            'bursam' => BursamMurabhaStep::ClientWakala,
+        };
+
+        return $traderOrder->checkOrderStepComplete($clientWakala);
     }
 
     /**
@@ -128,7 +136,12 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
     protected function isContractSignedStepCompleted(TraderOrder $traderOrder): bool
     {
-        return $traderOrder->checkOrderStepComplete(DmccMurabhaStep::ContractSigned);
+        $contractSigned = match ($traderOrder->provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::ContractSigned,
+            'bursam' => BursamMurabhaStep::ContractSigned,
+        };
+
+        return $traderOrder->checkOrderStepComplete($contractSigned);
     }
 
     /**
@@ -139,5 +152,30 @@ class MakeOrderProceedAction implements MakeOrderProceed
         $this->signedClientWakala = $signedClientWakala;
 
         return $this;
+    }
+
+    /**
+     * @throws OrderStatusDoesNotFollowSequenceException
+     * @throws OrderRequiresClientVerification
+     */
+    protected function handleProceedContractAndClientWakala(TraderOrder $traderOrder): array
+    {
+        $order = FinancingOrder::query()
+            ->lockForUpdate()
+            ->findOrFail($traderOrder->financing_order_id);
+
+        if ($order->is_verification_required) {
+            throw new OrderRequiresClientVerification;
+        }
+
+        $lastHistory = $traderOrder->traderHistories()->latest('id')->first();
+
+        if (is_null($lastHistory)) {
+            throw new OrderStatusDoesNotFollowSequenceException;
+        }
+
+        ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
+
+        return [];
     }
 }

@@ -77,4 +77,21 @@ class StepHistoriesDictionary
             $this->dictionaryNodeList->next();
         }
     }
+
+    public function getCompletedStepOrPreviousByHistory($history)
+    {
+        $this->dictionaryNodeList->rewind();
+        while ($this->dictionaryNodeList->valid()) {
+            if ($history == end($this->dictionaryNodeList->current()->histories)) {
+                return $this->dictionaryNodeList->current();
+            }
+
+            if (in_array($history, $this->dictionaryNodeList->current()->histories)) {
+                $this->dictionaryNodeList->prev();
+
+                return $this->dictionaryNodeList->current();
+            }
+            $this->dictionaryNodeList->next();
+        }
+    }
 }

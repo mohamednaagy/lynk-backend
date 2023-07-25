@@ -730,7 +730,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         @foreach ($products ?? [] as $product)
             <table class="min-w-full mt-4">
                 <tbody>
-                @if($trader_order_reference)
+                @if(isset($trader_order_reference))
                 <tr>
                     <td class="w-1/2 px-4 text-right border border-black">رقم الشهادة</td>
                     <td class="w-1/2 border border-black">{{$trader_order_reference}}</td>
