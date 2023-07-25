@@ -5,13 +5,15 @@ namespace App\Exports;
 use App\Enums\FinancingOrderStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
+use Illuminate\Support\Traits\Localizable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
 class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping
 {
+    use Localizable;
+
     protected array $headings = [
         'id' => 'ID',
         'amount' => 'Commodity Price (SAR)',
@@ -51,18 +53,11 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping
             'amount' => fn () => $order->amount->formatByDecimal(),
             'selling_price' => fn () => $order->selling_price->formatByDecimal(),
             'national_id' => fn () => $order->national_id,
-            'status' => function () use ($order) {
-                $currentLocale = App::getLocale();
-                App::setLocale('en');
-
-                $status = $order->status->isNot(FinancingOrderStatus::InProgress)
-                    || is_null($order->current_step)
+            'status' => fn () => $this->withLocale('en', function () use ($order) {
+                return $order->status->isNot(FinancingOrderStatus::InProgress)
+                || is_null($order->current_step)
                     ? $order->status->description : $order->current_step->description;
-
-                App::setLocale($currentLocale);
-
-                return $status;
-            },
+            }),
             'company_name' => fn () => $order->company->name,
         ]);
 
