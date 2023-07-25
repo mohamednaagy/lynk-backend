@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\V1\Lender\Orders\CancelTraderOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CompleteOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CreateOrderWithoutVerification;
 use App\Http\Controllers\Api\V1\Lender\Orders\CreateTraderOrder;
+use App\Http\Controllers\Api\V1\Lender\Orders\ExportOrders;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersStats;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrderStatus;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersVolume;
@@ -68,6 +69,7 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                     Route::get('orders/stats', GetOrdersStats::class);
                     Route::post('orders/no-verification', CreateOrderWithoutVerification::class);
                     Route::get('orders/statuses', GetOrderStatus::class);
+                    Route::get('orders/export', ExportOrders::class);
                     Route::post('orders/{order}/proceed', MakeOrderProceed::class);
                     Route::put('orders/{order}/approve', ApproveOrder::class);
                     Route::put('orders/{order}/reject', RejectOrder::class);

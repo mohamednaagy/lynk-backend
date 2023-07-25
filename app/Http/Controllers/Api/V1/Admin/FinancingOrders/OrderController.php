@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\FinancingOrders;
 
-use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
+use App\Actions\Contracts\Orders\BuildFinancingOrdersQuery;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
@@ -30,15 +30,17 @@ class OrderController extends Controller
             ->only('show');
     }
 
-    public function index(Request $request, GetPaginatedFinancingOrder $getPaginatedOrders): JsonResponse
+    public function index(Request $request, BuildFinancingOrdersQuery $buildFinancingOrdersQuery): JsonResponse
     {
         $company = Company::find($request->input('company'));
 
         if ($company) {
-            $getPaginatedOrders = $getPaginatedOrders->setCompany($company);
+            $buildFinancingOrdersQuery->setCompany($company);
         }
 
-        $orders = $getPaginatedOrders->setRelations(['company', 'creator'])->handle();
+        $orders = $buildFinancingOrdersQuery->setRelations(['company', 'creator'])
+            ->handle()
+            ->paginate();
 
         return fractal($orders, new FinancingOrderTransformer())
             ->parseIncludes([

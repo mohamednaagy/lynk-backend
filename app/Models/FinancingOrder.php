@@ -6,6 +6,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Enums\TransactionReason;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -72,6 +73,26 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'amount' => MoneyStringCast::class.':currency',
         'selling_price' => MoneyStringCast::class.':currency',
     ];
+
+    protected function currentStep(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $traderOrder = $this->activeTraderOrder->first();
+
+                if (is_null($traderOrder) || is_null($traderOrder->last_history_action)) {
+                    return null;
+                }
+
+                $currentStepNode = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+                    ->getStepByHistory($traderOrder->last_history_action);
+
+                $murabhaStepEnum = get_murabha_step_enum($traderOrder->provider);
+
+                return $murabhaStepEnum::fromValue($currentStepNode->step);
+            }
+        );
+    }
 
     protected function isUpdatable(): Attribute
     {
