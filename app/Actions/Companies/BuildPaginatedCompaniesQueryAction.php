@@ -2,24 +2,23 @@
 
 namespace App\Actions\Companies;
 
-use App\Actions\Contracts\Companies\GetPaginatedCompanies;
+use App\Actions\Contracts\Companies\BuildPaginatedCompaniesQuery;
 use App\Models\Company;
 use App\Support\QueryScoper\Scopes\Company\CompanySearchScope;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
-class GetPaginatedCompaniesAction implements GetPaginatedCompanies
+class BuildPaginatedCompaniesQueryAction implements BuildPaginatedCompaniesQuery
 {
     public $type = null;
 
-    public function handle(): LengthAwarePaginator
+    public function handle(): Builder
     {
         return Company::query()
             ->when($this->type, function ($query) {
                 $query->type($this->type);
             })
             ->toScopes($this->scopes())
-            ->withCount('orders')
-            ->paginate();
+            ->withCount('orders');
     }
 
     private function scopes(): array

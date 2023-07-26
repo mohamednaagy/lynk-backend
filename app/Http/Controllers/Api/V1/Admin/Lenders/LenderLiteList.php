@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Lenders;
 
-use App\Actions\Contracts\Companies\GetPaginatedCompanies;
+use App\Actions\Contracts\Companies\BuildPaginatedCompaniesQuery;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\CompanyType;
@@ -11,7 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Transformers\CompanyTransformer;
 use Illuminate\Http\JsonResponse;
 
-class LenderDropdownList extends Controller
+class LenderLiteList extends Controller
 {
     public function __construct()
     {
@@ -24,11 +24,13 @@ class LenderDropdownList extends Controller
     }
 
     public function __invoke(
-        GetPaginatedCompanies $getPaginatedCompanies
+        BuildPaginatedCompaniesQuery $buildPaginatedCompaniesQuery
     ): JsonResponse {
-        $getPaginatedCompanies->setType(CompanyType::Lender);
+        $companies = $buildPaginatedCompaniesQuery->setType(CompanyType::Lender)
+            ->handle()
+            ->get();
 
-        return fractal($getPaginatedCompanies->handle(), new CompanyTransformer())
+        return fractal($companies, new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',

@@ -21,7 +21,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderBalance;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderSetting;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderStatuses;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderController;
-use App\Http\Controllers\Api\V1\Admin\Lenders\LenderDropdownList;
+use App\Http\Controllers\Api\V1\Admin\Lenders\LenderLiteList;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderUserController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\CancelOrder as CancelFinancingOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\CompleteOrder;
@@ -94,7 +94,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::prefix('lenders')->group(function () {
             Route::get('/statuses', GetLenderStatuses::class);
-            Route::get('/dropdown-list', LenderDropdownList::class);
+            Route::get('/dropdown-list', LenderLiteList::class);
             Route::put('/{lender}/status', UpdateLenderStatus::class);
             Route::get('/{lender}/balance ', GetLenderBalance::class);
             Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
