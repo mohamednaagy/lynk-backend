@@ -7,7 +7,6 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
 use Illuminate\Http\JsonResponse;
@@ -32,12 +31,6 @@ class OrderController extends Controller
 
     public function index(Request $request, BuildFinancingOrdersQuery $buildFinancingOrdersQuery): JsonResponse
     {
-        $company = Company::find($request->input('company'));
-
-        if ($company) {
-            $buildFinancingOrdersQuery->setCompany($company);
-        }
-
         $orders = $buildFinancingOrdersQuery->setRelations(['company', 'creator'])
             ->handle()
             ->paginate();
