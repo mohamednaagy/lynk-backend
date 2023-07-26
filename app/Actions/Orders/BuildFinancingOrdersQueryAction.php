@@ -7,6 +7,7 @@ use App\Enums\CompanyType;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderAmountScope;
+use App\Support\QueryScoper\Scopes\FinancingOrders\OrderCompanyScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderFilterScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderNeedActionScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderSearchScope;
@@ -42,6 +43,7 @@ class BuildFinancingOrdersQueryAction implements BuildFinancingOrdersQuery
             'amount' => new OrderAmountScope(),
             'current_step' => new TraderOrderCurrentStepScope(),
             'filter' => new OrderFilterScope(),
+            'company' => new OrderCompanyScope(),
         ];
     }
 
