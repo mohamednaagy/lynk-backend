@@ -4,9 +4,11 @@ namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
 use App\Enums\ClientMessage;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Sms\Sms;
+use Shivella\Bitly\Facade\Bitly;
 
 class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatusIsMurabahaSaleCompleted
 {
@@ -23,11 +25,13 @@ class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatu
         $locale = app()->getLocale();
         $products = $traderOrder->products;
         $amount = $financingOrder->amount?->formatByDecimal() ?? '';
+        $documentMediaUrl = $this->getMediaUrl($traderOrder);
 
         return __(ClientMessage::MurabahaSaleCompleted, [
             'products' => $this->getProductsDescription($products),
             'amount' => $amount,
             'company_name' => $financingOrder->company->name,
+            'document_media_url' => $documentMediaUrl,
         ], $locale);
     }
 
@@ -37,5 +41,22 @@ class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatu
             ->map(function ($product) {
                 return "{$product['product']} ({$product['quantity']} {$product['uom']})";
             })->implode(', ');
+    }
+
+    private function getMediaUrl($traderOrder)
+    {
+        $warrantyDocumentMediaFile = match ($traderOrder->provider) {
+            'dmcc', 'fake' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
+            'bursam' => TraderOrderMediaCollection::BursamTtiHoldingCertificate,
+        };
+
+        $documentMediaUrl = $traderOrder->getFirstMedia($warrantyDocumentMediaFile)?->file_url;
+
+        $documentMediaShortUrl = $documentMediaUrl;
+        if (app()->isProduction() && ! empty($documentMediaUrl)) {
+            $documentMediaShortUrl = Bitly::getUrl($documentMediaUrl);
+        }
+
+        return $documentMediaShortUrl;
     }
 }

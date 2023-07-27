@@ -9,7 +9,6 @@ use App\Exceptions\MSGDuplicatedException;
 use App\Support\Sms\Events\SmsSent;
 use App\Support\Sms\SmsDriverInterface;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 
 class MsegatDriver implements SmsDriverInterface
 {
@@ -26,9 +25,6 @@ class MsegatDriver implements SmsDriverInterface
     /**
      * Execute the driver logic.
      *
-     * @param  string  $message
-     * @param  string  $phoneNumber
-     * @return void
      *
      * @throws BalanceIsNotEnoughException
      * @throws InvalidLoginInfoException
@@ -43,7 +39,7 @@ class MsegatDriver implements SmsDriverInterface
             'numbers' => $phoneNumber,
             'userSender' => config('sms.msegat.sender_name'),
             'apiKey' => $this->apiKey,
-            'msg' => $message."\n\n".Str::random(6),
+            'msg' => $message,
         ];
 
         $response = Http::post($this->baseUrl, $body);

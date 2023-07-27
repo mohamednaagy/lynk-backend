@@ -4,10 +4,12 @@ namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
 use App\Enums\ClientMessage;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Sms\Sms;
 use Illuminate\Support\Facades\Config;
+use Shivella\Bitly\Facade\Bitly;
 
 class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenStatusIsCommoditySoldToCustomer
 {
@@ -28,14 +30,16 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
         $url = $host.'/?'.http_build_query($query);
         $products = $traderOrder->products;
 
+        $documentMediaUrl = $this->getMediaUrl($traderOrder);
+
         if ($financingOrder->is_verification_require) {
-            return $this->resolveMessageIfVerificationRequired($financingOrder, $products, $url, $sellingPrice);
+            return $this->resolveMessageIfVerificationRequired($financingOrder, $products, $url, $sellingPrice, $documentMediaUrl);
         }
 
-        return $this->resolveMessageIfNoVerificationRequired($financingOrder, $products, $sellingPrice);
+        return $this->resolveMessageIfNoVerificationRequired($financingOrder, $products, $sellingPrice, $documentMediaUrl);
     }
 
-    private function resolveMessageIfVerificationRequired(FinancingOrder $financingOrder, $products, $url, $sellingPrice)
+    private function resolveMessageIfVerificationRequired(FinancingOrder $financingOrder, $products, $url, $sellingPrice, $documentMediaUrl)
     {
         return __(ClientMessage::CommoditySoldToCustomer, [
             'products' => $this->getProductsDescription($products),
@@ -43,16 +47,18 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
             'selling_price' => $sellingPrice,
             'order_id' => $financingOrder->id,
             'url' => $url,
+            'document_media_url' => $documentMediaUrl,
         ]);
     }
 
-    public function resolveMessageIfNoVerificationRequired(FinancingOrder $financingOrder, $products, $sellingPrice)
+    public function resolveMessageIfNoVerificationRequired(FinancingOrder $financingOrder, $products, $sellingPrice, $documentMediaUrl)
     {
         return __(ClientMessage::CommoditySoldToCustomerWithoutVerification, [
             'products' => $this->getProductsDescription($products),
             'order_id' => $financingOrder->id,
             'company_name' => $financingOrder->company->name,
             'selling_price' => $sellingPrice,
+            'document_media_url' => $documentMediaUrl,
         ]);
     }
 
@@ -62,5 +68,17 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
             ->map(function ($product) {
                 return "{$product['product']} ({$product['quantity']} {$product['uom']})";
             })->implode(', ');
+    }
+
+    private function getMediaUrl($traderOrder)
+    {
+        $documentMediaUrl = $traderOrder->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer)?->file_url;
+
+        $documentMediaShortUrl = $documentMediaUrl;
+        if (app()->isProduction() && ! empty($documentMediaUrl)) {
+            $documentMediaShortUrl = Bitly::getUrl($documentMediaUrl);
+        }
+
+        return $documentMediaShortUrl;
     }
 }
