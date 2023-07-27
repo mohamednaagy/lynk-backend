@@ -251,7 +251,8 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function canBeCompleted()
     {
         return $this->traderOrders()->completed()->exists()
-            && $this->status->isNot(FinancingOrderStatus::Completed);
+            && $this->status->isNot(FinancingOrderStatus::Completed)
+            && $this->status->isNot(FinancingOrderStatus::Cancelled);
     }
 
     public function cantBeCompleted()
