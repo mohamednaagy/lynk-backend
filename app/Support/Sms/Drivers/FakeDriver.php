@@ -4,18 +4,20 @@ namespace App\Support\Sms\Drivers;
 
 use App\Support\Sms\Events\SmsSent;
 use App\Support\Sms\SmsDriverInterface;
+use Storage;
 
 class FakeDriver implements SmsDriverInterface
 {
     /**
      * Execute the driver logic.
-     *
-     * @param  string  $message
-     * @param  string  $phoneNumber
-     * @return void
      */
     public function send(string $message, string $phoneNumber): void
     {
+        if (config('sms.logging')) {
+            Storage::disk('public')
+                ->prepend('logs/sms.log', $phoneNumber."\n".$message."\n");
+        }
+
         SmsSent::dispatch(
             'fake',
             [],
