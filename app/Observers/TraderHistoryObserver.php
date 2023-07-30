@@ -2,7 +2,6 @@
 
 namespace App\Observers;
 
-use App\Enums\TraderOrderStatus;
 use App\Models\TraderHistory;
 use App\Observers\Traits\ObserverHelper;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -34,16 +33,8 @@ class TraderHistoryObserver
         $currentStepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderHistory->action);
         $this->notifyAdminsAboutOrderStopped($traderHistory, $currentStepNode);
 
-        if ($traderHistory->traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
-            return;
-        }
-
         $currentCompletedStepNode = app(StepHistoriesDictionary::class)->getCompletedStepByHistory($traderHistory->action);
         $this->fireWebhookWhenStatusIsMurabhaOfferIssued($traderOrder, $currentCompletedStepNode);
-
-        if (is_null($traderHistory->traderOrder->products)) {
-            return;
-        }
 
         foreach ($this->getActionsOfProvider($traderOrder->provider, $currentCompletedStepNode) as $action) {
             app($action)->handle($traderOrder->order, $traderHistory->traderOrder);
