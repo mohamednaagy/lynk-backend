@@ -9,6 +9,7 @@ use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -31,7 +32,11 @@ class OrderController extends Controller
 
     public function index(Request $request, BuildFinancingOrdersQuery $buildFinancingOrdersQuery): JsonResponse
     {
-        $orders = $buildFinancingOrdersQuery->setRelations(['company', 'creator'])
+        $orders = $buildFinancingOrdersQuery->setRelations([
+            'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
+            'company' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
+            'creator',
+        ])
             ->handle()
             ->paginate();
 
