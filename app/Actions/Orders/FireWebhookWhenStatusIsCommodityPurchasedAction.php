@@ -12,6 +12,10 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
 {
     public function handle(FinancingOrder $financingOrder, TraderOrder $traderOrder): void
     {
+        if (is_null($traderOrder->products)) {
+            return;
+        }
+
         $products = $this->resolveProducts($traderOrder);
 
         WebhookEvent::fire($financingOrder->company, WebhookType::OrderUpdates, [
