@@ -3,23 +3,27 @@
 namespace App\Http\Controllers\Api\V1\Admin\FinancingOrders;
 
 use App\Actions\Contracts\Orders\BuildFinancingOrdersQuery;
+use App\Enums\Action;
+use App\Enums\Area;
+use App\Enums\Subject;
 use App\Exports\FinancingOrdersExport;
 use App\Http\Controllers\Controller;
-use App\Models\Company;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ExportOrders extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Manage, Action::Index])
+        );
+    }
+
     public function __invoke(Request $request, BuildFinancingOrdersQuery $buildOrdersQuery)
     {
-        $company = Company::find($request->input('company'));
-
-        if ($company) {
-            $buildOrdersQuery->setCompany($company);
-        }
-
         $query = $buildOrdersQuery->setRelations([
             'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
             'company' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
