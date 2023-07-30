@@ -30,16 +30,16 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
         $url = $host.'/?'.http_build_query($query);
         $products = $traderOrder->products;
 
-        $documentMediaUrl = $this->getMediaUrl($traderOrder);
+        $documentUrl = $this->getMediaUrl($traderOrder);
 
         if ($financingOrder->is_verification_require) {
-            return $this->resolveMessageIfVerificationRequired($financingOrder, $products, $url, $sellingPrice, $documentMediaUrl);
+            return $this->resolveMessageIfVerificationRequired($financingOrder, $products, $url, $sellingPrice, $documentUrl);
         }
 
-        return $this->resolveMessageIfNoVerificationRequired($financingOrder, $products, $sellingPrice, $documentMediaUrl);
+        return $this->resolveMessageIfNoVerificationRequired($financingOrder, $products, $sellingPrice, $documentUrl);
     }
 
-    private function resolveMessageIfVerificationRequired(FinancingOrder $financingOrder, $products, $url, $sellingPrice, $documentMediaUrl)
+    private function resolveMessageIfVerificationRequired(FinancingOrder $financingOrder, $products, $url, $sellingPrice, $documentUrl)
     {
         return __(ClientMessage::CommoditySoldToCustomer, [
             'products' => $this->getProductsDescription($products),
@@ -47,18 +47,18 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
             'selling_price' => $sellingPrice,
             'order_id' => $financingOrder->id,
             'url' => $url,
-            'document_media_url' => $documentMediaUrl,
+            'document_url' => $documentUrl,
         ]);
     }
 
-    public function resolveMessageIfNoVerificationRequired(FinancingOrder $financingOrder, $products, $sellingPrice, $documentMediaUrl)
+    public function resolveMessageIfNoVerificationRequired(FinancingOrder $financingOrder, $products, $sellingPrice, $documentUrl)
     {
         return __(ClientMessage::CommoditySoldToCustomerWithoutVerification, [
             'products' => $this->getProductsDescription($products),
             'order_id' => $financingOrder->id,
             'company_name' => $financingOrder->company->name,
             'selling_price' => $sellingPrice,
-            'document_media_url' => $documentMediaUrl,
+            'document_url' => $documentUrl,
         ]);
     }
 
@@ -72,13 +72,13 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
 
     private function getMediaUrl($traderOrder)
     {
-        $documentMediaUrl = $traderOrder->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer)?->file_url;
+        $documentUrl = $traderOrder->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer)?->file_url;
 
-        $documentMediaShortUrl = $documentMediaUrl;
-        if (app()->isProduction() && ! empty($documentMediaUrl)) {
-            $documentMediaShortUrl = Bitly::getUrl($documentMediaUrl);
+        $documentShortUrl = $documentUrl;
+        if (app()->isProduction() && ! empty($documentUrl)) {
+            $documentShortUrl = Bitly::getUrl($documentUrl);
         }
 
-        return $documentMediaShortUrl;
+        return $documentShortUrl;
     }
 }

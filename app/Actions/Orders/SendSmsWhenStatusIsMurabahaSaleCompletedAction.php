@@ -25,13 +25,13 @@ class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatu
         $locale = app()->getLocale();
         $products = $traderOrder->products;
         $amount = $financingOrder->amount?->formatByDecimal() ?? '';
-        $documentMediaUrl = $this->getMediaUrl($traderOrder);
+        $documentUrl = $this->getMediaUrl($traderOrder);
 
         return __(ClientMessage::MurabahaSaleCompleted, [
             'products' => $this->getProductsDescription($products),
             'amount' => $amount,
             'company_name' => $financingOrder->company->name,
-            'document_media_url' => $documentMediaUrl,
+            'document_url' => $documentUrl,
         ], $locale);
     }
 
@@ -50,13 +50,13 @@ class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatu
             'bursam' => TraderOrderMediaCollection::BursamTtiHoldingCertificate,
         };
 
-        $documentMediaUrl = $traderOrder->getFirstMedia($warrantyDocumentMediaFile)?->file_url;
+        $documentUrl = $traderOrder->getFirstMedia($warrantyDocumentMediaFile)?->file_url;
 
-        $documentMediaShortUrl = $documentMediaUrl;
-        if (app()->isProduction() && ! empty($documentMediaUrl)) {
-            $documentMediaShortUrl = Bitly::getUrl($documentMediaUrl);
+        $documentShortUrl = $documentUrl;
+        if (app()->isProduction() && ! empty($documentUrl)) {
+            $documentShortUrl = Bitly::getUrl($documentUrl);
         }
 
-        return $documentMediaShortUrl;
+        return $documentShortUrl;
     }
 }
