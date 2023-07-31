@@ -6,10 +6,10 @@ use App\Exceptions\BalanceIsNotEnoughException;
 use App\Exceptions\InvalidLoginInfoException;
 use App\Exceptions\MobileNumbersIsNotCorrectException;
 use App\Exceptions\MSGDuplicatedException;
+use App\Exceptions\MSGServiceStoppedException;
 use App\Support\Sms\Events\SmsSent;
 use App\Support\Sms\SmsDriverInterface;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class MsegatDriver implements SmsDriverInterface
@@ -47,11 +47,10 @@ class MsegatDriver implements SmsDriverInterface
         $response = Http::post($this->baseUrl, $body);
 
         if (is_null($response)) {
-            Log::debug('MsegatDriver: ', [
-                'response' => $response,
+            throw new MSGServiceStoppedException('Msegat Driver return NULL response', [
+                'body' => json_encode($body),
+                'response' => $response->json(),
             ]);
-
-            return;
         }
 
         SmsSent::dispatch(
