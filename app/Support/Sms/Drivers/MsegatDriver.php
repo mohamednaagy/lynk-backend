@@ -9,6 +9,7 @@ use App\Exceptions\MSGDuplicatedException;
 use App\Support\Sms\Events\SmsSent;
 use App\Support\Sms\SmsDriverInterface;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class MsegatDriver implements SmsDriverInterface
@@ -44,6 +45,14 @@ class MsegatDriver implements SmsDriverInterface
         ];
 
         $response = Http::post($this->baseUrl, $body);
+
+        if (is_null($response)) {
+            Log::debug('MsegatDriver: ', [
+                'response' => $response,
+            ]);
+
+            return;
+        }
 
         SmsSent::dispatch(
             'msegat',
