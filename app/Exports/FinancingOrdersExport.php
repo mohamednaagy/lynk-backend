@@ -20,7 +20,7 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping
         'selling_price' => 'Selling Price (SAR)',
         'national_id' => 'National ID / Iqama',
         'status' => 'Status',
-        'company_name' => 'Order Owner',
+        'company_name' => 'Company Name',
     ];
 
     protected $excludes = [];
