@@ -33,7 +33,9 @@ class ExportOrders extends Controller
 
         $export = (new FinancingOrdersExport($request, $query));
 
-        return Excel::download($export, $this->getFileName());
+        return Excel::download($export, $this->getFileName(), null, [
+            'X-File-Name' => $this->getFileName(),
+        ]);
     }
 
     protected function getFileName()
