@@ -62,7 +62,7 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping
                 || is_null($order->current_step)
                     ? $order->status->description : $order->current_step->description;
             }),
-            'created_at' => fn () => $order->created_at->format('Y-m-d H:i:s'),
+            'created_at' => fn () => $order->created_at->tz('Asia/Riyadh')->format('Y-m-d H:i:s'),
         ]);
 
         return array_map(fn ($item) => $item(), $items);

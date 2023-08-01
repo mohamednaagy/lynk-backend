@@ -18,16 +18,10 @@ class OrderCompanyScope extends QueryScoper
     {
         $company = Request::query('company');
 
-        $company = is_array($company)
-            ? $company
-            : explode(',', $company);
-
-        Request::merge([
-            'company' => $company,
-        ]);
-
         return [
-            'company' => $company,
+            'company' => is_array($company)
+                ? $company
+                : explode(',', $company),
         ];
     }
 
