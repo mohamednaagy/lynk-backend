@@ -43,8 +43,12 @@ class ExportOrders extends Controller
     {
         $todayDateInYYYYMMDD = now('Asia/Riyadh')->format('Ymd_His');
 
-        if ($request->has('company') && is_array($request->company) && count($request->company) === 1) {
-            $company = Company::find($request->company[0]);
+        if (
+            $request->has('company')
+            && is_array($request->company)
+            && count($request->company)
+        ) {
+            $company = Company::find($request->company[0], ['name']);
             if ($company) {
                 return "{$company->name}_LYNKOrderList_{$todayDateInYYYYMMDD}.xlsx";
             }
