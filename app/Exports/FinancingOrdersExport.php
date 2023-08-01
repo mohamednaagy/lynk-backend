@@ -19,8 +19,10 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping
         'amount' => 'Commodity Price (SAR)',
         'selling_price' => 'Selling Price (SAR)',
         'national_id' => 'National ID / Iqama',
-        'status' => 'Status',
+        'order_owner' => 'Order Owner',
         'company_name' => 'Company Name',
+        'status' => 'Status',
+        'created_at' => 'Created At',
     ];
 
     protected $excludes = [];
@@ -53,12 +55,14 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping
             'amount' => fn () => $order->amount->formatByDecimal(),
             'selling_price' => fn () => $order->selling_price->formatByDecimal(),
             'national_id' => fn () => $order->national_id,
+            'order_owner' => fn () => $order->creator->full_name,
+            'company_name' => fn () => $order->company->name,
             'status' => fn () => $this->withLocale('en', function () use ($order) {
                 return $order->status->isNot(FinancingOrderStatus::InProgress)
                 || is_null($order->current_step)
                     ? $order->status->description : $order->current_step->description;
             }),
-            'company_name' => fn () => $order->company->name,
+            'created_at' => fn () => $order->created_at->format('Y-m-d H:i:s'),
         ]);
 
         return array_map(fn ($item) => $item(), $items);

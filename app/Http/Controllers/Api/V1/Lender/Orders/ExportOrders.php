@@ -31,6 +31,7 @@ class ExportOrders extends Controller
         $query = $buildOrdersQuery->setCompany(tenant())
             ->setRelations([
                 'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
+                'creator',
             ])
             ->handle();
 
