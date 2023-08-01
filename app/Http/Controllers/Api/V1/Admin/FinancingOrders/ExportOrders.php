@@ -8,6 +8,7 @@ use App\Enums\Area;
 use App\Enums\Subject;
 use App\Exports\FinancingOrdersExport;
 use App\Http\Controllers\Controller;
+use App\Models\Company;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -33,14 +34,21 @@ class ExportOrders extends Controller
 
         $export = (new FinancingOrdersExport($request, $query));
 
-        return Excel::download($export, $this->getFileName(), null, [
-            'X-File-Name' => $this->getFileName(),
+        return Excel::download($export, $this->getFileName($request), null, [
+            'X-File-Name' => $this->getFileName($request),
         ]);
     }
 
-    protected function getFileName()
+    protected function getFileName(Request $request)
     {
         $todayDateInYYYYMMDD = now('Asia/Riyadh')->format('Ymd_His');
+
+        if ($request->has('company') && is_array($request->company) && count($request->company) === 1) {
+            $company = Company::find($request->company[0]);
+            if ($company) {
+                return "{$company->name}_LYNKOrderList_{$todayDateInYYYYMMDD}.xlsx";
+            }
+        }
 
         return "LYNKOrderList_{$todayDateInYYYYMMDD}.xlsx";
     }
