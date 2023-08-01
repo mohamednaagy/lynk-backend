@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
+use App\Actions\Contracts\Orders\BuildFinancingOrdersQuery;
 use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
-use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
 use App\Enums\Action;
 use App\Enums\Area;
@@ -49,15 +49,18 @@ class OrderController extends Controller
         )->only('update');
     }
 
-    public function index(Request $request, GetPaginatedFinancingOrder $getPaginatedOrders): JsonResponse
+    public function index(Request $request, BuildFinancingOrdersQuery $buildOrdersQuery): JsonResponse
     {
         if ($request->user()->hasRole(Role::LenderOrderCreator)) {
-            $getPaginatedOrders->setCreator($request->user());
+            $buildOrdersQuery->setCreator($request->user());
         }
 
-        $getPaginatedOrders->setCompany(tenant());
-
-        $financingOrders = $getPaginatedOrders->handle();
+        $financingOrders = $buildOrdersQuery->setCompany(tenant())
+            ->setRelations([
+                'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
+            ])
+            ->handle()
+            ->paginate();
 
         return fractal($financingOrders, new FinancingOrderTransformer())
             ->parseIncludes([

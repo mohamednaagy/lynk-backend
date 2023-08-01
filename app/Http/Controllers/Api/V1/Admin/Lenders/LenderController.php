@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Lenders;
 
+use App\Actions\Contracts\Companies\BuildPaginatedCompaniesQuery;
 use App\Actions\Contracts\Companies\CreateCompany;
-use App\Actions\Contracts\Companies\GetPaginatedCompanies;
 use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Action;
@@ -50,16 +50,14 @@ class LenderController extends Controller
         )->only('destroy');
     }
 
-    /**
-     * @param  GetPaginatedCompanies  $getPaginatedCompanies
-     * @return JsonResponse
-     */
     public function index(
-        GetPaginatedCompanies $getPaginatedCompanies
+        BuildPaginatedCompaniesQuery $buildPaginatedCompaniesQuery
     ): JsonResponse {
-        $getPaginatedCompanies->setType(CompanyType::Lender);
+        $companies = $buildPaginatedCompaniesQuery->setType(CompanyType::Lender)
+            ->handle()
+            ->paginate();
 
-        return fractal($getPaginatedCompanies->handle(), new CompanyTransformer())
+        return fractal($companies, new CompanyTransformer())
             ->parseIncludes([
                 'id',
                 'name',
@@ -71,12 +69,6 @@ class LenderController extends Controller
             ->respond();
     }
 
-    /**
-     * @param  StoreCompanyRequest  $request
-     * @param  CreateCompany  $createCompany
-     * @param  GetSettingsClassInstance  $getSettingsClassInstance
-     * @return JsonResponse
-     */
     public function store(
         StoreCompanyRequest $request,
         CreateCompany $createCompany,
@@ -112,10 +104,6 @@ class LenderController extends Controller
         });
     }
 
-    /**
-     * @param  Company  $lender
-     * @return JsonResponse
-     */
     public function show(Company $lender): JsonResponse
     {
         return fractal($lender, new CompanyTransformer())
@@ -134,12 +122,6 @@ class LenderController extends Controller
             ->respond();
     }
 
-    /**
-     * @param  UpdateCompanyRequest  $request
-     * @param  UpdateCompany  $updateCompany
-     * @param  Company  $lender
-     * @return JsonResponse
-     */
     public function update(
         UpdateCompanyRequest $request,
         UpdateCompany $updateCompany,
@@ -155,8 +137,6 @@ class LenderController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  Company  $lender
-     * @return JsonResponse
      *
      * @throws \Throwable
      */

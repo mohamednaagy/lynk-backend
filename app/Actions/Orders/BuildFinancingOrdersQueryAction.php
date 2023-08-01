@@ -2,22 +2,23 @@
 
 namespace App\Actions\Orders;
 
-use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
+use App\Actions\Contracts\Orders\BuildFinancingOrdersQuery;
 use App\Enums\CompanyType;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderAmountScope;
+use App\Support\QueryScoper\Scopes\FinancingOrders\OrderCompanyScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderFilterScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderNeedActionScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderSearchScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderSortScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderStatusScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\TraderOrderCurrentStepScope;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Stancl\Tenancy\Database\TenantScope;
 
-class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
+class BuildFinancingOrdersQueryAction implements BuildFinancingOrdersQuery
 {
     protected ?Model $creator = null;
 
@@ -25,9 +26,11 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
 
     private ?array $relations = [];
 
-    public function handle($perPage = null): LengthAwarePaginator
+    public function handle(): Builder
     {
-        return $this->baseQuery()->with($this->relations)->toScopes($this->scopes())->paginate($perPage);
+        return $this->baseQuery()
+            ->with($this->relations)
+            ->toScopes($this->scopes());
     }
 
     private function scopes(): array
@@ -40,6 +43,7 @@ class GetPaginatedFinancingOrderAction implements GetPaginatedFinancingOrder
             'amount' => new OrderAmountScope(),
             'current_step' => new TraderOrderCurrentStepScope(),
             'filter' => new OrderFilterScope(),
+            'company' => new OrderCompanyScope(),
         ];
     }
 

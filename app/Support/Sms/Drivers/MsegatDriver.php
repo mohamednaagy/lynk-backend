@@ -26,9 +26,6 @@ class MsegatDriver implements SmsDriverInterface
     /**
      * Execute the driver logic.
      *
-     * @param  string  $message
-     * @param  string  $phoneNumber
-     * @return void
      *
      * @throws BalanceIsNotEnoughException
      * @throws InvalidLoginInfoException
