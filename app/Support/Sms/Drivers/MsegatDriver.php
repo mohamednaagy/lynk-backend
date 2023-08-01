@@ -46,10 +46,13 @@ class MsegatDriver implements SmsDriverInterface
 
         $response = Http::post($this->baseUrl, $body);
 
-        if (is_null($response)) {
+        if (is_null($response->json())) {
             throw new MSGServiceStoppedException('Msegat Driver return NULL response', [
                 'body' => json_encode($body),
-                'response' => $response->json(),
+                'response' => json_encode([
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]),
             ]);
         }
 
