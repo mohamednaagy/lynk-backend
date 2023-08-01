@@ -28,7 +28,7 @@ class ExportOrders extends Controller
         $query = $buildOrdersQuery->setRelations([
             'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
             'company' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
-            'creator',
+            'creator' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
         ])
             ->handle();
 
@@ -63,6 +63,6 @@ class ExportOrders extends Controller
             return null;
         }
 
-        return Company::find($request->company[0], ['name']);
+        return Company::find($company[0], ['name']);
     }
 }
