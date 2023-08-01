@@ -22,7 +22,7 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping
         'order_owner' => 'Order Owner',
         'company_name' => 'Company Name',
         'status' => 'Status',
-        'created_at' => 'Created At',
+        'created_at' => 'Created Date',
     ];
 
     protected $excludes = [];
