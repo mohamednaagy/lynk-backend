@@ -12,9 +12,6 @@ class Kernel extends ConsoleKernel
 {
     /**
      * Define the application's command schedule.
-     *
-     * @param  Schedule  $schedule
-     * @return void
      */
     protected function schedule(Schedule $schedule): void
     {
@@ -23,15 +20,13 @@ class Kernel extends ConsoleKernel
             $schedule->job(new ProcessDmccNotifications())->everyMinute()->withoutOverlapping();
 
             $schedule->job(new ProcessDailySellingPendingCommodityToMarket())
-                ->between('18:00', '18:30')
+                ->between('18:30', '18:50')
                 ->timezone('Asia/Riyadh');
         }
     }
 
     /**
      * Register the commands for the application.
-     *
-     * @return void
      */
     protected function commands(): void
     {
