@@ -7,6 +7,7 @@ use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessDailySellingPendingCommodi
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccNotifications;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Config;
 
 class Kernel extends ConsoleKernel
 {
@@ -18,11 +19,15 @@ class Kernel extends ConsoleKernel
         if (is_bursam_service_available()) {
             $schedule->job(new ProcessFinancingOrders())->everyMinute()->withoutOverlapping();
             $schedule->job(new ProcessDmccNotifications())->everyMinute()->withoutOverlapping();
-
-            $schedule->job(new ProcessDailySellingPendingCommodityToMarket())
-                ->between('18:30', '18:50')
-                ->timezone('Asia/Riyadh');
         }
+
+        $timezone = Config::get('services.bursam.timezone');
+        $sellingCommodityStartTime = Config::get('services.bursam.selling_commodity_start_time');
+        $sellingCommodityEndTime = Config::get('services.bursam.selling_commodity_end_time');
+
+        $schedule->job(new ProcessDailySellingPendingCommodityToMarket())
+            ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
+            ->timezone($timezone);
     }
 
     /**
