@@ -41,7 +41,7 @@ class BuildFinancingOrdersQueryAction implements BuildFinancingOrdersQuery
             'status' => new OrderStatusScope(),
             'sort' => new OrderSortScope(),
             'amount' => new OrderAmountScope(),
-            'current_step' => new TraderOrderCurrentStepScope(),
+            // 'current_step' => new TraderOrderCurrentStepScope(),
             'filter' => new OrderFilterScope(),
             'company' => new OrderCompanyScope(),
         ];

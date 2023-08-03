@@ -5,9 +5,12 @@ namespace App\Actions\Wakala;
 use App\Actions\Contracts\Wakala\GetClientWakalaText;
 use App\Enums\BursamProductCode;
 use App\Models\TraderOrder;
+use Illuminate\Support\Traits\Localizable;
 
 class GetClientWakalaTextAction implements GetClientWakalaText
 {
+    use Localizable;
+
     public function handle(TraderOrder $traderOrder, string $clientTemplate)
     {
         $financingOrder = $traderOrder->order;
@@ -41,9 +44,11 @@ class GetClientWakalaTextAction implements GetClientWakalaText
                 $time,
                 $commodityNumber,
                 $amount,
-                in_array($commodity, BursamProductCode::getValues())
-                    ? BursamProductCode::fromValue($commodity)->description
-                    : $commodity,
+                $this->withLocale('ar', function () use ($commodity) {
+                    return in_array($commodity, BursamProductCode::getValues())
+                        ? BursamProductCode::fromValue($commodity)->description
+                        : $commodity;
+                }),
                 $commodityPrice,
                 $clientName,
                 $clientNationalId,

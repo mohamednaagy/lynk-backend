@@ -178,7 +178,9 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCreatedAt(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->created_at->format('Y-m-d h:i A'));
+        return $this->primitive(
+            $financingOrder->created_at->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i A')
+        );
     }
 
     public function includeCurrentStep(FinancingOrder $financingOrder)
