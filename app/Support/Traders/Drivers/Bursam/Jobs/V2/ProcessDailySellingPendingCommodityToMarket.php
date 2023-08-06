@@ -11,6 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
 {
@@ -40,14 +41,18 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
             ->select('id')
             ->lazyById()
             ->each(function (FinancingOrder $financingOrder) {
-                DB::transaction(function () use ($financingOrder) {
-                    $lockedFinancingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($financingOrder->id);
+                try {
+                    DB::transaction(function () use ($financingOrder) {
+                        $lockedFinancingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($financingOrder->id);
 
-                    $lockedFinancingOrder->activeTraderOrder->each(function ($activeTraderOrder) {
-                        Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)
-                            ->cancelTraderOrder($activeTraderOrder, TraderOrderCancelReason::MurabhaTimeout);
+                        $lockedFinancingOrder->activeTraderOrder->each(function ($activeTraderOrder) {
+                            Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)
+                                ->cancelTraderOrder($activeTraderOrder, TraderOrderCancelReason::MurabhaTimeout);
+                        });
                     });
-                });
+                } catch (\Throwable $th) {
+                    Log::error($th->getMessage(), ['exception' => $th]);
+                }
             });
     }
 }
