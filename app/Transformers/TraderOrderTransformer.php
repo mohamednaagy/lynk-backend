@@ -109,7 +109,7 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeCreatedAt(TraderOrder $traderOrder): Primitive
     {
-        return $this->primitive($traderOrder->created_at?->toDateTimeString());
+        return $this->primitive($traderOrder->created_at?->clone()->tz('Asia/Riyadh')->toDateTimeString());
     }
 
     public function setArea($area)
