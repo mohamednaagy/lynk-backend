@@ -26,8 +26,8 @@ class Kernel extends ConsoleKernel
         $sellingCommodityEndTime = Config::get('services.bursam.selling_commodity_end_time');
 
         $schedule->job(new ProcessDailySellingPendingCommodityToMarket())
-            ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
-            ->timezone($timezone);
+            ->timezone($timezone)
+            ->between($sellingCommodityStartTime, $sellingCommodityEndTime);
     }
 
     /**
