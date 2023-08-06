@@ -624,7 +624,7 @@ class BursamV1Driver implements TraderInterface
         if ($traderOrder->doesLastActionMatchWith([
             FinancingOrderHistory::GetTtiId, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
         ])) {
-            throw new Exception('Trader order cannot be cancelled now');
+            throw new Exception(sprintf('Trader order (#%s) cannot be cancelled now', $traderOrder->id));
         }
 
         $traderOrder->update([
