@@ -7,16 +7,16 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\WebhookType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Webhooks\Facades\WebhookEvent;
 
 class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhookWhenStatusIsCommoditySoldToCustomer
 {
     public function handle(FinancingOrder $financingOrder, TraderOrder $traderOrder): void
     {
-        $sellingCommodityToCustomerMedia = $traderOrder
-            ->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer);
-
-        $url = $sellingCommodityToCustomerMedia ? $sellingCommodityToCustomerMedia->getFullUrl() : '';
+        $documentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::SellingCommodityToCustomer);
+        $next_step_of_murabaha_step_completed = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+            ->getNextStepOf($traderOrder->currentStep);
 
         WebhookEvent::fire(
             $financingOrder->company,
@@ -27,7 +27,13 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
                     'value' => $financingOrder->status->value,
                     'label' => $financingOrder->status->description,
                 ],
-                'certificate_url' => $url,
+                'trading_information' => [
+                    'trading_id' => $traderOrder->id,
+                    'trading_reference' => $traderOrder->reference,
+                    'current_trading_status' => $next_step_of_murabaha_step_completed->step,
+                    'murabaha_step_completed' => $traderOrder->currentStep,
+                    'borrower_document_url' => get_file_url($documentMediaFile),
+                ],
             ]
         );
     }

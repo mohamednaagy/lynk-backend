@@ -3,9 +3,12 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommodityPurchased;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\WebhookType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Support\DataTransferObjects\CommodityProductDto;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Webhooks\Facades\WebhookEvent;
 
 class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhenStatusIsCommodityPurchased
@@ -16,7 +19,10 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
             return;
         }
 
-        $products = $this->resolveProducts($traderOrder);
+        $certDocumentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::TtiHoldingCertificate);
+        $ownershipDocumentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::TransferOwnershipToLender);
+        $next_step_of_murabaha_step_completed = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+            ->getNextStepOf($traderOrder->currentStep);
 
         WebhookEvent::fire($financingOrder->company, WebhookType::OrderUpdates, [
             'order_id' => $financingOrder->id,
@@ -24,21 +30,29 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
                 'value' => $financingOrder->status->value,
                 'label' => $financingOrder->status->description,
             ],
-            'products' => $products,
+            'trading_information' => [
+                'trading_id' => $traderOrder->id,
+                'trading_reference' => $traderOrder->reference,
+                'current_trading_status' => $next_step_of_murabaha_step_completed->step,
+                'murabaha_step_completed' => $traderOrder->currentStep,
+                'products' => $this->resolveProducts($traderOrder),
+                'cert_document_url' => get_file_url($certDocumentMediaFile),
+                'ownership_document_url' => get_file_url($ownershipDocumentMediaFile),
+            ],
         ]);
     }
 
-    public function resolveProducts(TraderOrder $traderOrder)
+    public function resolveProducts(TraderOrder $traderOrder): array
     {
-        $products = $traderOrder->products;
-        $data = [];
-        foreach ($products as $product) {
-            $data[] = [
-                'commodity_description' => $product['product'],
-                'quantity' => $product['quantity'],
-            ];
-        }
+        return collect($traderOrder->products)->map(function ($product) {
+            $productDto = CommodityProductDto::fromArray($product);
 
-        return $data;
+            return [
+                'product_description' => $productDto->getProduct(),
+                'product_volume' => $productDto->getQuantity(),
+                'product_value' => $productDto->getAmount(),
+            ];
+        })
+            ->toArray();
     }
 }
