@@ -21,7 +21,7 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
 
         $certDocumentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::TtiHoldingCertificate);
         $ownershipDocumentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::TransferOwnershipToLender);
-        $next_step_of_murabaha_step_completed = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+        $nextStepOfMurabahaStepCompleted = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
             ->getNextStepOf($traderOrder->currentStep);
 
         WebhookEvent::fire($financingOrder->company, WebhookType::OrderUpdates, [
@@ -33,8 +33,8 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
             'trading_information' => [
                 'trading_id' => $traderOrder->id,
                 'trading_reference' => $traderOrder->reference,
-                'current_trading_status' => $next_step_of_murabaha_step_completed->step,
-                'murabaha_step_completed' => $traderOrder->currentStep,
+                'current_trading_status' => $nextStepOfMurabahaStepCompleted->step,
+                'completed_murabaha_step' => $traderOrder->currentStep,
                 'products' => $this->resolveProducts($traderOrder),
                 'cert_document_url' => get_file_url($certDocumentMediaFile),
                 'ownership_document_url' => get_file_url($ownershipDocumentMediaFile),
@@ -49,8 +49,10 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
 
             return [
                 'product_description' => $productDto->getProduct(),
+                'product_volume_unit' => $productDto->getUom(),
                 'product_volume' => $productDto->getQuantity(),
                 'product_value' => $productDto->getAmount(),
+                'currency' => $productDto->getCurrency(),
             ];
         })
             ->toArray();
