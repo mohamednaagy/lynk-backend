@@ -226,9 +226,8 @@ class TraderOrder extends Model implements HasMedia
     {
         $dictionary = new StepHistoriesDictionary($this->provider, $this->version);
         $previousStep = $dictionary->getPreviousStepOf($this->currentStep);
-        $histories = $this->traderHistories;
 
-        foreach ($histories as $history) {
+        foreach ($this->traderHistories as $history) {
             if (end($previousStep->histories) == $history->action) {
                 return $previousStep->step;
             }
