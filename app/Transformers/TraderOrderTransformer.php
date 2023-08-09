@@ -93,9 +93,7 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeProducts(TraderOrder $traderOrder): Collection
     {
         $products = collect($traderOrder->products)->map(
-            fn ($product) => CommodityProductDto::fromArray(
-                array_merge($product, ['product_code' => $traderOrder->product_code])
-            )
+            fn ($product) => CommodityProductDto::fromArray($product)
         );
 
         return $this->collection($products, new ProductTransformer());
