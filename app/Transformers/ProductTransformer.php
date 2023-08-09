@@ -10,6 +10,7 @@ class ProductTransformer extends TransformerAbstract
 {
     protected array $defaultIncludes = [
         'name',
+        'volume_unit',
         'quantity',
         'amount',
         'currency',
@@ -25,6 +26,11 @@ class ProductTransformer extends TransformerAbstract
     public function includeName(CommodityProductDto $productDto): Primitive
     {
         return $this->primitive($productDto->getProduct());
+    }
+
+    public function includeVolumeUnit(CommodityProductDto $productDto): Primitive
+    {
+        return $this->primitive($productDto->getUom());
     }
 
     public function includeQuantity(CommodityProductDto $productDto): Primitive
