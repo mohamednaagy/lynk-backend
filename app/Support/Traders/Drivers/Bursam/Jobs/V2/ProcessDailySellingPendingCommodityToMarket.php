@@ -2,16 +2,13 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
-use App\Enums\TraderOrderCancelReason;
 use App\Models\FinancingOrder;
-use App\Support\Traders\Facades\Trader;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
 {
@@ -36,23 +33,13 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
         FinancingOrder::query()
             ->whereHas('activeTraderOrder', function ($query) {
                 return $query->where('provider', 'bursam')
-                    ->where('version', 'v2');
+                    ->where('version', 'v2')
+                    ->whereDate('created_at', Carbon::today());
             })
             ->select('id')
             ->lazyById()
             ->each(function (FinancingOrder $financingOrder) {
-                try {
-                    DB::transaction(function () use ($financingOrder) {
-                        $lockedFinancingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($financingOrder->id);
-
-                        $lockedFinancingOrder->activeTraderOrder->each(function ($activeTraderOrder) {
-                            Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)
-                                ->cancelTraderOrder($activeTraderOrder, TraderOrderCancelReason::MurabhaTimeout);
-                        });
-                    });
-                } catch (\Throwable $th) {
-                    Log::error($th->getMessage(), ['exception' => $th]);
-                }
+                ProcessBursamCancelTimeOutOrder::dispatch($financingOrder);
             });
     }
 }
