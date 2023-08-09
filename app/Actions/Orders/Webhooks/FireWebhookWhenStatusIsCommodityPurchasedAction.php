@@ -22,7 +22,7 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
 
         $certDocumentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::TtiHoldingCertificate);
         $ownershipDocumentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::TransferOwnershipToLender);
-        $nextStepOfMurabahaStepCompleted = $this->getNextStepOfCurrentStep($traderOrder);
+        $nextStepOfCompletedMurabahaStep = $this->getNextStepOfCurrentStep($traderOrder);
         $lastHistory = $this->getTraderOrderLastHistory($traderOrder);
 
         WebhookEvent::fire($financingOrder->company, WebhookType::OrderUpdates, [
@@ -34,7 +34,7 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
             'trading_information' => [
                 'trading_id' => $traderOrder->id,
                 'trading_reference' => $traderOrder->reference,
-                'current_trading_step' => $nextStepOfMurabahaStepCompleted?->step,
+                'current_trading_step' => $nextStepOfCompletedMurabahaStep?->step,
                 'completed_murabaha_step' => $traderOrder->currentStep,
                 'products' => $this->resolveProducts($traderOrder),
                 'cert_document_url' => get_file_url($certDocumentMediaFile),
