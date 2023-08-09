@@ -2,6 +2,8 @@
 
 namespace App\Support\FinancingOrders\StepAndHistories;
 
+use App\Models\TraderOrder;
+
 class StepHistoriesDictionary
 {
     public \SplDoublyLinkedList $dictionaryNodeList;
@@ -92,6 +94,24 @@ class StepHistoriesDictionary
                 return $this->dictionaryNodeList->current();
             }
             $this->dictionaryNodeList->next();
+        }
+    }
+
+    public function getLastCompletedStepOf(TraderOrder $traderOrder)
+    {
+        $histories = $traderOrder->traderHistories()->pluck('action')->toArray();
+
+        $this->dictionaryNodeList->rewind();
+        while ($this->dictionaryNodeList->valid()) {
+            $lastCompletedStepHistory = end($this->dictionaryNodeList->current()->histories);
+
+            if (in_array($lastCompletedStepHistory, $histories)) {
+                $this->dictionaryNodeList->next();
+            } else {
+                $this->dictionaryNodeList->prev();
+
+                return $this->dictionaryNodeList->current();
+            }
         }
     }
 }

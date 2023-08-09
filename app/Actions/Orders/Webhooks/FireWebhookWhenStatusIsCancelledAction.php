@@ -22,6 +22,7 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
         };
 
         $documentMediaFile = get_media_of_model($traderOrder, $warrantyMediaCollection);
+        $lastCompletedStep = $this->getDictionaryOfTraderOrder($traderOrder)->getLastCompletedStepOf($traderOrder);
 
         WebhookEvent::fire($financingOrder->company, WebhookType::OrderUpdates, [
             'order_id' => $financingOrder->id,
@@ -33,7 +34,7 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
                 'trading_id' => $traderOrder->id,
                 'trading_reference' => $traderOrder->reference,
                 'current_trading_step' => 'cancelled',
-                'completed_murabaha_step' => $this->getLastCompletedStepBeforeCancelling($traderOrder),
+                'completed_murabaha_step' => $lastCompletedStep?->step,
                 'warranty_document_url' => get_file_url($documentMediaFile),
             ],
             'updated_at' => $this->getFormattedDateTime($traderOrder),
