@@ -4,7 +4,10 @@ namespace App\Actions\Orders\Webhooks;
 
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Orders\Webhooks\Traits\OrderWebhooksHelper;
+use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\Trader;
 use App\Enums\WebhookType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -18,7 +21,7 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
     {
         $documentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::SellingCommodityToCustomer);
         $lastHistory = $this->getTraderOrderLastHistory($traderOrder);
-        $lastCompletedStep = $this->getDictionaryOfTraderOrder($traderOrder)->getLastCompletedStepOf($traderOrder);
+        $lastCompletedStep = $this->getCompletedStep($traderOrder);
         $nextStep = $this->getDictionaryOfTraderOrder($traderOrder)
             ->getNextStepOf($lastCompletedStep?->step);
 
@@ -41,5 +44,14 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
                 'updated_at' => $this->getFormattedDateTime($lastHistory),
             ]
         );
+    }
+
+    protected function getCompletedStepOfTrader($provider)
+    {
+        return match ($provider) {
+            Trader::Bursam => BursamMurabhaStep::CommoditySoldToCustomer,
+            Trader::Dmcc => DmccMurabhaStep::CommoditySoldToCustomer,
+            Trader::FakeDmcc => DmccMurabhaStep::CommoditySoldToCustomer,
+        };
     }
 }

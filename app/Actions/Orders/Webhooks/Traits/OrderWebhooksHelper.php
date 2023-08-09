@@ -19,6 +19,11 @@ trait OrderWebhooksHelper
         return $model?->updated_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A');
     }
 
+    public function getCompletedStep(TraderOrder $traderOrder)
+    {
+        return $this->getCompletedStepOfTrader($traderOrder->provider);
+    }
+
     public function getDictionaryOfTraderOrder(TraderOrder $traderOrder): StepHistoriesDictionary
     {
         return new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version);

@@ -103,9 +103,9 @@ class StepHistoriesDictionary
 
         $this->dictionaryNodeList->rewind();
         while ($this->dictionaryNodeList->valid()) {
-            $lastCompletedStepHistory = end($this->dictionaryNodeList->current()->histories);
+            $lastHistoryOfStep = end($this->dictionaryNodeList->current()->histories);
 
-            if (in_array($lastCompletedStepHistory, $histories)) {
+            if (in_array($lastHistoryOfStep, $histories)) {
                 $this->dictionaryNodeList->next();
             } else {
                 $this->dictionaryNodeList->prev();

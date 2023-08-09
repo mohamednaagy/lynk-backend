@@ -4,7 +4,10 @@ namespace App\Actions\Orders\Webhooks;
 
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCommodityPurchased;
 use App\Actions\Orders\Webhooks\Traits\OrderWebhooksHelper;
+use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\Trader;
 use App\Enums\WebhookType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -23,7 +26,7 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
         $certDocumentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::TtiHoldingCertificate);
         $ownershipDocumentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::TransferOwnershipToLender);
         $lastHistory = $this->getTraderOrderLastHistory($traderOrder);
-        $lastCompletedStep = $this->getDictionaryOfTraderOrder($traderOrder)->getLastCompletedStepOf($traderOrder);
+        $lastCompletedStep = $this->getCompletedStep($traderOrder);
         $nextStep = $this->getDictionaryOfTraderOrder($traderOrder)
             ->getNextStepOf($lastCompletedStep->step);
 
@@ -44,5 +47,14 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
             ],
             'updated_at' => $this->getFormattedDateTime($lastHistory),
         ]);
+    }
+
+    protected function getCompletedStepOfTrader($provider)
+    {
+        return match ($provider) {
+            Trader::Bursam => BursamMurabhaStep::PurchasingCommodity,
+            Trader::Dmcc => DmccMurabhaStep::PurchasingCommodity,
+            Trader::FakeDmcc => DmccMurabhaStep::PurchasingCommodity,
+        };
     }
 }
