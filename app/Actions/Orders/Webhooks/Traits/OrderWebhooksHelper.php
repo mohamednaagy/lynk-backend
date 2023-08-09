@@ -5,7 +5,6 @@ namespace App\Actions\Orders\Webhooks\Traits;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
-use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionaryNode;
 use Illuminate\Database\Eloquent\Model;
 
 trait OrderWebhooksHelper
@@ -18,11 +17,6 @@ trait OrderWebhooksHelper
     public function getFormattedDateTime(?Model $model)
     {
         return $model?->updated_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A');
-    }
-
-    public function getNextStepOfCurrentStep(TraderOrder $traderOrder): ?StepHistoriesDictionaryNode
-    {
-        return $this->getDictionaryOfTraderOrder($traderOrder)->getNextStepOf($traderOrder->currentStep);
     }
 
     public function getDictionaryOfTraderOrder(TraderOrder $traderOrder): StepHistoriesDictionary

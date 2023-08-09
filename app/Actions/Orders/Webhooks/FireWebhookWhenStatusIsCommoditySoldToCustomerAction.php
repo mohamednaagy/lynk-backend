@@ -17,8 +17,11 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
     public function handle(FinancingOrder $financingOrder, TraderOrder $traderOrder): void
     {
         $documentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::SellingCommodityToCustomer);
-        $nextStepOfCompletedMurabahaStep = $this->getNextStepOfCurrentStep($traderOrder);
         $lastHistory = $this->getTraderOrderLastHistory($traderOrder);
+        $currentStep = $this->getDictionaryOfTraderOrder($traderOrder)
+            ->getStepByHistory($lastHistory->action);
+        $nextStep = $this->getDictionaryOfTraderOrder($traderOrder)
+            ->getNextStepOf($currentStep->step);
 
         WebhookEvent::fire(
             $financingOrder->company,
@@ -32,10 +35,8 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
                 'trading_information' => [
                     'trading_id' => $traderOrder->id,
                     'trading_reference' => $traderOrder->reference,
-                    'current_trading_step' => $nextStepOfCompletedMurabahaStep?->step,
-                    'completed_murabaha_step' => $this->getDictionaryOfTraderOrder($traderOrder)
-                        ->getStepByHistory($lastHistory->action)
-                        ?->step,
+                    'current_trading_step' => $nextStep?->step,
+                    'completed_murabaha_step' => $currentStep?->step,
                     'borrower_document_url' => get_file_url($documentMediaFile),
                 ],
                 'updated_at' => $this->getFormattedDateTime($lastHistory),
