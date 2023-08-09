@@ -7,6 +7,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 class CreateTraderOrder extends Controller
@@ -22,12 +23,11 @@ class CreateTraderOrder extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function __invoke(InitiateTraderOrder $initiateTraderOrder, int $orderId)
     {
-        return DB::transaction(function () use ($initiateTraderOrder, $orderId) {
+        return DB::multipleTransaction(function () use ($initiateTraderOrder, $orderId) {
             $initiateTraderOrder->handle($orderId);
 
             return $this->successResponse();

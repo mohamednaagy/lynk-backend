@@ -3,8 +3,8 @@
 namespace App\Console;
 
 use App\Jobs\General\ProcessFinancingOrders;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\InitiateTraderOrdersIfTimedOut;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessDailySellingPendingCommodityToMarket;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessDailySoldCommodityToMarket;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccNotifications;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -35,7 +35,7 @@ class Kernel extends ConsoleKernel
             ->timezone($timezone)
             ->dailyAt($sellingCommodityStartTime);
 
-        $schedule->job(new ProcessDailySoldCommodityToMarket())
+        $schedule->job(new InitiateTraderOrdersIfTimedOut())
             ->timezone($timezone)
             ->dailyAt($marketOpeningStartTime);
 

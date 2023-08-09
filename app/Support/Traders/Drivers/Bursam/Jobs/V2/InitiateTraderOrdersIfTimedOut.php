@@ -14,7 +14,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class ProcessDailySoldCommodityToMarket implements ShouldQueue
+class InitiateTraderOrdersIfTimedOut implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -36,7 +36,7 @@ class ProcessDailySoldCommodityToMarket implements ShouldQueue
     public function handle(InitiateTraderOrder $initiateTraderOrder)
     {
         FinancingOrder::query()
-            ->whereHas('traderOrders', function ($query) {
+            ->whereHas('latestTraderOrder', function ($query) {
                 return $query->where('status', TraderOrderStatus::Cancelled)
                     ->where('cancel_reason', TraderOrderCancelReason::MurabhaTimeout)
                     ->where('provider', 'bursam')
@@ -46,7 +46,7 @@ class ProcessDailySoldCommodityToMarket implements ShouldQueue
             ->lazyById()
             ->each(function (FinancingOrder $financingOrder) use ($initiateTraderOrder) {
                 try {
-                    DB::transaction(function () use ($initiateTraderOrder, $financingOrder) {
+                    DB::multipleTransaction(function () use ($initiateTraderOrder, $financingOrder) {
                         $initiateTraderOrder->handle($financingOrder->id);
                     });
                 } catch (\Throwable $th) {
