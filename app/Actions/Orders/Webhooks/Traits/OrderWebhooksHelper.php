@@ -22,8 +22,27 @@ trait OrderWebhooksHelper
 
     public function getNextStepOfCurrentStep(TraderOrder $traderOrder): ?StepHistoriesDictionaryNode
     {
-        return (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
-            ->getNextStepOf($traderOrder->currentStep);
+        return $this->getDictionaryOfTraderOrder($traderOrder)->getNextStepOf($traderOrder->currentStep);
+    }
+
+    public function getDictionaryOfTraderOrder(TraderOrder $traderOrder): StepHistoriesDictionary
+    {
+        return new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version);
+    }
+
+    public function getLastCompletedStepBeforeCancelling(TraderOrder $traderOrder)
+    {
+        $dictionary = new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version);
+        $previousStep = $dictionary->getPreviousStepOf($traderOrder->currentStep);
+
+        foreach ($traderOrder->traderHistories as $history) {
+            if (end($previousStep->histories) == $history->action) {
+                return $previousStep->step;
+            }
+            $previousStep = $dictionary->getPreviousStepOf($previousStep->step);
+        }
+
+        return null;
     }
 
     public function resolveProducts(TraderOrder $traderOrder): array

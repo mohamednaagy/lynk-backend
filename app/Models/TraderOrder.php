@@ -221,19 +221,4 @@ class TraderOrder extends Model implements HasMedia
 
         return $this->checkOrderStepComplete($purchasingStepAccordingToTrader);
     }
-
-    public function getLastCompletedStep()
-    {
-        $dictionary = new StepHistoriesDictionary($this->provider, $this->version);
-        $previousStep = $dictionary->getPreviousStepOf($this->currentStep);
-
-        foreach ($this->traderHistories as $history) {
-            if (end($previousStep->histories) == $history->action) {
-                return $previousStep->step;
-            }
-            $previousStep = $dictionary->getPreviousStepOf($previousStep->step);
-        }
-
-        return null;
-    }
 }

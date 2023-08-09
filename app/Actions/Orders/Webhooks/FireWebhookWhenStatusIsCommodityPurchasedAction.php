@@ -35,7 +35,9 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
                 'trading_id' => $traderOrder->id,
                 'trading_reference' => $traderOrder->reference,
                 'current_trading_step' => $nextStepOfCompletedMurabahaStep?->step,
-                'completed_murabaha_step' => $traderOrder->currentStep,
+                'completed_murabaha_step' => $this->getDictionaryOfTraderOrder($traderOrder)
+                    ->getStepByHistory($lastHistory->action)
+                    ?->step,
                 'products' => $this->resolveProducts($traderOrder),
                 'cert_document_url' => get_file_url($certDocumentMediaFile),
                 'ownership_document_url' => get_file_url($ownershipDocumentMediaFile),
