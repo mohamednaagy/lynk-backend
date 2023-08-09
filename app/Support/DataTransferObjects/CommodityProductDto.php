@@ -8,12 +8,13 @@ class CommodityProductDto
 {
     public function __construct(
         protected string $product,
+        protected ?string $product_code,
         protected string $quantity,
         protected float $amount,
         protected string $previous_owner,
         protected string $date_time_of_purchasing_commodity,
         protected string $uom = '--',
-        protected string|null $warehouse = null,
+        protected ?string $warehouse = null,
         protected string $warehouse_or_vault_emirates = '--',
         protected string $warehouse_or_vault_country = '--',
         protected string $currency = 'SAR',
@@ -23,8 +24,8 @@ class CommodityProductDto
 
     public function getProduct(): string
     {
-        return in_array($this->product, BursamProductCode::getValues())
-             ? BursamProductCode::fromValue($this->product)->description
+        return in_array($this->product_code, BursamProductCode::getValues())
+             ? BursamProductCode::fromValue($this->product_code)->description
              : $this->product;
     }
 
@@ -41,6 +42,11 @@ class CommodityProductDto
     public function getAmount(): float
     {
         return $this->amount;
+    }
+
+    public function getCurrency(): string
+    {
+        return $this->currency;
     }
 
     public function getWarehouse(): string
@@ -61,6 +67,7 @@ class CommodityProductDto
     {
         return new static(
             $data['product'],
+            $data['product_code'] ?? null,
             $data['quantity'],
             $data['amount'],
             $data['previous_owner'],
@@ -77,12 +84,13 @@ class CommodityProductDto
     public function toArray(): array
     {
         return [
-            'product' => $this->product,
-            'quantity' => $this->quantity,
-            'uom' => $this->uom,
-            'amount' => $this->amount,
-            'warehouse' => $this->warehouse,
-            'previous_owner' => $this->previous_owner,
+            'product' => $this->getProduct(),
+            'quantity' => $this->getQuantity(),
+            'uom' => $this->getUom(),
+            'amount' => $this->getAmount(),
+            'currency' => $this->getCurrency(),
+            'warehouse' => $this->getWarehouse(),
+            'previous_owner' => $this->getPreviousOwner(),
             'date_time_of_purchasing_commodity' => $this->date_time_of_purchasing_commodity,
         ];
     }
