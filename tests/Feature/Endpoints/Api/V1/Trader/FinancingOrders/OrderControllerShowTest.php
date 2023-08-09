@@ -46,8 +46,6 @@ class OrderControllerShowTest extends TestCase
     private static string $endpoint;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -71,9 +69,6 @@ class OrderControllerShowTest extends TestCase
         self::$endpoint = 'api/v1/trader/orders/';
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cannot_access_order_controller_show(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -81,9 +76,6 @@ class OrderControllerShowTest extends TestCase
             ->assertUnauthorized();
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_admin_with_proper_permission_can_access_order_controller_show_successful(): void
     {
         $this->actingAs(self::$userTraderAdmin)
@@ -109,6 +101,7 @@ class OrderControllerShowTest extends TestCase
                         'trader_orders.provider',
                         'trader_orders.is_cancellable',
                         'trader_orders.history',
+                        'trader_orders.products',
                         'trader_orders.status',
                         'trader_orders.created_at',
                     ])
@@ -117,9 +110,6 @@ class OrderControllerShowTest extends TestCase
             )->assertJsonCount(1);
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_admin_cant_access_another_company_order(): void
     {
         $this->actingAs(self::$userTraderAdmin)

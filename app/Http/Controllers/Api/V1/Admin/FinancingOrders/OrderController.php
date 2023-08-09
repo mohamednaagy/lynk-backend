@@ -93,6 +93,7 @@ class OrderController extends Controller
                 'trader_orders.failure_reason',
                 'trader_orders.is_cancellable',
                 'trader_orders.history',
+                'trader_orders.products',
                 'trader_orders.status',
                 'trader_orders.created_at',
                 'creator',

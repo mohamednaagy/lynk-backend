@@ -13,7 +13,7 @@ class CommodityProductDto
         protected string $previous_owner,
         protected string $date_time_of_purchasing_commodity,
         protected string $uom = '--',
-        protected string|null $warehouse = null,
+        protected ?string $warehouse = null,
         protected string $warehouse_or_vault_emirates = '--',
         protected string $warehouse_or_vault_country = '--',
         protected string $currency = 'SAR',
@@ -24,8 +24,8 @@ class CommodityProductDto
     public function getProduct(): string
     {
         return in_array($this->product, BursamProductCode::getValues())
-             ? BursamProductCode::fromValue($this->product)->description
-             : $this->product;
+            ? BursamProductCode::fromValue($this->product)->description
+            : $this->product;
     }
 
     public function getQuantity(): string
@@ -41,6 +41,11 @@ class CommodityProductDto
     public function getAmount(): float
     {
         return $this->amount;
+    }
+
+    public function getCurrency(): string
+    {
+        return $this->currency;
     }
 
     public function getWarehouse(): string
@@ -81,6 +86,7 @@ class CommodityProductDto
             'quantity' => $this->quantity,
             'uom' => $this->uom,
             'amount' => $this->amount,
+            'currency' => $this->currency,
             'warehouse' => $this->warehouse,
             'previous_owner' => $this->previous_owner,
             'date_time_of_purchasing_commodity' => $this->date_time_of_purchasing_commodity,
