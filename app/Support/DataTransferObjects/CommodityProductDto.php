@@ -8,11 +8,11 @@ class CommodityProductDto
 {
     public function __construct(
         protected string $product,
-        protected ?string $product_code,
         protected string $quantity,
         protected float $amount,
         protected string $previous_owner,
         protected string $date_time_of_purchasing_commodity,
+        protected ?string $product_code = null,
         protected string $uom = '--',
         protected ?string $warehouse = null,
         protected string $warehouse_or_vault_emirates = '--',
@@ -24,8 +24,10 @@ class CommodityProductDto
 
     public function getProduct(): string
     {
-        return in_array($this->product_code, BursamProductCode::getValues())
-             ? BursamProductCode::fromValue($this->product_code)->description
+        $productCode = $this->product_code ?? $this->product;
+
+        return in_array($productCode, BursamProductCode::getValues())
+             ? BursamProductCode::fromValue($productCode)->description
              : $this->product;
     }
 
@@ -67,11 +69,11 @@ class CommodityProductDto
     {
         return new static(
             $data['product'],
-            $data['product_code'] ?? null,
             $data['quantity'],
             $data['amount'],
             $data['previous_owner'],
             $data['date_time_of_purchasing_commodity'],
+            $data['product_code'] ?? null,
             $data['uom'] ?? '--',
             $data['warehouse'] ?? '',
             $data['warehouse_or_vault_emirates'] ?? '--',
