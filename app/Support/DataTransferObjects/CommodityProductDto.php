@@ -86,13 +86,13 @@ class CommodityProductDto
     public function toArray(): array
     {
         return [
-            'product' => $this->getProduct(),
-            'quantity' => $this->getQuantity(),
-            'uom' => $this->getUom(),
-            'amount' => $this->getAmount(),
-            'currency' => $this->getCurrency(),
-            'warehouse' => $this->getWarehouse(),
-            'previous_owner' => $this->getPreviousOwner(),
+            'product' => $this->product,
+            'quantity' => $this->quantity,
+            'uom' => $this->uom,
+            'amount' => $this->amount,
+            'currency' => $this->currency,
+            'warehouse' => $this->warehouse,
+            'previous_owner' => $this->previous_owner,
             'date_time_of_purchasing_commodity' => $this->date_time_of_purchasing_commodity,
         ];
     }

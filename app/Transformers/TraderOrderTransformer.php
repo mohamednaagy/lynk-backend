@@ -8,6 +8,7 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
+use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -89,15 +90,15 @@ class TraderOrderTransformer extends TransformerAbstract
         return $this->collection([$historiesActions], new TraderHistoryTransformer($traderOrder, $traderMurabhaSteps));
     }
 
-    public function includeProducts(TraderOrder $traderOrder): Primitive
+    public function includeProducts(TraderOrder $traderOrder): Collection
     {
         $products = collect($traderOrder->products)->map(
             fn ($product) => CommodityProductDto::fromArray(
                 array_merge($product, ['product_code' => $traderOrder->product_code])
-            )->toArray()
+            )
         );
 
-        return $this->primitive($products);
+        return $this->collection($products, new ProductTransformer());
     }
 
     public function includeStatus(TraderOrder $traderOrder): Primitive
