@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCancelled;
+use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Enums\TraderOrderStatus;
 use App\Events\OrderCancelled;
 use App\Models\TraderOrder;
