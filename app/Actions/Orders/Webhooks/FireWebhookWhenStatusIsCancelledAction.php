@@ -32,11 +32,11 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
             'trading_information' => [
                 'trading_id' => $traderOrder->id,
                 'trading_reference' => $traderOrder->reference,
-                'current_trading_status' => [
+                'current_trading_step' => [
                     'value' => $traderOrder->status->value,
                     'label' => $traderOrder->status->description,
                 ],
-                'completed_murabaha_step' => $this->getLastStepBeforeCancelling($traderOrder),
+                'completed_murabaha_step' => $traderOrder->getLastCompletedStep(),
                 'warranty_document_url' => get_file_url($documentMediaFile),
             ],
             'updated_at' => $this->getFormattedDateTime($traderOrder),

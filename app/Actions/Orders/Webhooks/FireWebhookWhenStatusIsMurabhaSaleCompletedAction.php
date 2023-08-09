@@ -34,7 +34,10 @@ class FireWebhookWhenStatusIsMurabhaSaleCompletedAction implements FireWebhookWh
             'trading_information' => [
                 'trading_id' => $traderOrder->id,
                 'trading_reference' => $traderOrder->reference,
-                'current_trading_status' => 'completed',
+                'current_trading_step' => [
+                    'value' => $traderOrder->status->value,
+                    'label' => $traderOrder->status->description,
+                ],
                 'completed_murabaha_step' => $traderOrder->currentStep,
                 'signed_wakala_document_url' => get_file_url($wakalaDocumentMediaFile),
                 'warranty_document_url' => get_file_url($documentMediaFile),
