@@ -17,20 +17,23 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        if (is_bursam_service_available()) {
-            $schedule->job(new ProcessFinancingOrders())->everyMinute()->withoutOverlapping();
-            $schedule->job(new ProcessDmccNotifications())->everyMinute()->withoutOverlapping();
-        }
+        $schedule->job(new ProcessFinancingOrders())
+            ->when(is_bursam_service_available())
+            ->everyMinute()
+            ->withoutOverlapping();
+
+        $schedule->job(new ProcessDmccNotifications())
+            ->when(is_bursam_service_available())
+            ->everyMinute()
+            ->withoutOverlapping();
 
         $timezone = Config::get('services.bursam.timezone');
         $marketOpeningStartTime = Config::get('services.bursam.market_opening_start_time');
         $sellingCommodityStartTime = Config::get('services.bursam.selling_commodity_start_time');
-        $sellingCommodityEndTime = Config::get('services.bursam.selling_commodity_end_time');
 
         $schedule->job(new ProcessDailySellingPendingCommodityToMarket())
             ->timezone($timezone)
-            ->daily()
-            ->between($sellingCommodityStartTime, $sellingCommodityEndTime);
+            ->dailyAt($sellingCommodityStartTime);
 
         $schedule->job(new ProcessDailySoldCommodityToMarket())
             ->timezone($timezone)
