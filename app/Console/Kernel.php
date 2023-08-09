@@ -34,7 +34,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->job(new ProcessDailySoldCommodityToMarket())
             ->timezone($timezone)
-            ->dailyAt($sellingCommodityEndTime);
+            ->dailyAt($marketOpeningStartTime);
 
     }
 
