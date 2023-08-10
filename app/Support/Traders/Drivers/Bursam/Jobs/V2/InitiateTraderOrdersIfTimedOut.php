@@ -24,7 +24,6 @@ class InitiateTraderOrdersIfTimedOut implements ShouldQueue
      */
     public function __construct()
     {
-
     }
 
     /**
@@ -35,12 +34,12 @@ class InitiateTraderOrdersIfTimedOut implements ShouldQueue
     public function handle()
     {
         $timezone = Config::get('services.bursam.timezone');
-        $marketOpeningStartTime = Config::get('services.bursam.market_opening_start_time');
-        $marketOpeningEndTime = Config::get('services.bursam.market_opening_end_time');
+        $marketOpeningStartTimeString = Config::get('services.bursam.market_opening_start_time');
+        $marketOpeningEndTimeString = Config::get('services.bursam.market_opening_end_time');
 
-        $marketOpeningStartTime = Carbon::parse($marketOpeningStartTime, $timezone)->subDay()->utc();
+        $marketOpeningStartTime = Carbon::parse($marketOpeningStartTimeString, $timezone)->subDay()->utc();
 
-        $marketOpeningEndTime = Carbon::parse($marketOpeningEndTime, $timezone)->utc();
+        $marketOpeningEndTime = Carbon::parse($marketOpeningEndTimeString, $timezone)->utc();
 
         FinancingOrder::query()
             ->whereHas('latestTraderOrder', function ($query) use ($marketOpeningEndTime, $marketOpeningStartTime) {
