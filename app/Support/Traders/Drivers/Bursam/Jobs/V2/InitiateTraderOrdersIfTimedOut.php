@@ -33,21 +33,34 @@ class InitiateTraderOrdersIfTimedOut implements ShouldQueue
      *
      * @return void
      */
-    public function handle(InitiateTraderOrder $initiateTraderOrder)
+    public function handle()
     {
         FinancingOrder::query()
             ->whereHas('latestTraderOrder', function ($query) {
                 return $query->where('status', TraderOrderStatus::Cancelled)
                     ->where('cancel_reason', TraderOrderCancelReason::MurabhaTimeout)
                     ->where('provider', 'bursam')
-                    ->where('version', 'v2');
+                    ->where('version', 'v2')
+                    ->whereDate('created_at', now()->toDateString());
             })
             ->select('id')
             ->lazyById()
-            ->each(function (FinancingOrder $financingOrder) use ($initiateTraderOrder) {
+            ->each(function (FinancingOrder $financingOrder) {
                 try {
-                    DB::multipleTransaction(function () use ($initiateTraderOrder, $financingOrder) {
-                        $initiateTraderOrder->handle($financingOrder->id);
+                    dispatch(new class($financingOrder->id) implements ShouldQueue
+                    {
+                        use InteractsWithQueue, Queueable, SerializesModels;
+
+                        public function __construct(protected $financeOrderId)
+                        {
+                        }
+
+                        public function handle(InitiateTraderOrder $initiateTraderOrder)
+                        {
+                            DB::multipleTransaction(function () use ($initiateTraderOrder) {
+                                $initiateTraderOrder->handle($this->financeOrderId);
+                            });
+                        }
                     });
                 } catch (\Throwable $th) {
                     Log::error($th->getMessage(), ['exception' => $th]);

@@ -42,13 +42,25 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
             ->lazyById()
             ->each(function (FinancingOrder $financingOrder) {
                 try {
-                    DB::transaction(function () use ($financingOrder) {
-                        $lockedFinancingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($financingOrder->id);
+                    dispatch(new class($financingOrder->id) implements ShouldQueue
+                    {
+                        use InteractsWithQueue, Queueable, SerializesModels;
 
-                        $lockedFinancingOrder->activeTraderOrder->each(function ($activeTraderOrder) {
-                            Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)
-                                ->cancelTraderOrder($activeTraderOrder, TraderOrderCancelReason::MurabhaTimeout);
-                        });
+                        public function __construct(protected $financeOrderId)
+                        {
+                        }
+
+                        public function handle()
+                        {
+                            DB::transaction(function () {
+                                $lockedFinancingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financeOrderId);
+
+                                $lockedFinancingOrder->activeTraderOrder->each(function ($activeTraderOrder) {
+                                    Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)
+                                        ->cancelTraderOrder($activeTraderOrder, TraderOrderCancelReason::MurabhaTimeout);
+                                });
+                            });
+                        }
                     });
                 } catch (\Throwable $th) {
                     Log::error($th->getMessage(), ['exception' => $th]);
