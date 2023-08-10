@@ -28,7 +28,7 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
         $lastHistory = $this->getTraderOrderLastHistory($traderOrder);
         $lastCompletedStep = $this->getCompletedStep($traderOrder);
         $nextStep = $this->getDictionaryOfTraderOrder($traderOrder)
-            ->getNextStepOf($lastCompletedStep->step);
+            ->getNextStepOf($lastCompletedStep);
 
         WebhookEvent::fire($financingOrder->company, WebhookType::OrderUpdates, [
             'order_id' => $financingOrder->id,
@@ -40,7 +40,7 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
                 'trading_id' => $traderOrder->id,
                 'trading_reference' => $traderOrder->reference,
                 'current_trading_step' => $nextStep?->step,
-                'completed_murabaha_step' => $lastCompletedStep?->step,
+                'completed_murabaha_step' => $lastCompletedStep,
                 'products' => $this->resolveProducts($traderOrder),
                 'cert_document_url' => get_file_url($certDocumentMediaFile),
                 'ownership_document_url' => get_file_url($ownershipDocumentMediaFile),
@@ -49,12 +49,11 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
         ]);
     }
 
-    protected function getCompletedStepOfTrader($provider)
+    protected function getCompletedStepOfTrader($provider): string
     {
         return match ($provider) {
             Trader::Bursam => BursamMurabhaStep::PurchasingCommodity,
-            Trader::Dmcc => DmccMurabhaStep::PurchasingCommodity,
-            Trader::FakeDmcc => DmccMurabhaStep::PurchasingCommodity,
+            Trader::Dmcc, Trader::FakeDmcc => DmccMurabhaStep::PurchasingCommodity,
         };
     }
 }
