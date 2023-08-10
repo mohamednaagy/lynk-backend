@@ -244,8 +244,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function latestTraderOrder(): HasOne
     {
-        return $this->hasOne(TraderOrder::class, 'financing_order_id', 'id')
-            ->latest();
+        return $this->hasOne(TraderOrder::class, 'financing_order_id', 'id')->latestOfMany();
     }
 
     public function initiatedTraderOrders(): HasMany
