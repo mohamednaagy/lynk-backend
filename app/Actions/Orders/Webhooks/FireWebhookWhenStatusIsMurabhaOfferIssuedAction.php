@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Actions\Orders;
+namespace App\Actions\Orders\Webhooks;
 
-use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsMurabhaOfferIssued;
+use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsMurabhaOfferIssued;
 use App\Enums\WebhookType;
 use App\Models\FinancingOrder;
 use App\Support\Webhooks\Facades\WebhookEvent;

@@ -7,6 +7,8 @@ use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
+use App\Support\DataTransferObjects\CommodityProductDto;
+use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -24,6 +26,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'version',
         'failure_reason',
         'purchasing_commodity_information',
+        'products',
         'status',
         'is_cancellable',
         'history',
@@ -85,6 +88,15 @@ class TraderOrderTransformer extends TransformerAbstract
         $historiesActions = $traderOrder->traderHistories()->pluck('action')->toArray();
 
         return $this->collection([$historiesActions], new TraderHistoryTransformer($traderOrder, $traderMurabhaSteps));
+    }
+
+    public function includeProducts(TraderOrder $traderOrder): Collection
+    {
+        $products = collect($traderOrder->products)->map(
+            fn ($product) => CommodityProductDto::fromArray($product)
+        );
+
+        return $this->collection($products, new ProductTransformer());
     }
 
     public function includeStatus(TraderOrder $traderOrder): Primitive

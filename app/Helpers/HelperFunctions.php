@@ -2,8 +2,10 @@
 
 use App\Enums\BursamMurabhaStep;
 use App\Enums\DmccMurabhaStep;
+use App\Models\Media;
 use Illuminate\Support\Facades\Config;
 use Modules\Grantify\Facades\Grantify;
+use Spatie\MediaLibrary\HasMedia;
 
 if (! function_exists('validate_said')) {
     function validate_said($id_number)
@@ -83,6 +85,17 @@ if (! function_exists('get_file_url')) {
     {
         if ($media) {
             return route('api.v1.media.download', ['media' => $media->uuid]);
+        }
+
+        return null;
+    }
+}
+
+if (! function_exists('get_media_of_model')) {
+    function get_media_of_model($model, $mediaCollection): ?Media
+    {
+        if ($model instanceof HasMedia) {
+            return $model->getFirstMedia($mediaCollection);
         }
 
         return null;

@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Enums\TraderOrderStatus;
 use App\Events\OrderCancelled;
 use App\Models\TraderOrder;
@@ -29,17 +30,11 @@ class TraderOrderObserver
         }
     }
 
-    protected function takeActionsIfStatusWasChanged(TraderOrder $traderOrder)
+    protected function takeActionsIfStatusWasChanged(TraderOrder $traderOrder): void
     {
-        $dispatchables = match ($traderOrder->status->value) {
-            TraderOrderStatus::Cancelled => [
-                OrderCancelled::class,
-            ],
-            default => []
-        };
-
-        foreach ($dispatchables as $dispatchable) {
-            $dispatchable::dispatch($traderOrder);
+        if ($traderOrder->status->is(TraderOrderStatus::Cancelled)) {
+            OrderCancelled::dispatch($traderOrder);
+            app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
         }
     }
 
