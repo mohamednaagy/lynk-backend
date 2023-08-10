@@ -2,11 +2,12 @@
 
 namespace App\Observers\Traits;
 
-use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommodityPurchased;
-use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommoditySoldToCustomer;
-use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsMurabhaOfferIssued;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
+use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCommodityPurchased;
+use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCommoditySoldToCustomer;
+use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsMurabhaOfferIssued;
+use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsMurabhaSaleCompleted;
 use App\Enums\BursamMurabhaStep;
 use App\Enums\DmccMurabhaStep;
 use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
@@ -83,7 +84,10 @@ trait ObserverHelper
                     SendSmsWhenStatusIsCommoditySoldToCustomer::class,
                     FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
                 ],
-                BursamMurabhaStep::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
+                BursamMurabhaStep::MurabahaSaleCompleted => [
+                    SendSmsWhenStatusIsMurabahaSaleCompleted::class,
+                    FireWebhookWhenStatusIsMurabhaSaleCompleted::class,
+                ],
                 BursamMurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
                 default => []
             },

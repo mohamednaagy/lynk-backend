@@ -62,6 +62,11 @@ class CommodityProductDto
         return $this->previous_owner;
     }
 
+    public function getCurrency(): string
+    {
+        return $this->currency;
+    }
+
     public static function fromArray(array $data): CommodityProductDto
     {
         return new static(
