@@ -37,7 +37,7 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
                 'trading_id' => $traderOrder->id,
                 'trading_reference' => $traderOrder->reference,
                 'current_trading_step' => 'cancelled',
-                'completed_murabaha_step' => $lastCompletedStep?->step,
+                'completed_murabaha_step' => $this->getUiStepName($lastCompletedStep?->step),
                 'warranty_document_url' => get_file_url($documentMediaFile),
             ],
             'updated_at' => $this->getFormattedDateTime($traderOrder),
@@ -48,8 +48,7 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
     {
         return match ($provider) {
             Trader::Bursam => BursamMurabhaStep::MurabahaSaleCompleted,
-            Trader::Dmcc => DmccMurabhaStep::MurabahaSaleCompleted,
-            Trader::FakeDmcc => DmccMurabhaStep::MurabahaSaleCompleted,
+            Trader::Dmcc, Trader::FakeDmcc => DmccMurabhaStep::MurabahaSaleCompleted,
         };
     }
 }

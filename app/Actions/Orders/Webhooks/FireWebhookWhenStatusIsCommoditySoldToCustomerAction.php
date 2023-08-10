@@ -37,8 +37,8 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
                 'trading_information' => [
                     'trading_id' => $traderOrder->id,
                     'trading_reference' => $traderOrder->reference,
-                    'current_trading_step' => $nextStep?->step,
-                    'completed_murabaha_step' => $lastCompletedStep,
+                    'current_trading_step' => $this->getUiStepName($nextStep?->step),
+                    'completed_murabaha_step' => $this->getUiStepName($lastCompletedStep),
                     'borrower_document_url' => get_file_url($documentMediaFile),
                 ],
                 'updated_at' => $this->getFormattedDateTime($lastHistory),
