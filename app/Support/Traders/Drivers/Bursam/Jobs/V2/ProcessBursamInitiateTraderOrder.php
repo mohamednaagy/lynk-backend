@@ -38,9 +38,10 @@ class ProcessBursamInitiateTraderOrder implements ShouldQueue
                 $initiateTraderOrder->handle($this->financingOrder->id);
             } catch (OrderAlreadyHasActiveTraderOrderException $exception) {
                 //
-            } finally {
-                return Command::SUCCESS;
             }
+
+            return Command::SUCCESS;
+
         });
     }
 }
