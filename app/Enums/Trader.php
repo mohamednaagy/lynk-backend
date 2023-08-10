@@ -6,9 +6,9 @@ use BenSampo\Enum\Enum;
 
 final class Trader extends Enum
 {
-    const Bursam = 'Bursam';
+    const Bursam = 'bursam';
 
-    const Dmcc = 'Dmcc';
+    const Dmcc = 'dmcc';
 
-    const FakeDmcc = 'FakeDmcc';
+    const FakeDmcc = 'fake';
 }

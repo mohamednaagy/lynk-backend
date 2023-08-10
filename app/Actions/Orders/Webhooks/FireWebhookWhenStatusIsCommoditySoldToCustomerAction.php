@@ -23,7 +23,7 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
         $lastHistory = $this->getTraderOrderLastHistory($traderOrder);
         $lastCompletedStep = $this->getCompletedStep($traderOrder);
         $nextStep = $this->getDictionaryOfTraderOrder($traderOrder)
-            ->getNextStepOf($lastCompletedStep?->step);
+            ->getNextStepOf($lastCompletedStep);
 
         WebhookEvent::fire(
             $financingOrder->company,
@@ -38,7 +38,7 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
                     'trading_id' => $traderOrder->id,
                     'trading_reference' => $traderOrder->reference,
                     'current_trading_step' => $nextStep?->step,
-                    'completed_murabaha_step' => $lastCompletedStep?->step,
+                    'completed_murabaha_step' => $lastCompletedStep,
                     'borrower_document_url' => get_file_url($documentMediaFile),
                 ],
                 'updated_at' => $this->getFormattedDateTime($lastHistory),
@@ -50,8 +50,7 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
     {
         return match ($provider) {
             Trader::Bursam => BursamMurabhaStep::CommoditySoldToCustomer,
-            Trader::Dmcc => DmccMurabhaStep::CommoditySoldToCustomer,
-            Trader::FakeDmcc => DmccMurabhaStep::CommoditySoldToCustomer,
+            Trader::Dmcc, Trader::FakeDmcc => DmccMurabhaStep::CommoditySoldToCustomer,
         };
     }
 }

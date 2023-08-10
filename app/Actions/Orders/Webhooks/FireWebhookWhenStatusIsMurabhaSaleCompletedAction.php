@@ -39,7 +39,7 @@ class FireWebhookWhenStatusIsMurabhaSaleCompletedAction implements FireWebhookWh
                 'trading_id' => $traderOrder->id,
                 'trading_reference' => $traderOrder->reference,
                 'current_trading_step' => 'completed',
-                'completed_murabaha_step' => $lastCompletedStep?->step,
+                'completed_murabaha_step' => $lastCompletedStep,
                 'signed_wakala_document_url' => get_file_url($wakalaDocumentMediaFile),
                 'warranty_document_url' => get_file_url($documentMediaFile),
             ],
@@ -51,8 +51,7 @@ class FireWebhookWhenStatusIsMurabhaSaleCompletedAction implements FireWebhookWh
     {
         return match ($provider) {
             Trader::Bursam => BursamMurabhaStep::MurabahaSaleCompleted,
-            Trader::Dmcc => DmccMurabhaStep::MurabahaSaleCompleted,
-            Trader::FakeDmcc => DmccMurabhaStep::MurabahaSaleCompleted,
+            Trader::Dmcc, Trader::FakeDmcc => DmccMurabhaStep::MurabahaSaleCompleted,
         };
     }
 }
