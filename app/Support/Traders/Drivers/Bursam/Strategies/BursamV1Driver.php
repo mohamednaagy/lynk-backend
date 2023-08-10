@@ -66,6 +66,7 @@ class BursamV1Driver implements TraderInterface
      */
     public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
     {
+        /** @var TraderOrder $traderOrder */
         $traderOrder = $this->getOrInitiateTraderOrder($financingOrder);
         $productCode = $this->getUnusedProductCode();
 
@@ -114,10 +115,6 @@ class BursamV1Driver implements TraderInterface
         $traderOrder->update([
             'status' => TraderOrderStatus::InProgress,
             'product_code' => $productCode,
-        ]);
-
-        $financingOrder->update([
-            'status' => FinancingOrderStatus::InProgress,
         ]);
 
         return $traderOrder;
@@ -601,7 +598,7 @@ class BursamV1Driver implements TraderInterface
             'status' => TraderOrderStatus::PendingCancellation,
         ]);
 
-        ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id);
+        ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id, TraderOrderCancelReason::Manual);
 
         return true;
     }
