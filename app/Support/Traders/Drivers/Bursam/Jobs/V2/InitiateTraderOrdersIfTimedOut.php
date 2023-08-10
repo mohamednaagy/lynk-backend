@@ -5,11 +5,13 @@ namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Config;
 
 class InitiateTraderOrdersIfTimedOut implements ShouldQueue
 {
@@ -32,13 +34,21 @@ class InitiateTraderOrdersIfTimedOut implements ShouldQueue
      */
     public function handle()
     {
+        $timezone = Config::get('services.bursam.timezone');
+        $marketOpeningStartTime = Config::get('services.bursam.market_opening_start_time');
+        $marketOpeningEndTime = Config::get('services.bursam.market_opening_end_time');
+
+        $marketOpeningStartTime = Carbon::parse($marketOpeningStartTime, $timezone)->subDay()->utc();
+
+        $marketOpeningEndTime = Carbon::parse($marketOpeningEndTime, $timezone)->utc();
+
         FinancingOrder::query()
-            ->whereHas('latestTraderOrder', function ($query) {
+            ->whereHas('latestTraderOrder', function ($query) use ($marketOpeningEndTime, $marketOpeningStartTime) {
                 return $query->where('status', TraderOrderStatus::Cancelled)
                     ->where('data->cancel_reason', TraderOrderCancelReason::MurabhaTimeout)
                     ->where('provider', 'bursam')
                     ->where('version', 'v2')
-                    ->whereDate('created_at', now()->toDateString());
+                    ->whereBetween('created_at', [$marketOpeningStartTime, $marketOpeningEndTime]);
             })
             ->select('id')
             ->lazyById()

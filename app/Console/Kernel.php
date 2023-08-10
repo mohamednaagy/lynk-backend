@@ -41,7 +41,7 @@ class Kernel extends ConsoleKernel
         $schedule->job(new InitiateTraderOrdersIfTimedOut())
             ->timezone($timezone)
             ->everyFiveMinutes()
-            ->between($marketOpeningStartTime, Carbon::parse($marketOpeningStartTime)->addMinutes(15));
+            ->between($marketOpeningStartTime, Carbon::parse($marketOpeningStartTime, $timezone)->addMinutes(15));
 
     }
 
