@@ -34,8 +34,6 @@ class OrderControllerShowTest extends TestCase
     private static User $managerHasPermissionToShowMethod;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -97,6 +95,7 @@ class OrderControllerShowTest extends TestCase
                         'phone_number',
                         'phone_number_formatted',
                         'is_approved',
+                        'is_cancellable',
                         'status_reason',
                         'can_be_completed',
                         'can_create_trader_order',
@@ -107,6 +106,7 @@ class OrderControllerShowTest extends TestCase
                         'trader_orders.provider',
                         'trader_orders.is_cancellable',
                         'trader_orders.history',
+                        'trader_orders.products',
                         'trader_orders.status',
                         'trader_orders.created_at',
                         'creator',
