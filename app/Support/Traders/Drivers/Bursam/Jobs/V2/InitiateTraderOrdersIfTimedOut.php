@@ -2,7 +2,6 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
-use App\Actions\Contracts\Orders\TraderOrders\InitiateTraderOrder;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
@@ -11,8 +10,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class InitiateTraderOrdersIfTimedOut implements ShouldQueue
 {
@@ -46,25 +43,7 @@ class InitiateTraderOrdersIfTimedOut implements ShouldQueue
             ->select('id')
             ->lazyById()
             ->each(function (FinancingOrder $financingOrder) {
-                try {
-                    dispatch(new class($financingOrder->id) implements ShouldQueue
-                    {
-                        use InteractsWithQueue, Queueable, SerializesModels;
-
-                        public function __construct(protected $financeOrderId)
-                        {
-                        }
-
-                        public function handle(InitiateTraderOrder $initiateTraderOrder)
-                        {
-                            DB::multipleTransaction(function () use ($initiateTraderOrder) {
-                                $initiateTraderOrder->handle($this->financeOrderId);
-                            });
-                        }
-                    });
-                } catch (\Throwable $th) {
-                    Log::error($th->getMessage(), ['exception' => $th]);
-                }
+                ProcessBursamInitiateTraderOrder::dispatch($financingOrder);
             });
     }
 }
