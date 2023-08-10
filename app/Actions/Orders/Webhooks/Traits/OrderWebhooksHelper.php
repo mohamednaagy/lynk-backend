@@ -2,6 +2,7 @@
 
 namespace App\Actions\Orders\Webhooks\Traits;
 
+use App\Enums\DmccMurabhaStep;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -43,5 +44,13 @@ trait OrderWebhooksHelper
             ];
         })
             ->toArray();
+    }
+
+    public function getUiStepName(string $step): string
+    {
+        return match ($step) {
+            DmccMurabhaStep::CommoditySoldToCustomer => 'borrower_ownership_certificate',
+            default => $step
+        };
     }
 }
