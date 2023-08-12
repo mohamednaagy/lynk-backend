@@ -128,7 +128,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         });
 
         Route::apiResource('orders', OrderController::class)
-            ->only('index', 'show');
+            ->only('index', 'show', 'store', 'update');
 
         Route::prefix('traders')->group(function () {
             Route::post('{trader}/users/{user}/resend-invitation', ResendInvitationToUser::class);
