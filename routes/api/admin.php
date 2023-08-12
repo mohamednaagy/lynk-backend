@@ -11,10 +11,12 @@ use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
+use App\Http\Controllers\Api\V1\Admin\FinancingOrders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\ExportOrders;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\LenderTransactionController;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\MakeOrderProceed;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\OrderController;
+use App\Http\Controllers\Api\V1\Admin\FinancingOrders\RejectOrder;
 use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
 use App\Http\Controllers\Api\V1\Admin\Lenders\ChargeLenderBalanceManually;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderBalance;
@@ -109,6 +111,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::prefix('orders/{order}')->group(function () {
             Route::post('trader-orders', [TraderOrderController::class, 'store']);
+            Route::put('approve', ApproveOrder::class);
+            Route::put('reject', RejectOrder::class);
             Route::post('retry', RetryProceedOrder::class);
             Route::post('complete', CompleteOrder::class);
             Route::put('/cancel', CancelFinancingOrder::class);
