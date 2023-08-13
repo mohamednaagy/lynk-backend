@@ -67,7 +67,7 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 
                     $this->delete();
                 } else {
-                    logs()->debug('TraderException-0', method_exists($exception, 'getContext') ? $exception->getContext() : []);
+                    logs()->debug('TraderException-1', method_exists($exception, 'getContext') ? $exception->getContext() : []);
                     throw $exception;
                 }
             }
@@ -76,7 +76,7 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 
     public function failed($exception)
     {
-        logs()->debug('failed-exc');
+        logs()->debug('TraderException-5', method_exists($exception, 'getContext') ? $exception->getContext() : []);
         if ($exception instanceof TraderException) {
             DB::transaction(function () use ($exception) {
                 $traderOrder = TraderOrder::query()
