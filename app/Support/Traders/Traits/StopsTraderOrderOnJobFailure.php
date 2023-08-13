@@ -7,7 +7,7 @@ use App\Models\TraderOrder;
 
 trait StopsTraderOrderOnJobFailure
 {
-    public function failed($exception)
+    public function failed()
     {
         $traderOrder = null;
 
