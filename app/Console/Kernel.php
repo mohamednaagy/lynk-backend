@@ -21,12 +21,14 @@ class Kernel extends ConsoleKernel
         $schedule->job(new ProcessFinancingOrders())
             ->when(is_bursam_service_available())
             ->everyMinute()
-            ->withoutOverlapping();
+            ->withoutOverlapping()
+            ->onOneServer();
 
         $schedule->job(new ProcessDmccNotifications())
             ->when(is_bursam_service_available())
             ->everyMinute()
-            ->withoutOverlapping();
+            ->withoutOverlapping()
+            ->onOneServer();
 
         $timezone = Config::get('services.bursam.timezone');
         $marketOpeningStartTime = Config::get('services.bursam.market_opening_start_time');
@@ -35,14 +37,15 @@ class Kernel extends ConsoleKernel
 
         $schedule->job(new ProcessDailySellingPendingCommodityToMarket())
             ->timezone($timezone)
-            ->everyFiveMinutes()
-            ->between($sellingCommodityStartTime, $sellingCommodityEndTime);
+            ->everyTwoMinutes()
+            ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
+            ->onOneServer();
 
         $schedule->job(new InitiateTraderOrdersIfTimedOut())
             ->timezone($timezone)
-            ->everyFiveMinutes()
-            ->between($marketOpeningStartTime, Carbon::parse($marketOpeningStartTime, $timezone)->addMinutes(15));
-
+            ->everyTwoMinutes()
+            ->between($marketOpeningStartTime, Carbon::parse($marketOpeningStartTime, $timezone)->addMinutes(15))
+            ->onOneServer();
     }
 
     /**
