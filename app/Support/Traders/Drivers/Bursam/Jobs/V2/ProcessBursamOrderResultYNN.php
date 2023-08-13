@@ -25,6 +25,13 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 10;
+
+    /**
      * Create a new job instance.
      *
      * @return void
@@ -66,7 +73,7 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 
                     $this->delete();
                 } else {
-                    logs()->debug('TraderException-1', method_exists($exception, 'getContext') ? $exception->getContext() : []);
+                    logs()->debug('TraderException-2', method_exists($exception, 'getContext') ? $exception->getContext() : []);
                     throw $exception;
                 }
             }
@@ -75,28 +82,28 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 
     public function failed($exception)
     {
-        logs()->debug('TraderException-5', method_exists($exception, 'getContext') ? $exception->getContext() : [$exception->getMessage()]);
-        // if ($exception instanceof TraderException) {
-        //     DB::transaction(function () use ($exception) {
-        //         $traderOrder = TraderOrder::query()
-        //             ->lockForUpdate()
-        //             ->find($this->traderOrderId);
+        logs()->debug('TraderException-6', method_exists($exception, 'getContext') ? $exception->getContext() : [$exception->getMessage()]);
+        if ($exception instanceof TraderException) {
+            DB::transaction(function () use ($exception) {
+                $traderOrder = TraderOrder::query()
+                    ->lockForUpdate()
+                    ->find($this->traderOrderId);
 
-        //         if ($traderOrder === null) {
-        //             return;
-        //         }
+                if ($traderOrder === null) {
+                    return;
+                }
 
-        //         $traderOrder->order->update([
-        //             'status' => FinancingOrderStatus::TradingFailure,
-        //         ]);
+                $traderOrder->order->update([
+                    'status' => FinancingOrderStatus::TradingFailure,
+                ]);
 
-        //         $traderOrder->update([
-        //             'status' => TraderOrderStatus::Cancelled,
-        //             'failure_reason' => $exception->getContext('failure_reason'),
-        //             'cancel_reason' => TraderOrderCancelReason::FailureToPurchase,
-        //         ]);
-        //     });
-        // }
+                $traderOrder->update([
+                    'status' => TraderOrderStatus::Cancelled,
+                    'failure_reason' => $exception->getContext('failure_reason'),
+                    'cancel_reason' => TraderOrderCancelReason::FailureToPurchase,
+                ]);
+            });
+        }
     }
 
     public function middleware(): array
@@ -114,8 +121,8 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
     //     return now()->addMinutes(30);
     // }
 
-    // public function backoff(): int
-    // {
-    //     return config('trader.providers.bursam.purchasing_commodity_job_backoff_time');
-    // }
+    public function backoff(): int
+    {
+        return config('trader.providers.bursam.purchasing_commodity_job_backoff_time');
+    }
 }
