@@ -42,6 +42,7 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
     public function handle()
     {
         DB::transaction(function () {
+            logs()->debug('Test', ['hi0']);
             $traderOrder = TraderOrder::query()
                 ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::Initiated])
                 ->lockForUpdate()
@@ -51,9 +52,11 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
                 return;
             }
 
+            logs()->debug('Test', ['hi']);
             try {
                 Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
             } catch (TraderException $exception) {
+                logs()->debug('Test', [$exception]);
                 if ($exception->getContext('failure_code') == TraderErrorCode::INSUFFICIENT_COMMODITY) {
                     $traderOrder->order->update([
                         'status' => FinancingOrderStatus::TradingFailure,
@@ -75,29 +78,27 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 
     public function failed($exception)
     {
-        if (! $exception instanceof TraderException) {
-            return;
+        if ($exception instanceof TraderException) {
+            DB::transaction(function () use ($exception) {
+                $traderOrder = TraderOrder::query()
+                    ->lockForUpdate()
+                    ->find($this->traderOrderId);
+
+                if ($traderOrder === null) {
+                    return;
+                }
+
+                $traderOrder->order->update([
+                    'status' => FinancingOrderStatus::TradingFailure,
+                ]);
+
+                $traderOrder->update([
+                    'status' => TraderOrderStatus::Cancelled,
+                    'failure_reason' => $exception->getContext('failure_reason'),
+                    'cancel_reason' => TraderOrderCancelReason::FailureToPurchase,
+                ]);
+            });
         }
-
-        DB::transaction(function () use ($exception) {
-            $traderOrder = TraderOrder::query()
-                ->lockForUpdate()
-                ->find($this->traderOrderId);
-
-            if ($traderOrder === null) {
-                return;
-            }
-
-            $traderOrder->order->update([
-                'status' => FinancingOrderStatus::TradingFailure,
-            ]);
-
-            $traderOrder->update([
-                'status' => TraderOrderStatus::Cancelled,
-                'failure_reason' => $exception->getContext('failure_reason'),
-                'cancel_reason' => TraderOrderCancelReason::FailureToPurchase,
-            ]);
-        });
     }
 
     public function middleware(): array
