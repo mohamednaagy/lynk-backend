@@ -42,7 +42,6 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
     public function handle()
     {
         DB::transaction(function () {
-            logs()->debug('Test', ['hi0']);
             $traderOrder = TraderOrder::query()
                 ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::Initiated])
                 ->lockForUpdate()
@@ -52,11 +51,9 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
                 return;
             }
 
-            logs()->debug('Test', ['hi']);
             try {
                 Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
             } catch (TraderException $exception) {
-                logs()->debug('TraderException-0', [$exception]);
                 if ($exception->getContext('failure_code') == TraderErrorCode::INSUFFICIENT_COMMODITY) {
                     $traderOrder->order->update([
                         'status' => FinancingOrderStatus::TradingFailure,
@@ -70,6 +67,7 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 
                     $this->delete();
                 } else {
+                    logs()->debug('TraderException-0');
                     throw $exception;
                 }
             }
@@ -78,7 +76,6 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 
     public function failed($exception)
     {
-        logs()->debug('failed-logs', [$exception]);
         if ($exception instanceof TraderException) {
             DB::transaction(function () use ($exception) {
                 $traderOrder = TraderOrder::query()
