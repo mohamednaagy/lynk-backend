@@ -4,10 +4,11 @@ namespace App\Support\Traders\Traits;
 
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
+use Illuminate\Support\Facades\Log;
 
 trait StopsTraderOrderOnJobFailure
 {
-    public function failed()
+    public function failed($exception)
     {
         $traderOrder = null;
 
@@ -24,5 +25,7 @@ trait StopsTraderOrderOnJobFailure
         $traderOrder->update([
             'status' => TraderOrderStatus::FailureToProgress,
         ]);
+
+        Log::error($exception->getMesage());
     }
 }
