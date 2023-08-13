@@ -2,20 +2,15 @@
 
 namespace App\Observers;
 
-use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommodityPurchased;
-use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsCommoditySoldToCustomer;
-use App\Actions\Contracts\Orders\FireWebhookWhenStatusIsMurabhaOfferIssued;
-use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
-use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
-use App\Enums\MurabhaStep;
-use App\Enums\TraderOrderStatus;
-use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
 use App\Models\TraderHistory;
-use App\Settings\Classes\GeneralSettings;
+use App\Observers\Traits\ObserverHelper;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\Facades\Trader;
 
 class TraderHistoryObserver
 {
+    use ObserverHelper;
+
     /**
      * Handle the TraderHistory "created" event.
      *
@@ -24,61 +19,31 @@ class TraderHistoryObserver
      *
      * @throws \Exception
      */
+    public bool $afterCommit = true;
+
     public function created(TraderHistory $traderHistory)
     {
-        $timeout = app(GeneralSettings::class)->trader_order_timeout;
+        $traderOrder = $traderHistory->traderOrder()
+            ->withLastHistoryAction()
+            ->first();
 
-        // some Order at last step so no next step I think  another mail content needed
+        Trader::driver($traderOrder->provider, $traderOrder->version)
+            ->dispatchJobForTransitioningFlow($traderOrder);
+
         $currentStepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderHistory->action);
+        $this->notifyAdminsAboutOrderStopped($traderHistory, $currentStepNode);
 
-        if (! $currentStepNode) {
-            return;
-        }
+        $currentCompletedStepNode = app(StepHistoriesDictionary::class)->getCompletedStepByHistory($traderHistory->action);
+        $this->fireWebhookWhenStatusIsMurabhaOfferIssued($traderOrder, $currentCompletedStepNode);
 
-        $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($currentStepNode->step);
-
-        if ($nextStepNode) {
-            NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $traderHistory->action)
-                ->delay(now()->addMinutes($timeout));
-        }
-
-        if ($traderHistory->traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
-            return;
-        }
-
-        $stepNode = app(StepHistoriesDictionary::class)->getCompletedStepByHistory($traderHistory->action);
-
-        $financingOrder = $traderHistory->traderOrder->order;
-
-        if ($stepNode?->step === MurabhaStep::MurabhaOfferIssued) {
-            app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)->handle($financingOrder);
-
-            return;
-        }
-
-        if (empty($traderHistory->traderOrder->products)) {
-            return;
-        }
-
-        $actions = match ($stepNode?->step) {
-            MurabhaStep::CommoditySoldToCustomer => [
-                SendSmsWhenStatusIsCommoditySoldToCustomer::class,
-                FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
-            ],
-            MurabhaStep::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
-            MurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
-            default => []
-        };
-
-        foreach ($actions as $action) {
-            app($action)->handle($financingOrder, $traderHistory->traderOrder);
+        foreach ($this->getActionsOfProvider($traderOrder->provider, $currentCompletedStepNode) as $action) {
+            app($action)->handle($traderOrder->order, $traderHistory->traderOrder);
         }
     }
 
     /**
      * Handle the TraderHistory "updated" event.
      *
-     * @param  TraderHistory  $traderHistory
      * @return void
      */
     public function updated(TraderHistory $traderHistory)
@@ -89,7 +54,6 @@ class TraderHistoryObserver
     /**
      * Handle the TraderHistory "deleted" event.
      *
-     * @param  TraderHistory  $traderHistory
      * @return void
      */
     public function deleted(TraderHistory $traderHistory)
@@ -100,7 +64,6 @@ class TraderHistoryObserver
     /**
      * Handle the TraderHistory "restored" event.
      *
-     * @param  TraderHistory  $traderHistory
      * @return void
      */
     public function restored(TraderHistory $traderHistory)
@@ -111,7 +74,6 @@ class TraderHistoryObserver
     /**
      * Handle the TraderHistory "force deleted" event.
      *
-     * @param  TraderHistory  $traderHistory
      * @return void
      */
     public function forceDeleted(TraderHistory $traderHistory)

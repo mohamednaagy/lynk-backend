@@ -20,7 +20,13 @@ final class TraderOrderMediaCollection extends Enum
 
     const SellingCommodityToCustomer = 'selling_commodity_to_customer';
 
+    const BursamSellingCommodityToCustomer = 'bursam_selling_commodity_to_customer';
+
     const WarrantAmendmentExceptWarrantNo = 'warrant_amendment_except_warrant_no';
 
     const TtiHoldingCertificate = 'tti_holding_certificate';
+
+    const BursamTtiHoldingCertificate = 'bursam_tti_holding_certificate';
+
+    const ZatcaInvoice = 'trader_order_zatca_invoice';
 }

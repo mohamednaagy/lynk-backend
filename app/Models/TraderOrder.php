@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\Facades\Trader;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,6 +25,8 @@ use UnexpectedValueException;
 /**
  * @property mixed $reference
  * @property mixed $order
+ * @property mixed $provider
+ * @property mixed $version
  * @property TraderOrderStatus $status
  * @property Collection $traderHistories
  * @property Carbon $created_at
@@ -40,7 +44,10 @@ class TraderOrder extends Model implements HasMedia
         return [
             'id',
             'financing_order_id',
+            'mode',
+            'data',
             'provider',
+            'version',
             'status',
             'reference',
             'updated_at',
@@ -72,11 +79,19 @@ class TraderOrder extends Model implements HasMedia
         $this
             ->addMediaCollection(TraderOrderMediaCollection::SellingCommodityToCustomer)
             ->singleFile();
+        $this->addMediaCollection(TraderOrderMediaCollection::BursamSellingCommodityToCustomer)
+            ->singleFile();
         $this
             ->addMediaCollection(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo)
             ->singleFile();
         $this
             ->addMediaCollection(TraderOrderMediaCollection::TtiHoldingCertificate)
+            ->singleFile();
+
+        $this->addMediaCollection(TraderOrderMediaCollection::BursamTtiHoldingCertificate)
+            ->singleFile();
+
+        $this->addMediaCollection(TraderOrderMediaCollection::ZatcaInvoice)
             ->singleFile();
     }
 
@@ -90,48 +105,61 @@ class TraderOrder extends Model implements HasMedia
         return $this->hasMany(TraderHistory::class, 'trader_order_id', 'id');
     }
 
-    public function isCancellable(): bool
+    public function isCancellable(?string $area): bool
     {
         if ($this->status->isNot(TraderOrderStatus::InProgress)) {
             return false;
         }
 
-        $traderHistoryActions = $this->traderHistories->pluck('action')->toArray();
-
-        return ! count(array_intersect(FinancingOrderHistory::$notCancellableActions, $traderHistoryActions));
+        return Trader::driver($this->provider, $this->version)
+            ->isTraderOrderCancellable($this, $area);
     }
 
     public function checkOrderStepComplete(string $step): bool
     {
-        if (! array_key_exists($step, MurabhaStep::$stepToHistoriesDictionary)) {
-            throw new UnexpectedValueException('No mapping for this status');
+        $stepToHistoriesDictionary = trader_step_histories($this->provider, $this->version);
+
+        if (! array_key_exists($step, $stepToHistoriesDictionary)) {
+            throw new UnexpectedValueException('No mapping for this step');
         }
 
         return (bool) $this->traderHistories()
-            ->where('action', end(MurabhaStep::$stepToHistoriesDictionary[$step]))
+            ->where('action', end($stepToHistoriesDictionary[$step]))
             ->first();
     }
 
-    public function doesLastActionMatchWith($action): bool
+    public function doesLastActionMatchWith($actions): bool
     {
-        if (! in_array($action, FinancingOrderHistory::getValues())) {
-            throw new UnexpectedValueException('invalid Action');
+        if (! is_array($actions)) {
+            $actions = [$actions];
+        }
+
+        foreach ($actions as $action) {
+            if (! in_array($action, FinancingOrderHistory::getValues())) {
+                throw new UnexpectedValueException('invalid Action');
+            }
         }
 
         $lastAction = $this->traderHistories()->latest('id')->first();
 
-        return $lastAction->action == $action;
+        return in_array($lastAction->action, $actions);
     }
 
-    public function checkOrderHistoryAction($action): bool
+    public function checkOrderHistoryAction($actions): bool
     {
-        if (! in_array($action, FinancingOrderHistory::getValues())) {
-            throw new UnexpectedValueException('invalid Action');
+        if (! is_array($actions)) {
+            $actions = [$actions];
         }
 
-        return (bool) $this->traderHistories
-            ->where('action', $action)
-            ->first();
+        foreach ($actions as $action) {
+            if (! in_array($action, FinancingOrderHistory::getValues())) {
+                throw new UnexpectedValueException(sprintf('Invalid action %s', $action));
+            }
+        }
+
+        return $this->traderHistories()
+            ->whereIn('action', $actions)
+            ->exists();
     }
 
     public function scopeWithLastHistoryAction($query)
@@ -144,11 +172,11 @@ class TraderOrder extends Model implements HasMedia
         ]);
     }
 
-    protected function step(): Attribute
+    protected function currentStep(): Attribute
     {
         $lastAction = $this->traderHistories()->latest('id')->first();
 
-        $stepNode = app(StepHistoriesDictionary::class)->getStepByHistory($lastAction?->action);
+        $stepNode = (new StepHistoriesDictionary($this->provider, $this->version))->getStepByHistory($lastAction?->action);
 
         return new Attribute(
             get: fn () => $stepNode?->step,
@@ -182,5 +210,15 @@ class TraderOrder extends Model implements HasMedia
     public function scopeCompleted($query)
     {
         return $query->where('status', TraderOrderStatus::Completed);
+    }
+
+    public function isCommodityPurchased(): bool
+    {
+        $purchasingStepAccordingToTrader = match ($this->provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::PurchasingCommodity,
+            'bursam' => BursamMurabhaStep::PurchasingCommodity,
+        };
+
+        return $this->checkOrderStepComplete($purchasingStepAccordingToTrader);
     }
 }

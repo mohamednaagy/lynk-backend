@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
+use App\Actions\Contracts\Orders\BuildFinancingOrdersQuery;
 use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
-use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
-use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
-use App\Actions\Contracts\Wallets\DeductVatPercentage;
-use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\ErrorCode;
@@ -52,20 +49,18 @@ class OrderController extends Controller
         )->only('update');
     }
 
-    /**
-     * @param  Request  $request
-     * @param  GetPaginatedFinancingOrder  $getPaginatedOrders
-     * @return JsonResponse
-     */
-    public function index(Request $request, GetPaginatedFinancingOrder $getPaginatedOrders): JsonResponse
+    public function index(Request $request, BuildFinancingOrdersQuery $buildOrdersQuery): JsonResponse
     {
         if ($request->user()->hasRole(Role::LenderOrderCreator)) {
-            $getPaginatedOrders->setCreator($request->user());
+            $buildOrdersQuery->setCreator($request->user());
         }
 
-        $getPaginatedOrders->setCompany(tenant());
-
-        $financingOrders = $getPaginatedOrders->handle();
+        $financingOrders = $buildOrdersQuery->setCompany(tenant())
+            ->setRelations([
+                'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
+            ])
+            ->handle()
+            ->paginate();
 
         return fractal($financingOrders, new FinancingOrderTransformer())
             ->parseIncludes([
@@ -76,13 +71,11 @@ class OrderController extends Controller
                 'amount',
                 'selling_price',
                 'status_reason',
+                'current_step',
             ])->respond();
     }
 
     /**
-     * @param  FinancingOrder  $order
-     * @return JsonResponse
-     *
      * @throws AuthorizationException
      */
     public function show(FinancingOrder $order): JsonResponse
@@ -91,7 +84,7 @@ class OrderController extends Controller
 
         $order->load('creator', 'approver');
 
-        return fractal($order, new FinancingOrderTransformer())
+        return fractal($order, (new FinancingOrderTransformer())->setArea(Area::Lender))
             ->parseIncludes([
                 'id',
                 'status',
@@ -106,50 +99,46 @@ class OrderController extends Controller
                 'is_verification_required',
                 'is_updatable',
                 'is_approved',
+                'is_cancellable',
                 'can_be_completed',
+                'can_create_trader_order',
                 'payment_proof_url',
                 'status_reason',
                 'creator',
                 'approver',
+                'trader_orders.id',
+                'trader_orders.reference',
+                'trader_orders.failure_reason',
+                'trader_orders.is_cancellable',
+                'trader_orders.history',
+                'trader_orders.products',
+                'trader_orders.status',
+                'trader_orders.created_at',
                 'history',
             ])->respond();
     }
 
     /**
      * Handle the incoming request.
-     *
-     * @param  StoreOrderRequest  $request
-     * @param  CanCreateOrder  $canCreateOrder
-     * @param  CreateFinancingOrder  $createFinancingOrder
-     * @param  DeductOrderCreationFee  $deductOrderCreationFee
-     * @param  DeductVatPercentage  $deductVatPercentage
-     * @param  GenerateZatcaInvoice  $generateFatoura
-     * @return JsonResponse
      */
     public function store(
         StoreOrderRequest $request,
         CanCreateOrder $canCreateOrder,
-        CreateFinancingOrder $createFinancingOrder,
-        DeductOrderCreationFee $deductOrderCreationFee,
-        DeductVatPercentage $deductVatPercentage,
-        GenerateZatcaInvoice $generateFatoura
+        CreateFinancingOrder $createFinancingOrder
     ): JsonResponse {
         return DB::multipleTransaction(
             function () use (
                 $request,
                 $createFinancingOrder,
-                $deductOrderCreationFee,
-                $canCreateOrder,
-                $deductVatPercentage,
-                $generateFatoura
+                $canCreateOrder
             ) {
                 $company = tenant();
                 // throw exception is balance not enough
                 $canCreateOrder->handle($company);
 
-                $status = tenant()->does_order_require_approval
+                $status = $company->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval
-                    : FinancingOrderStatus::Approved;
+                    : FinancingOrderStatus::PendingTraderOrder;
 
                 $user = $request->user();
 
@@ -161,18 +150,9 @@ class OrderController extends Controller
                             'status' => $status,
                             'creator_id' => $user->id,
                             'creator_type' => $user->getMorphClass(),
-                            'approved_at' => $status === FinancingOrderStatus::Approved ? now() : null,
+                            'approved_at' => $status === FinancingOrderStatus::PendingApproval ? null : now(),
                         ]
                     )
-                );
-
-                // deduct the cost from the wallet
-                $creationFeeTransaction = $deductOrderCreationFee->handle($financingOrder);
-                $deductVatPercentage->handle($financingOrder, $creationFeeTransaction, $company);
-
-                $generateFatoura->handel(
-                    $financingOrder,
-                    creationFeeTransaction: $creationFeeTransaction
                 );
 
                 dispatch(new NotifyAdminsAboutOrderCreated($financingOrder, $user));
@@ -198,10 +178,6 @@ class OrderController extends Controller
     /**
      * Summary of update
      *
-     * @param  UpdateOrderRequest  $request
-     * @param  UpdateFinancingOrder  $updateFinancingOrder
-     * @param  FinancingOrder  $order
-     * @return JsonResponse
      *
      * @throws AuthorizationException
      */
@@ -218,7 +194,7 @@ class OrderController extends Controller
                 ErrorCode::ORDER_NOT_UPDATABLE
             );
         }
-        $financingOrder = $updateFinancingOrder->update($order, $request->validated());
+        $financingOrder = $updateFinancingOrder->handle($order, $request->validated());
 
         return fractal($financingOrder, new FinancingOrderTransformer())
             ->parseIncludes([

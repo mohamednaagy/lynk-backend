@@ -6,5 +6,5 @@ use App\Models\FinancingOrder;
 
 interface UpdateFinancingOrder
 {
-    public function update(FinancingOrder $financingOrder, array $data): FinancingOrder;
+    public function handle(FinancingOrder $financingOrder, array $data): FinancingOrder;
 }

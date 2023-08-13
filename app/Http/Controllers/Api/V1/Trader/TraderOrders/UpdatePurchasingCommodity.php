@@ -10,7 +10,7 @@ use App\Enums\MurabhaStep;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Trader\Orders\TraderOrders\UpdatePurchasingCommodityRequest;
-use App\Support\Traders\TraderHelperTrait;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use App\Transformers\TraderOrderTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -39,7 +39,7 @@ class UpdatePurchasingCommodity extends Controller
 
             app(HandlePurchasingCommodity::class)->handle($request, $financingOrder, $traderOrder);
 
-            return fractal($traderOrder, new TraderOrderTransformer())
+            return fractal($traderOrder, (new TraderOrderTransformer())->setArea(Area::Trader))
                 ->parseIncludes(
                     'purchasing_commodity_information',
                 )

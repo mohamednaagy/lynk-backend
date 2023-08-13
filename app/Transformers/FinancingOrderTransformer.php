@@ -2,10 +2,12 @@
 
 namespace App\Transformers;
 
-use App\Enums\FinancingOrderHistory;
+use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
+use App\Exceptions\TraderNotSupportedException;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use League\Fractal\Resource\Collection;
@@ -16,6 +18,8 @@ use League\Fractal\TransformerAbstract;
 class FinancingOrderTransformer extends TransformerAbstract
 {
     protected ?Company $company;
+
+    protected $area = null;
 
     public function __construct(Company $company = null)
     {
@@ -36,6 +40,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'selling_price',
         'is_verification_required',
         'is_updatable',
+        'is_cancellable',
         'is_approved',
         'status_reason',
         'creator',
@@ -44,6 +49,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'phone_number',
         'phone_number_formatted',
         'created_at',
+        'current_step',
         'history',
         'active_trader',
         'trader_orders',
@@ -88,7 +94,11 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCompanyName(FinancingOrder $financingOrder): Primitive
     {
-        return $this->primitive($this->company->name);
+        if ($this->company) {
+            return $this->primitive($this->company->name);
+        }
+
+        return $this->primitive($financingOrder->company->name);
     }
 
     public function includeReferenceNumber(FinancingOrder $financingOrder)
@@ -140,7 +150,15 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeIsUpdatable(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->status->is(FinancingOrderStatus::PendingApproval));
+        return $this->primitive(
+            $financingOrder->status->is(FinancingOrderStatus::PendingApproval)
+                || $financingOrder->status->is(FinancingOrderStatus::Rejected)
+        );
+    }
+
+    public function includeIsCancellable(FinancingOrder $financingOrder): Primitive
+    {
+        return $this->primitive($financingOrder->isCancellable($this->area));
     }
 
     public function includeIsVerificationRequired(FinancingOrder $financingOrder)
@@ -160,9 +178,24 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCreatedAt(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->created_at->format('Y-m-d h:i A'));
+        return $this->primitive(
+            $financingOrder->created_at->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i A')
+        );
     }
 
+    public function includeCurrentStep(FinancingOrder $financingOrder)
+    {
+        $step = $financingOrder->current_step;
+
+        return $this->primitive($step ? [
+            'value' => $step->value,
+            'description' => $step->description,
+        ] : null);
+    }
+
+    /**
+     * @throws TraderNotSupportedException
+     */
     public function includeHistory(FinancingOrder $financingOrder): Primitive|Collection
     {
         // TODO: handle not expired + cancelled cases or show all trading requests
@@ -178,19 +211,27 @@ class FinancingOrderTransformer extends TransformerAbstract
             return $this->primitive(null);
         }
 
-        return $this->collection(collect([
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-            FinancingOrderHistory::ContractSigned,
-            FinancingOrderHistory::ClientWakalaAccepted,
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-            FinancingOrderHistory::IssueMurabahaOffer,
-            FinancingOrderHistory::MurabahaSaleCompleted,
-        ]), new TraderHistoryTransformer($activeTraderOrder));
+        $traderMurabhaSteps = collect(get_murabha_steps($activeTraderOrder->provider, $activeTraderOrder->version))
+            ->except([
+                DmccMurabhaStep::TraderOrderCreated,
+                BursamMurabhaStep::TraderOrderCreated,
+                BursamMurabhaStep::TransferOwnershipToLender,
+            ])
+            ->keys()
+            ->flatten()
+            ->toArray();
+
+        $historiesActions = $activeTraderOrder->traderHistories()->pluck('action')->toArray();
+
+        return $this->collection([$historiesActions], new TraderHistoryTransformer($activeTraderOrder, $traderMurabhaSteps));
     }
 
     public function includeTraderOrders(FinancingOrder $financingOrder): Collection
     {
-        return $this->collection($financingOrder->traderOrders, new TraderOrderTransformer());
+        return $this->collection(
+            $financingOrder->traderOrders,
+            (new TraderOrderTransformer())->setArea($this->area)
+        );
     }
 
     public function includeActiveTrader(FinancingOrder $financingOrder): Primitive|Item
@@ -199,7 +240,10 @@ class FinancingOrderTransformer extends TransformerAbstract
             return $this->primitive(null);
         }
 
-        return $this->item($financingOrder->activeTraderOrder->first(), new TraderOrderTransformer());
+        return $this->item(
+            $financingOrder->activeTraderOrder->first(),
+            (new TraderOrderTransformer())->setArea($this->area)
+        );
     }
 
     public function includeTraderOrderHistory(FinancingOrder $financingOrder): Primitive
@@ -222,5 +266,12 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeCanCreateTraderOrder(FinancingOrder $financingOrder): Primitive
     {
         return $this->primitive($financingOrder->canCreateTraderOrder());
+    }
+
+    public function setArea($area)
+    {
+        $this->area = $area;
+
+        return $this;
     }
 }

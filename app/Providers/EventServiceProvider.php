@@ -2,10 +2,14 @@
 
 namespace App\Providers;
 
+use App\Events\OrderCancelled;
+use App\Listeners\RefundOrderCost;
 use App\Models\FinancingOrder;
 use App\Models\TraderHistory;
+use App\Models\TraderOrder;
 use App\Observers\FinancingOrderObserver;
 use App\Observers\TraderHistoryObserver;
+use App\Observers\TraderOrderObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -21,11 +25,15 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+        OrderCancelled::class => [
+            RefundOrderCost::class,
+        ],
     ];
 
     protected $observers = [
         FinancingOrder::class => [FinancingOrderObserver::class],
         TraderHistory::class => [TraderHistoryObserver::class],
+        TraderOrder::class => [TraderOrderObserver::class],
     ];
 
     /**

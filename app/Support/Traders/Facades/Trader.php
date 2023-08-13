@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Facade;
 use RuntimeException;
 
 /**
- * @method static driver(string $driver)
+ * @method static \App\Support\Traders\Contracts\TraderInterface driver(string $driver= null, string $version= null)
  */
 class Trader extends Facade
 {

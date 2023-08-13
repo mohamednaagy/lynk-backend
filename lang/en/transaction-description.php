@@ -5,4 +5,6 @@ return [
     'deposit_by_edaat' => 'Recharge balance by Sadad for invoice #:invoice_number',
     'vat_percentage' => 'VAT charges (:vat_percentage%) for order #:order_id',
     'manual_deposit' => 'Recharge the balance',
+    'refund_order_creation_fee' => 'Refund for trading request #:order_number',
+    'refund_vat_percentage' => 'Refund of VAT charges for trading request #:order_id',
 ];

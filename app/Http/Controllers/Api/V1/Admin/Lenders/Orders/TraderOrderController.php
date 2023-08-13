@@ -17,16 +17,13 @@ class TraderOrderController extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit, Action::Manage])
         )
             ->only(['store']);
     }
 
     /**
      * Handle the incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function store(
         StoreTradingRequest $request,
@@ -34,9 +31,25 @@ class TraderOrderController extends Controller
         int $order
     ): JsonResponse {
         return DB::transaction(function () use ($request, $createTraderOrder, $order) {
-            $createTraderOrder->handle($order, $request->validated());
+            $data = $request->validated();
+            $data['version'] = get_latest_version_of_trader($data['trader']);
+
+            if (! $this->isModeAvailableForTrader($data['trader'], $data['mode'], $data['version'])) {
+                return $this->errorResponse(__('error.trader_mode_not_supported'));
+            }
+
+            DB::transaction(function () use ($data, $order, $createTraderOrder) {
+                $createTraderOrder->handle($order, $data);
+            });
 
             return $this->successResponse();
         });
+    }
+
+    private function isModeAvailableForTrader($trader, $mode, $version): bool
+    {
+        $availableModes = config("trader.providers.{$trader}.modes.{$version}", []);
+
+        return in_array($mode, $availableModes);
     }
 }

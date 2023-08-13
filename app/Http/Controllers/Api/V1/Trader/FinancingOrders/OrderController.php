@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1\Trader\FinancingOrders;
 
+use App\Actions\Contracts\Orders\BuildFinancingOrdersQuery;
 use App\Actions\Contracts\Orders\GetOrder;
-use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
@@ -28,9 +28,13 @@ class OrderController extends Controller
     }
 
     public function index(
-        GetPaginatedFinancingOrder $getPaginatedFinancingOrder
+        BuildFinancingOrdersQuery $buildFinancingOrdersQuery
     ): JsonResponse {
-        return fractal($getPaginatedFinancingOrder->setCompany(tenant())->handle(), new FinancingOrderTransformer())
+        $financingOrders = $buildFinancingOrdersQuery->setCompany(tenant())
+            ->handle()
+            ->paginate();
+
+        return fractal($financingOrders, new FinancingOrderTransformer())
             ->parseIncludes([
                 'id',
                 'amount',
@@ -56,7 +60,7 @@ class OrderController extends Controller
             },
         ]);
 
-        return fractal($order, new FinancingOrderTransformer())
+        return fractal($order, (new FinancingOrderTransformer())->setArea(Area::Trader))
             ->parseIncludes([
                 'id',
                 'amount',
@@ -71,6 +75,7 @@ class OrderController extends Controller
                 'trader_orders.provider',
                 'trader_orders.is_cancellable',
                 'trader_orders.history',
+                'trader_orders.products',
                 'trader_orders.status',
                 'trader_orders.created_at',
             ])

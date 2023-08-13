@@ -45,6 +45,12 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
 
     const WaitingClientWakala = 20;
 
+    const CommoditySoldToMarket = 21;
+
+    const GetOwnershipToCustomerCertificate = 22;
+
+    const GetSellingToMarketCertificate = 23;
+
     public static array $notCancellableActions = [
         self::GetMurabahaPurchaseOfferDocument,
         self::AttachMpoDocument,

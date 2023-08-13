@@ -43,9 +43,6 @@ class FinancingOrderControllerShowTest extends TestCase
 
     private static Builder|Model $firstOrderInOtherCompany;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -62,9 +59,6 @@ class FinancingOrderControllerShowTest extends TestCase
         self::$firstOrderInOtherCompany = $this->createOrder(self::$secondCompany->id, self::$userLenderAdmin->id);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_show_order(): void
     {
         $this->withHeader('X-Company', self::$firstCompany->id)
@@ -75,9 +69,6 @@ class FinancingOrderControllerShowTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_can_show_order_in_same_company(): void
     {
         self::$firstOrderInSameCompany->load('creator', 'approver');
@@ -101,11 +92,20 @@ class FinancingOrderControllerShowTest extends TestCase
                         'is_verification_required',
                         'is_updatable',
                         'is_approved',
+                        'is_cancellable',
                         'can_be_completed',
+                        'can_create_trader_order',
                         'payment_proof_url',
                         'status_reason',
                         'creator',
                         'approver',
+                        'trader_orders.id',
+                        'trader_orders.reference',
+                        'trader_orders.failure_reason',
+                        'trader_orders.is_cancellable',
+                        'trader_orders.history',
+                        'trader_orders.status',
+                        'trader_orders.created_at',
                         'history',
                     ])
                     ->respond()
@@ -113,9 +113,6 @@ class FinancingOrderControllerShowTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_supervisor_user_can_show_order_in_same_company(): void
     {
         self::$firstOrderInSameCompany->load('creator', 'approver');
@@ -139,11 +136,20 @@ class FinancingOrderControllerShowTest extends TestCase
                         'is_verification_required',
                         'is_updatable',
                         'is_approved',
+                        'is_cancellable',
                         'can_be_completed',
+                        'can_create_trader_order',
                         'payment_proof_url',
                         'status_reason',
                         'creator',
                         'approver',
+                        'trader_orders.id',
+                        'trader_orders.reference',
+                        'trader_orders.failure_reason',
+                        'trader_orders.is_cancellable',
+                        'trader_orders.history',
+                        'trader_orders.status',
+                        'trader_orders.created_at',
                         'history',
                     ])
                     ->respond()
@@ -151,9 +157,6 @@ class FinancingOrderControllerShowTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_billing_user_cant_show_order_in_same_company(): void
     {
         $this->actingAs(self::$userLenderBilling)
@@ -162,9 +165,6 @@ class FinancingOrderControllerShowTest extends TestCase
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_order_creator_user_cant_show_order_not_owned_in_same_company(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
@@ -173,9 +173,6 @@ class FinancingOrderControllerShowTest extends TestCase
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_order_creator_user_can_show_order_owned_in_same_company(): void
     {
         self::$thirdOrderInSameCompany->load('creator', 'approver');
@@ -199,11 +196,20 @@ class FinancingOrderControllerShowTest extends TestCase
                         'is_verification_required',
                         'is_updatable',
                         'is_approved',
+                        'is_cancellable',
                         'can_be_completed',
+                        'can_create_trader_order',
                         'payment_proof_url',
                         'status_reason',
                         'creator',
                         'approver',
+                        'trader_orders.id',
+                        'trader_orders.reference',
+                        'trader_orders.failure_reason',
+                        'trader_orders.is_cancellable',
+                        'trader_orders.history',
+                        'trader_orders.status',
+                        'trader_orders.created_at',
                         'history',
                     ])
                     ->respond()

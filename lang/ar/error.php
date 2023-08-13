@@ -19,6 +19,7 @@ return [
     'invalid_operator_tcn' => 'معامل TCN غير صحيح',
     'no_enough_balance' => 'لا يوجد رصيد كافي',
     'order_status_doesnt_follow_sequence' => 'حالة الطلب التمويلي لا يمكن تغييرها لأنها لا تتبع التسلسل الصحيح',
+    'order_require_client_verification' => 'لا يمكنك المتابعة لأن الطلب يتطلب التحقق من العميل',
     'order_cannot_be_updated' => 'لا يمكن تعديل الطلب إذا كانت الحالة '.FinancingOrderStatus::joinDescription(FinancingOrderStatus::$allowedToUpdateStatuses),
     'webhook_type_not_supported' => 'هذا النوع غير مدعوم',
     'must_verify_email' => 'يجب عليك التحقق من البريد الإلكتروني',
@@ -31,5 +32,6 @@ return [
     'trader_not_supported' => 'هذه الشركة غير مدعومة',
     'order_is_already_completed' => 'الطلب مكتمل مسبقا',
     'order_already_has_active_trader_order' => 'هناك طلب قيد التنفيذ بالفعل',
-
+    'commodity_market_is_unavailable' => 'سوق السلع غير متاح فى الوقت الحالي.',
+    'trader_mode_not_supported' => 'لا يمكن إنشاء طلب باستخدام الوضع المعطى',
 ];

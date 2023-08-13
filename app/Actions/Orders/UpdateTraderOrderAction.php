@@ -10,16 +10,16 @@ class UpdateTraderOrderAction implements UpdateTraderOrder
 {
     public function handle(TraderOrder $traderOrder, array $data): TraderOrder
     {
-        $products = Arr::only(
+        $traderOrder->update(Arr::only(
             $data,
             [
                 'products',
                 'exchange_rate',
                 'auto_generate_financing_institution_certificate',
+                'mode',
+                'reference',
             ]
-        );
-
-        $traderOrder->update($products);
+        ));
 
         return $traderOrder;
     }

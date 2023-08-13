@@ -2,14 +2,11 @@
 
 namespace App\Jobs\General;
 
-use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
-use App\Jobs\Dmcc\ProcessDmccMpoOrder;
-use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
-use App\Jobs\Dmcc\ProcessDmccSellingCommodityToCustomerOrder;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -21,19 +18,30 @@ class ProcessFinancingOrders implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    protected array $providersWithVersions = [
+        [
+            'provider' => 'dmcc',
+            'versions' => ['v1'],
+        ],
+        [
+            'provider' => 'fake',
+            'versions' => ['v1'],
+        ],
+        [
+            'provider' => 'bursam',
+            'versions' => ['v2'],
+        ],
+    ];
+
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
-        $whiteListedProviders = ['dmcc', 'fake'];
-
         FinancingOrder::query()
             ->where('status', FinancingOrderStatus::Approved)
-            ->withCount(['traderOrders' => function ($query) use ($whiteListedProviders) {
-                $query->whereIn('provider', $whiteListedProviders)
+            ->withCount(['traderOrders' => function ($query) {
+                $query->where($this->scopeToProvidersWithVersionsClosure())
                     ->whereIn('status', [
                         TraderOrderStatus::InProgress,
                     ]);
@@ -47,19 +55,43 @@ class ProcessFinancingOrders implements ShouldQueue
 
         TraderOrder::query()
             ->withLastHistoryAction()
-            ->whereIn('provider', $whiteListedProviders)
+            ->where($this->scopeToProvidersWithVersionsClosure())
             ->whereIn('status', [
                 TraderOrderStatus::InProgress,
             ])->chunk(10, function ($traderOrderCollection) {
                 $traderOrderCollection->each(function (TraderOrder $traderOrder) {
-                    match ((int) $traderOrder->last_history_action) {
-                        FinancingOrderHistory::RespondPtp => ProcessDmccRespondedToPtpOrder::dispatch($traderOrder->id),
-                        FinancingOrderHistory::ContractSigned => ProcessAskClientForWakala::dispatch($traderOrder->id),
-                        FinancingOrderHistory::ClientWakalaAccepted => ProcessDmccSellingCommodityToCustomerOrder::dispatch($traderOrder->id),
-                        FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessDmccMpoOrder::dispatch($traderOrder->id),
-                        default => null,
-                    };
+                    Trader::driver($traderOrder->provider, $traderOrder->version)
+                        ->dispatchJobForTransitioningFlow($traderOrder);
                 });
             });
+    }
+
+    protected function scopeToProvidersWithVersionsClosure(): \Closure
+    {
+        return function ($query) {
+            $isFirstLoopComplete = false;
+
+            foreach ($this->providersWithVersions as $providerWithVersions) {
+                $whereClosure = $this->scopeToProviderAndVersionsClosure(
+                    $providerWithVersions['provider'],
+                    $providerWithVersions['versions']
+                );
+
+                if ($isFirstLoopComplete) {
+                    $query->orWhere($whereClosure);
+                } else {
+                    $query->where($whereClosure);
+                    $isFirstLoopComplete = true;
+                }
+            }
+
+            return $query;
+        };
+    }
+
+    protected function scopeToProviderAndVersionsClosure($provider, $verions): \Closure
+    {
+        return fn ($query) => $query->where('provider', $provider)
+            ->whereIn('version', $verions);
     }
 }

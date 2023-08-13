@@ -5,7 +5,7 @@ namespace App\Actions\Clients;
 use App\Actions\Contracts\Clients\AcceptClientWakala;
 use App\Enums\FinancingOrderHistory;
 use App\Models\TraderOrder;
-use App\Support\Traders\TraderHelperTrait;
+use App\Support\Traders\Traits\TraderHelperTrait;
 
 class AcceptClientWakalaAction implements AcceptClientWakala
 {

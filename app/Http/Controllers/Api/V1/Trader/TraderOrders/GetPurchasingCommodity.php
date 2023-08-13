@@ -24,7 +24,7 @@ class GetPurchasingCommodity extends Controller
         int $order,
         TraderOrder $traderOrder
     ): JsonResponse {
-        return fractal($traderOrder, new TraderOrderTransformer())
+        return fractal($traderOrder, (new TraderOrderTransformer())->setArea(Area::Trader))
             ->parseIncludes(
                 'purchasing_commodity_information',
             )->respond();

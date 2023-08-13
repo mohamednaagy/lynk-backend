@@ -6,11 +6,14 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Enums\TransactionReason;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Http\Request;
 use Modules\Otpify\Contracts\Otpifiable;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
@@ -71,6 +74,26 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'amount' => MoneyStringCast::class.':currency',
         'selling_price' => MoneyStringCast::class.':currency',
     ];
+
+    protected function currentStep(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $traderOrder = $this->activeTraderOrder->first();
+
+                if (is_null($traderOrder) || is_null($traderOrder->last_history_action)) {
+                    return null;
+                }
+
+                $currentStepNode = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+                    ->getStepByHistory($traderOrder->last_history_action);
+
+                $murabhaStepEnum = get_murabha_step_enum($traderOrder->provider);
+
+                return $murabhaStepEnum::fromValue($currentStepNode->step);
+            }
+        );
+    }
 
     protected function isUpdatable(): Attribute
     {
@@ -160,9 +183,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     /**
      * Check if this user requires verifying by OTP based on role.
-     *
-     * @param  Request  $request
-     * @return bool
      */
     public function doesRequireVerifyingByOtp(Request $request): bool
     {
@@ -215,17 +235,30 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         );
     }
 
-    public function activeTraderOrder()
+    public function activeTraderOrder(): HasMany
     {
         return $this->traderOrders()
             ->where('status', TraderOrderStatus::InProgress)
             ->latest();
     }
 
+    public function latestTraderOrder(): HasOne
+    {
+        return $this->hasOne(TraderOrder::class, 'financing_order_id', 'id')->latestOfMany();
+    }
+
+    public function initiatedTraderOrders(): HasMany
+    {
+        return $this->traderOrders()
+            ->where('status', TraderOrderStatus::Initiated)
+            ->latest();
+    }
+
     public function canBeCompleted()
     {
         return $this->traderOrders()->completed()->exists()
-            && $this->status->isNot(FinancingOrderStatus::Completed);
+            && $this->status->isNot(FinancingOrderStatus::Completed)
+            && $this->status->isNot(FinancingOrderStatus::Cancelled);
     }
 
     public function cantBeCompleted()
@@ -235,12 +268,45 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function canCreateTraderOrder()
     {
-        $doesNotHaveInProgressOrder = ! $this->traderOrders()
-            ->where('status', TraderOrderStatus::InProgress)
-            ->exists();
+        $doesNotHaveInActiveOrder = $this->traderOrders()
+            ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::PendingCancellation, TraderOrderStatus::Completed])
+            ->doesntExist();
 
         $orderIsNotCompleted = $this->status->isNot(FinancingOrderStatus::Completed);
+        $financingOrderIsNotCancelled = $this->status->isNot(FinancingOrderStatus::Cancelled);
+        $financingOrderIsNotPendingCancelled = $this->status->isNot(FinancingOrderStatus::PendingCancellation);
+        $orderIsPendingTraderOrder = $this->status->is(FinancingOrderStatus::PendingTraderOrder);
+        $bursamTraderServiceAvailability = $this->isBursamTraderServiceAvailable();
 
-        return $orderIsNotCompleted && $doesNotHaveInProgressOrder;
+        return ($orderIsNotCompleted && $doesNotHaveInActiveOrder
+            && $financingOrderIsNotCancelled && $financingOrderIsNotPendingCancelled
+            && $bursamTraderServiceAvailability)
+            || ($orderIsPendingTraderOrder && $orderIsNotCompleted && $bursamTraderServiceAvailability);
+    }
+
+    /**
+     * Check if the Bursam trader service is available when the current trader is set to Bursam.
+     * Otherwise, return true.
+     *
+     * @return bool
+     */
+    public function isBursamTraderServiceAvailable()
+    {
+        return config('trader.default') != 'bursam'
+            ? true
+            : is_bursam_service_available();
+    }
+
+    public function isCancellable($area)
+    {
+        $canMoveToPendingCancellation = $this->status->canMoveTo(FinancingOrderStatus::PendingCancellation);
+
+        if ($canMoveToPendingCancellation === false) {
+            return false;
+        }
+
+        $this->refresh();
+
+        return $this->activeTraderOrder->every(fn ($traderOrder) => $traderOrder->isCancellable($area));
     }
 }

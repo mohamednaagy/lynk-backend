@@ -1,6 +1,11 @@
 <?php
 
+use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
+use App\Models\Media;
+use Illuminate\Support\Facades\Config;
 use Modules\Grantify\Facades\Grantify;
+use Spatie\MediaLibrary\HasMedia;
 
 if (! function_exists('validate_said')) {
     function validate_said($id_number)
@@ -83,5 +88,93 @@ if (! function_exists('get_file_url')) {
         }
 
         return null;
+    }
+}
+
+if (! function_exists('get_media_of_model')) {
+    function get_media_of_model($model, $mediaCollection): ?Media
+    {
+        if ($model instanceof HasMedia) {
+            return $model->getFirstMedia($mediaCollection);
+        }
+
+        return null;
+    }
+}
+
+if (! function_exists('get_murabha_step_enum')) {
+    function get_murabha_step_enum(?string $provider = null): string
+    {
+        $provider = $provider ?? config('trader.default');
+
+        return match ($provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::class,
+            'bursam' => BursamMurabhaStep::class,
+            default => throw new \InvalidArgumentException('Invalid trader')
+        };
+    }
+}
+
+if (! function_exists('get_latest_version_of_trader')) {
+    function get_latest_version_of_trader($provider): string
+    {
+        return config('trader.providers.'.$provider.'.latest');
+    }
+}
+
+if (! function_exists('get_murabha_steps')) {
+    function get_murabha_steps($provider, ?string $version = null): array
+    {
+        return config('murabha-steps.'.$provider.'-versions.'.$version ?? get_latest_version_of_trader($provider));
+    }
+}
+
+if (! function_exists('trader_step_histories')) {
+    function trader_step_histories(string $provider, string $version): array
+    {
+        return match ($provider) {
+            'dmcc', 'fake' => DmccMurabhaStep::getStepsOfVersion($version),
+            'bursam' => BursamMurabhaStep::getStepsOfVersion($version),
+            default => throw new \InvalidArgumentException('Invalid trader')
+        };
+    }
+}
+
+if (! function_exists('is_bursam_service_available')) {
+    function is_bursam_service_available(): bool
+    {
+        $timezone = Config::get('services.bursam.timezone');
+        $now = now($timezone);
+        $marketOpeningStartTime = Config::get('services.bursam.market_opening_start_time');
+        $marketOpeningEndTime = Config::get('services.bursam.market_opening_end_time');
+        $fridayBreakStartTime = Config::get('services.bursam.friday_break_start_time');
+        $fridayBreakEndTime = Config::get('services.bursam.friday_break_end_time');
+
+        $marketOpeningStartDateTime = now($timezone)->setTimeFromTimeString($marketOpeningStartTime);
+        $marketOpeningEndDateTime = now($timezone)->setTimeFromTimeString($marketOpeningEndTime);
+        $fridayBreakStartDateTime = now($timezone)->setTimeFromTimeString($fridayBreakStartTime);
+        $fridayBreakEndDateTime = now($timezone)->setTimeFromTimeString($fridayBreakEndTime);
+
+        if ($now->isAfter($marketOpeningEndDateTime)) {
+            $marketOpeningEndDateTime->addDay();
+        } else {
+            $marketOpeningStartDateTime->subDay();
+        }
+
+        if (
+            ! $now->between($marketOpeningStartDateTime, $marketOpeningEndDateTime)
+            || ($now->isFriday() && $now->between($fridayBreakStartDateTime, $fridayBreakEndDateTime))
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+}
+
+if (! function_exists('parse_number')) {
+    function parse_number($number): float
+    {
+        return (float) preg_replace('/[^\d.]/', '', $number);
     }
 }

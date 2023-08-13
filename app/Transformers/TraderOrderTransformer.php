@@ -2,16 +2,20 @@
 
 namespace App\Transformers;
 
-use App\Enums\FinancingOrderHistory;
+use App\Enums\BursamMurabhaStep;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
+use App\Support\DataTransferObjects\CommodityProductDto;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
 class TraderOrderTransformer extends TransformerAbstract
 {
+    protected $area = null;
+
     protected array $defaultIncludes = [];
 
     protected array $availableIncludes = [
@@ -19,7 +23,10 @@ class TraderOrderTransformer extends TransformerAbstract
         'financing_order_id',
         'reference',
         'provider',
+        'version',
+        'failure_reason',
         'purchasing_commodity_information',
+        'products',
         'status',
         'is_cancellable',
         'history',
@@ -43,7 +50,7 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeReference(TraderOrder $traderOrder): Primitive
     {
-        return $this->primitive($traderOrder->reference);
+        return $this->primitive($traderOrder->reference ?: $traderOrder->id);
     }
 
     public function includeProvider(TraderOrder $traderOrder): Primitive
@@ -51,21 +58,45 @@ class TraderOrderTransformer extends TransformerAbstract
         return $this->primitive($traderOrder->provider);
     }
 
-    public function includeIsCancellable(TraderOrder $traderOrder): Primitive
+    public function includeVersion(TraderOrder $traderOrder): Primitive
     {
-        return $this->primitive($traderOrder->isCancellable());
+        return $this->primitive($traderOrder->version);
     }
 
-    public function includeHistory(TraderOrder $traderOrder): Collection
+    public function includeFailureReason(TraderOrder $traderOrder): Primitive
     {
-        return $this->collection(collect([
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-            FinancingOrderHistory::ContractSigned,
-            FinancingOrderHistory::ClientWakalaAccepted,
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-            FinancingOrderHistory::IssueMurabahaOffer,
-            FinancingOrderHistory::MurabahaSaleCompleted,
-        ]), new TraderHistoryTransformer($traderOrder));
+        return $this->primitive($traderOrder->failure_reason);
+    }
+
+    public function includeIsCancellable(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->isCancellable($this->area));
+    }
+
+    public function includeHistory(TraderOrder $traderOrder)
+    {
+        $traderMurabhaSteps = collect(get_murabha_steps($traderOrder->provider, $traderOrder->version))
+            ->except([
+                DmccMurabhaStep::TraderOrderCreated,
+                BursamMurabhaStep::TraderOrderCreated,
+                BursamMurabhaStep::TransferOwnershipToLender,
+            ])
+            ->keys()
+            ->flatten()
+            ->toArray();
+
+        $historiesActions = $traderOrder->traderHistories()->pluck('action')->toArray();
+
+        return $this->collection([$historiesActions], new TraderHistoryTransformer($traderOrder, $traderMurabhaSteps));
+    }
+
+    public function includeProducts(TraderOrder $traderOrder): Collection
+    {
+        $products = collect($traderOrder->products)->map(
+            fn ($product) => CommodityProductDto::fromArray($product)
+        );
+
+        return $this->collection($products, new ProductTransformer());
     }
 
     public function includeStatus(TraderOrder $traderOrder): Primitive
@@ -90,6 +121,13 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeCreatedAt(TraderOrder $traderOrder): Primitive
     {
-        return $this->primitive($traderOrder->created_at?->toDateTimeString());
+        return $this->primitive($traderOrder->created_at?->clone()->tz('Asia/Riyadh')->toDateTimeString());
+    }
+
+    public function setArea($area)
+    {
+        $this->area = $area;
+
+        return $this;
     }
 }

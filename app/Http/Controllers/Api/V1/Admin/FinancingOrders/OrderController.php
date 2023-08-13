@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\FinancingOrders;
 
-use App\Actions\Contracts\Orders\GetPaginatedFinancingOrder;
+use App\Actions\Contracts\Orders\BuildFinancingOrdersQuery;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -30,20 +30,15 @@ class OrderController extends Controller
             ->only('show');
     }
 
-    /**
-     * @param  GetPaginatedFinancingOrder  $getPaginatedOrders
-     * @param  Request  $request
-     * @return JsonResponse
-     */
-    public function index(Request $request, GetPaginatedFinancingOrder $getPaginatedOrders): JsonResponse
+    public function index(Request $request, BuildFinancingOrdersQuery $buildFinancingOrdersQuery): JsonResponse
     {
-        $company = Company::find($request->input('company'));
-
-        if ($company) {
-            $getPaginatedOrders = $getPaginatedOrders->setCompany($company);
-        }
-
-        $orders = $getPaginatedOrders->handle();
+        $orders = $buildFinancingOrdersQuery->setRelations([
+            'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
+            'company' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
+            'creator',
+        ])
+            ->handle()
+            ->paginate();
 
         return fractal($orders, new FinancingOrderTransformer())
             ->parseIncludes([
@@ -54,16 +49,14 @@ class OrderController extends Controller
                 'amount',
                 'selling_price',
                 'status_reason',
+                'current_step',
                 'creator',
+                'company_name',
                 'created_at',
             ])
             ->respond();
     }
 
-    /**
-     * @param  FinancingOrder  $order
-     * @return JsonResponse
-     */
     public function show(FinancingOrder $order): JsonResponse
     {
         $order->load([
@@ -74,7 +67,7 @@ class OrderController extends Controller
             'traderOrders.traderHistories',
         ]);
 
-        return fractal($order, new FinancingOrderTransformer())
+        return fractal($order, (new FinancingOrderTransformer())->setArea(Area::SuperAdmin))
             ->parseIncludes([
                 'id',
                 'status',
@@ -91,12 +84,16 @@ class OrderController extends Controller
                 'can_be_completed',
                 'can_create_trader_order',
                 'is_updatable',
+                'is_cancellable',
                 'approver',
                 'trader_orders.id',
                 'trader_orders.reference',
                 'trader_orders.provider',
+                'trader_orders.version',
+                'trader_orders.failure_reason',
                 'trader_orders.is_cancellable',
                 'trader_orders.history',
+                'trader_orders.products',
                 'trader_orders.status',
                 'trader_orders.created_at',
                 'creator',

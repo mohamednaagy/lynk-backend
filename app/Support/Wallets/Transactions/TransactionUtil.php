@@ -16,9 +16,6 @@ class TransactionUtil implements TransactionUtilInterface
 
     /**
      * Undocumented function
-     *
-     * @param  int  $reason
-     * @return DefaultGenerator|TransactionTypeHandlerInterface
      */
     public function resolveHandler(int $reason): DefaultGenerator|TransactionTypeHandlerInterface
     {
@@ -42,9 +39,7 @@ class TransactionUtil implements TransactionUtilInterface
     /**
      * Get transaction description
      *
-     * @param  Transaction  $transaction
      * @param  null  $locale
-     * @return string
      */
     public function getDescription(Transaction $transaction, $locale = null): string
     {
@@ -53,15 +48,15 @@ class TransactionUtil implements TransactionUtilInterface
 
     /**
      * Get transaction description
-     *
-     * @param  Wallet  $wallet
-     * @param  Money  $amount
-     * @param  int  $reason
-     * @param  array  $meta
-     * @return Transaction
      */
-    public function process(Wallet $wallet, Money $amount, int $reason, array $meta): Transaction
-    {
-        return $this->resolveHandler($reason)->process($wallet, $amount, $reason, $meta);
+    public function process(
+        Wallet $wallet,
+        Money $amount,
+        int $reason,
+        ?string $refrenceNumber,
+        array $meta
+    ): Transaction {
+        return $this->resolveHandler($reason)
+            ->process($wallet, $amount, $reason, $refrenceNumber, $meta);
     }
 }

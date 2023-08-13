@@ -27,15 +27,17 @@ class ApproveOrder extends Controller
 
     /**
      * Handle the incoming request.
-     *
-     * @param  Request  $request
-     * @param  ApproveOrderInterface  $approveOrder
-     * @param  int  $order
-     * @return JsonResponse
      */
-    public function __invoke(Request $request, ApproveOrderInterface $approveOrder, int $order): JsonResponse
+    public function __invoke(
+        Request $request,
+        ApproveOrderInterface $approveOrder,
+        int $order): JsonResponse
     {
-        return DB::transaction(function () use ($request, $approveOrder, $order) {
+        return DB::transaction(function () use (
+            $request,
+            $approveOrder,
+            $order
+        ) {
             $order = FinancingOrder::lockForUpdate()->findOrFail($order);
 
             if ($order->status->cantMoveTo(FinancingOrderStatus::Approved)) {

@@ -19,6 +19,7 @@ return [
     'invalid_operator_tcn' => 'Invalid operator TCN',
     'no_enough_balance' => 'No enough balance',
     'order_status_doesnt_follow_sequence' => 'Order status cannot be updated because it doesn\'t follow the right sequence',
+    'order_require_client_verification' => 'You cannot proceed because order requires client verification.',
     'order_cannot_be_updated' => 'Order can be updated only if the status is '.FinancingOrderStatus::joinDescription(FinancingOrderStatus::$allowedToUpdateStatuses),
     'webhook_type_not_supported' => 'Unsupported webhook type',
     'must_verify_email' => 'You must verify your email address',
@@ -31,4 +32,6 @@ return [
     'trader_not_supported' => 'Trader Not Supported',
     'order_is_already_completed' => 'Order is already completed',
     'order_is_already_has_active_trader_order' => 'Order already has active trading request',
+    'commodity_market_is_unavailable' => 'The commodity market service is currently unavailable.',
+    'trader_mode_not_supported' => 'Selected mode is not available for this trader',
 ];

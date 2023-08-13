@@ -2,17 +2,19 @@
 
 namespace App\Support\FinancingOrders\StepAndHistories;
 
-use App\Enums\MurabhaStep;
+use App\Models\TraderOrder;
 
 class StepHistoriesDictionary
 {
     public \SplDoublyLinkedList $dictionaryNodeList;
 
-    public function __construct()
+    public function __construct($trader = null, $version = null)
     {
         $this->dictionaryNodeList = new \SplDoublyLinkedList();
+        $trader = $trader ?? config('trader.default');
+        $version = $version ?? get_latest_version_of_trader($trader);
 
-        foreach (MurabhaStep::$stepToHistoriesDictionary as $step => $histories) {
+        foreach (trader_step_histories($trader, $version) as $step => $histories) {
             $this->dictionaryNodeList->push(new StepHistoriesDictionaryNode($step, $histories));
         }
     }
@@ -75,6 +77,41 @@ class StepHistoriesDictionary
             }
 
             $this->dictionaryNodeList->next();
+        }
+    }
+
+    public function getCompletedStepOrPreviousByHistory($history)
+    {
+        $this->dictionaryNodeList->rewind();
+        while ($this->dictionaryNodeList->valid()) {
+            if ($history == end($this->dictionaryNodeList->current()->histories)) {
+                return $this->dictionaryNodeList->current();
+            }
+
+            if (in_array($history, $this->dictionaryNodeList->current()->histories)) {
+                $this->dictionaryNodeList->prev();
+
+                return $this->dictionaryNodeList->current();
+            }
+            $this->dictionaryNodeList->next();
+        }
+    }
+
+    public function getLastCompletedStepOf(TraderOrder $traderOrder)
+    {
+        $histories = $traderOrder->traderHistories()->pluck('action')->toArray();
+
+        $this->dictionaryNodeList->rewind();
+        while ($this->dictionaryNodeList->valid()) {
+            $lastHistoryOfStep = end($this->dictionaryNodeList->current()->histories);
+
+            if (in_array($lastHistoryOfStep, $histories)) {
+                $this->dictionaryNodeList->next();
+            } else {
+                $this->dictionaryNodeList->prev();
+
+                return $this->dictionaryNodeList->current();
+            }
         }
     }
 }

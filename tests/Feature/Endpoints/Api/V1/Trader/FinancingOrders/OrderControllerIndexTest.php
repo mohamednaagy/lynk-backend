@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Trader\FinancingOrders;
 
-use App\Actions\Orders\GetPaginatedFinancingOrderAction;
+use App\Actions\Contracts\Orders\BuildFinancingOrdersQuery;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
@@ -43,8 +43,6 @@ class OrderControllerIndexTest extends TestCase
     private static Builder|Model $traderHistory;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -66,9 +64,6 @@ class OrderControllerIndexTest extends TestCase
         ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_unauth_user_cannot_access(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -76,17 +71,16 @@ class OrderControllerIndexTest extends TestCase
             ->assertUnauthorized();
     }
 
-    /**
-     * @return void
-     */
     public function test_auth_user_with_proper_permission_can_access(): void
     {
+        $orders = app(BuildFinancingOrdersQuery::class)->setCompany(tenant())->handle()->paginate();
+
         $this->actingAs(self::$userTraderAdmin)
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/trader/orders')
             ->assertOk()
             ->assertExactJson(
-                fractal((new GetPaginatedFinancingOrderAction())->setCompany(tenant())->handle(), new FinancingOrderTransformer())
+                fractal($orders, new FinancingOrderTransformer())
                     ->parseIncludes([
                         'id',
                         'amount',
@@ -98,17 +92,16 @@ class OrderControllerIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_can_see_only_current_trader_company_orders(): void
     {
+        $orders = app(BuildFinancingOrdersQuery::class)->setCompany(tenant())->handle()->paginate();
+
         $this->actingAs(self::$userTraderAdmin)
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/trader/orders')
             ->assertOk()
             ->assertExactJson(
-                fractal((new GetPaginatedFinancingOrderAction())->setCompany(tenant())->handle(), new FinancingOrderTransformer())
+                fractal($orders, new FinancingOrderTransformer())
                     ->parseIncludes([
                         'id',
                         'amount',

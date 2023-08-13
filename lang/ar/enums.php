@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Enums\BursamMurabhaStep;
+use App\Enums\BursamProductCode;
 use App\Enums\CompanyStatus;
+use App\Enums\DmccMurabhaStep;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
@@ -45,5 +48,36 @@ return [
         EdaatInvoiceStatus::Pending => 'قيد الانتظار',
         EdaatInvoiceStatus::Paid => 'مدفوعة',
         EdaatInvoiceStatus::Expired => 'منتهية الصلاحية',
+    ],
+
+    BursamMurabhaStep::class => [
+
+        BursamMurabhaStep::TraderOrderCreated => 'إنشاء طلب مرابحة',
+        BursamMurabhaStep::PurchasingCommodity => 'شراء السلعة',
+        BursamMurabhaStep::ContractSigned => 'توقيع العقد',
+        BursamMurabhaStep::CommoditySoldToCustomer => 'بيع السلعة للعميل',
+        BursamMurabhaStep::TransferOwnershipToLender => 'نقل الملكية إلى المُقرض',
+        BursamMurabhaStep::ClientWakala => 'وكالة العميل',
+        BursamMurabhaStep::MurabhaOfferIssued => 'إصدار عرض المرابحة',
+        BursamMurabhaStep::MurabahaSaleCompleted => 'إكمال عملية المرابحة',
+    ],
+
+    DmccMurabhaStep::class => [
+        DmccMurabhaStep::TraderOrderCreated => 'إنشاء طلب مرابحة',
+        DmccMurabhaStep::PurchasingCommodity => 'شراء السلعة',
+        DmccMurabhaStep::ContractSigned => 'توقيع العقد',
+        DmccMurabhaStep::CommoditySoldToCustomer => 'بيع السلعة للعميل',
+        DmccMurabhaStep::ClientWakala => 'وكالة العميل',
+        DmccMurabhaStep::MurabhaOfferIssued => 'إصدار عرض المرابحة',
+        DmccMurabhaStep::MurabahaSaleCompleted => 'إكمال عملية المرابحة',
+    ],
+    BursamProductCode::class => [
+        BursamProductCode::CrudePalmOil => 'زيت النخيل الخام',
+        BursamProductCode::PlasticResinA => 'راتنج بلاستيك A',
+        BursamProductCode::PlasticResinB => 'راتنج بلاستيك B',
+        BursamProductCode::PlumbumLead => 'رصاص',
+        BursamProductCode::RbdPalmOlein => 'زيت الأولين',
+        BursamProductCode::TimberHardwood => 'خشب صلب',
+        BursamProductCode::TimberSoftwood => 'خشب لين',
     ],
 ];
