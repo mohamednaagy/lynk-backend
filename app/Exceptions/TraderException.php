@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Support\Arr;
 use Throwable;
 
 class TraderException extends Exception
@@ -21,7 +22,8 @@ class TraderException extends Exception
     {
         $messageParts = array_filter([
             'TRADER_ERROR',
-            ($context['provider'] ?? null),
+            $context['provider'] ?? null,
+            'Trader Order ID '.Arr::get($context, 'trader_order_id', '---'),
             $context['version'] ?? null,
             $message,
         ]);

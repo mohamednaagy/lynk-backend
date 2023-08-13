@@ -17,18 +17,13 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    /**
-     * The number of times the job may be attempted.
-     *
-     * @var int
-     */
-    public $tries = 10;
 
     /**
      * Create a new job instance.
@@ -72,6 +67,7 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 
                     $this->delete();
                 } else {
+                    Log::error($exception->getMessage(), $exception->getContext());
                     throw $exception;
                 }
             }
@@ -80,27 +76,27 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 
     public function failed($exception)
     {
-        if ($exception instanceof TraderException) {
-            DB::transaction(function () use ($exception) {
-                $traderOrder = TraderOrder::query()
-                    ->lockForUpdate()
-                    ->find($this->traderOrderId);
+        DB::transaction(function () use ($exception) {
+            $traderOrder = TraderOrder::query()
+                ->lockForUpdate()
+                ->find($this->traderOrderId);
 
-                if ($traderOrder === null) {
-                    return;
-                }
+            if ($traderOrder === null) {
+                return;
+            }
 
-                $traderOrder->order->update([
-                    'status' => FinancingOrderStatus::TradingFailure,
-                ]);
+            $traderOrder->order->update([
+                'status' => FinancingOrderStatus::TradingFailure,
+            ]);
 
-                $traderOrder->update([
-                    'status' => TraderOrderStatus::Cancelled,
-                    'failure_reason' => $exception->getContext('failure_reason'),
-                    'cancel_reason' => TraderOrderCancelReason::FailureToPurchase,
-                ]);
-            });
-        }
+            $traderOrder->update([
+                'status' => TraderOrderStatus::Cancelled,
+                'failure_reason' => method_exists($exception, 'getContext') ?
+                    $exception->getContext('failure_reason')
+                    : $exception->getMessage(),
+                'cancel_reason' => TraderOrderCancelReason::FailureToPurchase,
+            ]);
+        });
     }
 
     public function middleware(): array
@@ -111,6 +107,11 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->traderOrderId;
+    }
+
+    public function retryUntil(): Carbon
+    {
+        return now()->addMinutes(30);
     }
 
     public function backoff(): int

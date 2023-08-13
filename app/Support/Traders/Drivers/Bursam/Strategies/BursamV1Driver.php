@@ -96,6 +96,7 @@ class BursamV1Driver implements TraderInterface
             throw new TraderException(
                 'Failed to create trader order',
                 [
+                    'trader_order_id' => $traderOrder->id,
                     'provider' => $this->provider,
                     'version' => $this->version,
                     'provider_request_body' => $requestBody,
@@ -150,6 +151,7 @@ class BursamV1Driver implements TraderInterface
             throw new TraderException(
                 'Failed to fetch order result YNN Insufficient Commodity',
                 [
+                    'trader_order_id' => $traderOrder->id,
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
                     'provider_request_body' => $requestBody,
@@ -165,6 +167,7 @@ class BursamV1Driver implements TraderInterface
             throw new TraderException(
                 'Failed to fetch order result YNN',
                 [
+                    'trader_order_id' => $traderOrder->id,
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
                     'provider_request_body' => $requestBody,
@@ -194,6 +197,7 @@ class BursamV1Driver implements TraderInterface
             throw new TraderException(
                 'Failed to get bid certificate',
                 [
+                    'trader_order_id' => $traderOrder->id,
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
                     'provider_request_body' => $requestBody,
@@ -291,6 +295,7 @@ class BursamV1Driver implements TraderInterface
             throw new TraderException(
                 'Failed to create lender ownership certificate',
                 [
+                    'trader_order_id' => $traderOrder->id,
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
                 ],
@@ -342,6 +347,7 @@ class BursamV1Driver implements TraderInterface
             throw new TraderException(
                 'Failed to create customer ownership document',
                 [
+                    'trader_order_id' => $traderOrder->id,
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
                 ],
@@ -399,6 +405,7 @@ class BursamV1Driver implements TraderInterface
             throw new TraderException(
                 'Failed to sell commodity to market',
                 [
+                    'trader_order_id' => $traderOrder->id,
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
                     'provider_response_body' => $response->json(),
@@ -439,6 +446,7 @@ class BursamV1Driver implements TraderInterface
             throw new TraderException(
                 'Failed to fetch order result NYY',
                 [
+                    'trader_order_id' => $traderOrder->id,
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
                     'uuid_two' => $traderOrder->uuid_two,
@@ -467,6 +475,7 @@ class BursamV1Driver implements TraderInterface
             throw new TraderException(
                 'Failed to get OTC certificate details',
                 [
+                    'trader_order_id' => $traderOrder->id,
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
                     'provider_response_body' => $response->json(),
@@ -532,6 +541,7 @@ class BursamV1Driver implements TraderInterface
             throw new TraderException(
                 'Failed to get STB certificate details',
                 [
+                    'trader_order_id' => $traderOrder->id,
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
                     'provider_response_body' => $response->json(),
