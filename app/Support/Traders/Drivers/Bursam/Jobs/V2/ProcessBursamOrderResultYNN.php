@@ -17,7 +17,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
@@ -73,7 +72,6 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 
                     $this->delete();
                 } else {
-                    logs()->debug('TraderException-2', method_exists($exception, 'getContext') ? $exception->getContext() : []);
                     throw $exception;
                 }
             }
@@ -82,7 +80,6 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 
     public function failed($exception)
     {
-        logs()->debug('TraderException-6', method_exists($exception, 'getContext') ? $exception->getContext() : [$exception->getMessage()]);
         if ($exception instanceof TraderException) {
             DB::transaction(function () use ($exception) {
                 $traderOrder = TraderOrder::query()
@@ -115,11 +112,6 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
     {
         return __CLASS__.'_'.$this->traderOrderId;
     }
-
-    // public function retryUntil(): Carbon
-    // {
-    //     return now()->addMinutes(30);
-    // }
 
     public function backoff(): int
     {
