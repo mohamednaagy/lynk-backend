@@ -76,6 +76,7 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 
     public function failed($exception)
     {
+        logs()->debug('failed-exc');
         if ($exception instanceof TraderException) {
             DB::transaction(function () use ($exception) {
                 $traderOrder = TraderOrder::query()
