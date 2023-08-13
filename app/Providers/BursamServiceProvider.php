@@ -37,7 +37,8 @@ class BursamServiceProvider extends ServiceProvider
                     ->withOptions([
                         'verify' => config('trader.providers.bursam.verify_tls'),
                     ])
-                    ->post($baseUrl.'/api/process/svc/auth/token', [
+                    ->baseUrl($baseUrl)
+                    ->post('api/process/svc/auth/token', [
                         'grant_type' => config('trader.providers.bursam.grant_type'),
                         'client_id' => config('trader.providers.bursam.member_short_name'),
                         'client_secret' => config('trader.providers.bursam.client_secret_key'),
