@@ -3,6 +3,7 @@
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use Carbon\Carbon;
@@ -47,6 +48,7 @@ class InitiateTraderOrdersIfTimedOut implements ShouldQueue
                     ->where('data->cancel_reason', TraderOrderCancelReason::MurabhaTimeout)
                     ->where('provider', 'bursam')
                     ->where('version', 'v2')
+                    ->where('mode', TraderOrderMode::Automatic)
                     ->whereBetween('created_at', [$marketOpeningStartTime, $marketOpeningEndTime]);
             })
             ->select('id')

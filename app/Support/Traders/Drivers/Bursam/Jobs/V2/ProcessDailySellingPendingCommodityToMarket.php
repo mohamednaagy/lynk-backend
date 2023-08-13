@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
+use App\Enums\TraderOrderMode;
 use App\Models\FinancingOrder;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -34,6 +35,7 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
             ->whereHas('activeTraderOrder', function ($query) {
                 return $query->where('provider', 'bursam')
                     ->where('version', 'v2')
+                    ->where('mode', TraderOrderMode::Automatic)
                     ->whereDate('created_at', Carbon::today());
             })
             ->select('id')
