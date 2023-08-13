@@ -109,13 +109,13 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
         return __CLASS__.'_'.$this->traderOrderId;
     }
 
-    public function retryUntil(): Carbon
-    {
-        return now()->addMinutes(30);
-    }
+    // public function retryUntil(): Carbon
+    // {
+    //     return now()->addMinutes(30);
+    // }
 
-    public function backoff(): int
-    {
-        return config('trader.providers.bursam.purchasing_commodity_job_backoff_time');
-    }
+    // public function backoff(): int
+    // {
+    //     return config('trader.providers.bursam.purchasing_commodity_job_backoff_time');
+    // }
 }
