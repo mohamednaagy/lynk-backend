@@ -40,11 +40,6 @@ class BursamV1Driver implements TraderInterface
 
     protected $version = 'v1';
 
-    public function baseUrl($path)
-    {
-        return 'http://'.config('trader.providers.bursam.base_url').'/'.$path;
-    }
-
     public function getOrInitiateTraderOrder(FinancingOrder $financingOrder): ?Model
     {
         if ($financingOrder->initiatedTraderOrders()->exists()) {
@@ -71,7 +66,7 @@ class BursamV1Driver implements TraderInterface
         $productCode = $this->getUnusedProductCode();
 
         $response = Http::bursam()->post(
-            $this->baseUrl('api/process/svc/bsas/order.json'),
+            'api/process/svc/bsas/order.json',
             $requestBody = [
                 'header' => [
                     'memberShortName' => config('trader.providers.bursam.member_short_name'),
@@ -123,7 +118,7 @@ class BursamV1Driver implements TraderInterface
     public function fetchOrderResultYNN(TraderOrder $traderOrder)
     {
         $response = Http::bursam()->post(
-            $this->baseUrl('api/process/svc/bsas/orderResult.json'),
+            'api/process/svc/bsas/orderResult.json',
             $requestBody = [
                 'header' => [
                     'memberShortName' => config('trader.providers.bursam.member_short_name'),
@@ -186,7 +181,7 @@ class BursamV1Driver implements TraderInterface
     public function getBidCertificateDetails(TraderOrder $traderOrder)
     {
         $response = Http::bursam()->post(
-            $this->baseUrl('api/process/svc/bsas/bidXML.json'),
+            'api/process/svc/bsas/bidXML.json',
             $requestBody = [
                 'input' => [
                     'membershortname' => config('trader.providers.bursam.member_short_name'),
@@ -374,7 +369,7 @@ class BursamV1Driver implements TraderInterface
         $financingOrder = $traderOrder->order;
 
         $response = Http::bursam()->post(
-            $this->baseUrl('api/process/svc/bsas/order.json'),
+            'api/process/svc/bsas/order.json',
             $requestBody = [
                 'header' => [
                     'memberShortName' => config('trader.providers.bursam.member_short_name'),
@@ -419,7 +414,7 @@ class BursamV1Driver implements TraderInterface
     public function fetchOrderResultNYY(TraderOrder $traderOrder)
     {
         $response = Http::bursam()->post(
-            $this->baseUrl('api/process/svc/bsas/orderResult.json'),
+            'api/process/svc/bsas/orderResult.json',
             $requestBody = [
                 'header' => [
                     'memberShortName' => config('trader.providers.bursam.member_short_name'),
@@ -459,7 +454,7 @@ class BursamV1Driver implements TraderInterface
     public function getOtcCertificateDetails(TraderOrder $traderOrder)
     {
         $response = Http::bursam()->post(
-            $this->baseUrl('api/process/svc/bsas/otcXML.json'),
+            'api/process/svc/bsas/otcXML.json',
             $requestBody = [
                 'input' => [
                     'membershortname' => config('trader.providers.bursam.member_short_name'),
@@ -524,7 +519,7 @@ class BursamV1Driver implements TraderInterface
     public function getStbCertificateDetails(TraderOrder $traderOrder)
     {
         $response = Http::bursam()->post(
-            $this->baseUrl('api/process/svc/bsas/stbXML.json'),
+            'api/process/svc/bsas/stbXML.json',
             $requestBody = [
                 'input' => [
                     'membershortname' => config('trader.providers.bursam.member_short_name'),
