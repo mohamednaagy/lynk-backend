@@ -83,7 +83,7 @@ class BursamV1Driver implements TraderInterface
                     'currency' => 'SAR',
                     'bidValue' => $financingOrder->amount->formatByDecimal(),
                     'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
-                    'tenor' => '00090',
+                    'tenor' => config('trader.providers.bursam.tenor'),
                     'otcCounterParty' => $financingOrder->customer_name,
                     'otcMurabaha' => '',
                     'otcMurabahaValue' => $financingOrder->selling_price->formatByDecimal(),
