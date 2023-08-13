@@ -56,7 +56,7 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
             try {
                 Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
             } catch (TraderException $exception) {
-                logs()->debug('Test', [$exception]);
+                logs()->debug('TraderException-0', [$exception]);
                 if ($exception->getContext('failure_code') == TraderErrorCode::INSUFFICIENT_COMMODITY) {
                     $traderOrder->order->update([
                         'status' => FinancingOrderStatus::TradingFailure,
