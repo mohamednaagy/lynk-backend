@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 
 trait TraderHelperTrait
@@ -90,10 +91,6 @@ trait TraderHelperTrait
         }
     }
 
-    /**
-     * @param $products
-     * @return Collection
-     */
     public function transformProductsToCommodityProductsDTO($products): Collection
     {
         return collect($products)->map(function ($product) {
@@ -111,7 +108,7 @@ trait TraderHelperTrait
 
     public function getUnusedProductCode()
     {
-        $productCodes = BursamProductCode::getValues();
+        $productCodes = BursamProductCode::getProductCodes(App::environment());
         $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
 
         $availableProductCodes = array_diff($productCodes, $unavailableProductCodes);
