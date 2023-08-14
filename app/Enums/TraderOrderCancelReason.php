@@ -9,7 +9,7 @@ final class TraderOrderCancelReason extends Enum implements LocalizedEnum
 {
     const Manual = 1;
 
-    const FailureToPurchase = 2;
-
     const MurabhaTimeout = 2;
+
+    const FailureToPurchase = 3;
 }
