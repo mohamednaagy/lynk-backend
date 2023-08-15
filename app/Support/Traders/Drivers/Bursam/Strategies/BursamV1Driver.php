@@ -213,7 +213,7 @@ class BursamV1Driver implements TraderInterface
                 (new CommodityProductDto(
                     product: $response->json('PNAME'),
                     quantity: $response->json('PVOLUME'),
-                    amount: (float) $response->json('TOTALVALUE'),
+                    amount: $response->json('TOTALVALUE'),
                     previous_owner: $response->json('OWNER'),
                     date_time_of_purchasing_commodity: $response->json('PURCHASETIMEDATE'),
                     uom: collect($traderOrder->original_data)->get('unit'),
