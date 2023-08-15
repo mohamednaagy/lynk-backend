@@ -17,7 +17,7 @@ class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatu
         $phoneNumber = ltrim($financingOrder->getPhoneNumber()->formatE164(), '+');
         $message = $this->resolveMessage($financingOrder, $traderOrder);
 
-        Sms::send($message, $phoneNumber);
+        // Sms::send($message, $phoneNumber);
     }
 
     public function resolveMessage(FinancingOrder $financingOrder, TraderOrder $traderOrder)

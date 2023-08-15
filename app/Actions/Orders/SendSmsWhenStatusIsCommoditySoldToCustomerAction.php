@@ -18,7 +18,7 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
         $phoneNumber = ltrim($financingOrder->getPhoneNumber()->formatE164(), '+');
         $message = $this->resolveSmsMessage($financingOrder, $traderOrder);
 
-        Sms::send($message, $phoneNumber);
+        // Sms::send($message, $phoneNumber);
     }
 
     private function resolveSmsMessage(FinancingOrder $financingOrder, TraderOrder $traderOrder)
