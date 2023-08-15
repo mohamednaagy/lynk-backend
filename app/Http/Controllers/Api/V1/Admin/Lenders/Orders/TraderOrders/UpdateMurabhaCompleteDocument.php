@@ -25,10 +25,6 @@ class UpdateMurabhaCompleteDocument extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  UpdateMurabhaCompleteDocumentRequest  $request
-     * @param  int  $order
-     * @param  int  $traderOrder
-     * @return JsonResponse
      *
      * @throws \Throwable
      */
@@ -40,7 +36,7 @@ class UpdateMurabhaCompleteDocument extends Controller
         return DB::transaction(function () use ($request, $order, $traderOrder) {
             [$order, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
 
-            (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))->UpdateMurabhaCompleteDocument($traderOrder, $request);
+            (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))->updateMurabhaCompleteDocument($traderOrder, $request);
 
             return $this->successResponse();
         });

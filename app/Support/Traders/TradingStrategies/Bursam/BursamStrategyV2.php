@@ -29,7 +29,7 @@ class BursamStrategyV2 extends BursamStrategyV1
         BursamMurabhaStep::MurabahaSaleCompleted => [
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
             FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
-                'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
+                'collection' => TraderOrderMediaCollection::BursamTtiHoldingCertificate,
                 'file' => 'document',
             ],
             FinancingOrderHistory::CommoditySoldToMarket => null,
