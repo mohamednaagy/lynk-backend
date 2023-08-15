@@ -73,8 +73,11 @@ return [
     BursamProductCode::class => [
         BursamProductCode::CrudePalmOil => 'Crude Palm Oil',
         BursamProductCode::PlasticResinA => 'Plastic Resin A',
+        BursamProductCode::PlasticResinADev => 'Plastic Resin A',
         BursamProductCode::PlasticResinB => 'Plastic Resin B',
+        BursamProductCode::PlasticResinBDev => 'Plastic Resin B',
         BursamProductCode::PlumbumLead => 'Lead',
+        BursamProductCode::PlumbumLeadDev => 'Plumbum Lead',
         BursamProductCode::RbdPalmOlein => 'Olein Oil',
         BursamProductCode::TimberHardwood => 'Timber Hardwood',
         BursamProductCode::TimberSoftwood => 'Timber Softwood',
