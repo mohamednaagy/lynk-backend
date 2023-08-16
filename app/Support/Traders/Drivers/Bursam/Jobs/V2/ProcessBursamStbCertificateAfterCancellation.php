@@ -6,7 +6,6 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -19,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait, StopsTraderOrderOnJobFailure;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
     public $tries = 8;
 
@@ -45,9 +44,12 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, Shoul
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::PendingCancellation)
                 ->lockForUpdate()
-                ->findOrFail($this->traderOrderId);
+                ->find($this->traderOrderId);
 
-            if (! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::GetSellingToMarketCertificate)) {
+            if (
+                is_null($traderOrder)
+                || ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::GetSellingToMarketCertificate)
+            ) {
                 Trader::driver('bursam', $traderOrder->version)->getStbCertificateDetails($traderOrder);
             }
 

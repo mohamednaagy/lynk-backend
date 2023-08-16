@@ -36,9 +36,12 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
         $traderOrder = TraderOrder::query()
             ->where('status', TraderOrderStatus::InProgress)
             ->lockForUpdate()
-            ->findOrFail($this->traderOrderId);
+            ->find($this->traderOrderId);
 
-        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)) {
+        if (
+            is_null($traderOrder)
+            || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)
+        ) {
             return;
         }
 

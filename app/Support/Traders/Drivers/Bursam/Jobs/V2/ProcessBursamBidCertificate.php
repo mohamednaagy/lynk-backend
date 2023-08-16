@@ -6,7 +6,6 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessBursamBidCertificate implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $backoff = 20;
 
@@ -42,9 +41,12 @@ class ProcessBursamBidCertificate implements ShouldQueue, ShouldBeUnique
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::InProgress)
                 ->lockForUpdate()
-                ->findOrFail($this->traderOrderId);
+                ->find($this->traderOrderId);
 
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)) {
+            if (
+                is_null($traderOrder)
+                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)
+            ) {
                 return;
             }
 

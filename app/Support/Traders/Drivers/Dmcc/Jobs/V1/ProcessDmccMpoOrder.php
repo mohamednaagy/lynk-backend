@@ -6,7 +6,6 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -19,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessDmccMpoOrder implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait, StopsTraderOrderOnJobFailure;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
     protected $traderOrder;
 
@@ -34,8 +33,6 @@ class ProcessDmccMpoOrder implements ShouldQueue, ShouldBeUnique
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {

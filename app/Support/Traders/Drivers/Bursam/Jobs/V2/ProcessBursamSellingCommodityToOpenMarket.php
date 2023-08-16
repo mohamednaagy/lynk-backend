@@ -6,7 +6,6 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -19,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessBursamSellingCommodityToOpenMarket implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * Create a new job instance.
@@ -41,9 +40,12 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldQueue, ShouldBe
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::InProgress)
                 ->lockForUpdate()
-                ->findOrFail($this->traderOrderId);
+                ->find($this->traderOrderId);
 
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted)) {
+            if (
+                is_null($traderOrder)
+                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted)
+            ) {
                 return;
             }
 
