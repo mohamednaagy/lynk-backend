@@ -23,6 +23,8 @@ final class TraderOrderStatus extends Enum implements LocalizedEnum
 
     const FailureToProgress = 7;
 
+    const FailureToCancel = 8;
+
     public static $inProgressOrComplete = [
         self::Completed,
         self::InProgress,

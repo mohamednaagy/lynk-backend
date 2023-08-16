@@ -72,7 +72,7 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, Shoul
         }
 
         $traderOrder->update([
-            'status' => TraderOrderStatus::FailureToProgress,
+            'status' => TraderOrderStatus::FailureToCancel,
         ]);
 
         Log::error(
