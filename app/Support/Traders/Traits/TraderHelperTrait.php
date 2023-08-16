@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 
 trait TraderHelperTrait
@@ -108,7 +107,7 @@ trait TraderHelperTrait
 
     public function getUnusedProductCode()
     {
-        $productCodes = BursamProductCode::getProductCodes(App::environment());
+        $productCodes = BursamProductCode::getValues();
         $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
 
         $availableProductCodes = array_diff($productCodes, $unavailableProductCodes);
