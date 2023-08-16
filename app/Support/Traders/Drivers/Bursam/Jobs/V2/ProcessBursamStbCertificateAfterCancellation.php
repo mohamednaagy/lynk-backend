@@ -15,6 +15,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, ShouldBeUnique
 {
@@ -58,6 +59,28 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, Shoul
                 'cancel_reason' => $this->cancelReason,
             ]);
         });
+    }
+
+    public function failed($exception)
+    {
+        $traderOrder = null;
+
+        $traderOrder = TraderOrder::query()->find($this->traderOrderId);
+
+        if (! $traderOrder) {
+            return;
+        }
+
+        $traderOrder->update([
+            'status' => TraderOrderStatus::FailureToProgress,
+        ]);
+
+        Log::error(
+            method_exists('getMessage', $exception)
+                ? $exception->getMesage()
+                : 'Cannot proceed to get STB',
+            [$exception]
+        );
     }
 
     public function middleware(): array
