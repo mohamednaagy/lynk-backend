@@ -4,14 +4,14 @@ namespace App\Actions\Wallets;
 
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\CreateTransactions;
-use App\Actions\Contracts\Wallets\DeductVatPercentage;
+use App\Actions\Contracts\Wallets\DeductTraderOrderVatPercentage;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\Transaction;
 
-class DeductVatPercentageAction implements DeductVatPercentage
+class DeductTraderOrderVatPercentageAction implements DeductTraderOrderVatPercentage
 {
     public function __construct(
         protected CreateTransactions $createTransactions,

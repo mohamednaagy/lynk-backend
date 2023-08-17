@@ -2,15 +2,17 @@
 
 namespace App\Actions\Lenders;
 
+use App\Actions\Contracts\Companies\GetVatAmount;
 use App\Actions\Contracts\Lenders\CalculateAmountWithVat;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Models\Company;
-use Money\Money;
+use Cknow\Money\Money;
 
 class CalculateAmountWithVatAction implements CalculateAmountWithVat
 {
     public function __construct(
-        protected GetProjectSettings $getProjectSettings
+        protected GetProjectSettings $getProjectSettings,
+        protected GetVatAmount $getVatAmount
     ) {
     }
 
@@ -21,25 +23,15 @@ class CalculateAmountWithVatAction implements CalculateAmountWithVat
      */
     public function handle(Company $company, int $chargeAmount): array
     {
-        $vatOfChargeAmount = $this->getVatAmount($chargeAmount);
-        $vatOfOrderCost = $this->getVatAmount($company->order_cost);
+        $chargeAmount = Money::SAR($chargeAmount, true); // This casting to simulate the values from the database
+        [$vatOfChargeAmount] = $this->getVatAmount->handle($chargeAmount);
+        [$vatOfOrderCost] = $this->getVatAmount->handle($company->order_cost);
 
-        $chargeAmountWithoutVat = money($chargeAmount)->subtract($vatOfChargeAmount);
+        $orderCost = $company->order_cost->add($vatOfOrderCost)->formatByDecimal();
+        $orderCount = $chargeAmount->divide($orderCost)->formatByDecimal();
 
-        $orderCost = $company->order_cost->add($vatOfOrderCost)->getAmount();
-        $orderCount = \money($chargeAmount)->divide($orderCost, Money::ROUND_DOWN)->getAmount();
+        $chargeAmountWithoutVat = $chargeAmount->subtract($vatOfChargeAmount)->formatByDecimal();
 
-        return [$chargeAmountWithoutVat->getAmount(), $orderCount];
-    }
-
-    private function getVatAmount($amount): \Cknow\Money\Money
-    {
-        if (! ($amount instanceof \Cknow\Money\Money)) {
-            $amount = money($amount);
-        }
-
-        $vatRate = $this->getProjectSettings->handle()->getVatRate();
-
-        return $amount->multiply($vatRate);
+        return [$chargeAmountWithoutVat, round($orderCount, mode: PHP_ROUND_HALF_DOWN)];
     }
 }
