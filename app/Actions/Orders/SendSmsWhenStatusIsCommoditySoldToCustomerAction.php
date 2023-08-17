@@ -76,7 +76,7 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
 
         $documentShortUrl = $documentUrl;
         if (app()->isProduction() && ! empty($documentUrl)) {
-            $documentShortUrl = Bitly::getUrl($documentUrl);
+            // $documentShortUrl = Bitly::getUrl($documentUrl);
         }
 
         return $documentShortUrl;

@@ -54,7 +54,7 @@ class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatu
 
         $documentShortUrl = $documentUrl;
         if (app()->isProduction() && ! empty($documentUrl)) {
-            $documentShortUrl = Bitly::getUrl($documentUrl);
+            // $documentShortUrl = Bitly::getUrl($documentUrl);
         }
 
         return $documentShortUrl;
