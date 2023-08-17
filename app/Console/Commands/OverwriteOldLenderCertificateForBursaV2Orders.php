@@ -23,7 +23,7 @@ class OverwriteOldLenderCertificateForBursaV2Orders extends Command
      *
      * @var string
      */
-    protected $signature = 'bursa:regenerate-lender-certs';
+    protected $signature = 'bursam:regenerate-lender-certs';
 
     /**
      * The console command description.
