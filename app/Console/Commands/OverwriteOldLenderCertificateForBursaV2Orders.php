@@ -121,6 +121,8 @@ class OverwriteOldLenderCertificateForBursaV2Orders extends Command
                 });
             });
 
+        $this->line(sprintf('Failed orders %s', implode(', ', $this->failedOrdersIds)));
+
         return Command::SUCCESS;
     }
 }
