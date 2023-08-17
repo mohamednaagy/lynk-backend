@@ -21,19 +21,7 @@ class OverwriteOldLenderCertificateForBursaV2Orders implements ShouldQueue
 {
     use Localizable, TraderHelperTrait, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'bursam:regenerate-lender-certs';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Overwrite old lender certs to have supplier as field';
+    public $tries = 1;
 
     public function __construct(protected $traderOrderId)
     {
