@@ -102,6 +102,13 @@ class OverwriteOldLenderCertificateForBursaV2Orders implements ShouldQueue
                     $traderOrder,
                     TraderOrderMediaCollection::TransferOwnershipToLender
                 );
+
+                $media = $traderOrder->getMedia(TraderOrderMediaCollection::TransferOwnershipToLender);
+
+                $media->last()->update([
+                    'created_at' => $timeInstanceInUtcTz,
+                    'updated_at' => $timeInstanceInUtcTz,
+                ]);
             });
         });
     }
