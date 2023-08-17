@@ -34,7 +34,7 @@ class BursamRetrieveOrderCertificatesCommand extends Command
             $this->error("Trader order with ID: $traderOrderId not found!");
         } else {
 
-            ProcessRetrieveOrderCertificates::dispatch($traderOrderId);
+            ProcessRetrieveOrderCertificates::dispatchSync($traderOrderId);
 
             $this->info('The command was successful!');
         }

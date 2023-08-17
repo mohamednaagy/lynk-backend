@@ -3,7 +3,6 @@
 namespace App\Jobs\General;
 
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -34,12 +33,13 @@ class ProcessRetrieveOrderCertificates implements ShouldQueue
      */
     public function handle(): void
     {
-        $traderOrder = TraderOrder::query()->findOrFail($this->traderOrderId);
-        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
+        $traderOrder = TraderOrder::query()->find($this->traderOrderId);
 
-        if ($traderOrder->status->isNot(TraderOrderStatus::Completed)) {
-            return;
+        if (! $traderOrder) {
+            $this->delete();
         }
+
+        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
 
         if (! $traderOrder->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)) {
             $trader->getBidCertificateDetails($traderOrder);
