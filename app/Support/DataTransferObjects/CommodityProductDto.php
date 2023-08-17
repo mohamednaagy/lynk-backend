@@ -10,7 +10,7 @@ class CommodityProductDto
         protected string $product,
         protected string $quantity,
         protected $amount,
-        protected string $previous_owner,
+        protected string|array $previous_owner,
         protected string $date_time_of_purchasing_commodity,
         protected string $uom = '--',
         protected ?string $warehouse = null,
@@ -60,6 +60,18 @@ class CommodityProductDto
     public function getPreviousOwner(): string
     {
         return $this->previous_owner;
+    }
+
+    public function getPreviousOwnerAsArray(): array
+    {
+        return is_array($this->previous_owner)
+            ? $this->previous_owner
+            : [$this->previous_owner];
+    }
+
+    public function getImplodedPreviousOwner($separator = ','): string
+    {
+        return implode($separator, $this->getPreviousOwnerAsArray());
     }
 
     public static function fromArray(array $data): CommodityProductDto
