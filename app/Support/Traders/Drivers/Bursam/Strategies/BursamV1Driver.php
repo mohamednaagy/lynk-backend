@@ -214,12 +214,13 @@ class BursamV1Driver implements TraderInterface
                     product: $response->json('PNAME'),
                     quantity: $response->json('PVOLUME'),
                     amount: $response->json('TOTALVALUE'),
-                    previous_owner: $response->json('OWNER'),
+                    previous_owner: $response->json('LINE.0.SUPPLIER'),
                     date_time_of_purchasing_commodity: $response->json('PURCHASETIMEDATE'),
                     uom: collect($traderOrder->original_data)->get('unit'),
                     currency: $response->json('CURRENCY')
                 ))->toArray(),
             ],
+            'bidXML' => $response->json(),
         ]);
 
         $productName = $response->json('PNAME');
@@ -485,6 +486,10 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
+        $traderOrder->update([
+            'otcXML' => $response->json(),
+        ]);
+
         $currentTimeInUtcTz = CarbonImmutable::now();
         $productName = $response->json('PNAME');
         $otcOwnerShipTemplate = view('bursam-templates.otc-certificate-template', [
@@ -550,6 +555,10 @@ class BursamV1Driver implements TraderInterface
                 ]
             );
         }
+
+        $traderOrder->update([
+            'stbXML' => $response->json(),
+        ]);
 
         $currentTimeInUtcTz = CarbonImmutable::now();
         $productName = $response->json('PNAME');
