@@ -59,7 +59,7 @@ class OverwriteOldLenderCertificateForBursaV2Orders implements ShouldQueue
         );
 
         if ($response->json('SUCCESSYN') == 'N') {
-            throw new \Exception(sprintf('Trader order failed %', $traderOrder->id));
+            throw new \Exception(sprintf('Trader order failed %s', $traderOrder->id));
         }
 
         DB::transaction(function () use ($traderOrder, $response) {
