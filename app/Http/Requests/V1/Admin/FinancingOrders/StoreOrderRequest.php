@@ -3,8 +3,10 @@
 namespace App\Http\Requests\V1\Admin\FinancingOrders;
 
 use App\Http\Requests\Traits\RequestHasMobileVerification;
+use App\Models\Company;
 use App\Rules\ValidateSAID;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreOrderRequest extends FormRequest
 {
@@ -28,7 +30,7 @@ class StoreOrderRequest extends FormRequest
     public function rules()
     {
         return [
-            'company_id' => ['required', 'exists:companies,id'],
+            'company_id' => ['required', Rule::exists(Company::class, 'id')],
             'customer_name' => ['required', 'string', 'max:255'],
             'reference_number' => ['nullable', 'string', 'max:100'],
             'national_id' => ['required', 'string', 'size:10', new ValidateSAID()],
