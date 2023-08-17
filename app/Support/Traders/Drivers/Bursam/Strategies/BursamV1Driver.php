@@ -23,6 +23,7 @@ use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -214,13 +215,13 @@ class BursamV1Driver implements TraderInterface
                     product: $response->json('PNAME'),
                     quantity: $response->json('PVOLUME'),
                     amount: $response->json('TOTALVALUE'),
-                    previous_owner: $response->json('LINE.0.SUPPLIER'),
+                    previous_owner: Arr::pluck($response->json('LINE'), 'SUPPLIER'),
                     date_time_of_purchasing_commodity: $response->json('PURCHASETIMEDATE'),
                     uom: collect($traderOrder->original_data)->get('unit'),
                     currency: $response->json('CURRENCY')
                 ))->toArray(),
             ],
-            'bidXML' => $response->json(),
+            'original_bid' => $response->json(),
         ]);
 
         $productName = $response->json('PNAME');
@@ -487,7 +488,7 @@ class BursamV1Driver implements TraderInterface
         }
 
         $traderOrder->update([
-            'otcXML' => $response->json(),
+            'otc_data' => $response->json(),
         ]);
 
         $currentTimeInUtcTz = CarbonImmutable::now();
@@ -557,7 +558,7 @@ class BursamV1Driver implements TraderInterface
         }
 
         $traderOrder->update([
-            'stbXML' => $response->json(),
+            'original_stb' => $response->json(),
         ]);
 
         $currentTimeInUtcTz = CarbonImmutable::now();

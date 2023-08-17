@@ -10,7 +10,7 @@ class CommodityProductDto
         protected string $product,
         protected string $quantity,
         protected $amount,
-        protected string $previous_owner,
+        protected string|array $previous_owner,
         protected string $date_time_of_purchasing_commodity,
         protected string $uom = '--',
         protected ?string $warehouse = null,
