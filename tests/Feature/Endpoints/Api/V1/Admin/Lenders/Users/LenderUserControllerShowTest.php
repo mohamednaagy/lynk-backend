@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
+namespace Endpoints\Api\V1\Admin\Lenders\Users;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -36,8 +36,6 @@ class LenderUserControllerShowTest extends TestCase
     private static string $endpoint;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -54,9 +52,6 @@ class LenderUserControllerShowTest extends TestCase
         self::$endpoint = 'api/v1/admin/lenders/'.self::$lender->id.'/users/';
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_show_lender_user(): void
     {
         $this->getJson(self::$endpoint.self::$userLenderAdmin->id)
@@ -66,9 +61,6 @@ class LenderUserControllerShowTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_admin_user_can_show_lender_user(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -90,9 +82,6 @@ class LenderUserControllerShowTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_manager_user_can_show_lender_user(): void
     {
         $this->actingAs(self::$userManager)
@@ -114,9 +103,6 @@ class LenderUserControllerShowTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_manager_user_without_permissions_cant_show_lender_user(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
@@ -126,9 +112,6 @@ class LenderUserControllerShowTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_admin_user_cant_show_lender_api_user(): void
     {
         $this->actingAs(self::$userAdmin)

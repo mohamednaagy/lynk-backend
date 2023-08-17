@@ -7,6 +7,7 @@ use App\Enums\Subject;
 use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
+use App\Http\Controllers\Api\V1\Admin\Auth\ResendAdminInvitation;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
@@ -39,6 +40,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabaha
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabhaCompleteDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodity;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateOrderPaymentProof;
+use App\Http\Controllers\Api\V1\Admin\Lenders\ResendInvitationToUser as ResendLenderInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
@@ -46,7 +48,7 @@ use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\LenderSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
-use App\Http\Controllers\Api\V1\Admin\Traders\ResendInvitationToUser;
+use App\Http\Controllers\Api\V1\Admin\Traders\ResendInvitationToUser as ResendTraderInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
 use App\Http\Controllers\Api\V1\Admin\Traders\UpdateTraderStatus;
@@ -69,6 +71,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::put('auth/profile', UpdateMyProfile::class);
 
+        Route::post('admins/{admin}/resend-invitation', ResendAdminInvitation::class);
         Route::apiResource('admins', AdminController::class);
 
         Route::get('/roles', GetAllRoles::class)->middleware(
@@ -102,6 +105,10 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/{lender}/settings ', GetLenderSetting::class);
         });
 
+        Route::prefix('lenders')->group(function () {
+            Route::post('{lender}/users/{user}/resend-invitation', ResendLenderInvitationToUser::class);
+        });
+
         Route::apiResource('lenders', LenderController::class);
         Route::apiResource('lenders.users', LenderUserController::class)->scoped();
 
@@ -131,7 +138,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             ->only('index', 'show', 'store', 'update');
 
         Route::prefix('traders')->group(function () {
-            Route::post('{trader}/users/{user}/resend-invitation', ResendInvitationToUser::class);
+            Route::post('{trader}/users/{user}/resend-invitation', ResendTraderInvitationToUser::class);
             Route::put('/{trader}/status', UpdateTraderStatus::class);
         });
 
