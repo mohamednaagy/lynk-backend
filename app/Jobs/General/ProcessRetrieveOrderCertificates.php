@@ -37,6 +37,8 @@ class ProcessRetrieveOrderCertificates implements ShouldQueue
 
         if (! $traderOrder) {
             $this->delete();
+
+            return;
         }
 
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
