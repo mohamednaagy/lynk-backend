@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Enums\FinancingOrderStatus;
+use App\Models\FinancingOrder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Traits\Localizable;
@@ -16,6 +17,7 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping
 
     protected array $headings = [
         'id' => 'ID',
+        'reference_number' => 'Reference Number',
         'amount' => 'Commodity Price (SAR)',
         'selling_price' => 'Selling Price (SAR)',
         'national_id' => 'National ID / Iqama',
@@ -48,10 +50,14 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping
         return $this;
     }
 
+    /**
+     * @param  FinancingOrder  $order
+     */
     public function map($order): array
     {
         $items = $this->filterExcludes([
             'id' => fn () => $order->id,
+            'reference_number' => fn () => $order->reference_number,
             'amount' => fn () => $order->amount->formatByDecimal(),
             'selling_price' => fn () => $order->selling_price->formatByDecimal(),
             'national_id' => fn () => $order->national_id,

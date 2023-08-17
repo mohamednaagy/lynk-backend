@@ -32,7 +32,7 @@ class ExportOrders extends Controller
         ])
             ->handle();
 
-        $export = (new FinancingOrdersExport($request, $query));
+        $export = (new FinancingOrdersExport($request, $query))->setExcludes(['reference_number']);
 
         return Excel::download($export, $this->getFileName($request), null, [
             'X-File-Name' => $this->getFileName($request),
