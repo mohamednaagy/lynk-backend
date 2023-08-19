@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Enums\TransactionReason;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -278,10 +279,17 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         $orderIsPendingTraderOrder = $this->status->is(FinancingOrderStatus::PendingTraderOrder);
         $bursamTraderServiceAvailability = $this->isBursamTraderServiceAvailable();
 
-        return ($orderIsNotCompleted && $doesNotHaveInActiveOrder
-            && $financingOrderIsNotCancelled && $financingOrderIsNotPendingCancelled
-            && $bursamTraderServiceAvailability)
-            || ($orderIsPendingTraderOrder && $orderIsNotCompleted && $bursamTraderServiceAvailability);
+        return
+            ($orderIsNotCompleted && $doesNotHaveInActiveOrder
+                && $financingOrderIsNotCancelled && $financingOrderIsNotPendingCancelled
+                && $bursamTraderServiceAvailability)
+            || ($orderIsPendingTraderOrder && $orderIsNotCompleted && $bursamTraderServiceAvailability)
+            && $this->isTradingMode(TraderOrderMode::Automatic);
+    }
+
+    public function isTradingMode(TraderOrderMode|string $mode)
+    {
+        return $this->company->trading_mode->is($mode);
     }
 
     /**
@@ -292,9 +300,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
      */
     public function isBursamTraderServiceAvailable()
     {
-        return config('trader.default') != 'bursam'
-            ? true
-            : is_bursam_service_available();
+        return config('trader.default') != 'bursam' || is_bursam_service_available();
     }
 
     public function isCancellable($area)

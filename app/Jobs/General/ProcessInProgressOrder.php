@@ -6,6 +6,7 @@ use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
+use App\Exceptions\BalanceIsNotEnoughException;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -54,7 +55,11 @@ class ProcessInProgressOrder implements ShouldQueue
                 return;
             }
 
-            app(CanCreateOrder::class)->handle($financingOrder->company);
+            try {
+                app(CanCreateOrder::class)->handle($financingOrder->company);
+            } catch (BalanceIsNotEnoughException $e) {
+                return;
+            }
 
             $traderOrder = $trader->createTraderOrder($financingOrder);
 
