@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\CompleteOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\RetryProceedOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrderController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\CancelTraderOrder;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\Commodities\OpenMarketProductController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabahaPurchaseOffer;
@@ -139,6 +140,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::get('product-codes', [ProductCodeCacheController::class, 'index']);
         Route::delete('product-codes', [ProductCodeCacheController::class, 'delete']);
+        Route::apiResource('open-market-products', OpenMarketProductController::class);
 
         Route::apiResource('traders', TraderController::class)
             ->only(['index', 'store', 'show', 'update']);

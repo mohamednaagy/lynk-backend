@@ -63,7 +63,7 @@ class BursamV1Driver implements TraderInterface
     {
         /** @var TraderOrder $traderOrder */
         $traderOrder = $this->getOrInitiateTraderOrder($financingOrder);
-        $productCode = $this->getUnusedProductCode();
+        $productCode = $this->getUnusedProductCode($traderOrder->provider);
 
         $response = Http::bursam()->post(
             'api/process/svc/bsas/order.json',
