@@ -17,14 +17,14 @@ class FinancingOrderCollection extends Collection
 
         $totalOrderCost = Transaction::select(['meta->financing_order_id as order_id',
             DB::raw('SUM(CASE WHEN reason = '.TransactionReason::OrderCreationFee.' THEN amount ELSE  -1 * amount END) as amount')])
-            ->whereIn('meta->financing_order_id', [108])
+            ->whereIn('meta->financing_order_id', $ids)
             ->whereIn('reason', [TransactionReason::OrderCreationFee, TransactionReason::RefundOrderCreationFee])
             ->groupBy('order_id')
             ->get();
 
         $totalOrderVat = Transaction::select(['meta->financing_order_id as order_id',
             DB::raw('SUM(CASE WHEN reason = '.TransactionReason::VatPercentageFee.' THEN amount ELSE  -1 * amount END) as amount')])
-            ->whereIn('meta->financing_order_id', [108])
+            ->whereIn('meta->financing_order_id', $ids)
             ->whereIn('reason', [TransactionReason::VatPercentageFee, TransactionReason::RefundVatPercentageFee])
             ->groupBy('order_id')
             ->get();
