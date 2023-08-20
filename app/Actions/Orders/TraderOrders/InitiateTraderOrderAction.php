@@ -18,7 +18,7 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
             ->lockForUpdate()
             ->findOrFail($orderId);
 
-        if (! $financingOrder->canCreateTraderOrder()) {
+        if (! $financingOrder->canCreateTraderOrder(request()->user())) {
             throw new OrderAlreadyHasActiveTraderOrderException;
         }
 

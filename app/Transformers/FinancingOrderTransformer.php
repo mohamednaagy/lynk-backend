@@ -265,7 +265,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCanCreateTraderOrder(FinancingOrder $financingOrder): Primitive
     {
-        return $this->primitive($financingOrder->canCreateTraderOrder());
+        return $this->primitive($financingOrder->canCreateTraderOrder(request()->user()));
     }
 
     public function setArea($area)
