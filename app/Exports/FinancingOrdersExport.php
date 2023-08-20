@@ -4,14 +4,16 @@ namespace App\Exports;
 
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
+use App\Support\Collections\FinancingOrderCollection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Traits\Localizable;
 use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping
+class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize
 {
     use Localizable;
 
@@ -24,7 +26,10 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping
         'order_owner' => 'Order Owner',
         'company_name' => 'Company Name',
         'status' => 'Status',
-        'created_at' => 'Created Date',
+        'created_date' => 'Created Date',
+        'created_time' => 'Created Time',
+        'cost_with_vat' => 'Cost With Vat (SAR)',
+        'cost_without_vat' => 'Cost Without Vat (SAR)',
     ];
 
     protected $excludes = [];
@@ -68,14 +73,35 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping
                 || is_null($order->current_step)
                     ? $order->status->description : $order->current_step->description;
             }),
-            'created_at' => fn () => $order->created_at->tz('Asia/Riyadh')->format('Y-m-d H:i:s'),
+            'created_date' => fn () => $order->created_at->clone()->tz('Asia/Riyadh')->format('Y-m-d'),
+            'created_time' => fn () => $order->created_at->clone()->tz('Asia/Riyadh')->format('H:i:s'),
+            'cost_with_vat' => fn () => number_format($order->cost_with_vat?->formatByDecimal(), 2),
+            'cost_without_vat' => fn () => number_format($order->cost_without_vat?->formatByDecimal(), 2),
         ]);
 
         return array_map(fn ($item) => $item(), $items);
     }
 
+    public function prepareRows($orders)
+    {
+        if (! $this->isDetailedExport()) {
+            return $orders;
+        }
+
+        return (new FinancingOrderCollection($orders))->loadCost();
+    }
+
     protected function filterExcludes($items)
     {
+        if ($this->isDetailedExport()) {
+            $this->excludes = [];
+        } else {
+            $this->excludes = array_merge($this->excludes, [
+                'cost_with_vat',
+                'cost_without_vat',
+            ]);
+        }
+
         return array_values(
             array_filter(
                 $items,
@@ -83,5 +109,10 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping
                 ARRAY_FILTER_USE_BOTH
             )
         );
+    }
+
+    protected function isDetailedExport(): bool
+    {
+        return $this->request->boolean('detailed');
     }
 }
