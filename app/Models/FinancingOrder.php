@@ -279,12 +279,12 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         $orderIsPendingTraderOrder = $this->status->is(FinancingOrderStatus::PendingTraderOrder);
         $bursamTraderServiceAvailability = $this->isBursamTraderServiceAvailable();
 
-        return
+        return (
             ($orderIsNotCompleted && $doesNotHaveInActiveOrder
                 && $financingOrderIsNotCancelled && $financingOrderIsNotPendingCancelled
                 && $bursamTraderServiceAvailability)
             || ($orderIsPendingTraderOrder && $orderIsNotCompleted && $bursamTraderServiceAvailability)
-            && $this->isTradingMode(TraderOrderMode::Automatic);
+        ) && $this->isTradingMode(TraderOrderMode::Automatic);
     }
 
     public function isTradingMode(TraderOrderMode|string $mode)
