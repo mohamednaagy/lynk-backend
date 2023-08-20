@@ -2,11 +2,11 @@
 
 namespace App\Actions\Companies;
 
-use App\Actions\Contracts\Companies\GetVatAmount;
+use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use Cknow\Money\Money;
 
-class GetVatAmountAction implements GetVatAmount
+class CalculateVatAmountAction implements CalculateVatAmount
 {
     public function __construct(
         protected GetProjectSettings $getProjectSettings

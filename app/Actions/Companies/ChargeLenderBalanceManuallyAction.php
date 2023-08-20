@@ -2,8 +2,8 @@
 
 namespace App\Actions\Companies;
 
+use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\Companies\ChargeLenderBalanceManually;
-use App\Actions\Contracts\Companies\GetVatAmount;
 use App\Actions\Contracts\Lenders\CalculateAmountWithVat;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\CreateTransactions;
@@ -27,7 +27,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
         protected CreateTransactions $createTransactions,
         protected GenerateVoucherReceipt $generateVoucherReceipt,
         protected GenerateZatcaInvoice $generateZatcaInvoice,
-        protected GetVatAmount $getVatAmount,
+        protected CalculateVatAmount $calculateVatAmount,
         protected GetProjectSettings $getProjectSettings,
         protected CalculateAmountWithVat $calculateAmountWithVat
     ) {
@@ -37,7 +37,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
     {
         $wallet = $company->getWallet(WalletType::CompanyWallet);
         $totalAmount = Money::parseByDecimal(Arr::get($data, 'amount'), $wallet->currency);
-        [$vatAmount, $vatRate] = $this->getVatAmount->handle($totalAmount);
+        [$vatAmount, $vatRate] = $this->calculateVatAmount->handle($totalAmount);
 
         $transaction = $this->createTransactions->handle(
             $wallet,
@@ -60,7 +60,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
         );
 
         $invoiceSpecs = $this->getInvoiceSpecs($vatTransaction, $company, (int) $totalAmount->formatByDecimal(), $vatAmount, $vatRate);
-        $this->generateZatcaInvoice->handle($invoiceSpecs);
+        $this->generateZatcaInvoice->handle($invoiceSpecs, TransactionMediaCollection::RechargeReceipt);
 
         return $transaction;
     }
@@ -73,8 +73,8 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
             $transaction->getKey(),
             $transaction,
             $this->getProjectSettings->handle()->getCompanyName(Config::get('app.locale', 'en')),
-            $transaction->getKey(),
-            $transaction->created_at->timezone('Asia/Riyadh')->toDateTimeString(),
+            $this->getProjectSettings->handle()->getVatId(),
+            $transaction->created_at,
             $transaction->amount->formatByDecimal(),
             $vatAmount->formatByDecimal(),
             new Order(

@@ -22,15 +22,12 @@ class LenderTransactionController extends Controller
         )->only('index');
     }
 
-    /**
-     * @param  Company  $lender
-     * @return JsonResponse
-     */
     public function index(Company $lender): JsonResponse
     {
         $transactions = $lender->transactions(WalletType::CompanyWallet)
             ->with([
-                'media' => fn ($query) => $query->where('collection_name', TransactionMediaCollection::VoucherReceipt),
+                'media' => fn ($query) => $query->where('collection_name', TransactionMediaCollection::VoucherReceipt)
+                    ->orWhere('collection_name', TransactionMediaCollection::RechargeReceipt),
             ])
             ->paginate();
 

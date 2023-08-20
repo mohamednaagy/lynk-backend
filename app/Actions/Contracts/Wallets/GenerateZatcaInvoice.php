@@ -6,5 +6,5 @@ use App\Support\ZatcaEInvoice\InvoiceSpecs;
 
 interface GenerateZatcaInvoice
 {
-    public function handle(InvoiceSpecs $invoiceSpecs);
+    public function handle(InvoiceSpecs $invoiceSpecs, $mediaCollection);
 }

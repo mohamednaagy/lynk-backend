@@ -4,7 +4,7 @@ namespace App\Actions\Contracts\Companies;
 
 use App\Support\Money\Money;
 
-interface GetVatAmount
+interface CalculateVatAmount
 {
     public function handle(Money $amount): array;
 }

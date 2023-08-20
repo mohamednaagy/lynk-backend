@@ -24,14 +24,14 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
     {
     }
 
-    public function handle(InvoiceSpecs $invoiceSpecs)
+    public function handle(InvoiceSpecs $invoiceSpecs, $mediaCollection)
     {
         $displayQRCodeAsBase64 = GenerateQrCode::fromArray([
             new Seller($invoiceSpecs->getSeller()),
             new TaxNumber($invoiceSpecs->getTaxNumber()),
             new InvoiceDate($invoiceSpecs->getDate()),
-            new InvoiceTotalAmount($invoiceSpecs->getTotalAmount()),
-            new InvoiceTaxAmount($invoiceSpecs->getTaxAmount()),
+            new InvoiceTotalAmount($invoiceSpecs->getTotalAmountWithVat()),
+            new InvoiceTaxAmount($invoiceSpecs->getVatAmount()),
         ])->render();
 
         $html = view($this->getTemplate(), [
@@ -44,10 +44,10 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
 
         PdfGenerator::outputFromHtml(
             $html,
-            function ($fileResource) use ($invoiceSpecs) {
-                return $invoiceSpecs->getAssociatedModel()->addMediaFromStream($fileResource)
-                    ->usingFileName("simplified-invoice-{$invoiceSpecs->getKey()}".'.pdf')
-                    ->toMediaCollection($this->getCollectionName());
+            function ($fileResource) use ($invoiceSpecs, $mediaCollection) {
+                return $invoiceSpecs->getTransaction()->addMediaFromStream($fileResource)
+                    ->usingFileName("simplified-invoice-{$invoiceSpecs->getInvoiceId()}".'.pdf')
+                    ->toMediaCollection($mediaCollection);
             }
         );
     }
@@ -55,10 +55,5 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
     public function getTemplate()
     {
         return $this->template;
-    }
-
-    public function getCollectionName()
-    {
-        return $this->collectionName;
     }
 }

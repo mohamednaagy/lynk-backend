@@ -23,9 +23,9 @@ class CalculateChargeAmount extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Company $lender, int $amount, CalculateAmountWithVat $calculateAmountWithVat): JsonResponse
+    public function __invoke(Company $lender, int $amountWithVat, CalculateAmountWithVat $calculateAmountWithVat): JsonResponse
     {
-        [$amountWithoutVat, $orderCount] = $calculateAmountWithVat->handle($lender, $amount);
+        [$amountWithoutVat, $orderCount] = $calculateAmountWithVat->handle($lender, $amountWithVat);
 
         return $this->successResponse(data: [
             'amount_without_vat' => $amountWithoutVat,

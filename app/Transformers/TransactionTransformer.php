@@ -59,6 +59,10 @@ class TransactionTransformer extends TransformerAbstract
             return $this->primitive(
                 $transaction->getFirstMedia(TransactionMediaCollection::VoucherReceipt)?->file_url
             );
+        } elseif (in_array($transaction->reason, [TransactionReason::VatPercentageOnDeposit])) {
+            return $this->primitive(
+                $transaction->getFirstMedia(TransactionMediaCollection::RechargeReceipt)?->file_url
+            );
         }
 
         return $this->null();

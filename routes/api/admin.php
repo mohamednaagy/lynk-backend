@@ -99,7 +99,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::put('/{lender}/status', UpdateLenderStatus::class);
             Route::get('/{lender}/balance ', GetLenderBalance::class);
             Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
-            Route::get('/{lender}/calculate-balance/{amount}', CalculateChargeAmount::class)
+            Route::get('/{lender}/calculate-balance/{amount_with_vat}', CalculateChargeAmount::class)
                 ->whereNumber('amount');
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);

@@ -9,5 +9,5 @@ interface CalculateAmountWithVat
     /**
      * Create new user.
      */
-    public function handle(Company $company, int $chargeAmount): array;
+    public function handle(Company $company, int $chargeAmountWithVat): array;
 }

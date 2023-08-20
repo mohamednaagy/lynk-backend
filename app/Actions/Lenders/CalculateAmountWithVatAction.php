@@ -2,7 +2,7 @@
 
 namespace App\Actions\Lenders;
 
-use App\Actions\Contracts\Companies\GetVatAmount;
+use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\Lenders\CalculateAmountWithVat;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Models\Company;
@@ -12,7 +12,7 @@ class CalculateAmountWithVatAction implements CalculateAmountWithVat
 {
     public function __construct(
         protected GetProjectSettings $getProjectSettings,
-        protected GetVatAmount $getVatAmount
+        protected CalculateVatAmount $calculateVatAmount
     ) {
     }
 
@@ -21,17 +21,17 @@ class CalculateAmountWithVatAction implements CalculateAmountWithVat
      *
      * @return array $user
      */
-    public function handle(Company $company, int $chargeAmount): array
+    public function handle(Company $company, int $chargeAmountWithVat): array
     {
-        $chargeAmount = Money::SAR($chargeAmount, true); // This casting to simulate the values from the database
-        [$vatOfChargeAmount] = $this->getVatAmount->handle($chargeAmount);
-        [$vatOfOrderCost] = $this->getVatAmount->handle($company->order_cost);
+        $chargeAmountWithVatMoney = Money::SAR($chargeAmountWithVat, true); // This casting to simulate the values from the database
+        [$vatOfChargeAmount] = $this->calculateVatAmount->handle($chargeAmountWithVatMoney);
+        [$vatOfOrderCost] = $this->calculateVatAmount->handle($company->order_cost);
 
         $orderCost = $company->order_cost->add($vatOfOrderCost)->formatByDecimal();
-        $orderCount = $chargeAmount->divide($orderCost)->formatByDecimal();
+        $orderCount = $chargeAmountWithVatMoney->divide($orderCost)->formatByDecimal();
 
-        $chargeAmountWithoutVat = $chargeAmount->subtract($vatOfChargeAmount)->formatByDecimal();
+        $chargeAmountWithoutVat = $chargeAmountWithVatMoney->subtract($vatOfChargeAmount)->formatByDecimal();
 
-        return [$chargeAmountWithoutVat, (int) $orderCount];
+        return [$chargeAmountWithoutVat, floor($orderCount)];
     }
 }

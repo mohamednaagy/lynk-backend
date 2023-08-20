@@ -5,6 +5,7 @@ namespace App\Actions\Wallets;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\GenerateTraderOrderInvoice;
 use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\TraderOrder;
 use App\Models\Transaction;
 use App\Support\ZatcaEInvoice\InvoiceSpecs;
@@ -28,7 +29,7 @@ class GenerateTraderOrderInvoiceAction implements GenerateTraderOrderInvoice
         $financingOrder->load([
             'company' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
         ]);
-        $company = $financingOrder->company()->withTrashed()->first();
+        $company = $financingOrder->company;
         $vatAmount = $company->order_cost->multiply($seller->getVatRate());
 
         $order = new Order(
@@ -51,14 +52,14 @@ class GenerateTraderOrderInvoiceAction implements GenerateTraderOrderInvoice
             $traderOrder,
             $seller->getCompanyName(Config::get('app.locale', 'en')),
             $seller->getVatId(),
-            $traderOrder->created_at->timezone('Asia/Riyadh')->toDateTimeString(),
+            $traderOrder->created_at,
             $company->order_cost->add($vatAmount)->formatByDecimal(),
             $vatAmount->formatByDecimal(),
             $order,
-            $company,
+            $company->name,
             $creationFeeTransaction
         );
 
-        $this->generateZatcaInvoice->handle($invoiceSpecs);
+        $this->generateZatcaInvoice->handle($invoiceSpecs, TraderOrderMediaCollection::ZatcaInvoice);
     }
 }

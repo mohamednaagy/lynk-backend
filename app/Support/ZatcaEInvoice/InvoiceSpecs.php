@@ -3,20 +3,21 @@
 namespace App\Support\ZatcaEInvoice;
 
 use App\Models\Transaction;
+use Carbon\Carbon;
 use Spatie\MediaLibrary\HasMedia;
 
 class InvoiceSpecs
 {
     public function __construct(
-        protected string $key,
+        protected string $invoiceId,
         protected HasMedia $associatedModel,
-        protected string $seller,
+        protected string $sellerName,
         protected string $taxNumber,
-        protected $date,
-        protected $totalAmount,
-        protected $taxAmount,
+        protected Carbon $date,
+        protected $totalAmountWithVat,
+        protected $vatAmount,
         protected Order $order,
-        protected string $buyer,
+        protected string $buyerName,
         protected Transaction $transaction
     ) {
     }
@@ -26,14 +27,14 @@ class InvoiceSpecs
         return $this->associatedModel;
     }
 
-    public function getKey(): string
+    public function getInvoiceId(): string
     {
-        return $this->key;
+        return $this->invoiceId;
     }
 
     public function getSeller(): string
     {
-        return $this->seller;
+        return $this->sellerName;
     }
 
     public function getTaxNumber(): string
@@ -43,17 +44,17 @@ class InvoiceSpecs
 
     public function getDate()
     {
-        return $this->date;
+        return $this->date->timezone('Asia/Riyadh')->toDateTimeString();
     }
 
-    public function getTotalAmount()
+    public function getTotalAmountWithVat()
     {
-        return $this->totalAmount;
+        return $this->totalAmountWithVat;
     }
 
-    public function getTaxAmount()
+    public function getVatAmount()
     {
-        return $this->taxAmount;
+        return $this->vatAmount;
     }
 
     public function getOrder(): Order
@@ -63,7 +64,7 @@ class InvoiceSpecs
 
     public function getBuyer(): string
     {
-        return $this->buyer;
+        return $this->buyerName;
     }
 
     public function getTransaction(): Transaction
