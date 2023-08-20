@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\Role;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Enums\TransactionReason;
@@ -284,7 +285,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
                 && $financingOrderIsNotCancelled && $financingOrderIsNotPendingCancelled
                 && $bursamTraderServiceAvailability)
             || ($orderIsPendingTraderOrder && $orderIsNotCompleted && $bursamTraderServiceAvailability)
-        ) && $this->isTradingMode(TraderOrderMode::Automatic);
+        ) && ($this->isTradingMode(TraderOrderMode::Automatic) || auth()->user()?->hasRole([Role::Admin, Role::Manager]));
     }
 
     public function isTradingMode(TraderOrderMode|string $mode)
