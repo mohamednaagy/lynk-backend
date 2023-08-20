@@ -36,7 +36,7 @@ class ExportOrders extends Controller
             ->handle();
 
         $export = (new FinancingOrdersExport($request, $query))
-            ->setExcludes(['company_name', 'created_at', 'order_owner']);
+            ->setExcludes(['company_name', 'created_date', 'created_time', 'order_owner']);
 
         return Excel::download($export, $this->getFileName(), null, [
             'X-File-Name' => $this->getFileName(),
