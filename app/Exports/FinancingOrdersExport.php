@@ -75,8 +75,8 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
             }),
             'created_date' => fn () => $order->created_at->clone()->tz('Asia/Riyadh')->format('Y-m-d'),
             'created_time' => fn () => $order->created_at->clone()->tz('Asia/Riyadh')->format('H:i:s'),
-            'cost_with_vat' => fn () => number_format($order->total_cost + $order->total_vat, 2),
-            'cost_without_vat' => fn () => number_format($order->total_cost, 0),
+            'cost_with_vat' => fn () => number_format($order->cost_with_vat?->formatByDecimal(), 2),
+            'cost_without_vat' => fn () => number_format($order->cost_wtihout_vat?->formatByDecimal(), 0),
         ]);
 
         return array_map(fn ($item) => $item(), $items);
