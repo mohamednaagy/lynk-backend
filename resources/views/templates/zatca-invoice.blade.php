@@ -747,7 +747,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 <div class="mb-1">
                     <h2 class="text-sm text-gray-600">{{ __('zatca/e-invoice.bill_to') }}</h2>
                 </div>
-                <h2 class="mb-1 font-semibold">{{ $buyer->name }}</h2>
+                <h2 class="mb-1 font-semibold">{{ $buyer }}</h2>
                 <ul class="text-xs text-gray-500">
                     {{--                <li>{{ __('zatca/e-invoice.contact_number') }}: {{ $buyer->mobile_dialing_phone_number }}</li> --}}
                 </ul>
@@ -813,7 +813,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </div>
 
                 <div class="w-2/12">
-                    <div>{{ $item->getLineTotal()->formatByDecimal() }}</div>
+                    <div>{{ $item->getLineTotalWithoutVat()->formatByDecimal() }}</div>
                 </div>
             </div>
         @endforeach

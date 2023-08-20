@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Actions\Wallets;
+
+use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
+use App\Actions\Contracts\Wallets\GenerateTraderOrderInvoice;
+use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
+use App\Models\TraderOrder;
+use App\Models\Transaction;
+use App\Support\ZatcaEInvoice\InvoiceSpecs;
+use App\Support\ZatcaEInvoice\Order;
+use App\Support\ZatcaEInvoice\PurchaseLine;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Config;
+
+class GenerateTraderOrderInvoiceAction implements GenerateTraderOrderInvoice
+{
+    public function __construct(
+        protected GetProjectSettings $getProjectSettings,
+        protected GenerateZatcaInvoice $generateZatcaInvoice,
+    ) {
+    }
+
+    public function handle(TraderOrder $traderOrder, Transaction $creationFeeTransaction)
+    {
+        $seller = $this->getProjectSettings->handle();
+        $financingOrder = $traderOrder->order;
+        $financingOrder->load([
+            'company' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
+        ]);
+        $company = $financingOrder->company()->withTrashed()->first();
+        $vatAmount = $company->order_cost->multiply($seller->getVatRate());
+
+        $order = new Order(
+            $creationFeeTransaction->reference_number,
+            [
+                new PurchaseLine(
+                    __('zatca/e-invoice.create_order_cost', [
+                        'number' => $traderOrder->getKey(),
+                    ]),
+                    $company->order_cost,
+                    $seller->getVatRateInPercentage()
+                ),
+            ],
+            $traderOrder->created_at->clone()->tz('Asia/Riyadh'),
+            $financingOrder
+        );
+
+        $invoiceSpecs = new InvoiceSpecs(
+            $traderOrder->getKey(),
+            $traderOrder,
+            $seller->getCompanyName(Config::get('app.locale', 'en')),
+            $seller->getVatId(),
+            $traderOrder->created_at->timezone('Asia/Riyadh')->toDateTimeString(),
+            $company->order_cost->add($vatAmount)->formatByDecimal(),
+            $vatAmount->formatByDecimal(),
+            $order,
+            $company,
+            $creationFeeTransaction
+        );
+
+        $this->generateZatcaInvoice->handle($invoiceSpecs);
+    }
+}

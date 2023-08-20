@@ -5,7 +5,7 @@ namespace App\Actions\Orders;
 use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Actions\Contracts\Wallets\DeductTraderOrderVatPercentage;
-use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
+use App\Actions\Contracts\Wallets\GenerateTraderOrderInvoice;
 use App\Models\TraderOrder;
 
 class DeductBalanceForNewOrderAction implements DeductBalanceForNewOrder
@@ -13,7 +13,7 @@ class DeductBalanceForNewOrderAction implements DeductBalanceForNewOrder
     public function __construct(
         protected DeductOrderCreationFee $deductOrderCreationFee,
         protected DeductTraderOrderVatPercentage $deductVatPercentage,
-        protected GenerateZatcaInvoice $generateZatcaInvoice
+        protected GenerateTraderOrderInvoice $generateZatcaInvoice
     ) {
     }
 
@@ -30,7 +30,7 @@ class DeductBalanceForNewOrderAction implements DeductBalanceForNewOrder
             $financingOrder->company()->withTrashed()->first()
         );
 
-        $this->generateZatcaInvoice->handel(
+        $this->generateZatcaInvoice->handle(
             $traderOrder,
             creationFeeTransaction: $creationFeeTransaction
         );

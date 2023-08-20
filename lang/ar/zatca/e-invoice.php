@@ -29,4 +29,5 @@ return [
     'amount_with_currency' => ':amount ريال',
     'create_order_cost' => 'رسوم إنشاء طلب تمويلي #number:',
     'vat' => 'نسبه قيمه الضريبه المضافه',
+    'recharge_balance' => 'اعاده شحن الرصيد',
 ];

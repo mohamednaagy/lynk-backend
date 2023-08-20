@@ -32,6 +32,6 @@ class CalculateAmountWithVatAction implements CalculateAmountWithVat
 
         $chargeAmountWithoutVat = $chargeAmount->subtract($vatOfChargeAmount)->formatByDecimal();
 
-        return [$chargeAmountWithoutVat, round($orderCount, mode: PHP_ROUND_HALF_DOWN)];
+        return [$chargeAmountWithoutVat, (int) $orderCount];
     }
 }

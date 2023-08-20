@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
-use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
@@ -34,14 +33,12 @@ class CreateOrderWithoutVerification extends Controller
         CreateOrderWithoutVerificationRequest $request,
         CanCreateOrder $canCreateOrder,
         CreateFinancingOrder $createFinancingOrder,
-        GenerateZatcaInvoice $generateFatoura
     ) {
         return DB::multipleTransaction(
             function () use (
                 $request,
                 $createFinancingOrder,
                 $canCreateOrder
-
             ) {
                 $company = tenant();
                 // throw exception is balance not enough

@@ -29,4 +29,5 @@ return [
     'amount_with_currency' => 'SAR :amount',
     'create_order_cost' => 'Creation charge for financing order #:number',
     'vat' => 'VAT percentage',
+    'recharge_balance' => 'Recharge the balance',
 ];
