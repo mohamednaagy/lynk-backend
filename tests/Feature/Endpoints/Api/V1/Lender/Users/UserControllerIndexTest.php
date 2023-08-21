@@ -41,9 +41,6 @@ class UserControllerIndexTest extends TestCase
 
     private static LengthAwarePaginator $lenderUsersCollection;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -66,9 +63,6 @@ class UserControllerIndexTest extends TestCase
         })->paginate();
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_index_lender_users_unsuccessful(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -79,9 +73,6 @@ class UserControllerIndexTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_can_index_lender_users_successful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -99,14 +90,12 @@ class UserControllerIndexTest extends TestCase
                         'phone_country_code',
                         'formatted_phone_number',
                         'role',
+                        'is_invitation_accepted',
                     ])->respond()
                     ->getData(true)
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_supervisor_user_cant_index_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderSupervisor)
@@ -115,9 +104,6 @@ class UserControllerIndexTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_billing_user_cant_index_lender_users_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderBilling)
@@ -126,9 +112,6 @@ class UserControllerIndexTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_api_user_cant_index_lender_users_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderApi)
@@ -137,9 +120,6 @@ class UserControllerIndexTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_order_creator_user_cant_index_lender_users_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
@@ -148,9 +128,6 @@ class UserControllerIndexTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_lender_admin_user_cant_index_lender_users_case_company_pending_unsuccessful(): void
     {
         self::$company->update([
@@ -163,9 +140,6 @@ class UserControllerIndexTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_lender_admin_user_cant_index_lender_users_case_company_under_review_unsuccessful(): void
     {
         self::$company->update([
@@ -178,9 +152,6 @@ class UserControllerIndexTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_lender_admin_user_cant_index_lender_users_case_company_rejected_unsuccessful(): void
     {
         self::$company->update([
@@ -193,9 +164,6 @@ class UserControllerIndexTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_lender_admin_user_cant_index_lender_users_case_email_not_verified_unsuccessful(): void
     {
         self::$userLenderAdmin->update([

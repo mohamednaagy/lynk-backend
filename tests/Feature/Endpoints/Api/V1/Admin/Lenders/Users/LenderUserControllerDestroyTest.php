@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
+namespace Endpoints\Api\V1\Admin\Lenders\Users;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Grantify\Facades\Grantify;
+use Tests\Feature\Endpoints\Api\V1\Admin\Lenders\BindingResolutionException;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
@@ -34,8 +35,6 @@ class LenderUserControllerDestroyTest extends TestCase
     private static string $endpoint;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -51,9 +50,6 @@ class LenderUserControllerDestroyTest extends TestCase
         self::$endpoint = 'api/v1/admin/lenders/'.self::$lender->id.'/users/';
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_delete_lender_user(): void
     {
         $this->deleteJson(self::$endpoint.(int) self::$userLenderAdmin->id)
@@ -63,9 +59,6 @@ class LenderUserControllerDestroyTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_user_can_delete_lender_user_successful(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -76,9 +69,6 @@ class LenderUserControllerDestroyTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_manager_user_can_delete_lender_user_successful(): void
     {
         $this->actingAs(self::$userManager)
@@ -89,9 +79,6 @@ class LenderUserControllerDestroyTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_manager_user_without_permissions_cant_delete_lender_user(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
@@ -101,9 +88,6 @@ class LenderUserControllerDestroyTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_user_cant_delete_lender_api_user(): void
     {
         $this->actingAs(self::$userAdmin)

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\V1\Admin\Traders;
+namespace App\Http\Requests\V1\Admin\Companies\Users;
 
 use App\Rules\HostWhitelistRule;
 use App\Rules\UrlProtocolRule;
@@ -10,8 +10,6 @@ class ResendInvitationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {

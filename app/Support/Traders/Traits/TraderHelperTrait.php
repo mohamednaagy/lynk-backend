@@ -90,10 +90,6 @@ trait TraderHelperTrait
         }
     }
 
-    /**
-     * @param $products
-     * @return Collection
-     */
     public function transformProductsToCommodityProductsDTO($products): Collection
     {
         return collect($products)->map(function ($product) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
+namespace Endpoints\Api\V1\Admin\Lenders\Users;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -17,7 +17,7 @@ use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
 
-class LenderUserControllerStoreTest extends TestCase
+class LenderUserControllerUpdateTest extends TestCase
 {
     use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
 
@@ -29,13 +29,13 @@ class LenderUserControllerStoreTest extends TestCase
 
     private static User $userManager;
 
+    private static User $userLenderAdmin;
+
     private static array $userDetails;
 
     private static string $endpoint;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -45,8 +45,9 @@ class LenderUserControllerStoreTest extends TestCase
         [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
-        $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Create]));
-        self::$endpoint = 'api/v1/admin/lenders/'.self::$lender->id.'/users';
+        $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::LenderUsers, Action::Edit]));
+
+        self::$userLenderAdmin = $this->createLenderUser(self::$lender->id, Role::LenderAdmin);
         self::$userDetails = [
             'first_name' => 'first_name',
             'last_name' => 'last_name',
@@ -56,81 +57,51 @@ class LenderUserControllerStoreTest extends TestCase
             'redirect_url' => 'http://bimventures.com',
             'role' => Role::LenderAdmin,
         ];
+        self::$endpoint = 'api/v1/admin/lenders/'.self::$lender->id.'/users/'.self::$userLenderAdmin->id;
     }
 
-    /**
-     * @return void
-     */
-    public function test_un_auth_user_cant_store_lender_user(): void
+    public function test_that_un_auth_user_cant_update_lender_user(): void
     {
-        $this->postJson(self::$endpoint, self::$userDetails)
+        $this->putJson(self::$endpoint, self::$userDetails)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
             ]);
     }
 
-    /**
-     * @return void
-     */
-    public function test_auth_admin_user_can_store_lender_user_with_valid_data_successfully(): void
+    public function test_that_auth_admin_user_can_update_lender_user_with_valid_data(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson(self::$endpoint, self::$userDetails)
+            ->putJson(self::$endpoint, self::$userDetails)
             ->assertOk()
-            ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'first_name',
-                    'last_name',
-                    'email',
-                    'phone_number',
-                    'phone_country_code',
-                    'formatted_phone_number',
-                ],
+            ->assertExactJson([
+                'data' => [],
             ]);
     }
 
-    /**
-     * @return void
-     */
-    public function test_auth_manager_user_can_store_lender_user_with_valid_data_successfully(): void
+    public function test_that_auth_manager_user_can_update_lender_user_with_valid_data(): void
     {
         $this->actingAs(self::$userManager)
-            ->postJson(self::$endpoint, self::$userDetails)
+            ->putJson(self::$endpoint, self::$userDetails)
             ->assertOk()
-            ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'first_name',
-                    'last_name',
-                    'email',
-                    'phone_number',
-                    'phone_country_code',
-                    'formatted_phone_number',
-                ],
+            ->assertExactJson([
+                'data' => [],
             ]);
     }
 
-    /**
-     * @return void
-     */
-    public function test_auth_manager_user_without_permissions_cant_store_lender_user_with_valid_data(): void
+    public function test_that_auth_manager_user_without_permissions_cant_update_lender_user_with_valid_data(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
 
         $this->actingAs(self::$userManager)
-            ->postJson(self::$endpoint, self::$userDetails)
+            ->putJson(self::$endpoint, self::$userDetails)
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
-    public function test_auth_admin_user_cant_store_lender_user_without_first_name(): void
+    public function test_that_auth_admin_user_cant_update_lender_user_without_first_name(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson(self::$endpoint, Arr::except(self::$userDetails, 'first_name'))
+            ->putJson(self::$endpoint, Arr::except(self::$userDetails, 'first_name'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The first name field is required.',
@@ -142,13 +113,10 @@ class LenderUserControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
-    public function test_auth_admin_user_cant_store_lender_user_without_last_name(): void
+    public function test_that_auth_admin_user_cant_update_lender_user_without_last_name(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson(self::$endpoint, Arr::except(self::$userDetails, 'last_name'))
+            ->putJson(self::$endpoint, Arr::except(self::$userDetails, 'last_name'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The last name field is required.',
@@ -160,13 +128,10 @@ class LenderUserControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
-    public function test_auth_admin_user_cant_store_lender_user_without_phone_country_code(): void
+    public function test_that_auth_admin_user_cant_update_lender_user_without_phone_country_code(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson(self::$endpoint, Arr::except(self::$userDetails, 'phone_country_code'))
+            ->putJson(self::$endpoint, Arr::except(self::$userDetails, 'phone_country_code'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The phone country code field is required when phone number is present. (and 1 more error)',
@@ -181,13 +146,10 @@ class LenderUserControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
-    public function test_auth_admin_user_cant_store_lender_user_without_phone_number(): void
+    public function test_that_auth_admin_user_cant_update_lender_user_without_phone_number(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson(self::$endpoint, Arr::except(self::$userDetails, 'phone_number'))
+            ->putJson(self::$endpoint, Arr::except(self::$userDetails, 'phone_number'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The phone number field is required.',
@@ -199,13 +161,10 @@ class LenderUserControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
-    public function test_auth_admin_user_cant_store_lender_user_without_email(): void
+    public function test_that_auth_admin_user_cant_update_lender_user_without_email(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson(self::$endpoint, Arr::except(self::$userDetails, 'email'))
+            ->putJson(self::$endpoint, Arr::except(self::$userDetails, 'email'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The email field is required.',
@@ -217,31 +176,20 @@ class LenderUserControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
-    public function test_auth_admin_user_cant_store_lender_user_without_redirect_url(): void
+    public function test_that_auth_admin_user_can_update_lender_user_without_redirect_url(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson(self::$endpoint, Arr::except(self::$userDetails, 'redirect_url'))
-            ->assertUnprocessable()
+            ->putJson(self::$endpoint, Arr::except(self::$userDetails, 'redirect_url'))
+            ->assertOk()
             ->assertExactJson([
-                'message' => 'The redirect url field is required.',
-                'errors' => [
-                    'redirect_url' => [
-                        'The redirect url field is required.',
-                    ],
-                ],
+                'data' => [],
             ]);
     }
 
-    /**
-     * @return void
-     */
-    public function test_auth_admin_user_cant_store_lender_user_without_role(): void
+    public function test_that_auth_admin_user_cant_update_lender_user_without_role(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson(self::$endpoint, Arr::except(self::$userDetails, 'role'))
+            ->putJson(self::$endpoint, Arr::except(self::$userDetails, 'role'))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The role field is required.',
@@ -253,41 +201,16 @@ class LenderUserControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
-    public function test_auth_admin_user_cant_store_lender_user_with_lender_api_user_role(): void
+    public function test_that_auth_admin_user_cant_update_lender_user_with_lender_api_user_role(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson(self::$endpoint, array_merge(self::$userDetails, ['role' => Role::LenderApiUser]))
+            ->putJson(self::$endpoint, array_merge(self::$userDetails, ['role' => Role::LenderApiUser]))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The selected role is invalid.',
                 'errors' => [
                     'role' => [
                         'The selected role is invalid.',
-                    ],
-                ],
-            ]);
-    }
-
-    /**
-     * @return void
-     */
-    public function test_admin_user_cant_store_lender_user_with_same_email_for_another_user_in_same_company(): void
-    {
-        User::factory()->create([
-            'company_id' => self::$lender->id,
-            'email' => 'user@bim.com',
-        ]);
-        $this->actingAs(self::$userAdmin)
-            ->postJson(self::$endpoint, self::$userDetails)
-            ->assertUnprocessable()
-            ->assertExactJson([
-                'message' => 'The email has already been taken.',
-                'errors' => [
-                    'email' => [
-                        'The email has already been taken.',
                     ],
                 ],
             ]);

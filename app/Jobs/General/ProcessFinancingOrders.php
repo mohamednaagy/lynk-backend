@@ -3,6 +3,7 @@
 namespace App\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
+use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -46,6 +47,7 @@ class ProcessFinancingOrders implements ShouldQueue
                         TraderOrderStatus::InProgress,
                     ]);
             }])
+            ->whereRelation('company', 'trading_mode', TraderOrderMode::Automatic)
             ->having('trader_orders_count', 0)
             ->chunk(10, function (Collection $orderCollection) {
                 $orderCollection->each(function (FinancingOrder $order) {

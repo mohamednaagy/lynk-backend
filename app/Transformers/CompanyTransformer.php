@@ -25,6 +25,7 @@ class CompanyTransformer extends TransformerAbstract
         'notifications_email',
         'orders_sum_amount',
         'notify_admins_about_new_orders',
+        'trading_mode',
     ];
 
     public function transform(Company $company): array
@@ -78,6 +79,11 @@ class CompanyTransformer extends TransformerAbstract
     public function includeDoesOrderRequireApproval(Company $company): Primitive
     {
         return $this->primitive($company->does_order_require_approval);
+    }
+
+    public function includeTradingMode(Company $company): Primitive
+    {
+        return $this->primitive($company->trading_mode);
     }
 
     public function includeWebhookSecretKey(Company $company): Primitive

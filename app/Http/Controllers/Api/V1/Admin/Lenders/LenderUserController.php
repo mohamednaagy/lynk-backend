@@ -68,16 +68,13 @@ class LenderUserController extends Controller
                 'formatted_phone_number',
                 'orders_count',
                 'role',
+                'is_invitation_accepted',
             ])->respond();
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  Request  $request
-     * @param  Company  $lender
-     * @param  User  $user
-     * @return JsonResponse
      *
      * @throws AuthorizationException
      */
@@ -100,11 +97,6 @@ class LenderUserController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  StoreUserRequest  $request
-     * @param  Company  $lender
-     * @param  CreateLenderUserWithRoleAndPermission  $createUserWithRoleAndPermission
-     * @return JsonResponse
      */
     public function store(
         StoreUserRequest $request,
@@ -138,12 +130,6 @@ class LenderUserController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  UpdateUserRequest  $request
-     * @param  Company  $lender
-     * @param  User  $user
-     * @param  UpdateLenderUserWithRoleAndPermission  $updateUserWithRoleAndPermission
-     * @return JsonResponse
      */
     public function update(
         UpdateUserRequest $request,
@@ -160,10 +146,6 @@ class LenderUserController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  User  $user
-     * @param  Company  $lender
-     * @return JsonResponse
      */
     public function destroy(Company $lender, User $user): JsonResponse
     {
