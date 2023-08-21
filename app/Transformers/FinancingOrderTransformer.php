@@ -10,6 +10,7 @@ use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderNotSupportedException;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\User;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Fractal\Resource\Primitive;
@@ -20,6 +21,8 @@ class FinancingOrderTransformer extends TransformerAbstract
     protected ?Company $company;
 
     protected $area = null;
+
+    protected User $user;
 
     public function __construct(Company $company = null)
     {
@@ -265,12 +268,19 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCanCreateTraderOrder(FinancingOrder $financingOrder): Primitive
     {
-        return $this->primitive($financingOrder->canCreateTraderOrder(request()->user()));
+        return $this->primitive($financingOrder->canCreateTraderOrder($this->user));
     }
 
     public function setArea($area)
     {
         $this->area = $area;
+
+        return $this;
+    }
+
+    public function setCurrentUser(User $user)
+    {
+        $this->user = $user;
 
         return $this;
     }

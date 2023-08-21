@@ -40,8 +40,6 @@ class TraderOrderControllerShowTest extends TestCase
     private static string $baseURL;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -65,9 +63,6 @@ class TraderOrderControllerShowTest extends TestCase
         self::$baseURL = 'api/v1/admin/orders/'.self::$order->id;
     }
 
-    /**
-     * @return void
-     */
     public function test_unauth_user_cant_access_order_controller_show(): void
     {
         $this->withHeader('X-Company', self::$traderCompany->id)
@@ -75,9 +70,6 @@ class TraderOrderControllerShowTest extends TestCase
             ->assertUnauthorized();
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_can_access_order_controller_show_successful(): void
     {
         self::$order->load([
@@ -93,7 +85,9 @@ class TraderOrderControllerShowTest extends TestCase
             ->getJson(self::$baseURL)
             ->assertOk()
             ->assertExactJson(
-                fractal(self::$order, (new FinancingOrderTransformer(self::$traderCompany))->setArea(Area::SuperAdmin))
+                fractal(self::$order, (new FinancingOrderTransformer(self::$traderCompany))
+                    ->setArea(Area::SuperAdmin)
+                    ->setCurrentUser(self::$userAdmin))
                     ->parseIncludes([
                         'id',
                         'status',
@@ -106,6 +100,7 @@ class TraderOrderControllerShowTest extends TestCase
                         'phone_number',
                         'phone_number_formatted',
                         'is_approved',
+                        'is_cancellable',
                         'status_reason',
                         'can_be_completed',
                         'can_create_trader_order',
@@ -114,10 +109,13 @@ class TraderOrderControllerShowTest extends TestCase
                         'trader_orders.id',
                         'trader_orders.reference',
                         'trader_orders.provider',
+                        'trader_orders.version',
                         'trader_orders.is_cancellable',
                         'trader_orders.history',
                         'trader_orders.status',
+                        'trader_orders.products',
                         'trader_orders.created_at',
+                        'trader_orders.failure_reason',
                         'creator',
                         'created_at',
                         'payment_proof_url',
@@ -127,9 +125,6 @@ class TraderOrderControllerShowTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_order_controller_ensure_order_can_be_completed_is_true(): void
     {
         self::$traderOrder->update(['status' => TraderOrderStatus::Completed]);

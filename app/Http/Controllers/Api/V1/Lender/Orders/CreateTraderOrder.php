@@ -28,7 +28,7 @@ class CreateTraderOrder extends Controller
     public function __invoke(InitiateTraderOrder $initiateTraderOrder, int $orderId)
     {
         return DB::multipleTransaction(function () use ($initiateTraderOrder, $orderId) {
-            $initiateTraderOrder->handle($orderId);
+            $initiateTraderOrder->handle(request()->user(), $orderId);
 
             return $this->successResponse();
         });

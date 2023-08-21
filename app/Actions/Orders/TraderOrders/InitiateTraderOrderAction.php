@@ -8,17 +8,18 @@ use App\Enums\FinancingOrderStatus;
 use App\Exceptions\CommodityMarketIsUnavailableException;
 use App\Exceptions\OrderAlreadyHasActiveTraderOrderException;
 use App\Models\FinancingOrder;
+use App\Models\User;
 use App\Support\Traders\Facades\Trader;
 
 class InitiateTraderOrderAction implements InitiateTraderOrder
 {
-    public function handle(int $orderId)
+    public function handle(User $user, int $orderId)
     {
         $financingOrder = FinancingOrder::query()
             ->lockForUpdate()
             ->findOrFail($orderId);
 
-        if (! $financingOrder->canCreateTraderOrder(request()->user())) {
+        if (! $financingOrder->canCreateTraderOrder($user)) {
             throw new OrderAlreadyHasActiveTraderOrderException;
         }
 

@@ -270,6 +270,17 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function canCreateTraderOrder(User $user = null): bool
     {
+        $bursamTraderServiceAvailability = $this->isBursamTraderServiceAvailable();
+        $isAutomaticTradingMode = $this->isTradingMode(TraderOrderMode::Automatic);
+        $isAdminOrManager = $user?->hasRole([Role::Admin, Role::Manager]);
+
+        return $this->isTraderOrderCreationAllowed($bursamTraderServiceAvailability)
+            || $this->isPendingTraderOrderCreationAllowed($bursamTraderServiceAvailability)
+            && ($isAutomaticTradingMode || $isAdminOrManager);
+    }
+
+    private function isTraderOrderCreationAllowed($bursamTraderServiceAvailability): bool
+    {
         $doesNotHaveInActiveOrder = $this->traderOrders()
             ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::PendingCancellation, TraderOrderStatus::Completed])
             ->doesntExist();
@@ -277,18 +288,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         $orderIsNotCompleted = $this->status->isNot(FinancingOrderStatus::Completed);
         $financingOrderIsNotCancelled = $this->status->isNot(FinancingOrderStatus::Cancelled);
         $financingOrderIsNotPendingCancelled = $this->status->isNot(FinancingOrderStatus::PendingCancellation);
-        $orderIsPendingTraderOrder = $this->status->is(FinancingOrderStatus::PendingTraderOrder);
-        $bursamTraderServiceAvailability = $this->isBursamTraderServiceAvailable();
-        $isAutomaticTradingMode = $this->isTradingMode(TraderOrderMode::Automatic);
-        $isAdminOrManager = $user?->hasRole([Role::Admin, Role::Manager]);
 
-        return $this->isTraderOrderCreationAllowed($orderIsNotCompleted, $doesNotHaveInActiveOrder, $financingOrderIsNotCancelled, $financingOrderIsNotPendingCancelled, $bursamTraderServiceAvailability)
-            || $this->isPendingTraderOrderCreationAllowed($orderIsPendingTraderOrder, $orderIsNotCompleted, $bursamTraderServiceAvailability)
-            && ($isAutomaticTradingMode || $isAdminOrManager);
-    }
-
-    private function isTraderOrderCreationAllowed(bool $orderIsNotCompleted, bool $doesNotHaveInActiveOrder, bool $financingOrderIsNotCancelled, bool $financingOrderIsNotPendingCancelled, bool $bursamTraderServiceAvailability): bool
-    {
         return $orderIsNotCompleted
             && $doesNotHaveInActiveOrder
             && $financingOrderIsNotCancelled
@@ -296,8 +296,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             && $bursamTraderServiceAvailability;
     }
 
-    private function isPendingTraderOrderCreationAllowed(bool $orderIsPendingTraderOrder, bool $orderIsNotCompleted, bool $bursamTraderServiceAvailability): bool
+    private function isPendingTraderOrderCreationAllowed(bool $bursamTraderServiceAvailability): bool
     {
+        $orderIsNotCompleted = $this->status->isNot(FinancingOrderStatus::Completed);
+        $orderIsPendingTraderOrder = $this->status->is(FinancingOrderStatus::PendingTraderOrder);
+
         return $orderIsPendingTraderOrder
             && $orderIsNotCompleted
             && $bursamTraderServiceAvailability;
