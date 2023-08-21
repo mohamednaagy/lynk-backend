@@ -9,6 +9,7 @@ use App\Enums\Role;
 use App\Enums\Subject;
 use App\Exports\FinancingOrdersExport;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -31,7 +32,7 @@ class ExportOrders extends Controller
         $query = $buildOrdersQuery->setCompany(tenant())
             ->setRelations([
                 'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
-                'creator',
+                'creator' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
             ])
             ->handle();
 
