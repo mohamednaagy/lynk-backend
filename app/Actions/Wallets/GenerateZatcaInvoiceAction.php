@@ -4,7 +4,6 @@ namespace App\Actions\Wallets;
 
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\ZatcaEInvoice\InvoiceSpecs;
 use Salla\ZATCA\GenerateQrCode;
@@ -17,8 +16,6 @@ use Salla\ZATCA\Tags\TaxNumber;
 class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
 {
     protected string $template = 'templates.zatca-invoice';
-
-    protected string $collectionName = TraderOrderMediaCollection::ZatcaInvoice;
 
     public function __construct(protected GetProjectSettings $getProjectSettings)
     {
