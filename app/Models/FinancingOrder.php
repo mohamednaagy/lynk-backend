@@ -282,12 +282,25 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         $isAutomaticTradingMode = $this->isTradingMode(TraderOrderMode::Automatic);
         $isAdminOrManager = $user?->hasRole([Role::Admin, Role::Manager]);
 
-        return (
-            ($orderIsNotCompleted && $doesNotHaveInActiveOrder
-                && $financingOrderIsNotCancelled && $financingOrderIsNotPendingCancelled
-                && $bursamTraderServiceAvailability)
-            || ($orderIsPendingTraderOrder && $orderIsNotCompleted && $bursamTraderServiceAvailability)
-        ) && ($isAutomaticTradingMode || $isAdminOrManager);
+        return $this->isTraderOrderCreationAllowed($orderIsNotCompleted, $doesNotHaveInActiveOrder, $financingOrderIsNotCancelled, $financingOrderIsNotPendingCancelled, $bursamTraderServiceAvailability)
+            || $this->isPendingTraderOrderCreationAllowed($orderIsPendingTraderOrder, $orderIsNotCompleted, $bursamTraderServiceAvailability)
+            && ($isAutomaticTradingMode || $isAdminOrManager);
+    }
+
+    private function isTraderOrderCreationAllowed(bool $orderIsNotCompleted, bool $doesNotHaveInActiveOrder, bool $financingOrderIsNotCancelled, bool $financingOrderIsNotPendingCancelled, bool $bursamTraderServiceAvailability): bool
+    {
+        return $orderIsNotCompleted
+            && $doesNotHaveInActiveOrder
+            && $financingOrderIsNotCancelled
+            && $financingOrderIsNotPendingCancelled
+            && $bursamTraderServiceAvailability;
+    }
+
+    private function isPendingTraderOrderCreationAllowed(bool $orderIsPendingTraderOrder, bool $orderIsNotCompleted, bool $bursamTraderServiceAvailability): bool
+    {
+        return $orderIsPendingTraderOrder
+            && $orderIsNotCompleted
+            && $bursamTraderServiceAvailability;
     }
 
     public function isTradingMode(TraderOrderMode|string $mode)
