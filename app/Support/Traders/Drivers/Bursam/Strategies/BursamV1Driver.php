@@ -276,7 +276,11 @@ class BursamV1Driver implements TraderInterface
                         'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                         'order_number' => $traderOrder->financing_order_id,
                         'amount' => $amount,
-                        'previous_owner' => $products->implode(fn ($item) => $item->getPreviousOwner(), '،'),
+                        'previous_owner' => $products->map(
+                            fn ($item) => $item->getPreviousOwnerAsArray()
+                        )
+                            ->flatten()
+                            ->implode('،'),
                         'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
                         'date' => $currentTimeInRiyadhTz->toDateString(),
                         'time' => $currentTimeInRiyadhTz->toTimeString(),

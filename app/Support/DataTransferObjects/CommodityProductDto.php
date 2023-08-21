@@ -57,7 +57,7 @@ class CommodityProductDto
         return '';
     }
 
-    public function getPreviousOwner(): string
+    public function getPreviousOwner(): string|array
     {
         return $this->previous_owner;
     }
