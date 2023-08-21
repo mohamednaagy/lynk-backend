@@ -271,10 +271,13 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function canCreateTraderOrder(User $user = null): bool
     {
         if (
-            $this->isComplete()
+            $this->isNotReadyToStartTrading()
+            || $this->hasFailed()
+            || $this->isComplete()
             || $this->isInCancellationState()
             || $this->isDefaultTraderAvailable() === false
             || $this->isInPendingTradingRequestState() === false
+
         ) {
             return false;
         }
@@ -290,6 +293,17 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return $this->status->is(FinancingOrderStatus::Completed);
     }
 
+    private function isNotReadyToStartTrading(): bool
+    {
+        return $this->status->is(FinancingOrderStatus::PendingApproval)
+            || $this->status->is(FinancingOrderStatus::Rejected);
+    }
+
+    private function hasFailed(): bool
+    {
+        return $this->status->is(FinancingOrderStatus::TradingFailure);
+    }
+
     private function isInPendingTradingRequestState(): bool
     {
         $doesHaveActiveOrder = $this->traderOrders()
@@ -301,6 +315,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         }
 
         return $this->status->is(FinancingOrderStatus::PendingTraderOrder)
+            || $this->status->is(FinancingOrderStatus::Approved)
             || $this->status->is(FinancingOrderStatus::InProgress);
     }
 
