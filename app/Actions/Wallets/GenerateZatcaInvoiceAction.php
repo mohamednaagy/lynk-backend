@@ -4,6 +4,7 @@ namespace App\Actions\Wallets;
 
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
+use App\Models\ZatcaInvoice;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\ZatcaEInvoice\InvoiceSpecs;
 use Salla\ZATCA\GenerateQrCode;
@@ -23,6 +24,10 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
 
     public function handle(InvoiceSpecs $invoiceSpecs, $mediaCollection)
     {
+        $invoiceId = ZatcaInvoice::query()->create([
+            'transaction_id' => $invoiceSpecs->getTransaction()->getKey(),
+        ])->getKey();
+
         $displayQRCodeAsBase64 = GenerateQrCode::fromArray([
             new Seller($invoiceSpecs->getSeller()),
             new TaxNumber($invoiceSpecs->getTaxNumber()),
@@ -32,6 +37,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
         ])->render();
 
         $html = view($this->getTemplate(), [
+            'invoice_number' => $invoiceId,
             'seller' => $this->getProjectSettings->handle(),
             'order' => $invoiceSpecs->getOrder(),
             'qr_code' => $displayQRCodeAsBase64,
@@ -41,9 +47,9 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
 
         PdfGenerator::outputFromHtml(
             $html,
-            function ($fileResource) use ($invoiceSpecs, $mediaCollection) {
+            function ($fileResource) use ($invoiceSpecs, $mediaCollection, $invoiceId) {
                 return $invoiceSpecs->getTransaction()->addMediaFromStream($fileResource)
-                    ->usingFileName("simplified-invoice-{$invoiceSpecs->getInvoiceId()}".'.pdf')
+                    ->usingFileName("simplified-invoice-{$invoiceId}".'.pdf')
                     ->toMediaCollection($mediaCollection);
             }
         );

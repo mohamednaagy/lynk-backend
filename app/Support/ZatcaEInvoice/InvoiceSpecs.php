@@ -9,7 +9,6 @@ use Spatie\MediaLibrary\HasMedia;
 class InvoiceSpecs
 {
     public function __construct(
-        protected string $invoiceId,
         protected HasMedia $associatedModel,
         protected string $sellerName,
         protected string $taxNumber,
@@ -25,11 +24,6 @@ class InvoiceSpecs
     public function getAssociatedModel(): HasMedia
     {
         return $this->associatedModel;
-    }
-
-    public function getInvoiceId(): string
-    {
-        return $this->invoiceId;
     }
 
     public function getSeller(): string

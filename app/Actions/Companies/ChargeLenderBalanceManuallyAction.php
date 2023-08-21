@@ -70,7 +70,6 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
         [$amountWithoutVat, $orderCount] = $this->calculateAmountWithVat->handle($company, $totalAmount);
 
         return new InvoiceSpecs(
-            $transaction->getKey(),
             $transaction,
             $this->getProjectSettings->handle()->getCompanyName(Config::get('app.locale', 'en')),
             $this->getProjectSettings->handle()->getVatId(),

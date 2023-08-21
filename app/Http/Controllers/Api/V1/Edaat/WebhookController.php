@@ -88,7 +88,6 @@ class WebhookController extends Controller
     private function getInvoiceSpecs($transaction, $company, $amount, $vatAmount, $orderCount): InvoiceSpecs
     {
         return new InvoiceSpecs(
-            $this->getProjectSettings->handle()->getVatId(),
             $transaction,
             $this->getProjectSettings->handle()->getCompanyName(Config::get('app.locale', 'en')),
             $this->getProjectSettings->handle()->getVatId(),

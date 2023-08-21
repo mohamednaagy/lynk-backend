@@ -48,7 +48,6 @@ class GenerateTraderOrderInvoiceAction implements GenerateTraderOrderInvoice
         );
 
         $invoiceSpecs = new InvoiceSpecs(
-            $traderOrder->getKey(),
             $traderOrder,
             $seller->getCompanyName(Config::get('app.locale', 'en')),
             $seller->getVatId(),
