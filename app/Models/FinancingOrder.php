@@ -308,7 +308,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     {
         $doesHaveActiveOrder = $this->traderOrders()
             ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::PendingCancellation])
-            ->exist();
+            ->exists();
 
         if ($doesHaveActiveOrder) {
             return false;

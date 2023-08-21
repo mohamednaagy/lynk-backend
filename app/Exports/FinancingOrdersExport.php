@@ -66,7 +66,7 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
             'amount' => fn () => $order->amount->formatByDecimal(),
             'selling_price' => fn () => $order->selling_price->formatByDecimal(),
             'national_id' => fn () => $order->national_id,
-            'order_owner' => fn () => $order->creator->full_name,
+            'order_owner' => fn () => $order->creator?->full_name,
             'company_name' => fn () => $order->company->name,
             'status' => fn () => $this->withLocale('en', function () use ($order) {
                 return $order->status->isNot(FinancingOrderStatus::InProgress)
