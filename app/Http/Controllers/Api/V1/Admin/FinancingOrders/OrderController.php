@@ -57,7 +57,7 @@ class OrderController extends Controller
             ->respond();
     }
 
-    public function show(FinancingOrder $order): JsonResponse
+    public function show(Request $request, FinancingOrder $order): JsonResponse
     {
         $order->load([
             'creator',
@@ -69,7 +69,7 @@ class OrderController extends Controller
 
         return fractal($order, (new FinancingOrderTransformer())
             ->setArea(Area::SuperAdmin)
-            ->setCurrentUser(request()->user()))
+            ->setCurrentUser($request->user()))
             ->parseIncludes([
                 'id',
                 'status',
