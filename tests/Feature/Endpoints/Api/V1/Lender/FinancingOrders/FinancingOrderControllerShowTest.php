@@ -77,7 +77,7 @@ class FinancingOrderControllerShowTest extends TestCase
             ->getJson('api/v1/lender/orders/'.self::$firstOrderInSameCompany->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$firstOrderInSameCompany, new FinancingOrderTransformer())
+                fractal(self::$firstOrderInSameCompany, (new FinancingOrderTransformer())->setCurrentUser(self::$userLenderAdmin))
                     ->parseIncludes([
                         'id',
                         'status',
@@ -121,7 +121,7 @@ class FinancingOrderControllerShowTest extends TestCase
             ->getJson('api/v1/lender/orders/'.self::$firstOrderInSameCompany->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$firstOrderInSameCompany, new FinancingOrderTransformer())
+                fractal(self::$firstOrderInSameCompany, (new FinancingOrderTransformer())->setCurrentUser(self::$userLenderSupervisor))
                     ->parseIncludes([
                         'id',
                         'status',
@@ -181,7 +181,7 @@ class FinancingOrderControllerShowTest extends TestCase
             ->getJson('api/v1/lender/orders/'.self::$thirdOrderInSameCompany->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$thirdOrderInSameCompany, new FinancingOrderTransformer())
+                fractal(self::$thirdOrderInSameCompany, (new FinancingOrderTransformer())->setCurrentUser(self::$userLenderOrderCreator))
                     ->parseIncludes([
                         'id',
                         'status',

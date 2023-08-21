@@ -9,11 +9,6 @@ use Illuminate\Support\Arr;
 
 class UpdateCompanyAction implements UpdateCompany
 {
-    /**
-     * @param  Company  $company
-     * @param  array  $data
-     * @return Company
-     */
     public function handle(Company $company, array $data): Company
     {
         if (isset($data['order_cost'])) {
@@ -36,6 +31,7 @@ class UpdateCompanyAction implements UpdateCompany
                     'internal_status_comment',
                     'driver',
                     'notify_admins_about_new_orders',
+                    'trading_mode',
                 ]
             )
         );

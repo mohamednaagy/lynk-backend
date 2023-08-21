@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1\Admin\Companies;
 
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
+use App\Enums\TraderOrderMode;
 use App\Models\Company;
 use App\Rules\CompanyUniqueNameRule;
 use BenSampo\Enum\Rules\EnumValue;
@@ -13,8 +14,6 @@ class StoreCompanyRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -76,6 +75,11 @@ class StoreCompanyRequest extends FormRequest
                 'required',
                 'integer',
                 new EnumValue(CompanyNewOrderNotificationForAdminStatus::class, false),
+            ],
+            'trading_mode' => [
+                'required',
+                'string',
+                new EnumValue(TraderOrderMode::class, false),
             ],
         ];
     }

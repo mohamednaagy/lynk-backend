@@ -35,7 +35,7 @@ class ProcessBursamInitiateTraderOrder implements ShouldQueue
     {
         DB::multipleTransaction(function () use ($initiateTraderOrder) {
             try {
-                $initiateTraderOrder->handle($this->financingOrder->id);
+                $initiateTraderOrder->handle($this->financingOrder->creator, $this->financingOrder->id);
             } catch (OrderAlreadyHasActiveTraderOrderException $exception) {
                 //
             }

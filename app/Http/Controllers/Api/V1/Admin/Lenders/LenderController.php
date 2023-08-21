@@ -118,6 +118,7 @@ class LenderController extends Controller
                 'order_cost',
                 'notifications_email',
                 'notify_admins_about_new_orders',
+                'trading_mode',
             ])
             ->respond();
     }
