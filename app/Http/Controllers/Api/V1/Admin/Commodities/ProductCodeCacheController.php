@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\Commodities;
+namespace App\Http\Controllers\Api\V1\Admin\Commodities;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -15,7 +15,7 @@ class ProductCodeCacheController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit, Action::Manage])
         )
             ->only(['index', 'delete']);
     }

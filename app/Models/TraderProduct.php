@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\TraderProductStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 
-class OpenMarketProduct extends Model
+class TraderProduct extends Model
 {
     use HasFactory, HasTranslations;
 
@@ -16,5 +17,11 @@ class OpenMarketProduct extends Model
         'name',
         'code',
         'provider',
+        'order',
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => TraderProductStatus::class,
     ];
 }

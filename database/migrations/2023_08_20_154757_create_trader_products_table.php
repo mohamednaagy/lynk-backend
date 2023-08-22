@@ -13,11 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('open_market_products', function (Blueprint $table) {
+        Schema::create('trader_products', function (Blueprint $table) {
             $table->id();
             $table->json('name');
+            $table->unsignedTinyInteger('order');
             $table->string('code');
             $table->string('provider');
+            $table->string('status');
 
             $table->timestamps();
         });
@@ -30,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('open_market_products');
+        Schema::dropIfExists('trader_products');
     }
 };
