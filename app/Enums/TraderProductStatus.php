@@ -2,7 +2,9 @@
 
 namespace App\Enums;
 
-class TraderProductStatus
+use BenSampo\Enum\Enum;
+
+class TraderProductStatus extends Enum
 {
     const Enabled = 'ENABLED';
 

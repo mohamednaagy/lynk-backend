@@ -5,8 +5,8 @@ namespace App\Support\Traders\Traits;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
-use App\Models\OpenMarketProduct;
 use App\Models\TraderOrder;
+use App\Models\TraderProduct;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Database\Eloquent\Model;
@@ -107,10 +107,13 @@ trait TraderHelperTrait
 
     public function getUnusedProductCode($provider)
     {
-        $productCodes = OpenMarketProduct::query()
+        $productCodes = TraderProduct::query()
             ->where('provider', $provider)
+            ->orderBy('order', 'asc')
             ->get()
+            ->pluck('code')
             ->toArray();
+
         $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
 
         $availableProductCodes = array_diff($productCodes, $unavailableProductCodes);

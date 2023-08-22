@@ -30,7 +30,7 @@ final class BursamProductCode extends Enum implements LocalizedEnum
     public static function getProductCodes(string $env): array
     {
         return match ($env) {
-            'development', 'testing' => [
+            default => [
                 self::CrudePalmOil,
                 self::PlasticResinBDev,
                 self::RbdPalmOlein,
