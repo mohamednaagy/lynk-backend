@@ -5,6 +5,7 @@ namespace App\Support\Collections;
 use App\Enums\TransactionReason;
 use App\Models\FinancingOrder;
 use App\Models\Transaction;
+use App\Support\Money\Money;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -33,11 +34,11 @@ class FinancingOrderCollection extends Collection
             return $order->setAttribute(
                 'cost_with_vat',
                 $totalOrderCost->firstWhere('order_id', $order->id)?->amount->add(
-                    $totalOrderVat->firstWhere('order_id', $order->id)?->amount
+                    $totalOrderVat->firstWhere('order_id', $order->id)?->amount ?? new Money(0)
                 ),
             )->setAttribute(
                 'cost_without_vat',
-                $totalOrderCost->firstWhere('order_id', $order->id)?->amount,
+                $totalOrderCost->firstWhere('order_id', $order->id)?->amount ?? new Money(0),
             );
         });
     }
