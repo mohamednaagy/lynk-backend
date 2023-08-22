@@ -46,13 +46,12 @@ class WebhookController extends Controller
                 $amountWithVat = $invoice->amount;
                 [$amountWithoutVat, $ordersCount] = $calcAmountWithoutVatAndOrdersCount->handle($company, $amountWithVat);
 
-                $amountWithoutVatMoney = money($amountWithoutVat);
-                $vatAmount = $amountWithVat->subtract($amountWithoutVatMoney);
+                $vatAmount = $amountWithVat->subtract($amountWithoutVat);
 
                 $transaction = $createTransactions->handle(
                     $wallet,
                     TransactionReason::DepositByEdaat,
-                    $amountWithoutVatMoney,
+                    $amountWithoutVat,
                     [
                         'invoice_number' => $invoice->invoice_number,
                     ],
@@ -73,7 +72,7 @@ class WebhookController extends Controller
                 $invoiceSpecs = $this->getInvoiceSpecs(
                     $vatTransaction,
                     $company,
-                    (int) $amountWithoutVatMoney->formatByDecimal(),
+                    $amountWithVat->formatByDecimal(),
                     $vatAmount,
                     $ordersCount
                 );

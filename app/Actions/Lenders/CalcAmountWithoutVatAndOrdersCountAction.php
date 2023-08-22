@@ -28,11 +28,11 @@ class CalcAmountWithoutVatAndOrdersCountAction implements CalcAmountWithoutVatAn
             ->setIsVatIncludedInAmount(true)
             ->handle();
 
-        $orderCost = $company->order_cost->add($vatOfChargeAmount)->formatByDecimal();
-        $ordersCount = $chargeAmountWithVat->divide($orderCost)->formatByDecimal();
+        $orderCost = $company->order_cost->add($vatOfChargeAmount);
+        $ordersCount = $chargeAmountWithVat->divide($orderCost->getAmount());
 
-        $chargeAmountWithoutVat = $chargeAmountWithVat->subtract($vatOfChargeAmount)->formatByDecimal();
+        $chargeAmountWithoutVat = $chargeAmountWithVat->subtract($vatOfChargeAmount);
 
-        return [$chargeAmountWithoutVat, floor($ordersCount)];
+        return [$chargeAmountWithoutVat, floor($ordersCount->getAmount())];
     }
 }
