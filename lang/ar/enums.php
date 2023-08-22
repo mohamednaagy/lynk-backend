@@ -74,8 +74,11 @@ return [
     BursamProductCode::class => [
         BursamProductCode::CrudePalmOil => 'زيت النخيل الخام',
         BursamProductCode::PlasticResinA => 'راتنج بلاستيك A',
+        BursamProductCode::PlasticResinADev => 'راتنج بلاستيك A',
         BursamProductCode::PlasticResinB => 'راتنج بلاستيك B',
+        BursamProductCode::PlasticResinBDev => 'راتنج بلاستيك B',
         BursamProductCode::PlumbumLead => 'رصاص',
+        BursamProductCode::PlumbumLeadDev => 'رصاص',
         BursamProductCode::RbdPalmOlein => 'زيت الأولين',
         BursamProductCode::TimberHardwood => 'خشب صلب',
         BursamProductCode::TimberSoftwood => 'خشب لين',
