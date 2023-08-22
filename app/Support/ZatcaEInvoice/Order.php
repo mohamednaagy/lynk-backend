@@ -12,7 +12,7 @@ class Order
         protected string $reference,
         protected array $items,
         protected Carbon $invoiceDate,
-        protected FinancingOrder $order,
+        protected ?FinancingOrder $order = null,
     ) {
     }
 
@@ -43,8 +43,6 @@ class Order
 
     /**
      * Get order subtotal (without VAT or without discount)
-     *
-     * @return Money
      */
     public function getSubtotal(): Money
     {
@@ -58,8 +56,6 @@ class Order
 
     /**
      * Get order total amount
-     *
-     * @return Money
      */
     public function getTotalAmount(): Money
     {
@@ -73,8 +69,6 @@ class Order
 
     /**
      * Get order total discount
-     *
-     * @return Money
      */
     public function getTotalDiscount(): Money
     {
@@ -88,8 +82,6 @@ class Order
 
     /**
      * Get order total amount without VAT
-     *
-     * @return Money
      */
     public function getTotalWithoutVat(): Money
     {
@@ -98,8 +90,6 @@ class Order
 
     /**
      * Get order total VAT
-     *
-     * @return Money
      */
     public function getTotalVat(): Money
     {

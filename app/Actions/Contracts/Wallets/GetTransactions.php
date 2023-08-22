@@ -2,10 +2,9 @@
 
 namespace App\Actions\Contracts\Wallets;
 
+use App\Models\Company;
+
 interface GetTransactions
 {
-    /**
-     * @return mixed
-     */
-    public function handle(): mixed;
+    public function handle(Company $company): mixed;
 }

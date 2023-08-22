@@ -4,13 +4,9 @@ namespace App\Actions\Wallets;
 
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Models\TraderOrder;
-use App\Models\Transaction;
+use App\Models\ZatcaInvoice;
 use App\Support\PdfGenerator\PdfGenerator;
-use App\Support\ZatcaEInvoice\Order;
-use App\Support\ZatcaEInvoice\PurchaseLine;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Support\ZatcaEInvoice\InvoiceSpecs;
 use Illuminate\Support\Facades\Config;
 use Salla\ZATCA\GenerateQrCode;
 use Salla\ZATCA\Tags\InvoiceDate;
@@ -23,59 +19,40 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
 {
     protected string $template = 'templates.zatca-invoice';
 
-    protected string $collectionName = TraderOrderMediaCollection::ZatcaInvoice;
-
     public function __construct(protected GetProjectSettings $getProjectSettings)
     {
     }
 
-    public function handel(TraderOrder $traderOrder, Transaction $creationFeeTransaction)
+    public function handle(InvoiceSpecs $invoiceSpecs, $mediaCollection)
     {
-        $seller = $this->getProjectSettings->handle();
-        $financingOrder = $traderOrder->order;
-        $financingOrder->load([
-            'company' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
-        ]);
-
-        $company = $financingOrder->company()->withTrashed()->first();
-
-        $vatAmount = $company->order_cost->multiply($seller->getVatRate());
+        $invoiceId = ZatcaInvoice::query()->create([
+            'transaction_id' => $invoiceSpecs->getTransaction()->getKey(),
+        ])->getKey();
 
         $displayQRCodeAsBase64 = GenerateQrCode::fromArray([
-            new Seller($seller->getCompanyName(Config::get('app.locale', 'en'))),
-            new TaxNumber($seller->getVatId()),
-            new InvoiceDate($traderOrder->created_at->timezone('Asia/Riyadh')->toDateTimeString()),
-            new InvoiceTotalAmount($company->order_cost->add($vatAmount)->formatByDecimal()),
-            new InvoiceTaxAmount($vatAmount->formatByDecimal()),
+            new Seller($invoiceSpecs->getSeller()->getCompanyName(Config::get('app.locale', 'en'))),
+            new TaxNumber($invoiceSpecs->getTaxNumber()),
+            new InvoiceDate($invoiceSpecs->getDate()),
+            new InvoiceTotalAmount($invoiceSpecs->getTotalAmountWithVat()),
+            new InvoiceTaxAmount($invoiceSpecs->getVatAmount()),
         ])->render();
 
         $html = view($this->getTemplate(), [
-            'seller' => $seller,
-            'order' => new Order(
-                $creationFeeTransaction->reference_number,
-                [
-                    new PurchaseLine(
-                        __('zatca/e-invoice.create_order_cost', [
-                            'number' => $traderOrder->getKey(),
-                        ]),
-                        $company->order_cost,
-                        $seller->getVatRateInPercentage()
-                    ),
-                ],
-                $traderOrder->created_at->clone()->tz('Asia/Riyadh'),
-                $financingOrder
-            ),
+            'invoice_number' => $invoiceId,
+            'seller' => $invoiceSpecs->getSeller(),
+            'order' => $invoiceSpecs->getOrder(),
             'qr_code' => $displayQRCodeAsBase64,
-            'buyer' => $company,
-            'creation_fee_transaction' => $creationFeeTransaction,
+            'buyer' => $invoiceSpecs->getBuyer(),
+            'creation_fee_transaction' => $invoiceSpecs->getTransaction(),
         ])->render();
 
         PdfGenerator::outputFromHtml(
             $html,
-            function ($fileResource) use ($traderOrder) {
-                return $traderOrder->addMediaFromStream($fileResource)
-                    ->usingFileName("simplified-invoice-{$traderOrder->getKey()}".'.pdf')
-                    ->toMediaCollection($this->getCollectionName());
+            function ($fileResource) use ($invoiceSpecs, $mediaCollection, $invoiceId) {
+                return $invoiceSpecs->getAssociatedModel()
+                    ->addMediaFromStream($fileResource)
+                    ->usingFileName("simplified-invoice-{$invoiceId}".'.pdf')
+                    ->toMediaCollection($mediaCollection);
             }
         );
     }
@@ -83,10 +60,5 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
     public function getTemplate()
     {
         return $this->template;
-    }
-
-    public function getCollectionName()
-    {
-        return $this->collectionName;
     }
 }

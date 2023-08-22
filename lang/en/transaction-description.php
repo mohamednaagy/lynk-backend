@@ -7,4 +7,5 @@ return [
     'manual_deposit' => 'Recharge the balance',
     'refund_order_creation_fee' => 'Refund for trading request #:order_number',
     'refund_vat_percentage' => 'Refund of VAT charges for trading request #:order_id',
+    'vat_percentage_recharge' => 'VAT charges (:vat_percentage%) for Recharge the balance',
 ];

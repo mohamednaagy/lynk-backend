@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\V1\Admin\FinancingOrders\MakeOrderProceed;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\OrderController;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\RejectOrder;
 use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
+use App\Http\Controllers\Api\V1\Admin\Lenders\CalculateAmountWithoutVatAndOrdersCount;
 use App\Http\Controllers\Api\V1\Admin\Lenders\ChargeLenderBalanceManually;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderBalance;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderSetting;
@@ -103,6 +104,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::put('/{lender}/status', UpdateLenderStatus::class);
             Route::get('/{lender}/balance ', GetLenderBalance::class);
             Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
+            Route::get('/{lender}/calculate-balance/{amount_with_vat}', CalculateAmountWithoutVatAndOrdersCount::class)
+                ->whereNumber('amount');
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);
         });

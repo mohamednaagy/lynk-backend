@@ -2,10 +2,9 @@
 
 namespace App\Actions\Contracts\Wallets;
 
-use App\Models\TraderOrder;
-use App\Models\Transaction;
+use App\Support\ZatcaEInvoice\InvoiceSpecs;
 
 interface GenerateZatcaInvoice
 {
-    public function handel(TraderOrder $traderOrder, Transaction $creationFeeTransaction);
+    public function handle(InvoiceSpecs $invoiceSpecs, $mediaCollection);
 }
