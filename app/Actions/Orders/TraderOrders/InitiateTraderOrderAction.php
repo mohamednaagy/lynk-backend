@@ -23,7 +23,7 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
             throw new OrderAlreadyHasActiveTraderOrderException;
         }
 
-        if (! $financingOrder->isBursamTraderServiceAvailable()) {
+        if (! is_bursam_service_available()) {
             throw new CommodityMarketIsUnavailableException;
         }
 
