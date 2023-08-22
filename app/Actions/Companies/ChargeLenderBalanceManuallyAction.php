@@ -19,7 +19,6 @@ use App\Support\ZatcaEInvoice\Order;
 use App\Support\ZatcaEInvoice\PurchaseLine;
 use Cknow\Money\Money;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Config;
 
 class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
 {
@@ -89,7 +88,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
 
         return new InvoiceSpecs(
             $transaction,
-            $this->getProjectSettings->handle()->getCompanyName(Config::get('app.locale', 'en')),
+            $this->getProjectSettings->handle(),
             $this->getProjectSettings->handle()->getVatId(),
             $transaction->created_at->clone(),
             $totalAmountWithVat->formatByDecimal(),

@@ -12,7 +12,6 @@ use App\Support\ZatcaEInvoice\InvoiceSpecs;
 use App\Support\ZatcaEInvoice\Order;
 use App\Support\ZatcaEInvoice\PurchaseLine;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Config;
 
 class GenerateTraderOrderInvoiceAction implements GenerateTraderOrderInvoice
 {
@@ -49,7 +48,7 @@ class GenerateTraderOrderInvoiceAction implements GenerateTraderOrderInvoice
 
         $invoiceSpecs = new InvoiceSpecs(
             $traderOrder,
-            $seller->getCompanyName(Config::get('app.locale', 'en')),
+            $seller,
             $seller->getVatId(),
             $traderOrder->created_at,
             $company->order_cost->add($vatAmount)->formatByDecimal(),

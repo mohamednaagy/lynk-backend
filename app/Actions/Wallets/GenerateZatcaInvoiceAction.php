@@ -7,6 +7,7 @@ use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
 use App\Models\ZatcaInvoice;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\ZatcaEInvoice\InvoiceSpecs;
+use Illuminate\Support\Facades\Config;
 use Salla\ZATCA\GenerateQrCode;
 use Salla\ZATCA\Tags\InvoiceDate;
 use Salla\ZATCA\Tags\InvoiceTaxAmount;
@@ -29,7 +30,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
         ])->getKey();
 
         $displayQRCodeAsBase64 = GenerateQrCode::fromArray([
-            new Seller($invoiceSpecs->getSeller()),
+            new Seller($invoiceSpecs->getSeller()->getCompanyName(Config::get('app.locale', 'en'))),
             new TaxNumber($invoiceSpecs->getTaxNumber()),
             new InvoiceDate($invoiceSpecs->getDate()),
             new InvoiceTotalAmount($invoiceSpecs->getTotalAmountWithVat()),
@@ -38,7 +39,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
 
         $html = view($this->getTemplate(), [
             'invoice_number' => $invoiceId,
-            'seller' => $this->getProjectSettings->handle(),
+            'seller' => $invoiceSpecs->getSeller(),
             'order' => $invoiceSpecs->getOrder(),
             'qr_code' => $displayQRCodeAsBase64,
             'buyer' => $invoiceSpecs->getBuyer(),

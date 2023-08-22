@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Edaat;
 use App\Actions\Contracts\Lenders\CalcAmountWithoutVatAndOrdersCount;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\CreateTransactions;
+use App\Actions\Contracts\Wallets\GenerateVoucherReceipt;
 use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\MediaCollections\TransactionMediaCollection;
@@ -17,7 +18,6 @@ use App\Support\ZatcaEInvoice\InvoiceSpecs;
 use App\Support\ZatcaEInvoice\Order;
 use App\Support\ZatcaEInvoice\PurchaseLine;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
@@ -46,16 +46,19 @@ class WebhookController extends Controller
                 $amountWithVat = $invoice->amount;
                 [$amountWithoutVat, $ordersCount] = $calcAmountWithoutVatAndOrdersCount->handle($company, $amountWithVat);
 
-                $vatAmount = $amountWithVat->subtract($amountWithoutVat);
+                $amountWithoutVatMoney = money($amountWithoutVat);
+                $vatAmount = $amountWithVat->subtract($amountWithoutVatMoney);
 
                 $transaction = $createTransactions->handle(
                     $wallet,
                     TransactionReason::DepositByEdaat,
-                    $amountWithoutVat,
+                    $amountWithoutVatMoney,
                     [
                         'invoice_number' => $invoice->invoice_number,
                     ],
                 );
+
+                app(GenerateVoucherReceipt::class)->handle($transaction);
 
                 $vatTransaction = $createTransactions->handle(
                     $wallet,
@@ -70,7 +73,7 @@ class WebhookController extends Controller
                 $invoiceSpecs = $this->getInvoiceSpecs(
                     $vatTransaction,
                     $company,
-                    (int) $amountWithoutVat->formatByDecimal(),
+                    (int) $amountWithoutVatMoney->formatByDecimal(),
                     $vatAmount,
                     $ordersCount
                 );
@@ -84,7 +87,7 @@ class WebhookController extends Controller
     {
         return new InvoiceSpecs(
             $transaction,
-            $this->getProjectSettings->handle()->getCompanyName(Config::get('app.locale', 'en')),
+            $this->getProjectSettings->handle(),
             $this->getProjectSettings->handle()->getVatId(),
             $transaction->created_at->clone(),
             $amountWithVat,

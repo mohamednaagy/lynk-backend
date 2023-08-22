@@ -3,6 +3,7 @@
 namespace App\Support\ZatcaEInvoice;
 
 use App\Models\Transaction;
+use App\Support\ProjectSettings\Project;
 use Carbon\Carbon;
 use Spatie\MediaLibrary\HasMedia;
 
@@ -10,7 +11,7 @@ class InvoiceSpecs
 {
     public function __construct(
         protected HasMedia $associatedModel,
-        protected string $sellerName,
+        protected Project $seller,
         protected string $taxNumber,
         protected Carbon $date,
         protected $totalAmountWithVat,
@@ -26,9 +27,9 @@ class InvoiceSpecs
         return $this->associatedModel;
     }
 
-    public function getSeller(): string
+    public function getSeller(): Project
     {
-        return $this->sellerName;
+        return $this->seller;
     }
 
     public function getTaxNumber(): string
