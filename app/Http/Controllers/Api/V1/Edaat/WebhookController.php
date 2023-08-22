@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1\Edaat;
 
-use App\Actions\Contracts\Companies\CalculateVatAmount;
-use App\Actions\Contracts\Lenders\CalculateAmountWithVat;
+use App\Actions\Contracts\Lenders\CalcAmountWithoutVatAndOrdersCount;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\CreateTransactions;
-use App\Actions\Contracts\Wallets\GenerateVoucherReceipt;
 use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\MediaCollections\TransactionMediaCollection;
@@ -32,9 +30,7 @@ class WebhookController extends Controller
         Request $request,
         EdaatService $edaatService,
         CreateTransactions $createTransactions,
-        CalculateVatAmount $calculateVatAmount,
-        CalculateAmountWithVat $calculateAmountWithVat,
-        GenerateZatcaInvoice $generateZatcaInvoice
+        CalcAmountWithoutVatAndOrdersCount $calcAmountWithoutVatAndOrdersCount
     ) {
         Log::debug('test', [$request->all()]);
         foreach ($request->all() as $invoice) {
@@ -48,8 +44,9 @@ class WebhookController extends Controller
                 $invoice->update(['status' => EdaatInvoiceStatus::Paid]);
 
                 $amountWithVat = $invoice->amount;
-                [$vatAmount, $vatRate] = $calculateVatAmount->handle($amountWithVat);
-                $amountWithoutVat = $amountWithVat->subtract($vatAmount);
+                [$amountWithoutVat, $ordersCount] = $calcAmountWithoutVatAndOrdersCount->handle($company, $amountWithVat);
+
+                $vatAmount = $amountWithVat->subtract($amountWithoutVat);
 
                 $transaction = $createTransactions->handle(
                     $wallet,
@@ -57,10 +54,8 @@ class WebhookController extends Controller
                     $amountWithoutVat,
                     [
                         'invoice_number' => $invoice->invoice_number,
-                    ]
+                    ],
                 );
-
-                app(GenerateVoucherReceipt::class)->handle($transaction);
 
                 $vatTransaction = $createTransactions->handle(
                     $wallet,
@@ -68,31 +63,31 @@ class WebhookController extends Controller
                     $vatAmount,
                     [
                         'vat_percentage' => $this->getProjectSettings->handle()->getVatRateInPercentage(),
-                    ]
+                    ],
+                    referenceNumber: $transaction->reference_number
                 );
 
-                [$chargeAmountWithoutVat, $orderCount] = $calculateAmountWithVat->handle($company, (int) $amountWithVat->formatByDecimal());
                 $invoiceSpecs = $this->getInvoiceSpecs(
                     $vatTransaction,
                     $company,
                     (int) $amountWithoutVat->formatByDecimal(),
                     $vatAmount,
-                    $orderCount
+                    $ordersCount
                 );
 
-                $generateZatcaInvoice->handle($invoiceSpecs, TransactionMediaCollection::RechargeReceipt);
+                app(GenerateZatcaInvoice::class)->handle($invoiceSpecs, TransactionMediaCollection::RechargeReceipt);
             }
         }
     }
 
-    private function getInvoiceSpecs($transaction, $company, $amount, $vatAmount, $orderCount): InvoiceSpecs
+    private function getInvoiceSpecs($transaction, $company, $amountWithVat, $vatAmount, $orderCount): InvoiceSpecs
     {
         return new InvoiceSpecs(
             $transaction,
             $this->getProjectSettings->handle()->getCompanyName(Config::get('app.locale', 'en')),
             $this->getProjectSettings->handle()->getVatId(),
-            $transaction->created_at,
-            $amount,
+            $transaction->created_at->clone(),
+            $amountWithVat,
             $vatAmount,
             new Order(
                 $transaction->reference_number,

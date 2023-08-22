@@ -2,7 +2,7 @@
 
 namespace App\Actions\Wallets;
 
-use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
+use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Enums\TransactionReason;
@@ -13,7 +13,7 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
 {
     public function __construct(
         protected CreateTransactions $createTransactions,
-        protected GetProjectSettings $getProjectSettings
+        protected CalculateVatAmount $calculateVatAmount
     ) {
     }
 
@@ -22,13 +22,15 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
         $financingOrder = $traderOrder->order;
         $company = $financingOrder->company()->withTrashed()->first();
         $wallet = $company->getWallet(WalletType::CompanyWallet);
-        $vatRate = $this->getProjectSettings->handle()->getVatRate();
-        $vatPercentageFee = $company->order_cost->multiply($vatRate);
+        [$vatAmount] = $this->calculateVatAmount
+            ->setAmount($company->order_cost)
+            ->setIsVatIncludedInAmount(false)
+            ->handle();
 
         return $this->createTransactions->handle(
             $wallet,
             TransactionReason::OrderCreationFee,
-            $company->order_cost->add($vatPercentageFee),
+            $company->order_cost->add($vatAmount),
             [
                 'financing_order_id' => $financingOrder->id,
                 'trader_order_id' => $traderOrder->id,

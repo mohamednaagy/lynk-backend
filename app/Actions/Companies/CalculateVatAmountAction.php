@@ -8,16 +8,47 @@ use Cknow\Money\Money;
 
 class CalculateVatAmountAction implements CalculateVatAmount
 {
+    protected bool $isVatIncludedInAmount;
+
+    protected Money $amount;
+
     public function __construct(
         protected GetProjectSettings $getProjectSettings
     ) {
     }
 
-    public function handle(Money $amount): array
+    public function handle(): array
     {
+        if (! isset($this->amount) || ! isset($this->isVatIncludedInAmount)) {
+            throw new \Exception('Amount or isVatIncluedInAmount are not set');
+        }
+
         $vatRate = $this->getProjectSettings->handle()->getVatRate();
-        $vatAmount = $amount->multiply($vatRate);
+
+        $vatAmount = null;
+
+        if ($this->isVatIncludedInAmount) {
+            $vatAmount = $this->amount->subtract(
+                $this->amount->divide(1 + $vatRate)
+            );
+        } else {
+            $vatAmount = $this->amount->multiply($vatRate);
+        }
 
         return [$vatAmount, $vatRate];
+    }
+
+    public function setIsVatIncludedInAmount(bool $isIncluded): CalculateVatAmount
+    {
+        $this->isVatIncludedInAmount = $isIncluded;
+
+        return $this;
+    }
+
+    public function setAmount(Money $amount): CalculateVatAmount
+    {
+        $this->amount = $amount;
+
+        return $this;
     }
 }

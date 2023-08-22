@@ -4,7 +4,7 @@ namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\Companies\ChargeLenderBalanceManually;
-use App\Actions\Contracts\Lenders\CalculateAmountWithVat;
+use App\Actions\Contracts\Lenders\CalcAmountWithoutVatAndOrdersCount;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Actions\Contracts\Wallets\GenerateVoucherReceipt;
@@ -29,25 +29,29 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
         protected GenerateZatcaInvoice $generateZatcaInvoice,
         protected CalculateVatAmount $calculateVatAmount,
         protected GetProjectSettings $getProjectSettings,
-        protected CalculateAmountWithVat $calculateAmountWithVat
+        protected CalcAmountWithoutVatAndOrdersCount $calcAmountWithoutVatAndOrdersCount
     ) {
     }
 
     public function handle(Company $company, array $data)
     {
         $wallet = $company->getWallet(WalletType::CompanyWallet);
-        $totalAmount = Money::parseByDecimal(Arr::get($data, 'amount'), $wallet->currency);
-        [$vatAmount, $vatRate] = $this->calculateVatAmount->handle($totalAmount);
+        $totalAmountWithVat = Money::parseByDecimal(Arr::get($data, 'amount'), $wallet->currency);
+        [$vatAmount, $vatRate] = $this->calculateVatAmount
+            ->setAmount($totalAmountWithVat)
+            ->setIsVatIncludedInAmount(true)
+            ->handle();
 
         $transaction = $this->createTransactions->handle(
             $wallet,
             TransactionReason::ManualDeposit,
-            $totalAmount->subtract($vatAmount),
+            $totalAmountWithVat->subtract($vatAmount),
             Arr::only($data, ['description_en', 'description_ar'])
         );
 
         $transaction->addMedia(Arr::get($data, 'attachment'))
             ->toMediaCollection(TransactionMediaCollection::Attachments);
+
         $this->generateVoucherReceipt->handle($transaction);
 
         $vatTransaction = $this->createTransactions->handle(
@@ -56,25 +60,39 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
             $vatAmount,
             [
                 'vat_percentage' => $vatRate * 100,
-            ]
+            ],
+            referenceNumber: $transaction->reference_number
         );
 
-        $invoiceSpecs = $this->getInvoiceSpecs($vatTransaction, $company, (int) $totalAmount->formatByDecimal(), $vatAmount, $vatRate);
+        $invoiceSpecs = $this->getInvoiceSpecs(
+            $vatTransaction,
+            $company,
+            $totalAmountWithVat,
+            $vatAmount,
+            $vatRate
+        );
+
         $this->generateZatcaInvoice->handle($invoiceSpecs, TransactionMediaCollection::RechargeReceipt);
 
         return $transaction;
     }
 
-    private function getInvoiceSpecs(Transaction $transaction, Company $company, $totalAmount, $vatAmount, $vatRate): InvoiceSpecs
-    {
-        [$amountWithoutVat, $orderCount] = $this->calculateAmountWithVat->handle($company, $totalAmount);
+    private function getInvoiceSpecs(
+        Transaction $transaction,
+        Company $company,
+        Money $totalAmountWithVat,
+        $vatAmount,
+        $vatRate
+    ): InvoiceSpecs {
+        [, $ordersCount] = $this->calcAmountWithoutVatAndOrdersCount
+            ->handle($company, $totalAmountWithVat);
 
         return new InvoiceSpecs(
             $transaction,
             $this->getProjectSettings->handle()->getCompanyName(Config::get('app.locale', 'en')),
             $this->getProjectSettings->handle()->getVatId(),
-            $transaction->created_at,
-            $transaction->amount->formatByDecimal(),
+            $transaction->created_at->clone(),
+            $totalAmountWithVat->formatByDecimal(),
             $vatAmount->formatByDecimal(),
             new Order(
                 $transaction->reference_number,
@@ -83,7 +101,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
                         __('zatca/e-invoice.recharge_balance'),
                         $company->order_cost,
                         $vatRate * 100,
-                        quantity: $orderCount
+                        quantity: $ordersCount
                     ),
                 ],
                 $transaction->created_at->clone()->tz('Asia/Riyadh'),

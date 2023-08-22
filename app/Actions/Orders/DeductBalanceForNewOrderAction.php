@@ -15,7 +15,6 @@ class DeductBalanceForNewOrderAction implements DeductBalanceForNewOrder
 
     public function handle(TraderOrder $traderOrder): void
     {
-        // deduct the cost from the wallet
-        $creationFeeTransaction = $this->deductOrderCreationFee->handle($traderOrder);
+        $this->deductOrderCreationFee->handle($traderOrder);
     }
 }

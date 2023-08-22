@@ -48,7 +48,8 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
         PdfGenerator::outputFromHtml(
             $html,
             function ($fileResource) use ($invoiceSpecs, $mediaCollection, $invoiceId) {
-                return $invoiceSpecs->getAssociatedModel()->addMediaFromStream($fileResource)
+                return $invoiceSpecs->getAssociatedModel()
+                    ->addMediaFromStream($fileResource)
                     ->usingFileName("simplified-invoice-{$invoiceId}".'.pdf')
                     ->toMediaCollection($mediaCollection);
             }
