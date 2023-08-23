@@ -54,6 +54,7 @@ class WebhookController extends Controller
                     $amountWithoutVat,
                     [
                         'invoice_number' => $invoice->invoice_number,
+                        'voucher_value' => $amountWithVat->formatByDecimal(),
                     ],
                 );
 
@@ -84,10 +85,12 @@ class WebhookController extends Controller
 
     private function getInvoiceSpecs($transaction, $company, $amountWithVat, $vatAmount, $orderCount): InvoiceSpecs
     {
+        $project = $this->getProjectSettings->handle();
+
         return new InvoiceSpecs(
             $transaction,
-            $this->getProjectSettings->handle(),
-            $this->getProjectSettings->handle()->getVatId(),
+            $project,
+            $project->getVatId(),
             $transaction->created_at->clone(),
             $amountWithVat,
             $vatAmount,
@@ -97,7 +100,7 @@ class WebhookController extends Controller
                     new PurchaseLine(
                         __('zatca/e-invoice.recharge_balance'),
                         $company->order_cost,
-                        $this->getProjectSettings->handle()->getVatRateInPercentage(),
+                        $project->getVatRateInPercentage(),
                         quantity: $orderCount
                     ),
                 ],

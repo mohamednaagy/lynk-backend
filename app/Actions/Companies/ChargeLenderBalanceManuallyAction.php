@@ -41,11 +41,12 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
             ->setIsVatIncludedInAmount(true)
             ->handle();
 
+        $data['voucher_value'] = $totalAmountWithVat->formatByDecimal();
         $transaction = $this->createTransactions->handle(
             $wallet,
             TransactionReason::ManualDeposit,
             $totalAmountWithVat->subtract($vatAmount),
-            Arr::only($data, ['description_en', 'description_ar'])
+            Arr::only($data, ['description_en', 'description_ar', 'voucher_value'])
         );
 
         $transaction->addMedia(Arr::get($data, 'attachment'))
@@ -58,7 +59,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
             TransactionReason::VatPercentageOnDeposit,
             $vatAmount,
             [
-                'vat_percentage' => $vatRate * 100,
+                'vat_percentage' => $this->getProjectSettings->handle()->getVatRateInPercentage(),
             ],
             referenceNumber: $transaction->reference_number
         );
@@ -67,8 +68,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
             $vatTransaction,
             $company,
             $totalAmountWithVat,
-            $vatAmount,
-            $vatRate
+            $vatAmount
         );
 
         $this->generateZatcaInvoice->handle($invoiceSpecs, TransactionMediaCollection::RechargeReceipt);
@@ -80,16 +80,17 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
         Transaction $transaction,
         Company $company,
         Money $totalAmountWithVat,
-        $vatAmount,
-        $vatRate
+        $vatAmount
     ): InvoiceSpecs {
         [, $ordersCount] = $this->calcAmountWithoutVatAndOrdersCount
             ->handle($company, $totalAmountWithVat);
 
+        $project = $this->getProjectSettings->handle();
+
         return new InvoiceSpecs(
             $transaction,
-            $this->getProjectSettings->handle(),
-            $this->getProjectSettings->handle()->getVatId(),
+            $project,
+            $project->getVatId(),
             $transaction->created_at->clone(),
             $totalAmountWithVat->formatByDecimal(),
             $vatAmount->formatByDecimal(),
@@ -99,7 +100,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
                     new PurchaseLine(
                         __('zatca/e-invoice.recharge_balance'),
                         $company->order_cost,
-                        $vatRate * 100,
+                        $project->getVatRateInPercentage(),
                         quantity: $ordersCount
                     ),
                 ],

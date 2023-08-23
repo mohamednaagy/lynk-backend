@@ -18,9 +18,14 @@ class GenerateVoucherReceiptAction implements GenerateVoucherReceipt
     public function handle(Transaction $transaction)
     {
         $company = $transaction->wallet->holder;
+        $amount = $transaction->amount->formatByDecimal();
+
+        if (isset($transaction->meta['voucher_value'])) {
+            $amount = $transaction->meta['voucher_value'];
+        }
 
         $content = __('invoices/voucher-receipt.content', [
-            'amount' => $transaction->amount->formatByDecimal(),
+            'amount' => $amount,
             'company_name' => $company->name,
         ], 'ar');
 

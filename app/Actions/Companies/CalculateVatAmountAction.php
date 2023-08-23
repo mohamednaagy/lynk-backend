@@ -20,7 +20,7 @@ class CalculateVatAmountAction implements CalculateVatAmount
     public function handle(): array
     {
         if (! isset($this->amount) || ! isset($this->isVatIncludedInAmount)) {
-            throw new \Exception('Amount or isVatIncluedInAmount are not set');
+            throw new \Exception('Amount or isVatIncludedInAmount are not set');
         }
 
         $vatRate = $this->getProjectSettings->handle()->getVatRate();
