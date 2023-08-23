@@ -37,6 +37,7 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
                 'reference_number ' => $financingOrder->reference_number,
                 'amount' => $financingOrder->amount,
                 'order_cost' => $company->order_cost,
+                'vat_amount' => $vatAmount,
             ]
         );
     }
