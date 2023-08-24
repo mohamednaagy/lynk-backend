@@ -16,6 +16,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class ProcessInProgressOrder implements ShouldQueue
@@ -58,6 +59,8 @@ class ProcessInProgressOrder implements ShouldQueue
             try {
                 app(CanCreateOrder::class)->handle($financingOrder->company);
             } catch (BalanceIsNotEnoughException $e) {
+                Log::alert($financingOrder->id);
+
                 return;
             }
 
