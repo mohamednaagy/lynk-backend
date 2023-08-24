@@ -57,6 +57,7 @@ class Company extends BaseTenant
             'type',
             'driver',
             'notify_admins_about_new_orders',
+            'trading_mode',
             'deleted_at',
         ];
     }
