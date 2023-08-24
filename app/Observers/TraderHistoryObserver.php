@@ -11,16 +11,6 @@ class TraderHistoryObserver
 {
     use ObserverHelper;
 
-    /**
-     * Handle the TraderHistory "created" event.
-     *
-     * @param  TraderHistory  $traderHistory
-     * @return void
-     *
-     * @throws \Exception
-     */
-    public bool $afterCommit = true;
-
     public function created(TraderHistory $traderHistory)
     {
         $traderOrder = $traderHistory->traderOrder()

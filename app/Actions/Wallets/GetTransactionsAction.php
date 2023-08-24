@@ -13,8 +13,10 @@ class GetTransactionsAction implements GetTransactions
     {
         return $company->transactions(WalletType::CompanyWallet)
             ->with([
-                'media' => fn ($query) => $query->where('collection_name', TransactionMediaCollection::VoucherReceipt)
-                    ->orWhere('collection_name', TransactionMediaCollection::RechargeReceipt),
+                'media' => fn ($query) => $query->whereIn('collection_name', [
+                    TransactionMediaCollection::VoucherReceipt,
+                    TransactionMediaCollection::ZatcaInvoice,
+                ]),
             ])
             ->paginate();
     }

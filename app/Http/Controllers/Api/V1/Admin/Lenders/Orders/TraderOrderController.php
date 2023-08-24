@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders;
 
 use App\Actions\Contracts\Orders\CreateTraderOrder;
+use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
@@ -17,7 +18,7 @@ class TraderOrderController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit, Action::Manage])
         )
             ->only(['store']);
     }
@@ -30,7 +31,7 @@ class TraderOrderController extends Controller
         CreateTraderOrder $createTraderOrder,
         int $order
     ): JsonResponse {
-        return DB::transaction(function () use ($request, $createTraderOrder, $order) {
+        return DB::multipleTransaction(function () use ($request, $createTraderOrder, $order) {
             $data = $request->validated();
             $data['version'] = get_latest_version_of_trader($data['trader']);
 
@@ -38,9 +39,9 @@ class TraderOrderController extends Controller
                 return $this->errorResponse(__('error.trader_mode_not_supported'));
             }
 
-            DB::transaction(function () use ($data, $order, $createTraderOrder) {
-                $createTraderOrder->handle($order, $data);
-            });
+            $traderOrder = $createTraderOrder->handle($order, $data);
+
+            app(DeductBalanceForNewOrder::class)->handle($traderOrder);
 
             return $this->successResponse();
         });

@@ -36,7 +36,8 @@ class GenerateTraderOrderInvoiceAction implements GenerateTraderOrderInvoice
             [
                 new PurchaseLine(
                     __('zatca/e-invoice.create_order_cost', [
-                        'number' => $traderOrder->getKey(),
+                        'trader_order_id' => $traderOrder->getKey(),
+                        'financing_order_id' => $traderOrder->financing_order_id,
                     ]),
                     $company->order_cost,
                     $seller->getVatRateInPercentage()
