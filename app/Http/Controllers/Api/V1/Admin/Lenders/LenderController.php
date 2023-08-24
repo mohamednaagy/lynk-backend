@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Admin\Lenders;
 
 use App\Actions\Contracts\Companies\BuildPaginatedCompaniesQuery;
+use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Actions\Contracts\GetSettingsClassInstance;
@@ -74,8 +75,16 @@ class LenderController extends Controller
         CreateCompany $createCompany,
         GetSettingsClassInstance $getSettingsClassInstance
     ): JsonResponse {
-        return DB::transaction(function () use ($request, $getSettingsClassInstance, $createCompany) {
-            $data = $request->validated();
+        $data = $request->validated();
+
+        if (! $this->isOrderCostWithVatValid($data['order_cost_tiers'])) {
+            return $this->errorResponse('There is invalid VAT amount');
+        }
+
+        $data['order_cost_tiers'] = $this->unsetProrationAmountInFirstTiers($data['order_cost_tiers']);
+
+        return DB::transaction(function () use ($data, $getSettingsClassInstance, $createCompany) {
+
             $data['status'] = $getSettingsClassInstance->handle(Area::Lender)->default_company_status_created_by_operation;
 
             $company = $createCompany->handle(
@@ -149,5 +158,36 @@ class LenderController extends Controller
         });
 
         return $this->successResponse();
+    }
+
+    private function isOrderCostWithVatValid(array $tiers): bool
+    {
+        foreach ($tiers as $tier) {
+            $orderCostWithoutVat = money($tier['order_cost_without_vat']);
+            $orderCostWithVat = money($tier['order_cost_with_vat']);
+            [$vatOfChargeAmount] = app(CalculateVatAmount::class)
+                ->setAmount($orderCostWithoutVat)
+                ->setIsVatIncludedInAmount(false)
+                ->handle();
+
+            if (! $orderCostWithVat->equals($orderCostWithoutVat->add($vatOfChargeAmount))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function unsetProrationAmountInFirstTiers(array $tiers): array
+    {
+        $tiersCount = count($tiers);
+        for ($i = 0; $i < ($tiersCount - 1); $i++) {
+            $tier = &$tiers[$i];
+            if (isset($tier['proration_amount'])) {
+                $tier['proration_amount'] = null;
+            }
+        }
+
+        return $tiers;
     }
 }
