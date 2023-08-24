@@ -29,7 +29,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
     {
     }
 
-    public function handel(TraderOrder $traderOrder, Transaction $creationFeeTransaction)
+    public function handle(TraderOrder $traderOrder, Transaction $creationFeeTransaction)
     {
         $seller = $this->getProjectSettings->handle();
         $financingOrder = $traderOrder->order;

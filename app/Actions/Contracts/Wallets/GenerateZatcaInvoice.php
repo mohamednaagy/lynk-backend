@@ -7,5 +7,5 @@ use App\Models\Transaction;
 
 interface GenerateZatcaInvoice
 {
-    public function handel(TraderOrder $traderOrder, Transaction $creationFeeTransaction);
+    public function handle(TraderOrder $traderOrder, Transaction $creationFeeTransaction);
 }
