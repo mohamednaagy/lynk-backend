@@ -10,6 +10,8 @@ class CalculateVatAmountAction implements CalculateVatAmount
 {
     protected bool $isVatIncludedInAmount;
 
+    protected string $vatRate;
+
     protected Money $amount;
 
     public function __construct(
@@ -23,7 +25,7 @@ class CalculateVatAmountAction implements CalculateVatAmount
             throw new \Exception('Amount or isVatIncludedInAmount are not set');
         }
 
-        $vatRate = $this->getProjectSettings->handle()->getVatRate();
+        $vatRate = $this->vatRate ?? $this->getProjectSettings->handle()->getVatRate();
 
         $vatAmount = null;
 
@@ -48,6 +50,13 @@ class CalculateVatAmountAction implements CalculateVatAmount
     public function setAmount(Money $amount): CalculateVatAmount
     {
         $this->amount = $amount;
+
+        return $this;
+    }
+
+    public function setVatRate(string $rate): CalculateVatAmount
+    {
+        $this->vatRate = $rate;
 
         return $this;
     }

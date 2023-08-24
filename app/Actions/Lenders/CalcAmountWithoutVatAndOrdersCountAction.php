@@ -23,20 +23,27 @@ class CalcAmountWithoutVatAndOrdersCountAction implements CalcAmountWithoutVatAn
      */
     public function handle(Company $company, Money $chargeAmountWithVat): array
     {
-        [$vatOfChargeAmount] = $this->calculateVatAmount
+        [$vatOfChargeAmount, $vatRateOfChargeAmount] = $this->calculateVatAmount
             ->setAmount($chargeAmountWithVat)
             ->setIsVatIncludedInAmount(true)
             ->handle();
+
         [$vatOfOrderCost] = $this->calculateVatAmount
             ->setAmount($company->order_cost)
             ->setIsVatIncludedInAmount(false)
+            ->setVatRate($vatRateOfChargeAmount)
             ->handle();
 
         $orderCost = $company->order_cost->add($vatOfOrderCost);
-        $ordersCount = $chargeAmountWithVat->divide($orderCost->getAmount());
+        $ordersCount = $chargeAmountWithVat->getAmount() / $orderCost->getAmount();
 
         $chargeAmountWithoutVat = $chargeAmountWithVat->subtract($vatOfChargeAmount);
 
-        return [$chargeAmountWithoutVat, floor($ordersCount->getAmount())];
+        return [
+            $chargeAmountWithoutVat,
+            floor($ordersCount),
+            $vatRateOfChargeAmount,
+            $ordersCount,
+        ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Companies;
 
+use App\Rules\IsAmountMultiplesOfOrderCost;
 use App\Rules\MoneyValueRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -25,7 +26,13 @@ class StoreTransactionRequest extends FormRequest
     public function rules()
     {
         return [
-            'amount' => ['required', 'gt:0', 'numeric', new MoneyValueRule],
+            'amount' => [
+                'required',
+                'gt:0',
+                'numeric',
+                new MoneyValueRule,
+                new IsAmountMultiplesOfOrderCost($this->route('lender')),
+            ],
             'description_en' => ['required', 'string', 'max:255'],
             'description_ar' => ['required', 'string', 'max:255'],
             'attachment' => ['required', 'file', 'mimes:png,jpg,jpeg,pdf', 'max:2048'],

@@ -21,14 +21,7 @@ class Transaction extends Model implements HasMedia
         return ['uuid'];
     }
 
-    protected $fillable = [
-        'id',
-        'wallet_id',
-        'reference_number',
-        'amount',
-        'meta',
-        'reason',
-    ];
+    protected $guarded = [];
 
     protected $casts = [
         'meta' => 'array',

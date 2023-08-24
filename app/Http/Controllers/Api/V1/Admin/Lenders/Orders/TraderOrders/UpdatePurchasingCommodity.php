@@ -28,7 +28,7 @@ class UpdatePurchasingCommodity extends Controller
         int $order,
         int $traderOrder
     ): JsonResponse {
-        return DB::transaction(function () use ($traderOrder, $request) {
+        return DB::multipleTransaction(function () use ($traderOrder, $request) {
             [$financingOrder, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
 
             (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))->updatePurchasingCommodity($traderOrder, $request);
