@@ -2,7 +2,6 @@
 
 namespace App\Support\Traders\TradingStrategies\Bursam;
 
-use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Actions\Contracts\Orders\UpdateTraderOrder;
 use App\Enums\BursamMurabhaStep;
 use App\Enums\FinancingOrderHistory;
@@ -29,8 +28,6 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
             $traderOrder,
             BursamMurabhaStep::PurchasingCommodity
         );
-
-        app(DeductBalanceForNewOrder::class)->handle($traderOrder);
 
         $this->transferOwnershipToLender($traderOrder, $request);
     }

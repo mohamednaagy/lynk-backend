@@ -30,7 +30,7 @@ class DeductBalanceForNewOrderAction implements DeductBalanceForNewOrder
             $financingOrder->company()->withTrashed()->first()
         );
 
-        $this->generateZatcaInvoice->handel(
+        $this->generateZatcaInvoice->handle(
             $traderOrder,
             creationFeeTransaction: $creationFeeTransaction
         );

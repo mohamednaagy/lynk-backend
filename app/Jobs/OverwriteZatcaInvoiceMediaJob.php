@@ -57,7 +57,7 @@ class OverwriteZatcaInvoiceMediaJob implements ShouldQueue
                         $financingOrder->clearMediaCollection(FinancingOrderMediaCollection::ZatcaInvoice);
                     }
 
-                    app(GenerateZatcaInvoice::class)->handel($financingOrder, $creationFeeTransaction);
+                    app(GenerateZatcaInvoice::class)->handle($financingOrder, $creationFeeTransaction);
                 });
             });
     }
