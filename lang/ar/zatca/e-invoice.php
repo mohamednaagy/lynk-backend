@@ -27,7 +27,7 @@ return [
     'total' => 'إجمالي قيمة الفاتورة شامل الضريبة',
     'invoice_number' => 'فاتورة #:number',
     'amount_with_currency' => ':amount ريال',
-    'create_order_cost' => 'رسوم إنشاء طلب تمويلي #number:',
+    'create_order_cost' => 'رسوم إنشاء طلب مرابحة #trader_order_id للطلب التمويلي #financing_order_id:',
     'vat' => 'نسبه قيمه الضريبه المضافه',
     'recharge_balance' => 'اعاده شحن الرصيد',
 ];

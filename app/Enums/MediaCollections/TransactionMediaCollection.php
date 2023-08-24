@@ -10,5 +10,5 @@ final class TransactionMediaCollection extends Enum
 
     public const VoucherReceipt = 'voucher_receipt';
 
-    public const RechargeReceipt = 'recharge_receipt';
+    public const ZatcaInvoice = 'zatca_invoice';
 }

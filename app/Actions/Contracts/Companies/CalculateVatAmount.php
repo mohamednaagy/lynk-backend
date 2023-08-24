@@ -11,4 +11,6 @@ interface CalculateVatAmount
     public function setIsVatIncludedInAmount(bool $isIncluded): self;
 
     public function setAmount(Money $amount): self;
+
+    public function setVatRate(string $vatRate): self;
 }

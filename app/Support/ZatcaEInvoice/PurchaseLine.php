@@ -11,7 +11,7 @@ class PurchaseLine
         protected Money $itemPrice,
         protected string $vatPercentage,
         protected float $discount = 0,
-        protected int $quantity = 1
+        protected int|float $quantity = 1
     ) {
     }
 
@@ -31,7 +31,7 @@ class PurchaseLine
         return $this->name;
     }
 
-    public function getQuantity(): int
+    public function getQuantity(): int|float
     {
         return $this->quantity;
     }
@@ -53,8 +53,6 @@ class PurchaseLine
 
     /**
      * Get total line amount (without VAT & without discount)
-     *
-     * @return Money
      */
     public function getLineSubtotal(): Money
     {
@@ -79,8 +77,6 @@ class PurchaseLine
 
     /**
      * Get total VAT amount
-     *
-     * @return Money
      */
     public function getTotalVatAmount(): Money
     {
@@ -96,8 +92,6 @@ class PurchaseLine
 
     /**
      * Get total line amount (with VAT)
-     *
-     * @return Money
      */
     public function getLineTotal(): Money
     {

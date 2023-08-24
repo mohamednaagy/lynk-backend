@@ -51,18 +51,34 @@ class TransactionTransformer extends TransformerAbstract
 
     public function includeReceiptUrl(Transaction $transaction): Primitive|NullResource
     {
-        if (in_array($transaction->reason, TransactionReason::$reasonsAssociatedWithZatcaInvoice)) {
+        if (
+            $transaction->reason === TransactionReason::OrderCreationFee
+        ) {
+            if ($transaction->meta['is_vat_included'] === false) {
+                return $this->primitive(optional($transaction->zatcaInvoiceMedia)->file_url);
+            }
+
             return $this->primitive(
-                $transaction->zatca_invoice_media?->file_url
+                $transaction->getFirstMedia(TransactionMediaCollection::ZatcaInvoice)?->file_url
             );
-        } elseif (in_array($transaction->reason, [TransactionReason::DepositByEdaat, TransactionReason::ManualDeposit])) {
+        } elseif ($transaction->reason === TransactionReason::ManualDeposit) {
             return $this->primitive(
                 $transaction->getFirstMedia(TransactionMediaCollection::VoucherReceipt)?->file_url
             );
-        } elseif (in_array($transaction->reason, [TransactionReason::VatPercentageOnDeposit])) {
+        } elseif (in_array($transaction->reason, [TransactionReason::VatPercentageFee, TransactionReason::VatPercentageOnDeposit])) {
             return $this->primitive(
-                $transaction->getFirstMedia(TransactionMediaCollection::RechargeReceipt)?->file_url
+                $transaction->getFirstMedia(TransactionMediaCollection::ZatcaInvoice)?->file_url
             );
+        } elseif ($transaction->reason === TransactionReason::DepositByEdaat) {
+            $fileUrl = null;
+
+            if ($media = $transaction->getFirstMedia(TransactionMediaCollection::VoucherReceipt)) {
+                $fileUrl = $media->file_url;
+            } elseif ($transaction->zatcaInvoiceMedia) {
+                $fileUrl = $transaction->zatcaInvoiceMedia->file_url;
+            }
+
+            return $this->primitive($fileUrl);
         }
 
         return $this->null();
