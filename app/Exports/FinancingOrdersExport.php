@@ -32,7 +32,14 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
         'cost_without_vat' => 'Cost Without Vat (SAR)',
     ];
 
-    protected $excludes = [];
+    protected array $excludes = [];
+
+    protected array $detailedHeadings = [
+        'created_date',
+        'created_time',
+        'cost_with_vat',
+        'cost_without_vat',
+    ];
 
     public function __construct(protected Request $request, protected Builder $ordersQuery)
     {
@@ -93,13 +100,12 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
 
     protected function filterExcludes($items)
     {
+        $excludeDetails = array_diff($this->detailedHeadings, $this->excludes);
+
         if ($this->isDetailedExport()) {
-            $this->excludes = [];
+            $this->excludes = array_filter($this->excludes, fn ($value) => ! in_array($value, $excludeDetails));
         } else {
-            $this->excludes = array_merge($this->excludes, [
-                'cost_with_vat',
-                'cost_without_vat',
-            ]);
+            $this->excludes = array_unique(array_merge($this->excludes, $this->detailedHeadings));
         }
 
         return array_values(
