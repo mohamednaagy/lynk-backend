@@ -19,9 +19,9 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
 
     protected array $headings = [
         'id' => 'ID',
-        'reference_number' => 'Reference Number',
         'amount' => 'Commodity Price (SAR)',
         'selling_price' => 'Selling Price (SAR)',
+        'reference_number' => 'Reference Number',
         'national_id' => 'National ID / Iqama',
         'order_owner' => 'Order Owner',
         'company_name' => 'Company Name',
@@ -69,9 +69,9 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
     {
         $items = $this->filterExcludes([
             'id' => fn () => $order->id,
-            'reference_number' => fn () => $order->reference_number,
             'amount' => fn () => $order->amount->formatByDecimal(),
             'selling_price' => fn () => $order->selling_price->formatByDecimal(),
+            'reference_number' => fn () => $order->reference_number,
             'national_id' => fn () => $order->national_id,
             'order_owner' => fn () => $order->creator?->full_name,
             'company_name' => fn () => $order->company->name,
