@@ -100,9 +100,8 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
 
     protected function filterExcludes($items)
     {
-        $excludeDetails = array_diff($this->detailedHeadings, $this->excludes);
-
         if ($this->isDetailedExport()) {
+            $excludeDetails = array_diff($this->detailedHeadings, $this->excludes);
             $this->excludes = array_filter($this->excludes, fn ($value) => ! in_array($value, $excludeDetails));
         } else {
             $this->excludes = array_unique(array_merge($this->excludes, $this->detailedHeadings));
