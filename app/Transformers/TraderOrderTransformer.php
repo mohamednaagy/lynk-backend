@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Enums\BursamMurabhaStep;
+use App\Enums\BursamProductCode;
 use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
@@ -110,7 +111,15 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includePurchasingCommodityInformation(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive([
-            'products' => $traderOrder->products,
+            'products' => collect($traderOrder->products)->map(function ($product) {
+                $productDescription = in_array($product['product'], BursamProductCode::getValues())
+                    ? BursamProductCode::fromValue($product['product'])->description
+                    : $product['product'];
+
+                $product['product_description'] = $productDescription;
+
+                return $product;
+            }),
             'ptp_document' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::PromiseToPurchase)?->file_url,
             'exchange_rate' => $traderOrder->exchange_rate,
             'original_holding_certificate' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)?->file_url,
