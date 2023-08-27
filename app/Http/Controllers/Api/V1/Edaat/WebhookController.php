@@ -56,6 +56,7 @@ class WebhookController extends Controller
                     $amountWithoutVat,
                     [
                         'invoice_number' => $invoice->invoice_number,
+                        'is_vat_included' => false,
                     ],
                 );
 
