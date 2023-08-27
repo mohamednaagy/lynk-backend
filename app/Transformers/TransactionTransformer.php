@@ -54,8 +54,10 @@ class TransactionTransformer extends TransformerAbstract
         if (
             $transaction->reason === TransactionReason::OrderCreationFee
         ) {
-            if ($transaction->meta['is_vat_included'] === false) {
-                return $this->primitive(optional($transaction->zatcaInvoiceMedia)->file_url);
+            if (isset($transaction->meta['is_vat_included'])) {
+                if ($transaction->meta['is_vat_included'] === false) {
+                    return $this->primitive(optional($transaction->zatcaInvoiceMedia)->file_url);
+                }
             }
 
             return $this->primitive(
