@@ -20,10 +20,19 @@ return new class extends Migration
                 foreach ($transactions as $transaction) {
                     DB::connection(config('wallet.database.connection'))
                         ->transaction(function () use ($transaction) {
+                            $vatTransaction = Transaction::query()
+                                ->where('reference_number', $transaction->referance_number)
+                                ->first();
 
-                            $transaction->update([
-                                'meta->is_vat_included' => false,
-                            ]);
+                            if ($vatTransaction) {
+                                $transaction->update([
+                                    'meta->is_vat_included' => false,
+                                ]);
+                            } else {
+                                $transaction->update([
+                                    'meta->is_vat_included' => true,
+                                ]);
+                            }
                         });
                 }
             });
