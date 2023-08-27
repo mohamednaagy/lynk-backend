@@ -13,14 +13,10 @@ class TransactionCollection extends Collection
     public function loadZatcaInvoicesMedia()
     {
         $transactionsWithoutInvoicesReferences = $this->filter(function ($transaction) {
-            $is_vat_included = false;
-            if (isset($transaction->meta['is_vat_included'])) {
-                $is_vat_included = $transaction->meta['is_vat_included'];
-            }
 
             return $transaction->reason === TransactionReason::DepositByEdaat
                 || ($transaction->reason === TransactionReason::OrderCreationFee
-                    && $is_vat_included === false);
+                    && $transaction->meta['is_vat_included'] === false);
         })
             ->pluck('reference_number');
 
@@ -40,15 +36,10 @@ class TransactionCollection extends Collection
             $relatedTransactionsKeyedByRef,
             $mediaKeyedByModelId
         ) {
-            $is_vat_included = false;
-            if (isset($transaction->meta['is_vat_included'])) {
-                $is_vat_included = $transaction->meta['is_vat_included'];
-            }
-
             if (
                 $transaction->reason === TransactionReason::DepositByEdaat
                 || ($transaction->reason === TransactionReason::OrderCreationFee
-                    && $is_vat_included === false)
+                    && $transaction->meta['is_vat_included'] === false)
             ) {
                 $relatedTransaction = $relatedTransactionsKeyedByRef[$transaction->reference_number] ?? null;
 
