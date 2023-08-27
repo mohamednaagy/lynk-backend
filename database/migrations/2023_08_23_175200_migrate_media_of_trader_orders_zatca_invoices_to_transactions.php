@@ -44,7 +44,11 @@ return new class extends Migration
                         if ($mediaItem->model_type === FinancingOrder::class) {
                             $financingOrderId = $mediaItem->model_id;
                         } elseif ($mediaItem->model_type === TraderOrder::class) {
-                            $financingOrderId = $mediaItem->model->financing_order_id;
+                            if ($mediaItem->model) {
+                                $financingOrderId = $mediaItem->model->financing_order_id;
+                            } else {
+                                return;
+                            }
                         }
 
                         // if ($financingOrderId === null) {
