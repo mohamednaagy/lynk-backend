@@ -2,7 +2,6 @@
 
 namespace App\Transformers;
 
-use App\Enums\Area;
 use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
 use App\Models\Transaction;
@@ -57,10 +56,8 @@ class TransactionTransformer extends TransformerAbstract
         if (
             $transaction->reason === TransactionReason::OrderCreationFee
         ) {
-            if (isset($transaction->meta['is_vat_included'])) {
-                if ($transaction->meta['is_vat_included'] === false) {
-                    return $this->primitive(optional($transaction->zatcaInvoiceMedia)->file_url);
-                }
+            if ($transaction->meta['is_vat_included'] === false) {
+                return $this->primitive(optional($transaction->zatcaInvoiceMedia)->file_url);
             }
 
             return $this->primitive(
@@ -75,10 +72,6 @@ class TransactionTransformer extends TransformerAbstract
                 $transaction->getFirstMedia(TransactionMediaCollection::ZatcaInvoice)?->file_url
             );
         } elseif ($transaction->reason === TransactionReason::DepositByEdaat) {
-            if ($this->area == Area::Lender) {
-                return $this->primitive(null);
-            }
-
             $fileUrl = null;
 
             if ($media = $transaction->getFirstMedia(TransactionMediaCollection::VoucherReceipt)) {
@@ -91,12 +84,5 @@ class TransactionTransformer extends TransformerAbstract
         }
 
         return $this->null();
-    }
-
-    public function setArea($area): static
-    {
-        $this->area = $area;
-
-        return $this;
     }
 }

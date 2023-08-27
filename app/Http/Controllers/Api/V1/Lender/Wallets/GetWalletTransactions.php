@@ -27,7 +27,7 @@ class GetWalletTransactions extends Controller
 
         tap($paginatedTransactions)->loadZatcaInvoicesMedia();
 
-        return fractal($paginatedTransactions, (new TransactionTransformer())->setArea(Area::Lender))
+        return fractal($paginatedTransactions, (new TransactionTransformer()))
             ->parseIncludes([
                 'id',
                 'date',
