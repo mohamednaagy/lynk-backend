@@ -92,6 +92,11 @@ class Company extends BaseTenant
         return $this->morphMany(Wallet::class, 'holder');
     }
 
+    public function tieredPricing()
+    {
+        return $this->hasMany(TieredPricing::class);
+    }
+
     public function scopeType($query, string $type)
     {
         return $query->where('type', $type);

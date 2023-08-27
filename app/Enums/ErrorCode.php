@@ -59,4 +59,6 @@ class ErrorCode
     public const COMMODITY_MARKET_IS_UNAVAILABLE = 1026;
 
     public const ORDER_REQUIRE_CLIENT_VERIFICATION = 1027;
+
+    public const COMPANY_ORDER_COST_INVALID = 1028;
 }
