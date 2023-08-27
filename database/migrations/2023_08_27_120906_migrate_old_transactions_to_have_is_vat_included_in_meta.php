@@ -21,6 +21,7 @@ return new class extends Migration
                     DB::connection(config('wallet.database.connection'))
                         ->transaction(function () use ($transaction) {
                             $vatTransaction = Transaction::query()
+                                ->where('reason', TransactionReason::VatPercentageOnDeposit)
                                 ->where('reference_number', $transaction->referance_number)
                                 ->first();
 
@@ -45,6 +46,5 @@ return new class extends Migration
      */
     public function down()
     {
-
     }
 };
