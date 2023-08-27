@@ -12,6 +12,8 @@ use League\Fractal\TransformerAbstract;
 
 class TransactionTransformer extends TransformerAbstract
 {
+    protected string|null $area = null;
+
     protected array $availableIncludes = [
         'id',
         'date',

@@ -45,7 +45,11 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
             $wallet,
             TransactionReason::ManualDeposit,
             $totalAmountWithVat->subtract($vatAmount),
-            Arr::only($data, ['description_en', 'description_ar'])
+            [
+                'description_en' => $data['description_en'],
+                'description_ar' => $data['description_ar'],
+                'is_vat_included' => false,
+            ]
         );
 
         $transaction->addMedia(Arr::get($data, 'attachment'))

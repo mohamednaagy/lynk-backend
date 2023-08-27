@@ -13,6 +13,7 @@ class TransactionCollection extends Collection
     public function loadZatcaInvoicesMedia()
     {
         $transactionsWithoutInvoicesReferences = $this->filter(function ($transaction) {
+
             return $transaction->reason === TransactionReason::DepositByEdaat
                 || ($transaction->reason === TransactionReason::OrderCreationFee
                     && $transaction->meta['is_vat_included'] === false);

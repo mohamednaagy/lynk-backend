@@ -49,6 +49,7 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
                     $amountWithoutVat,
                     [
                         'invoice_number' => $edaatInvoice->invoice_number,
+                        'is_vat_included' => false,
                     ],
                 );
 
