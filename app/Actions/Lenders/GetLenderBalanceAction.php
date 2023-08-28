@@ -26,7 +26,7 @@ class GetLenderBalanceAction implements GetLenderBalance
 
         $balance = $company->balance(WalletType::CompanyWallet);
         $orderCost = null;
-        if ($company->tieredPricing()->count() == 1) {
+        if (! $company->isTiered()) {
             $tierPrice = $company->tieredPricing()->first();
 
             $orderCost = $tierPrice->order_cost_without_vat->multiply(($vatRate) + 1)->getAmount();

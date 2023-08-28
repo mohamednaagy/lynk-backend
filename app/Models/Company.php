@@ -97,6 +97,11 @@ class Company extends BaseTenant
         return $this->hasMany(TieredPricing::class);
     }
 
+    public function isTiered(): bool
+    {
+        return $this->tieredPricing()->count() > 1;
+    }
+
     public function scopeType($query, string $type)
     {
         return $query->where('type', $type);

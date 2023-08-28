@@ -29,7 +29,7 @@ class CalcAmountWithoutVatAndOrdersCountAction implements CalcAmountWithoutVatAn
             ->handle();
 
         $ordersCount = null;
-        if ($company->tieredPricing()->count() == 1) {
+        if (! $company->isTiered()) {
             $tierPrice = $company->tieredPricing()->first();
             $orderCostWithVat = $tierPrice->order_cost_without_vat->multiply(($vatRate) + 1);
             $ordersCount = $chargeAmountWithVat->divide($orderCostWithVat->getAmount(), \Money\Money::ROUND_DOWN);

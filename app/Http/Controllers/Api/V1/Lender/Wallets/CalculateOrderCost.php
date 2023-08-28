@@ -26,7 +26,7 @@ class CalculateOrderCost extends Controller
     ): JsonResponse {
         $company = tenant();
         $amount = null;
-        if ($company->tieredPricing()->count() == 1) {
+        if (! $company->isTiered()) {
             $tierPrice = $company->tieredPricing()->first();
 
             $amount = $calculateOrdersCost->handle(
@@ -36,7 +36,7 @@ class CalculateOrderCost extends Controller
         }
 
         return $this->successResponse(data: [
-            'amount' => $amount ? $amount->formatByDecimal() : 0,
+            'amount' => $amount ? $amount->formatByDecimal() : '-',
         ]);
     }
 }

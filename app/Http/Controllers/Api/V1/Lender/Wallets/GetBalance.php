@@ -22,11 +22,12 @@ class GetBalance extends Controller
 
     public function __invoke(Request $request, GetLenderBalance $getBalance): JsonResponse
     {
+        $company = tenant();
         $balances = $getBalance->handle(tenant());
 
         return $this->successResponse(data: [
             'balance' => number_format($balances['balance']->formatByDecimal(), 2),
-            'available_orders' => $balances['availableOrders'],
+            'available_orders' => $company->isTiered() ? '-' : $balances['availableOrders'],
         ]);
     }
 }

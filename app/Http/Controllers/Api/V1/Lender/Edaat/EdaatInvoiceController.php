@@ -46,11 +46,16 @@ class EdaatInvoiceController extends Controller
         return DB::transaction(function () use ($createEdaatInvoice, $request, $calculateOrderCost) {
             /** @var Company $company */
             $company = tenant();
+            $amount = $request->validated('amount');
 
-            $amount = $calculateOrderCost->handle(
-                $request->validated('orders_count'),
-                $company->order_cost
-            );
+            if (! $company->isTiered()) {
+                $tierPrice = $company->tieredPricing()->first();
+
+                $amount = $calculateOrderCost->handle(
+                    $request->validated('orders_count'),
+                    $tierPrice->order_cost_without_vat
+                );
+            }
 
             $invoice = $createEdaatInvoice->handle($amount);
 
