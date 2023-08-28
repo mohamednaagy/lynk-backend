@@ -70,7 +70,7 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
             'company_name' => fn () => $order->company->name,
             'status' => fn () => $this->withLocale('en', function () use ($order) {
                 return $order->status->isNot(FinancingOrderStatus::InProgress)
-                || is_null($order->current_step)
+                    || is_null($order->current_step)
                     ? $order->status->description : $order->current_step->description;
             }),
             'created_date' => fn () => $order->created_at->clone()->tz('Asia/Riyadh')->format('Y-m-d'),
@@ -84,7 +84,7 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
 
     public function prepareRows($orders)
     {
-        if (count(array_diff(['cost_with_vat', 'cost_without_vat'], $this->excludes)) === 0) {
+        if ($this->doesCostExistInExcludes()) {
             return $orders;
         }
 
@@ -100,5 +100,15 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
                 ARRAY_FILTER_USE_BOTH
             )
         );
+    }
+
+    public function doesCostExistInExcludes()
+    {
+        return count(
+            array_diff(
+                ['cost_with_vat', 'cost_without_vat'],
+                $this->excludes
+            )
+        ) === 0;
     }
 }
