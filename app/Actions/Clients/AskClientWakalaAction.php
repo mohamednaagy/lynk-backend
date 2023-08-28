@@ -23,7 +23,7 @@ class AskClientWakalaAction implements AskClientWakala
 
         $shortUrl = $url;
         if (app()->isProduction()) {
-            // $shortUrl = Bitly::getUrl($url);
+            $shortUrl = Bitly::getUrl($url);
         }
 
         try {

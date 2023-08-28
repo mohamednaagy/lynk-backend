@@ -18,7 +18,7 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
         $phoneNumber = ltrim($financingOrder->getPhoneNumber()->formatE164(), '+');
         $message = $this->resolveSmsMessage($financingOrder, $traderOrder);
 
-        // Sms::send($message, $phoneNumber);
+        Sms::send($message, $phoneNumber);
     }
 
     private function resolveSmsMessage(FinancingOrder $financingOrder, TraderOrder $traderOrder)
@@ -76,7 +76,7 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
 
         $documentShortUrl = $documentUrl;
         if (app()->isProduction() && ! empty($documentUrl)) {
-            // $documentShortUrl = Bitly::getUrl($documentUrl);
+            $documentShortUrl = Bitly::getUrl($documentUrl);
         }
 
         return $documentShortUrl;
