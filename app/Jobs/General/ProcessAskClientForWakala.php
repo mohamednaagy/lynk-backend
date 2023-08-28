@@ -36,7 +36,6 @@ class ProcessAskClientForWakala implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
      *
      * @throws BindingResolutionException
      */
@@ -56,20 +55,18 @@ class ProcessAskClientForWakala implements ShouldQueue
 
         $financingOrder = $traderOrder->order;
 
-        if ($financingOrder->is_verification_required) {
-            app()->make(AskClientWakala::class)->handle(
-                $financingOrder,
-                Str::replace('{order_id}', $financingOrder->id, Config::get('frontend.client_wakala_url'))
-            );
-        }
+        // if ($financingOrder->is_verification_required) {
+        //     app()->make(AskClientWakala::class)->handle(
+        //         $financingOrder,
+        //         Str::replace('{order_id}', $financingOrder->id, Config::get('frontend.client_wakala_url'))
+        //     );
+        // }
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::WaitingClientWakala);
     }
 
     /**
      * Get the middleware the job should pass through.
-     *
-     * @return array
      */
     public function middleware(): array
     {

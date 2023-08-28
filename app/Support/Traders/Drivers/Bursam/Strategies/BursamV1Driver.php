@@ -23,6 +23,7 @@ use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -214,12 +215,13 @@ class BursamV1Driver implements TraderInterface
                     product: $response->json('PNAME'),
                     quantity: $response->json('PVOLUME'),
                     amount: $response->json('TOTALVALUE'),
-                    previous_owner: $response->json('OWNER'),
+                    previous_owner: Arr::pluck($response->json('LINE'), 'SUPPLIER'),
                     date_time_of_purchasing_commodity: $response->json('PURCHASETIMEDATE'),
                     uom: collect($traderOrder->original_data)->get('unit'),
                     currency: $response->json('CURRENCY')
                 ))->toArray(),
             ],
+            'original_bid' => $response->json(),
         ]);
 
         $productName = $response->json('PNAME');
@@ -274,7 +276,11 @@ class BursamV1Driver implements TraderInterface
                         'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                         'order_number' => $traderOrder->financing_order_id,
                         'amount' => $amount,
-                        'previous_owner' => $products->implode(fn ($item) => $item->getPreviousOwner(), '،'),
+                        'previous_owner' => $products->map(
+                            fn ($item) => $item->getPreviousOwnerAsArray()
+                        )
+                            ->flatten()
+                            ->implode('،'),
                         'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
                         'date' => $currentTimeInRiyadhTz->toDateString(),
                         'time' => $currentTimeInRiyadhTz->toTimeString(),
@@ -485,6 +491,10 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
+        $traderOrder->update([
+            'otc_data' => $response->json(),
+        ]);
+
         $currentTimeInUtcTz = CarbonImmutable::now();
         $productName = $response->json('PNAME');
         $otcOwnerShipTemplate = view('bursam-templates.otc-certificate-template', [
@@ -550,6 +560,10 @@ class BursamV1Driver implements TraderInterface
                 ]
             );
         }
+
+        $traderOrder->update([
+            'original_stb' => $response->json(),
+        ]);
 
         $currentTimeInUtcTz = CarbonImmutable::now();
         $productName = $response->json('PNAME');
