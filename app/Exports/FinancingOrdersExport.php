@@ -19,9 +19,9 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
 
     protected array $headings = [
         'id' => 'ID',
-        'reference_number' => 'Reference Number',
         'amount' => 'Commodity Price (SAR)',
         'selling_price' => 'Selling Price (SAR)',
+        'reference_number' => 'Reference Number',
         'national_id' => 'National ID / Iqama',
         'order_owner' => 'Order Owner',
         'company_name' => 'Company Name',
@@ -32,7 +32,7 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
         'cost_without_vat' => 'Cost Without Vat (SAR)',
     ];
 
-    protected $excludes = [];
+    protected array $excludes = [];
 
     public function __construct(protected Request $request, protected Builder $ordersQuery)
     {
@@ -62,15 +62,15 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
     {
         $items = $this->filterExcludes([
             'id' => fn () => $order->id,
-            'reference_number' => fn () => $order->reference_number,
             'amount' => fn () => $order->amount->formatByDecimal(),
             'selling_price' => fn () => $order->selling_price->formatByDecimal(),
+            'reference_number' => fn () => $order->reference_number,
             'national_id' => fn () => $order->national_id,
             'order_owner' => fn () => $order->creator?->full_name,
             'company_name' => fn () => $order->company->name,
             'status' => fn () => $this->withLocale('en', function () use ($order) {
                 return $order->status->isNot(FinancingOrderStatus::InProgress)
-                || is_null($order->current_step)
+                    || is_null($order->current_step)
                     ? $order->status->description : $order->current_step->description;
             }),
             'created_date' => fn () => $order->created_at->clone()->tz('Asia/Riyadh')->format('Y-m-d'),
@@ -84,7 +84,7 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
 
     public function prepareRows($orders)
     {
-        if (! $this->isDetailedExport()) {
+        if ($this->doesCostExistInExcludes()) {
             return $orders;
         }
 
@@ -93,15 +93,6 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
 
     protected function filterExcludes($items)
     {
-        if ($this->isDetailedExport()) {
-            $this->excludes = [];
-        } else {
-            $this->excludes = array_merge($this->excludes, [
-                'cost_with_vat',
-                'cost_without_vat',
-            ]);
-        }
-
         return array_values(
             array_filter(
                 $items,
@@ -111,8 +102,13 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
         );
     }
 
-    protected function isDetailedExport(): bool
+    public function doesCostExistInExcludes()
     {
-        return $this->request->boolean('detailed');
+        return count(
+            array_diff(
+                ['cost_with_vat', 'cost_without_vat'],
+                $this->excludes
+            )
+        ) === 0;
     }
 }
