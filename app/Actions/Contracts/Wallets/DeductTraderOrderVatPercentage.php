@@ -6,7 +6,7 @@ use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\Transaction;
 
-interface DeductVatPercentage
+interface DeductTraderOrderVatPercentage
 {
     public function handle(TraderOrder $traderOrder, Transaction $transaction, Company $company);
 }

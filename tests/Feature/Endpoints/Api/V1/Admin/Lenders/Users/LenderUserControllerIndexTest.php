@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
+namespace Endpoints\Api\V1\Admin\Lenders\Users;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -35,8 +35,6 @@ class LenderUserControllerIndexTest extends TestCase
     private static string $endpoint;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -62,9 +60,6 @@ class LenderUserControllerIndexTest extends TestCase
             ->paginate();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_index_lender_users(): void
     {
         $this->getJson(self::$endpoint)
@@ -74,9 +69,6 @@ class LenderUserControllerIndexTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_admin_user_can_index_lender_users(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -94,14 +86,12 @@ class LenderUserControllerIndexTest extends TestCase
                         'formatted_phone_number',
                         'orders_count',
                         'role',
+                        'is_invitation_accepted',
                     ])->respond()
                     ->getData(true)
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_manager_user_without_permissions_cant_index_lender_users(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
@@ -111,9 +101,6 @@ class LenderUserControllerIndexTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_manager_user_can_index_lender_users(): void
     {
         $this->actingAs(self::$userManager)
@@ -131,6 +118,7 @@ class LenderUserControllerIndexTest extends TestCase
                         'formatted_phone_number',
                         'orders_count',
                         'role',
+                        'is_invitation_accepted',
                     ])->respond()
                     ->getData(true)
             );

@@ -78,13 +78,15 @@ class OrderController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function show(FinancingOrder $order): JsonResponse
+    public function show(Request $request, FinancingOrder $order): JsonResponse
     {
         $this->authorize('view', $order);
 
         $order->load('creator', 'approver');
 
-        return fractal($order, (new FinancingOrderTransformer())->setArea(Area::Lender))
+        return fractal($order, (new FinancingOrderTransformer())
+            ->setArea(Area::Lender)
+            ->setCurrentUser($request->user()))
             ->parseIncludes([
                 'id',
                 'status',

@@ -9,6 +9,7 @@ use App\Enums\Role;
 use App\Enums\Subject;
 use App\Exports\FinancingOrdersExport;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -31,12 +32,16 @@ class ExportOrders extends Controller
         $query = $buildOrdersQuery->setCompany(tenant())
             ->setRelations([
                 'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
-                'creator',
+                'creator' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
             ])
             ->handle();
 
         $export = (new FinancingOrdersExport($request, $query))
-            ->setExcludes(['company_name', 'created_at', 'order_owner']);
+            ->setExcludes(
+                $request->boolean('detailed')
+                    ? ['company_name', 'order_owner']
+                    : ['company_name', 'created_date', 'created_time', 'order_owner', 'cost_with_vat', 'cost_without_vat']
+            );
 
         return Excel::download($export, $this->getFileName(), null, [
             'X-File-Name' => $this->getFileName(),

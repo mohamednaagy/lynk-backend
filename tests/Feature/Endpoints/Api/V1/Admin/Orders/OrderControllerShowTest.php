@@ -82,7 +82,9 @@ class OrderControllerShowTest extends TestCase
             ->getJson('api/v1/admin/orders/'.$order->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal($order, (new FinancingOrderTransformer())->setArea(Area::SuperAdmin))
+                fractal($order, (new FinancingOrderTransformer())
+                    ->setArea(Area::SuperAdmin)
+                    ->setCurrentUser(self::$admin))
                     ->parseIncludes([
                         'id',
                         'status',

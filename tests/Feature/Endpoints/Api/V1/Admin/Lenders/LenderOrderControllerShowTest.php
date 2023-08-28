@@ -86,7 +86,9 @@ class LenderOrderControllerShowTest extends TestCase
             ->getJson(self::$endpoint.$order->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal($order, (new FinancingOrderTransformer())->setArea(Area::SuperAdmin))
+                fractal($order, (new FinancingOrderTransformer())
+                    ->setArea(Area::SuperAdmin)
+                    ->setCurrentUser(self::$admin))
                     ->parseIncludes([
                         'id',
                         'status',

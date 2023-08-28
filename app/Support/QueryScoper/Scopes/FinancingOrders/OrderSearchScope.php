@@ -50,7 +50,7 @@ class OrderSearchScope extends QueryScoper
 
         return $builder->where(function (Builder $builder) use ($search) {
             $builder->where('id', $search)
-                ->orWhere('reference_number', $search)
+                ->orWhere('reference_number', 'LIKE', "%$search%")
                 ->orWhere('national_id', 'LIKE', "%$search%")
                 ->orWhere('phone_number', 'LIKE', "%$search%");
         });

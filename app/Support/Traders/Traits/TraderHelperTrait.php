@@ -2,11 +2,11 @@
 
 namespace App\Support\Traders\Traits;
 
-use App\Enums\BursamProductCode;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Models\TraderProduct;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Database\Eloquent\Model;
@@ -90,10 +90,6 @@ trait TraderHelperTrait
         }
     }
 
-    /**
-     * @param $products
-     * @return Collection
-     */
     public function transformProductsToCommodityProductsDTO($products): Collection
     {
         return collect($products)->map(function ($product) {
@@ -109,9 +105,15 @@ trait TraderHelperTrait
         });
     }
 
-    public function getUnusedProductCode()
+    public function getUnusedProductCode($provider)
     {
-        $productCodes = BursamProductCode::getValues();
+        $productCodes = TraderProduct::query()
+            ->where('provider', $provider)
+            ->orderBy('order', 'asc')
+            ->get()
+            ->pluck('code')
+            ->toArray();
+
         $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
 
         $availableProductCodes = array_diff($productCodes, $unavailableProductCodes);

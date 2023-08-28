@@ -14,10 +14,6 @@ class CreateCompanyAction implements CreateCompany
     ) {
     }
 
-    /**
-     * @param  array  $data
-     * @return Company
-     */
     public function handle(array $data): Company
     {
         if (empty($data['webhook_secret_key'])) {
@@ -41,6 +37,7 @@ class CreateCompanyAction implements CreateCompany
                     'driver',
                     'type',
                     'notify_admins_about_new_orders',
+                    'trading_mode',
                 ]
             )
         );

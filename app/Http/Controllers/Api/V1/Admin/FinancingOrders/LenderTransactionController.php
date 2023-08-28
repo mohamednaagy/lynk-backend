@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\FinancingOrders;
 
+use App\Actions\Contracts\Wallets\GetTransactions;
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\Subject;
-use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Transformers\TransactionTransformer;
@@ -22,17 +21,9 @@ class LenderTransactionController extends Controller
         )->only('index');
     }
 
-    /**
-     * @param  Company  $lender
-     * @return JsonResponse
-     */
-    public function index(Company $lender): JsonResponse
+    public function index(Company $lender, GetTransactions $getTransactions): JsonResponse
     {
-        $transactions = $lender->transactions(WalletType::CompanyWallet)
-            ->with([
-                'media' => fn ($query) => $query->where('collection_name', TransactionMediaCollection::VoucherReceipt),
-            ])
-            ->paginate();
+        $transactions = $getTransactions->handle($lender);
 
         tap($transactions)->loadZatcaInvoicesMedia();
 

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\Role;
+use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Enums\TransactionReason;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -266,35 +268,75 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return ! $this->canBeCompleted();
     }
 
-    public function canCreateTraderOrder()
+    public function canCreateTraderOrder(User $user = null): bool
     {
-        $doesNotHaveInActiveOrder = $this->traderOrders()
-            ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::PendingCancellation, TraderOrderStatus::Completed])
-            ->doesntExist();
+        if (
+            $this->isNotReadyToStartTrading()
+            || $this->hasFailed()
+            || $this->isComplete()
+            || $this->isInCancellationState()
+            || $this->isDefaultTraderAvailable() === false
+            || $this->isInPendingTradingRequestState() === false
 
-        $orderIsNotCompleted = $this->status->isNot(FinancingOrderStatus::Completed);
-        $financingOrderIsNotCancelled = $this->status->isNot(FinancingOrderStatus::Cancelled);
-        $financingOrderIsNotPendingCancelled = $this->status->isNot(FinancingOrderStatus::PendingCancellation);
-        $orderIsPendingTraderOrder = $this->status->is(FinancingOrderStatus::PendingTraderOrder);
-        $bursamTraderServiceAvailability = $this->isBursamTraderServiceAvailable();
+        ) {
+            return false;
+        }
 
-        return ($orderIsNotCompleted && $doesNotHaveInActiveOrder
-            && $financingOrderIsNotCancelled && $financingOrderIsNotPendingCancelled
-            && $bursamTraderServiceAvailability)
-            || ($orderIsPendingTraderOrder && $orderIsNotCompleted && $bursamTraderServiceAvailability);
+        $currentUserHasPermissionToCreate = $user?->hasRole([Role::Admin, Role::Manager])
+            || $this->isTradingMode(TraderOrderMode::Automatic);
+
+        return $currentUserHasPermissionToCreate;
     }
 
-    /**
-     * Check if the Bursam trader service is available when the current trader is set to Bursam.
-     * Otherwise, return true.
-     *
-     * @return bool
-     */
-    public function isBursamTraderServiceAvailable()
+    private function isComplete(): bool
     {
-        return config('trader.default') != 'bursam'
-            ? true
-            : is_bursam_service_available();
+        return $this->status->is(FinancingOrderStatus::Completed);
+    }
+
+    private function isNotReadyToStartTrading(): bool
+    {
+        return $this->status->is(FinancingOrderStatus::PendingApproval)
+            || $this->status->is(FinancingOrderStatus::Rejected);
+    }
+
+    private function hasFailed(): bool
+    {
+        return $this->status->is(FinancingOrderStatus::TradingFailure);
+    }
+
+    private function isInPendingTradingRequestState(): bool
+    {
+        $doesHaveActiveOrder = $this->traderOrders()
+            ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::PendingCancellation])
+            ->exists();
+
+        if ($doesHaveActiveOrder) {
+            return false;
+        }
+
+        return $this->status->is(FinancingOrderStatus::PendingTraderOrder)
+            || $this->status->is(FinancingOrderStatus::Approved)
+            || $this->status->is(FinancingOrderStatus::InProgress);
+    }
+
+    private function isInCancellationState(): bool
+    {
+        return $this->status->is(FinancingOrderStatus::PendingCancellation)
+            || $this->status->is(FinancingOrderStatus::Cancelled);
+    }
+
+    public function isTradingMode(TraderOrderMode|string $mode)
+    {
+        return $this->company->trading_mode->is($mode);
+    }
+
+    public function isDefaultTraderAvailable()
+    {
+        if (config('trader.default') === 'bursam') {
+            return is_bursam_service_available();
+        }
+
+        return true;
     }
 
     public function isCancellable($area)

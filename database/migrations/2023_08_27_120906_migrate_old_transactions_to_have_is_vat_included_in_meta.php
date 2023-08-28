@@ -1,0 +1,50 @@
+<?php
+
+use App\Enums\TransactionReason;
+use App\Models\Transaction;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Transaction::whereIn('reason', [TransactionReason::DepositByEdaat, TransactionReason::ManualDeposit])
+            ->orderBy('id')
+            ->chunk(100, function ($transactions) {
+                foreach ($transactions as $transaction) {
+                    DB::connection(config('wallet.database.connection'))
+                        ->transaction(function () use ($transaction) {
+                            $vatTransaction = Transaction::query()
+                                ->where('reason', TransactionReason::VatPercentageOnDeposit)
+                                ->where('reference_number', $transaction->referance_number)
+                                ->first();
+
+                            if ($vatTransaction) {
+                                $transaction->update([
+                                    'meta->is_vat_included' => false,
+                                ]);
+                            } else {
+                                $transaction->update([
+                                    'meta->is_vat_included' => true,
+                                ]);
+                            }
+                        });
+                }
+            });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+    }
+};

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
+use App\Enums\TraderOrderMode;
 use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\QueryScoper\HasScopes;
 use App\Support\Wallets\Traits\HasWallet;
@@ -33,6 +34,7 @@ class Company extends BaseTenant
         'order_cost' => MoneyStringCast::class.':order_cost_currency',
         'type' => CompanyType::class,
         'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::class,
+        'trading_mode' => TraderOrderMode::class,
     ];
 
     public static function getCustomColumns(): array
@@ -55,6 +57,7 @@ class Company extends BaseTenant
             'type',
             'driver',
             'notify_admins_about_new_orders',
+            'trading_mode',
             'deleted_at',
         ];
     }

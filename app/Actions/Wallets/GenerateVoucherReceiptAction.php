@@ -6,6 +6,7 @@ use App\Actions\Contracts\Wallets\GenerateVoucherReceipt;
 use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Models\Transaction;
 use App\Support\PdfGenerator\PdfGenerator;
+use Cknow\Money\Money;
 
 class GenerateVoucherReceiptAction implements GenerateVoucherReceipt
 {
@@ -15,12 +16,12 @@ class GenerateVoucherReceiptAction implements GenerateVoucherReceipt
 
     protected string $collectionName = TransactionMediaCollection::VoucherReceipt;
 
-    public function handle(Transaction $transaction)
+    public function handle(Transaction $transaction, Money $amount)
     {
         $company = $transaction->wallet->holder;
 
         $content = __('invoices/voucher-receipt.content', [
-            'amount' => $transaction->amount->formatByDecimal(),
+            'amount' => $amount->formatByDecimal(),
             'company_name' => $company->name,
         ], 'ar');
 
@@ -40,7 +41,7 @@ class GenerateVoucherReceiptAction implements GenerateVoucherReceipt
             $html,
             function ($fileResource) use ($transaction) {
                 return $transaction->addMediaFromStream($fileResource)
-                    ->usingFileName("voucher-receipt-{$transaction->getKey()}".'.pdf')
+                    ->usingFileName("voucher-receipt-{$transaction->reference_number}".'.pdf')
                     ->toMediaCollection($this->getCollectionName());
             }
         );

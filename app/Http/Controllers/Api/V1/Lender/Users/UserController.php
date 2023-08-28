@@ -54,9 +54,6 @@ class UserController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param  GetPaginatedLenderUsers  $getPaginatedLenders
-     * @return JsonResponse
      */
     public function index(GetPaginatedLenderUsers $getPaginatedLenders): JsonResponse
     {
@@ -70,15 +67,12 @@ class UserController extends Controller
                 'phone_country_code',
                 'formatted_phone_number',
                 'role',
+                'is_invitation_accepted',
             ])->respond();
     }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  StoreUserRequest  $storeUserRequest
-     * @param  CreateLenderUserWithRoleAndPermission  $createLenderWithRoleAndPermission
-     * @return JsonResponse
      */
     public function store(
         StoreUserRequest $storeUserRequest,
@@ -108,9 +102,6 @@ class UserController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  User  $user
-     * @return JsonResponse
      */
     public function show(User $user): JsonResponse
     {
@@ -135,11 +126,6 @@ class UserController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  User  $user
-     * @param  UpdateUserRequest  $updateUserRequest
-     * @param  UpdateLenderUserWithRoleAndPermission  $updateLenderUserWithRoleAndPermission
-     * @return JsonResponse
      */
     public function update(
         UpdateUserRequest $updateUserRequest,
@@ -160,7 +146,6 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  User  $user
      * @return JsonResponse
      */
     public function destroy(User $user)

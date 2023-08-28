@@ -5,17 +5,18 @@ namespace App\Actions\Wallets;
 use App\Actions\Contracts\Wallets\GetTransactions;
 use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\WalletType;
+use App\Models\Company;
 
 class GetTransactionsAction implements GetTransactions
 {
-    /**
-     * @return mixed
-     */
-    public function handle(): mixed
+    public function handle(Company $company): mixed
     {
-        return tenant()->transactions(WalletType::CompanyWallet)
+        return $company->transactions(WalletType::CompanyWallet)
             ->with([
-                'media' => fn ($query) => $query->where('collection_name', TransactionMediaCollection::VoucherReceipt),
+                'media' => fn ($query) => $query->whereIn('collection_name', [
+                    TransactionMediaCollection::VoucherReceipt,
+                    TransactionMediaCollection::ZatcaInvoice,
+                ]),
             ])
             ->paginate();
     }
