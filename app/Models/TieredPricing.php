@@ -37,11 +37,11 @@ class TieredPricing extends Model
     {
         $pricing = (new static)->newQuery()
             ->where('company_id', $company->getKey())
-//            ->where('order_value_start', '<=', $orderValue->getAmount())
-//            ->where(function (Builder $query) use ($orderValue) {
-//                $query->where('order_value_end', '>=', $orderValue->getAmount())
-//                    ->orWhereNull('order_value_end');
-//            })
+            ->where('order_value_start', '<=', $orderValue->getAmount())
+            ->where(function (Builder $query) use ($orderValue) {
+                $query->where('order_value_end', '>=', $orderValue->getAmount())
+                    ->orWhereNull('order_value_end');
+            })
             ->first();
 
         if (! $pricing) {

@@ -24,13 +24,19 @@ class CalculateOrderCost extends Controller
         CalculateOrdersRequest $request,
         CalculateOrdersCost $calculateOrdersCost
     ): JsonResponse {
-        $amount = $calculateOrdersCost->handle(
-            ordersCount: $request->validated('orders_count'),
-            orderCost: tenant()->order_cost
-        );
+        $company = tenant();
+        $amount = null;
+        if ($company->tieredPricing()->count() == 1) {
+            $tierPrice = $company->tieredPricing()->first();
+
+            $amount = $calculateOrdersCost->handle(
+                ordersCount: $request->validated('orders_count'),
+                orderCost: $tierPrice->order_cost_without_vat
+            );
+        }
 
         return $this->successResponse(data: [
-            'amount' => $amount->formatByDecimal(),
+            'amount' => $amount ? $amount->formatByDecimal() : 0,
         ]);
     }
 }

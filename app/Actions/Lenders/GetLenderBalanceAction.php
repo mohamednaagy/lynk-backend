@@ -18,7 +18,6 @@ class GetLenderBalanceAction implements GetLenderBalance
     /**
      * Update user.
      *
-     * @param  Company  $company
      * @return array $user
      */
     public function handle(Company $company): array
@@ -26,8 +25,12 @@ class GetLenderBalanceAction implements GetLenderBalance
         $vatRate = $this->getProjectSettings->handle()->getVatRate();
 
         $balance = $company->balance(WalletType::CompanyWallet);
+        $orderCost = null;
+        if ($company->tieredPricing()->count() == 1) {
+            $tierPrice = $company->tieredPricing()->first();
 
-        $orderCost = $company->order_cost->multiply(($vatRate) + 1)->getAmount();
+            $orderCost = $tierPrice->order_cost_without_vat->multiply(($vatRate) + 1)->getAmount();
+        }
 
         return [
             'balance' => $balance,
