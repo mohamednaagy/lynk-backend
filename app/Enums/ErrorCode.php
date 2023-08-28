@@ -60,5 +60,5 @@ class ErrorCode
 
     public const ORDER_REQUIRE_CLIENT_VERIFICATION = 1027;
 
-    public const COMPANY_ORDER_COST_INVALID = 1028;
+    public const COMPANY_NO_MATCH_ORDER_COST_AND_VALUE = 1028;
 }

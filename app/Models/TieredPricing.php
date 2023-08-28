@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OrderFeeType;
-use App\Exceptions\OrderCostException;
+use App\Exceptions\NoMatchOrderCostAndValueException;
 use App\Support\Money\Casts\MoneyStringCast;
 use Cknow\Money\Money;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,7 +18,6 @@ class TieredPricing extends Model
         'order_value_end',
         'fee_type',
         'order_cost_without_vat',
-        'order_cost_with_vat',
         'proration_amount',
     ];
 
@@ -32,21 +31,21 @@ class TieredPricing extends Model
     ];
 
     /**
-     * @throws OrderCostException
+     * @throws NoMatchOrderCostAndValueException
      */
     public static function getOrderPrice(Company $company, Money $orderValue): Money
     {
         $pricing = (new static)->newQuery()
-            ->where('company_id', $company->id)
-            ->where('order_value_start', '<=', $orderValue->getAmount())
-            ->where(function (Builder $query) use ($orderValue) {
-                $query->where('order_value_end', '>=', $orderValue->getAmount())
-                    ->orWhereNull('order_value_end');
-            })
+            ->where('company_id', $company->getKey())
+//            ->where('order_value_start', '<=', $orderValue->getAmount())
+//            ->where(function (Builder $query) use ($orderValue) {
+//                $query->where('order_value_end', '>=', $orderValue->getAmount())
+//                    ->orWhereNull('order_value_end');
+//            })
             ->first();
 
         if (! $pricing) {
-            throw new OrderCostException();
+            throw new NoMatchOrderCostAndValueException();
         }
 
         if ($pricing->fee_type->is(OrderFeeType::Proration)) {

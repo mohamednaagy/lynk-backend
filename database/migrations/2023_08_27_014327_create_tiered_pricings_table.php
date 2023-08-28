@@ -16,7 +16,6 @@ return new class extends Migration
             $table->decimal('order_value_end', 64, 0)->nullable();
             $table->string('fee_type', 15);
             $table->decimal('order_cost_without_vat', 64, 0);
-            $table->decimal('order_cost_with_vat', 64, 0)->nullable();
             $table->decimal('proration_amount', 64, 0)->nullable();
             $table->timestamps();
         });

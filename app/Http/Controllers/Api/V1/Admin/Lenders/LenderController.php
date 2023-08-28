@@ -81,7 +81,7 @@ class LenderController extends Controller
             return $this->errorResponse('There is invalid VAT amount');
         }
 
-        $data['order_cost_tiers'] = $this->unsetProrationAmountInFirstTiers($data['order_cost_tiers']);
+        $data['order_cost_tiers'] = $this->unsetProrationAmounExceptForLastTier($data['order_cost_tiers']);
 
         return DB::transaction(function () use ($data, $getSettingsClassInstance, $createCompany) {
 
@@ -90,13 +90,15 @@ class LenderController extends Controller
             $company = $createCompany->handle(
                 array_merge($data, [
                     'order_cost' => Money::parseByDecimal(
-                        $data['order_cost'],
+                        0,
                         Money::getDefaultCurrency()
                     ),
                 ])
             );
 
             $company->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
+
+            $company->tieredPricing()->createMany($data['order_cost_tiers']);
 
             return fractal($company, new CompanyTransformer())
                 ->parseIncludes([
@@ -165,12 +167,12 @@ class LenderController extends Controller
         foreach ($tiers as $tier) {
             $orderCostWithoutVat = money($tier['order_cost_without_vat']);
             $orderCostWithVat = money($tier['order_cost_with_vat']);
-            [$vatOfChargeAmount] = app(CalculateVatAmount::class)
+            [$vatOfOrderCostAmount] = app(CalculateVatAmount::class)
                 ->setAmount($orderCostWithoutVat)
                 ->setIsVatIncludedInAmount(false)
                 ->handle();
 
-            if (! $orderCostWithVat->equals($orderCostWithoutVat->add($vatOfChargeAmount))) {
+            if (! $orderCostWithVat->equals($orderCostWithoutVat->add($vatOfOrderCostAmount))) {
                 return false;
             }
         }
@@ -178,7 +180,7 @@ class LenderController extends Controller
         return true;
     }
 
-    public function unsetProrationAmountInFirstTiers(array $tiers): array
+    public function unsetProrationAmounExceptForLastTier(array $tiers): array
     {
         $tiersCount = count($tiers);
         for ($i = 0; $i < ($tiersCount - 1); $i++) {

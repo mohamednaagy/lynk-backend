@@ -7,7 +7,7 @@ use App\Enums\OrderFeeType;
 use App\Enums\TraderOrderMode;
 use App\Models\Company;
 use App\Rules\CompanyUniqueNameRule;
-use App\Rules\OrderCostAmountTiersRangeRule;
+use App\Rules\OrderCostTiersRangeRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -29,7 +29,7 @@ class StoreCompanyRequest extends FormRequest
      */
     public function rules(): array
     {
-        $tiersNumber = count($this->order_cost_tiers);
+        $tiersCount = count($this->order_cost_tiers);
 
         return [
             'name' => [
@@ -58,51 +58,55 @@ class StoreCompanyRequest extends FormRequest
             'order_cost_tiers' => [
                 'required',
                 'array',
-                new OrderCostAmountTiersRangeRule,
+                new OrderCostTiersRangeRule,
             ],
             'order_cost_tiers.*' => [
                 'required',
                 'array',
             ],
+            'order_cost_tiers.*.order_value_start' => [
+                'required',
+                'decimal:0,2',
+            ],
             'order_cost_tiers.0.order_value_start' => [
                 'required',
                 'numeric',
-                Rule::in([0.00]),
-            ],
-            'order_cost_tiers.*.order_value_start' => [
-                'required',
-                'numeric',
-                'decimal:2',
+                Rule::in([0.00, 0, 0.0, '0', '0.0', '0.00']),
             ],
             'order_cost_tiers.*.order_value_end' => [
                 'nullable',
-                'numeric',
                 'gt:order_cost_tiers.*.order_value_start',
-                'decimal:2',
+                'decimal:0,2',
             ],
-            'order_cost_tiers.'.($tiersNumber - 1).'.order_value_end' => [
+            'order_cost_tiers.'.($tiersCount - 1).'.order_value_end' => [
                 'prohibited',
             ],
             'order_cost_tiers.*.fee_type' => [
+                'required',
+                Rule::in([OrderFeeType::Fixed]),
+            ],
+            'order_cost_tiers.'.($tiersCount - 1).'.fee_type' => [
                 'required',
                 Rule::in(OrderFeeType::getValues()),
             ],
             'order_cost_tiers.*.order_cost_without_vat' => [
                 'required',
-                'numeric',
-                'decimal:2',
+                'decimal:0,2',
             ],
             'order_cost_tiers.*.order_cost_with_vat' => [
                 'required',
-                'numeric',
                 'gt:order_cost_tiers.*.order_cost_without_vat',
-                'decimal:2',
+                'decimal:0,2',
             ],
             'order_cost_tiers.*.proration_amount' => [
+                'exclude_unless:order_cost_tiers.*.fee_type,'.OrderFeeType::Proration,
+                'required',
+                'decimal:0,2',
+            ],
+            'order_cost_tiers.'.($tiersCount - 1).'.proration_amount' => [
                 'required_if:order_cost_tiers.*.fee_type,'.OrderFeeType::Proration,
                 'nullable',
-                'numeric',
-                'decimal:2',
+                'decimal:0,2',
             ],
             'public_status_comment' => [
                 'nullable',
