@@ -11,12 +11,14 @@ use App\Enums\Area;
 use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
+use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\FinancingOrders\StoreOrderRequest;
 use App\Http\Requests\V1\Admin\FinancingOrders\UpdateOrderRequest;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Transformers\FinancingOrderTransformer;
+use Cknow\Money\Money;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\JsonResponse;
@@ -144,7 +146,13 @@ class OrderController extends Controller
             ) {
                 $company = Company::find($request->input('company_id'));
                 // throw exception is balance not enough
-                $canCreateOrder->handle($company, money($request->validated('amount')));
+                $canCreateOrder->handle(
+                    $company,
+                    Money::parseByDecimal(
+                        $request->validated('amount'),
+                        $company->getWallet(WalletType::CompanyWallet)
+                    )
+                );
 
                 $status = $company->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval

@@ -28,9 +28,9 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
         $company = $financingOrder->company()->withTrashed()->first();
         $wallet = $company->getWallet(WalletType::CompanyWallet);
 
-        $orderCostWithoutVat = TieredPricing::getOrderCost($company, $financingOrder->amount);
+        $orderCostWithoutVat = TieredPricing::getOrderCostWithVat($company, $financingOrder->amount);
 
-        [$vatAmount] = $this->calculateVatAmount
+        [$vatAmount, $vatRate] = $this->calculateVatAmount
             ->setAmount($orderCostWithoutVat)
             ->setIsVatIncludedInAmount(false)
             ->handle();
@@ -45,6 +45,7 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
                 'reference_number ' => $financingOrder->reference_number,
                 'amount' => $financingOrder->amount,
                 'order_cost' => $orderCostWithoutVat,
+                'vat_rate' => $vatRate,
                 'is_vat_included' => true,
                 'pricing_tier' => TieredPricing::getPricingTier($company, $financingOrder->amount),
             ]

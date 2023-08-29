@@ -28,15 +28,22 @@ class CalcAmountWithoutVatAndOrdersCountAction implements CalcAmountWithoutVatAn
             ->setIsVatIncludedInAmount(true)
             ->handle();
 
+        $chargeAmountWithoutVat = $chargeAmountWithVat->subtract($vatOfChargeAmount);
+
+        $ordersCount = $this->calcOrdersCount($company, $chargeAmountWithVat, $vatRate);
+
+        return [$chargeAmountWithoutVat, $ordersCount?->getAmount()];
+    }
+
+    protected function calcOrdersCount(Company $company, Money $chargeAmountWithVat, $vatRate)
+    {
         $ordersCount = null;
-        if (! $company->isTiered()) {
+        if ($company->isStandard()) {
             $tierPrice = $company->tieredPricing()->first();
             $orderCostWithVat = $tierPrice->order_cost_without_vat->multiply(($vatRate) + 1);
             $ordersCount = $chargeAmountWithVat->divide($orderCostWithVat->getAmount(), \Money\Money::ROUND_DOWN);
         }
 
-        $chargeAmountWithoutVat = $chargeAmountWithVat->subtract($vatOfChargeAmount);
-
-        return [$chargeAmountWithoutVat, $ordersCount?->getAmount()];
+        return $ordersCount;
     }
 }

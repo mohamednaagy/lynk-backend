@@ -16,9 +16,6 @@ use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
 
 class RegisterLenderAction implements RegisterLender
 {
-    /**
-     * RegisterLenderAction constructor.
-     */
     public function __construct(
         protected CreateUser $createUser,
         protected CreateCompany $createCompany,

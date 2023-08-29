@@ -86,11 +86,12 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
     ): InvoiceSpecs {
         [, $ordersCount] = $this->calcAmountWithoutVatAndOrdersCount
             ->handle($company, $totalAmountWithVat);
-        $unitPrice = TieredPricing::getOrderCost($company, $totalAmountWithVat);
+
+        $costWithoutVat = TieredPricing::getOrderCostWithoutVat($company, $totalAmountWithVat);
 
         if ($company->isTiered()) {
             $ordersCount = 1;
-            $unitPrice = $totalAmountWithVat->subtract($vatAmount);
+            $costWithoutVat = $totalAmountWithVat->subtract($vatAmount);
         }
 
         return new InvoiceSpecs(
@@ -105,7 +106,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
                 [
                     new PurchaseLine(
                         __('zatca/e-invoice.recharge_balance'),
-                        $unitPrice,
+                        $costWithoutVat,
                         $vatRate * 100,
                         quantity: $ordersCount
                     ),

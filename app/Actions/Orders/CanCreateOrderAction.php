@@ -2,7 +2,6 @@
 
 namespace App\Actions\Orders;
 
-use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Enums\WalletType;
 use App\Exceptions\BalanceIsNotEnoughException;
@@ -20,13 +19,9 @@ class CanCreateOrderAction implements CanCreateOrder
     public function handle(Company $company, Money $amount): bool
     {
         $wallet = $company->getWallet(WalletType::CompanyWallet);
-        $orderCost = TieredPricing::getOrderCost($company, $amount);
-        [$vatOfOrderCost] = app(CalculateVatAmount::class)
-            ->setAmount($orderCost)
-            ->setIsVatIncludedInAmount(false)
-            ->handle();
+        $orderCostWithVat = TieredPricing::getOrderCostWithVat($company, $amount);
 
-        if ($wallet->balance->greaterThanOrEqual($orderCost->add($vatOfOrderCost))) {
+        if ($wallet->balance->greaterThanOrEqual($orderCostWithVat)) {
             return true;
         }
 

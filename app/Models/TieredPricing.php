@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Enums\OrderFeeType;
 use App\Exceptions\NoMatchOrderCostAndValueException;
 use App\Support\Money\Casts\MoneyStringCast;
@@ -33,7 +34,7 @@ class TieredPricing extends Model
     /**
      * @throws NoMatchOrderCostAndValueException
      */
-    public static function getOrderCost(Company $company, Money $orderValue): Money
+    public static function getOrderCostWithoutVat(Company $company, Money $orderValue): Money
     {
         $pricing = self::getPricingTier($company, $orderValue);
 
@@ -48,6 +49,42 @@ class TieredPricing extends Model
         }
 
         return $pricing->order_cost_without_vat;
+    }
+
+    /**
+     * @throws NoMatchOrderCostAndValueException
+     */
+    public static function getOrderCostWithVat(Company $company, Money $orderValue): Money
+    {
+        $orderCostWithoutVat = self::getOrderCostWithVat($company, $orderValue);
+
+        [$vatAmount] = app(CalculateVatAmount::class)
+            ->setAmount($orderCostWithoutVat)
+            ->setIsVatIncludedInAmount(false)
+            ->handle();
+
+        return $orderCostWithoutVat->add($vatAmount);
+    }
+
+    public static function getOrderCostIfStandard(Company $company): array|null
+    {
+        if ($company->isTiered()) {
+            return null;
+        }
+
+        $tier = (new static)->newQuery()
+            ->where('company_id', $company->getKey())
+            ->first();
+
+        [$vatVamount, $vatRate] = app(CalculateVatAmount::class)
+            ->setAmount($tier->order_cost_without_vat)
+            ->setIsVatIncludedInAmount(false);
+
+        return [
+            'costWithoutVat' => $tier->order_cost_without_vat,
+            'costWithVat' => $tier->order_cost_without_vat->add($vatVamount),
+            'vatRate' => $vatRate,
+        ];
     }
 
     public static function getPricingTier(Company $company, Money $orderValue): Builder|Model|null

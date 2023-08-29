@@ -16,7 +16,7 @@ class GetBalance extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderWallet, Action::Show, Action::Manage])
+                perm(Area::Lender, [Subject::LenderWallet, Action::Show, Action::Manage])
         );
     }
 
@@ -27,7 +27,7 @@ class GetBalance extends Controller
 
         return $this->successResponse(data: [
             'balance' => number_format($balances['balance']->formatByDecimal(), 2),
-            'available_orders' => $company->isTiered() ? null : $balances['availableOrders'],
+            'available_orders' => $balances['availableOrders'],
         ]);
     }
 }

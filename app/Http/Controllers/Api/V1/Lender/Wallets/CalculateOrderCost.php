@@ -8,6 +8,7 @@ use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Wallets\CalculateOrdersRequest;
+use App\Models\TieredPricing;
 use Illuminate\Http\JsonResponse;
 
 class CalculateOrderCost extends Controller
@@ -16,7 +17,7 @@ class CalculateOrderCost extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderFinancingOrderCost, Action::Calculate])
+                perm(Area::Lender, [Subject::LenderFinancingOrderCost, Action::Calculate])
         );
     }
 
@@ -26,12 +27,12 @@ class CalculateOrderCost extends Controller
     ): JsonResponse {
         $company = tenant();
         $amount = null;
-        if ($company->isStandard()) {
-            $tierPrice = $company->tieredPricing()->first();
 
+        $orderCost = TieredPricing::getOrderCostIfStandard($company);
+        if ($orderCost) {
             $amount = $calculateOrdersCost->handle(
                 ordersCount: $request->validated('orders_count'),
-                orderCost: $tierPrice->order_cost_without_vat
+                orderCostWithoutVat: $orderCost['costWithoutVat']
             );
         }
 

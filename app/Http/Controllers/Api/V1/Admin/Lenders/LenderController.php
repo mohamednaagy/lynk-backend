@@ -10,6 +10,7 @@ use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\CompanyType;
+use App\Enums\ErrorCode;
 use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
@@ -78,23 +79,19 @@ class LenderController extends Controller
         $data = $request->validated();
 
         if (! $this->isOrderCostWithVatValid($data['order_cost_tiers'])) {
-            return $this->errorResponse('There is invalid VAT amount');
+            return $this->errorResponse(
+                message: __('error.order_cost_with_vat_and_without_vat_incorrect'),
+                code: ErrorCode::ORDER_COST_WITHOUT_VAT_AND_WITH_VAT_INCORRECT
+            );
         }
 
         $data['order_cost_tiers'] = $this->unsetProrationAmounExceptForLastTier($data['order_cost_tiers']);
 
         return DB::transaction(function () use ($data, $getSettingsClassInstance, $createCompany) {
+            $data['status'] = $getSettingsClassInstance->handle(Area::Lender)
+                ->default_company_status_created_by_operation;
 
-            $data['status'] = $getSettingsClassInstance->handle(Area::Lender)->default_company_status_created_by_operation;
-
-            $company = $createCompany->handle(
-                array_merge($data, [
-                    'order_cost' => Money::parseByDecimal(
-                        0,
-                        Money::getDefaultCurrency()
-                    ),
-                ])
-            );
+            $company = $createCompany->handle($data);
 
             $company->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
 

@@ -35,4 +35,5 @@ return [
     'commodity_market_is_unavailable' => 'سوق السلع غير متاح فى الوقت الحالي.',
     'trader_mode_not_supported' => 'لا يمكن إنشاء طلب باستخدام الوضع المعطى',
     'no_match_for_order_cost_and_value' => 'لا يمكن حساب تكلفة طلب المرابحة',
+    'order_cost_with_vat_and_without_vat_incorrect' => 'القيمة المدخلة للطلب مع الضريبة غير صحيحة',
 ];
