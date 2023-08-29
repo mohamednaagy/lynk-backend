@@ -98,13 +98,9 @@ class StoreCompanyRequest extends FormRequest
                 'gt:order_cost_tiers.*.order_cost_without_vat',
                 'decimal:0,2',
             ],
-            'order_cost_tiers.*.proration_amount' => [
-                'exclude_unless:order_cost_tiers.*.fee_type,'.OrderFeeType::Proration,
-                'required',
-                'decimal:0,2',
-            ],
             'order_cost_tiers.'.($tiersCount - 1).'.proration_amount' => [
-                'required_if:order_cost_tiers.*.fee_type,'.OrderFeeType::Proration,
+                'exclude_unless:order_cost_tiers.'.($tiersCount - 1).'.fee_type,'.OrderFeeType::Proration,
+                'required_if:order_cost_tiers.'.($tiersCount - 1).'.fee_type,'.OrderFeeType::Proration,
                 'nullable',
                 'decimal:0,2',
             ],

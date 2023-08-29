@@ -34,5 +34,5 @@ return [
     'order_already_has_active_trader_order' => 'هناك طلب قيد التنفيذ بالفعل',
     'commodity_market_is_unavailable' => 'سوق السلع غير متاح فى الوقت الحالي.',
     'trader_mode_not_supported' => 'لا يمكن إنشاء طلب باستخدام الوضع المعطى',
-    'no_match_for_order_cost_and_value' => 'لايمكن حساب سعر الطلب',
+    'no_match_for_order_cost_and_value' => 'لا يمكن حساب تكلفة طلب المرابحة',
 ];

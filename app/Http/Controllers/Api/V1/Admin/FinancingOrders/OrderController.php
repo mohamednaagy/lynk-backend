@@ -144,7 +144,7 @@ class OrderController extends Controller
             ) {
                 $company = Company::find($request->input('company_id'));
                 // throw exception is balance not enough
-                $canCreateOrder->handle($company);
+                $canCreateOrder->handle($company, money($request->validated('amount')));
 
                 $status = $company->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval

@@ -6,7 +6,6 @@ use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
 use App\Enums\TraderOrderMode;
-use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\QueryScoper\HasScopes;
 use App\Support\Wallets\Traits\HasWallet;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,7 +30,6 @@ class Company extends BaseTenant
         'status' => CompanyStatus::class,
         'does_order_require_approval' => 'boolean',
         'webhook_secret_key' => 'encrypted',
-        'order_cost' => MoneyStringCast::class.':order_cost_currency',
         'type' => CompanyType::class,
         'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::class,
         'trading_mode' => TraderOrderMode::class,
@@ -49,11 +47,9 @@ class Company extends BaseTenant
             'public_status_comment',
             'internal_status_comment',
             'does_order_require_approval',
-            'order_cost',
             'webhook_secret_key',
             'created_at',
             'updated_at',
-            'order_cost_currency',
             'type',
             'driver',
             'notify_admins_about_new_orders',
@@ -100,6 +96,11 @@ class Company extends BaseTenant
     public function isTiered(): bool
     {
         return $this->tieredPricing()->count() > 1;
+    }
+
+    public function isStandard(): bool
+    {
+        return $this->tieredPricing()->count() == 1;
     }
 
     public function scopeType($query, string $type)

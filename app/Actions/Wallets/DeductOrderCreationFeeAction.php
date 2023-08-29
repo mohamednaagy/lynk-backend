@@ -7,6 +7,7 @@ use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
+use App\Exceptions\NoMatchOrderCostAndValueException;
 use App\Models\TieredPricing;
 use App\Models\TraderOrder;
 
@@ -18,13 +19,16 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
     ) {
     }
 
+    /**
+     * @throws NoMatchOrderCostAndValueException
+     */
     public function handle(TraderOrder $traderOrder)
     {
         $financingOrder = $traderOrder->order;
         $company = $financingOrder->company()->withTrashed()->first();
         $wallet = $company->getWallet(WalletType::CompanyWallet);
 
-        $orderCostWithoutVat = TieredPricing::getOrderPrice($company, $financingOrder->amount);
+        $orderCostWithoutVat = TieredPricing::getOrderCost($company, $financingOrder->amount);
 
         [$vatAmount] = $this->calculateVatAmount
             ->setAmount($orderCostWithoutVat)
@@ -42,6 +46,7 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
                 'amount' => $financingOrder->amount,
                 'order_cost' => $orderCostWithoutVat,
                 'is_vat_included' => true,
+                'pricing_tier' => TieredPricing::getPricingTier($company, $financingOrder->amount),
             ]
         );
     }

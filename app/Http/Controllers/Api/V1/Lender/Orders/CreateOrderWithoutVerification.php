@@ -42,7 +42,7 @@ class CreateOrderWithoutVerification extends Controller
             ) {
                 $company = tenant();
                 // throw exception is balance not enough
-                $canCreateOrder->handle($company);
+                $canCreateOrder->handle($company, money($request->validated('amount')));
 
                 $financingOrder = $createFinancingOrder->handle(
                     $company,

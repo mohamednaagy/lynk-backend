@@ -13,6 +13,7 @@ use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Models\Company;
+use App\Models\TieredPricing;
 use App\Models\Transaction;
 use App\Support\ZatcaEInvoice\InvoiceSpecs;
 use App\Support\ZatcaEInvoice\Order;
@@ -85,7 +86,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
     ): InvoiceSpecs {
         [, $ordersCount] = $this->calcAmountWithoutVatAndOrdersCount
             ->handle($company, $totalAmountWithVat);
-        $unitPrice = $company->order_cost;
+        $unitPrice = TieredPricing::getOrderCost($company, $totalAmountWithVat);
 
         if ($company->isTiered()) {
             $ordersCount = 1;

@@ -27,7 +27,7 @@ class GetBalance extends Controller
 
         return $this->successResponse(data: [
             'balance' => number_format($balances['balance']->formatByDecimal(), 2),
-            'available_orders' => $company->isTiered() ? '-' : $balances['availableOrders'],
+            'available_orders' => $company->isTiered() ? null : $balances['availableOrders'],
         ]);
     }
 }

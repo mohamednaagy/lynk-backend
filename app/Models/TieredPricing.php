@@ -33,16 +33,9 @@ class TieredPricing extends Model
     /**
      * @throws NoMatchOrderCostAndValueException
      */
-    public static function getOrderPrice(Company $company, Money $orderValue): Money
+    public static function getOrderCost(Company $company, Money $orderValue): Money
     {
-        $pricing = (new static)->newQuery()
-            ->where('company_id', $company->getKey())
-            ->where('order_value_start', '<=', $orderValue->getAmount())
-            ->where(function (Builder $query) use ($orderValue) {
-                $query->where('order_value_end', '>=', $orderValue->getAmount())
-                    ->orWhereNull('order_value_end');
-            })
-            ->first();
+        $pricing = self::getPricingTier($company, $orderValue);
 
         if (! $pricing) {
             throw new NoMatchOrderCostAndValueException();
@@ -55,5 +48,17 @@ class TieredPricing extends Model
         }
 
         return $pricing->order_cost_without_vat;
+    }
+
+    public static function getPricingTier(Company $company, Money $orderValue): Builder|Model|null
+    {
+        return (new static)->newQuery()
+            ->where('company_id', $company->getKey())
+            ->where('order_value_start', '<=', $orderValue->getAmount())
+            ->where(function (Builder $query) use ($orderValue) {
+                $query->where('order_value_end', '>=', $orderValue->getAmount())
+                    ->orWhereNull('order_value_end');
+            })
+            ->first();
     }
 }

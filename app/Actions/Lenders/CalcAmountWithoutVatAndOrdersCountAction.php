@@ -37,6 +37,6 @@ class CalcAmountWithoutVatAndOrdersCountAction implements CalcAmountWithoutVatAn
 
         $chargeAmountWithoutVat = $chargeAmountWithVat->subtract($vatOfChargeAmount);
 
-        return [$chargeAmountWithoutVat, $ordersCount ? $ordersCount->getAmount() : 0];
+        return [$chargeAmountWithoutVat, $ordersCount?->getAmount()];
     }
 }

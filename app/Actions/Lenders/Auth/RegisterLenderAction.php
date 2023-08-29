@@ -37,7 +37,6 @@ class RegisterLenderAction implements RegisterLender
             'unique_name' => $data['company_unique_name'],
             'company_cr' => $data['company_cr'],
             'status' => $data['company_status'],
-            'order_cost' => $data['order_cost'],
             'does_order_require_approval' => $data['does_order_require_approval'],
         ]);
 
