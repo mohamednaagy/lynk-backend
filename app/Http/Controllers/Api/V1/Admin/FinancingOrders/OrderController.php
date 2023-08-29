@@ -150,7 +150,7 @@ class OrderController extends Controller
                     $company,
                     Money::parseByDecimal(
                         $request->validated('amount'),
-                        $company->getWallet(WalletType::CompanyWallet)
+                        $company->getWallet(WalletType::CompanyWallet)->currency
                     )
                 );
 

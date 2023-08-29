@@ -56,7 +56,7 @@ class TieredPricing extends Model
      */
     public static function getOrderCostWithVat(Company $company, Money $orderValue): Money
     {
-        $orderCostWithoutVat = self::getOrderCostWithVat($company, $orderValue);
+        $orderCostWithoutVat = self::getOrderCostWithoutVat($company, $orderValue);
 
         [$vatAmount] = app(CalculateVatAmount::class)
             ->setAmount($orderCostWithoutVat)
