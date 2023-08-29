@@ -10,6 +10,8 @@ use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
 use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
+use App\Exceptions\NoMatchOrderCostAndValueException;
+use App\Models\TieredPricing;
 use App\Models\TraderOrder;
 use App\Support\ZatcaEInvoice\InvoiceSpecs;
 use App\Support\ZatcaEInvoice\Order;
@@ -25,13 +27,19 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
     ) {
     }
 
+    /**
+     * @throws NoMatchOrderCostAndValueException
+     */
     public function handle(TraderOrder $traderOrder)
     {
         $financingOrder = $traderOrder->order;
         $company = $financingOrder->company()->withTrashed()->first();
         $wallet = $company->getWallet(WalletType::CompanyWallet);
+
+        $orderCostWithoutVat = TieredPricing::getOrderCostWithoutVat($company, $financingOrder->amount);
+
         [$vatAmount, $vatRate] = $this->calculateVatAmount
-            ->setAmount($company->order_cost)
+            ->setAmount($orderCostWithoutVat)
             ->setIsVatIncludedInAmount(false)
             ->handle();
 
@@ -40,7 +48,7 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
         $transaction = $this->createTransactions->handle(
             $wallet,
             TransactionReason::OrderCreationFee,
-            $totalAmountWithVat,
+            $orderCostWithoutVat->add($vatAmount),
             [
                 'financing_order_id' => $financingOrder->id,
                 'trader_order_id' => $traderOrder->id,
@@ -50,6 +58,10 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
                 'is_vat_included' => true,
                 'vat_percentage' => $vatRate * 100,
                 'vat_amount' => $vatAmount,
+                'order_cost' => $orderCostWithoutVat,
+                'vat_rate' => $vatRate,
+                'is_vat_included' => true,
+                'pricing_tier' => TieredPricing::getPricingTier($company, $financingOrder->amount),
             ]
         );
 

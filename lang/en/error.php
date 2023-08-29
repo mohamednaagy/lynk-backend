@@ -34,4 +34,6 @@ return [
     'order_is_already_has_active_trader_order' => 'Order already has active trading request',
     'commodity_market_is_unavailable' => 'The commodity market service is currently unavailable.',
     'trader_mode_not_supported' => 'Selected mode is not available for this trader',
+    'no_match_for_order_cost_and_value' => 'Not able to match order cost with order value',
+    'order_cost_with_vat_and_without_vat_incorrect' => 'Entered value of order cost with VAT is incorrect',
 ];

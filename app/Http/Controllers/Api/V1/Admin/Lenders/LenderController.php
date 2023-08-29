@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api\V1\Admin\Lenders;
 
 use App\Actions\Contracts\Companies\BuildPaginatedCompaniesQuery;
+use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\CompanyType;
+use App\Enums\ErrorCode;
 use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
@@ -74,20 +76,26 @@ class LenderController extends Controller
         CreateCompany $createCompany,
         GetSettingsClassInstance $getSettingsClassInstance
     ): JsonResponse {
-        return DB::transaction(function () use ($request, $getSettingsClassInstance, $createCompany) {
-            $data = $request->validated();
-            $data['status'] = $getSettingsClassInstance->handle(Area::Lender)->default_company_status_created_by_operation;
+        $data = $request->validated();
 
-            $company = $createCompany->handle(
-                array_merge($data, [
-                    'order_cost' => Money::parseByDecimal(
-                        $data['order_cost'],
-                        Money::getDefaultCurrency()
-                    ),
-                ])
+        if (! $this->isOrderCostWithVatValid($data['order_cost_tiers'])) {
+            return $this->errorResponse(
+                message: __('error.order_cost_with_vat_and_without_vat_incorrect'),
+                code: ErrorCode::ORDER_COST_WITHOUT_VAT_AND_WITH_VAT_INCORRECT
             );
+        }
+
+        $data['order_cost_tiers'] = $this->unsetProrationAmounExceptForLastTier($data['order_cost_tiers']);
+
+        return DB::transaction(function () use ($data, $getSettingsClassInstance, $createCompany) {
+            $data['status'] = $getSettingsClassInstance->handle(Area::Lender)
+                ->default_company_status_created_by_operation;
+
+            $company = $createCompany->handle($data);
 
             $company->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
+
+            $company->tieredPricing()->createMany($data['order_cost_tiers']);
 
             return fractal($company, new CompanyTransformer())
                 ->parseIncludes([
@@ -149,5 +157,36 @@ class LenderController extends Controller
         });
 
         return $this->successResponse();
+    }
+
+    private function isOrderCostWithVatValid(array $tiers): bool
+    {
+        foreach ($tiers as $tier) {
+            $orderCostWithoutVat = money($tier['order_cost_without_vat']);
+            $orderCostWithVat = money($tier['order_cost_with_vat']);
+            [$vatOfOrderCostAmount] = app(CalculateVatAmount::class)
+                ->setAmount($orderCostWithoutVat)
+                ->setIsVatIncludedInAmount(false)
+                ->handle();
+
+            if (! $orderCostWithVat->equals($orderCostWithoutVat->add($vatOfOrderCostAmount))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function unsetProrationAmounExceptForLastTier(array $tiers): array
+    {
+        $tiersCount = count($tiers);
+        for ($i = 0; $i < ($tiersCount - 1); $i++) {
+            $tier = &$tiers[$i];
+            if (isset($tier['proration_amount'])) {
+                $tier['proration_amount'] = null;
+            }
+        }
+
+        return $tiers;
     }
 }

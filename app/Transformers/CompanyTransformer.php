@@ -18,7 +18,7 @@ class CompanyTransformer extends TransformerAbstract
         'status',
         'orders_count',
         'created_at',
-        'order_cost',
+        'is_tiered',
         'webhook_secret_key',
         'public_status_comment',
         'driver',
@@ -48,9 +48,9 @@ class CompanyTransformer extends TransformerAbstract
         return $this->primitive($company->unique_name);
     }
 
-    public function includeOrderCost(Company $company): Primitive
+    public function includeIsTiered(Company $company): Primitive
     {
-        return $this->primitive($company->order_cost->formatByDecimal());
+        return $this->primitive($company->isTiered());
     }
 
     public function includeCompanyCr(Company $company): Primitive

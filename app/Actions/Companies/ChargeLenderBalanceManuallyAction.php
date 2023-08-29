@@ -13,6 +13,7 @@ use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Models\Company;
+use App\Models\TieredPricing;
 use App\Models\Transaction;
 use App\Support\ZatcaEInvoice\InvoiceSpecs;
 use App\Support\ZatcaEInvoice\Order;
@@ -89,10 +90,17 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
         $vatAmount,
         $vatPercentage
     ): InvoiceSpecs {
-        [, $ordersCount] = $this->calcAmountWithoutVatAndOrdersCount
-            ->handle($company, $totalAmountWithVat);
-
         $project = $this->getProjectSettings->handle();
+
+        $itemCostWithoutVat = null;
+        if ($company->isTiered()) {
+            $itemCostWithoutVat = $totalAmountWithVat->subtract($vatAmount);
+            $ordersCount = 1;
+        } else {
+            $itemCostWithoutVat = TieredPricing::getOrderCostIfStandard($company);
+            [, $ordersCount] = $this->calcAmountWithoutVatAndOrdersCount
+                ->handle($company, $totalAmountWithVat);
+        }
 
         return new InvoiceSpecs(
             $transaction,
@@ -106,7 +114,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
                 [
                     new PurchaseLine(
                         __('zatca/e-invoice.recharge_balance'),
-                        $company->order_cost,
+                        $itemCostWithoutVat,
                         $vatPercentage,
                         quantity: $ordersCount
                     ),

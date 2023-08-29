@@ -12,7 +12,6 @@ class GetAuthUser extends Controller
     /**
      * Handle an authentication attempt.
      *
-     * @param  Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function __invoke(Request $request)
@@ -30,6 +29,7 @@ class GetAuthUser extends Controller
                 'company.status',
                 'company.id',
                 'company.public_status_comment',
+                'company.is_tiered',
                 'permissions',
                 'locale',
                 'phone_number',

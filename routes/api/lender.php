@@ -15,7 +15,6 @@ use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CancelOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CancelTraderOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CompleteOrder;
-use App\Http\Controllers\Api\V1\Lender\Orders\CreateOrderWithoutVerification;
 use App\Http\Controllers\Api\V1\Lender\Orders\CreateTraderOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\ExportOrders;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersStats;
@@ -67,7 +66,6 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                     Route::apiResource('edaat-invoices', EdaatInvoiceController::class)->only('index', 'store');
                     Route::get('orders/volume', GetOrdersVolume::class);
                     Route::get('orders/stats', GetOrdersStats::class);
-                    Route::post('orders/no-verification', CreateOrderWithoutVerification::class);
                     Route::get('orders/statuses', GetOrderStatus::class);
                     Route::get('orders/export', ExportOrders::class);
                     Route::post('orders/{order}/proceed', MakeOrderProceed::class);

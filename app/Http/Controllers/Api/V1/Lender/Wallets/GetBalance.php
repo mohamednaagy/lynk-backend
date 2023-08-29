@@ -16,12 +16,13 @@ class GetBalance extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderWallet, Action::Show, Action::Manage])
+                perm(Area::Lender, [Subject::LenderWallet, Action::Show, Action::Manage])
         );
     }
 
     public function __invoke(Request $request, GetLenderBalance $getBalance): JsonResponse
     {
+        $company = tenant();
         $balances = $getBalance->handle(tenant());
 
         return $this->successResponse(data: [
