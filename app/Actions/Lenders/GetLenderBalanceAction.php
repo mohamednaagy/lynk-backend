@@ -22,7 +22,7 @@ class GetLenderBalanceAction implements GetLenderBalance
         return [
             'balance' => $balance,
             'availableOrders' => $orderCost
-                ? $balance->divide($orderCost['costWithVat'], Money::ROUND_DOWN)->getAmount()
+                ? $balance->divide($orderCost['costWithVat']->getAmount(), Money::ROUND_DOWN)->getAmount()
                 : null,
         ];
     }

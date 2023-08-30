@@ -10,7 +10,7 @@ use Illuminate\Contracts\Validation\Rule;
 
 class IsAmountMultiplesOfOrderCost implements Rule
 {
-    protected ?Money $orderCostWithVat;
+    protected ?Money $orderCostWithVat = null;
 
     /**
      * Create a new rule instance.
