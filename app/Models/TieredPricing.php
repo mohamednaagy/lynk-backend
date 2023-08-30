@@ -76,13 +76,13 @@ class TieredPricing extends Model
             ->where('company_id', $company->getKey())
             ->first();
 
-        [$vatVamount, $vatRate] = app(CalculateVatAmount::class)
+        [$vatAmount, $vatRate] = app(CalculateVatAmount::class)
             ->setAmount($tier->order_cost_without_vat)
             ->setIsVatIncludedInAmount(false);
 
         return [
             'costWithoutVat' => $tier->order_cost_without_vat,
-            'costWithVat' => $tier->order_cost_without_vat->add($vatVamount),
+            'costWithVat' => $tier->order_cost_without_vat->add($vatAmount),
             'vatRate' => $vatRate,
         ];
     }
