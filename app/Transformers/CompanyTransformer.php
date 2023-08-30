@@ -19,6 +19,7 @@ class CompanyTransformer extends TransformerAbstract
         'orders_count',
         'created_at',
         'is_tiered',
+        'order_cost_tiers',
         'webhook_secret_key',
         'public_status_comment',
         'driver',
@@ -118,5 +119,10 @@ class CompanyTransformer extends TransformerAbstract
     public function includeNotifyAdminsAboutNewOrders(Company $company)
     {
         return $this->primitive($company->notify_admins_about_new_orders);
+    }
+
+    public function includeOrderCostTiers(Company $company)
+    {
+        return $this->collection($company->tieredPricing, new OrderCostTierTransformer());
     }
 }
