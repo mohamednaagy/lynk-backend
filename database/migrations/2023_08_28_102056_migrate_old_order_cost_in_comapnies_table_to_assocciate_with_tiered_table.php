@@ -18,7 +18,7 @@ return new class extends Migration
             ->chunk(20, function (Collection $companies) {
                 $companies->each(function (Company $company) {
 
-                    $orderCostWithoutVat = $company->order_cost->getAmount();
+                    $orderCostWithoutVat = money($company->order_cost, $company->order_cost_currency);
 
                     $company->tieredPricing()->create([
                         'order_value_start' => 0,
