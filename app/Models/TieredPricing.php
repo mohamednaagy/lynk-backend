@@ -78,7 +78,8 @@ class TieredPricing extends Model
 
         [$vatAmount, $vatRate] = app(CalculateVatAmount::class)
             ->setAmount($tier->order_cost_without_vat)
-            ->setIsVatIncludedInAmount(false);
+            ->setIsVatIncludedInAmount(false)
+            ->handle();
 
         return [
             'costWithoutVat' => $tier->order_cost_without_vat,
