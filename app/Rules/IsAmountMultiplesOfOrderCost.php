@@ -2,15 +2,15 @@
 
 namespace App\Rules;
 
-use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Enums\WalletType;
 use App\Models\Company;
+use App\Models\TieredPricing;
 use Cknow\Money\Money;
 use Illuminate\Contracts\Validation\Rule;
 
 class IsAmountMultiplesOfOrderCost implements Rule
 {
-    protected Money $orderCostWithVat;
+    protected ?Money $orderCostWithVat;
 
     /**
      * Create a new rule instance.
@@ -19,11 +19,10 @@ class IsAmountMultiplesOfOrderCost implements Rule
      */
     public function __construct(protected Company $company)
     {
-        [$vatAmount] = app(CalculateVatAmount::class)->setAmount($this->company->order_cost)
-            ->setIsVatIncludedInAmount(false)
-            ->handle();
-
-        $this->orderCostWithVat = $this->company->order_cost->add($vatAmount);
+        if ($this->company->isStandard()) {
+            $orderCostWithoutVat = TieredPricing::getOrderCostIfStandard($company);
+            $this->orderCostWithVat = $orderCostWithoutVat['costWithVat'];
+        }
     }
 
     /**
@@ -35,6 +34,10 @@ class IsAmountMultiplesOfOrderCost implements Rule
      */
     public function passes($attribute, $value)
     {
+        if (is_null($this->orderCostWithVat)) {
+            return true;
+        }
+
         $totalAmountWithVat = Money::parseByDecimal(
             $value,
             $this->company->getWallet(WalletType::CompanyWallet)->currency
