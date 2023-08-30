@@ -29,7 +29,10 @@ class StoreCompanyRequest extends FormRequest
      */
     public function rules(): array
     {
-        $tiersCount = count($this->order_cost_tiers);
+        $lastTierIndex = '*';
+        if ($this->order_cost_tiers) {
+            $lastTierIndex = count($this->order_cost_tiers) - 1;
+        }
 
         return [
             'name' => [
@@ -78,14 +81,14 @@ class StoreCompanyRequest extends FormRequest
                 'gt:order_cost_tiers.*.order_value_start',
                 'decimal:0,2',
             ],
-            'order_cost_tiers.'.($tiersCount - 1).'.order_value_end' => [
+            'order_cost_tiers.'.$lastTierIndex.'.order_value_end' => [
                 'prohibited',
             ],
             'order_cost_tiers.*.fee_type' => [
                 'required',
                 Rule::in([OrderFeeType::Fixed]),
             ],
-            'order_cost_tiers.'.($tiersCount - 1).'.fee_type' => [
+            'order_cost_tiers.'.$lastTierIndex.'.fee_type' => [
                 'required',
                 Rule::in(OrderFeeType::getValues()),
             ],
@@ -98,9 +101,9 @@ class StoreCompanyRequest extends FormRequest
                 'gt:order_cost_tiers.*.order_cost_without_vat',
                 'decimal:0,2',
             ],
-            'order_cost_tiers.'.($tiersCount - 1).'.proration_amount' => [
-                'exclude_unless:order_cost_tiers.'.($tiersCount - 1).'.fee_type,'.OrderFeeType::Proration,
-                'required_if:order_cost_tiers.'.($tiersCount - 1).'.fee_type,'.OrderFeeType::Proration,
+            'order_cost_tiers.'.$lastTierIndex.'.proration_amount' => [
+                'exclude_unless:order_cost_tiers.'.$lastTierIndex.'.fee_type,'.OrderFeeType::Proration,
+                'required_if:order_cost_tiers.'.$lastTierIndex.'.fee_type,'.OrderFeeType::Proration,
                 'nullable',
                 'decimal:0,2',
             ],

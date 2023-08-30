@@ -30,6 +30,11 @@ class UpdateCompanyAction implements UpdateCompany
             )
         );
 
+        if (isset($data['order_cost_tiers'])) {
+            $company->tieredPricing()->delete();
+            $company->tieredPricing()->createMany($data['order_cost_tiers']);
+        }
+
         return $company;
     }
 }
