@@ -43,7 +43,6 @@ class EdaatInvoiceController extends Controller
 
     public function store(
         CalculateOrdersRequest $request,
-        $calculateOrderCost,
         CreateEdaatInvoiceInterface $createEdaatInvoice
     ) {
         return DB::transaction(function () use ($createEdaatInvoice, $request) {
@@ -67,11 +66,12 @@ class EdaatInvoiceController extends Controller
 
     protected function resolveAmount(Request $request, Company $company)
     {
-        $orderCostForStandrdPricing = TieredPricing::getOrderCostIfStandard($company);
-        if ($orderCostForStandrdPricing) {
+        $orderCostForStandardPricing = TieredPricing::getOrderCostIfStandard($company);
+
+        if ($orderCostForStandardPricing) {
             return app(CalculateOrdersCost::class)->handle(
                 $request->validated('orders_count'),
-                $orderCostForStandrdPricing['costWithoutVat']
+                $orderCostForStandardPricing['costWithoutVat']
             );
         } else {
             return Money::parseByDecimal(
