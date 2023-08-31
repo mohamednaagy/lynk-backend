@@ -19,7 +19,7 @@ class OrderCostTiersRangeRule implements Rule
     public function passes($attribute, $tiers): bool
     {
         $tiersCount = count($tiers);
-        // ($tiersNumber-1) to ignore last tier
+        // ($tiersNumber - 1) to ignore last tier
         for ($i = 0; $i < ($tiersCount - 1); $i++) {
             $currentTier = $tiers[$i];
             $nextTier = $tiers[$i + 1];
