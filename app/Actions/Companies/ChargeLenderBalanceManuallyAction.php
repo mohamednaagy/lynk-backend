@@ -97,8 +97,11 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
             $ordersCount = 1;
         } else {
             $itemCostWithoutVat = TieredPricing::getOrderCostIfStandard($company)['costWithoutVat'];
-            [, $ordersCount] = $this->calcAmountWithoutVatAndOrdersCount
-                ->handle($company, $totalAmountWithVat);
+            [$chargeAmountWithoutVat,
+                $roundedOrdersCount,
+                $vatRateOfChargeAmount,
+                $ordersCount] = $this->calcAmountWithoutVatAndOrdersCount
+                    ->handle($company, $totalAmountWithVat);
         }
 
         return new InvoiceSpecs(

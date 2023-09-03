@@ -6,6 +6,7 @@ use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\Lenders\CalcAmountWithoutVatAndOrdersCount;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Models\Company;
+use App\Models\TieredPricing;
 use Cknow\Money\Money;
 
 class CalcAmountWithoutVatAndOrdersCountAction implements CalcAmountWithoutVatAndOrdersCount
@@ -30,18 +31,22 @@ class CalcAmountWithoutVatAndOrdersCountAction implements CalcAmountWithoutVatAn
 
         $chargeAmountWithoutVat = $chargeAmountWithVat->subtract($vatOfChargeAmount);
 
-        $ordersCount = $this->calcOrdersCount($company, $chargeAmountWithVat, $vatRateOfChargeAmount);
+        $ordersCount = $this->calcOrdersCount($company, $chargeAmountWithVat);
 
-        return [$chargeAmountWithoutVat, $ordersCount?->getAmount()];
+        return [
+            $chargeAmountWithoutVat,
+            $ordersCount ? floor($ordersCount) : null,
+            $vatRateOfChargeAmount,
+            $ordersCount,
+        ];
     }
 
-    protected function calcOrdersCount(Company $company, Money $chargeAmountWithVat, $vatRate)
+    protected function calcOrdersCount(Company $company, Money $chargeAmountWithVat)
     {
         $ordersCount = null;
         if ($company->isStandard()) {
-            $tierPrice = $company->tieredPricing()->first();
-            $orderCostWithVat = $tierPrice->order_cost_without_vat->multiply(($vatRate) + 1);
-            $ordersCount = $chargeAmountWithVat->divide($orderCostWithVat->getAmount(), \Money\Money::ROUND_DOWN);
+            $orderCostWithVat = TieredPricing::getOrderCostIfStandard($company)['costWithVat'];
+            $ordersCount = $chargeAmountWithVat->getAmount() / $orderCostWithVat->getAmount();
         }
 
         return $ordersCount;

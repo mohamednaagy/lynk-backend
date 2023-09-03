@@ -46,10 +46,10 @@ class WebhookController extends Controller
                     $invoice->update(['status' => EdaatInvoiceStatus::Paid]);
 
                     $amountWithVat = $invoice->amount;
-                    [$amountWithoutVat, $rawOrdersCount] = $calcAmountWithoutVatAndOrdersCount->handle(
-                        $company,
-                        $amountWithVat
-                    );
+                    [$amountWithoutVat,
+                        $roundedOrdersCount,
+                        $vatRateOfChargeAmount,
+                        $rawOrdersCount] = $calcAmountWithoutVatAndOrdersCount->handle($company, $amountWithVat);
 
                     $vatAmount = $amountWithVat->subtract($amountWithoutVat);
 
@@ -63,8 +63,7 @@ class WebhookController extends Controller
                         ],
                     );
 
-                    $vatPercentage = $this->getProjectSettings->handle()->getVatRateInPercentage();
-
+                    $vatPercentage = $vatRateOfChargeAmount * 100;
                     $vatTransaction = $createTransactions->handle(
                         $wallet,
                         TransactionReason::VatPercentageOnDeposit,
@@ -78,7 +77,7 @@ class WebhookController extends Controller
                     $invoiceSpecs = $this->getInvoiceSpecs(
                         $vatTransaction,
                         $company,
-                        $amountWithVat->formatByDecimal(),
+                        $amountWithVat,
                         $vatAmount,
                         $rawOrdersCount,
                         $vatPercentage
