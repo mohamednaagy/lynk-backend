@@ -27,8 +27,6 @@ class CalculateVatAmountAction implements CalculateVatAmount
 
         $vatRate = $this->vatRate ?? $this->getProjectSettings->handle()->getVatRate();
 
-        $vatAmount = null;
-
         if ($this->isVatIncludedInAmount) {
             $vatAmount = $this->amount->subtract(
                 $this->amount->divide(1 + $vatRate)

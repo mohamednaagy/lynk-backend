@@ -27,7 +27,7 @@ return [
     'tax_rates' => 'Tax Rates',
     'invoice_number' => 'Invoice #:number',
     'amount_with_currency' => 'SAR :amount',
-    'create_order_cost' => 'Creation charge for financing order #:number',
+    'create_order_cost' => 'Creation charge of trading request #:trader_order_id for financing order #:financing_order_id',
     'vat' => 'VAT percentage',
     'recharge_balance' => 'Recharge the balance',
 ];
