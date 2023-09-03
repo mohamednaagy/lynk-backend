@@ -5,9 +5,12 @@ namespace App\Support\Traders\TradingStrategies\Bursam;
 use App\Enums\BursamMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Support\Traders\Traits\TraderHelperTrait;
 
 class BursamStrategyV1 extends BaseBursamStrategy
 {
+    use TraderHelperTrait;
+
     public array $stepToHistoriesMap = [
         BursamMurabhaStep::PurchasingCommodity => [
             FinancingOrderHistory::RespondPtp => null,

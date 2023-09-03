@@ -593,7 +593,7 @@ class BursamV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function cancelOrder(FinancingOrder $financingOrder): mixed
+    public function cancelOrder(FinancingOrder $financingOrder): bool
     {
         $traderOrder = $financingOrder->activeTraderOrder()->first();
 
@@ -614,7 +614,8 @@ class BursamV1Driver implements TraderInterface
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
         int $cancelReason = TraderOrderCancelReason::Manual
-    ): mixed {
+    ): bool {
+        // Bursam V2 only
         if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket)) {
             $traderOrder->update([
                 'status' => TraderOrderStatus::Cancelled,

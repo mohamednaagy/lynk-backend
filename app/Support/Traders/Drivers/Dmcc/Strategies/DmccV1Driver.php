@@ -187,7 +187,7 @@ class DmccV1Driver implements TraderInterface
                     'version' => $this->version,
                     'financing_order_id' => $financingOrder->id,
                     'provider_request_body' => $requestBody,
-                    'provider_response_body' => $response->body(),
+                    'provider_response_body' => $response,
                 ]
             );
         }
