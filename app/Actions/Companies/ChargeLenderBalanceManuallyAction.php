@@ -92,12 +92,11 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
     ): InvoiceSpecs {
         $project = $this->getProjectSettings->handle();
 
-        $itemCostWithoutVat = null;
         if ($company->isTiered()) {
             $itemCostWithoutVat = $totalAmountWithVat->subtract($vatAmount);
             $ordersCount = 1;
         } else {
-            $itemCostWithoutVat = TieredPricing::getOrderCostIfStandard($company);
+            $itemCostWithoutVat = TieredPricing::getOrderCostIfStandard($company)['costWithoutVat'];
             [, $ordersCount] = $this->calcAmountWithoutVatAndOrdersCount
                 ->handle($company, $totalAmountWithVat);
         }
