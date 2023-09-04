@@ -20,6 +20,7 @@ use App\Models\Company;
 use App\Transformers\CompanyTransformer;
 use Cknow\Money\Money;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class LenderController extends Controller
@@ -76,7 +77,7 @@ class LenderController extends Controller
         CreateCompany $createCompany,
         GetSettingsClassInstance $getSettingsClassInstance
     ): JsonResponse {
-        $data = $request->validated();
+        $data = Arr::only($request->all(), array_keys($request->validated()));
 
         if (! $this->isOrderCostWithVatValid($data['order_cost_tiers'])) {
             return $this->errorResponse(
@@ -143,7 +144,9 @@ class LenderController extends Controller
         Company $lender
     ): JsonResponse {
         return DB::transaction(function () use ($request, $updateCompany, $lender) {
-            $updateCompany->handle($lender, $request->validated());
+            $data = Arr::only($request->all(), array_keys($request->validated()));
+
+            $updateCompany->handle($lender, $data);
 
             return $this->successResponse();
         });
