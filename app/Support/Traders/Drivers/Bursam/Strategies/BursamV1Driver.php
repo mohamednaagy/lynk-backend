@@ -615,15 +615,6 @@ class BursamV1Driver implements TraderInterface
         TraderOrder $traderOrder,
         int $cancelReason = TraderOrderCancelReason::Manual
     ): bool {
-        // Bursam V2 only
-        if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket)) {
-            $traderOrder->update([
-                'status' => TraderOrderStatus::Cancelled,
-            ]);
-
-            return true;
-        }
-
         if ($traderOrder->doesLastActionMatchWith([
             FinancingOrderHistory::GetTtiId, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
         ])) {
