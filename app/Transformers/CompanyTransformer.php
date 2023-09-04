@@ -4,6 +4,7 @@ namespace App\Transformers;
 
 use App\Models\Company;
 use Cknow\Money\Money;
+use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -121,8 +122,12 @@ class CompanyTransformer extends TransformerAbstract
         return $this->primitive($company->notify_admins_about_new_orders);
     }
 
-    public function includeOrderCostTiers(Company $company)
+    public function includeOrderCostTiers(Company $company): Collection
     {
-        return $this->collection($company->tieredPricing, new OrderCostTierTransformer());
+        $orderCostTiers = $company->tieredPricing()
+            ->orderBy('order_value_start')
+            ->get();
+
+        return $this->collection($orderCostTiers, new OrderCostTierTransformer());
     }
 }
