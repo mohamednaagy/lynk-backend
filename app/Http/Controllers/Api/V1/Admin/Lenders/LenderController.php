@@ -167,9 +167,10 @@ class LenderController extends Controller
 
     private function isOrderCostWithVatValid(array $tiers): bool
     {
+        $currency = Money::getDefaultCurrency();
         foreach ($tiers as $tier) {
-            $orderCostWithoutVat = money($tier['order_cost_without_vat']);
-            $orderCostWithVat = money($tier['order_cost_with_vat']);
+            $orderCostWithoutVat = Money::parseByDecimal($tier['order_cost_without_vat'], $currency);
+            $orderCostWithVat = Money::parseByDecimal($tier['order_cost_with_vat'], $currency);
             [$vatOfOrderCostAmount] = app(CalculateVatAmount::class)
                 ->setAmount($orderCostWithoutVat)
                 ->setIsVatIncludedInAmount(false)
