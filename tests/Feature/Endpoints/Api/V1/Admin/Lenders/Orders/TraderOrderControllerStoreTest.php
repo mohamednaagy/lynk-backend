@@ -7,6 +7,7 @@ use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
+use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\User;
@@ -37,14 +38,10 @@ class TraderOrderControllerStoreTest extends TestCase
 
     private static string $apiUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
-
-        [self::$company] = $this->createCompany('2000', ['company_cr' => '1234567891']);
+        self::$company = $this->createLenderCompanyWithStandardOrderCost('2000', ['company_cr' => '1234567891']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$superAdminUser = $this->createSuperAdminUser();
         self::$managerHasPermissions = $this->createSuperAdminUser(Role::Manager);
@@ -67,9 +64,6 @@ class TraderOrderControllerStoreTest extends TestCase
             '/trader-orders';
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_order_controller_store_unauth_user_cant_make_order_completed(): void
     {
         $this->postJson(self::$apiUrl)
@@ -79,9 +73,6 @@ class TraderOrderControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_order_controller_store_only_roles_of_super_admin_area_can_access(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
@@ -99,6 +90,7 @@ class TraderOrderControllerStoreTest extends TestCase
             ->postJson(self::$apiUrl, [
                 'trader' => 'fake',
                 'reference_number' => '102030',
+                'mode' => TraderOrderMode::Manual,
             ])
             ->assertStatus(Response::HTTP_OK);
     }
@@ -123,9 +115,6 @@ class TraderOrderControllerStoreTest extends TestCase
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_order_controller_store_that_trader_is_required(): void
     {
         $this->actingAs(self::$superAdminUser)
@@ -135,9 +124,6 @@ class TraderOrderControllerStoreTest extends TestCase
             ->assertJsonValidationErrorFor('trader');
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_order_controller_store_reference_number_is_required(): void
     {
         $this->actingAs(self::$superAdminUser)
@@ -147,9 +133,6 @@ class TraderOrderControllerStoreTest extends TestCase
             ->assertJsonValidationErrorFor('reference_number');
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_order_controller_store_trader_should_be_supported(): void
     {
         $this->actingAs(self::$superAdminUser)
@@ -163,9 +146,6 @@ class TraderOrderControllerStoreTest extends TestCase
             ->assertJsonValidationErrorFor('trader');
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_order_controller_store_will_return_error_response_if_order_is_completed(): void
     {
         self::$financingOrder->update([
@@ -186,9 +166,6 @@ class TraderOrderControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_order_controller_store_will_return_error_response_if_order_has_active_trader(): void
     {
         self::$financingOrder->traderOrders()->create(
@@ -213,9 +190,6 @@ class TraderOrderControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_order_controller_store_successfully(): void
     {
         $this->actingAs(self::$superAdminUser)
