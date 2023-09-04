@@ -52,7 +52,7 @@ class TraderOrderScenario
 
         $this->traderOrder->load('traderHistories');
 
-        $this->traderOrder = $this->traderOrder->query()->withLastHistoryAction()->first();
+        $this->traderOrder = $this->traderOrder->withLastHistoryAction()->first();
 
         return $this;
     }
@@ -134,6 +134,10 @@ class TraderOrderScenario
                 }
             });
         }
+
+        $this->traderOrder->load('traderHistories');
+
+        $this->traderOrder = $this->traderOrder->withLastHistoryAction()->first();
 
         return $this;
     }
