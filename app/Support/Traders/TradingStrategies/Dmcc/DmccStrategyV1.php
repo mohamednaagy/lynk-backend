@@ -5,12 +5,9 @@ namespace App\Support\Traders\TradingStrategies\Dmcc;
 use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Support\Traders\Traits\TraderHelperTrait;
 
 class DmccStrategyV1 extends BaseDmccStrategy
 {
-    use TraderHelperTrait;
-
     public array $stepToHistoriesMap = [
         DmccMurabhaStep::PurchasingCommodity => [
             FinancingOrderHistory::RespondPtp => null,
