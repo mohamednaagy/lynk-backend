@@ -3,8 +3,8 @@
 namespace Tests\Unit\Traders;
 
 use App\Enums\BursamErrorCode;
+use App\Enums\BursamMurabhaStep;
 use App\Enums\BursamProductCode;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
@@ -267,7 +267,7 @@ class BursamV1DriverTest extends TestCase
 
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(DmccMurabhaStep::ContractSigned);
+            ->moveToStep(BursamMurabhaStep::ContractSigned);
 
         (new BursamV1Driver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
 
