@@ -86,6 +86,7 @@ class LenderController extends Controller
         }
 
         $data['order_cost_tiers'] = $this->unsetProrationAmounExceptForLastTier($data['order_cost_tiers']);
+        $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers']);
 
         return DB::transaction(function () use ($data, $getSettingsClassInstance, $createCompany) {
             $data['status'] = $getSettingsClassInstance->handle(Area::Lender)
@@ -143,7 +144,10 @@ class LenderController extends Controller
         Company $lender
     ): JsonResponse {
         return DB::transaction(function () use ($request, $updateCompany, $lender) {
-            $updateCompany->handle($lender, $request->validated());
+            $data = $request->validated();
+            $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers']);
+
+            $updateCompany->handle($lender, $data);
 
             return $this->successResponse();
         });
@@ -191,6 +195,19 @@ class LenderController extends Controller
             $tier = &$tiers[$i];
             if (isset($tier['proration_amount'])) {
                 $tier['proration_amount'] = null;
+            }
+        }
+
+        return $tiers;
+    }
+
+    protected function castTiersAmountsToMoney($tiers)
+    {
+        $currency = Money::getDefaultCurrency();
+        foreach ($tiers as &$tier) {
+            $tier['order_value_start'] = Money::parseByDecimal($tier['order_value_start'], $currency);
+            if ($tier['order_value_end'] != null) {
+                $tier['order_value_end'] = Money::parseByDecimal($tier['order_value_end'], $currency);
             }
         }
 
