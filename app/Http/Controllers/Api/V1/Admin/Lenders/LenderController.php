@@ -211,6 +211,10 @@ class LenderController extends Controller
             if ($tier['order_value_end'] != null) {
                 $tier['order_value_end'] = Money::parseByDecimal($tier['order_value_end'], $currency);
             }
+
+            if ($tier['proration_amount'] != null) {
+                $tier['proration_amount'] = Money::parseByDecimal($tier['proration_amount'], $currency);
+            }
         }
 
         return $tiers;
