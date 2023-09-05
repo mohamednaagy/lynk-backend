@@ -20,7 +20,6 @@ use App\Models\Company;
 use App\Transformers\CompanyTransformer;
 use Cknow\Money\Money;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class LenderController extends Controller
@@ -77,7 +76,7 @@ class LenderController extends Controller
         CreateCompany $createCompany,
         GetSettingsClassInstance $getSettingsClassInstance
     ): JsonResponse {
-        $data = Arr::only($request->all(), array_keys($request->validated()));
+        $data = $request->validated();
 
         if (! $this->isOrderCostWithVatValid($data['order_cost_tiers'])) {
             return $this->errorResponse(
@@ -87,6 +86,7 @@ class LenderController extends Controller
         }
 
         $data['order_cost_tiers'] = $this->unsetProrationAmounExceptForLastTier($data['order_cost_tiers']);
+        $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers']);
 
         return DB::transaction(function () use ($data, $getSettingsClassInstance, $createCompany) {
             $data['status'] = $getSettingsClassInstance->handle(Area::Lender)
@@ -144,7 +144,8 @@ class LenderController extends Controller
         Company $lender
     ): JsonResponse {
         return DB::transaction(function () use ($request, $updateCompany, $lender) {
-            $data = Arr::only($request->all(), array_keys($request->validated()));
+            $data = $request->validated();
+            $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers']);
 
             $updateCompany->handle($lender, $data);
 
@@ -194,6 +195,19 @@ class LenderController extends Controller
             $tier = &$tiers[$i];
             if (isset($tier['proration_amount'])) {
                 $tier['proration_amount'] = null;
+            }
+        }
+
+        return $tiers;
+    }
+
+    protected function castTiersAmountsToMoney($tiers)
+    {
+        $currency = Money::getDefaultCurrency();
+        foreach ($tiers as &$tier) {
+            $tier['order_value_start'] = Money::parseByDecimal($tier['order_value_start'], $currency);
+            if ($tier['order_value_end'] != null) {
+                $tier['order_value_end'] = Money::parseByDecimal($tier['order_value_end'], $currency);
             }
         }
 

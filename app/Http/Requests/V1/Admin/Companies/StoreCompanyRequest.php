@@ -9,7 +9,6 @@ use App\Models\Company;
 use App\Rules\CompanyUniqueNameRule;
 use App\Rules\OrderCostTiersRangeRule;
 use BenSampo\Enum\Rules\EnumValue;
-use Cknow\Money\Money;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -135,21 +134,5 @@ class StoreCompanyRequest extends FormRequest
                 new EnumValue(TraderOrderMode::class, false),
             ],
         ];
-    }
-
-    protected function passedValidation()
-    {
-        $currency = Money::getDefaultCurrency();
-        $tiers = $this->order_cost_tiers;
-        foreach ($tiers as &$tier) {
-            $tier['order_value_start'] = Money::parseByDecimal($tier['order_value_start'], $currency);
-            if ($tier['order_value_end'] != null) {
-                $tier['order_value_end'] = Money::parseByDecimal($tier['order_value_end'], $currency);
-            }
-        }
-
-        $this->merge([
-            'order_cost_tiers' => $tiers,
-        ]);
     }
 }
