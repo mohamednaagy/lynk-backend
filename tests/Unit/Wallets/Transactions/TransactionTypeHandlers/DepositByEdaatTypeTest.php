@@ -72,6 +72,7 @@ class DepositByEdaatTypeTest extends TestCase
             self::$wallet,
             Money::parseByDecimal(100, 'SAR'),
             TransactionReason::DepositByEdaat,
+            null,
             []
         );
         $this->assertInstanceOf(Transaction::class, $transaction);
