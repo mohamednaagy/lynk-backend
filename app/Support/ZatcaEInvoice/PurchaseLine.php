@@ -3,6 +3,7 @@
 namespace App\Support\ZatcaEInvoice;
 
 use Cknow\Money\Money;
+use function Psl\Str\format_number;
 
 class PurchaseLine
 {
@@ -31,9 +32,9 @@ class PurchaseLine
         return $this->name;
     }
 
-    public function getQuantity(): int|float
+    public function getQuantity(): string
     {
-        return $this->quantity;
+        return format_number($this->quantity, 2);
     }
 
     public function getItemPrice(): Money

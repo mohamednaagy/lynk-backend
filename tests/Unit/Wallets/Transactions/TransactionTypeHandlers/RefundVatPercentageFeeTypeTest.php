@@ -8,14 +8,14 @@ use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use App\Support\Wallets\Contracts\TransactionTypeHandlerInterface;
-use App\Support\Wallets\Transactions\TransactionTypeHandlers\OrderCreationFeeType;
+use App\Support\Wallets\Transactions\TransactionTypeHandlers\RefundVatPercentageFeeType;
 use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 
-class OrderCreationFeeTypeTest extends TestCase
+class RefundVatPercentageFeeTypeTest extends TestCase
 {
     use RefreshDatabase, InteractsWithCompany;
 
@@ -28,8 +28,8 @@ class OrderCreationFeeTypeTest extends TestCase
     private static Wallet $wallet;
 
     private static array $messages = [
-        'ar' => 'رسوم إنشاء طلب #123456',
-        'en' => 'Order #123456 creation fee',
+        'ar' => 'استعادة الرسوم الضريبية لطلب المرابحة #1',
+        'en' => 'Refund of VAT charges for trading request #1',
     ];
 
     /**
@@ -39,27 +39,28 @@ class OrderCreationFeeTypeTest extends TestCase
     {
         parent::setUp();
 
-        self::$transactionTypeHandler = new OrderCreationFeeType();
-        [self::$company, self::$wallet] = $this->createCompany(2000);
+        self::$transactionTypeHandler = new RefundVatPercentageFeeType();
+        [self::$company, self::$wallet] = $this->createCompany();
         self::$depositTransaction = app()->make(TransactionServiceInterface::class)
             ->deposit(
                 self::$wallet,
-                Money::parseByDecimal(-100, 'SAR'),
-                1,
+                Money::parseByDecimal(15, 'SAR'),
+                TransactionReason::RefundVatPercentageFee,
                 null,
                 [
-                    'type' => 'test',
-                    'financing_order_id' => '123456',
+                    'transaction_id' => '1',
+                    'financing_order_id' => '1',
+                    'vat_rate' => 0.15,
                 ]
             );
     }
 
-    public function test_order_creation_fee_handler_implements_transaction_type_handler_interface_instance()
+    public function test_refund_vat_percentage_fee_handler_implements_transaction_type_handler_interface_instance()
     {
         $this->assertInstanceOf(TransactionTypeHandlerInterface::class, self::$transactionTypeHandler);
     }
 
-    public function test_order_creation_fee_generate_message_method_with_all_available_locales_return_string()
+    public function test_refund_vat_percentage_fee_generate_message_method_with_all_available_locales_return_string()
     {
         foreach (self::$messages as $locale => $message) {
             $transactionDescription = self::$transactionTypeHandler->generateMessage(self::$depositTransaction, $locale);
@@ -67,12 +68,12 @@ class OrderCreationFeeTypeTest extends TestCase
         }
     }
 
-    public function test_order_creation_fee_process_method_return_transaction_model_instance()
+    public function test_refund_vat_percentage_fee_process_method_return_transaction_model_instance()
     {
         $transaction = self::$transactionTypeHandler->process(
             self::$wallet,
-            Money::parseByDecimal(100, 'SAR'),
-            TransactionReason::OrderCreationFee,
+            Money::parseByDecimal(15, 'SAR'),
+            TransactionReason::RefundVatPercentageFee,
             null,
             []
         );

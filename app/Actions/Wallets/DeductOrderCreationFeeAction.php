@@ -43,19 +43,17 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
             ->setIsVatIncludedInAmount(false)
             ->handle();
 
-        $totalAmountWithVat = $company->order_cost->add($vatAmount);
+        $totalAmountWithVat = $orderCostWithoutVat->add($vatAmount);
 
         $transaction = $this->createTransactions->handle(
             $wallet,
             TransactionReason::OrderCreationFee,
-            $orderCostWithoutVat->add($vatAmount),
+            $totalAmountWithVat,
             [
                 'financing_order_id' => $financingOrder->id,
                 'trader_order_id' => $traderOrder->id,
                 'reference_number ' => $financingOrder->reference_number,
                 'amount' => $financingOrder->amount,
-                'order_cost' => $company->order_cost,
-                'is_vat_included' => true,
                 'vat_percentage' => $vatRate * 100,
                 'vat_amount' => $vatAmount,
                 'order_cost' => $orderCostWithoutVat,
@@ -82,7 +80,7 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
                             'trader_order_id' => $traderOrder->getKey(),
                             'financing_order_id' => $traderOrder->financing_order_id,
                         ]),
-                        $company->order_cost,
+                        $orderCostWithoutVat,
                         $vatRate * 100,
                         quantity: 1
                     ),

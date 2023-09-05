@@ -12,6 +12,7 @@ use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Models\EdaatInvoice;
+use App\Models\TieredPricing;
 use App\Support\Edaat\EdaatService;
 use App\Support\ZatcaEInvoice\InvoiceSpecs;
 use App\Support\ZatcaEInvoice\Order;
@@ -82,26 +83,32 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
     private function getInvoiceSpecs(
         $transaction,
         $company,
-        $amountWithVat,
+        $totalAmountWithVat,
         $vatAmount,
         $orderCount,
         $vatPercentage
     ): InvoiceSpecs {
         $project = $this->getProjectSettings->handle();
 
+        if ($company->isTiered()) {
+            $itemCostWithoutVat = $totalAmountWithVat->subtract($vatAmount);
+        } else {
+            $itemCostWithoutVat = TieredPricing::getOrderCostIfStandard($company)['costWithoutVat'];
+        }
+
         return new InvoiceSpecs(
             $transaction,
             $project,
             $project->getVatId(),
             $transaction->created_at->clone(),
-            $amountWithVat,
+            $totalAmountWithVat,
             $vatAmount,
             new Order(
                 $transaction->reference_number,
                 [
                     new PurchaseLine(
                         __('zatca/e-invoice.recharge_balance'),
-                        $company->order_cost,
+                        $itemCostWithoutVat,
                         $vatPercentage,
                         quantity: $orderCount
                     ),
