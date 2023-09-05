@@ -365,7 +365,7 @@ class BursamV1DriverTest extends TestCase
             return Http::response([
                 'body' => [
                     [
-                        'bidErrNo' => BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES,
+                        'bidErrNo' => $this->faker->randomElement(BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES),
                         'productCode' => self::$traderOrder->product_code,
                     ],
                 ],
