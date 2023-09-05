@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Jobs\General;
 
+use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
-use App\Enums\MurabhaStep;
 use App\Enums\Role;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\Company;
@@ -51,7 +51,7 @@ class ProcessAskClientForWakalaTest extends TestCase
         self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder();
 
         TraderOrderScenario::of(self::$traderOrder)
-            ->moveToStep(MurabhaStep::ContractSigned);
+            ->moveToStep(DmccMurabhaStep::ContractSigned);
     }
 
     public function test_process_ask_client_for_wakala_processed_if_murabha_step_contract_signed()
@@ -65,11 +65,11 @@ class ProcessAskClientForWakalaTest extends TestCase
 
     public function test_process_ask_client_for_wakala_will_not_processed_if_murabha_step_not_contract_signed()
     {
-        $murabhaSteps = MurabhaStep::getValues();
+        $murabhaSteps = DmccMurabhaStep::getValues();
         foreach ($murabhaSteps as $murabhaStep) {
             if (
-                $murabhaStep == MurabhaStep::ContractSigned
-                || $murabhaStep == MurabhaStep::TraderOrderCreated
+                $murabhaStep == DmccMurabhaStep::ContractSigned
+                || $murabhaStep == DmccMurabhaStep::TraderOrderCreated
             ) {
                 continue;
             }

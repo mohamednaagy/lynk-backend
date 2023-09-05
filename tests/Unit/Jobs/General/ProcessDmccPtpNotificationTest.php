@@ -3,11 +3,11 @@
 namespace Jobs\General;
 
 use App\Enums\FinancingOrderHistory;
-use App\Jobs\Dmcc\ProcessDmccPtpNotification;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccPtpNotification;
 use CodeDredd\Soap\Facades\Soap;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;

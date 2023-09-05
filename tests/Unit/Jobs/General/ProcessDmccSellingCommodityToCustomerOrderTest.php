@@ -2,15 +2,15 @@
 
 namespace Tests\Unit\Jobs\General;
 
+use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
-use App\Jobs\Dmcc\ProcessDmccSellingCommodityToCustomerOrder;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccSellingCommodityToCustomerOrder;
 use CodeDredd\Soap\Facades\Soap;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -110,7 +110,7 @@ class ProcessDmccSellingCommodityToCustomerOrderTest extends TestCase
         Storage::fake();
 
         /** @var TraderOrder $traderOrder */
-        $traderOrder = InProgressOrder::of(self::$order)->createTraderOrder('dmcc', data:[
+        $traderOrder = InProgressOrder::of(self::$order)->createTraderOrder('dmcc', data: [
             'status' => TraderOrderStatus::InProgress,
             'product' => 'Product',
             'quantity' => 2,
@@ -126,7 +126,7 @@ class ProcessDmccSellingCommodityToCustomerOrderTest extends TestCase
 
         TraderOrderScenario::of($traderOrder)
             ->reset()
-            ->moveToStep(MurabhaStep::ClientWakala);
+            ->moveToStep(DmccMurabhaStep::ClientWakala);
 
         $processOrder = new ProcessDmccSellingCommodityToCustomerOrder($traderOrder->id);
         $processOrder->handle();
@@ -148,7 +148,7 @@ class ProcessDmccSellingCommodityToCustomerOrderTest extends TestCase
 
         TraderOrderScenario::of($traderOrder)
             ->reset()
-            ->moveToStep(MurabhaStep::ClientWakala);
+            ->moveToStep(DmccMurabhaStep::ClientWakala);
 
         $processOrder = new ProcessDmccSellingCommodityToCustomerOrder($traderOrder->id);
         $processOrder->handle();

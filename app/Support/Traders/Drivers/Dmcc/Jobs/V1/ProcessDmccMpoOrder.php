@@ -34,8 +34,6 @@ class ProcessDmccMpoOrder implements ShouldQueue, ShouldBeUnique
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
@@ -46,7 +44,7 @@ class ProcessDmccMpoOrder implements ShouldQueue, ShouldBeUnique
                 return;
             }
 
-            $trader = Trader::driver($this->traderOrder->provider);
+            $trader = Trader::driver($this->traderOrder->provider, $this->traderOrder->version);
 
             $versionNo = $trader->uploadTTIDocumentAndGetVersionNumber($this->traderOrder->reference);
 
