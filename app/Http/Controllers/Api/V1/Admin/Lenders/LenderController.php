@@ -28,27 +28,27 @@ class LenderController extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::Lenders, Action::Index, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::Lenders, Action::Show, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::Lenders, Action::Create, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::Lenders, Action::Edit, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Edit, Action::Manage])
         )->only('update');
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::Lenders, Action::Delete, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Delete, Action::Manage])
         )->only('destroy');
     }
 
@@ -86,7 +86,6 @@ class LenderController extends Controller
         }
 
         $data['order_cost_tiers'] = $this->unsetProrationAmounExceptForLastTier($data['order_cost_tiers']);
-        $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers']);
 
         return DB::transaction(function () use ($data, $getSettingsClassInstance, $createCompany) {
             $data['status'] = $getSettingsClassInstance->handle(Area::Lender)
@@ -145,8 +144,6 @@ class LenderController extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($request, $updateCompany, $lender) {
             $data = $request->validated();
-            $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers']);
-
             $updateCompany->handle($lender, $data);
 
             return $this->successResponse();
@@ -195,25 +192,6 @@ class LenderController extends Controller
             $tier = &$tiers[$i];
             if (isset($tier['proration_amount'])) {
                 $tier['proration_amount'] = null;
-            }
-        }
-
-        return $tiers;
-    }
-
-    protected function castTiersAmountsToMoney($tiers)
-    {
-        $currency = Money::getDefaultCurrency();
-        foreach ($tiers as &$tier) {
-            $tier['order_value_start'] = Money::parseByDecimal($tier['order_value_start'], $currency);
-            $tier['order_cost_without_vat'] = Money::parseByDecimal($tier['order_cost_without_vat'], $currency);
-
-            if ($tier['order_value_end'] != null) {
-                $tier['order_value_end'] = Money::parseByDecimal($tier['order_value_end'], $currency);
-            }
-
-            if ($tier['proration_amount'] != null) {
-                $tier['proration_amount'] = Money::parseByDecimal($tier['proration_amount'], $currency);
             }
         }
 
