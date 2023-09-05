@@ -206,6 +206,8 @@ class LenderController extends Controller
         $currency = Money::getDefaultCurrency();
         foreach ($tiers as &$tier) {
             $tier['order_value_start'] = Money::parseByDecimal($tier['order_value_start'], $currency);
+            $tier['order_cost_without_vat'] = Money::parseByDecimal($tier['order_cost_without_vat'], $currency);
+
             if ($tier['order_value_end'] != null) {
                 $tier['order_value_end'] = Money::parseByDecimal($tier['order_value_end'], $currency);
             }
