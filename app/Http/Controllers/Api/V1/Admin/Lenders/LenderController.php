@@ -146,7 +146,6 @@ class LenderController extends Controller
         return DB::transaction(function () use ($request, $updateCompany, $lender) {
             $data = $request->validated();
             $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers']);
-
             $updateCompany->handle($lender, $data);
 
             return $this->successResponse();
@@ -212,7 +211,7 @@ class LenderController extends Controller
                 $tier['order_value_end'] = Money::parseByDecimal($tier['order_value_end'], $currency);
             }
 
-            if ($tier['proration_amount'] != null) {
+            if (isset($tier['proration_amount']) && $tier['proration_amount'] != null) {
                 $tier['proration_amount'] = Money::parseByDecimal($tier['proration_amount'], $currency);
             }
         }
