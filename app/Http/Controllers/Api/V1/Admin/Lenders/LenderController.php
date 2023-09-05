@@ -145,7 +145,9 @@ class LenderController extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($request, $updateCompany, $lender) {
             $data = $request->validated();
-            $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers']);
+
+            $currency = $lender->getWallet(WalletType::CompanyWallet)->currency;
+            $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers'], $currency);
 
             $updateCompany->handle($lender, $data);
 
@@ -201,9 +203,12 @@ class LenderController extends Controller
         return $tiers;
     }
 
-    protected function castTiersAmountsToMoney($tiers)
+    protected function castTiersAmountsToMoney($tiers, $currency = null)
     {
-        $currency = Money::getDefaultCurrency();
+        if (is_null($currency)) {
+            $currency = Money::getDefaultCurrency();
+        }
+
         foreach ($tiers as &$tier) {
             $tier['order_value_start'] = Money::parseByDecimal($tier['order_value_start'], $currency);
             $tier['order_cost_without_vat'] = Money::parseByDecimal($tier['order_cost_without_vat'], $currency);
