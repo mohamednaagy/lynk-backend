@@ -14,6 +14,7 @@ use App\Models\FinancingOrder;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamSellingCommodityToOpenMarketForCancellation;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Drivers\Bursam\Strategies\BursamV1Driver;
@@ -50,6 +51,12 @@ class BursamV1DriverTest extends TestCase
 
     protected static Model|TraderOrder $traderOrder;
 
+    protected static string $driverClass = BursamV1Driver::class;
+
+    protected static TraderInterface $driver;
+
+    protected static string $version = 'v1';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -63,10 +70,12 @@ class BursamV1DriverTest extends TestCase
             ->commit()
             ->model();
 
+        self::$driver = new static::$driverClass();
+
         $data = [
             'product_code' => $this->faker->randomElement(BursamProductCode::getValues()),
             'provider' => 'bursam',
-            'version' => 'v1',
+            'version' => static::$version,
             'uuid_one' => Str::uuid(),
             'products' => [
                 [
@@ -118,7 +127,7 @@ class BursamV1DriverTest extends TestCase
         self::$traderOrder->update(['status' => TraderOrderStatus::Initiated]);
         $traderOrderCount = TraderOrder::query()->count();
 
-        $traderOrder = (new BursamV1Driver())->getOrInitiateTraderOrder(self::$order);
+        $traderOrder = self::$driver->getOrInitiateTraderOrder(self::$order);
 
         $this->assertDatabaseCount((new TraderOrder())->getTable(), $traderOrderCount);
         $this->assertEquals($traderOrder->id, self::$traderOrder->id);
@@ -134,7 +143,7 @@ class BursamV1DriverTest extends TestCase
             ->commit()
             ->model();
 
-        $traderOrder = (new BursamV1Driver())->getOrInitiateTraderOrder($order);
+        $traderOrder = self::$driver->getOrInitiateTraderOrder($order);
 
         $this->assertDatabaseCount((new TraderOrder())->getTable(), $traderOrderCount + 1);
         $this->assertInstanceOf(TraderOrder::class, $traderOrder);
@@ -145,6 +154,7 @@ class BursamV1DriverTest extends TestCase
      */
     public function test_create_trader_order_success(): void
     {
+        Event::fake();
         $traderOrderCount = TraderOrder::query()->count();
         $traderOrderHistoryCount = TraderHistory::query()->count();
 
@@ -152,7 +162,7 @@ class BursamV1DriverTest extends TestCase
             return Http::response([], 200);
         });
 
-        (new BursamV1Driver())->createTraderOrder(self::$order);
+        self::$driver->createTraderOrder(self::$order);
 
         $this->assertDatabaseCount((new TraderOrder())->getTable(), $traderOrderCount + 1);
         $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderOrderHistoryCount + 1);
@@ -174,7 +184,7 @@ class BursamV1DriverTest extends TestCase
             ], 200);
         });
 
-        (new BursamV1Driver())->createTraderOrder(self::$order);
+        self::$driver->createTraderOrder(self::$order);
 
         $this->assertDatabaseCount((new TraderOrder())->getTable(), 2);
         $this->assertDatabaseCount((new TraderHistory())->getTable(), 0);
@@ -196,7 +206,7 @@ class BursamV1DriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new BursamV1Driver())->cancelOrder(self::$order);
+        $response = self::$driver->cancelOrder(self::$order);
 
         Queue::assertPushed(ProcessBursamStbCertificateAfterCancellation::class);
         $this->assertTrue($response);
@@ -221,7 +231,7 @@ class BursamV1DriverTest extends TestCase
             ], 200);
         });
 
-        (new BursamV1Driver())->cancelOrder(self::$order);
+        self::$driver->cancelOrder(self::$order);
 
         Queue::assertNotPushed(ProcessBursamStbCertificateAfterCancellation::class);
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
@@ -235,7 +245,7 @@ class BursamV1DriverTest extends TestCase
             ->reset()
             ->moveToHistory(FinancingOrderHistory::GetTtiHoldingCertificateDocument);
 
-        $result = (new BursamV1Driver())->cancelTraderOrder(self::$traderOrder);
+        $result = self::$driver->cancelTraderOrder(self::$traderOrder);
 
         $this->assertTrue($result);
         $this->assertTrue(self::$traderOrder->status->is(TraderOrderStatus::PendingCancellation));
@@ -253,7 +263,7 @@ class BursamV1DriverTest extends TestCase
         TraderOrderScenario::of(self::$traderOrder)
             ->reset();
 
-        (new BursamV1Driver())->cancelTraderOrder(self::$traderOrder);
+        self::$driver->cancelTraderOrder(self::$traderOrder);
     }
 
     /**
@@ -269,7 +279,7 @@ class BursamV1DriverTest extends TestCase
             ->reset()
             ->moveToStep(BursamMurabhaStep::ContractSigned);
 
-        (new BursamV1Driver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
+        self::$driver->createSellingCommodityToCustomerDocument(self::$traderOrder);
 
         $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
     }
@@ -286,7 +296,7 @@ class BursamV1DriverTest extends TestCase
 
         $activityLogCount = Activity::query()->count();
 
-        (new BursamV1Driver())->createSellingCommodityToCustomerDocument(new TraderOrder());
+        self::$driver->createSellingCommodityToCustomerDocument(new TraderOrder());
 
         $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
@@ -300,7 +310,7 @@ class BursamV1DriverTest extends TestCase
         Storage::fake();
         UploadedFile::fake();
 
-        (new BursamV1Driver())->createTransferOwnershipToLenderDocument(self::$traderOrder);
+        self::$driver->createTransferOwnershipToLenderDocument(self::$traderOrder);
 
         $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender));
     }
@@ -317,7 +327,7 @@ class BursamV1DriverTest extends TestCase
 
         $activityLogCount = Activity::query()->count();
 
-        (new BursamV1Driver())->createTransferOwnershipToLenderDocument(new TraderOrder());
+        self::$driver->createTransferOwnershipToLenderDocument(new TraderOrder());
 
         $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender));
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
@@ -325,6 +335,7 @@ class BursamV1DriverTest extends TestCase
 
     public function test_fetch_order_result_ynn_success()
     {
+        Event::fake();
         $traderOrderHistoryCount = TraderHistory::query()->count();
 
         Http::fake(function () {
@@ -341,7 +352,7 @@ class BursamV1DriverTest extends TestCase
             ], 200);
         });
 
-        (new BursamV1Driver())->fetchOrderResultYNN(self::$traderOrder);
+        self::$driver->fetchOrderResultYNN(self::$traderOrder);
 
         $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderOrderHistoryCount + 1);
     }
@@ -363,7 +374,7 @@ class BursamV1DriverTest extends TestCase
 
         $this->expectException(TraderException::class);
 
-        (new BursamV1Driver())->fetchOrderResultYNN(self::$traderOrder);
+        self::$driver->fetchOrderResultYNN(self::$traderOrder);
 
         Cache::shouldHaveReceived('put')
             ->once()
@@ -387,11 +398,12 @@ class BursamV1DriverTest extends TestCase
 
         $this->expectException(TraderException::class);
 
-        (new BursamV1Driver())->fetchOrderResultYNN(self::$traderOrder);
+        self::$driver->fetchOrderResultYNN(self::$traderOrder);
     }
 
     public function test_fetch_order_result_nyy_success()
     {
+        Event::fake();
         $traderOrderHistoryCount = TraderHistory::count();
         Http::fake(function () {
             return Http::response([
@@ -407,7 +419,7 @@ class BursamV1DriverTest extends TestCase
             ], 200);
         });
 
-        (new BursamV1Driver())->fetchOrderResultNYY(self::$traderOrder);
+        self::$driver->fetchOrderResultNYY(self::$traderOrder);
 
         $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderOrderHistoryCount + 1);
     }
@@ -430,7 +442,7 @@ class BursamV1DriverTest extends TestCase
 
         $this->expectException(TraderException::class);
 
-        (new BursamV1Driver())->fetchOrderResultNYY(self::$traderOrder);
+        self::$driver->fetchOrderResultNYY(self::$traderOrder);
     }
 
     public function test_selling_commodity_to_bursam_success()
@@ -443,7 +455,7 @@ class BursamV1DriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new BursamV1Driver())->sellCommodityToBursam(self::$traderOrder);
+        $response = self::$driver->sellCommodityToBursam(self::$traderOrder);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertNotNull(self::$traderOrder->uuid_two);
@@ -461,7 +473,7 @@ class BursamV1DriverTest extends TestCase
 
         $this->expectException(TraderException::class);
 
-        (new BursamV1Driver())->sellCommodityToBursam(self::$traderOrder);
+        self::$driver->sellCommodityToBursam(self::$traderOrder);
     }
 
     public function test_get_bid_certificate_details_success()
@@ -492,7 +504,7 @@ class BursamV1DriverTest extends TestCase
         });
         self::$traderOrder->update(['original_data' => ['unit' => 'Tonnages']]);
 
-        (new BursamV1Driver())->getBidCertificateDetails(self::$traderOrder);
+        self::$driver->getBidCertificateDetails(self::$traderOrder);
 
         $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TtiHoldingCertificate));
     }
@@ -507,7 +519,7 @@ class BursamV1DriverTest extends TestCase
 
         $this->expectException(TraderException::class);
 
-        (new BursamV1Driver())->getBidCertificateDetails(self::$traderOrder);
+        self::$driver->getBidCertificateDetails(self::$traderOrder);
     }
 
     public function test_get_otc_certificate_details_success()
@@ -538,7 +550,7 @@ class BursamV1DriverTest extends TestCase
         });
         self::$traderOrder->update(['original_data' => ['unit' => 'Tonnages']]);
 
-        (new BursamV1Driver())->getOtcCertificateDetails(self::$traderOrder);
+        self::$driver->getOtcCertificateDetails(self::$traderOrder);
 
         $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::BursamSellingCommodityToCustomer));
     }
@@ -553,7 +565,7 @@ class BursamV1DriverTest extends TestCase
 
         $this->expectException(TraderException::class);
 
-        (new BursamV1Driver())->getOtcCertificateDetails(self::$traderOrder);
+        self::$driver->getOtcCertificateDetails(self::$traderOrder);
     }
 
     public function test_get_stb_certificate_details_success()
@@ -584,7 +596,7 @@ class BursamV1DriverTest extends TestCase
         });
         self::$traderOrder->update(['original_data' => ['unit' => 'Tonnages']]);
 
-        (new BursamV1Driver())->getStbCertificateDetails(self::$traderOrder);
+        self::$driver->getStbCertificateDetails(self::$traderOrder);
 
         $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::BursamTtiHoldingCertificate));
     }
@@ -599,11 +611,11 @@ class BursamV1DriverTest extends TestCase
 
         $this->expectException(TraderException::class);
 
-        (new BursamV1Driver())->getStbCertificateDetails(self::$traderOrder);
+        self::$driver->getStbCertificateDetails(self::$traderOrder);
     }
 
     public function test_is_trader_order_cancellable_success()
     {
-        $this->assertTrue((new BursamV1Driver())->isTraderOrderCancellable(self::$traderOrder, ''));
+        $this->assertTrue(self::$driver->isTraderOrderCancellable(self::$traderOrder, ''));
     }
 }
