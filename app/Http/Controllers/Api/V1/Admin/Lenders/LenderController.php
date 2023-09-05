@@ -28,27 +28,27 @@ class LenderController extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::Lenders, Action::Index, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::Lenders, Action::Show, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::Lenders, Action::Create, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::Lenders, Action::Edit, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Edit, Action::Manage])
         )->only('update');
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::Lenders, Action::Delete, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Lenders, Action::Delete, Action::Manage])
         )->only('destroy');
     }
 
@@ -146,6 +146,7 @@ class LenderController extends Controller
         return DB::transaction(function () use ($request, $updateCompany, $lender) {
             $data = $request->validated();
             $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers']);
+
             $updateCompany->handle($lender, $data);
 
             return $this->successResponse();

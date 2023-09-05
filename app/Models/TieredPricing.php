@@ -8,6 +8,7 @@ use App\Exceptions\NoMatchOrderCostAndValueException;
 use App\Support\Money\Casts\MoneyStringCast;
 use Cknow\Money\Money;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class TieredPricing extends Model
@@ -30,6 +31,42 @@ class TieredPricing extends Model
         'order_cost_with_vat' => MoneyStringCast::class,
         'proration_amount' => MoneyStringCast::class,
     ];
+
+    protected function orderValueStart(): Attribute
+    {
+        $currency = Money::getDefaultCurrency();
+
+        return Attribute::make(
+            set: fn ($value) => Money::parseByDecimal($value, $currency)->getAmount(),
+        );
+    }
+
+    protected function orderValueEnd(): Attribute
+    {
+        $currency = Money::getDefaultCurrency();
+
+        return Attribute::make(
+            set: fn ($value) => Money::parseByDecimal($value, $currency)->getAmount(),
+        );
+    }
+
+    protected function orderCostWithoutVat(): Attribute
+    {
+        $currency = Money::getDefaultCurrency();
+
+        return Attribute::make(
+            set: fn ($value) => Money::parseByDecimal($value, $currency)->getAmount(),
+        );
+    }
+
+    protected function prorationAmount(): Attribute
+    {
+        $currency = Money::getDefaultCurrency();
+
+        return Attribute::make(
+            set: fn ($value) => $value ? Money::parseByDecimal($value, $currency)->getAmount() : null,
+        );
+    }
 
     /**
      * @throws NoMatchOrderCostAndValueException
