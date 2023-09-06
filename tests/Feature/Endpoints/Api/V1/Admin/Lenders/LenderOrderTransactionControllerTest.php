@@ -33,15 +33,13 @@ class LenderOrderTransactionControllerTest extends TestCase
     private static string $endpoint;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
     {
         parent::setUp();
 
-        [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910', 'order_cost' => '200']);
+        self::$lender = $this->createLenderCompanyWithStandardOrderCost('2000', ['company_cr' => '12345678910']);
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(
@@ -52,9 +50,6 @@ class LenderOrderTransactionControllerTest extends TestCase
         self::$endpoint = 'api/v1/admin/lenders/';
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_get_lender_transactions(): void
     {
         $this->getJson(self::$endpoint.self::$lender->id.'/transactions')
@@ -64,9 +59,6 @@ class LenderOrderTransactionControllerTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_can_get_lender_transactions_successfully(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -86,9 +78,6 @@ class LenderOrderTransactionControllerTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_manager_with_permissions_can_get_lender_transactions_successfully(): void
     {
         $this->actingAs(self::$userManager)
@@ -108,9 +97,6 @@ class LenderOrderTransactionControllerTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_manager_without_permissions_cant_get_lender_transactions(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);

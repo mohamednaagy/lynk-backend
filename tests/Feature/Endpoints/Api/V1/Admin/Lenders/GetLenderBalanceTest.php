@@ -31,15 +31,13 @@ class GetLenderBalanceTest extends TestCase
     private static string $endpoint;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
     {
         parent::setUp();
 
-        [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910', 'order_cost' => '200']);
+        self::$lender = $this->createLenderCompanyWithStandardOrderCost('20000', ['company_cr' => '12345678910']);
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(
@@ -52,9 +50,6 @@ class GetLenderBalanceTest extends TestCase
         self::$endpoint = 'api/v1/admin/lenders/'.self::$lender->id.'/balance';
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_get_lender_balance(): void
     {
         $this->getJson(self::$endpoint)
@@ -64,9 +59,6 @@ class GetLenderBalanceTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_can_get_lender_balance_successfully(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -74,15 +66,12 @@ class GetLenderBalanceTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    'available_orders' => '8',
-                    'balance' => '20.00',
+                    'available_orders' => '1',
+                    'balance' => '200.00',
                 ],
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_manager_with_permissions_can_get_lender_balance_successfully(): void
     {
         $this->actingAs(self::$userManager)
@@ -90,15 +79,12 @@ class GetLenderBalanceTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    'available_orders' => '8',
-                    'balance' => '20.00',
+                    'available_orders' => '1',
+                    'balance' => '200.00',
                 ],
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_manager_without_permissions_cant_get_lender_balance(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);

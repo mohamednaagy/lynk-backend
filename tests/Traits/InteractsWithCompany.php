@@ -44,7 +44,9 @@ trait InteractsWithCompany
             \money($walletInitialAmount, 'SAR'),
             1,
             1,
-            []
+            [
+                'is_vat_included' => true,
+            ]
         );
 
         return [
