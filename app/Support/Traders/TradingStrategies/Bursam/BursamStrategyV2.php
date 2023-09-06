@@ -7,13 +7,10 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
-use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Http\Request;
 
 class BursamStrategyV2 extends BursamStrategyV1
 {
-    use TraderHelperTrait;
-
     public array $stepToHistoriesMap = [
         BursamMurabhaStep::PurchasingCommodity => [
             FinancingOrderHistory::GetTtiHoldingCertificateDocument => null,

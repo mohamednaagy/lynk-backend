@@ -4,8 +4,10 @@ namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
+use App\Exceptions\TraderException;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -38,6 +40,26 @@ class BursamV2Driver extends BursamV1Driver
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
         ]);
+    }
+
+    /**
+     * @throws TraderException
+     */
+    public function cancelTraderOrder(
+        TraderOrder $traderOrder,
+        int $cancelReason = TraderOrderCancelReason::Manual
+    ): bool {
+        if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket)) {
+            $traderOrder->update([
+                'status' => TraderOrderStatus::Cancelled,
+            ]);
+
+            return true;
+        }
+
+        parent::cancelTraderOrder($traderOrder, $cancelReason);
+
+        return true;
     }
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void

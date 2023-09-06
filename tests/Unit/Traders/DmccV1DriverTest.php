@@ -2,22 +2,22 @@
 
 namespace Tests\Unit\Traders;
 
+use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\MurabhaStep;
 use App\Exceptions\TraderException;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\User;
-use App\Support\Traders\Drivers\DmccDriver;
+use App\Support\Traders\Drivers\Dmcc\Strategies\DmccV1Driver;
 use Carbon\Carbon;
 use CodeDredd\Soap\Facades\Soap;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
-use RuntimeException;
 use Spatie\Activitylog\Models\Activity;
 use Tests\Support\FinancingOrders\InProgressOrder;
 use Tests\Support\FinancingOrders\OrderScenario;
@@ -26,7 +26,7 @@ use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
 
-class DmccDriverTest extends TestCase
+class DmccV1DriverTest extends TestCase
 {
     use RefreshDatabase, InteractsWithCompany, InteractsWithUser;
 
@@ -98,11 +98,9 @@ class DmccDriverTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
-    public function test_get_tti_success(): void
+    public function test_create_trader_order_success(): void
     {
         $traderOrderCount = TraderOrder::query()->count();
         $traderOrderHistoryCount = TraderHistory::query()->count();
@@ -115,15 +113,13 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccDriver())->getTti(self::$order);
+        (new DmccV1Driver())->createTraderOrder(self::$order);
 
         $this->assertDatabaseCount((new TraderOrder())->getTable(), $traderOrderCount + 1);
         $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderOrderHistoryCount + 1);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_process_order_with_empty_string_fails(): void
@@ -139,19 +135,15 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccDriver())->getTti(self::$order);
+        (new DmccV1Driver())->createTraderOrder(self::$order);
 
         $this->assertDatabaseCount((new TraderOrder())->getTable(), 0);
         $this->assertDatabaseCount((new TraderHistory())->getTable(), 0);
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 
-    /**
-     * @return void
-     */
     public function test_accept_agreement_fail(): void
     {
-        $this->expectException(RuntimeException::class);
 
         $activityLogCount = Activity::query()->count();
 
@@ -163,14 +155,14 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccDriver())->acceptAgreement();
+        $this->expectException(TraderException::class);
+
+        (new DmccV1Driver())->acceptAgreement();
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_fetch_notifications_success(): void
@@ -187,14 +179,12 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccDriver())->fetchNotifications('ACTIONABLE');
+        $response = (new DmccV1Driver())->fetchNotifications('ACTIONABLE');
 
         $this->assertIsArray($response);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_fetch_notifications_with_invalid_response_fails(): void
@@ -209,14 +199,12 @@ class DmccDriverTest extends TestCase
             ], 500);
         });
 
-        (new DmccDriver())->fetchNotifications('ACTIONABLE');
+        (new DmccV1Driver())->fetchNotifications('ACTIONABLE');
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_get_tti_id_success(): void
@@ -229,21 +217,17 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccDriver())->getTtiId(self::$order);
+        $response = (new DmccV1Driver())->getTtiId(self::$order);
 
         $this->assertIsString($response);
         $this->assertEquals(1, $response);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_get_tti_id_with_invalid_response_fails(): void
     {
-        $this->expectException(TraderException::class);
-
         $activityLogCount = Activity::query()->count();
 
         Soap::fake(function () {
@@ -253,15 +237,14 @@ class DmccDriverTest extends TestCase
                 'errorMessage' => 'error',
             ], 200);
         });
+        $this->expectException(TraderException::class);
 
-        (new DmccDriver())->getTtiId(self::$order);
+        (new DmccV1Driver())->getTtiId(self::$order);
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_cancel_order_success(): void
@@ -272,14 +255,12 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccDriver())->cancelOrder(self::$order);
+        $response = (new DmccV1Driver())->cancelOrder(self::$order);
 
         $this->assertEquals('0000', $response->successCode);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_cancel_order_fail(): void
@@ -294,14 +275,12 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccDriver())->cancelOrder(self::$order);
+        (new DmccV1Driver())->cancelOrder(self::$order);
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_respond_ptp_service_success(): void
@@ -312,14 +291,12 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccDriver())->respondPtpService(self::$order);
+        $response = (new DmccV1Driver())->respondPtpService(self::$order);
 
         $this->assertEquals('0000', $response->successCode);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_respond_ptp_service_with_invalid_response_fails(): void
@@ -334,33 +311,30 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccDriver())->respondPtpService(self::$order);
+        (new DmccV1Driver())->respondPtpService(self::$order);
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_create_selling_commodity_to_customer_document_success(): void
     {
         Storage::fake();
         UploadedFile::fake();
+        Event::fake();
 
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(MurabhaStep::ContractSigned);
+            ->moveToStep(DmccMurabhaStep::ContractSigned);
 
-        (new DmccDriver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
+        (new DmccV1Driver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
 
         $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_create_selling_commodity_to_customer_document_with_invalid_trader_order_fails(): void
@@ -372,15 +346,13 @@ class DmccDriverTest extends TestCase
 
         $activityLogCount = Activity::query()->count();
 
-        (new DmccDriver())->createSellingCommodityToCustomerDocument(new TraderOrder());
+        (new DmccV1Driver())->createSellingCommodityToCustomerDocument(new TraderOrder());
 
         $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_create_transfer_ownership_to_lender_document_success(): void
@@ -388,14 +360,12 @@ class DmccDriverTest extends TestCase
         Storage::fake();
         UploadedFile::fake();
 
-        (new DmccDriver())->createTransferOwnershipToLenderDocument(self::$traderOrder);
+        (new DmccV1Driver())->createTransferOwnershipToLenderDocument(self::$traderOrder);
 
         $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender));
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_create_transfer_ownership_to_lender_document_with_invalid_trader_order_fails(): void
@@ -407,15 +377,13 @@ class DmccDriverTest extends TestCase
 
         $activityLogCount = Activity::query()->count();
 
-        (new DmccDriver())->createTransferOwnershipToLenderDocument(new TraderOrder());
+        (new DmccV1Driver())->createTransferOwnershipToLenderDocument(new TraderOrder());
 
         $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender));
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_get_document_by_type_and_transaction_success(): void
@@ -434,14 +402,12 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccDriver())->getDocumentByTypeAndTransaction(1, 'documentType');
+        $response = (new DmccV1Driver())->getDocumentByTypeAndTransaction(1, 'documentType');
 
         $this->assertEquals('document', $response);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_get_document_by_type_and_transaction_with_invalid_response_fails(): void
@@ -460,14 +426,12 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccDriver())->getDocumentByTypeAndTransaction(1, 'documentType');
+        (new DmccV1Driver())->getDocumentByTypeAndTransaction(1, 'documentType');
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_get_inventory_basket_success(): void
@@ -500,14 +464,12 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccDriver())->getInventoryBasket(self::$traderOrder);
+        $response = (new DmccV1Driver())->getInventoryBasket(self::$traderOrder);
 
         $this->assertEquals('', $response->errorCode);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_get_inventory_basket_fail(): void
@@ -522,14 +484,12 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccDriver())->getInventoryBasket(self::$traderOrder);
+        (new DmccV1Driver())->getInventoryBasket(self::$traderOrder);
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_upload_tti_document_and_get_version_number_success(): void
@@ -540,14 +500,12 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccDriver())->uploadTTIDocumentAndGetVersionNumber('1');
+        $response = (new DmccV1Driver())->uploadTTIDocumentAndGetVersionNumber('1');
 
         $this->assertEquals(1, $response);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_upload_tti_document_and_get_version_number_fail(): void
@@ -562,14 +520,12 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccDriver())->uploadTTIDocumentAndGetVersionNumber('1');
+        (new DmccV1Driver())->uploadTTIDocumentAndGetVersionNumber('1');
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_issue_murabaha_purchase_offer_success(): void
@@ -582,14 +538,12 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccDriver())->issueMurabahaPurchaseOffer(1, 1);
+        (new DmccV1Driver())->issueMurabahaPurchaseOffer(1, 1);
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount);
     }
 
     /**
-     * @return void
-     *
      * @throws TraderException
      */
     public function test_issue_murabaha_purchase_offer_with_invalid_response_fails(): void
@@ -604,7 +558,7 @@ class DmccDriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccDriver())->issueMurabahaPurchaseOffer(1, 1);
+        (new DmccV1Driver())->issueMurabahaPurchaseOffer(1, 1);
 
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }

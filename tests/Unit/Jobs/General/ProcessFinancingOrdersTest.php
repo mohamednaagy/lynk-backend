@@ -4,15 +4,15 @@ namespace Tests\Unit\Jobs\General;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\Role;
-use App\Jobs\Dmcc\ProcessDmccMpoOrder;
-use App\Jobs\Dmcc\ProcessDmccRespondedToPtpOrder;
-use App\Jobs\Dmcc\ProcessDmccSellingCommodityToCustomerOrder;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Jobs\General\ProcessFinancingOrders;
 use App\Jobs\General\ProcessInProgressOrder;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoOrder;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccRespondedToPtpOrder;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccSellingCommodityToCustomerOrder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Tests\Support\FinancingOrders\InProgressOrder;
