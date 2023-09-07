@@ -776,7 +776,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     </tr>
                     <tr>
                         <td class="w-1/2 px-4 text-right border border-black">قيمة السلعة</td>
-                        <td class="w-1/2 border border-black">{{number_format($product->getAmount(), 2)}} ريال سعودي</td>
+                        <td class="w-1/2 border border-black">{{$product->getAmount()}} ريال سعودي</td>
                     </tr>
                     @if($product->getWarehouse())
                     <tr>
