@@ -11,7 +11,6 @@ use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Grantify\Facades\Grantify;
-use Tests\Feature\Endpoints\Api\V1\Admin\Lenders\BindingResolutionException;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
@@ -34,9 +33,6 @@ class LenderUserControllerDestroyTest extends TestCase
 
     private static string $endpoint;
 
-    /**
-     * @throws BindingResolutionException
-     */
     public function setUp(): void
     {
         parent::setUp();

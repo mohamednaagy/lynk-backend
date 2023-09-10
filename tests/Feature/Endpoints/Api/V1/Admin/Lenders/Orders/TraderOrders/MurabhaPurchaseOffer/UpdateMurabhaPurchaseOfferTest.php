@@ -3,8 +3,8 @@
 namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer;
 
 use App\Enums\Area;
+use App\Enums\BursamMurabhaStep;
 use App\Enums\ErrorCode;
-use App\Enums\MurabhaStep;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
@@ -40,9 +40,6 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
 
     private static array $requestData;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -71,9 +68,6 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
         ];
     }
 
-    /**
-     * @return void
-     */
     public function test_that_unauth_user_cant_update_murabha_purchase_offer(): void
     {
         $this->postJson(self::$updateMurabhaPurchaseOfferUrl, self::$requestData)
@@ -83,9 +77,6 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_other_area_roles_of_not_super_admin_area_cant_update_murabha_purchase_offer_document(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
@@ -100,30 +91,24 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function test_proceed_murabha_purchase_offer_document_is_successfull(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(MurabhaStep::ClientWakala);
+            ->moveToStep(BursamMurabhaStep::ClientWakala);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaPurchaseOfferUrl, self::$requestData)
             ->assertJsonStructure(['data']);
 
-        $this->assertEquals(MurabhaStep::MurabhaOfferIssued, self::$traderOrder->append('step')->step);
+        $this->assertEquals(BursamMurabhaStep::MurabhaOfferIssued, self::$traderOrder->currentStep);
     }
 
-    /**
-     * @return void
-     */
     public function test_update_murabha_purchase_offer_document_not_follow_sequence(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(MurabhaStep::PurchasingCommodity);
+            ->moveToStep(BursamMurabhaStep::PurchasingCommodity);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaPurchaseOfferUrl, self::$requestData)
@@ -134,19 +119,16 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_update_murabha_purchase_offer_document_is_successful_and_order_status_will_not_be_updated(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
+            ->moveToStep(BursamMurabhaStep::MurabhaOfferIssued);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaPurchaseOfferUrl, self::$requestData)
             ->assertJsonStructure(['data']);
 
-        $this->assertEquals(MurabhaStep::MurabhaOfferIssued, self::$traderOrder->append('step')->step);
+        $this->assertEquals(BursamMurabhaStep::MurabhaOfferIssued, self::$traderOrder->currentStep);
     }
 }

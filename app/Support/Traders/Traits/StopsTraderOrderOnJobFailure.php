@@ -26,6 +26,6 @@ trait StopsTraderOrderOnJobFailure
             'status' => TraderOrderStatus::FailureToProgress,
         ]);
 
-        Log::error($exception->getMesage());
+        Log::error($exception->getMessage());
     }
 }
