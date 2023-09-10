@@ -22,6 +22,7 @@ use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamTransferOwnershipToL
 use App\Support\Traders\Drivers\Bursam\Strategies\BursamV2Driver;
 use Illuminate\Queue\CallQueuedClosure;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Tests\Support\FinancingOrders\OrderScenario;
 use Tests\Support\FinancingOrders\TraderOrderScenario;
@@ -59,13 +60,25 @@ class BursamV2DriverTest extends BursamV1DriverTest
         $this->assertInstanceOf(TraderOrder::class, $traderOrder);
     }
 
-    public function test_cancel_trader_order_if_not_commodity_purchased_success()
+    public function test_cancel_trader_order_manual_mode()
     {
-        Bus::fake();
-
+        Event::fake();
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToHistory(FinancingOrderHistory::GetTtiHoldingCertificateDocument);
+            ->moveToHistory(FinancingOrderHistory::CommoditySoldToMarket);
+
+        $result = self::$driver->cancelTraderOrder(self::$traderOrder);
+
+        $this->assertTrue($result);
+        $this->assertTrue(self::$traderOrder->status->is(TraderOrderStatus::Cancelled));
+    }
+
+    public function test_cancel_trader_order_if_commodity_purchased()
+    {
+        Bus::fake();
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToHistory(FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
 
         $result = self::$driver->cancelTraderOrder(self::$traderOrder);
 
@@ -78,12 +91,23 @@ class BursamV2DriverTest extends BursamV1DriverTest
         ]);
     }
 
-    public function test_cancel_trader_order_fails()
+    public function test_cancel_trader_while_sending_trader_request_to_bursa()
     {
         $this->expectException(\Exception::class);
 
         TraderOrderScenario::of(self::$traderOrder)
             ->reset();
+
+        self::$driver->cancelTraderOrder(self::$traderOrder);
+    }
+
+    public function test_cancel_trader_while_waiting_response_from_bursa()
+    {
+        $this->expectException(\Exception::class);
+
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToHistory(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
 
         self::$driver->cancelTraderOrder(self::$traderOrder);
     }

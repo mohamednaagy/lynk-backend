@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Jobs\Dmcc;
+namespace Jobs\Dmcc\V1;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;

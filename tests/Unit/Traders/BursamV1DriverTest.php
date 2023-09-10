@@ -5,7 +5,7 @@ namespace Tests\Unit\Traders;
 use App\Enums\BursamErrorCode;
 use App\Enums\BursamMurabhaStep;
 use App\Enums\BursamProductCode;
-use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
@@ -15,7 +15,6 @@ use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\User;
 use App\Support\Traders\Contracts\TraderInterface;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamSellingCommodityToOpenMarketForCancellation;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Drivers\Bursam\Strategies\BursamV1Driver;
 use Illuminate\Database\Eloquent\Model;
@@ -23,8 +22,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Queue\CallQueuedClosure;
-use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
@@ -237,33 +234,17 @@ class BursamV1DriverTest extends TestCase
         $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
     }
 
-    public function test_cancel_trader_order_if_not_commodity_purchased_success()
+    public function test_cancel_trader_order_manual_mode()
     {
-        Bus::fake();
-
+        Event::fake();
         TraderOrderScenario::of(self::$traderOrder)
-            ->reset()
-            ->moveToHistory(FinancingOrderHistory::GetTtiHoldingCertificateDocument);
+            ->reset();
 
         $result = self::$driver->cancelTraderOrder(self::$traderOrder);
 
         $this->assertTrue($result);
-        $this->assertTrue(self::$traderOrder->status->is(TraderOrderStatus::PendingCancellation));
-        Bus::assertChained([
-            ProcessBursamSellingCommodityToOpenMarketForCancellation::class,
-            ProcessBursamStbCertificateAfterCancellation::class,
-            CallQueuedClosure::class,
-        ]);
-    }
-
-    public function test_cancel_trader_order_fails()
-    {
-        $this->expectException(\Exception::class);
-
-        TraderOrderScenario::of(self::$traderOrder)
-            ->reset();
-
-        self::$driver->cancelTraderOrder(self::$traderOrder);
+        $this->assertTrue(self::$traderOrder->status->is(TraderOrderStatus::Cancelled));
+        $this->assertTrue(self::$traderOrder->order->status->is(FinancingOrderStatus::Cancelled));
     }
 
     /**
