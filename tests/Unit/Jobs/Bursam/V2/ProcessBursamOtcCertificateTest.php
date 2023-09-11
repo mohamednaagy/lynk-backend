@@ -6,20 +6,21 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Exceptions\TraderException;
 use App\Models\TraderOrder;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamBidCertificate;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOtcCertificate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Queue;
 use Tests\Support\FinancingOrders\CommittedOrder;
 use Tests\Support\FinancingOrders\InProgressOrder;
 use Tests\Support\FinancingOrders\OrderScenario;
 use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 
-class ProcessBursamBidCertificateTest extends TestCase
+class ProcessBursamOtcCertificateTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithFaker;
 
     protected static CommittedOrder $financingOrder;
 
@@ -34,16 +35,15 @@ class ProcessBursamBidCertificateTest extends TestCase
 
         self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder(driver: 'bursam', data: [
             'version' => 'v2',
-            'original_data' => ['unit' => 'Tonnages'],
         ]);
 
         TraderOrderScenario::of(self::$traderOrder)
-            ->moveToHistory(FinancingOrderHistory::GetTtiHoldingCertificateDocument);
+            ->moveToHistory(FinancingOrderHistory::CommoditySoldToMarket);
     }
 
-    public function test_get_bid_certificate()
+    public function test_get_owner_to_customer_certificate()
     {
-        Queue::fake();
+        Event::fake();
         Http::fake(function () {
             return Http::response([
                 'ECERTNO' => 'OLN03SEP23-0000002-000',
@@ -67,17 +67,13 @@ class ProcessBursamBidCertificateTest extends TestCase
             ]);
         });
 
-        (new ProcessBursamBidCertificate(self::$traderOrder->id))->handle();
+        (new ProcessBursamOtcCertificate(self::$traderOrder->id))->handle();
 
-        self::$traderOrder->refresh();
-
-        $this->assertNotNull(self::$traderOrder->products);
-        $this->assertNotNull(self::$traderOrder->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate));
-        $this->assertNotNull(self::$traderOrder->getFirstMedia(TraderOrderMediaCollection::ClientWakala));
-        $this->assertTrue(self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument));
+        $this->assertNotNull(self::$traderOrder->getFirstMedia(TraderOrderMediaCollection::BursamSellingCommodityToCustomer));
+        $this->assertTrue(self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetOwnershipToCustomerCertificate));
     }
 
-    public function test_get_bid_certificate_fail()
+    public function test_get_owner_to_customer_certificate_failure()
     {
         Http::fake(function () {
             return Http::response([
@@ -87,22 +83,6 @@ class ProcessBursamBidCertificateTest extends TestCase
 
         $this->expectException(TraderException::class);
 
-        (new ProcessBursamBidCertificate(self::$traderOrder->id))->handle();
-    }
-
-    public function test_get_bid_certificate_when_fetch_ynn_not_completed()
-    {
-        Queue::fake();
-        TraderOrderScenario::of(self::$traderOrder)
-            ->reset();
-
-        (new ProcessBursamBidCertificate(self::$traderOrder->id))->handle();
-
-        self::$traderOrder->refresh();
-
-        $this->assertNull(self::$traderOrder->products);
-        $this->assertNull(self::$traderOrder->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate));
-        $this->assertNull(self::$traderOrder->getFirstMedia(TraderOrderMediaCollection::ClientWakala));
-        $this->assertFalse(self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument));
+        (new ProcessBursamOtcCertificate(self::$traderOrder->id))->handle();
     }
 }

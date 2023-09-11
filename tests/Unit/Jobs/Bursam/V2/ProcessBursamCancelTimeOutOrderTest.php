@@ -36,14 +36,15 @@ class ProcessBursamCancelTimeOutOrderTest extends TestCase
         self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder(driver: 'bursam', data: [
             'version' => 'v2',
         ]);
+
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToHistory(FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
     }
 
     public function test_cancel_order_when_timeout()
     {
         Bus::fake();
-        TraderOrderScenario::of(self::$traderOrder)
-            ->reset()
-            ->moveToHistory(FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
 
         (new ProcessBursamCancelTimeOutOrder(self::$financingOrder->model()))->handle();
 

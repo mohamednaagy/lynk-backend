@@ -5,9 +5,10 @@ namespace Jobs\Bursam\V2;
 use App\Enums\FinancingOrderHistory;
 use App\Exceptions\TraderException;
 use App\Models\TraderOrder;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultNYY;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamSellingCommodityToOpenMarket;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Tests\Support\FinancingOrders\CommittedOrder;
@@ -16,9 +17,9 @@ use Tests\Support\FinancingOrders\OrderScenario;
 use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 
-class ProcessBursamOrderResultNYYTest extends TestCase
+class ProcessBursamSellingCommodityToOpenMarketTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithFaker;
 
     protected static CommittedOrder $financingOrder;
 
@@ -36,51 +37,40 @@ class ProcessBursamOrderResultNYYTest extends TestCase
         ]);
 
         TraderOrderScenario::of(self::$traderOrder)
-            ->reset()
-            ->moveToHistory(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
+            ->moveToHistory(FinancingOrderHistory::ClientWakalaAccepted);
     }
 
-    public function test_check_if_order_sold_to_market()
+    public function test_selling_commodity_to_open_market_success()
     {
         Event::fake();
         Http::fake(function () {
             return Http::response([
-                'status' => [
-                    'processingCount' => 0,
-                ],
                 'body' => [
-                    [
-                        'otcErrNo' => '999',
-                        'stbErrNo' => '999',
-                    ],
+                    ['statusCode' => 0],
                 ],
             ], 200);
         });
 
-        (new ProcessBursamOrderResultNYY(self::$traderOrder->id))->handle();
+        (new ProcessBursamSellingCommodityToOpenMarket(self::$traderOrder->id))->handle();
 
-        $this->assertTrue(self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CommoditySoldToMarket));
+        self::$traderOrder->refresh();
+
+        $this->assertTrue(self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument));
+        $this->assertNotNull(self::$traderOrder->uuid_two);
     }
 
-    public function test_check_if_order_not_sold_to_market()
+    public function test_selling_commodity_to_open_market_failed()
     {
-        Event::fake();
         Http::fake(function () {
             return Http::response([
-                'status' => [
-                    'processingCount' => 0,
-                ],
-                'body' => [
-                    [
-                        'otcErrNo' => rand(0, 998),
-                        'stbErrNo' => rand(0, 998),
-                    ],
+                'header' => [
+                    'errorCode' => 'unable to sell the commodity',
                 ],
             ], 200);
         });
 
         $this->expectException(TraderException::class);
 
-        (new ProcessBursamOrderResultNYY(self::$traderOrder->id))->handle();
+        (new ProcessBursamSellingCommodityToOpenMarket(self::$traderOrder->id))->handle();
     }
 }

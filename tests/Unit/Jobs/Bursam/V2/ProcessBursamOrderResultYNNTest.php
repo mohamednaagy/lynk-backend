@@ -17,7 +17,6 @@ use Illuminate\Support\Str;
 use Tests\Support\FinancingOrders\CommittedOrder;
 use Tests\Support\FinancingOrders\InProgressOrder;
 use Tests\Support\FinancingOrders\OrderScenario;
-use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 
 class ProcessBursamOrderResultYNNTest extends TestCase
@@ -43,8 +42,6 @@ class ProcessBursamOrderResultYNNTest extends TestCase
     public function test_create_bursam_trader_request()
     {
         Event::fake();
-        TraderOrderScenario::of(self::$traderOrder)
-            ->reset();
         Http::fake(function () {
             return Http::response([
                 'status' => [
@@ -66,8 +63,6 @@ class ProcessBursamOrderResultYNNTest extends TestCase
 
     public function test_create_bursam_trader_request_when_product_is_not_available()
     {
-        TraderOrderScenario::of(self::$traderOrder)
-            ->reset();
         $failureCode = $this->faker->randomElement(BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES);
         Http::fake(function () use ($failureCode) {
             return Http::response([
