@@ -17,13 +17,11 @@ use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Contracts\TraderInterface;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamSellingCommodityToOpenMarketForCancellation;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -615,43 +613,22 @@ class BursamV1Driver implements TraderInterface
         TraderOrder $traderOrder,
         int $cancelReason = TraderOrderCancelReason::Manual
     ): bool {
-        if ($traderOrder->doesLastActionMatchWith([
-            FinancingOrderHistory::GetTtiId, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
-        ])) {
-            throw new Exception(sprintf('Trader order (#%s) cannot be cancelled now', $traderOrder->id));
-        }
-
         $traderOrder->update([
-            'status' => TraderOrderStatus::PendingCancellation,
+            'status' => TraderOrderStatus::Cancelled,
+            'cancel_reason' => $cancelReason,
         ]);
 
-        Bus::chain([
-            new ProcessBursamSellingCommodityToOpenMarketForCancellation($traderOrder->id),
-            new ProcessBursamStbCertificateAfterCancellation($traderOrder->id, $cancelReason),
-            function () use ($traderOrder) {
-                $activeTraderOrdersCount = TraderOrder::where('status', TraderOrderStatus::InProgress)
-                    ->where('financing_order_id', $traderOrder->id)
-                    ->count();
+        $activeTraderOrdersCount = TraderOrder::where('status', TraderOrderStatus::InProgress)
+            ->where('financing_order_id', $traderOrder->id)
+            ->count();
 
-                if ($activeTraderOrdersCount !== 0) {
-                    return;
-                }
+        if ($activeTraderOrdersCount === 0) {
+            $order = $traderOrder->order;
 
-                $order = $traderOrder->order()->first();
-
-                if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
-                    $order->update([
-                        'status' => FinancingOrderStatus::Cancelled,
-                    ]);
-                }
-
-                if ($order->status->is(FinancingOrderStatus::InProgress)) {
-                    $order->update([
-                        'status' => FinancingOrderStatus::PendingTraderOrder,
-                    ]);
-                }
-            },
-        ])->dispatch();
+            $order->update([
+                'status' => FinancingOrderStatus::Cancelled,
+            ]);
+        }
 
         return true;
     }

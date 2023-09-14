@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Jobs\General;
+namespace Jobs\Dmcc\V1;
 
 use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
