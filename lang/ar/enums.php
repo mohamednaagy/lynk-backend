@@ -50,7 +50,6 @@ return [
     ],
 
     MurabhaStep::class => [
-
         MurabhaStep::TraderOrderCreated => 'إنشاء طلب مرابحة',
         MurabhaStep::PurchasingCommodity => 'شراء السلعة',
         MurabhaStep::ContractSigned => 'توقيع العقد',

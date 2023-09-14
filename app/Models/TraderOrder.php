@@ -213,8 +213,6 @@ class TraderOrder extends Model implements HasMedia
 
     public function isCommodityPurchased(): bool
     {
-        $purchasingStepAccordingToTrader = MurabhaStep::PurchasingCommodity;
-
-        return $this->checkOrderStepComplete($purchasingStepAccordingToTrader);
+        return $this->checkOrderStepComplete(MurabhaStep::PurchasingCommodity);
     }
 }

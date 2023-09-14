@@ -77,19 +77,15 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
     protected function isPreviousStepOfClientWakalaNotCompleted(TraderOrder $traderOrder): bool
     {
-        $clientWakala = MurabhaStep::ClientWakala;
-
         $previousStep = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
-            ->getPreviousStepOf($clientWakala)->step;
+            ->getPreviousStepOf(MurabhaStep::ClientWakala)->step;
 
         return ! $traderOrder->checkOrderStepComplete($previousStep);
     }
 
     protected function isClientWakalaStepCompleted(TraderOrder $traderOrder): bool
     {
-        $clientWakala = MurabhaStep::ClientWakala;
-
-        return $traderOrder->checkOrderStepComplete($clientWakala);
+        return $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala);
     }
 
     /**
@@ -116,19 +112,15 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
     protected function isPreviousStepOfContractSignedNotCompleted(TraderOrder $traderOrder): bool
     {
-        $contractSigned = MurabhaStep::ContractSigned;
-
         return ! $traderOrder->checkOrderStepComplete(
             (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
-                ->getPreviousStepOf($contractSigned)->step
+                ->getPreviousStepOf(MurabhaStep::ContractSigned)->step
         );
     }
 
     protected function isContractSignedStepCompleted(TraderOrder $traderOrder): bool
     {
-        $contractSigned = MurabhaStep::ContractSigned;
-
-        return $traderOrder->checkOrderStepComplete($contractSigned);
+        return $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
     }
 
     /**

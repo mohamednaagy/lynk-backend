@@ -45,17 +45,12 @@ trait ObserverHelper
             return false;
         }
 
-        if ($currentStepNode?->step === $this->getStepMurabhaOfferIssuedOfProvider($traderOrder->provider)) {
+        if ($currentStepNode?->step === MurabhaStep::MurabhaOfferIssued) {
             app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)
                 ->handle($traderOrder->order);
         }
 
         return true;
-    }
-
-    private function getStepMurabhaOfferIssuedOfProvider($provider): string
-    {
-        return MurabhaStep::MurabhaOfferIssued;
     }
 
     private function getActionsOfProvider($provider, ?StepHistoriesDictionaryNode $stepNode): array
@@ -93,8 +88,6 @@ trait ObserverHelper
     private function isPurchasingOrSellingCommodity($step): bool
     {
         return in_array($step, [
-            MurabhaStep::PurchasingCommodity,
-            MurabhaStep::MurabahaSaleCompleted,
             MurabhaStep::PurchasingCommodity,
             MurabhaStep::MurabahaSaleCompleted,
         ]);

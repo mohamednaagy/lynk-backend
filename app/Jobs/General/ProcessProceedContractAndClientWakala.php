@@ -56,13 +56,9 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
             $currentStepNode = $traderDictionary->getCompletedStepOrPreviousByHistory($traderOrder->last_history_action);
             $nextStepNode = $traderDictionary->getNextStepOf($currentStepNode->step);
 
-            $clientWakala = MurabhaStep::ClientWakala;
-
-            $contractSigned = MurabhaStep::ContractSigned;
-
             $proceedAction = match ($nextStepNode->step) {
-                $clientWakala => FinancingOrderProceedCase::ClientWakalaAccepted,
-                $contractSigned => FinancingOrderProceedCase::ContractSigned,
+                MurabhaStep::ClientWakala => FinancingOrderProceedCase::ClientWakalaAccepted,
+                MurabhaStep::ContractSigned => FinancingOrderProceedCase::ContractSigned,
                 default => null,
             };
 
@@ -70,7 +66,7 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
                 $makeOrderProceed->handle($traderOrder, $proceedAction, false);
             }
 
-            if (! $traderOrder->checkOrderStepComplete($contractSigned) || ! $traderOrder->checkOrderStepComplete($clientWakala)) {
+            if (! $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned) || ! $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala)) {
                 self::dispatch($this->traderOrderId)->delay(now()->addSeconds(30));
             }
         });
