@@ -4,10 +4,8 @@ namespace App\Actions\Orders\Webhooks;
 
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Orders\Webhooks\Traits\OrderWebhooksHelper;
-use App\Enums\BursamMurabhaStep;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\Trader;
+use App\Enums\MurabhaStep;
 use App\Enums\WebhookType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -48,9 +46,6 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
 
     protected function getCompletedStepOfTrader($provider)
     {
-        return match ($provider) {
-            Trader::Bursam => BursamMurabhaStep::CommoditySoldToCustomer,
-            Trader::Dmcc, Trader::FakeDmcc => DmccMurabhaStep::CommoditySoldToCustomer,
-        };
+        return MurabhaStep::CommoditySoldToCustomer;
     }
 }

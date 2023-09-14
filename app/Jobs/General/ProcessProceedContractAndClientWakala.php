@@ -3,9 +3,8 @@
 namespace App\Jobs\General;
 
 use App\Actions\Contracts\Orders\MakeOrderProceed;
-use App\Enums\BursamMurabhaStep;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderProceedCase;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
@@ -57,15 +56,9 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
             $currentStepNode = $traderDictionary->getCompletedStepOrPreviousByHistory($traderOrder->last_history_action);
             $nextStepNode = $traderDictionary->getNextStepOf($currentStepNode->step);
 
-            $clientWakala = match ($traderOrder->provider) {
-                'dmcc', 'fake' => DmccMurabhaStep::ClientWakala,
-                'bursam' => BursamMurabhaStep::ClientWakala,
-            };
+            $clientWakala = MurabhaStep::ClientWakala;
 
-            $contractSigned = match ($traderOrder->provider) {
-                'dmcc', 'fake' => DmccMurabhaStep::ContractSigned,
-                'bursam' => BursamMurabhaStep::ContractSigned,
-            };
+            $contractSigned = MurabhaStep::ContractSigned;
 
             $proceedAction = match ($nextStepNode->step) {
                 $clientWakala => FinancingOrderProceedCase::ClientWakalaAccepted,

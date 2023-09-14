@@ -2,9 +2,9 @@
 
 namespace App\Support\Traders\TradingStrategies\Bursam;
 
-use App\Enums\BursamMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -15,18 +15,18 @@ class BursamStrategyV2 extends BursamStrategyV1
     use TraderHelperTrait;
 
     public array $stepToHistoriesMap = [
-        BursamMurabhaStep::PurchasingCommodity => [
+        MurabhaStep::PurchasingCommodity => [
             FinancingOrderHistory::GetTtiHoldingCertificateDocument => null,
             FinancingOrderHistory::AttachTtiHoldingCertificateDocument => [
                 'collection' => TraderOrderMediaCollection::TtiHoldingCertificate,
                 'file' => 'original_holding_certificate',
             ],
         ],
-        BursamMurabhaStep::ClientWakala => [
+        MurabhaStep::ClientWakala => [
             FinancingOrderHistory::WaitingClientWakala => null,
             FinancingOrderHistory::ClientWakalaAccepted => null,
         ],
-        BursamMurabhaStep::MurabahaSaleCompleted => [
+        MurabhaStep::MurabahaSaleCompleted => [
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
             FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
                 'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
@@ -41,7 +41,7 @@ class BursamStrategyV2 extends BursamStrategyV1
 
     public function updateCommodityCertificateForClient(TraderOrder $traderOrder, Request $request)
     {
-        $traderOrder->ensureCanAccessStep(BursamMurabhaStep::ContractSigned);
+        $traderOrder->ensureCanAccessStep(MurabhaStep::ContractSigned);
 
         $this->sellCommodityToCustomer($traderOrder, $request);
     }
@@ -52,16 +52,16 @@ class BursamStrategyV2 extends BursamStrategyV1
 
     public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
     {
-        $traderOrder->ensureCanAccessStep(BursamMurabhaStep::ClientWakala);
+        $traderOrder->ensureCanAccessStep(MurabhaStep::ClientWakala);
 
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
-            BursamMurabhaStep::MurabahaSaleCompleted
+            MurabhaStep::MurabahaSaleCompleted
         );
 
         $this->createStepHistories(
             $request,
             $traderOrder,
-            BursamMurabhaStep::MurabahaSaleCompleted
+            MurabhaStep::MurabahaSaleCompleted
         );
 
         if ($canUpdateOrderStatus) {

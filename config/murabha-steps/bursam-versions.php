@@ -1,59 +1,59 @@
 <?php
 
-use App\Enums\BursamMurabhaStep;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\MurabhaStep;
 
 return [
     'v1' => [
-        BursamMurabhaStep::TraderOrderCreated => [
+        MurabhaStep::TraderOrderCreated => [
             FinancingOrderHistory::GetTtiId,
         ],
-        BursamMurabhaStep::PurchasingCommodity => [
+        MurabhaStep::PurchasingCommodity => [
             FinancingOrderHistory::GetTtiHoldingCertificateDocument,
             FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ],
-        BursamMurabhaStep::ContractSigned => [
+        MurabhaStep::ContractSigned => [
             FinancingOrderHistory::ContractSigned,
         ],
-        BursamMurabhaStep::ClientWakala => [
+        MurabhaStep::ClientWakala => [
             FinancingOrderHistory::WaitingClientWakala,
             FinancingOrderHistory::ClientWakalaAccepted,
         ],
-        BursamMurabhaStep::CommoditySoldToCustomer => [
+        MurabhaStep::CommoditySoldToCustomer => [
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
         ],
-        BursamMurabhaStep::MurabhaOfferIssued => [
+        MurabhaStep::MurabhaOfferIssued => [
             FinancingOrderHistory::IssueMurabahaOffer,
             FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
             FinancingOrderHistory::AttachMpoDocument,
         ],
-        BursamMurabhaStep::MurabahaSaleCompleted => [
+        MurabhaStep::MurabahaSaleCompleted => [
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
             FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
             FinancingOrderHistory::MurabahaSaleCompleted,
         ],
     ],
     'v2' => [
-        BursamMurabhaStep::TraderOrderCreated => [
+        MurabhaStep::TraderOrderCreated => [
             FinancingOrderHistory::GetTtiId,
         ],
-        BursamMurabhaStep::PurchasingCommodity => [
+        MurabhaStep::PurchasingCommodity => [
             FinancingOrderHistory::GetTtiHoldingCertificateDocument,
             FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ],
-        BursamMurabhaStep::ContractSigned => [
+        MurabhaStep::ContractSigned => [
             FinancingOrderHistory::ContractSigned,
         ],
-        BursamMurabhaStep::CommoditySoldToCustomer => [
+        MurabhaStep::CommoditySoldToCustomer => [
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
         ],
-        BursamMurabhaStep::ClientWakala => [
+        MurabhaStep::ClientWakala => [
             FinancingOrderHistory::WaitingClientWakala,
             FinancingOrderHistory::ClientWakalaAccepted,
         ],
-        BursamMurabhaStep::MurabahaSaleCompleted => [
+        MurabhaStep::MurabahaSaleCompleted => [
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
             FinancingOrderHistory::CommoditySoldToMarket,
             FinancingOrderHistory::GetOwnershipToCustomerCertificate,

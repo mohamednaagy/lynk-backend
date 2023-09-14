@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\Role;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
@@ -90,9 +91,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
                 $currentStepNode = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
                     ->getStepByHistory($traderOrder->last_history_action);
 
-                $murabhaStepEnum = get_murabha_step_enum($traderOrder->provider);
-
-                return $murabhaStepEnum::fromValue($currentStepNode->step);
+                return MurabhaStep::fromValue($currentStepNode->step);
             }
         );
     }

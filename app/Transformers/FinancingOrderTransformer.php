@@ -2,10 +2,9 @@
 
 namespace App\Transformers;
 
-use App\Enums\BursamMurabhaStep;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderNotSupportedException;
 use App\Models\Company;
@@ -216,9 +215,8 @@ class FinancingOrderTransformer extends TransformerAbstract
 
         $traderMurabhaSteps = collect(get_murabha_steps($activeTraderOrder->provider, $activeTraderOrder->version))
             ->except([
-                DmccMurabhaStep::TraderOrderCreated,
-                BursamMurabhaStep::TraderOrderCreated,
-                BursamMurabhaStep::TransferOwnershipToLender,
+                MurabhaStep::TraderOrderCreated,
+                MurabhaStep::TransferOwnershipToLender,
             ])
             ->keys()
             ->flatten()

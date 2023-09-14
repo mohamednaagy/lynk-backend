@@ -1,14 +1,14 @@
 <?php
 
-use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\MurabhaStep;
 
 return [
     'v1' => [
-        DmccMurabhaStep::TraderOrderCreated => [
+        MurabhaStep::TraderOrderCreated => [
             FinancingOrderHistory::GetTtiId,
         ],
-        DmccMurabhaStep::PurchasingCommodity => [
+        MurabhaStep::PurchasingCommodity => [
             FinancingOrderHistory::RespondPtp,
             FinancingOrderHistory::GetPtpDocument,
             FinancingOrderHistory::AttachPtpDocumentToOrder,
@@ -16,22 +16,22 @@ return [
             FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
         ],
-        DmccMurabhaStep::ClientWakala => [
+        MurabhaStep::ClientWakala => [
             FinancingOrderHistory::WaitingClientWakala,
             FinancingOrderHistory::ClientWakalaAccepted,
         ],
-        DmccMurabhaStep::ContractSigned => [
+        MurabhaStep::ContractSigned => [
             FinancingOrderHistory::ContractSigned,
         ],
-        DmccMurabhaStep::CommoditySoldToCustomer => [
+        MurabhaStep::CommoditySoldToCustomer => [
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
         ],
-        DmccMurabhaStep::MurabhaOfferIssued => [
+        MurabhaStep::MurabhaOfferIssued => [
             FinancingOrderHistory::IssueMurabahaOffer,
             FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
             FinancingOrderHistory::AttachMpoDocument,
         ],
-        DmccMurabhaStep::MurabahaSaleCompleted => [
+        MurabhaStep::MurabahaSaleCompleted => [
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
             FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument,
             FinancingOrderHistory::MurabahaSaleCompleted,

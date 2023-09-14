@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Enums\BursamMurabhaStep;
 use App\Enums\BursamProductCode;
 use App\Enums\CompanyStatus;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 
 return [
     CompanyStatus::class => [
@@ -50,26 +49,17 @@ return [
         EdaatInvoiceStatus::Expired => 'Expired',
     ],
 
-    BursamMurabhaStep::class => [
-        BursamMurabhaStep::TraderOrderCreated => 'Trader Order Created',
-        BursamMurabhaStep::PurchasingCommodity => 'Purchasing Commodity',
-        BursamMurabhaStep::ContractSigned => 'Contract Signed',
-        BursamMurabhaStep::CommoditySoldToCustomer => 'Commodity Sold To Customer',
-        BursamMurabhaStep::TransferOwnershipToLender => 'Transfer Ownership To Lender',
-        BursamMurabhaStep::ClientWakala => 'Client Wakala',
-        BursamMurabhaStep::MurabhaOfferIssued => 'Murabha Offer Issued',
-        BursamMurabhaStep::MurabahaSaleCompleted => 'Murabaha Sale Completed',
+    MurabhaStep::class => [
+        MurabhaStep::TraderOrderCreated => 'Trader Order Created',
+        MurabhaStep::PurchasingCommodity => 'Purchasing Commodity',
+        MurabhaStep::ContractSigned => 'Contract Signed',
+        MurabhaStep::CommoditySoldToCustomer => 'Commodity Sold To Customer',
+        MurabhaStep::TransferOwnershipToLender => 'Transfer Ownership To Lender',
+        MurabhaStep::ClientWakala => 'Client Wakala',
+        MurabhaStep::MurabhaOfferIssued => 'Murabha Offer Issued',
+        MurabhaStep::MurabahaSaleCompleted => 'Murabaha Sale Completed',
     ],
 
-    DmccMurabhaStep::class => [
-        DmccMurabhaStep::TraderOrderCreated => 'Trader Order Created',
-        DmccMurabhaStep::PurchasingCommodity => 'Purchasing Commodity',
-        DmccMurabhaStep::ContractSigned => 'Contract Signed',
-        DmccMurabhaStep::CommoditySoldToCustomer => 'Commodity Sold To Customer',
-        DmccMurabhaStep::ClientWakala => 'Client Wakala',
-        DmccMurabhaStep::MurabhaOfferIssued => 'Murabha Offer Issued',
-        DmccMurabhaStep::MurabahaSaleCompleted => 'Murabaha Sale Completed',
-    ],
     BursamProductCode::class => [
         BursamProductCode::CrudePalmOil => 'Crude Palm Oil',
         BursamProductCode::PlasticResinA => 'Plastic Resin A',

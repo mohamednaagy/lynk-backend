@@ -4,10 +4,8 @@ namespace App\Actions\Orders\Webhooks;
 
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Actions\Orders\Webhooks\Traits\OrderWebhooksHelper;
-use App\Enums\BursamMurabhaStep;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\Trader;
+use App\Enums\MurabhaStep;
 use App\Enums\WebhookType;
 use App\Models\TraderOrder;
 use App\Support\Webhooks\Facades\WebhookEvent;
@@ -46,9 +44,6 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
 
     protected function getCompletedStepOfTrader($provider)
     {
-        return match ($provider) {
-            Trader::Bursam => BursamMurabhaStep::MurabahaSaleCompleted,
-            Trader::Dmcc, Trader::FakeDmcc => DmccMurabhaStep::MurabahaSaleCompleted,
-        };
+        return MurabhaStep::MurabahaSaleCompleted;
     }
 }

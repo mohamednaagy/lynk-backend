@@ -2,9 +2,8 @@
 
 namespace App\Transformers;
 
-use App\Enums\BursamMurabhaStep;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
@@ -77,9 +76,8 @@ class TraderOrderTransformer extends TransformerAbstract
     {
         $traderMurabhaSteps = collect(get_murabha_steps($traderOrder->provider, $traderOrder->version))
             ->except([
-                DmccMurabhaStep::TraderOrderCreated,
-                BursamMurabhaStep::TraderOrderCreated,
-                BursamMurabhaStep::TransferOwnershipToLender,
+                MurabhaStep::TraderOrderCreated,
+                MurabhaStep::TransferOwnershipToLender,
             ])
             ->keys()
             ->flatten()
