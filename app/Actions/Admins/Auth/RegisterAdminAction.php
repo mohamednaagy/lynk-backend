@@ -12,12 +12,6 @@ use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
 
 class RegisterAdminAction implements RegisterAdmin
 {
-    /**
-     * RegisterLenderAction constructor.
-     *
-     * @param  CreateUser  $createUser
-     * @param  AssignRoleToUser  $assignRoleToUser
-     */
     public function __construct(
         protected CreateUser $createUser,
         protected AssignRoleToUser $assignRoleToUser,
@@ -25,9 +19,6 @@ class RegisterAdminAction implements RegisterAdmin
     }
 
     /**
-     * @param  array  $data
-     * @return User
-     *
      * @throws TenantCouldNotBeIdentifiedById
      */
     public function handle(array $data): User

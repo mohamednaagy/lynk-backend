@@ -4,6 +4,7 @@ namespace App\Actions\Lenders\Auth;
 
 use App\Actions\Contracts\AssignRoleToUser;
 use App\Actions\Contracts\Companies\CreateCompany;
+use App\Actions\Contracts\Companies\CreateDefaultPricingTier;
 use App\Actions\Contracts\CreateUser;
 use App\Actions\Contracts\Lenders\Auth\RegisterLender;
 use App\Enums\Role;
@@ -15,13 +16,6 @@ use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
 
 class RegisterLenderAction implements RegisterLender
 {
-    /**
-     * RegisterLenderAction constructor.
-     *
-     * @param  CreateUser  $createUser
-     * @param  CreateCompany  $createCompany
-     * @param  AssignRoleToUser  $assignRoleToUser
-     */
     public function __construct(
         protected CreateUser $createUser,
         protected CreateCompany $createCompany,
@@ -30,9 +24,6 @@ class RegisterLenderAction implements RegisterLender
     }
 
     /**
-     * @param  array  $data
-     * @return User
-     *
      * @throws TenantCouldNotBeIdentifiedById
      */
     public function handle(array $data): User
@@ -43,13 +34,14 @@ class RegisterLenderAction implements RegisterLender
             'unique_name' => $data['company_unique_name'],
             'company_cr' => $data['company_cr'],
             'status' => $data['company_status'],
-            'order_cost' => $data['order_cost'],
             'does_order_require_approval' => $data['does_order_require_approval'],
         ]);
 
         tenancy()->initialize($company);
 
         $company->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
+
+        app(CreateDefaultPricingTier::class)->handle($company);
 
         $user = $this->createUser->handle(
             Arr::only($data, [

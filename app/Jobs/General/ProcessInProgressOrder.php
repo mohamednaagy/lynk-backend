@@ -57,7 +57,7 @@ class ProcessInProgressOrder implements ShouldQueue
             }
 
             try {
-                app(CanCreateOrder::class)->handle($financingOrder->company);
+                app(CanCreateOrder::class)->handle($financingOrder->company, $financingOrder->amount);
             } catch (BalanceIsNotEnoughException $e) {
                 Log::alert($financingOrder->id);
 
