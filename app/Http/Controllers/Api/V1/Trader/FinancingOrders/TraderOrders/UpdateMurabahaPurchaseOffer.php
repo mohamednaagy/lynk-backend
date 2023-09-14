@@ -29,12 +29,12 @@ class UpdateMurabahaPurchaseOffer extends Controller
         int $order,
         int $traderOrder
     ): JsonResponse {
-        return DB::transaction(function () use ($request, $order, $traderOrder) {
+        return DB::transaction(function () use ($order, $traderOrder) {
             [$order, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
 
             $traderOrder->ensureCanAccessStep(MurabhaStep::ClientWakala);
 
-            app(HandleIssuingMurabahaPurchaseOffer::class)->handle($request, $order, $traderOrder);
+            // Use Strategy Context
 
             return $this->successResponse();
         });

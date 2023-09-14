@@ -29,12 +29,6 @@ final class MurabhaStep extends Enum implements TraderMurabhaStepInterface, Loca
         $driver ??= config('trader.default');
         $version ??= get_latest_version_of_trader($driver);
 
-        $murabhaSteps = get_murabha_steps($driver, $version);
-
-        if (is_null($murabhaSteps)) {
-            throw new \InvalidArgumentException('Invalid Trader or version');
-        }
-
-        return $murabhaSteps;
+        return get_murabha_steps($driver, $version);
     }
 }
