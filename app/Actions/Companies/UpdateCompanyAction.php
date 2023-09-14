@@ -4,17 +4,14 @@ namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Models\Company;
-use Cknow\Money\Money;
+use App\Models\TieredPricing;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 class UpdateCompanyAction implements UpdateCompany
 {
     public function handle(Company $company, array $data): Company
     {
-        if (isset($data['order_cost'])) {
-            $data['order_cost'] = Money::parseByDecimal($data['order_cost'], Money::getDefaultCurrency());
-        }
-
         $company->update(
             Arr::only(
                 $data,
@@ -24,7 +21,6 @@ class UpdateCompanyAction implements UpdateCompany
                     'unique_name',
                     'company_cr',
                     'status',
-                    'order_cost',
                     'does_order_require_approval',
                     'webhook_secret_key',
                     'public_status_comment',
@@ -36,6 +32,30 @@ class UpdateCompanyAction implements UpdateCompany
             )
         );
 
+        if (isset($data['order_cost_tiers'])) {
+            $this->updateCompanyPricingTiers($company, collect($data['order_cost_tiers']));
+        }
+
         return $company;
+    }
+
+    public function updateCompanyPricingTiers(Company $company, Collection $requestPricingTiers)
+    {
+        $requestPricingTiersIds = $requestPricingTiers->pluck('id');
+        $deletedPricingTiersIds = $company->tieredPricing()->pluck('id')->diff($requestPricingTiersIds);
+
+        foreach ($deletedPricingTiersIds as $tier_id) {
+            TieredPricing::query()->find($tier_id)->delete();
+        }
+
+        foreach ($requestPricingTiersIds as $tier_id) {
+            $tier = $requestPricingTiers->where('id', $tier_id)->first();
+            TieredPricing::query()->find($tier_id)?->update($tier);
+        }
+
+        $newTiers = $requestPricingTiers->whereNull('id');
+        foreach ($newTiers as $tier) {
+            $company->tieredPricing()->create($tier);
+        }
     }
 }

@@ -29,7 +29,6 @@ class CreateCompanyAction implements CreateCompany
                     'unique_name',
                     'company_cr',
                     'status',
-                    'order_cost',
                     'does_order_require_approval',
                     'webhook_secret_key',
                     'public_status_comment',

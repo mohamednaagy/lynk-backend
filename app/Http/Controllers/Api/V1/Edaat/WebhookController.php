@@ -12,11 +12,13 @@ use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Models\EdaatInvoice;
+use App\Models\TieredPricing;
 use App\Support\Edaat\EdaatService;
 use App\Support\ZatcaEInvoice\InvoiceSpecs;
 use App\Support\ZatcaEInvoice\Order;
 use App\Support\ZatcaEInvoice\PurchaseLine;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
@@ -32,85 +34,93 @@ class WebhookController extends Controller
         CalcAmountWithoutVatAndOrdersCount $calcAmountWithoutVatAndOrdersCount
     ) {
         Log::debug('test', [$request->all()]);
-        foreach ($request->all() as $invoice) {
-            if ($edaatService->isPaidInvoice($invoice['InvoiceNo'])) {
-                $invoice = EdaatInvoice::where('id', $invoice['InternalCode'])->lockForUpdate()->first();
-                if ($invoice->status->isNot(EdaatInvoiceStatus::Pending)) {
-                    continue;
+        DB::transaction(function () use ($request, $calcAmountWithoutVatAndOrdersCount, $createTransactions, $edaatService) {
+            foreach ($request->all() as $invoice) {
+                if ($edaatService->isPaidInvoice($invoice['InvoiceNo'])) {
+                    $invoice = EdaatInvoice::where('id', $invoice['InternalCode'])->lockForUpdate()->first();
+                    if ($invoice->status->isNot(EdaatInvoiceStatus::Pending)) {
+                        continue;
+                    }
+                    $company = $invoice->company;
+                    $wallet = $company->getWallet(WalletType::CompanyWallet);
+                    $invoice->update(['status' => EdaatInvoiceStatus::Paid]);
+
+                    $amountWithVat = $invoice->amount;
+                    [$amountWithoutVat,
+                        $roundedOrdersCount,
+                        $vatRateOfChargeAmount,
+                        $rawOrdersCount] = $calcAmountWithoutVatAndOrdersCount->handle($company, $amountWithVat);
+
+                    $vatAmount = $amountWithVat->subtract($amountWithoutVat);
+
+                    $transaction = $createTransactions->handle(
+                        $wallet,
+                        TransactionReason::DepositByEdaat,
+                        $amountWithoutVat,
+                        [
+                            'invoice_number' => $invoice->invoice_number,
+                            'is_vat_included' => false,
+                        ],
+                    );
+
+                    $vatPercentage = $vatRateOfChargeAmount * 100;
+                    $vatTransaction = $createTransactions->handle(
+                        $wallet,
+                        TransactionReason::VatPercentageOnDeposit,
+                        $vatAmount,
+                        [
+                            'vat_percentage' => $vatPercentage,
+                        ],
+                        referenceNumber: $transaction->reference_number
+                    );
+
+                    $invoiceSpecs = $this->getInvoiceSpecs(
+                        $vatTransaction,
+                        $company,
+                        $amountWithVat,
+                        $vatAmount,
+                        $rawOrdersCount,
+                        $vatPercentage
+                    );
+
+                    app(GenerateZatcaInvoice::class)->handle($invoiceSpecs, TransactionMediaCollection::ZatcaInvoice);
                 }
-                $company = $invoice->company;
-                $wallet = $company->getWallet(WalletType::CompanyWallet);
-                $invoice->update(['status' => EdaatInvoiceStatus::Paid]);
-
-                $amountWithVat = $invoice->amount;
-                [$amountWithoutVat,, $vatRate, $rawOrdersCount] = $calcAmountWithoutVatAndOrdersCount->handle(
-                    $company,
-                    $amountWithVat
-                );
-
-                $vatAmount = $amountWithVat->subtract($amountWithoutVat);
-
-                $transaction = $createTransactions->handle(
-                    $wallet,
-                    TransactionReason::DepositByEdaat,
-                    $amountWithoutVat,
-                    [
-                        'invoice_number' => $invoice->invoice_number,
-                        'is_vat_included' => false,
-                    ],
-                );
-
-                $vatPercentage = $vatRate * 100;
-
-                $vatTransaction = $createTransactions->handle(
-                    $wallet,
-                    TransactionReason::VatPercentageOnDeposit,
-                    $vatAmount,
-                    [
-                        'vat_percentage' => $vatPercentage,
-                    ],
-                    referenceNumber: $transaction->reference_number
-                );
-
-                $invoiceSpecs = $this->getInvoiceSpecs(
-                    $vatTransaction,
-                    $company,
-                    $amountWithVat->formatByDecimal(),
-                    $vatAmount,
-                    $rawOrdersCount,
-                    $vatPercentage
-                );
-
-                app(GenerateZatcaInvoice::class)->handle($invoiceSpecs, TransactionMediaCollection::ZatcaInvoice);
             }
-        }
+        });
     }
 
     private function getInvoiceSpecs(
         $transaction,
         $company,
-        $amountWithVat,
+        $totalAmountWithVat,
         $vatAmount,
-        $orderCount,
+        $ordersCount,
         $vatPercentage
     ): InvoiceSpecs {
         $project = $this->getProjectSettings->handle();
+
+        if ($company->isTiered()) {
+            $itemCostWithoutVat = $totalAmountWithVat->subtract($vatAmount);
+            $ordersCount = 1;
+        } else {
+            $itemCostWithoutVat = TieredPricing::getOrderCostIfStandard($company)['costWithoutVat'];
+        }
 
         return new InvoiceSpecs(
             $transaction,
             $project,
             $project->getVatId(),
             $transaction->created_at->clone(),
-            $amountWithVat,
+            $totalAmountWithVat,
             $vatAmount,
             new Order(
                 $transaction->reference_number,
                 [
                     new PurchaseLine(
                         __('zatca/e-invoice.recharge_balance'),
-                        $company->order_cost,
+                        $itemCostWithoutVat,
                         $vatPercentage,
-                        quantity: $orderCount
+                        quantity: $ordersCount
                     ),
                 ],
                 $transaction->created_at->clone()->tz('Asia/Riyadh'),

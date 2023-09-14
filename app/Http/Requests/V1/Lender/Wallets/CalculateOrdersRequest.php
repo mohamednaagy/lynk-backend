@@ -2,15 +2,13 @@
 
 namespace App\Http\Requests\V1\Lender\Wallets;
 
-use App\Models\User;
+use App\Rules\MoneyValueRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CalculateOrdersRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -24,8 +22,15 @@ class CalculateOrdersRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'orders_count' => ['required', 'integer', 'min:1', 'max:99999999999999'],
-        ];
+        $rules = [];
+
+        $company = tenant();
+        if ($company->isTiered()) {
+            $rules['amount'] = ['required', 'numeric', 'gt:0', new MoneyValueRule];
+        } else {
+            $rules['orders_count'] = ['required', 'integer', 'min:1', 'max:99999999999999'];
+        }
+
+        return $rules;
     }
 }

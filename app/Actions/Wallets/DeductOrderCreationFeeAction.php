@@ -10,6 +10,8 @@ use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
 use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
+use App\Exceptions\NoMatchOrderCostAndValueException;
+use App\Models\TieredPricing;
 use App\Models\TraderOrder;
 use App\Support\ZatcaEInvoice\InvoiceSpecs;
 use App\Support\ZatcaEInvoice\Order;
@@ -25,17 +27,23 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
     ) {
     }
 
+    /**
+     * @throws NoMatchOrderCostAndValueException
+     */
     public function handle(TraderOrder $traderOrder)
     {
         $financingOrder = $traderOrder->order;
         $company = $financingOrder->company()->withTrashed()->first();
         $wallet = $company->getWallet(WalletType::CompanyWallet);
+
+        $orderCostWithoutVat = TieredPricing::getOrderCostWithoutVat($company, $financingOrder->amount);
+
         [$vatAmount, $vatRate] = $this->calculateVatAmount
-            ->setAmount($company->order_cost)
+            ->setAmount($orderCostWithoutVat)
             ->setIsVatIncludedInAmount(false)
             ->handle();
 
-        $totalAmountWithVat = $company->order_cost->add($vatAmount);
+        $totalAmountWithVat = $orderCostWithoutVat->add($vatAmount);
 
         $transaction = $this->createTransactions->handle(
             $wallet,
@@ -46,10 +54,12 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
                 'trader_order_id' => $traderOrder->id,
                 'reference_number ' => $financingOrder->reference_number,
                 'amount' => $financingOrder->amount,
-                'order_cost' => $company->order_cost,
-                'is_vat_included' => true,
                 'vat_percentage' => $vatRate * 100,
                 'vat_amount' => $vatAmount,
+                'order_cost' => $orderCostWithoutVat,
+                'vat_rate' => $vatRate,
+                'is_vat_included' => true,
+                'pricing_tier' => TieredPricing::getPricingTier($company, $financingOrder->amount),
             ]
         );
 
@@ -70,7 +80,7 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
                             'trader_order_id' => $traderOrder->getKey(),
                             'financing_order_id' => $traderOrder->financing_order_id,
                         ]),
-                        $company->order_cost,
+                        $orderCostWithoutVat,
                         $vatRate * 100,
                         quantity: 1
                     ),

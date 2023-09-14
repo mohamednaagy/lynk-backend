@@ -63,6 +63,7 @@ class DefaultGeneratorTest extends TestCase
             self::$wallet,
             Money::parseByDecimal(100, 'SAR'),
             TransactionReason::ManualDeposit,
+            null,
             []
         );
         $this->assertInstanceOf(Transaction::class, $transaction);
