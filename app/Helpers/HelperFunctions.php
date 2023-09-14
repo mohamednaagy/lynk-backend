@@ -111,7 +111,9 @@ if (! function_exists('get_latest_version_of_trader')) {
 if (! function_exists('get_murabha_steps')) {
     function get_murabha_steps($provider, string $version = null): array
     {
-        return config('murabha-steps.'.$provider.'-versions.'.$version ?? get_latest_version_of_trader($provider));
+        $version = $version ?? get_latest_version_of_trader($provider);
+
+        return config('murabha-steps.'.$provider.'-versions.'.$version);
     }
 }
 

@@ -60,7 +60,35 @@ class LenderControllerUpdateTest extends TestCase
             'notifications_email' => 'notifications_email@email.com',
             'unique_name' => 'companyUniqueName',
             'company_cr' => '1234567891',
-            'order_cost' => 20,
+            'order_cost_tiers' => [
+                [
+                    'id' => null,
+                    'order_value_start' => '0.00',
+                    'order_value_end' => '100000',
+                    'fee_type' => 'fixed',
+                    'order_cost_without_vat' => '100',
+                    'order_cost_with_vat' => '115',
+                    'proration_amount' => null,
+                ],
+                [
+                    'id' => null,
+                    'order_value_start' => '100000.01',
+                    'order_value_end' => 300000,
+                    'fee_type' => 'fixed',
+                    'order_cost_without_vat' => '80.00',
+                    'order_cost_with_vat' => '92.00',
+                    'proration_amount' => '20.00',
+                ],
+                [
+                    'id' => null,
+                    'order_value_start' => '300000.01',
+                    'order_value_end' => null,
+                    'fee_type' => 'proration',
+                    'order_cost_without_vat' => '20.00',
+                    'order_cost_with_vat' => '23.00',
+                    'proration_amount' => 500000,
+                ],
+            ],
             'does_order_require_approval' => '1',
             'notify_admins_about_new_orders' => '1',
             'webhook_secret_key' => Str::random(Config::get('webhook-server.secret_key_length', 40)),
@@ -173,13 +201,16 @@ class LenderControllerUpdateTest extends TestCase
     public function test_admin_cant_update_lender_without_order_cost(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->putJson(self::$endpoint.self::$lender->id, Arr::except(self::$lenderDetails, 'order_cost'))
+            ->putJson(self::$endpoint.self::$lender->id, Arr::except(self::$lenderDetails, 'order_cost_tiers'))
             ->assertUnprocessable()
             ->assertExactJson([
-                'message' => 'The order cost field is required.',
+                'message' => 'The order cost tiers field is required. (and 1 more error)',
                 'errors' => [
-                    'order_cost' => [
-                        'The order cost field is required.',
+                    'order_cost_tiers' => [
+                        'The order cost tiers field is required.',
+                    ],
+                    'order_cost_tiers.0.order_value_start' => [
+                        'The order cost tiers.0.order value start field is required.',
                     ],
                 ],
             ]);

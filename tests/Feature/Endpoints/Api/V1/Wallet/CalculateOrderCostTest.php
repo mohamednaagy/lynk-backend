@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Wallet;
 
-use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Models\Company;
+use App\Models\TieredPricing;
 use App\Models\User;
 use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -38,8 +38,6 @@ class CalculateOrderCostTest extends TestCase
 
     public static User $lenderCreatorUser;
 
-    public static float $vatRate;
-
     public static Money $approvedCompanyOrderCostWithVat;
 
     /**
@@ -48,27 +46,23 @@ class CalculateOrderCostTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        [self::$company] = $this->createCompany();
+        self::$company = $this->createLenderCompanyWithStandardOrderCost();
 
         [self::$notApprovedCompany] = $this->createCompany(data: ['company_cr' => '12345678911', 'status' => CompanyStatus::Pending]);
 
-        self::$lenderAdminUserNotApproved = $this->createLenderUser(self::$notApprovedCompany->id, Role::LenderAdmin);
-        self::$lenderAdminUserNotVerified = $this->createLenderUser(self::$company->id, Role::LenderAdmin, data: ['email_verified_at' => null]);
-        self::$lenderAdminUser = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$lenderAdminUserNotApproved = $this->createLenderUser(self::$notApprovedCompany->id);
+        self::$lenderAdminUserNotVerified = $this->createLenderUser(self::$company->id, data: ['email_verified_at' => null]);
+        self::$lenderAdminUser = $this->createLenderUser(self::$company->id);
         self::$lenderSupervisorUser = $this->createLenderUser(self::$company->id, Role::LenderSupervisor);
         self::$lenderBillingUser = $this->createLenderUser(self::$company->id, Role::LenderBilling);
         self::$lenderApiUser = $this->createLenderUser(self::$company->id, Role::LenderApiUser);
         self::$lenderCreatorUser = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
 
-        self::$vatRate = app(GetProjectSettings::class)->handle()->getVatRate();
-
-        self::$approvedCompanyOrderCostWithVat = self::$company->order_cost->multiply(self::$vatRate + 1);
+        self::$approvedCompanyOrderCostWithVat = TieredPricing::getOrderCostIfStandard(self::$company)['costWithVat'];
     }
 
     /**
      * A basic feature test example.
-     *
-     * @return void
      */
     public function test_calculate_order_cost_calculation_and_response(): void
     {
@@ -91,8 +85,6 @@ class CalculateOrderCostTest extends TestCase
 
     /**
      * A basic feature test example.
-     *
-     * @return void
      */
     public function test_calculate_order_cost_validation_rule(): void
     {

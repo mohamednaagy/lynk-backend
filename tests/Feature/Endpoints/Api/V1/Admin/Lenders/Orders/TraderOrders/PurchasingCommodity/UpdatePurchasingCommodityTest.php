@@ -3,8 +3,9 @@
 namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\PurchasingCommodity;
 
 use App\Enums\Area;
+use App\Enums\BursamMurabhaStep;
 use App\Enums\ErrorCode;
-use App\Enums\MurabhaStep;
+use App\Enums\Trader;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
@@ -15,6 +16,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
 use Tests\Support\FinancingOrders\CommittedOrder;
 use Tests\Support\FinancingOrders\InProgressOrder;
 use Tests\Support\FinancingOrders\OrderScenario;
@@ -42,9 +44,6 @@ class UpdatePurchasingCommodityTest extends TestCase
 
     private static array $requestData;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -64,7 +63,7 @@ class UpdatePurchasingCommodityTest extends TestCase
             ->creator(self::$userLender)
             ->commit();
 
-        self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder();
+        self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder(Trader::Bursam);
 
         self::$updatePurchasingCommodityUrl = self::BaseUrl.
             '/orders/'.
@@ -97,9 +96,6 @@ class UpdatePurchasingCommodityTest extends TestCase
         ];
     }
 
-    /**
-     * @return void
-     */
     public function test_that_unauth_user_cant_update_purchasing_commodity(): void
     {
         $this->postJson(self::$updatePurchasingCommodityUrl, self::$requestData)
@@ -109,9 +105,6 @@ class UpdatePurchasingCommodityTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_other_area_roles_of_not_super_admin_area_cant_update_purchasing_commodity(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
@@ -126,14 +119,12 @@ class UpdatePurchasingCommodityTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function test_proceed_purchasing_commodity_is_successfull_and_order_status_will_be_updated(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset();
 
+        Queue::fake();
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updatePurchasingCommodityUrl, self::$requestData)
             ->assertJsonStructure([
@@ -142,7 +133,7 @@ class UpdatePurchasingCommodityTest extends TestCase
                 ],
             ]);
 
-        $this->assertEquals(MurabhaStep::PurchasingCommodity, self::$traderOrder->append('step')->step);
+        $this->assertEquals(BursamMurabhaStep::PurchasingCommodity, self::$traderOrder->currentStep);
     }
 
     public function test_update_purchasing_commodity_not_follow_sequence(): void
@@ -158,14 +149,11 @@ class UpdatePurchasingCommodityTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_update_purchasing_commodity_is_successful_and_order_status_will_not_be_updated(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(MurabhaStep::PurchasingCommodity);
+            ->moveToStep(BursamMurabhaStep::PurchasingCommodity);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updatePurchasingCommodityUrl, self::$requestData)
@@ -175,6 +163,6 @@ class UpdatePurchasingCommodityTest extends TestCase
                 ],
             ]);
 
-        $this->assertEquals(MurabhaStep::PurchasingCommodity, self::$traderOrder->append('step')->step);
+        $this->assertEquals(BursamMurabhaStep::PurchasingCommodity, self::$traderOrder->currentStep);
     }
 }

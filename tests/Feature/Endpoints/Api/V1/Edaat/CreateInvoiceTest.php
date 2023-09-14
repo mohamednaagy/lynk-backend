@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Edaat;
 
-use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
@@ -22,15 +21,12 @@ class CreateInvoiceTest extends TestCase
 
     private static Wallet $wallet;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
-        self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$company = $this->createLenderCompanyWithStandardOrderCost('2000', ['company_cr' => '12345678910']);
+        self::$userLender = $this->createLenderUser(self::$company->id);
     }
 
     public function test_un_auth_user_cant_create_edaat_invoice_with_valid_data()

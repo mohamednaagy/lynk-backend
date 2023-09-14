@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\V1\Client;
 
 use App\Actions\Contracts\Clients\SendOtpClientWakala as SendOTPClientWakalaInterface;
+use App\Enums\BursamMurabhaStep;
 use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MurabhaStep;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Client\SendOtpRequest;
 use App\Models\FinancingOrder;
@@ -18,8 +18,6 @@ class SendOtpClientWakala extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  SendOtpRequest  $request
-     * @param  SendOTPClientWakalaInterface  $sendOTPClientWakala
      * @return JsonResponse
      *
      * @throws \Throwable
@@ -60,7 +58,7 @@ class SendOtpClientWakala extends Controller
 
             if (
                 $traderOrder === null
-                || $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala)
+                || $traderOrder->checkOrderStepComplete(BursamMurabhaStep::ClientWakala)
             ) {
                 return $this->errorResponse(
                     __('error.client_wakala_already_accepted'),

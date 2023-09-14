@@ -2,14 +2,14 @@
 
 namespace Tests\Unit\Jobs\General;
 
+use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
-use App\Enums\MurabhaStep;
 use App\Enums\Role;
-use App\Jobs\Dmcc\ProcessDmccMpoSaleCompleteNotification;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoSaleCompleteNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\FinancingOrders\InProgressOrder;
 use Tests\Support\FinancingOrders\OrderScenario;
@@ -66,7 +66,7 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
 
         TraderOrderScenario::of($traderOrderDmcc)
             ->reset()
-            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
+            ->moveToStep(DmccMurabhaStep::MurabhaOfferIssued);
 
         (new ProcessDmccMpoSaleCompleteNotification(self::$notification))->handle();
 
@@ -82,7 +82,7 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
 
         TraderOrderScenario::of($traderOrderFake)
             ->reset()
-            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
+            ->moveToStep(DmccMurabhaStep::MurabhaOfferIssued);
 
         (new ProcessDmccMpoSaleCompleteNotification(self::$notification))->handle();
 
