@@ -14,28 +14,16 @@ class BursamStrategyV2 extends BursamStrategyV1
 {
     use TraderHelperTrait;
 
-    public array $stepToHistoriesMap = [
-        MurabhaStep::PurchasingCommodity => [
-            FinancingOrderHistory::GetTtiHoldingCertificateDocument => null,
-            FinancingOrderHistory::AttachTtiHoldingCertificateDocument => [
-                'collection' => TraderOrderMediaCollection::TtiHoldingCertificate,
-                'file' => 'original_holding_certificate',
-            ],
+    public static string $version = 'v2';
+
+    public array $historySteFileMap = [
+        FinancingOrderHistory::AttachTtiHoldingCertificateDocument => [
+            'collection' => TraderOrderMediaCollection::TtiHoldingCertificate,
+            'file' => 'original_holding_certificate',
         ],
-        MurabhaStep::ClientWakala => [
-            FinancingOrderHistory::WaitingClientWakala => null,
-            FinancingOrderHistory::ClientWakalaAccepted => null,
-        ],
-        MurabhaStep::MurabahaSaleCompleted => [
-            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
-            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
-                'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-                'file' => 'document',
-            ],
-            FinancingOrderHistory::CommoditySoldToMarket => null,
-            FinancingOrderHistory::GetOwnershipToCustomerCertificate => null,
-            FinancingOrderHistory::GetSellingToMarketCertificate => null,
-            FinancingOrderHistory::MurabahaSaleCompleted => null,
+        FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
+            'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
+            'file' => 'document',
         ],
     ];
 
