@@ -4,6 +4,7 @@ namespace Tests\Unit\Jobs\General;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -69,6 +70,7 @@ class ProcessAskClientForWakalaTest extends TestCase
             if (
                 $murabhaStep == MurabhaStep::ContractSigned
                 || $murabhaStep == MurabhaStep::TraderOrderCreated
+                || ((in_array(self::$traderOrder->provider, [Trader::Dmcc, Trader::FakeDmcc]) && $murabhaStep == MurabhaStep::TransferOwnershipToLender))
             ) {
                 continue;
             }

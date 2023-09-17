@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Traders;
 
-use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Exceptions\TraderException;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -233,7 +233,7 @@ class FakeV1DriverTest extends TestCase
 
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(DmccMurabhaStep::ContractSigned);
+            ->moveToStep(MurabhaStep::ContractSigned);
 
         (new FakeV1Driver())->getInventoryBasket(self::$traderOrder);
         self::$traderOrder->fresh();

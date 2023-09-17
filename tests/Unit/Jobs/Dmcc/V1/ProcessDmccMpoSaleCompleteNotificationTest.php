@@ -2,8 +2,8 @@
 
 namespace Jobs\Dmcc\V1;
 
-use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\MurabhaStep;
 use App\Enums\Role;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -66,7 +66,7 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
 
         TraderOrderScenario::of($traderOrderDmcc)
             ->reset()
-            ->moveToStep(DmccMurabhaStep::MurabhaOfferIssued);
+            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
 
         (new ProcessDmccMpoSaleCompleteNotification(self::$notification))->handle();
 
@@ -82,7 +82,7 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
 
         TraderOrderScenario::of($traderOrderFake)
             ->reset()
-            ->moveToStep(DmccMurabhaStep::MurabhaOfferIssued);
+            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
 
         (new ProcessDmccMpoSaleCompleteNotification(self::$notification))->handle();
 

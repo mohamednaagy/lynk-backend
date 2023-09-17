@@ -3,9 +3,9 @@
 namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument;
 
 use App\Enums\Area;
-use App\Enums\BursamMurabhaStep;
 use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\MurabhaStep;
 use App\Enums\Trader;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
@@ -110,7 +110,7 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(BursamMurabhaStep::MurabhaOfferIssued);
+            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
@@ -142,8 +142,8 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
     public function unsuitableTraderHistoryDataProvider(): array
     {
-        $murabhaOfferIssuedHistories = $this->stepDictionary->getStepOf(BursamMurabhaStep::MurabhaOfferIssued)?->histories ?? [];
-        $murabahaSaleCompletedHistories = $this->stepDictionary->getStepOf(BursamMurabhaStep::MurabahaSaleCompleted)?->histories ?? [];
+        $murabhaOfferIssuedHistories = $this->stepDictionary->getStepOf(MurabhaStep::MurabhaOfferIssued)?->histories ?? [];
+        $murabahaSaleCompletedHistories = $this->stepDictionary->getStepOf(MurabhaStep::MurabahaSaleCompleted)?->histories ?? [];
 
         $histories = collect(FinancingOrderHistory::getValues())
             ->reject(function ($item) use ($murabhaOfferIssuedHistories, $murabahaSaleCompletedHistories) {
@@ -162,7 +162,7 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(BursamMurabhaStep::MurabhaOfferIssued);
+            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)

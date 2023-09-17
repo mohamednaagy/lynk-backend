@@ -12,10 +12,12 @@ use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\User;
+use App\Observers\TraderOrderObserver;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
@@ -61,7 +63,7 @@ class TraderOrderControllerStoreTest extends TestCase
         );
 
         self::$apiUrl = 'api/v1/admin/orders/'
-            .self::$financingOrder->getRawOriginal('id').
+            .self::$financingOrder->id.
             '/trader-orders';
     }
 
@@ -90,6 +92,9 @@ class TraderOrderControllerStoreTest extends TestCase
      */
     public function test_trader_order_controller_store_super_admin_can_access($trader, $mode)
     {
+        Event::fake([
+            TraderOrderObserver::class,
+        ]);
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$apiUrl, [
                 'trader' => $trader,

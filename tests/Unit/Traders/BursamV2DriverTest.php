@@ -3,8 +3,8 @@
 namespace Tests\Unit\Traders;
 
 use App\Enums\Area;
-use App\Enums\BursamMurabhaStep;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\General\ProcessAskClientForWakala;
@@ -133,7 +133,7 @@ class BursamV2DriverTest extends BursamV1DriverTest
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(BursamMurabhaStep::ContractSigned);
+            ->moveToStep(MurabhaStep::ContractSigned);
 
         $this->assertFalse(self::$driver->isTraderOrderCancellable(self::$traderOrder, Area::Lender));
     }

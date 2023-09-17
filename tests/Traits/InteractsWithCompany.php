@@ -2,6 +2,7 @@
 
 namespace Tests\Traits;
 
+use App\Actions\Contracts\Companies\CreateDefaultPricingTier;
 use App\Enums\Area;
 use App\Enums\CompanyType;
 use App\Enums\EdaatInvoiceStatus;
@@ -48,6 +49,8 @@ trait InteractsWithCompany
                 'is_vat_included' => true,
             ]
         );
+
+        app(CreateDefaultPricingTier::class)->handle($company);
 
         return [
             $company,

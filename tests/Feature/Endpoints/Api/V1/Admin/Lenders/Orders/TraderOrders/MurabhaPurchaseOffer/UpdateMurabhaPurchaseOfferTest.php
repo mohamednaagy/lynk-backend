@@ -3,8 +3,8 @@
 namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer;
 
 use App\Enums\Area;
-use App\Enums\BursamMurabhaStep;
 use App\Enums\ErrorCode;
+use App\Enums\MurabhaStep;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
@@ -95,20 +95,20 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(BursamMurabhaStep::ClientWakala);
+            ->moveToStep(MurabhaStep::ClientWakala);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaPurchaseOfferUrl, self::$requestData)
             ->assertJsonStructure(['data']);
 
-        $this->assertEquals(BursamMurabhaStep::MurabhaOfferIssued, self::$traderOrder->currentStep);
+        $this->assertEquals(MurabhaStep::MurabhaOfferIssued, self::$traderOrder->currentStep);
     }
 
     public function test_update_murabha_purchase_offer_document_not_follow_sequence(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(BursamMurabhaStep::PurchasingCommodity);
+            ->moveToStep(MurabhaStep::PurchasingCommodity);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaPurchaseOfferUrl, self::$requestData)
@@ -123,12 +123,12 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(BursamMurabhaStep::MurabhaOfferIssued);
+            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updateMurabhaPurchaseOfferUrl, self::$requestData)
             ->assertJsonStructure(['data']);
 
-        $this->assertEquals(BursamMurabhaStep::MurabhaOfferIssued, self::$traderOrder->currentStep);
+        $this->assertEquals(MurabhaStep::MurabhaOfferIssued, self::$traderOrder->currentStep);
     }
 }

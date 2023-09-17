@@ -2,7 +2,7 @@
 
 namespace Jobs\Dmcc\V1;
 
-use App\Enums\DmccMurabhaStep;
+use App\Enums\MurabhaStep;
 use App\Enums\Role;
 use App\Exceptions\TraderNotSupportedException;
 use App\Models\Company;
@@ -67,7 +67,7 @@ class ProcessUnprocessedDmccNotificationTest extends TestCase
         self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder('fake', self::$ttiId);
 
         TraderOrderScenario::of(self::$traderOrder)
-            ->moveToStep(DmccMurabhaStep::MurabahaSaleCompleted);
+            ->moveToStep(MurabhaStep::MurabahaSaleCompleted);
     }
 
     public function test_process_unprocessed_dmcc_notification_job_will_processed_only_if_the_active_trader_has_dmcc_as_provider()

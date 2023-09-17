@@ -3,7 +3,6 @@
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Traders\Orders;
 
 use App\Enums\Area;
-use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -43,8 +42,6 @@ class TraderOrderControllerIndexTest extends TestCase
     private static string $baseURL;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -60,16 +57,10 @@ class TraderOrderControllerIndexTest extends TestCase
             'status' => TraderOrderStatus::InProgress,
             'reference' => 123,
         ]);
-        self::$traderHistory = self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::GetTtiId,
-        ]);
 
         self::$baseURL = 'api/v1/admin/orders';
     }
 
-    /**
-     * @return void
-     */
     public function test_unauth_user_cant_access_order_controller_index(): void
     {
         $this->withHeader('X-Company', self::$traderCompany->id)
@@ -77,9 +68,6 @@ class TraderOrderControllerIndexTest extends TestCase
             ->assertUnauthorized();
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_can_access_order_controller_index_successful(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -87,13 +75,15 @@ class TraderOrderControllerIndexTest extends TestCase
             ->getJson(self::$baseURL)
             ->assertOk()
             ->assertExactJson(
-                fractal(FinancingOrder::paginate(), (new FinancingOrderTransformer())->setArea(Area::Trader))
+                fractal(FinancingOrder::paginate(), (new FinancingOrderTransformer())->setArea(Area::SuperAdmin))
                     ->parseIncludes([
                         'id',
+                        'company_name',
                         'status',
                         'reference_number',
                         'national_id',
                         'amount',
+                        'current_step',
                         'selling_price',
                         'status_reason',
                         'creator',

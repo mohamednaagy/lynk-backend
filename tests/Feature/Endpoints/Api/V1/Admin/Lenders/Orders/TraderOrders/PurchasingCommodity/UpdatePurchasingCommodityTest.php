@@ -3,13 +3,15 @@
 namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\PurchasingCommodity;
 
 use App\Enums\Area;
-use App\Enums\BursamMurabhaStep;
 use App\Enums\ErrorCode;
+use App\Enums\MurabhaStep;
 use App\Enums\Trader;
 use App\Models\Company;
+use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\User;
 use App\Support\Sms\Events\SmsSent;
+use App\Transformers\TraderOrderTransformer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -133,7 +135,7 @@ class UpdatePurchasingCommodityTest extends TestCase
                 ],
             ]);
 
-        $this->assertEquals(BursamMurabhaStep::PurchasingCommodity, self::$traderOrder->currentStep);
+        $this->assertEquals(MurabhaStep::PurchasingCommodity, self::$traderOrder->currentStep);
     }
 
     public function test_update_purchasing_commodity_not_follow_sequence(): void
@@ -151,18 +153,21 @@ class UpdatePurchasingCommodityTest extends TestCase
 
     public function test_update_purchasing_commodity_is_successful_and_order_status_will_not_be_updated(): void
     {
+        Event::fake([
+            'eloquent.created: '.TraderHistory::class,
+        ]);
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(BursamMurabhaStep::PurchasingCommodity);
+            ->moveToStep(MurabhaStep::PurchasingCommodity);
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updatePurchasingCommodityUrl, self::$requestData)
-            ->assertJsonStructure([
-                'data' => [
+            ->assertJson(fractal(self::$traderOrder->fresh(), (new TraderOrderTransformer())->setArea(Area::SuperAdmin))
+                ->parseIncludes(
                     'purchasing_commodity_information',
-                ],
-            ]);
-
-        $this->assertEquals(BursamMurabhaStep::PurchasingCommodity, self::$traderOrder->currentStep);
+                )
+                ->respond()
+                ->getData(true)
+            );
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Traders;
 
-use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Exceptions\TraderException;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -327,7 +327,7 @@ class DmccV1DriverTest extends TestCase
 
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(DmccMurabhaStep::ContractSigned);
+            ->moveToStep(MurabhaStep::ContractSigned);
 
         (new DmccV1Driver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
 
