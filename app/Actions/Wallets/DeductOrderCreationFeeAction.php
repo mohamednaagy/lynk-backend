@@ -6,16 +6,11 @@ use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
-use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
-use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Exceptions\NoMatchOrderCostAndValueException;
 use App\Models\TieredPricing;
 use App\Models\TraderOrder;
-use App\Support\ZatcaEInvoice\InvoiceSpecs;
-use App\Support\ZatcaEInvoice\Order;
-use App\Support\ZatcaEInvoice\PurchaseLine;
 
 class DeductOrderCreationFeeAction implements DeductOrderCreationFee
 {
@@ -23,7 +18,6 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
         protected CreateTransactions $createTransactions,
         protected CalculateVatAmount $calculateVatAmount,
         protected GetProjectSettings $getProjectSettings,
-        protected GenerateZatcaInvoice $generateZatcaInvoice
     ) {
     }
 
@@ -45,7 +39,7 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
 
         $totalAmountWithVat = $orderCostWithoutVat->add($vatAmount);
 
-        $transaction = $this->createTransactions->handle(
+        return $this->createTransactions->handle(
             $wallet,
             TransactionReason::OrderCreationFee,
             $totalAmountWithVat,
@@ -62,37 +56,5 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
                 'pricing_tier' => TieredPricing::getPricingTier($company, $financingOrder->amount),
             ]
         );
-
-        $seller = $this->getProjectSettings->handle();
-
-        $invoiceSpecs = new InvoiceSpecs(
-            $transaction,
-            $seller,
-            $seller->getVatId(),
-            $transaction->created_at->clone(),
-            $totalAmountWithVat->formatByDecimal(),
-            $vatAmount->formatByDecimal(),
-            new Order(
-                $transaction->reference_number,
-                [
-                    new PurchaseLine(
-                        __('zatca/e-invoice.create_order_cost', [
-                            'trader_order_id' => $traderOrder->getKey(),
-                            'financing_order_id' => $traderOrder->financing_order_id,
-                        ]),
-                        $orderCostWithoutVat,
-                        $vatRate * 100,
-                        quantity: 1
-                    ),
-                ],
-                $transaction->created_at->clone()->tz('Asia/Riyadh'),
-            ),
-            $company->name,
-            $transaction,
-        );
-
-        $this->generateZatcaInvoice->handle($invoiceSpecs, TransactionMediaCollection::ZatcaInvoice);
-
-        return $transaction;
     }
 }
