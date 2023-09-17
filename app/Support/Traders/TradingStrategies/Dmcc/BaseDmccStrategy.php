@@ -22,7 +22,7 @@ abstract class BaseDmccStrategy implements TraderStrategyInterface
     public function __construct()
     {
         $this->stepToHistoriesMap = collect(get_murabha_steps('dmcc', static::$version))
-            ->only([MurabhaStep::PurchasingCommodity, MurabhaStep::ClientWakala, MurabhaStep::MurabahaSaleCompleted])
+            ->only([MurabhaStep::PurchasingCommodity, MurabhaStep::ClientWakala, MurabhaStep::MurabhaOfferIssued, MurabhaStep::MurabahaSaleCompleted])
             ->map(function ($step) {
                 return collect($step)->mapWithKeys(function ($history) {
                     return [$history => $this->historySteFileMap[$history] ?? null];

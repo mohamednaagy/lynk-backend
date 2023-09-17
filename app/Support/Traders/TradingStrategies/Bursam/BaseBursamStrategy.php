@@ -22,7 +22,12 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
     public function __construct()
     {
         $this->stepToHistoriesMap = collect(get_murabha_steps('bursam', static::$version))
-            ->only([MurabhaStep::PurchasingCommodity, MurabhaStep::ClientWakala, MurabhaStep::MurabahaSaleCompleted])
+            ->only(
+                array_merge(
+                    [MurabhaStep::PurchasingCommodity, MurabhaStep::ClientWakala, MurabhaStep::MurabahaSaleCompleted],
+                    static::$version === 'v1' ? [MurabhaStep::MurabhaOfferIssued] : []
+                )
+            )
             ->map(function ($step) {
                 return collect($step)->mapWithKeys(function ($history) {
                     return [$history => $this->historySteFileMap[$history] ?? null];
