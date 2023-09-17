@@ -4,43 +4,27 @@ namespace App\Support\Traders\TradingStrategies\Dmcc;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\MurabhaStep;
 
 class DmccStrategyV1 extends BaseDmccStrategy
 {
-    public array $stepToHistoriesMap = [
-        MurabhaStep::PurchasingCommodity => [
-            FinancingOrderHistory::RespondPtp => null,
-            FinancingOrderHistory::GetPtpDocument => null,
-            FinancingOrderHistory::GetTtiHoldingCertificateDocument => null,
-            FinancingOrderHistory::AttachPtpDocumentToOrder => [
-                'collection' => TraderOrderMediaCollection::PromiseToPurchase,
-                'file' => 'ptp_document',
-            ],
-            FinancingOrderHistory::AttachTtiHoldingCertificateDocument => [
-                'collection' => TraderOrderMediaCollection::TtiHoldingCertificate,
-                'file' => 'original_holding_certificate',
-            ],
+    public static string $version = 'v1';
+
+    public array $historySteFileMap = [
+        FinancingOrderHistory::AttachPtpDocumentToOrder => [
+            'collection' => TraderOrderMediaCollection::PromiseToPurchase,
+            'file' => 'ptp_document',
         ],
-        MurabhaStep::ClientWakala => [
-            FinancingOrderHistory::WaitingClientWakala => null,
-            FinancingOrderHistory::ClientWakalaAccepted => null,
+        FinancingOrderHistory::AttachTtiHoldingCertificateDocument => [
+            'collection' => TraderOrderMediaCollection::TtiHoldingCertificate,
+            'file' => 'original_holding_certificate',
         ],
-        MurabhaStep::MurabhaOfferIssued => [
-            FinancingOrderHistory::IssueMurabahaOffer => null,
-            FinancingOrderHistory::GetMurabahaPurchaseOfferDocument => null,
-            FinancingOrderHistory::AttachMpoDocument => [
-                'collection' => TraderOrderMediaCollection::MurabahaPurchaseOrder,
-                'file' => 'document',
-            ],
+        FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
+            'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
+            'file' => 'document',
         ],
-        MurabhaStep::MurabahaSaleCompleted => [
-            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
-            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
-                'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-                'file' => 'document',
-            ],
-            FinancingOrderHistory::MurabahaSaleCompleted => null,
+        FinancingOrderHistory::AttachMpoDocument => [
+            'collection' => TraderOrderMediaCollection::MurabahaPurchaseOrder,
+            'file' => 'document',
         ],
     ];
 }
