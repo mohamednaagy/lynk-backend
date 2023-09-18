@@ -38,6 +38,13 @@ class TraderOrderScenario
 
     public function getTraderOrder()
     {
+        $this->traderOrder->load('traderHistories');
+
+        $this->traderOrder->setAttribute('last_history_action', TraderHistory::select('action')
+            ->where('trader_order_id', $this->traderOrder->id)
+            ->latest('id')
+            ->take(1));
+
         return $this->traderOrder;
     }
 
@@ -49,10 +56,6 @@ class TraderOrderScenario
                 ->where('action', '!=', FinancingOrderHistory::GetTtiId)
                 ->delete();
         });
-
-        $this->traderOrder->load('traderHistories');
-
-        $this->traderOrder = $this->traderOrder->withLastHistoryAction()->first();
 
         return $this;
     }
@@ -134,10 +137,6 @@ class TraderOrderScenario
                 }
             });
         }
-
-        $this->traderOrder->load('traderHistories');
-
-        $this->traderOrder = $this->traderOrder->withLastHistoryAction()->first();
 
         return $this;
     }
