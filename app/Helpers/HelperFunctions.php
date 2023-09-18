@@ -109,18 +109,25 @@ if (! function_exists('get_latest_version_of_trader')) {
 }
 
 if (! function_exists('get_murabha_steps')) {
-    function get_murabha_steps($provider, string $version = null): array
+    function get_murabha_steps($provider, string $version = null, bool $withFiles = false): array
     {
         $version = $version ?? get_latest_version_of_trader($provider);
+        $stepHistories = config('murabha-steps.'.$provider.'-versions.'.$version);
 
-        return config('murabha-steps.'.$provider.'-versions.'.$version);
+        if ($withFiles) {
+            return $stepHistories;
+        }
+
+        return collect($stepHistories)->transform(function ($histories, $step) {
+            return array_keys($histories);
+        })->toArray();
     }
 }
 
 if (! function_exists('trader_step_histories')) {
     function trader_step_histories(string $provider, string $version): array
     {
-        return MurabhaStep::getStepsOfVersion($provider, $version);
+        return MurabhaStep::getSteps($provider, $version);
     }
 }
 

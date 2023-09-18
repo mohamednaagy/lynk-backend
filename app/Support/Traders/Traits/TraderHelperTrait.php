@@ -19,7 +19,13 @@ trait TraderHelperTrait
 {
     public function createStepHistories(Request $request, TraderOrder $traderOrder, $step): void
     {
-        foreach ($this->stepToHistoriesMap[$step] as $history => $media) {
+        $stepToHistoriesMap = get_murabha_steps($traderOrder->provider, $traderOrder->version, true);
+
+        if (! array_key_exists($step, $stepToHistoriesMap)) {
+            return;
+        }
+
+        foreach ($stepToHistoriesMap[$step] as $history => $media) {
             if ($media && $request->has($media['file'])) {
                 $this->attachDocumentToOrder(
                     $traderOrder,

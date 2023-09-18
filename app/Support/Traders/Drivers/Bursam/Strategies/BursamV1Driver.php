@@ -624,11 +624,21 @@ class BursamV1Driver implements TraderInterface
             ->where('financing_order_id', $traderOrder->id)
             ->count();
 
-        if ($activeTraderOrdersCount === 0) {
-            $order = $traderOrder->order;
+        if ($activeTraderOrdersCount !== 0) {
+            return false;
+        }
 
+        $order = $traderOrder->order;
+
+        if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
             $order->update([
                 'status' => FinancingOrderStatus::Cancelled,
+            ]);
+        }
+
+        if ($order->status->is(FinancingOrderStatus::InProgress)) {
+            $order->update([
+                'status' => FinancingOrderStatus::PendingTraderOrder,
             ]);
         }
 
