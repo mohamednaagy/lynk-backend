@@ -44,7 +44,7 @@ class TieredPricing extends Model
 
         if ($pricing->fee_type->is(OrderFeeType::Proration)) {
             return $pricing->order_cost_without_vat->multiply(
-                $orderValue->divide($pricing->proration_amount)
+                $orderValue->getAmount() / $pricing->proration_amount->getAmount()
             );
         }
 
