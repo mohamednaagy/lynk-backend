@@ -119,7 +119,7 @@ class BursamV1DriverTest extends TestCase
         self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder(data: $data);
     }
 
-    public function test_get_or_initiate_trader_oder_if_has_trader_order_success()
+    public function test_get_or_initiate_trader_oder_doesnt_create_trader_order_if_has_trader_order()
     {
         self::$traderOrder->update(['status' => TraderOrderStatus::Initiated]);
         $traderOrderCount = TraderOrder::query()->count();
@@ -130,7 +130,7 @@ class BursamV1DriverTest extends TestCase
         $this->assertEquals($traderOrder->id, self::$traderOrder->id);
     }
 
-    public function test_get_or_initiate_trader_order_if_has_no_trader_order_success()
+    public function test_get_or_initiate_trader_order_does_create_trader_order_if_has_no_trader_order_success()
     {
         $traderOrderCount = TraderOrder::query()->count();
 
