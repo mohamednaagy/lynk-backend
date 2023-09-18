@@ -17,20 +17,6 @@ abstract class BaseDmccStrategy implements TraderStrategyInterface
 {
     use TraderHelperTrait;
 
-    public array $stepToHistoriesMap;
-
-    public function __construct()
-    {
-        $this->stepToHistoriesMap = collect(get_murabha_steps('dmcc', static::$version))
-            ->only([MurabhaStep::PurchasingCommodity, MurabhaStep::ClientWakala, MurabhaStep::MurabhaOfferIssued, MurabhaStep::MurabahaSaleCompleted])
-            ->map(function ($step) {
-                return collect($step)->mapWithKeys(function ($history) {
-                    return [$history => $this->historySteFileMap[$history] ?? null];
-                });
-            })
-            ->toArray();
-    }
-
     public function updatePurchasingCommodity(TraderOrder $traderOrder, Request $request)
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::TraderOrderCreated);
