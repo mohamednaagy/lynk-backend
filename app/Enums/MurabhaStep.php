@@ -24,7 +24,7 @@ final class MurabhaStep extends Enum implements TraderMurabhaStepInterface, Loca
 
     const MurabahaSaleCompleted = 'murabaha_sale_completed';
 
-    public static function getStepsOfVersion(string $driver = null, string $version = null): array
+    public static function getSteps(string $driver = null, string $version = null): array
     {
         $driver ??= config('trader.default');
         $version ??= get_latest_version_of_trader($driver);

@@ -625,9 +625,11 @@ class BursamV1Driver implements TraderInterface
         if ($activeTraderOrdersCount === 0) {
             $order = $traderOrder->order;
 
-            $order->update([
-                'status' => FinancingOrderStatus::Cancelled,
-            ]);
+            if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
+                $order->update([
+                    'status' => FinancingOrderStatus::Cancelled,
+                ]);
+            }
         }
 
         return true;

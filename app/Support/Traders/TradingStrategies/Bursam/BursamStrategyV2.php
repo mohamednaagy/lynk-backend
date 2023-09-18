@@ -2,8 +2,6 @@
 
 namespace App\Support\Traders\TradingStrategies\Bursam;
 
-use App\Enums\FinancingOrderHistory;
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
@@ -12,17 +10,6 @@ use Illuminate\Http\Request;
 class BursamStrategyV2 extends BursamStrategyV1
 {
     public static string $version = 'v2';
-
-    public array $historySteFileMap = [
-        FinancingOrderHistory::AttachTtiHoldingCertificateDocument => [
-            'collection' => TraderOrderMediaCollection::TtiHoldingCertificate,
-            'file' => 'original_holding_certificate',
-        ],
-        FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
-            'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-            'file' => 'document',
-        ],
-    ];
 
     public function updateCommodityCertificateForClient(TraderOrder $traderOrder, Request $request)
     {
