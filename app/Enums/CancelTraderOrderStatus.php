@@ -10,7 +10,7 @@ use BenSampo\Enum\Enum;
  */
 final class CancelTraderOrderStatus extends Enum
 {
-    const PendingCancellation = 0;
+    const PendingCancellation = 1;
 
-    const Cancelled = 1;
+    const Cancelled = 2;
 }
