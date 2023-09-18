@@ -2,6 +2,7 @@
 
 namespace App\Actions\Wallets;
 
+use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\Lenders\CalcAmountWithoutVatAndOrdersCount;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\CheckEdaatInvoiceStatus;
@@ -24,7 +25,8 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
         protected EdaatService $edaatService,
         protected CreateTransactions $createTransactions,
         protected CalcAmountWithoutVatAndOrdersCount $calcAmountWithoutVatAndOrdersCount,
-        protected GetProjectSettings $getProjectSettings
+        protected GetProjectSettings $getProjectSettings,
+        protected CalculateVatAmount $calculateVatAmount
     ) {
     }
 
@@ -34,20 +36,19 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
             if ($this->edaatService->isPaidInvoice($edaatInvoice->invoice_number)) {
                 $edaatInvoice->update(['status' => EdaatInvoiceStatus::Paid]);
 
-                $wallet = $edaatInvoice->company->getWallet(WalletType::CompanyWallet);
+                $company = $edaatInvoice->company;
+                $wallet = $company->getWallet(WalletType::CompanyWallet);
+                $totalAmountWithVat = $edaatInvoice->amount;
 
-                $amountWithVat = $edaatInvoice->amount;
-                [$amountWithoutVat,, $vatRate, $rawOrdersCount] = $this->calcAmountWithoutVatAndOrdersCount->handle(
-                    $edaatInvoice->company,
-                    $amountWithVat
-                );
-
-                $vatAmount = $amountWithVat->subtract($amountWithoutVat);
+                [$vatAmount, $vatRate] = $this->calculateVatAmount
+                    ->setAmount($totalAmountWithVat)
+                    ->setIsVatIncludedInAmount(true)
+                    ->handle();
 
                 $transaction = $this->createTransactions->handle(
                     $wallet,
                     TransactionReason::DepositByEdaat,
-                    $amountWithoutVat,
+                    $totalAmountWithVat->subtract($vatAmount),
                     [
                         'invoice_number' => $edaatInvoice->invoice_number,
                         'is_vat_included' => false,
@@ -55,7 +56,6 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
                 );
 
                 $vatPercentage = $vatRate * 100;
-
                 $vatTransaction = $this->createTransactions->handle(
                     $wallet,
                     TransactionReason::VatPercentageOnDeposit,
@@ -68,10 +68,9 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
 
                 $invoiceSpecs = $this->getInvoiceSpecs(
                     $vatTransaction,
-                    $edaatInvoice->company,
-                    $amountWithVat->formatByDecimal(),
+                    $company,
+                    $totalAmountWithVat,
                     $vatAmount,
-                    $rawOrdersCount,
                     $vatPercentage
                 );
 
@@ -85,15 +84,17 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
         $company,
         $totalAmountWithVat,
         $vatAmount,
-        $orderCount,
         $vatPercentage
     ): InvoiceSpecs {
         $project = $this->getProjectSettings->handle();
 
         if ($company->isTiered()) {
             $itemCostWithoutVat = $totalAmountWithVat->subtract($vatAmount);
+            $ordersCount = 1;
         } else {
             $itemCostWithoutVat = TieredPricing::getOrderCostIfStandard($company)['costWithoutVat'];
+            [ , , ,$ordersCount] = $this->calcAmountWithoutVatAndOrdersCount
+                ->handle($company, $totalAmountWithVat);
         }
 
         return new InvoiceSpecs(
@@ -101,7 +102,7 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
             $project,
             $project->getVatId(),
             $transaction->created_at->clone(),
-            $totalAmountWithVat,
+            $totalAmountWithVat->formatByDecimal(),
             $vatAmount,
             new Order(
                 $transaction->reference_number,
@@ -110,7 +111,7 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
                         __('zatca/e-invoice.recharge_balance'),
                         $itemCostWithoutVat,
                         $vatPercentage,
-                        quantity: $orderCount
+                        quantity: $ordersCount
                     ),
                 ],
                 $transaction->created_at->clone()->tz('Asia/Riyadh'),
