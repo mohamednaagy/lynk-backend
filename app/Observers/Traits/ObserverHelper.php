@@ -8,8 +8,7 @@ use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCommodityPurcha
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsMurabhaOfferIssued;
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsMurabhaSaleCompleted;
-use App\Enums\BursamMurabhaStep;
-use App\Enums\DmccMurabhaStep;
+use App\Enums\MurabhaStep;
 use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
@@ -46,21 +45,12 @@ trait ObserverHelper
             return false;
         }
 
-        if ($currentStepNode?->step === $this->getStepMurabhaOfferIssuedOfProvider($traderOrder->provider)) {
+        if ($currentStepNode?->step === MurabhaStep::MurabhaOfferIssued) {
             app(FireWebhookWhenStatusIsMurabhaOfferIssued::class)
                 ->handle($traderOrder->order);
         }
 
         return true;
-    }
-
-    private function getStepMurabhaOfferIssuedOfProvider($provider): string
-    {
-        return match ($provider) {
-            'fake', 'dmcc' => DmccMurabhaStep::MurabhaOfferIssued,
-            'bursam' => BursamMurabhaStep::MurabhaOfferIssued,
-            default => ''
-        };
     }
 
     private function getActionsOfProvider($provider, ?StepHistoriesDictionaryNode $stepNode): array
@@ -71,24 +61,24 @@ trait ObserverHelper
 
         return match ($provider) {
             'fake', 'dmcc' => match ($stepNode->step) {
-                DmccMurabhaStep::CommoditySoldToCustomer => [
+                MurabhaStep::CommoditySoldToCustomer => [
                     SendSmsWhenStatusIsCommoditySoldToCustomer::class,
                     FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
                 ],
-                DmccMurabhaStep::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
-                DmccMurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
+                MurabhaStep::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
+                MurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
                 default => []
             },
             'bursam' => match ($stepNode->step) {
-                BursamMurabhaStep::CommoditySoldToCustomer => [
+                MurabhaStep::CommoditySoldToCustomer => [
                     SendSmsWhenStatusIsCommoditySoldToCustomer::class,
                     FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
                 ],
-                BursamMurabhaStep::MurabahaSaleCompleted => [
+                MurabhaStep::MurabahaSaleCompleted => [
                     SendSmsWhenStatusIsMurabahaSaleCompleted::class,
                     FireWebhookWhenStatusIsMurabhaSaleCompleted::class,
                 ],
-                BursamMurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
+                MurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
                 default => []
             },
             default => []
@@ -98,10 +88,8 @@ trait ObserverHelper
     private function isPurchasingOrSellingCommodity($step): bool
     {
         return in_array($step, [
-            BursamMurabhaStep::PurchasingCommodity,
-            BursamMurabhaStep::MurabahaSaleCompleted,
-            DmccMurabhaStep::PurchasingCommodity,
-            DmccMurabhaStep::MurabahaSaleCompleted,
+            MurabhaStep::PurchasingCommodity,
+            MurabhaStep::MurabahaSaleCompleted,
         ]);
     }
 }

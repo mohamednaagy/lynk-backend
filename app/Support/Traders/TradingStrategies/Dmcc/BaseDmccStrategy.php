@@ -3,9 +3,9 @@
 namespace App\Support\Traders\TradingStrategies\Dmcc;
 
 use App\Actions\Contracts\Orders\UpdateTraderOrder;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -19,14 +19,14 @@ abstract class BaseDmccStrategy implements TraderStrategyInterface
 
     public function updatePurchasingCommodity(TraderOrder $traderOrder, Request $request)
     {
-        $traderOrder->ensureCanAccessStep(DmccMurabhaStep::TraderOrderCreated);
+        $traderOrder->ensureCanAccessStep(MurabhaStep::TraderOrderCreated);
 
         app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
 
         $this->createStepHistories(
             $request,
             $traderOrder,
-            DmccMurabhaStep::PurchasingCommodity
+            MurabhaStep::PurchasingCommodity
         );
 
         $this->transferOwnershipToLender($traderOrder, $request);
@@ -53,18 +53,18 @@ abstract class BaseDmccStrategy implements TraderStrategyInterface
 
     public function updateMurabahaPurchaseOffer(TraderOrder $traderOrder, Request $request)
     {
-        $traderOrder->ensureCanAccessStep(DmccMurabhaStep::ClientWakala);
+        $traderOrder->ensureCanAccessStep(MurabhaStep::ClientWakala);
 
         $this->createStepHistories(
             $request,
             $traderOrder,
-            DmccMurabhaStep::MurabhaOfferIssued
+            MurabhaStep::MurabhaOfferIssued
         );
     }
 
     public function updateCommodityCertificateForClient(TraderOrder $traderOrder, Request $request)
     {
-        $traderOrder->ensureCanAccessStep(DmccMurabhaStep::ContractSigned);
+        $traderOrder->ensureCanAccessStep(MurabhaStep::ContractSigned);
 
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
 
@@ -83,16 +83,16 @@ abstract class BaseDmccStrategy implements TraderStrategyInterface
 
     public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
     {
-        $traderOrder->ensureCanAccessStep(DmccMurabhaStep::MurabhaOfferIssued);
+        $traderOrder->ensureCanAccessStep(MurabhaStep::MurabhaOfferIssued);
 
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
-            DmccMurabhaStep::MurabahaSaleCompleted
+            MurabhaStep::MurabahaSaleCompleted
         );
 
         $this->createStepHistories(
             $request,
             $traderOrder,
-            DmccMurabhaStep::MurabahaSaleCompleted
+            MurabhaStep::MurabahaSaleCompleted
         );
 
         if ($canUpdateOrderStatus) {

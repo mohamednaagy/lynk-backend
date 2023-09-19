@@ -5,9 +5,8 @@ namespace App\Http\Controllers\Api\V1\Lender\Orders;
 use App\Actions\Contracts\Orders\CancelTraderOrder as CancelTraderOrderInterface;
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\BursamMurabhaStep;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\ErrorCode;
+use App\Enums\MurabhaStep;
 use App\Enums\Subject;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
@@ -76,13 +75,8 @@ class CancelTraderOrder extends Controller
 
     private function getContractSignedLastHistory($traderOrder)
     {
-        $contractSignedStep = match ($traderOrder->provider) {
-            'dmcc', 'fake' => DmccMurabhaStep::ContractSigned,
-            'bursam' => BursamMurabhaStep::ContractSigned,
-        };
-
         $contractSignedHistories = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
-            ->getStepOf($contractSignedStep)
+            ->getStepOf(MurabhaStep::ContractSigned)
             ?->histories;
 
         return end($contractSignedHistories);

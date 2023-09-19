@@ -66,7 +66,7 @@ class TieredPricing extends Model
         return $orderCostWithoutVat->add($vatAmount);
     }
 
-    public static function getOrderCostIfStandard(Company $company): array|null
+    public static function getOrderCostIfStandard(Company $company): ?array
     {
         if ($company->isTiered()) {
             return null;

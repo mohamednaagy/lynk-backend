@@ -40,9 +40,6 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
 
     private static array $requestData;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -71,9 +68,6 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
         ];
     }
 
-    /**
-     * @return void
-     */
     public function test_that_unauth_user_cant_update_murabha_purchase_offer(): void
     {
         $this->postJson(self::$updateMurabhaPurchaseOfferUrl, self::$requestData)
@@ -83,9 +77,6 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_other_area_roles_of_not_super_admin_area_cant_update_murabha_purchase_offer_document(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
@@ -100,9 +91,6 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function test_proceed_murabha_purchase_offer_document_is_successfull(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
@@ -113,12 +101,9 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
             ->postJson(self::$updateMurabhaPurchaseOfferUrl, self::$requestData)
             ->assertJsonStructure(['data']);
 
-        $this->assertEquals(MurabhaStep::MurabhaOfferIssued, self::$traderOrder->append('step')->step);
+        $this->assertEquals(MurabhaStep::MurabhaOfferIssued, self::$traderOrder->currentStep);
     }
 
-    /**
-     * @return void
-     */
     public function test_update_murabha_purchase_offer_document_not_follow_sequence(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
@@ -134,9 +119,6 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_update_murabha_purchase_offer_document_is_successful_and_order_status_will_not_be_updated(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
@@ -147,6 +129,6 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
             ->postJson(self::$updateMurabhaPurchaseOfferUrl, self::$requestData)
             ->assertJsonStructure(['data']);
 
-        $this->assertEquals(MurabhaStep::MurabhaOfferIssued, self::$traderOrder->append('step')->step);
+        $this->assertEquals(MurabhaStep::MurabhaOfferIssued, self::$traderOrder->currentStep);
     }
 }

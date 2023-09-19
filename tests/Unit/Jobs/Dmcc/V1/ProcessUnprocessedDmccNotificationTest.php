@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\Unit\Jobs\Dmcc;
+namespace Jobs\Dmcc\V1;
 
 use App\Enums\MurabhaStep;
 use App\Enums\Role;
 use App\Exceptions\TraderNotSupportedException;
-use App\Jobs\Dmcc\ProcessUnprocessedDmccNotification;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessUnprocessedDmccNotification;
 use App\Support\Traders\Events\ProcessNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;

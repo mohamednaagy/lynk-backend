@@ -1,18 +1,18 @@
 <?php
 
-namespace Jobs\Dmcc;
+namespace Jobs\Dmcc\V1;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
-use App\Jobs\Dmcc\ProcessDmccMpoOrder;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\Media;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoOrder;
 use CodeDredd\Soap\Facades\Soap;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model;
@@ -56,6 +56,7 @@ class ProcessDmccMpoOrderTest extends TestCase
             ->model();
 
         $data = [
+            'version' => 'v1',
             'products' => [
                 [
                     'product' => 'Yogurt',
@@ -158,7 +159,7 @@ class ProcessDmccMpoOrderTest extends TestCase
 
     public function test_process_dmcc_mpo_when_order_status_not_client_wakala_complete_fail()
     {
-        $financeHistories = FinancingOrderHistory::asArray();
+        $financeHistories = collect(trader_step_histories(self::$traderOrder->provider, self::$traderOrder->version))->flatten();
 
         foreach ($financeHistories as $financeHistory) {
             if (in_array($financeHistory, [

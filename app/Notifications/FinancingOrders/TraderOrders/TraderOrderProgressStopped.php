@@ -2,6 +2,7 @@
 
 namespace App\Notifications\FinancingOrders\TraderOrders;
 
+use App\Enums\MurabhaStep;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use Illuminate\Bus\Queueable;
@@ -40,7 +41,7 @@ class TraderOrderProgressStopped extends Notification
         $currentStepNode = $this->traderDictionary->getStepByHistory($this->traderOrder->last_history_action);
         $nextStepNode = $this->traderDictionary->getNextStepOf($currentStepNode->step);
         $nextStepEnum = $nextStepNode
-            ? get_murabha_step_enum($this->traderOrder->provider)::fromValue($nextStepNode->step)->description
+            ? MurabhaStep::fromValue($nextStepNode->step)->description
             : null;
 
         return (new MailMessage)

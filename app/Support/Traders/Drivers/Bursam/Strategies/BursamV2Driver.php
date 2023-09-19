@@ -4,8 +4,12 @@ namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderStatus;
+use App\Enums\TraderOrderCancellationStatus;
+use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
+use App\Exceptions\TraderException;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -14,10 +18,14 @@ use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultNYY;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultYNN;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOtcCertificate;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamSellingCommodityToOpenMarket;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamSellingCommodityToOpenMarketForCancellation;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificate;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamTransferOwnershipToCustomer;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamTransferOwnershipToLender;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Str;
 
 class BursamV2Driver extends BursamV1Driver
@@ -38,6 +46,63 @@ class BursamV2Driver extends BursamV1Driver
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
         ]);
+    }
+
+    /**
+     * @throws TraderException
+     */
+    public function cancelTraderOrder(
+        TraderOrder $traderOrder,
+        int $cancelReason = TraderOrderCancelReason::Manual
+    ): int {
+        if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket)) {
+            $traderOrder->update([
+                'status' => TraderOrderStatus::Cancelled,
+                'cancel_reason' => $cancelReason,
+            ]);
+
+            return TraderOrderCancellationStatus::Cancelled;
+        }
+
+        if ($traderOrder->doesLastActionMatchWith([
+            FinancingOrderHistory::GetTtiId, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+        ])) {
+            throw new Exception(sprintf('Trader order (#%s) cannot be cancelled now', $traderOrder->id));
+        }
+
+        $traderOrder->update([
+            'status' => TraderOrderStatus::PendingCancellation,
+        ]);
+
+        Bus::chain([
+            new ProcessBursamSellingCommodityToOpenMarketForCancellation($traderOrder->id),
+            new ProcessBursamStbCertificateAfterCancellation($traderOrder->id, $cancelReason),
+            function () use ($traderOrder) {
+                $activeTraderOrdersCount = TraderOrder::where('status', TraderOrderStatus::InProgress)
+                    ->where('financing_order_id', $traderOrder->id)
+                    ->count();
+
+                if ($activeTraderOrdersCount !== 0) {
+                    return;
+                }
+
+                $order = $traderOrder->order()->first();
+
+                if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
+                    $order->update([
+                        'status' => FinancingOrderStatus::Cancelled,
+                    ]);
+                }
+
+                if ($order->status->is(FinancingOrderStatus::InProgress)) {
+                    $order->update([
+                        'status' => FinancingOrderStatus::PendingTraderOrder,
+                    ]);
+                }
+            },
+        ])->dispatch();
+
+        return TraderOrderCancellationStatus::PendingCancellation;
     }
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void

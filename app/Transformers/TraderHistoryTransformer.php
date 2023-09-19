@@ -2,10 +2,8 @@
 
 namespace App\Transformers;
 
-use App\Enums\BursamMurabhaStep;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Exceptions\TraderNotSupportedException;
+use App\Enums\MurabhaStep;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use Illuminate\Support\Collection;
@@ -15,8 +13,6 @@ use League\Fractal\TransformerAbstract;
 
 class TraderHistoryTransformer extends TransformerAbstract
 {
-    protected string $murabhaSteps;
-
     protected StepHistoriesDictionary $traderStepHistories;
 
     protected Collection $traderHistories;
@@ -28,11 +24,6 @@ class TraderHistoryTransformer extends TransformerAbstract
     public function __construct(protected ?TraderOrder $traderOrder, $historySteps)
     {
         $this->setDefaultIncludes(array_merge($this->getDefaultIncludes(), $historySteps));
-        $this->murabhaSteps = match ($traderOrder->provider) {
-            'dmcc', 'fake' => DmccMurabhaStep::class,
-            'bursam' => BursamMurabhaStep::class,
-            default => throw new TraderNotSupportedException()
-        };
         $this->traderStepHistories = new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version);
         $this->traderHistories = $traderOrder->traderHistories ?? collect();
     }
@@ -57,7 +48,7 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     public function includePurchasingCommodity($historiesActions): Primitive
     {
-        [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep($historiesActions, $this->murabhaSteps::PurchasingCommodity);
+        [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep($historiesActions, MurabhaStep::PurchasingCommodity);
 
         $certDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::TtiHoldingCertificate);
         $ownershipDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::TransferOwnershipToLender);
@@ -81,7 +72,7 @@ class TraderHistoryTransformer extends TransformerAbstract
     public function includeClientWakala($historiesActions): Primitive
     {
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
-            $historiesActions, $this->murabhaSteps::ClientWakala
+            $historiesActions, MurabhaStep::ClientWakala
         );
 
         $signedWakalaDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::SignedClientWakala);
@@ -101,7 +92,7 @@ class TraderHistoryTransformer extends TransformerAbstract
     public function includeContractSigned($historiesActions): Primitive
     {
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
-            $historiesActions, $this->murabhaSteps::ContractSigned
+            $historiesActions, MurabhaStep::ContractSigned
         );
 
         $wakalaDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::ClientWakala);
@@ -121,7 +112,7 @@ class TraderHistoryTransformer extends TransformerAbstract
     public function includeCommoditySoldToCustomer($historiesActions): Primitive
     {
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
-            $historiesActions, $this->murabhaSteps::CommoditySoldToCustomer
+            $historiesActions, MurabhaStep::CommoditySoldToCustomer
         );
 
         $documentMediaFile = $this->getMedia(TraderOrderMediaCollection::SellingCommodityToCustomer);
@@ -141,7 +132,7 @@ class TraderHistoryTransformer extends TransformerAbstract
     public function includeMurabhaOfferIssued($historiesActions): Primitive
     {
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
-            $historiesActions, $this->murabhaSteps::MurabhaOfferIssued
+            $historiesActions, MurabhaStep::MurabhaOfferIssued
         );
 
         $mpoDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder);
@@ -161,7 +152,7 @@ class TraderHistoryTransformer extends TransformerAbstract
     public function includeMurabahaSaleCompleted($historiesActions): Primitive
     {
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
-            $historiesActions, $this->murabhaSteps::MurabahaSaleCompleted
+            $historiesActions, MurabhaStep::MurabahaSaleCompleted
         );
 
         $warrantyDocumentMediaFile = match ($this->traderOrder->provider) {

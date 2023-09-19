@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
 use Tests\Support\FinancingOrders\CommittedOrder;
 use Tests\Support\FinancingOrders\InProgressOrder;
 use Tests\Support\FinancingOrders\OrderScenario;
@@ -43,9 +44,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
 
     private static string $fileName;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -79,6 +77,7 @@ class UpdateCommodityCertificateForClientTest extends TestCase
                 ],
             ]);
 
+        Queue::fake();
         self::$traderOrder->traderHistories()->create([
             'action' => FinancingOrderHistory::ContractSigned,
         ]);
@@ -93,9 +92,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
         self::$fileName = self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf';
     }
 
-    /**
-     * @return void
-     */
     public function test_that_unauth_user_cant_update_selling_commodity_certificate(): void
     {
         $this->postJson(self::$endpoint)
@@ -105,9 +101,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_other_area_roles_of_not_super_admin_area_cant_update_selling_commodity_certificate(): void
     {
         $this->assertStatusCodeExceptForPermissions(
@@ -126,9 +119,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_manager_with_proper_permissions_can_access(): void
     {
         $this->assignPermissionToUser(self::$managerUser, perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit]));
@@ -141,9 +131,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
             ->assertStatus(Response::HTTP_OK);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_manager_without_proper_permissions_cannot_access(): void
     {
         $this->actingAs(self::$managerUser)
@@ -154,9 +141,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    /**
-     * @return void
-     */
     public function test_update_selling_commodity_certificate_with_document_succeed(): void
     {
         $this->actingAs(self::$superAdminUser)
@@ -182,9 +166,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_update_selling_commodity_certificate_with_document_with_trader_order_not_in_progress_succeed(): void
     {
         self::$traderOrder->update(['status' => TraderOrderStatus::Completed]);
@@ -201,9 +182,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_update_selling_commodity_certificate_with_auto_generation_succeed(): void
     {
         $this->actingAs(self::$superAdminUser)
@@ -229,9 +207,6 @@ class UpdateCommodityCertificateForClientTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_update_selling_commodity_certificate_with_auto_generation_with_trader_order_not_in_progress_succeed(): void
     {
         self::$traderOrder->update(['status' => TraderOrderStatus::Completed]);

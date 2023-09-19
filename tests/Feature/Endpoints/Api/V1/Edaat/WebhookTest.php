@@ -30,14 +30,11 @@ class WebhookTest extends TestCase
 
     private static Builder|Model $edaatInvoice;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        self::$company = $this->createLenderCompanyWithStandardOrderCost('2000', ['company_cr' => '12345678910']);
 
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
 
@@ -81,8 +78,13 @@ class WebhookTest extends TestCase
             ->where('meta->invoice_number', self::$edaatInvoice->invoice_number)
             ->first();
 
-        $this->assertEquals(self::$edaatInvoice->amount->getAmount(), $transaction->amount);
-        $this->assertDatabaseCount(Transaction::class, $transactionsCount + 1);
+        $invoiceTransactionsAmount = DB::connection(Config::get('wallet.database.connection'))
+            ->table('transactions')
+            ->where('reference_number', $transaction->reference_number)
+            ->sum('amount');
+
+        $this->assertEquals(self::$edaatInvoice->amount->getAmount(), $invoiceTransactionsAmount);
+        $this->assertDatabaseCount(Transaction::class, $transactionsCount + 2);
     }
 
     public function test_edaat_invoices_webhook_with_un_paid_invoice_fail()

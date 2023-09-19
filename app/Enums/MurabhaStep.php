@@ -6,7 +6,7 @@ use App\Enums\Contracts\Murabha\TraderMurabhaStepInterface;
 use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
 
-final class DmccMurabhaStep extends Enum implements TraderMurabhaStepInterface, LocalizedEnum
+final class MurabhaStep extends Enum implements TraderMurabhaStepInterface, LocalizedEnum
 {
     const TraderOrderCreated = 'trader_order_created';
 
@@ -16,19 +16,19 @@ final class DmccMurabhaStep extends Enum implements TraderMurabhaStepInterface, 
 
     const CommoditySoldToCustomer = 'commodity_sold_to_customer';
 
+    const TransferOwnershipToLender = 'transfer_ownership_to_lender';
+
     const ClientWakala = 'client_wakala';
 
     const MurabhaOfferIssued = 'murabha_offer_issued';
 
     const MurabahaSaleCompleted = 'murabaha_sale_completed';
 
-    public static function getStepsOfVersion(?string $version = null): array
+    public static function getSteps(string $driver = null, string $version = null): array
     {
-        $version = $version ?? get_latest_version_of_trader('dmcc');
+        $driver ??= config('trader.default');
+        $version ??= get_latest_version_of_trader($driver);
 
-        return match ($version) {
-            'v1' => get_murabha_steps('dmcc', 'v1'),
-            default => throw new \InvalidArgumentException('Invalid version')
-        };
+        return get_murabha_steps($driver, $version);
     }
 }

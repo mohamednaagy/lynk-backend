@@ -8,6 +8,7 @@ use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Role;
+use App\Enums\Trader;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
@@ -42,9 +43,6 @@ class MakeOrderProceedTest extends TestCase
 
     private static string $orderProceedUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -59,14 +57,11 @@ class MakeOrderProceedTest extends TestCase
             ->creator(self::$userLender)
             ->commit();
 
-        self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder();
+        self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder(Trader::Bursam);
 
         self::$orderProceedUrl = self::BaseUrl.self::$financingOrder->id.'/proceed';
     }
 
-    /**
-     * @return void
-     */
     public function test_that_unauth_user_cant_make_order_proceed(): void
     {
         $this->withHeader('X-Company', self::$company->getOriginal('id'))
@@ -77,9 +72,6 @@ class MakeOrderProceedTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_make_order_proceed_on_contract_signed_for_auth_user_has_lender_supervisor_role(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
@@ -100,9 +92,6 @@ class MakeOrderProceedTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_make_order_proceed_on_contract_signed_for_auth_user_has_lender_api_user_role(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
@@ -123,9 +112,6 @@ class MakeOrderProceedTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_unauthorized_lender_billing_cannot_make_order_proceed_on_contract_signed(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
@@ -146,9 +132,6 @@ class MakeOrderProceedTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_lender_order_creator_can_make_order_proceed_on_contract_signed(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
@@ -168,9 +151,6 @@ class MakeOrderProceedTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_unauthorized_user_with_not_verified_email_cannot_make_order_proceed_on_contract_signed(): void
     {
         // update user email verified at to be null
@@ -192,9 +172,6 @@ class MakeOrderProceedTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_unauthorized_user_when_company_not_active_cannot_make_order_proceed_on_contract_signed(): void
     {
         // update user email verified at to be null
@@ -217,9 +194,6 @@ class MakeOrderProceedTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_make_order_proceed_on_empty_case(): void
     {
         $response = $this->actingAs(self::$userLender)
@@ -241,9 +215,6 @@ class MakeOrderProceedTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_make_order_proceed_on_invalid_case(): void
     {
         $response = $this->actingAs(self::$userLender)
@@ -265,9 +236,6 @@ class MakeOrderProceedTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_make_order_proceed_on_order_status_doesnt_follow_sequence(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
@@ -286,9 +254,6 @@ class MakeOrderProceedTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_make_order_proceed_on_contract_signed(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
@@ -328,9 +293,6 @@ class MakeOrderProceedTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_make_order_proceed_for_client_wakala_if_order_doesnt_follow_sequence(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
@@ -352,9 +314,6 @@ class MakeOrderProceedTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_proceed_order_client_wakala_file_required_when_client_wakala_accepted_and_order_verification_is_false(): void
     {
         self::$financingOrder->requireVerification(false)->commit();
@@ -368,9 +327,6 @@ class MakeOrderProceedTest extends TestCase
             ->assertJsonValidationErrorFor('client_wakala');
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_proceed_order_client_wakala_should_be_pdf_file(): void
     {
         self::$financingOrder->requireVerification(false)->commit();
@@ -385,9 +341,6 @@ class MakeOrderProceedTest extends TestCase
             ->assertJsonValidationErrorFor('client_wakala');
     }
 
-    /**
-     * @return void
-     */
     public function test_make_order_proceed_on_client_wakala_accepted_when_verification_is_not_required(): void
     {
         // update financing order is_verification_required to be able to move to client wakala accepted
@@ -412,9 +365,6 @@ class MakeOrderProceedTest extends TestCase
         $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::SignedClientWakala));
     }
 
-    /**
-     * @return void
-     */
     public function test_make_order_cannot_reprocessed_on_client_wakala_accepted(): void
     {
         self::$financingOrder->requireVerification(false)->commit();

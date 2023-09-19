@@ -45,14 +45,11 @@ class ChargeLenderBalanceManuallyTest extends TestCase
 
     private static User $lenderSupervisor;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
 
-        [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        self::$lender = $this->createLenderCompanyWithStandardOrderCost('2000', ['company_cr' => '12345678910']);
         self::$userLenderAdmin = $this->createLenderUser(self::$lender->id);
         self::$managerHasPermission = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(self::$managerHasPermission, perm(Area::SuperAdmin, [Subject::LenderWallet, Action::Charge]));
@@ -81,7 +78,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
     {
         $this->actingAs(self::$admin)
             ->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit', [
-                'amount' => 10,
+                'amount' => 115000,
                 'description_en' => 'deposit some money',
                 'description_ar' => 'deposit some money',
                 'attachment' => UploadedFile::fake()
@@ -97,7 +94,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
     {
         $this->actingAs(self::$admin);
         $this->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit', [
-            'amount' => 50,
+            'amount' => 115000,
             'description_en' => 'deposit some money',
             'description_ar' => 'deposit some money',
             'attachment' => UploadedFile::fake()
@@ -113,7 +110,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
         $balance = self::$lender->balance(WalletType::CompanyWallet);
         $this->actingAs(self::$admin);
         $this->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit', [
-            'amount' => 50,
+            'amount' => 115000,
             'description_en' => 'deposit some money',
             'description_ar' => 'deposit some money',
             'attachment' => UploadedFile::fake()
@@ -121,14 +118,14 @@ class ChargeLenderBalanceManuallyTest extends TestCase
         ]);
 
         $balanceAfterDeposit = self::$lender->balance(WalletType::CompanyWallet);
-        $this->assertTrue($balance->add(Money::parseByDecimal(50, 'SAR'))->equals($balanceAfterDeposit));
+        $this->assertTrue($balance->add(Money::parseByDecimal(115000, 'SAR'))->equals($balanceAfterDeposit));
     }
 
     public function test_charge_lender_balance_manually_voucher_invoice_generated_successfully()
     {
         $this->actingAs(self::$admin)
             ->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit', [
-                'amount' => 50,
+                'amount' => 115000,
                 'description_en' => 'deposit some money',
                 'description_ar' => 'deposit some money',
                 'attachment' => UploadedFile::fake()
@@ -144,7 +141,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
     {
         $this->actingAs(self::$admin)
             ->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit', [
-                'amount' => 10,
+                'amount' => 115000,
                 'description_en' => 'deposit some money',
                 'description_ar' => 'deposit some money',
                 'attachment' => UploadedFile::fake()
@@ -157,7 +154,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
     {
         $this->actingAs(self::$manager)
             ->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit', [
-                'amount' => 10,
+                'amount' => 115000,
                 'description_en' => 'deposit some money',
                 'description_ar' => 'deposit some money',
                 'attachment' => UploadedFile::fake()
@@ -170,7 +167,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
     {
         $this->actingAs(self::$managerHasPermission)
             ->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit', [
-                'amount' => 10,
+                'amount' => 115000,
                 'description_en' => 'deposit some money',
                 'description_ar' => 'deposit some money',
                 'attachment' => UploadedFile::fake()
@@ -182,7 +179,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
     public function test_that_order_show_cannot_be_accessed_by_lender_users()
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function (User $user, string $role) {
-            return  $this->actingAs($user)
+            return $this->actingAs($user)
                 ->withHeader('X-Company', self::$lender->getOriginal('id'))
                 ->postJson('api/v1/admin/lenders/'.self::$lender->id.'/wallet/manual-deposit');
         });
