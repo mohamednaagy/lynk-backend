@@ -7,6 +7,8 @@ use App\Enums\BursamProductCode;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\OrderCancellationStatus;
+use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Models\Company;
@@ -119,7 +121,7 @@ class BursamV1DriverTest extends TestCase
         self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder(data: $data);
     }
 
-    public function test_get_or_initiate_trader_oder_if_has_trader_order_success()
+    public function test_get_or_initiate_trader_oder_doesnt_create_trader_order_if_has_trader_order()
     {
         self::$traderOrder->update(['status' => TraderOrderStatus::Initiated]);
         $traderOrderCount = TraderOrder::query()->count();
@@ -130,7 +132,7 @@ class BursamV1DriverTest extends TestCase
         $this->assertEquals($traderOrder->id, self::$traderOrder->id);
     }
 
-    public function test_get_or_initiate_trader_order_if_has_no_trader_order_success()
+    public function test_get_or_initiate_trader_order_does_create_trader_order_if_has_no_trader_order_success()
     {
         $traderOrderCount = TraderOrder::query()->count();
 
@@ -168,7 +170,7 @@ class BursamV1DriverTest extends TestCase
     /**
      * @throws TraderException
      */
-    public function test_process_order_with_error_code_fails(): void
+    public function test_create_trader_order_throws_error_if_service_rejects_request(): void
     {
         $this->expectException(TraderException::class);
 
@@ -191,7 +193,7 @@ class BursamV1DriverTest extends TestCase
     /**
      * @throws TraderException
      */
-    public function test_cancel_order_success(): void
+    public function test_cancel_order_if_commodity_sold_to_market_success(): void
     {
         Queue::fake();
 
@@ -206,13 +208,13 @@ class BursamV1DriverTest extends TestCase
         $response = self::$driver->cancelOrder(self::$order);
 
         Queue::assertPushed(ProcessBursamStbCertificateAfterCancellation::class);
-        $this->assertTrue($response);
+        $this->assertEquals(OrderCancellationStatus::PendingCancellation, $response);
     }
 
     /**
      * @throws TraderException
      */
-    public function test_cancel_order_fail(): void
+    public function test_cancel_order_if_commodity_sold_to_market_fail(): void
     {
         Queue::fake();
 
@@ -242,7 +244,7 @@ class BursamV1DriverTest extends TestCase
 
         $result = self::$driver->cancelTraderOrder(self::$traderOrder);
 
-        $this->assertTrue($result);
+        $this->assertEquals(TraderOrderCancellationStatus::Cancelled, $result);
         $this->assertTrue(self::$traderOrder->status->is(TraderOrderStatus::Cancelled));
         $this->assertTrue(self::$traderOrder->order->status->is(FinancingOrderStatus::Cancelled));
     }

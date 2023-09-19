@@ -5,6 +5,7 @@ namespace App\Support\Traders\Drivers\Bursam\Strategies;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
@@ -53,14 +54,14 @@ class BursamV2Driver extends BursamV1Driver
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
         int $cancelReason = TraderOrderCancelReason::Manual
-    ): bool {
+    ): int {
         if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket)) {
             $traderOrder->update([
                 'status' => TraderOrderStatus::Cancelled,
                 'cancel_reason' => $cancelReason,
             ]);
 
-            return true;
+            return TraderOrderCancellationStatus::Cancelled;
         }
 
         if ($traderOrder->doesLastActionMatchWith([
@@ -101,7 +102,7 @@ class BursamV2Driver extends BursamV1Driver
             },
         ])->dispatch();
 
-        return true;
+        return TraderOrderCancellationStatus::PendingCancellation;
     }
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void

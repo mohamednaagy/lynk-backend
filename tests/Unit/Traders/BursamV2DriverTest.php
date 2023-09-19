@@ -5,6 +5,7 @@ namespace Tests\Unit\Traders;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
+use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Jobs\General\ProcessAskClientForWakala;
@@ -69,7 +70,7 @@ class BursamV2DriverTest extends BursamV1DriverTest
 
         $result = self::$driver->cancelTraderOrder(self::$traderOrder);
 
-        $this->assertTrue($result);
+        $this->assertEquals(TraderOrderCancellationStatus::Cancelled, $result);
         $this->assertTrue(self::$traderOrder->status->is(TraderOrderStatus::Cancelled));
     }
 
@@ -82,7 +83,7 @@ class BursamV2DriverTest extends BursamV1DriverTest
 
         $result = self::$driver->cancelTraderOrder(self::$traderOrder);
 
-        $this->assertTrue($result);
+        $this->assertEquals(TraderOrderCancellationStatus::PendingCancellation, $result);
         $this->assertTrue(self::$traderOrder->status->is(TraderOrderStatus::PendingCancellation));
         Bus::assertChained([
             ProcessBursamSellingCommodityToOpenMarketForCancellation::class,

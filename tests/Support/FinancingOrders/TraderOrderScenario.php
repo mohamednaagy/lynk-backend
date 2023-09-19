@@ -50,9 +50,7 @@ class TraderOrderScenario
                 ->delete();
         });
 
-        $this->traderOrder->load('traderHistories');
-
-        $this->traderOrder = $this->traderOrder->withLastHistoryAction()->first();
+        $this->loadHistoriesAndSetLastAction();
 
         return $this;
     }
@@ -135,10 +133,18 @@ class TraderOrderScenario
             });
         }
 
-        $this->traderOrder->load('traderHistories');
-
-        $this->traderOrder = $this->traderOrder->withLastHistoryAction()->first();
+        $this->loadHistoriesAndSetLastAction();
 
         return $this;
+    }
+
+    protected function loadHistoriesAndSetLastAction()
+    {
+        $this->traderOrder->load('traderHistories');
+
+        $this->traderOrder->setAttribute('last_history_action', TraderHistory::select('action')
+            ->where('trader_order_id', $this->traderOrder->id)
+            ->latest('id')
+            ->take(1));
     }
 }
