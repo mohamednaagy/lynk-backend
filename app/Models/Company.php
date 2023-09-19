@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
+use App\Enums\OrderFeeType;
 use App\Enums\TraderOrderMode;
 use App\Support\QueryScoper\HasScopes;
 use App\Support\Wallets\Traits\HasWallet;
@@ -96,12 +97,12 @@ class Company extends BaseTenant
 
     public function isTiered(): bool
     {
-        return $this->tieredPricing()->count() > 1;
+        return $this->tieredPricing()->count() > 1 || $this->tieredPricing()->first()->fee_type->is(OrderFeeType::Proration);
     }
 
     public function isStandard(): bool
     {
-        return $this->tieredPricing()->count() == 1;
+        return $this->tieredPricing()->count() == 1 && $this->tieredPricing()->first()->fee_type->is(OrderFeeType::Fixed);
     }
 
     public function scopeType($query, string $type)
