@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\Unit\Jobs\Dmcc;
+namespace Jobs\Dmcc\V1;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\TraderOrderStatus;
-use App\Jobs\Dmcc\ProcessDmccCancelNotification;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccCancelNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\FinancingOrders\CommittedOrder;

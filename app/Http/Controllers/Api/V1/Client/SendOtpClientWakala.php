@@ -18,8 +18,6 @@ class SendOtpClientWakala extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  SendOtpRequest  $request
-     * @param  SendOTPClientWakalaInterface  $sendOTPClientWakala
      * @return JsonResponse
      *
      * @throws \Throwable

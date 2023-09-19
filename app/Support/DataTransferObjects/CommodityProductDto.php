@@ -9,7 +9,7 @@ class CommodityProductDto
     public function __construct(
         protected string $product,
         protected string $quantity,
-        protected string|float $amount,
+        protected $amount,
         protected array|string $previous_owner,
         protected string $date_time_of_purchasing_commodity,
         protected string $uom = '--',
@@ -38,7 +38,7 @@ class CommodityProductDto
         return $this->uom;
     }
 
-    public function getAmount(): string|float
+    public function getAmount(): string
     {
         return $this->amount;
     }

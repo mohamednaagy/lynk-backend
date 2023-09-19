@@ -29,11 +29,11 @@ class ProcessBursamInitiateTraderOrder implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
+     * @return bool
      */
     public function handle(InitiateTraderOrder $initiateTraderOrder)
     {
-        DB::multipleTransaction(function () use ($initiateTraderOrder) {
+        return DB::multipleTransaction(function () use ($initiateTraderOrder) {
             try {
                 $initiateTraderOrder->handle($this->financingOrder->creator, $this->financingOrder->id);
             } catch (OrderAlreadyHasActiveTraderOrderException $exception) {
@@ -41,7 +41,6 @@ class ProcessBursamInitiateTraderOrder implements ShouldQueue
             }
 
             return Command::SUCCESS;
-
         });
     }
 }

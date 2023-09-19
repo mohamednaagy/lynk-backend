@@ -6,6 +6,8 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
+use App\Models\TraderHistory;
+use App\Models\TraderOrder;
 
 class InProgressOrder
 {
@@ -40,17 +42,21 @@ class InProgressOrder
             throw new \Exception('Active trader order exists');
         }
 
-        $traderOrder = $this->financingOrder
-            ->traderOrders()
-            ->create(array_merge([
-                'provider' => $driver ?? config('trader.default'),
-                'reference' => $reference,
-                'status' => $status,
-            ], $data));
+        $traderOrder = TraderOrder::withoutEvents(function () use ($reference, $status, $data, $driver) {
+            return $this->financingOrder
+                ->traderOrders()
+                ->create(array_merge([
+                    'provider' => $driver ?? config('trader.default'),
+                    'reference' => $reference,
+                    'status' => $status,
+                ], $data));
+        });
 
-        $traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::GetTtiId,
-        ]);
+        TraderHistory::withoutEvents(function () use ($traderOrder) {
+            $traderOrder->traderHistories()->create([
+                'action' => FinancingOrderHistory::GetTtiId,
+            ]);
+        });
 
         return $traderOrder;
     }

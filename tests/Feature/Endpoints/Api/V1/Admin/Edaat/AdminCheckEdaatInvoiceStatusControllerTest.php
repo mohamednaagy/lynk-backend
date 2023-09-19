@@ -42,9 +42,6 @@ class AdminCheckEdaatInvoiceStatusControllerTest extends TestCase
 
     private static User $managerHasPermission;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -56,13 +53,13 @@ class AdminCheckEdaatInvoiceStatusControllerTest extends TestCase
             ], 200);
         });
 
-        [self::$company, self::$wallet] = $this->createCompany(
+        self::$company = $this->createLenderCompanyWithStandardOrderCost(
             '2000',
             [
                 'company_cr' => '12345678910',
             ]
         );
-        [self::$secondCompany] = $this->createCompany(
+        self::$secondCompany = $this->createLenderCompanyWithStandardOrderCost(
             '2000',
             [
                 'company_cr' => '12345678999',

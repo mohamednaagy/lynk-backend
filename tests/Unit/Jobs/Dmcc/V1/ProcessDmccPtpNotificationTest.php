@@ -1,13 +1,13 @@
 <?php
 
-namespace Jobs\General;
+namespace Jobs\Dmcc\V1;
 
 use App\Enums\FinancingOrderHistory;
-use App\Jobs\Dmcc\ProcessDmccPtpNotification;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccPtpNotification;
 use CodeDredd\Soap\Facades\Soap;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -113,6 +113,8 @@ class ProcessDmccPtpNotificationTest extends TestCase
      */
     public function test_job_not_processed_if_current_financing_order_is_unsuitable_status($unsuitableOrderStatusData)
     {
+        dump($unsuitableOrderStatusData);
+
         self::$traderOrder = TraderOrderScenario::of(self::$traderOrder)
             ->reset()
             ->moveToHistory($unsuitableOrderStatusData)
@@ -122,7 +124,7 @@ class ProcessDmccPtpNotificationTest extends TestCase
         $process->handle();
 
         $this->assertFalse(
-            self::$traderOrder->checkOrderHistoryAction(FinancingOrderHistory::RespondPtp)
+            self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::RespondPtp)
         );
     }
 
@@ -131,6 +133,7 @@ class ProcessDmccPtpNotificationTest extends TestCase
         return collect(FinancingOrderHistory::getValues())->reject(function ($item) {
             return in_array($item, [
                 FinancingOrderHistory::RespondPtp, FinancingOrderHistory::GetTtiId, FinancingOrderHistory::OrderCancelled, FinancingOrderHistory::Expired,
+                FinancingOrderHistory::CommoditySoldToMarket, FinancingOrderHistory::GetOwnershipToCustomerCertificate, FinancingOrderHistory::GetSellingToMarketCertificate, // not exists in DMCC steps
             ]);
         })->map(function ($item) {
             return [$item];

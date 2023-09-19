@@ -5,8 +5,8 @@ namespace App\Models;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
+use App\Enums\OrderFeeType;
 use App\Enums\TraderOrderMode;
-use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\QueryScoper\HasScopes;
 use App\Support\Wallets\Traits\HasWallet;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,7 +31,6 @@ class Company extends BaseTenant
         'status' => CompanyStatus::class,
         'does_order_require_approval' => 'boolean',
         'webhook_secret_key' => 'encrypted',
-        'order_cost' => MoneyStringCast::class.':order_cost_currency',
         'type' => CompanyType::class,
         'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::class,
         'trading_mode' => TraderOrderMode::class,
@@ -49,11 +48,9 @@ class Company extends BaseTenant
             'public_status_comment',
             'internal_status_comment',
             'does_order_require_approval',
-            'order_cost',
             'webhook_secret_key',
             'created_at',
             'updated_at',
-            'order_cost_currency',
             'type',
             'driver',
             'notify_admins_about_new_orders',
@@ -91,6 +88,21 @@ class Company extends BaseTenant
     public function wallets()
     {
         return $this->morphMany(Wallet::class, 'holder');
+    }
+
+    public function tieredPricing()
+    {
+        return $this->hasMany(TieredPricing::class);
+    }
+
+    public function isTiered(): bool
+    {
+        return $this->tieredPricing()->count() > 1 || $this->tieredPricing()->first()->fee_type->is(OrderFeeType::Proration);
+    }
+
+    public function isStandard(): bool
+    {
+        return $this->isTiered() === false;
     }
 
     public function scopeType($query, string $type)

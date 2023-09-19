@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\Unit\Jobs\Dmcc;
+namespace Jobs\Dmcc\V1;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Role;
-use App\Jobs\Dmcc\ProcessDmccPtpDocumentRetrievedOrder;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccPtpDocumentRetrievedOrder;
 use CodeDredd\Soap\Facades\Soap;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model;
@@ -51,7 +51,9 @@ class ProcessDmccPtpDocumentRetrievedOrderTest extends TestCase
             ->commit()
             ->model();
 
-        self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder();
+        self::$traderOrder = InProgressOrder::of(self::$order)->createTraderOrder('dmcc', data: [
+            'version' => 'v1',
+        ]);
 
         TraderOrderScenario::of(self::$traderOrder)->moveToHistory(FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
 
@@ -141,7 +143,7 @@ class ProcessDmccPtpDocumentRetrievedOrderTest extends TestCase
 
     public function test_process_dmcc_ptp_document_retrieved_when_muraha_step_not_ptp_document_retrieved_fail()
     {
-        $financeHistories = FinancingOrderHistory::getValues();
+        $financeHistories = collect(trader_step_histories(self::$traderOrder->provider, self::$traderOrder->version))->flatten();
 
         foreach ($financeHistories as $financeHistory) {
             if (in_array($financeHistory, [

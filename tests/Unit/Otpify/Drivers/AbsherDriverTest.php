@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Models\FinancingOrder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
 use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
 use Modules\Otpify\Exceptions\OtpCodeExpiredException;
@@ -32,6 +33,12 @@ class AbsherDriverTest extends TestCase
         config()->set('otpify.default', 'absher');
         [$company] = $this->createCompany('2000', ['company_cr' => '12345678910']);
         $lender = $this->createLenderUser($company->id, Role::LenderAdmin);
+
+        Http::fake(function () {
+            return Http::response([
+                'tcn' => '12345',
+            ]);
+        });
 
         self::$financingOrder = $this->createOrder($company->id, $lender->id);
     }

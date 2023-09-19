@@ -6,6 +6,7 @@ use App\Enums\Area;
 use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\TraderOrder;
@@ -17,6 +18,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
 use Tests\Support\FinancingOrders\CommittedOrder;
 use Tests\Support\FinancingOrders\InProgressOrder;
 use Tests\Support\FinancingOrders\OrderScenario;
@@ -44,9 +46,8 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
     private static array $requestData;
 
-    /**
-     * @return void
-     */
+    private StepHistoriesDictionary $stepDictionary;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -66,7 +67,7 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
             ->creator(self::$userLender)
             ->commit();
 
-        self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder();
+        self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder(Trader::Bursam);
 
         self::$updateMurabhaCompleteDocumentUrl = self::BaseUrl.
             '/orders/'.
@@ -79,11 +80,10 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
             'document' => UploadedFile::fake()
                 ->create('attachment.pdf', 10),
         ];
+
+        $this->stepDictionary = (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version));
     }
 
-    /**
-     * @return void
-     */
     public function test_that_unauth_user_cant_update_murabha_complete_document(): void
     {
         $this->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
@@ -93,9 +93,6 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_other_area_roles_of_not_super_admin_area_cant_update_murabha_complete_document(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
@@ -109,9 +106,6 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function test_proceed_murabha_complete_document_is_successfull_and_order_status_will_be_updated(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
@@ -128,14 +122,13 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
     /**
      * @dataProvider unsuitableTraderHistoryDataProvider
-     *
-     * @param $unsuitableTraderHistoryData
-     * @return void
      */
-    public function test_update_murabha_complete_document_not_follow_sequence($unsuitableTraderHistoryData): void
+    public function test_update_murabha_complete_document_not_follow_sequence($action): void
     {
+        Queue::fake();
+
         self::$traderOrder->traderHistories()->create([
-            'action' => $unsuitableTraderHistoryData,
+            'action' => $action,
         ]);
 
         $this->actingAs(self::$superAdminUser)
@@ -147,24 +140,24 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
             ]);
     }
 
-    public function unsuitableTraderHistoryDataProvider()
+    public function unsuitableTraderHistoryDataProvider(): array
     {
-        $murabhaOfferIssuedNode = app(StepHistoriesDictionary::class)->getStepOf(MurabhaStep::MurabhaOfferIssued);
-        $murabahaSaleCompletedNode = app(StepHistoriesDictionary::class)->getStepOf(MurabhaStep::MurabahaSaleCompleted);
+        $murabhaOfferIssuedHistories = $this->stepDictionary->getStepOf(MurabhaStep::MurabhaOfferIssued)?->histories ?? [];
+        $murabahaSaleCompletedHistories = $this->stepDictionary->getStepOf(MurabhaStep::MurabahaSaleCompleted)?->histories ?? [];
 
-        return [
-            'histories_that_doesnt_follow_sequence' => collect(FinancingOrderHistory::getValues())
-                ->reject(function ($item) use ($murabhaOfferIssuedNode, $murabahaSaleCompletedNode) {
-                    return $item == end($murabhaOfferIssuedNode->histories)
-                        || $item == end($murabahaSaleCompletedNode->histories);
-                })
-                ->toArray(),
-        ];
+        $histories = collect(FinancingOrderHistory::getValues())
+            ->reject(function ($item) use ($murabhaOfferIssuedHistories, $murabahaSaleCompletedHistories) {
+                return $item == end($murabhaOfferIssuedHistories)
+                    || $item == end($murabahaSaleCompletedHistories);
+            });
+
+        $histories->transform(function ($history) {
+            return [$history];
+        });
+
+        return $histories->toArray();
     }
 
-    /**
-     * @return void
-     */
     public function test_update_murabha_complete_document_is_successful(): void
     {
         TraderOrderScenario::of(self::$traderOrder)

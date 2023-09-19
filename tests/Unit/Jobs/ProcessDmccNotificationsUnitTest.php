@@ -3,11 +3,11 @@
 namespace Tests\Unit\Jobs;
 
 use App\Exceptions\TraderException;
-use App\Jobs\Dmcc\ProcessDmccCancelNotification;
-use App\Jobs\Dmcc\ProcessDmccMpoSaleCompleteNotification;
-use App\Jobs\Dmcc\ProcessDmccNotifications;
-use App\Jobs\Dmcc\ProcessDmccPtpDocumentRetrievedOrder;
-use App\Jobs\Dmcc\ProcessDmccPtpNotification;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccCancelNotification;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoSaleCompleteNotification;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccNotifications;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccPtpDocumentRetrievedOrder;
+use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccPtpNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;

@@ -1,7 +1,6 @@
 <?php
 
-use App\Enums\BursamMurabhaStep;
-use App\Enums\DmccMurabhaStep;
+use App\Enums\MurabhaStep;
 use App\Models\Media;
 use Illuminate\Support\Facades\Config;
 use Modules\Grantify\Facades\Grantify;
@@ -102,19 +101,6 @@ if (! function_exists('get_media_of_model')) {
     }
 }
 
-if (! function_exists('get_murabha_step_enum')) {
-    function get_murabha_step_enum(?string $provider = null): string
-    {
-        $provider = $provider ?? config('trader.default');
-
-        return match ($provider) {
-            'dmcc', 'fake' => DmccMurabhaStep::class,
-            'bursam' => BursamMurabhaStep::class,
-            default => throw new \InvalidArgumentException('Invalid trader')
-        };
-    }
-}
-
 if (! function_exists('get_latest_version_of_trader')) {
     function get_latest_version_of_trader($provider): string
     {
@@ -123,20 +109,25 @@ if (! function_exists('get_latest_version_of_trader')) {
 }
 
 if (! function_exists('get_murabha_steps')) {
-    function get_murabha_steps($provider, ?string $version = null): array
+    function get_murabha_steps($provider, string $version = null, bool $withFiles = false): array
     {
-        return config('murabha-steps.'.$provider.'-versions.'.$version ?? get_latest_version_of_trader($provider));
+        $version = $version ?? get_latest_version_of_trader($provider);
+        $stepHistories = config('murabha-steps.'.$provider.'-versions.'.$version);
+
+        if ($withFiles) {
+            return $stepHistories;
+        }
+
+        return collect($stepHistories)->transform(function ($histories, $step) {
+            return array_keys($histories);
+        })->toArray();
     }
 }
 
 if (! function_exists('trader_step_histories')) {
     function trader_step_histories(string $provider, string $version): array
     {
-        return match ($provider) {
-            'dmcc', 'fake' => DmccMurabhaStep::getStepsOfVersion($version),
-            'bursam' => BursamMurabhaStep::getStepsOfVersion($version),
-            default => throw new \InvalidArgumentException('Invalid trader')
-        };
+        return MurabhaStep::getSteps($provider, $version);
     }
 }
 

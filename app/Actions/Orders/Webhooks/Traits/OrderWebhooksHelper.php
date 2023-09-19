@@ -2,7 +2,7 @@
 
 namespace App\Actions\Orders\Webhooks\Traits;
 
-use App\Enums\DmccMurabhaStep;
+use App\Enums\MurabhaStep;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 
 trait OrderWebhooksHelper
 {
-    public function getTraderOrderLastHistory(TraderOrder $traderOrder): Model|null
+    public function getTraderOrderLastHistory(TraderOrder $traderOrder): ?Model
     {
         return $traderOrder->traderHistories()->latest('id')->first();
     }
@@ -49,7 +49,7 @@ trait OrderWebhooksHelper
     public function getUiStepName(string $step): string
     {
         return match ($step) {
-            DmccMurabhaStep::CommoditySoldToCustomer => 'borrower_ownership_certificate',
+            MurabhaStep::CommoditySoldToCustomer => 'borrower_ownership_certificate',
             default => $step
         };
     }

@@ -5,11 +5,10 @@ namespace App\Actions\Orders;
 use App\Actions\Contracts\Clients\AcceptClientWakala;
 use App\Actions\Contracts\Orders\MakeOrderProceed;
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
-use App\Enums\BursamMurabhaStep;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Exceptions\OrderRequiresClientVerification;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Jobs\General\ProcessProceedContractAndClientWakala;
@@ -78,25 +77,15 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
     protected function isPreviousStepOfClientWakalaNotCompleted(TraderOrder $traderOrder): bool
     {
-        $clientWakala = match ($traderOrder->provider) {
-            'dmcc', 'fake' => DmccMurabhaStep::ClientWakala,
-            'bursam' => BursamMurabhaStep::ClientWakala,
-        };
-
         $previousStep = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
-            ->getPreviousStepOf($clientWakala)->step;
+            ->getPreviousStepOf(MurabhaStep::ClientWakala)->step;
 
         return ! $traderOrder->checkOrderStepComplete($previousStep);
     }
 
     protected function isClientWakalaStepCompleted(TraderOrder $traderOrder): bool
     {
-        $clientWakala = match ($traderOrder->provider) {
-            'dmcc', 'fake' => DmccMurabhaStep::ClientWakala,
-            'bursam' => BursamMurabhaStep::ClientWakala,
-        };
-
-        return $traderOrder->checkOrderStepComplete($clientWakala);
+        return $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala);
     }
 
     /**
@@ -123,25 +112,15 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
     protected function isPreviousStepOfContractSignedNotCompleted(TraderOrder $traderOrder): bool
     {
-        $contractSigned = match ($traderOrder->provider) {
-            'dmcc', 'fake' => DmccMurabhaStep::ContractSigned,
-            'bursam' => BursamMurabhaStep::ContractSigned,
-        };
-
         return ! $traderOrder->checkOrderStepComplete(
             (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
-                ->getPreviousStepOf($contractSigned)->step
+                ->getPreviousStepOf(MurabhaStep::ContractSigned)->step
         );
     }
 
     protected function isContractSignedStepCompleted(TraderOrder $traderOrder): bool
     {
-        $contractSigned = match ($traderOrder->provider) {
-            'dmcc', 'fake' => DmccMurabhaStep::ContractSigned,
-            'bursam' => BursamMurabhaStep::ContractSigned,
-        };
-
-        return $traderOrder->checkOrderStepComplete($contractSigned);
+        return $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
     }
 
     /**

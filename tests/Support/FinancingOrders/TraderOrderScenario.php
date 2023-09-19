@@ -3,7 +3,7 @@
 namespace Tests\Support\FinancingOrders;
 
 use App\Enums\FinancingOrderHistory;
-use App\Enums\MurabhaStep;
+use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionaryNode;
@@ -12,13 +12,18 @@ class TraderOrderScenario
 {
     protected StepHistoriesDictionary $dictionary;
 
+    protected array $traderHistory;
+
     protected array $orderedSteps;
 
     protected function __construct(protected TraderOrder $traderOrder)
     {
-        $this->dictionary = app(StepHistoriesDictionary::class);
 
-        $this->orderedSteps = array_keys(MurabhaStep::$stepToHistoriesDictionary);
+        $this->dictionary = new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version);
+
+        $this->traderHistory = trader_step_histories($this->traderOrder->provider, $traderOrder->version);
+
+        $this->orderedSteps = array_keys($this->traderHistory);
     }
 
     public static function of(TraderOrder $traderOrder)
@@ -38,14 +43,14 @@ class TraderOrderScenario
 
     public function reset()
     {
-        $this->traderOrder
-            ->traderHistories()
-            ->where('action', '!=', FinancingOrderHistory::GetTtiId)
-            ->delete();
+        TraderHistory::withoutEvents(function () {
+            $this->traderOrder
+                ->traderHistories()
+                ->where('action', '!=', FinancingOrderHistory::GetTtiId)
+                ->delete();
+        });
 
-        $this->traderOrder->load('traderHistories');
-
-        $this->traderOrder = $this->traderOrder->query()->withLastHistoryAction()->first();
+        $this->loadHistoriesAndSetLastAction();
 
         return $this;
     }
@@ -59,7 +64,7 @@ class TraderOrderScenario
             throw new \Exception('Current/next step doesn\'t exists');
         }
 
-        $lastHistoryOfDestinationStep = end(MurabhaStep::$stepToHistoriesDictionary[$destinationStep]);
+        $lastHistoryOfDestinationStep = end($this->traderHistory[$destinationStep]);
 
         $this->moveToHistory($lastHistoryOfDestinationStep);
 
@@ -98,7 +103,7 @@ class TraderOrderScenario
 
         for ($i = $positionOfCurrentStep; $i <= $positionOfNextStep; $i++) {
             $step = $this->orderedSteps[$i];
-            $histories = MurabhaStep::$stepToHistoriesDictionary[$step];
+            $histories = $this->traderHistory[$step];
 
             if (
                 $step === $currentStep->step &&
@@ -111,21 +116,35 @@ class TraderOrderScenario
                 $histories = collect($histories)->slice($lastActionHistoryPosition + 1)->values();
             }
 
-            foreach ($histories as $history) {
-                $this->traderOrder->traderHistories()->updateOrCreate([
-                    'action' => $history,
-                ], [
-                    'created_at' => $createAt,
-                ]);
+            TraderHistory::withoutEvents(function () use ($destinationHistory, $histories, $createAt) {
+                foreach ($histories as $history) {
+                    $this->traderOrder->traderHistories()->updateOrCreate([
+                        'action' => $history,
+                    ], [
+                        'created_at' => $createAt,
+                    ]);
 
-                if ($history === $destinationHistory) {
-                    break;
+                    if ($history === $destinationHistory) {
+                        break;
+                    }
+
+                    $createAt = $createAt->addMinutes(1);
                 }
-
-                $createAt = $createAt->addMinutes(1);
-            }
+            });
         }
 
+        $this->loadHistoriesAndSetLastAction();
+
         return $this;
+    }
+
+    protected function loadHistoriesAndSetLastAction()
+    {
+        $this->traderOrder->load('traderHistories');
+
+        $this->traderOrder->setAttribute('last_history_action', TraderHistory::select('action')
+            ->where('trader_order_id', $this->traderOrder->id)
+            ->latest('id')
+            ->take(1));
     }
 }

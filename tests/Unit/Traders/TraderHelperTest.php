@@ -10,7 +10,7 @@ use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
 use App\Support\DataTransferObjects\CommodityProductDto;
-use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\TradingStrategies\Dmcc\DmccStrategyV1;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -40,7 +40,7 @@ class TraderHelperTest extends TestCase
         [self::$company] = $this->createCompany('2000', ['company_cr' => '1234567891']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin, 'lenderAdmin@bim.com');
         self::$financingOrder = $this->createOrder(self::$company->id, self::$userLender->id, ['status' => FinancingOrderStatus::PendingApproval]);
-        self::$traderHelperTrait = $this->getObjectForTrait(TraderHelperTrait::class);
+        self::$traderHelperTrait = $this->getObjectForTrait(TraderHelperTrait::class, traitClassName: DmccStrategyV1::class);
 
         self::$traderOrder = self::$traderHelperTrait->createTraderOrder(self::$financingOrder, '123', 'dmcc');
         $data = [
@@ -94,7 +94,6 @@ class TraderHelperTest extends TestCase
     {
         /** @var TraderOrder $traderOrder */
         $traderOrder = self::$traderHelperTrait->createTraderOrder(self::$financingOrder, '123', 'dmcc');
-        $trader = Trader::driver($traderOrder->provider);
 
         foreach (self::$traderHelperTrait->stepToHistoriesMap as $status => $history) {
             $traderOrder->traderHistories()->delete();
@@ -114,7 +113,7 @@ class TraderHelperTest extends TestCase
                 $uploadedFiles
             );
 
-            self::$traderHelperTrait->createStepHistories($request, $trader, $traderOrder, $status);
+            self::$traderHelperTrait->createStepHistories($request, $traderOrder, $status);
 
             foreach ($collectionNames as $collection) {
                 $this->assertTrue($traderOrder->fresh()->hasMedia($collection));
