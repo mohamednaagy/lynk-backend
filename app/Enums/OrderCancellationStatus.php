@@ -8,7 +8,7 @@ use BenSampo\Enum\Enum;
  * @method static static PendingCancellation()
  * @method static static Cancelled()
  */
-final class CancelTraderOrderStatus extends Enum
+class OrderCancellationStatus extends Enum
 {
     const PendingCancellation = 1;
 

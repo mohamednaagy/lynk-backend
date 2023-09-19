@@ -4,12 +4,12 @@ namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
 use App\Enums\BursamErrorCode;
 use App\Enums\BursamProductCode;
-use App\Enums\CancelOrderStatus;
-use App\Enums\CancelTraderOrderStatus;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\OrderCancellationStatus;
 use App\Enums\TraderErrorCode;
+use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
@@ -605,7 +605,7 @@ class BursamV1Driver implements TraderInterface
 
         ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id, TraderOrderCancelReason::Manual);
 
-        return CancelOrderStatus::PendingCancellation;
+        return OrderCancellationStatus::PendingCancellation;
     }
 
     /**
@@ -642,7 +642,7 @@ class BursamV1Driver implements TraderInterface
             ]);
         }
 
-        return CancelTraderOrderStatus::Cancelled;
+        return TraderOrderCancellationStatus::Cancelled;
     }
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void

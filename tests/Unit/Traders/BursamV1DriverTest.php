@@ -4,11 +4,11 @@ namespace Tests\Unit\Traders;
 
 use App\Enums\BursamErrorCode;
 use App\Enums\BursamProductCode;
-use App\Enums\CancelOrderStatus;
-use App\Enums\CancelTraderOrderStatus;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\OrderCancellationStatus;
+use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Models\Company;
@@ -208,7 +208,7 @@ class BursamV1DriverTest extends TestCase
         $response = self::$driver->cancelOrder(self::$order);
 
         Queue::assertPushed(ProcessBursamStbCertificateAfterCancellation::class);
-        $this->assertEquals(CancelOrderStatus::PendingCancellation, $response);
+        $this->assertEquals(OrderCancellationStatus::PendingCancellation, $response);
     }
 
     /**
@@ -244,7 +244,7 @@ class BursamV1DriverTest extends TestCase
 
         $result = self::$driver->cancelTraderOrder(self::$traderOrder);
 
-        $this->assertEquals(CancelTraderOrderStatus::Cancelled, $result);
+        $this->assertEquals(TraderOrderCancellationStatus::Cancelled, $result);
         $this->assertTrue(self::$traderOrder->status->is(TraderOrderStatus::Cancelled));
         $this->assertTrue(self::$traderOrder->order->status->is(FinancingOrderStatus::Cancelled));
     }
