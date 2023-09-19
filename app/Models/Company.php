@@ -102,7 +102,7 @@ class Company extends BaseTenant
 
     public function isStandard(): bool
     {
-        return $this->tieredPricing()->count() == 1 && $this->tieredPricing()->first()->fee_type->is(OrderFeeType::Fixed);
+        return $this->isTiered() === false;
     }
 
     public function scopeType($query, string $type)
