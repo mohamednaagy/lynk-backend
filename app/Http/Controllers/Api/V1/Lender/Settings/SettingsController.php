@@ -33,6 +33,7 @@ class SettingsController extends Controller
                 'order_cost',
                 'does_order_require_approval',
                 'webhook_secret_key',
+                'require_initiate_trade_request',
             ])->respond();
     }
 

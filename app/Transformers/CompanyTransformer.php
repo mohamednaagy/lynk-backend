@@ -28,6 +28,7 @@ class CompanyTransformer extends TransformerAbstract
         'orders_sum_amount',
         'notify_admins_about_new_orders',
         'trading_mode',
+        'require_initiate_trade_request',
     ];
 
     public function transform(Company $company): array
@@ -129,5 +130,10 @@ class CompanyTransformer extends TransformerAbstract
             ->get();
 
         return $this->collection($orderCostTiers, new OrderCostTierTransformer());
+    }
+
+    public function includeRequireInitiateTradeRequest(Company $company)
+    {
+        return $this->primitive($company->require_initiate_trade_request);
     }
 }

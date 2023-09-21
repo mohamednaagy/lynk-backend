@@ -17,6 +17,7 @@ class LenderSettingsTransformer extends TransformerAbstract
         'default_company_registration_status',
         'default_company_status_created_by_operation',
         'notify_admins_about_new_orders',
+        'require_initiate_trade_request',
     ];
 
     public function transform(Settings $settings): array
@@ -53,5 +54,10 @@ class LenderSettingsTransformer extends TransformerAbstract
     public function includeNotifyAdminsAboutNewOrders(Settings $settings): Primitive
     {
         return $this->primitive($settings->notify_admins_about_new_orders);
+    }
+
+    public function includeRequireInitiateTradeRequest(Settings $settings): Primitive
+    {
+        return $this->primitive($settings->require_initiate_trade_request);
     }
 }

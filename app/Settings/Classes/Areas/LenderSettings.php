@@ -19,6 +19,8 @@ class LenderSettings extends Settings
 
     public $notify_admins_about_new_orders;
 
+    public bool $require_initiate_trade_request;
+
     public static function group(): string
     {
         return 'area_lender';
