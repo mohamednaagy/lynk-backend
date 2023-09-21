@@ -57,6 +57,10 @@ class UpdateCompanyRequest extends FormRequest
                 'required',
                 'boolean',
             ],
+            'require_initiate_trade_request' => [
+                'required',
+                'boolean',
+            ],
             'order_cost_tiers' => [
                 'required',
                 'array',
