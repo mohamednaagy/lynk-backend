@@ -8,6 +8,7 @@ use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MurabhaStep;
+use App\Enums\WalletNotificationType;
 
 return [
     CompanyStatus::class => [
@@ -71,5 +72,9 @@ return [
         BursamProductCode::RbdPalmOlein => 'Olein Oil',
         BursamProductCode::TimberHardwood => 'Timber Hardwood',
         BursamProductCode::TimberSoftwood => 'Timber Softwood',
+    ],
+    WalletNotificationType::class => [
+        WalletNotificationType::ORDER_COUNT => 'Order Available Threshold',
+        WalletNotificationType::WALLET_BALANCE => 'Amount Available Threshold',
     ],
 ];

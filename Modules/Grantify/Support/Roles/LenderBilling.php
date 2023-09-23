@@ -25,5 +25,8 @@ class LenderBilling
         Subject::LenderEdaatInvoices => [
             Action::Manage,
         ],
+        Subject::WalletNotifications => [
+            Action::Manage,
+        ],
     ];
 }
