@@ -148,7 +148,7 @@ class OrderController extends Controller
 
                 $status = $company->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval
-                    : FinancingOrderStatus::PendingTraderOrder;
+                    : FinancingOrderStatus::Approved;
 
                 $user = $request->user();
 

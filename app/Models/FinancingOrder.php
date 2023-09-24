@@ -106,14 +106,14 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     protected function phoneNumberCountryCode(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->phone_number->getCountry(),
+            get: fn () => $this->phone_number?->getCountry(),
         );
     }
 
     protected function mobileDialingPhoneNumber(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->phone_number->formatForMobileDialingInCountry($this->phone_number->getCountry()),
+            get: fn () => $this->phone_number?->formatForMobileDialingInCountry($this->phone_number?->getCountry()),
         );
     }
 

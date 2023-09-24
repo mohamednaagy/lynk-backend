@@ -4,7 +4,7 @@ namespace App\Support\Sms\Drivers;
 
 use App\Support\Sms\Events\SmsSent;
 use App\Support\Sms\SmsDriverInterface;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 
 class FakeDriver implements SmsDriverInterface
 {

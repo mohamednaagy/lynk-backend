@@ -2,6 +2,8 @@
 
 namespace App\Observers;
 
+use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
+use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
 use App\Models\TraderHistory;
 use App\Observers\Traits\ObserverHelper;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -26,8 +28,19 @@ class TraderHistoryObserver
         $currentCompletedStepNode = app(StepHistoriesDictionary::class)->getCompletedStepByHistory($traderHistory->action);
         $this->fireWebhookWhenStatusIsMurabhaOfferIssued($traderOrder, $currentCompletedStepNode);
 
-        foreach ($this->getActionsOfProvider($traderOrder->provider, $currentCompletedStepNode) as $action) {
-            app($action)->handle($traderOrder->order, $traderHistory->traderOrder);
+        foreach ($this->getActionsOfProvider($traderOrder->provider, $currentCompletedStepNode) as $actionClass) {
+            $action = app($actionClass);
+
+            if (
+                ($action instanceof SendSmsWhenStatusIsCommoditySoldToCustomer ||
+                    $action instanceof SendSmsWhenStatusIsMurabahaSaleCompleted) &&
+                ! $traderOrder->order->is_verification_required
+            ) {
+                continue;
+            }
+
+            $action->handle($traderOrder->order, $traderHistory->traderOrder);
+
         }
     }
 
