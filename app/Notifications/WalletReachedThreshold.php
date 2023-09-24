@@ -47,7 +47,7 @@ class WalletReachedThreshold extends Notification
             ->subject(__('emails/wallet-reached-threshold.'.$this->walletNotification->type->value.'.subject'))
             ->line(trans('emails/wallet-reached-threshold.'.$this->walletNotification->type->value.'.content', [
                 'value' => $this->walletNotification->type->is(WalletNotificationType::ORDER_COUNT)
-                    ? (int) $this->walletNotification->value->formatByDecimal()
+                    ? intval($this->walletNotification->value->formatByDecimal())
                     : $this->walletNotification->value->formatByDecimal(),
             ]))
             ->action(trans('emails/wallet-reached-threshold.action'), $url);

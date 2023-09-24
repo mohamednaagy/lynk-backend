@@ -6,6 +6,7 @@ use App\Actions\Contracts\Wallets\Notifications\SyncWalletNotification;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
+use App\Enums\WalletNotificationType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Wallets\WalletNotificationRequest;
 use App\Models\WalletNotification;
@@ -35,7 +36,11 @@ class WalletNotificationController extends Controller
     {
         $company = tenant();
 
-        return fractal($company->walletNotification, new WalletNotificationTransformer)->respond();
+        return fractal($company->walletNotification, new WalletNotificationTransformer)
+            ->addMeta([
+                'types' => WalletNotificationType::asSelectArray(),
+            ])
+            ->respond();
     }
 
     public function store(WalletNotificationRequest $request, SyncWalletNotification $syncWalletNotification)

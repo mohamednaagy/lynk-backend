@@ -43,7 +43,7 @@ class CheckWalletNotificaitonJob implements ShouldQueue
         }
 
         $doesReachedThreshold = match ($notifiaction->type->value) {
-            WalletNotificationType::ORDER_COUNT => $this->getOrderCount($company, $balance) <= (int) $notifiaction->value->formatByDecimal(),
+            WalletNotificationType::ORDER_COUNT => $this->getOrderCount($company, $balance) <= intval($notifiaction->value->formatByDecimal()),
             WalletNotificationType::WALLET_BALANCE => $balance->lessThanOrEqual($notifiaction->value),
         };
 

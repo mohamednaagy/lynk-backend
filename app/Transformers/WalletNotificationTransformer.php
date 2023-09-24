@@ -17,7 +17,7 @@ class WalletNotificationTransformer extends TransformerAbstract
                 'label' => $walletNotification->type->description,
             ],
             'value' => $walletNotification->type->is(WalletNotificationType::ORDER_COUNT)
-                ? (int) $walletNotification->value->formatByDecimal()
+                ? intval($walletNotification->value->formatByDecimal())
                 : $walletNotification->value->formatByDecimal(),
         ];
     }
