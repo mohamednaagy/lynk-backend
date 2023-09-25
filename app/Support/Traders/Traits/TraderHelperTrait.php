@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use InvalidArgumentException;
 
 trait TraderHelperTrait
 {
@@ -22,7 +23,7 @@ trait TraderHelperTrait
         $stepToHistoriesMap = get_murabha_steps($traderOrder->provider, $traderOrder->version, true);
 
         if (! array_key_exists($step, $stepToHistoriesMap)) {
-            return;
+            throw new InvalidArgumentException();
         }
 
         foreach ($stepToHistoriesMap[$step] as $history => $media) {
