@@ -37,6 +37,7 @@ class CreateCompanyAction implements CreateCompany
                     'type',
                     'notify_admins_about_new_orders',
                     'trading_mode',
+                    'require_initiate_trade_request',
                 ]
             )
         );
