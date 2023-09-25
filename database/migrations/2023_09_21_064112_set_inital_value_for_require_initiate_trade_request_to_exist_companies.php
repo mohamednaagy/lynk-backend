@@ -15,7 +15,7 @@ return new class extends Migration
     public function up()
     {
         Company::query()
-            ->chunk(20, function (Collection $companies) {
+            ->chunkById(20, function (Collection $companies) {
                 $companies->each(function (Company $company) {
                     $company->update([
                         'require_initiate_trade_request' => $company->trading_mode->is(TraderOrderMode::Manual) || ! $company->does_order_require_approval,
