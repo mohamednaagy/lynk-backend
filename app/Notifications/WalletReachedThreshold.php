@@ -8,6 +8,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Config;
+use NumberFormatter;
 
 class WalletReachedThreshold extends Notification
 {
@@ -47,7 +48,7 @@ class WalletReachedThreshold extends Notification
             ->subject(__('emails/wallet-reached-threshold.'.$this->walletNotification->type->value.'.subject'))
             ->line(trans('emails/wallet-reached-threshold.'.$this->walletNotification->type->value.'.content', [
                 'value' => $this->walletNotification->type->is(WalletNotificationType::ORDER_COUNT)
-                    ? intval($this->walletNotification->value->formatByDecimal())
+                    ? $this->walletNotification->value->format(style: NumberFormatter::TYPE_INT32)
                     : $this->walletNotification->value->formatByDecimal(),
             ]))
             ->action(trans('emails/wallet-reached-threshold.action'), $url);
