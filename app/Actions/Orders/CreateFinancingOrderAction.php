@@ -12,7 +12,10 @@ use Illuminate\Support\Arr;
 
 class CreateFinancingOrderAction implements CreateFinancingOrder
 {
-    public function handle(Company $company, array $data): FinancingOrder|Model
+    /**
+     * @return FinancingOrder|Model
+     */
+    public function handle(Company $company, array $data): FinancingOrder
     {
         $data = cast_phone_number_if_exist($data);
 
