@@ -43,7 +43,7 @@ class CheckWalletNotificaitonJob implements ShouldQueue
         }
 
         $doesReachedThreshold = match ($notifiaction->type->value) {
-            WalletNotificationType::ORDER_COUNT => $this->getOrderCount($company, $balance) <= intval($notifiaction->value->formatByDecimal()),
+            WalletNotificationType::ORDER_COUNT => $this->getOrderCount($company, $balance)->lessThanOrEqual($notifiaction->value),
             WalletNotificationType::WALLET_BALANCE => $balance->lessThanOrEqual($notifiaction->value),
         };
 
@@ -67,14 +67,14 @@ class CheckWalletNotificaitonJob implements ShouldQueue
         Notification::send($notifiables, new WalletReachedThreshold($notifiaction));
     }
 
-    private function getOrderCount(Company $company, Money $balance): ?int
+    private function getOrderCount(Company $company, Money $balance): ?Money
     {
         if (! $company->isStandard()) {
-            return null;
+            return new Money(0);
         }
 
         $orderCostWithVat = TieredPricing::getOrderCostIfStandard($company)['costWithVat'];
 
-        return $balance->getAmount() / $orderCostWithVat->getAmount();
+        return $balance->divide($orderCostWithVat->getAmount(), \Money\Money::ROUND_DOWN);
     }
 }
