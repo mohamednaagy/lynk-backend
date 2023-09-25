@@ -107,6 +107,7 @@ class LenderController extends Controller
                     'unique_name',
                     'company_cr',
                     'does_order_require_approval',
+                    'require_initiate_trade_request',
                     'order_cost',
                 ])
                 ->respond();
@@ -133,6 +134,7 @@ class LenderController extends Controller
                 'order_cost_tiers.proration_amount',
                 'notifications_email',
                 'notify_admins_about_new_orders',
+                'require_initiate_trade_request',
                 'trading_mode',
             ])
             ->respond();
