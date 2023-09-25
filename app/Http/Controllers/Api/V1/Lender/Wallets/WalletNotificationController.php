@@ -9,6 +9,7 @@ use App\Enums\Subject;
 use App\Enums\WalletNotificationType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Wallets\WalletNotificationRequest;
+use App\Models\Company;
 use App\Models\WalletNotification;
 use App\Transformers\WalletNotificationTransformer;
 
@@ -34,11 +35,14 @@ class WalletNotificationController extends Controller
 
     public function index()
     {
+        /** @var Company $company */
         $company = tenant();
 
         return fractal($company->walletNotification, new WalletNotificationTransformer)
             ->addMeta([
-                'types' => WalletNotificationType::asSelectArray(),
+                'types' => collect(WalletNotificationType::asSelectArray())->reject(function ($item, $value) use ($company) {
+                    return $company->isTiered() && $value == WalletNotificationType::ORDER_COUNT;
+                }),
             ])
             ->respond();
     }
