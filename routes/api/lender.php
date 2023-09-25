@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\V1\Lender\Users\UserController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CalculateOrderCost;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetBalance;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetWalletTransactions;
+use App\Http\Controllers\Api\V1\Lender\Wallets\WalletNotificationController;
 use App\Http\Controllers\Api\V1\Lender\Webhooks\WebhookController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
@@ -94,6 +95,9 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                             Route::get('/transactions', GetWalletTransactions::class);
                         }
                     );
+
+                    Route::apiResource('wallet-notifications', WalletNotificationController::class)
+                        ->only('index', 'store', 'destroy');
 
                     Route::apiResource('webhooks', WebhookController::class)->only('index', 'store', 'destroy');
                     Route::put('webhooks/refresh-secret', [WebhookController::class, 'refreshSecret']);
