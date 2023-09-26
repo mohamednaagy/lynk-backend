@@ -28,7 +28,7 @@ class UpdateOrderRequest extends FormRequest
     {
         return [
             'reference_number' => ['nullable', 'string', 'max:100'],
-            'national_id' => ['required', 'integer', 'size:10', 'digits:10', 'gt:0'],
+            'national_id' => ['required', 'integer', 'digits:10', 'gt:0'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],
             'amount' => ['required', 'numeric', 'gt:0'],

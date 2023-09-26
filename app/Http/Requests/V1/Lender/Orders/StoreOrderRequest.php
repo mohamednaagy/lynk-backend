@@ -29,7 +29,7 @@ class StoreOrderRequest extends FormRequest
         return [
             'customer_name' => ['required', 'string', 'max:255'],
             'reference_number' => ['nullable', 'string', 'max:100'],
-            'national_id' => ['required', 'integer', 'size:10', 'digits:10', 'gt:0'],
+            'national_id' => ['required', 'integer', 'digits:10', 'gt:0'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'string', 'phone:phone_country_code,mobile'],
             'amount' => ['required', 'numeric', 'gte:1'],
