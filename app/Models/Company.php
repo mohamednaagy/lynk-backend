@@ -51,6 +51,7 @@ class Company extends BaseTenant
             'internal_status_comment',
             'does_order_require_approval',
             'require_initiate_trade_request',
+            'notify_borrowers_about_order_updates',
             'webhook_secret_key',
             'created_at',
             'updated_at',

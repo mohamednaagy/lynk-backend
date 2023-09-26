@@ -49,7 +49,7 @@ class TraderHistoryObserver
 
     private function isNotifyBorrowersAboutOrderUpdatesOn(FinancingOrder $financingOrder): bool
     {
-        $company = $financingOrder->company();
+        $company = $financingOrder->company;
 
         return $company->notify_borrowers_about_order_updates;
     }
