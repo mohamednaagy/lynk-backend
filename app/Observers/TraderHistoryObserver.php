@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
+use App\Models\FinancingOrder;
 use App\Models\TraderHistory;
 use App\Observers\Traits\ObserverHelper;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -34,14 +35,23 @@ class TraderHistoryObserver
             if (
                 ($action instanceof SendSmsWhenStatusIsCommoditySoldToCustomer ||
                     $action instanceof SendSmsWhenStatusIsMurabahaSaleCompleted) &&
-                ! $traderOrder->order->is_verification_required
+                $this->isNotifyBorrowersAboutOrderUpdatesOn($traderOrder->order)
             ) {
-                continue;
+                if (! $traderOrder->order->is_verification_required) {
+                    continue;
+                }
             }
 
             $action->handle($traderOrder->order, $traderHistory->traderOrder);
 
         }
+    }
+
+    private function isNotifyBorrowersAboutOrderUpdatesOn(FinancingOrder $financingOrder): bool
+    {
+        $company = $financingOrder->company();
+
+        return $company->notify_borrowers_about_order_updates;
     }
 
     /**

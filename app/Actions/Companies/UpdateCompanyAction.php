@@ -29,6 +29,7 @@ class UpdateCompanyAction implements UpdateCompany
                     'notify_admins_about_new_orders',
                     'trading_mode',
                     'require_initiate_trade_request',
+                    'notify_borrowers_about_order_updates',
                 ]
             )
         );

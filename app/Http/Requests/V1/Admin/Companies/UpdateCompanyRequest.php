@@ -134,6 +134,10 @@ class UpdateCompanyRequest extends FormRequest
                 'integer',
                 new EnumValue(CompanyNewOrderNotificationForAdminStatus::class, false),
             ],
+            'notify_borrowers_about_order_updates' => [
+                'required',
+                'boolean',
+            ],
             'trading_mode' => [
                 'required',
                 'string',

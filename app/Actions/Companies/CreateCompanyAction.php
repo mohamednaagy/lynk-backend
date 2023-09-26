@@ -36,6 +36,7 @@ class CreateCompanyAction implements CreateCompany
                     'driver',
                     'type',
                     'notify_admins_about_new_orders',
+                    'notify_borrowers_about_order_updates',
                     'trading_mode',
                     'require_initiate_trade_request',
                 ]
