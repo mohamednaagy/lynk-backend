@@ -33,9 +33,7 @@ class UpdateOrderRequest extends FormRequest
             'national_id' => ['required', 'string', 'size:10', new ValidateSAID()],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => [
-                Rule::requiredIf(function () {
-                    return $this->order?->is_verification_required;
-                }),
+                Rule::requiredIf($this->order->is_verification_required),
                 'phone:phone_country_code,mobile',
                 'string',
             ],
