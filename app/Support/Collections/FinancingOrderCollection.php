@@ -18,7 +18,7 @@ class FinancingOrderCollection extends Collection
 
         $totalOrderCost = Transaction::select([
             'meta->financing_order_id as order_id',
-            DB::raw('SUM(CASE WHEN reason = '.TransactionReason::OrderCreationFee.' THEN -1 * amount ELSE amount END) as amount'),
+            DB::raw('-1 * SUM(amount) as amount'),
             DB::raw('SUM(CASE WHEN reason = '.TransactionReason::OrderCreationFee.' THEN JSON_EXTRACT(meta, "$.vat_amount.amount") ELSE 0 END) as vat'),
         ])
             ->whereIn('meta->financing_order_id', $ids)
@@ -26,7 +26,7 @@ class FinancingOrderCollection extends Collection
             ->groupBy('order_id')
             ->get();
         $totalOrderVat = Transaction::select(['meta->financing_order_id as order_id',
-            DB::raw('SUM(CASE WHEN reason = '.TransactionReason::VatPercentageFee.' THEN -1 * amount ELSE amount END) as amount')])
+            DB::raw('-1 * SUM(amount) as amount')])
             ->whereIn('meta->financing_order_id', $ids)
             ->whereIn('reason', [TransactionReason::VatPercentageFee, TransactionReason::RefundVatPercentageFee])
             ->groupBy('order_id')
