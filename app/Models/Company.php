@@ -30,6 +30,7 @@ class Company extends BaseTenant
     protected $casts = [
         'status' => CompanyStatus::class,
         'does_order_require_approval' => 'boolean',
+        'notify_borrowers_about_order_updates' => 'boolean',
         'require_initiate_trade_request' => 'boolean',
         'webhook_secret_key' => 'encrypted',
         'type' => CompanyType::class,
@@ -50,6 +51,7 @@ class Company extends BaseTenant
             'internal_status_comment',
             'does_order_require_approval',
             'require_initiate_trade_request',
+            'notify_borrowers_about_order_updates',
             'webhook_secret_key',
             'created_at',
             'updated_at',

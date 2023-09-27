@@ -27,6 +27,7 @@ class CompanyTransformer extends TransformerAbstract
         'notifications_email',
         'orders_sum_amount',
         'notify_admins_about_new_orders',
+        'notify_borrowers_about_order_updates',
         'trading_mode',
         'require_initiate_trade_request',
     ];
@@ -121,6 +122,11 @@ class CompanyTransformer extends TransformerAbstract
     public function includeNotifyAdminsAboutNewOrders(Company $company)
     {
         return $this->primitive($company->notify_admins_about_new_orders);
+    }
+
+    public function includeNotifyBorrowersAboutOrderUpdates(Company $company)
+    {
+        return $this->primitive($company->notify_borrowers_about_order_updates);
     }
 
     public function includeOrderCostTiers(Company $company): Collection
