@@ -15,7 +15,7 @@ return new class extends Migration
     public function up()
     {
         Company::doesntHave('tieredPricing')
-            ->chunk(20, function (Collection $companies) {
+            ->chunkById(20, function (Collection $companies) {
                 $companies->each(function (Company $company) {
 
                     $orderCostWithoutVat = money($company->order_cost, $company->order_cost_currency);
