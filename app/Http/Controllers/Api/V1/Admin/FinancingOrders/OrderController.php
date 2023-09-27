@@ -101,7 +101,6 @@ class OrderController extends Controller
                 'status',
                 'reference_number',
                 'customer_name',
-                'company_name',
                 'national_id',
                 'company_name',
                 'amount',
