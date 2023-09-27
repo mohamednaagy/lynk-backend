@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Lender\Settings;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
+use App\Enums\TraderOrderMode;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Settings\UpdateSettingsRequest;
 use App\Transformers\CompanyTransformer;
@@ -42,6 +43,10 @@ class SettingsController extends Controller
         $company = tenant();
 
         $data = $updateSettingsRequest->validated();
+        if ($company->trading_mode->is(TraderOrderMode::Manual)) {
+            unset($data['require_initiate_trade_request']);
+        }
+
         $company->update($data);
 
         return $this->successResponse([]);
