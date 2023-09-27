@@ -50,7 +50,6 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
                     'selling_price',
                     'status',
                     'status_reason',
-                    'is_verification_required',
                 ]
             )
         );
