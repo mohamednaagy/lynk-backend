@@ -172,7 +172,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->where('reason', TransactionReason::OrderCreationFee);
     }
 
-    public function getPhoneNumber(): PhoneNumber
+    public function getPhoneNumber(): ?PhoneNumber
     {
         return $this->phone_number;
     }
