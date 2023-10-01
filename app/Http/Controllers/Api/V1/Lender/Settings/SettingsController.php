@@ -36,6 +36,7 @@ class SettingsController extends Controller
                 'does_order_require_approval',
                 'webhook_secret_key',
                 'require_initiate_trade_request',
+                'notify_borrowers_about_order_updates',
             ])->respond();
     }
 

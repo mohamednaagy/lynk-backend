@@ -31,7 +31,7 @@ class CreateCompanyAction implements CreateCompany
                     'status',
                     'does_order_require_approval',
                     'webhook_secret_key',
-                    'public_status_comment',
+                    'public_sFtatus_comment',
                     'internal_status_comment',
                     'driver',
                     'type',
