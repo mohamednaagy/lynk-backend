@@ -32,9 +32,6 @@ class LenderSettingsIndexTest extends TestCase
 
     private static User $userLenderOrderCreator;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -47,9 +44,6 @@ class LenderSettingsIndexTest extends TestCase
         self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_index_lender_settings(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -60,9 +54,6 @@ class LenderSettingsIndexTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_lender_admin_role_can_index_lender_settings(): void
     {
         $this->actingAs(self::$userLender)
@@ -74,6 +65,8 @@ class LenderSettingsIndexTest extends TestCase
                     ->parseIncludes([
                         'order_cost',
                         'does_order_require_approval',
+                        'notify_borrowers_about_order_updates',
+                        'require_initiate_trade_request',
                         'webhook_secret_key',
                     ])
                     ->respond()
@@ -81,9 +74,6 @@ class LenderSettingsIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_lender_api_user_role_can_index_lender_settings(): void
     {
         $this->actingAs(self::$userLenderApiUser)
@@ -95,6 +85,8 @@ class LenderSettingsIndexTest extends TestCase
                     ->parseIncludes([
                         'order_cost',
                         'does_order_require_approval',
+                        'notify_borrowers_about_order_updates',
+                        'require_initiate_trade_request',
                         'webhook_secret_key',
                     ])
                     ->respond()
@@ -102,9 +94,6 @@ class LenderSettingsIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_lender_supervisor_role_cannot_index_lender_settings(): void
     {
         $this->actingAs(self::$userLenderSupervisor)
@@ -117,9 +106,6 @@ class LenderSettingsIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_lender_billing_role_cannot_index_lender_settings(): void
     {
         $this->actingAs(self::$userLenderBilling)
@@ -132,9 +118,6 @@ class LenderSettingsIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_lender_creator_role_cannot_index_lender_settings(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
@@ -147,9 +130,6 @@ class LenderSettingsIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_user_with_not_verified_email_cannot_index_lender_settings(): void
     {
         // update user email verified at to be null
@@ -166,9 +146,6 @@ class LenderSettingsIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_user_when_company_not_active_cannot_index_lender_settings(): void
     {
         // update user email verified at to be null

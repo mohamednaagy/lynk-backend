@@ -25,6 +25,7 @@ class UpdateSettingsRequest extends FormRequest
         return [
             'does_order_require_approval' => ['required', 'boolean'],
             'require_initiate_trade_request' => ['required', 'boolean'],
+            'notify_borrowers_about_order_updates' => ['required', 'boolean'],
         ];
     }
 }
