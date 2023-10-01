@@ -58,7 +58,6 @@ class UpdateCompanyRequest extends FormRequest
                 'boolean',
             ],
             'require_initiate_trade_request' => [
-                'nullable',
                 'required_if:trading_mode,'.TraderOrderMode::Automatic,
                 'boolean',
             ],
