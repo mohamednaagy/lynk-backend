@@ -14,6 +14,10 @@ class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatu
 {
     public function handle(FinancingOrder $financingOrder, TraderOrder $traderOrder): void
     {
+        if (! $this->isNotifyBorrowersAboutOrderUpdatesOn($financingOrder) || ! $financingOrder->is_verification_required) {
+            return;
+        }
+
         $phoneNumber = ltrim($financingOrder->getPhoneNumber()->formatE164(), '+');
         $message = $this->resolveMessage($financingOrder, $traderOrder);
 
@@ -58,5 +62,12 @@ class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatu
         }
 
         return $documentShortUrl;
+    }
+
+    private function isNotifyBorrowersAboutOrderUpdatesOn(FinancingOrder $financingOrder): bool
+    {
+        $company = $financingOrder->company;
+
+        return $company->notify_borrowers_about_order_updates;
     }
 }
