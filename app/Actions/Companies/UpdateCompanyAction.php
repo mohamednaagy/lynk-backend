@@ -12,6 +12,10 @@ class UpdateCompanyAction implements UpdateCompany
 {
     public function handle(Company $company, array $data): Company
     {
+        if (array_key_exists('require_initiate_trade_request', $data) && is_null($data['require_initiate_trade_request'])) {
+            unset($data['require_initiate_trade_request']);
+        }
+
         $company->update(
             Arr::only(
                 $data,
