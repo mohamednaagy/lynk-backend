@@ -20,6 +20,10 @@ class CreateCompanyAction implements CreateCompany
             $data['webhook_secret_key'] = $this->generateWebhookSecretKey->handle();
         }
 
+        if (array_key_exists('require_initiate_trade_request', $data) && is_null($data['require_initiate_trade_request'])) {
+            unset($data['require_initiate_trade_request']);
+        }
+
         return Company::create(
             Arr::only(
                 $data,
