@@ -29,7 +29,7 @@ class TransactionObserverTest extends TestCase
         [self::$lender] = $this->createCompany();
     }
 
-    public function test_fire_job_to_check_balance_threshold_reached_when_negative_transaction_is_created_()
+    public function test_fire_job_to_check_balance_threshold_reached_when_negative_transaction_is_created()
     {
         Queue::fake([
             CheckWalletNotificaitonJob::class,
@@ -42,7 +42,7 @@ class TransactionObserverTest extends TestCase
         Queue::assertPushed(CheckWalletNotificaitonJob::class);
     }
 
-    public function test_mot_fire_job_to_check_balance_threshold_reached_when_positive_transaction_is_created_()
+    public function test_mot_fire_job_to_check_balance_threshold_reached_when_positive_transaction_is_created()
     {
         Queue::fake([
             CheckWalletNotificaitonJob::class,
