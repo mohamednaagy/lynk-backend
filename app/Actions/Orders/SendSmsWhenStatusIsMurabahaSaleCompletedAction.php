@@ -14,7 +14,7 @@ class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatu
 {
     public function handle(FinancingOrder $financingOrder, TraderOrder $traderOrder): void
     {
-        if (! $this->isNotifyBorrowersAboutOrderUpdatesOn($financingOrder) || ! $financingOrder->is_verification_required) {
+        if (! $this->isNotifyBorrowersAboutOrderUpdatesOn($financingOrder) || ! $financingOrder->getPhoneNumber()) {
             return;
         }
 
