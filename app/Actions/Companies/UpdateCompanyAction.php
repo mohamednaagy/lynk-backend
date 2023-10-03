@@ -3,6 +3,7 @@
 namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\UpdateCompany;
+use App\Enums\WalletNotificationType;
 use App\Models\Company;
 use App\Models\TieredPricing;
 use Illuminate\Support\Arr;
@@ -41,8 +42,8 @@ class UpdateCompanyAction implements UpdateCompany
 
             $isTieredAfterUpdate = $company->isTiered();
 
-            if ($isTieredBeforeUpdate != $isTieredAfterUpdate) {
-                $company->walletNotification()->delete();
+            if ($isTieredBeforeUpdate != $isTieredAfterUpdate && $isTieredAfterUpdate) {
+                $company->walletNotification()->where('type', WalletNotificationType::ORDER_COUNT)->delete();
             }
         }
 
