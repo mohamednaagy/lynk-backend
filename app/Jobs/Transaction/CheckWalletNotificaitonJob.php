@@ -63,7 +63,7 @@ class CheckWalletNotificaitonJob implements ShouldQueue
                 $query->role(Role::LenderAdmin)
                     ->orWhere(function ($query) {
                         $query->permission(
-                            perm(Area::Lender, [Subject::WalletNotifications, Action::Index])
+                            perm_arr(Area::Lender, [Subject::WalletNotifications, Action::Index, Action::Manage])
                         );
                     });
             })
