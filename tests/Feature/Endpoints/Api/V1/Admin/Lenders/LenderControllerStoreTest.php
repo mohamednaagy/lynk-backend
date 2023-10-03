@@ -74,6 +74,8 @@ class LenderControllerStoreTest extends TestCase
                 ],
             ],
             'does_order_require_approval' => '1',
+            'notify_borrowers_about_order_updates' => '1',
+            'require_initiate_trade_request' => '1',
             'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::On,
             'webhook_secret_key' => Str::random(Config::get('webhook-server.secret_key_length', 40)),
             'trading_mode' => TraderOrderMode::Automatic,
@@ -104,6 +106,8 @@ class LenderControllerStoreTest extends TestCase
                     'unique_name',
                     'company_cr',
                     'does_order_require_approval',
+                    'require_initiate_trade_request',
+                    'notify_borrowers_about_order_updates',
                 ],
             ]);
 
