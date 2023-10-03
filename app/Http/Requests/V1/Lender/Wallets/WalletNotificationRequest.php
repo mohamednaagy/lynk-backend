@@ -28,6 +28,7 @@ class WalletNotificationRequest extends FormRequest
             ],
             'value' => [
                 'required',
+                'gte:0',
                 $this->input('type') === WalletNotificationType::ORDER_COUNT
                     ? 'integer'
                     : 'numeric',
