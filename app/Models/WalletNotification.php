@@ -6,6 +6,7 @@ use App\Enums\WalletNotificationType;
 use App\Support\Money\Casts\MoneyStringCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 class WalletNotification extends Model
@@ -23,4 +24,14 @@ class WalletNotification extends Model
         'type' => WalletNotificationType::class,
         'value' => MoneyStringCast::class,
     ];
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function wallet(): BelongsTo
+    {
+        return $this->belongsTo(Wallet::class);
+    }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Transaction;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -33,6 +33,11 @@ class CheckWalletNotificaitonJob implements ShouldQueue
     public function handle(): void
     {
         $company = $this->wallet->holder;
+
+        if (! $company instanceof Company) {
+            return;
+        }
+
         $notifiaction = WalletNotification::where('company_id', $company->id)
             ->where('wallet_id', $this->wallet->id)
             ->first();
@@ -58,7 +63,7 @@ class CheckWalletNotificaitonJob implements ShouldQueue
                 $query->role(Role::LenderAdmin)
                     ->orWhere(function ($query) {
                         $query->permission(
-                            perm(Area::Lender, [Subject::WalletNotifications, Action::Index])
+                            perm_arr(Area::Lender, [Subject::WalletNotifications, Action::Index, Action::Manage])
                         );
                     });
             })

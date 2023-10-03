@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Jobs\CheckWalletNotificaitonJob;
+use App\Jobs\Transaction\CheckWalletNotificaitonJob;
 use App\Models\Transaction;
 
 class TransactionObserver
