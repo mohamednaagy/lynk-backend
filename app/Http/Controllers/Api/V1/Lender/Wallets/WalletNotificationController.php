@@ -10,7 +10,6 @@ use App\Enums\WalletNotificationType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Wallets\WalletNotificationRequest;
 use App\Models\Company;
-use App\Models\WalletNotification;
 use App\Transformers\WalletNotificationTransformer;
 
 class WalletNotificationController extends Controller
@@ -26,11 +25,6 @@ class WalletNotificationController extends Controller
             'permission:'.
             perm(Area::Lender, [Subject::WalletNotifications, Action::Create, Action::Manage])
         )->only('store');
-
-        $this->middleware(
-            'permission:'.
-            perm(Area::Lender, [Subject::WalletNotifications, Action::Delete, Action::Manage])
-        )->only('destroy');
     }
 
     public function index()
@@ -54,12 +48,5 @@ class WalletNotificationController extends Controller
         $notifications = $syncWalletNotification->handle($company, $request->validated());
 
         return fractal($notifications, new WalletNotificationTransformer)->respond();
-    }
-
-    public function destroy(WalletNotification $walletNotification)
-    {
-        $walletNotification->delete();
-
-        return $this->successResponse();
     }
 }

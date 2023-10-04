@@ -97,7 +97,7 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                     );
 
                     Route::apiResource('wallet-notifications', WalletNotificationController::class)
-                        ->only('index', 'store', 'destroy');
+                        ->only('index', 'store');
 
                     Route::apiResource('webhooks', WebhookController::class)->only('index', 'store', 'destroy');
                     Route::put('webhooks/refresh-secret', [WebhookController::class, 'refreshSecret']);
