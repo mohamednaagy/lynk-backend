@@ -31,6 +31,10 @@ class SyncWalletNotificationAction implements SyncWalletNotification
                 ]
             );
 
+        if ($walletNotification->wasChanged(['value', 'type'])) {
+            $walletNotification->markAsNotNotified();
+        }
+
         return $walletNotification;
     }
 }
