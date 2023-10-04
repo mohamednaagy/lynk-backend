@@ -38,6 +38,19 @@ class WalletNotificationControlleStoreTest extends TestCase
         self::$userBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
     }
 
+    public function test_delete_wallet_notification_when_value_is_null()
+    {
+        $this->actingAs(self::$userLenderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->postJson(self::$url, [
+                'type' => WalletNotificationType::ORDER_COUNT,
+                'value' => null,
+            ])
+            ->assertOk();
+
+        $this->assertNull(self::$company->walletNotification);
+    }
+
     public function test_set_wallet_notification_with_order_count_type_success_when_no_notification_exists_and_company_is_standard()
     {
         self::$company->walletNotification()->delete();

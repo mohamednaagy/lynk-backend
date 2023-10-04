@@ -56,6 +56,10 @@ class CheckWalletNotificaitonJob implements ShouldQueue
             return;
         }
 
+        if ($notifiaction->isNotified()) {
+            return;
+        }
+
         $notifiables = User::query()
             ->withoutGlobalScope(TenantScope::class)
             ->where('company_id', $company->id)
@@ -70,6 +74,8 @@ class CheckWalletNotificaitonJob implements ShouldQueue
             ->get();
 
         Notification::send($notifiables, new WalletReachedThreshold($notifiaction));
+
+        $notifiaction->markAsNotified();
     }
 
     private function getOrderCount(Company $company, Money $balance): ?Money

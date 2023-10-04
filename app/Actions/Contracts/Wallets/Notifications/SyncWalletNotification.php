@@ -7,5 +7,5 @@ use App\Models\WalletNotification;
 
 interface SyncWalletNotification
 {
-    public function handle(Company $company, array $data): WalletNotification;
+    public function handle(Company $company, array $data): ?WalletNotification;
 }

@@ -68,7 +68,9 @@ class CheckWalletNotificaitonJobTest extends TestCase
             'value' => $orderCount->getAmount() - 1,
         ])
             ->for(self::$company)
-            ->for($wallet)->create();
+            ->for($wallet)
+            ->notNotified()
+            ->create();
 
         app(CreateTransactions::class)->handle($wallet, TransactionReason::OrderCreationFee, $orderCostWithVat, []);
 
@@ -96,7 +98,9 @@ class CheckWalletNotificaitonJobTest extends TestCase
             'value' => $balance->subtract($amount),
         ])
             ->for(self::$company)
-            ->for($wallet)->create();
+            ->for($wallet)
+            ->notNotified()
+            ->create();
 
         app(CreateTransactions::class)->handle($wallet, TransactionReason::OrderCreationFee, $amount, []);
 
@@ -104,6 +108,33 @@ class CheckWalletNotificaitonJobTest extends TestCase
 
         Notification::assertSentTo(self::$lenderAdmin, WalletReachedThreshold::class);
         Notification::assertSentTo(self::$lenderBilling, WalletReachedThreshold::class);
+        Notification::assertNotSentTo(self::$lenderSupervisor, WalletReachedThreshold::class);
+        Notification::assertNotSentTo(self::$lenderOrderCreator, WalletReachedThreshold::class);
+        Notification::assertNotSentTo(self::$lenderApiUser, WalletReachedThreshold::class);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function test_check_wallet_if_threshold_reached_with_notification_already_notified()
+    {
+        Notification::fake();
+        $wallet = self::$company->getWallet(WalletType::CompanyWallet);
+        $balance = $wallet->balance;
+        $amount = Money::parseByDecimal(10, $wallet->currency);
+
+        WalletNotification::factory()
+            ->for(self::$company)
+            ->for($wallet)
+            ->notified()
+            ->create();
+
+        app(CreateTransactions::class)->handle($wallet, TransactionReason::OrderCreationFee, $amount, []);
+
+        (new CheckWalletNotificaitonJob($wallet))->handle();
+
+        Notification::assertNotSentTo(self::$lenderAdmin, WalletReachedThreshold::class);
+        Notification::assertNotSentTo(self::$lenderBilling, WalletReachedThreshold::class);
         Notification::assertNotSentTo(self::$lenderSupervisor, WalletReachedThreshold::class);
         Notification::assertNotSentTo(self::$lenderOrderCreator, WalletReachedThreshold::class);
         Notification::assertNotSentTo(self::$lenderApiUser, WalletReachedThreshold::class);

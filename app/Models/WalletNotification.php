@@ -18,6 +18,7 @@ class WalletNotification extends Model
         'wallet_id',
         'type',
         'value',
+        'notified_at',
     ];
 
     protected $casts = [
@@ -33,5 +34,24 @@ class WalletNotification extends Model
     public function wallet(): BelongsTo
     {
         return $this->belongsTo(Wallet::class);
+    }
+
+    public function markAsNotified(): bool
+    {
+        return $this->fill([
+            'notified_at' => $this->freshTimestamp(),
+        ])->save();
+    }
+
+    public function markAsNotNotified(): bool
+    {
+        return $this->fill([
+            'notified_at' => null,
+        ])->save();
+    }
+
+    public function isNotified(): bool
+    {
+        return ! is_null($this->notified_at);
     }
 }
