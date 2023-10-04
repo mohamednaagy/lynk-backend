@@ -134,8 +134,8 @@ return [
     'money_value' => 'The :attribute format is invalid.',
     'company_unique_name' => 'Identifier should contain only English letters, numbers and _. It should start with English letter',
     'url_protocol' => 'The :attribute must start with one of the following URL protocols: :values.',
-    'custom_validation' => [
-    ],
+    'amount_not_multiples_of_order_cost' => 'Entered amount should be multiples of :order_cost_with_vat',
+    'custom_validation' => [],
     /*
      |--------------------------------------------------------------------------
      | Custom Validation Language Lines
@@ -151,6 +151,7 @@ return [
         'company_unique_name' => [
             'regex' => 'Identifier should contain only English letters, numbers and _. It should start with English letter',
         ],
+        'order_cost_amount_tiers_range' => 'Order value start must be greater than order value end of previous tier with only 0.01',
     ],
     /*
      |--------------------------------------------------------------------------

@@ -73,6 +73,7 @@ class OrderCreationFeeTypeTest extends TestCase
             self::$wallet,
             Money::parseByDecimal(100, 'SAR'),
             TransactionReason::OrderCreationFee,
+            null,
             []
         );
         $this->assertInstanceOf(Transaction::class, $transaction);

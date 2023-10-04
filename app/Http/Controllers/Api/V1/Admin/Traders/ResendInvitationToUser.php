@@ -7,7 +7,7 @@ use App\Enums\Area;
 use App\Enums\CompanyType;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Admin\Traders\ResendInvitationRequest;
+use App\Http\Requests\V1\Admin\Traders\Users\ResendInvitationRequest;
 use App\Mail\CompleteRegisterInvitation;
 use App\Models\Company;
 use App\Models\User;
@@ -24,12 +24,6 @@ class ResendInvitationToUser extends Controller
         );
     }
 
-    /**
-     * @param  ResendInvitationRequest  $request
-     * @param  Company  $trader
-     * @param  User  $user
-     * @return JsonResponse
-     */
     public function __invoke(ResendInvitationRequest $request, Company $trader, User $user): JsonResponse
     {
         if (is_null($user->password)) {

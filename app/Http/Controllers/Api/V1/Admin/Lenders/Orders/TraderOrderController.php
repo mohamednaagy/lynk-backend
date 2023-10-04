@@ -31,7 +31,7 @@ class TraderOrderController extends Controller
         CreateTraderOrder $createTraderOrder,
         int $order
     ): JsonResponse {
-        return DB::transaction(function () use ($request, $createTraderOrder, $order) {
+        return DB::multipleTransaction(function () use ($request, $createTraderOrder, $order) {
             $data = $request->validated();
             $data['version'] = get_latest_version_of_trader($data['trader']);
 

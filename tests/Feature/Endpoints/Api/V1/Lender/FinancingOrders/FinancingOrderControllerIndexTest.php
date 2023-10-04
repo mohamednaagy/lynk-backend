@@ -44,9 +44,6 @@ class FinancingOrderControllerIndexTest extends TestCase
 
     private static Builder|Model $firstOrderInOtherCompany;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -63,9 +60,6 @@ class FinancingOrderControllerIndexTest extends TestCase
         self::$firstOrderInOtherCompany = $this->createOrder(self::$secondCompany->id, self::$userLenderAdmin->id);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_index_orders(): void
     {
         $this->withHeader('X-Company', self::$firstCompany->id)
@@ -76,9 +70,6 @@ class FinancingOrderControllerIndexTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_can_index_orders_in_same_company(): void
     {
         $orders = self::$firstCompany->orders()->paginate();
@@ -95,6 +86,7 @@ class FinancingOrderControllerIndexTest extends TestCase
                         'reference_number',
                         'national_id',
                         'amount',
+                        'current_step',
                         'selling_price',
                         'status_reason',
                     ])
@@ -103,9 +95,6 @@ class FinancingOrderControllerIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_supervisor_user_can_index_orders_in_same_company(): void
     {
         $orders = self::$firstCompany->orders()->paginate();
@@ -122,6 +111,7 @@ class FinancingOrderControllerIndexTest extends TestCase
                         'reference_number',
                         'national_id',
                         'amount',
+                        'current_step',
                         'selling_price',
                         'status_reason',
                     ])
@@ -130,9 +120,6 @@ class FinancingOrderControllerIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_billing_user_cant_index_orders_in_same_company(): void
     {
         $this->actingAs(self::$userLenderBilling)
@@ -141,9 +128,6 @@ class FinancingOrderControllerIndexTest extends TestCase
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_order_creator_user_can_index_orders_owned_in_same_company(): void
     {
         $orders = FinancingOrder::query()
@@ -162,6 +146,7 @@ class FinancingOrderControllerIndexTest extends TestCase
                         'reference_number',
                         'national_id',
                         'amount',
+                        'current_step',
                         'selling_price',
                         'status_reason',
                     ])

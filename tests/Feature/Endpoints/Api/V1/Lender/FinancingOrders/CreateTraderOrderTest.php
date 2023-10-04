@@ -30,16 +30,13 @@ class CreateTraderOrderTest extends TestCase
 
     private static string $apiUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
 
         [self::$company] = $this->createCompany('2000', ['company_cr' => '1234567891']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
-        self::$financingOrder = $this->createOrder(self::$company->id, self::$userLender->id, ['status' => FinancingOrderStatus::PendingApproval]);
+        self::$financingOrder = $this->createOrder(self::$company->id, self::$userLender->id, ['status' => FinancingOrderStatus::Approved]);
         self::$apiUrl = 'api/v1/lender/orders/'.self::$financingOrder->id.'/trader-orders';
     }
 

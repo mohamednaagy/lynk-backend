@@ -45,15 +45,13 @@ class FinancingOrderControllerStoreTest extends TestCase
     private static array $orderDetails;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000', data: [
+        self::$company = $this->createLenderCompanyWithStandardOrderCost('11500000', data: [
             'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::On,
         ]);
         self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
@@ -79,9 +77,6 @@ class FinancingOrderControllerStoreTest extends TestCase
         ];
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_create_order(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -92,9 +87,6 @@ class FinancingOrderControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_national_id_cant_create_order(): void
     {
         $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
@@ -103,9 +95,6 @@ class FinancingOrderControllerStoreTest extends TestCase
             ->assertJsonValidationErrorFor('national_id');
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_amount_cant_create_order(): void
     {
         $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
@@ -124,9 +113,6 @@ class FinancingOrderControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_selling_price_cant_create_order(): void
     {
         $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
@@ -142,9 +128,6 @@ class FinancingOrderControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_phone_country_code_cant_create_order(): void
     {
         $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
@@ -163,9 +146,6 @@ class FinancingOrderControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_phone_number_cant_create_order(): void
     {
         $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
@@ -181,9 +161,6 @@ class FinancingOrderControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_is_verification_required_cant_create_order(): void
     {
         $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
@@ -199,9 +176,6 @@ class FinancingOrderControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_can_create_order_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -228,9 +202,6 @@ class FinancingOrderControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_supervisor_user_can_create_order_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderSupervisor)
@@ -257,9 +228,6 @@ class FinancingOrderControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_billing_user_cant_create_order_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderBilling)
@@ -268,9 +236,6 @@ class FinancingOrderControllerStoreTest extends TestCase
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_order_creator_user_can_create_order_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
@@ -297,9 +262,6 @@ class FinancingOrderControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_and_managers_get_notification_about_new_order(): void
     {
         Notification::fake();
@@ -314,9 +276,6 @@ class FinancingOrderControllerStoreTest extends TestCase
         Notification::assertNotSentTo(self::$mangerHasNoPermissions, OrderCreated::class);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_and_managers_did_not_get_notification_about_new_order_when_disabled(): void
     {
         Notification::fake();

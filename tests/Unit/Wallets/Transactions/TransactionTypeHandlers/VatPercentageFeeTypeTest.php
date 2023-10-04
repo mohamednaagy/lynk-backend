@@ -74,6 +74,7 @@ class VatPercentageFeeTypeTest extends TestCase
             self::$wallet,
             Money::parseByDecimal(100, 'SAR'),
             TransactionReason::VatPercentageFee,
+            null,
             []
         );
         $this->assertInstanceOf(Transaction::class, $transaction);

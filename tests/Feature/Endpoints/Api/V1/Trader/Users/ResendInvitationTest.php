@@ -28,7 +28,7 @@ class ResendInvitationTest extends TestCase
 
     private static User $traderAdmin;
 
-    private static User $traderAdminBelonsToTraderNotActive;
+    private static User $traderAdminBelongsToTraderNotActive;
 
     private static User $traderAdminNotVerified;
 
@@ -61,7 +61,7 @@ class ResendInvitationTest extends TestCase
                 'email' => 'TraderAdmin1@bim.com',
                 'password' => null,
             ]);
-        self::$traderAdminBelonsToTraderNotActive = $this->createTraderUser(
+        self::$traderAdminBelongsToTraderNotActive = $this->createTraderUser(
             self::$traderNotActive->id,
             data: ['email' => 'TraderAdmin2@bim.com']
         );
@@ -80,7 +80,7 @@ class ResendInvitationTest extends TestCase
     public function test_resend_invitation_can_not_access_when_trader_not_active()
     {
         $this->withHeader('X-Company', self::$traderNotActive->id)
-            ->actingAs(self::$traderAdminBelonsToTraderNotActive)
+            ->actingAs(self::$traderAdminBelongsToTraderNotActive)
             ->postJson(
                 'api/v1/trader/users/'.self::$traderBelongsToTraderNotActive->id.'/resend-invitation',
                 [

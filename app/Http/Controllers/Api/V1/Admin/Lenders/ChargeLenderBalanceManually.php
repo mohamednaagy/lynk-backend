@@ -18,17 +18,12 @@ class ChargeLenderBalanceManually extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::LenderWallet, Action::Manage, Action::Charge])
+                perm(Area::SuperAdmin, [Subject::LenderWallet, Action::Manage, Action::Charge])
         );
     }
 
     /**
      * Handle the incoming request.
-     *
-     * @param  StoreTransactionRequest  $request
-     * @param  Company  $lender
-     * @param  ChargeLenderBalanceManuallyInterface  $chargeBalanceManuallyInterface
-     * @return JsonResponse
      */
     public function __invoke(
         StoreTransactionRequest $request,

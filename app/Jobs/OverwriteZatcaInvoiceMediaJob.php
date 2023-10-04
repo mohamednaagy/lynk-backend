@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
+use App\Actions\Contracts\Wallets\GenerateTraderOrderInvoice;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Models\FinancingOrder;
 use Illuminate\Bus\Queueable;
@@ -57,7 +57,7 @@ class OverwriteZatcaInvoiceMediaJob implements ShouldQueue
                         $financingOrder->clearMediaCollection(FinancingOrderMediaCollection::ZatcaInvoice);
                     }
 
-                    app(GenerateZatcaInvoice::class)->handle($financingOrder, $creationFeeTransaction);
+                    app(GenerateTraderOrderInvoice::class)->handle($financingOrder, $creationFeeTransaction);
                 });
             });
     }

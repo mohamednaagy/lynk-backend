@@ -7,15 +7,20 @@ use App\Enums\Subject;
 use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
+use App\Http\Controllers\Api\V1\Admin\Auth\ResendAdminInvitation;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
+use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
+use App\Http\Controllers\Api\V1\Admin\FinancingOrders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\ExportOrders;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\LenderTransactionController;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\MakeOrderProceed;
 use App\Http\Controllers\Api\V1\Admin\FinancingOrders\OrderController;
+use App\Http\Controllers\Api\V1\Admin\FinancingOrders\RejectOrder;
 use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
+use App\Http\Controllers\Api\V1\Admin\Lenders\CalculateAmountWithoutVatAndOrdersCount;
 use App\Http\Controllers\Api\V1\Admin\Lenders\ChargeLenderBalanceManually;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderBalance;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderSetting;
@@ -28,7 +33,6 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\CompleteOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\RetryProceedOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrderController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\CancelTraderOrder;
-use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabhaCompleteDocument;
@@ -39,6 +43,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabaha
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabhaCompleteDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodity;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateOrderPaymentProof;
+use App\Http\Controllers\Api\V1\Admin\Lenders\ResendInvitationToUser as ResendLenderInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
@@ -46,7 +51,7 @@ use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\LenderSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
-use App\Http\Controllers\Api\V1\Admin\Traders\ResendInvitationToUser;
+use App\Http\Controllers\Api\V1\Admin\Traders\ResendInvitationToUser as ResendTraderInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
 use App\Http\Controllers\Api\V1\Admin\Traders\UpdateTraderStatus;
@@ -69,6 +74,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::put('auth/profile', UpdateMyProfile::class);
 
+        Route::post('admins/{admin}/resend-invitation', ResendAdminInvitation::class);
         Route::apiResource('admins', AdminController::class);
 
         Route::get('/roles', GetAllRoles::class)->middleware(
@@ -98,8 +104,14 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::put('/{lender}/status', UpdateLenderStatus::class);
             Route::get('/{lender}/balance ', GetLenderBalance::class);
             Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
+            Route::get('/{lender}/calculate-balance/{amount_with_vat}', CalculateAmountWithoutVatAndOrdersCount::class)
+                ->whereNumber('amount');
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);
+        });
+
+        Route::prefix('lenders')->group(function () {
+            Route::post('{lender}/users/{user}/resend-invitation', ResendLenderInvitationToUser::class);
         });
 
         Route::apiResource('lenders', LenderController::class);
@@ -109,6 +121,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::prefix('orders/{order}')->group(function () {
             Route::post('trader-orders', [TraderOrderController::class, 'store']);
+            Route::put('approve', ApproveOrder::class);
+            Route::put('reject', RejectOrder::class);
             Route::post('retry', RetryProceedOrder::class);
             Route::post('complete', CompleteOrder::class);
             Route::put('/cancel', CancelFinancingOrder::class);
@@ -128,10 +142,10 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         });
 
         Route::apiResource('orders', OrderController::class)
-            ->only('index', 'show');
+            ->only('index', 'show', 'store', 'update');
 
         Route::prefix('traders')->group(function () {
-            Route::post('{trader}/users/{user}/resend-invitation', ResendInvitationToUser::class);
+            Route::post('{trader}/users/{user}/resend-invitation', ResendTraderInvitationToUser::class);
             Route::put('/{trader}/status', UpdateTraderStatus::class);
         });
 

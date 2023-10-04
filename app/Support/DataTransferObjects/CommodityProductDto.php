@@ -10,7 +10,7 @@ class CommodityProductDto
         protected string $product,
         protected string $quantity,
         protected $amount,
-        protected string|array $previous_owner,
+        protected array|string $previous_owner,
         protected string $date_time_of_purchasing_commodity,
         protected string $uom = '--',
         protected ?string $warehouse = null,
@@ -38,7 +38,7 @@ class CommodityProductDto
         return $this->uom;
     }
 
-    public function getAmount()
+    public function getAmount(): string
     {
         return $this->amount;
     }

@@ -32,8 +32,6 @@ class LenderControllerIndexTest extends TestCase
     private static string $endpoint;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -51,9 +49,6 @@ class LenderControllerIndexTest extends TestCase
         self::$endpoint = 'api/v1/admin/lenders';
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_index_lenders(): void
     {
         $this->getJson(self::$endpoint)
@@ -63,9 +58,6 @@ class LenderControllerIndexTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_can_index_lenders_successfully(): void
     {
         $lenders = Company::query()
@@ -84,16 +76,12 @@ class LenderControllerIndexTest extends TestCase
                         'status',
                         'orders_count',
                         'created_at',
-                        'order_cost',
                     ])
                     ->respond()
                     ->getData(true)
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_controller_index_lender_companies_only_successfully(): void
     {
         $this->createTraderCompany('2000');
@@ -108,9 +96,6 @@ class LenderControllerIndexTest extends TestCase
         $this->assertTrue($actualResponse->json('meta.pagination.total') == $lendersCount);
     }
 
-    /**
-     * @return void
-     */
     public function test_manager_with_permissions_can_index_lenders_successfully(): void
     {
         $lenders = Company::query()->withCount('orders')->paginate();
@@ -126,16 +111,12 @@ class LenderControllerIndexTest extends TestCase
                         'status',
                         'orders_count',
                         'created_at',
-                        'order_cost',
                     ])
                     ->respond()
                     ->getData(true)
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_manager_without_permissions_cant_index_lenders(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);

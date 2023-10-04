@@ -770,17 +770,77 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 بـ\{{ $product_name }} لأكثر من يوم عمل</p>
             <p class="pt-2 text-center text-black">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
         </div>
-        <div class="flex flex-row justify-between pt-8 font-semibold">
-            <p class="text-right text-[11px] text-cyan-900">www.lynk.sa</p>
-            <p class="text-right text-[11px] text-cyan-900">الرمز البريدي 13522</p>
-            <div class="flex flex-row-reverse gap-0.5">
-                <p class="text-right text-[11px] text-cyan-900">,3504</p>
-                <p class="text-right text-[11px] text-cyan-900">طريق الامام سعود بن فيصل ، حي الملقا ، 6418</p>
+        <div class="divide-y divide-gray-300/50">
+            <div class="py-8 space-y-6 text-base leading-7">
+                <p class="text-black">التاريخ: {{ $date ?? '' }}</p>
+                <p class="text-black">الوقت: {{ $time ?? '' }}</p>
+                <p class="text-xl text-center text-black">شهادة حيازة</p>
+                <p class="text-center text-black">نؤكد نحن لينك أن السلع المشار لها
+                    @if ($products->first()?->getWarehouse())
+                        في الموقع أدناه
+                    @endif
+                    ؛ في حيازتنا بالنيابة
+                    عن {{ $company_name }} من
+                    تاريخ وتوقيت هذه الشهادة، وقد تم شراؤها من {{ $previous_owner }} بناء على طلب الشركة مقابل مبلغ
+                    وقدره {{ $amount }} ريال سعودي
+                </p>
+                <p class="text-lg font-semibold text-center text-black">بيانات السلع/ـة</p>
+                @foreach ($products ?? [] as $product)
+                    <table class="min-w-full mt-4">
+                        <tbody>
+                            @if (isset($trader_order_reference))
+                                <tr>
+                                    <td class="w-1/2 px-4 text-right border border-black">رقم الشهادة</td>
+                                    <td class="w-1/2 border border-black">{{ $trader_order_reference }}</td>
+                                </tr>
+                            @endif
+                            <tr>
+                                <td class="w-1/2 px-4 text-right border border-black">نوع السلعة</td>
+                                <td class="w-1/2 border border-black">{{ $product->getProduct() }}</td>
+                            </tr>
+                            <tr>
+                                <td class="w-1/2 px-4 text-right border border-black">الكمية</td>
+                                <td class="w-1/2 border border-black">{{ $product->getQuantity() }}
+                                    {{ $product->getUom() }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-1/2 px-4 text-right border border-black">قيمة السلعة</td>
+                                <td class="w-1/2 border border-black">{{ $product->getAmount() }} ريال سعودي</td>
+                            </tr>
+                            @if ($product->getWarehouse())
+                                <tr>
+                                    <td class="w-1/2 px-4 text-right border border-black">موقع السلعة</td>
+                                    <td class="w-1/2 border border-black">{{ $product->getWarehouse() }}</td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
+                @endforeach
+                <p class="text-lg text-center text-black">سيتم حفظ السلعة
+                    @if ($products->first()?->getWarehouse())
+                        بالموقع المشار له أعلاه
+                    @endif
+                    ، بالنيابة عن {{ $company_name }}
+                    إلى أن يتم إشعارنا بالتصرف.
+                </p>
+                <p class="text-lg text-center text-black">{{ $company_name }} سيكون مسؤولًا عن رسوم التخزين والحفظ إذا
+                    تم
+                    الاحتفاظ
+                    بـ\{{ $product_name }} لأكثر من يوم عمل</p>
+                <p class="pt-2 text-center text-black">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
             </div>
-            <p class="text-right text-[11px] text-cyan-900">السجل التجاري 1010828018</p>
-            <p class="text-right text-[11px] text-cyan-600">شركة تقنيات صلة المالية</p>
+            <div class="flex flex-row justify-between pt-8 font-semibold">
+                <p class="text-right text-[11px] text-cyan-900">www.lynk.sa</p>
+                <p class="text-right text-[11px] text-cyan-900">الرمز البريدي 13522</p>
+                <div class="flex flex-row-reverse gap-0.5">
+                    <p class="text-right text-[11px] text-cyan-900">,3504</p>
+                    <p class="text-right text-[11px] text-cyan-900">طريق الامام سعود بن فيصل ، حي الملقا ، 6418</p>
+                </div>
+                <p class="text-right text-[11px] text-cyan-900">السجل التجاري 1010828018</p>
+                <p class="text-right text-[11px] text-cyan-600">شركة تقنيات صلة المالية</p>
+            </div>
         </div>
-    </div>
 
 </body>
 

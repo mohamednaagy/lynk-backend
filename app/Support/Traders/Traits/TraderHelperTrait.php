@@ -2,11 +2,11 @@
 
 namespace App\Support\Traders\Traits;
 
-use App\Enums\BursamProductCode;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Models\TraderProduct;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Database\Eloquent\Model;
@@ -19,7 +19,13 @@ trait TraderHelperTrait
 {
     public function createStepHistories(Request $request, TraderOrder $traderOrder, $step): void
     {
-        foreach ($this->stepToHistoriesMap[$step] as $history => $media) {
+        $stepToHistoriesMap = get_murabha_steps($traderOrder->provider, $traderOrder->version, true);
+
+        if (! array_key_exists($step, $stepToHistoriesMap)) {
+            return;
+        }
+
+        foreach ($stepToHistoriesMap[$step] as $history => $media) {
             if ($media && $request->has($media['file'])) {
                 $this->attachDocumentToOrder(
                     $traderOrder,
@@ -105,9 +111,15 @@ trait TraderHelperTrait
         });
     }
 
-    public function getUnusedProductCode()
+    public function getUnusedProductCode($provider)
     {
-        $productCodes = BursamProductCode::getValues();
+        $productCodes = TraderProduct::query()
+            ->where('provider', $provider)
+            ->orderBy('order', 'asc')
+            ->get()
+            ->pluck('code')
+            ->toArray();
+
         $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
 
         $availableProductCodes = array_diff($productCodes, $unavailableProductCodes);

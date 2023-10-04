@@ -35,8 +35,6 @@ class LenderOrderControllerIndexTest extends TestCase
     private static string $endpoint;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -82,9 +80,11 @@ class LenderOrderControllerIndexTest extends TestCase
                         'id',
                         'status',
                         'reference_number',
+                        'company_name',
                         'national_id',
                         'amount',
                         'selling_price',
+                        'current_step',
                         'status_reason',
                         'creator',
                         'created_at',

@@ -3,9 +3,8 @@
 namespace App\Jobs\General;
 
 use App\Actions\Contracts\Orders\MakeOrderProceed;
-use App\Enums\BursamMurabhaStep;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderProceedCase;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
@@ -57,19 +56,9 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
             $currentStepNode = $traderDictionary->getCompletedStepOrPreviousByHistory($traderOrder->last_history_action);
             $nextStepNode = $traderDictionary->getNextStepOf($currentStepNode->step);
 
-            $clientWakala = match ($traderOrder->provider) {
-                'dmcc', 'fake' => DmccMurabhaStep::ClientWakala,
-                'bursam' => BursamMurabhaStep::ClientWakala,
-            };
-
-            $contractSigned = match ($traderOrder->provider) {
-                'dmcc', 'fake' => DmccMurabhaStep::ContractSigned,
-                'bursam' => BursamMurabhaStep::ContractSigned,
-            };
-
             $proceedAction = match ($nextStepNode->step) {
-                $clientWakala => FinancingOrderProceedCase::ClientWakalaAccepted,
-                $contractSigned => FinancingOrderProceedCase::ContractSigned,
+                MurabhaStep::ClientWakala => FinancingOrderProceedCase::ClientWakalaAccepted,
+                MurabhaStep::ContractSigned => FinancingOrderProceedCase::ContractSigned,
                 default => null,
             };
 
@@ -77,7 +66,7 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
                 $makeOrderProceed->handle($traderOrder, $proceedAction, false);
             }
 
-            if (! $traderOrder->checkOrderStepComplete($contractSigned) || ! $traderOrder->checkOrderStepComplete($clientWakala)) {
+            if (! $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned) || ! $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala)) {
                 self::dispatch($this->traderOrderId)->delay(now()->addSeconds(30));
             }
         });

@@ -23,11 +23,11 @@ class GetWalletTransactions extends Controller
     public function __invoke(
         GetTransactions $getTransactions
     ): JsonResponse {
-        $paginatedTransactions = $getTransactions->handle();
+        $paginatedTransactions = $getTransactions->handle(tenant());
 
         tap($paginatedTransactions)->loadZatcaInvoicesMedia();
 
-        return fractal($paginatedTransactions, new TransactionTransformer())
+        return fractal($paginatedTransactions, (new TransactionTransformer()))
             ->parseIncludes([
                 'id',
                 'date',

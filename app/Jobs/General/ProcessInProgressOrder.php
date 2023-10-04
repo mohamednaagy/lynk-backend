@@ -6,6 +6,7 @@ use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
+use App\Exceptions\BalanceIsNotEnoughException;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -15,6 +16,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class ProcessInProgressOrder implements ShouldQueue
@@ -54,7 +56,13 @@ class ProcessInProgressOrder implements ShouldQueue
                 return;
             }
 
-            app(CanCreateOrder::class)->handle($financingOrder->company);
+            try {
+                app(CanCreateOrder::class)->handle($financingOrder->company, $financingOrder->amount);
+            } catch (BalanceIsNotEnoughException $e) {
+                Log::alert($financingOrder->id);
+
+                return;
+            }
 
             $traderOrder = $trader->createTraderOrder($financingOrder);
 

@@ -3,6 +3,7 @@
 namespace App\Support\ZatcaEInvoice;
 
 use Cknow\Money\Money;
+use function Psl\Str\format_number;
 
 class PurchaseLine
 {
@@ -11,7 +12,7 @@ class PurchaseLine
         protected Money $itemPrice,
         protected string $vatPercentage,
         protected float $discount = 0,
-        protected int $quantity = 1
+        protected int|float $quantity = 1
     ) {
     }
 
@@ -31,9 +32,9 @@ class PurchaseLine
         return $this->name;
     }
 
-    public function getQuantity(): int
+    public function getQuantity(): string
     {
-        return $this->quantity;
+        return format_number($this->quantity, 2);
     }
 
     public function getItemPrice(): Money
@@ -53,8 +54,6 @@ class PurchaseLine
 
     /**
      * Get total line amount (without VAT & without discount)
-     *
-     * @return Money
      */
     public function getLineSubtotal(): Money
     {
@@ -79,8 +78,6 @@ class PurchaseLine
 
     /**
      * Get total VAT amount
-     *
-     * @return Money
      */
     public function getTotalVatAmount(): Money
     {
@@ -96,8 +93,6 @@ class PurchaseLine
 
     /**
      * Get total line amount (with VAT)
-     *
-     * @return Money
      */
     public function getLineTotal(): Money
     {

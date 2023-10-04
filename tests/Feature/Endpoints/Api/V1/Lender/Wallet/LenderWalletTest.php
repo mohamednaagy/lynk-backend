@@ -53,16 +53,14 @@ class LenderWalletTest extends TestCase
     private static string $endpoint;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
     {
         parent::setUp();
 
-        [self::$company, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910', 'order_cost' => 200]);
-        [self::$pendingCompany, self::$pendingWallet] = $this->createCompany('2000', ['company_cr' => '12345678911', 'status' => CompanyStatus::Pending()->value]);
+        self::$company = $this->createLenderCompanyWithStandardOrderCost('11500000', ['company_cr' => '12345678910', 'order_cost' => 200]);
+        [self::$pendingCompany, self::$pendingWallet] = $this->createCompany('115000', ['company_cr' => '12345678911', 'status' => CompanyStatus::Pending()->value]);
         [self::$underReviewCompany, self::$underReviewWallet] = $this->createCompany('2000', ['company_cr' => '12345678912', 'status' => CompanyStatus::UnderReview()->value]);
         [self::$rejectedCompany, self::$rejectedWallet] = $this->createCompany('2000', ['company_cr' => '12345678913', 'status' => CompanyStatus::Rejected()->value]);
         [self::$approvedCompany, self::$approvedWallet] = $this->createCompany('2000', ['company_cr' => '12345678914', 'status' => CompanyStatus::Approved()->value]);
@@ -79,9 +77,6 @@ class LenderWalletTest extends TestCase
         self::$endpoint = 'api/v1/lender/wallet/balance';
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_get_wallet_balance(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -92,9 +87,6 @@ class LenderWalletTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_user_can_get_wallet_balance_successfully(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -103,15 +95,12 @@ class LenderWalletTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    'available_orders' => '8',
-                    'balance' => '20.00',
+                    'available_orders' => '1000',
+                    'balance' => '115,000.00',
                 ],
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_supervisor_user_can_get_wallet_balance_successfully(): void
     {
         $this->actingAs(self::$userLenderSupervisor)
@@ -120,15 +109,12 @@ class LenderWalletTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    'available_orders' => '8',
-                    'balance' => '20.00',
+                    'available_orders' => '1000',
+                    'balance' => '115,000.00',
                 ],
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_billing_user_can_get_wallet_balance_successfully(): void
     {
         $this->actingAs(self::$userLenderBilling)
@@ -137,15 +123,12 @@ class LenderWalletTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    'available_orders' => '8',
-                    'balance' => '20.00',
+                    'available_orders' => '1000',
+                    'balance' => '115,000.00',
                 ],
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_api_user_can_get_wallet_balance_successfully(): void
     {
         $res = $this->actingAs(self::$userLenderApi)
@@ -154,15 +137,12 @@ class LenderWalletTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    'available_orders' => '8',
-                    'balance' => '20.00',
+                    'available_orders' => '1000',
+                    'balance' => '115,000.00',
                 ],
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_order_creator_user_cant_get_wallet_balance(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
@@ -171,9 +151,6 @@ class LenderWalletTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_get_wallet_balance_with_pending_company(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -186,9 +163,6 @@ class LenderWalletTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_get_wallet_balance_with_under_review_company(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -201,9 +175,6 @@ class LenderWalletTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_get_wallet_balance_with_rejected_company(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -216,9 +187,6 @@ class LenderWalletTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_without_verified_email_cant_get_wallet_balance_with_under_review_company(): void
     {
         $this->actingAs(self::$userLenderAdminWithoutVerifiedEmail)
@@ -231,9 +199,6 @@ class LenderWalletTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_without_verified_email_cant_get_wallet_balance_with_approved_company(): void
     {
         $this->actingAs(self::$userLenderAdminWithoutVerifiedEmail)

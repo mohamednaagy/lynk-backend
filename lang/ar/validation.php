@@ -135,6 +135,7 @@ return [
     'money_value' => 'صيغة حقل :attribute .غير صحيحة.',
     'company_unique_name' => 'يجب أن يحتوي المعرف على أحرف إنجليزية وأرقام و _ فقط. بالإضافة يجب أن يبدأ بحرف إنجليزي',
     'url_protocol' => ':attribute يجب ان  يبدأ بأحد القيم التالية: :values',
+    'amount_not_multiples_of_order_cost' => 'القيمة المدخلة يجب أن تكون من مضاعفات :order_cost_with_vat',
     'custom_validation' => [
         'phone_number_does_not_belong_to_national_id' => 'Phone number doesn’t belong to National ID/Iqama',
         'invalid_person_id' => 'Invalid National ID',
@@ -157,6 +158,7 @@ return [
         'company_unique_name' => [
             'regex' => 'يجب أن يحتوي المعرف على أحرف إنجليزية وأرقام و _ فقط. بالإضافة يجب أن يبدأ بحرف إنجليزي',
         ],
+        'order_cost_amount_tiers_range' => 'يجب أن تكون بداية قيمة الطلب أكبر من نهاية القيمه السابقة بـ 0.01 فقط',
     ],
 
     'attributes' => [

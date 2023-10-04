@@ -2,9 +2,9 @@
 
 namespace App\Transformers;
 
-use App\Enums\BursamMurabhaStep;
-use App\Enums\DmccMurabhaStep;
+use App\Enums\BursamProductCode;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
@@ -77,9 +77,8 @@ class TraderOrderTransformer extends TransformerAbstract
     {
         $traderMurabhaSteps = collect(get_murabha_steps($traderOrder->provider, $traderOrder->version))
             ->except([
-                DmccMurabhaStep::TraderOrderCreated,
-                BursamMurabhaStep::TraderOrderCreated,
-                BursamMurabhaStep::TransferOwnershipToLender,
+                MurabhaStep::TraderOrderCreated,
+                MurabhaStep::TransferOwnershipToLender,
             ])
             ->keys()
             ->flatten()
@@ -110,7 +109,15 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includePurchasingCommodityInformation(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive([
-            'products' => $traderOrder->products,
+            'products' => collect($traderOrder->products)->map(function ($product) {
+                $productDescription = in_array($product['product'], BursamProductCode::getValues())
+                    ? BursamProductCode::fromValue($product['product'])->description
+                    : $product['product'];
+
+                $product['product_description'] = $productDescription;
+
+                return $product;
+            }),
             'ptp_document' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::PromiseToPurchase)?->file_url,
             'exchange_rate' => $traderOrder->exchange_rate,
             'original_holding_certificate' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)?->file_url,

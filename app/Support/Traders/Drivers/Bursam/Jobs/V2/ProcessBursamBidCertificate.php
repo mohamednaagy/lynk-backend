@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
+use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
@@ -52,6 +53,8 @@ class ProcessBursamBidCertificate implements ShouldQueue, ShouldBeUnique
 
             Trader::driver('bursam', $traderOrder->version)
                 ->getBidCertificateDetails($traderOrder);
+
+            app(GenerateClientWakala::class)->handle($traderOrder);
         });
     }
 

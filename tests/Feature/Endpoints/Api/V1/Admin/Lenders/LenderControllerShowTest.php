@@ -6,6 +6,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
+use App\Enums\TraderOrderMode;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
@@ -31,15 +32,16 @@ class LenderControllerShowTest extends TestCase
     private static string $endpoint;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
     {
         parent::setUp();
 
-        [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        [self::$lender, self::$wallet] = $this->createCompany('2000', [
+            'company_cr' => '12345678910',
+            'trading_mode' => TraderOrderMode::Automatic,
+        ]);
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(
@@ -49,9 +51,6 @@ class LenderControllerShowTest extends TestCase
         self::$endpoint = 'api/v1/admin/lenders/'.self::$lender->id;
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_show_lender(): void
     {
         $this->getJson(self::$endpoint)
@@ -61,9 +60,6 @@ class LenderControllerShowTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_user_can_show_lender_successfully(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -79,18 +75,16 @@ class LenderControllerShowTest extends TestCase
                         'unique_name',
                         'company_cr',
                         'does_order_require_approval',
-                        'order_cost',
+                        'order_cost_tiers',
                         'notifications_email',
                         'notify_admins_about_new_orders',
+                        'trading_mode',
                     ])
                     ->respond()
                     ->getData(true)
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_manager_with_permissions_can_show_lender_successfully(): void
     {
         $this->actingAs(self::$userManager)
@@ -106,18 +100,16 @@ class LenderControllerShowTest extends TestCase
                         'unique_name',
                         'company_cr',
                         'does_order_require_approval',
-                        'order_cost',
+                        'order_cost_tiers',
                         'notifications_email',
                         'notify_admins_about_new_orders',
+                        'trading_mode',
                     ])
                     ->respond()
                     ->getData(true)
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_manager_without_permissions_cant_show_lender(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);

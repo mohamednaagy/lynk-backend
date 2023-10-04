@@ -13,11 +13,11 @@ class CalculateOrdersCostAction implements CalculateOrdersCost
     ) {
     }
 
-    public function handle(int $ordersCount, Money $orderCost): Money
+    public function handle(int $ordersCount, Money $orderCostWithoutVat): Money
     {
         $vatRate = $this->getProjectSettings->handle()->getVatRate();
 
-        $orderCostWithVat = $orderCost->multiply(($vatRate) + 1);
+        $orderCostWithVat = $orderCostWithoutVat->multiply(($vatRate) + 1);
 
         return $orderCostWithVat->multiply($ordersCount);
     }

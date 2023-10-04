@@ -2,9 +2,9 @@
 
 namespace App\Support\Traders\Drivers\Dmcc\Jobs\V1;
 
-use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -62,7 +62,7 @@ class ProcessDmccMpoSaleCompleteNotification implements ShouldQueue, ShouldBeUni
                 return;
             }
 
-            if (! $this->traderOrder->checkOrderStepComplete(DmccMurabhaStep::MurabhaOfferIssued)) {
+            if (! $this->traderOrder->checkOrderStepComplete(MurabhaStep::MurabhaOfferIssued)) {
                 return;
             }
 

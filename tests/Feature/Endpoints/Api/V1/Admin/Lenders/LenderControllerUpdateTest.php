@@ -7,6 +7,7 @@ use App\Enums\Area;
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
+use App\Enums\TraderOrderMode;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
@@ -37,8 +38,6 @@ class LenderControllerUpdateTest extends TestCase
     private static string $endpoint;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -61,17 +60,43 @@ class LenderControllerUpdateTest extends TestCase
             'notifications_email' => 'notifications_email@email.com',
             'unique_name' => 'companyUniqueName',
             'company_cr' => '1234567891',
-            'order_cost' => 20,
+            'order_cost_tiers' => [
+                [
+                    'id' => null,
+                    'order_value_start' => '0.00',
+                    'order_value_end' => '100000',
+                    'fee_type' => 'fixed',
+                    'order_cost_without_vat' => '100',
+                    'order_cost_with_vat' => '115',
+                    'proration_amount' => null,
+                ],
+                [
+                    'id' => null,
+                    'order_value_start' => '100000.01',
+                    'order_value_end' => 300000,
+                    'fee_type' => 'fixed',
+                    'order_cost_without_vat' => '80.00',
+                    'order_cost_with_vat' => '92.00',
+                    'proration_amount' => '20.00',
+                ],
+                [
+                    'id' => null,
+                    'order_value_start' => '300000.01',
+                    'order_value_end' => null,
+                    'fee_type' => 'proration',
+                    'order_cost_without_vat' => '20.00',
+                    'order_cost_with_vat' => '23.00',
+                    'proration_amount' => 500000,
+                ],
+            ],
             'does_order_require_approval' => '1',
             'notify_admins_about_new_orders' => '1',
             'webhook_secret_key' => Str::random(Config::get('webhook-server.secret_key_length', 40)),
+            'trading_mode' => TraderOrderMode::Automatic,
         ];
         self::$endpoint = 'api/v1/admin/lenders/';
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_update_lender(): void
     {
         $this->putJson(self::$endpoint.self::$lender->id, self::$lenderDetails)
@@ -81,9 +106,6 @@ class LenderControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_can_update_lender_successfully(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -96,9 +118,6 @@ class LenderControllerUpdateTest extends TestCase
         $this->assertEquals(self::$lender->refresh()->unique_name, 'companyUniqueName');
     }
 
-    /**
-     * @return void
-     */
     public function test_manager_with_permissions_can_update_lender_successfully(): void
     {
         $this->actingAs(self::$userManager)
@@ -111,9 +130,6 @@ class LenderControllerUpdateTest extends TestCase
         $this->assertEquals(self::$lender->refresh()->unique_name, 'companyUniqueName');
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_can_update_lender_with_even_same_company_cr_and_unique_name_successfully(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -133,9 +149,6 @@ class LenderControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_manager_without_permissions_cant_update_lender(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
@@ -145,9 +158,6 @@ class LenderControllerUpdateTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_cant_update_lender_without_name(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -163,9 +173,6 @@ class LenderControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_can_update_lender_without_company_cr_successfully(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -176,9 +183,6 @@ class LenderControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_cant_update_lender_without_does_order_require_approval(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -194,27 +198,24 @@ class LenderControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_cant_update_lender_without_order_cost(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->putJson(self::$endpoint.self::$lender->id, Arr::except(self::$lenderDetails, 'order_cost'))
+            ->putJson(self::$endpoint.self::$lender->id, Arr::except(self::$lenderDetails, 'order_cost_tiers'))
             ->assertUnprocessable()
             ->assertExactJson([
-                'message' => 'The order cost field is required.',
+                'message' => 'The order cost tiers field is required. (and 1 more error)',
                 'errors' => [
-                    'order_cost' => [
-                        'The order cost field is required.',
+                    'order_cost_tiers' => [
+                        'The order cost tiers field is required.',
+                    ],
+                    'order_cost_tiers.0.order_value_start' => [
+                        'The order cost tiers.0.order value start field is required.',
                     ],
                 ],
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_cant_update_lender_without_unique_name(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -230,9 +231,21 @@ class LenderControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
+    public function test_admin_cant_update_lender_without_trading_mode(): void
+    {
+        $this->actingAs(self::$userAdmin)
+            ->putJson(self::$endpoint.self::$lender->id, Arr::except(self::$lenderDetails, 'trading_mode'))
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The trading mode field is required.',
+                'errors' => [
+                    'trading_mode' => [
+                        'The trading mode field is required.',
+                    ],
+                ],
+            ]);
+    }
+
     public function test_admin_cant_update_lender_with_exist_unique_name(): void
     {
         Company::query()->create(array_merge(self::$lenderDetails, [
@@ -255,9 +268,6 @@ class LenderControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_can_update_lender_with_exist_unique_name_after_delete_successfully(): void
     {
         $lender = Company::query()->create(array_merge(self::$lenderDetails, [

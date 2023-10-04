@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Enums\BursamMurabhaStep;
 use App\Enums\BursamProductCode;
 use App\Enums\CompanyStatus;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 
 return [
     CompanyStatus::class => [
@@ -50,32 +49,25 @@ return [
         EdaatInvoiceStatus::Expired => 'منتهية الصلاحية',
     ],
 
-    BursamMurabhaStep::class => [
-
-        BursamMurabhaStep::TraderOrderCreated => 'إنشاء طلب مرابحة',
-        BursamMurabhaStep::PurchasingCommodity => 'شراء السلعة',
-        BursamMurabhaStep::ContractSigned => 'توقيع العقد',
-        BursamMurabhaStep::CommoditySoldToCustomer => 'بيع السلعة للعميل',
-        BursamMurabhaStep::TransferOwnershipToLender => 'نقل الملكية إلى المُقرض',
-        BursamMurabhaStep::ClientWakala => 'وكالة العميل',
-        BursamMurabhaStep::MurabhaOfferIssued => 'إصدار عرض المرابحة',
-        BursamMurabhaStep::MurabahaSaleCompleted => 'إكمال عملية المرابحة',
+    MurabhaStep::class => [
+        MurabhaStep::TraderOrderCreated => 'إنشاء طلب مرابحة',
+        MurabhaStep::PurchasingCommodity => 'شراء السلعة',
+        MurabhaStep::ContractSigned => 'توقيع العقد',
+        MurabhaStep::CommoditySoldToCustomer => 'بيع السلعة للعميل',
+        MurabhaStep::TransferOwnershipToLender => 'نقل الملكية إلى المُقرض',
+        MurabhaStep::ClientWakala => 'وكالة العميل',
+        MurabhaStep::MurabhaOfferIssued => 'إصدار عرض المرابحة',
+        MurabhaStep::MurabahaSaleCompleted => 'إكمال عملية المرابحة',
     ],
 
-    DmccMurabhaStep::class => [
-        DmccMurabhaStep::TraderOrderCreated => 'إنشاء طلب مرابحة',
-        DmccMurabhaStep::PurchasingCommodity => 'شراء السلعة',
-        DmccMurabhaStep::ContractSigned => 'توقيع العقد',
-        DmccMurabhaStep::CommoditySoldToCustomer => 'بيع السلعة للعميل',
-        DmccMurabhaStep::ClientWakala => 'وكالة العميل',
-        DmccMurabhaStep::MurabhaOfferIssued => 'إصدار عرض المرابحة',
-        DmccMurabhaStep::MurabahaSaleCompleted => 'إكمال عملية المرابحة',
-    ],
     BursamProductCode::class => [
         BursamProductCode::CrudePalmOil => 'زيت النخيل الخام',
         BursamProductCode::PlasticResinA => 'راتنج بلاستيك A',
+        BursamProductCode::PlasticResinADev => 'راتنج بلاستيك A',
         BursamProductCode::PlasticResinB => 'راتنج بلاستيك B',
+        BursamProductCode::PlasticResinBDev => 'راتنج بلاستيك B',
         BursamProductCode::PlumbumLead => 'رصاص',
+        BursamProductCode::PlumbumLeadDev => 'رصاص',
         BursamProductCode::RbdPalmOlein => 'زيت الأولين',
         BursamProductCode::TimberHardwood => 'خشب صلب',
         BursamProductCode::TimberSoftwood => 'خشب لين',

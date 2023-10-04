@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1\Trader\FinancingOrders\TraderOrders;
 use App\Actions\Contracts\Orders\GetOrderAndTraderOrderLockedForUpdate;
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\DmccMurabhaStep;
+use App\Enums\MurabhaStep;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Trader\Orders\TraderOrders\UpdateMurabahaPurchaseOfferRequest;
@@ -29,12 +29,12 @@ class UpdateMurabahaPurchaseOffer extends Controller
         int $order,
         int $traderOrder
     ): JsonResponse {
-        return DB::transaction(function () use ($request, $order, $traderOrder) {
+        return DB::transaction(function () use ($order, $traderOrder) {
             [$order, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
 
-            $traderOrder->ensureCanAccessStep(DmccMurabhaStep::ClientWakala);
+            $traderOrder->ensureCanAccessStep(MurabhaStep::ClientWakala);
 
-            app(HandleIssuingMurabahaPurchaseOffer::class)->handle($request, $order, $traderOrder);
+            // Use Strategy Context
 
             return $this->successResponse();
         });

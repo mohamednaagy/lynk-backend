@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use App\Enums\BursamMurabhaStep;
-use App\Enums\DmccMurabhaStep;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -214,11 +213,6 @@ class TraderOrder extends Model implements HasMedia
 
     public function isCommodityPurchased(): bool
     {
-        $purchasingStepAccordingToTrader = match ($this->provider) {
-            'dmcc', 'fake' => DmccMurabhaStep::PurchasingCommodity,
-            'bursam' => BursamMurabhaStep::PurchasingCommodity,
-        };
-
-        return $this->checkOrderStepComplete($purchasingStepAccordingToTrader);
+        return $this->checkOrderStepComplete(MurabhaStep::PurchasingCommodity);
     }
 }

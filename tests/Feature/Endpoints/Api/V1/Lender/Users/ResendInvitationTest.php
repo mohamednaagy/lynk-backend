@@ -26,11 +26,11 @@ class ResendInvitationTest extends TestCase
 
     private static User $lenderBelongsToCompanyNotActive;
 
-    private static User $lenerAdmin;
+    private static User $lenderAdmin;
 
-    private static User $lenerAdminBelonsToCompanyNotActive;
+    private static User $lenderAdminBelongsToCompanyNotActive;
 
-    private static User $lenerAdminNotVerified;
+    private static User $lenderAdminNotVerified;
 
     private static string $redirectUrl;
 
@@ -48,11 +48,11 @@ class ResendInvitationTest extends TestCase
             ]
         );
 
-        self::$lenerAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
+        self::$lenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$lenderAdminNotJoined = $this->createLenderUser(self::$company->id, Role::LenderAdmin, ['password' => null]);
-        self::$lenerAdminBelonsToCompanyNotActive = $this->createLenderUser(self::$companyNotActive->id, Role::LenderAdmin);
+        self::$lenderAdminBelongsToCompanyNotActive = $this->createLenderUser(self::$companyNotActive->id, Role::LenderAdmin);
 
-        self::$lenerAdminNotVerified = $this->createLenderUser(
+        self::$lenderAdminNotVerified = $this->createLenderUser(
             self::$company->id,
             Role::LenderAdmin,
             ['email_verified_at' => null]
@@ -67,7 +67,7 @@ class ResendInvitationTest extends TestCase
     public function test_resend_invitation_can_not_access_when_company_not_active()
     {
         $this->withHeader('X-Company', self::$companyNotActive->id)
-            ->actingAs(self::$lenerAdminBelonsToCompanyNotActive)
+            ->actingAs(self::$lenderAdminBelongsToCompanyNotActive)
             ->postJson(
                 'api/v1/lender/users/'.self::$lenderBelongsToCompanyNotActive->id.'/resend-invitation',
                 [
@@ -83,7 +83,7 @@ class ResendInvitationTest extends TestCase
     public function test_resend_invitation_can_not_access_without_verify_email()
     {
         $this->withHeader('X-Company', self::$company->id)
-            ->actingAs(self::$lenerAdminNotVerified)
+            ->actingAs(self::$lenderAdminNotVerified)
             ->postJson(
                 'api/v1/lender/users/'.self::$lenderAdminNotJoined->id.'/resend-invitation',
                 [
@@ -100,7 +100,7 @@ class ResendInvitationTest extends TestCase
     public function test_resend_invitation_lender_admin_can_access()
     {
         $this->withHeader('X-Company', self::$company->id)
-            ->actingAs(self::$lenerAdmin)
+            ->actingAs(self::$lenderAdmin)
             ->postJson(
                 'api/v1/lender/users/'.self::$lenderAdminNotJoined->id.'/resend-invitation',
                 [
@@ -115,7 +115,7 @@ class ResendInvitationTest extends TestCase
         $roles = [Role::LenderBilling, Role::LenderApiUser, Role::LenderOrderCreator, Role::LenderSupervisor];
 
         $this->assertStatusCodeToSpecificRoles(403, $roles, function (User $user, string $role) {
-            return  $this->actingAs($user)
+            return $this->actingAs($user)
                 ->withHeader('X-Company', self::$company->getOriginal('id'))
                 ->postJson(
                     'api/v1/lender/users/'.self::$lenderAdminNotJoined->id.'/resend-invitation',
@@ -130,7 +130,7 @@ class ResendInvitationTest extends TestCase
     {
         Mail::fake();
         $this->withHeader('X-Company', self::$company->id)
-            ->actingAs(self::$lenerAdmin)
+            ->actingAs(self::$lenderAdmin)
             ->postJson(
                 'api/v1/lender/users/'.self::$lenderAdminNotJoined->id.'/resend-invitation',
                 [

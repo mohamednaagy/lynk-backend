@@ -6,5 +6,5 @@ use Cknow\Money\Money;
 
 interface CalculateOrdersCost
 {
-    public function handle(int $ordersCount, Money $orderCost): Money;
+    public function handle(int $ordersCount, Money $orderCostWithoutVat): Money;
 }
