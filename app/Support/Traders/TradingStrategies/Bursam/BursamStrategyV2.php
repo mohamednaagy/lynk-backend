@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\TradingStrategies\Bursam;
 
+use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
@@ -10,6 +11,12 @@ use Illuminate\Http\Request;
 class BursamStrategyV2 extends BursamStrategyV1
 {
     public static string $version = 'v2';
+
+    public function updatePurchasingCommodity(TraderOrder $traderOrder, Request $request)
+    {
+        parent::updatePurchasingCommodity($traderOrder, $request);
+        app(GenerateClientWakala::class)->handle($traderOrder);
+    }
 
     public function updateCommodityCertificateForClient(TraderOrder $traderOrder, Request $request)
     {
