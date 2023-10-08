@@ -47,6 +47,19 @@ return [
             'verify_peer' => false,
         ],
 
+        'mailhog' => [
+            'transport' => 'smtp',
+            'host' => env('MAILHOG_MAIL_HOST', 'smtp.mailgun.org'),
+            'port' => env('MAILHOG_MAIL_PORT', 587),
+            'encryption' => env('MAILHOG_MAIL_ENCRYPTION', 'tls'),
+            'username' => env('MAILHOG_MAIL_USERNAME'),
+            'password' => env('MAILHOG_MAIL_PASSWORD'),
+            'timeout' => null,
+
+            'auth_mode' => null,
+            'verify_peer' => false,
+        ],
+
         'ses' => [
             'transport' => 'ses',
         ],
