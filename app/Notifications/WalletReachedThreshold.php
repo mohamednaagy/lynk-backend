@@ -4,8 +4,8 @@ namespace App\Notifications;
 
 use App\Enums\WalletNotificationType;
 use App\Models\WalletNotification;
-use DragonCode\Contracts\Queue\ShouldQueue;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Config;
