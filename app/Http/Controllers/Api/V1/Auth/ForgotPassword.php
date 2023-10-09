@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Password;
 class ForgotPassword extends Controller
 {
     /**
-     * @param  SendLinkRequest  $request
      * @return \Illuminate\Http\JsonResponse
      *
      * @throws \Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById
@@ -24,6 +23,8 @@ class ForgotPassword extends Controller
 
             if ($company) {
                 tenancy()->initialize($company);
+            } else {
+                return $this->successResponse();
             }
         }
 
