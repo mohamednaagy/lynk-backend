@@ -12,18 +12,13 @@ class ClientWakala extends Controller
 {
     /**
      * Handle the incoming request.
-     *
-     * @param  AskWakalaRequest  $request
-     * @param  AskClientWakala  $askClientWakala
-     * @param  FinancingOrder  $order
-     * @return JsonResponse
      */
     public function __invoke(
         AskWakalaRequest $request,
         AskClientWakala $askClientWakala,
         FinancingOrder $order
     ): JsonResponse {
-        $askClientWakala->handle($order, $request->validated('wakala_url'));
+        // $askClientWakala->handle($order, $request->validated('wakala_url'));
 
         return $this->successResponse();
     }

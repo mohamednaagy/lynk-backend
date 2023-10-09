@@ -7,6 +7,8 @@ use BenSampo\Enum\Enum;
 
 final class BursamProductCode extends Enum implements LocalizedEnum
 {
+    const CrudePalmOil = 'CPO-MSIA-09';
+
     const PlasticResinB = 'PR-B MSIA14';
 
     const PlasticResinBDev = 'PR-B-MSIA14';
@@ -14,8 +16,6 @@ final class BursamProductCode extends Enum implements LocalizedEnum
     const PlasticResinA = 'PR-A MSIA14';
 
     const PlasticResinADev = 'PR -A-MY-14';
-
-    const CrudePalmOil = 'CPO-MSIA-09';
 
     const PlumbumLead = 'PB-LEAD -19';
 

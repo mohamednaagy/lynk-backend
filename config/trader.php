@@ -35,6 +35,7 @@ return [
             'modes' => [
                 'v1' => [
                     TraderOrderMode::Manual,
+                    TraderOrderMode::Automatic,
                 ],
             ],
         ],
