@@ -62,8 +62,8 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
     {
         $items = $this->filterExcludes([
             'id' => fn () => $order->id,
-            'amount' => fn () => $order->amount->formatByDecimal(),
-            'selling_price' => fn () => $order->selling_price->formatByDecimal(),
+            'amount' => fn () => format_money_value($order->amount),
+            'selling_price' => fn () => format_money_value($order->selling_price),
             'reference_number' => fn () => $order->reference_number,
             'national_id' => fn () => $order->national_id,
             'order_owner' => fn () => $order->creator?->full_name,
