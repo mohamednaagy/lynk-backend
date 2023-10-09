@@ -89,6 +89,7 @@ class FinancingOrderControllerIndexTest extends TestCase
                         'current_step',
                         'selling_price',
                         'status_reason',
+                        'created_at',
                     ])
                     ->respond()
                     ->getData(true)
@@ -114,6 +115,7 @@ class FinancingOrderControllerIndexTest extends TestCase
                         'current_step',
                         'selling_price',
                         'status_reason',
+                        'created_at',
                     ])
                     ->respond()
                     ->getData(true)
@@ -149,6 +151,7 @@ class FinancingOrderControllerIndexTest extends TestCase
                         'current_step',
                         'selling_price',
                         'status_reason',
+                        'created_at',
                     ])
                     ->respond()
                     ->getData(true)

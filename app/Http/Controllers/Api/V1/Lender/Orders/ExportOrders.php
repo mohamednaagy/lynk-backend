@@ -40,7 +40,7 @@ class ExportOrders extends Controller
             ->setExcludes(
                 $request->boolean('detailed')
                     ? ['company_name', 'order_owner']
-                    : ['company_name', 'created_date', 'created_time', 'order_owner', 'cost_with_vat', 'cost_without_vat']
+                    : ['company_name', 'order_owner', 'cost_with_vat', 'cost_without_vat']
             );
 
         return Excel::download($export, $this->getFileName(), null, [
