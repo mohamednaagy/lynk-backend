@@ -11,7 +11,6 @@ use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
-use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Sms\Events\SmsSent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -46,8 +45,6 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
     private static array $requestData;
 
-    private StepHistoriesDictionary $stepDictionary;
-
     public function setUp(): void
     {
         parent::setUp();
@@ -81,7 +78,6 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
                 ->create('attachment.pdf', 10),
         ];
 
-        $this->stepDictionary = (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version));
     }
 
     public function test_that_unauth_user_cant_update_murabha_complete_document(): void
@@ -106,7 +102,7 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
         );
     }
 
-    public function test_proceed_murabha_complete_document_is_successfull_and_order_status_will_be_updated(): void
+    public function test_proceed_murabha_complete_document_is_successful_and_order_status_will_be_updated(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
@@ -123,10 +119,9 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
     /**
      * @dataProvider unsuitableTraderHistoryDataProvider
      */
-    public function test_update_murabha_complete_document_not_follow_sequence($action): void
+    public function test_update_murabha_complete_document_not_follow_sequence($action)
     {
         Queue::fake();
-
         self::$traderOrder->traderHistories()->create([
             'action' => $action,
         ]);
@@ -142,13 +137,10 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
     public function unsuitableTraderHistoryDataProvider(): array
     {
-        $murabhaOfferIssuedHistories = $this->stepDictionary->getStepOf(MurabhaStep::MurabhaOfferIssued)?->histories ?? [];
-        $murabahaSaleCompletedHistories = $this->stepDictionary->getStepOf(MurabhaStep::MurabahaSaleCompleted)?->histories ?? [];
-
         $histories = collect(FinancingOrderHistory::getValues())
-            ->reject(function ($item) use ($murabhaOfferIssuedHistories, $murabahaSaleCompletedHistories) {
-                return $item == end($murabhaOfferIssuedHistories)
-                    || $item == end($murabahaSaleCompletedHistories);
+            ->reject(function ($item) {
+                return $item == FinancingOrderHistory::AttachMpoDocument
+                    || $item == FinancingOrderHistory::MurabahaSaleCompleted;
             });
 
         $histories->transform(function ($history) {
@@ -170,5 +162,51 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
         $freshTraderOrderStatus = self::$traderOrder->fresh()->status;
         $this->assertTrue($freshTraderOrderStatus->is(TraderOrderStatus::Completed));
+    }
+
+    public function test_send_sms_on_update_murabha_complete_document_if_notify_borrowers_settings_on_and_phone_provided(): void
+    {
+        Event::fake([
+            SmsSent::class,
+        ]);
+
+        self::$lender->update(['notify_borrowers_about_order_updates' => true]);
+
+        TraderOrderScenario::of(self::$traderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
+
+        $this->actingAs(self::$superAdminUser)
+            ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData);
+
+        Event::assertDispatched(SmsSent::class);
+    }
+
+    public function test_not_send_sms_on_update_murabha_complete_document_if_notify_borrowers_settings_off_and_phone_provided(): void
+    {
+        self::$lender->update(['notify_borrowers_about_order_updates' => false]);
+
+        Event::fake([
+            SmsSent::class,
+        ]);
+
+        $this->actingAs(self::$superAdminUser)
+            ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData);
+
+        Event::assertNotDispatched(SmsSent::class);
+    }
+
+    public function test_not_send_sms_on_update_murabha_complete_document_if_notify_borrowers_settings_on_and_phone_not_provided(): void
+    {
+        Event::fake([
+            SmsSent::class,
+        ]);
+
+        self::$lender->update(['notify_borrowers_about_order_updates' => false]);
+
+        $this->actingAs(self::$superAdminUser)
+            ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData);
+
+        Event::assertNotDispatched(SmsSent::class);
     }
 }
