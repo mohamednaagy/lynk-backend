@@ -107,6 +107,11 @@ class UpdateCompanyRequest extends FormRequest
                 'required',
                 'decimal:0,2',
             ],
+            'order_cost_tiers.*.order_cost_with_vat' => [
+                'required',
+                'gt:order_cost_tiers.*.order_cost_without_vat',
+                'decimal:0,2',
+            ],
             'order_cost_tiers.'.$lastTierIndex.'.proration_amount' => [
                 'exclude_unless:order_cost_tiers.'.$lastTierIndex.'.fee_type,'.OrderFeeType::Proration,
                 'required_if:order_cost_tiers.'.$lastTierIndex.'.fee_type,'.OrderFeeType::Proration,
