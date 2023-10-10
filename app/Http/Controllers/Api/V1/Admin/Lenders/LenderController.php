@@ -160,7 +160,6 @@ class LenderController extends Controller
             $currency = $lender->getWallet(WalletType::CompanyWallet)->currency;
             $data['order_cost_tiers'] = $this->unsetProrationAmounExceptForLastTier($data['order_cost_tiers']);
             $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers'], $currency);
-            //            dd($data['order_cost_tiers']);
             $updateCompany->handle($lender, $data);
 
             return $this->successResponse();
