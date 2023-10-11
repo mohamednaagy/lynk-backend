@@ -98,6 +98,8 @@ class OrderControllerIndexTest extends TestCase
                         'national_id',
                         'amount',
                         'selling_price',
+                        'formatted_amount',
+                        'formatted_selling_price',
                         'status_reason',
                         'current_step',
                         'creator',

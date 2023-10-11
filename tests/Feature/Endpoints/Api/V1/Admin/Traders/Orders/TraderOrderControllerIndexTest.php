@@ -85,6 +85,8 @@ class TraderOrderControllerIndexTest extends TestCase
                         'amount',
                         'current_step',
                         'selling_price',
+                        'formatted_amount',
+                        'formatted_selling_price',
                         'status_reason',
                         'creator',
                         'created_at',
