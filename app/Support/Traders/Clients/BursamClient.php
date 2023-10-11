@@ -239,7 +239,7 @@ class BursamClient
                 return Http::response([
                     'ECERTNO' => $traderOrder->reference,
                     'BUYER' => 'LYNK LLC',
-                    'OWNER' => 'RHB',
+                    'OWNER' => 'LYNK LLC',
                     'BIDNO' => '4',
                     'TOTALVALUE' => $traderOrder->order->amount->formatByDecimal(),
                     'CURRENCY' => 'SAR',
