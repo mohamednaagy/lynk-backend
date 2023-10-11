@@ -19,7 +19,6 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 {
@@ -70,7 +69,6 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
 
                     $this->delete();
                 } else {
-                    Log::error($exception->getMessage(), $exception->getContext());
                     throw $exception;
                 }
             }
