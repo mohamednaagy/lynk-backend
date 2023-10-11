@@ -25,8 +25,10 @@ class FinancingOrderCollection extends Collection
             ->whereIn('reason', [TransactionReason::OrderCreationFee, TransactionReason::RefundOrderCreationFee])
             ->groupBy('order_id')
             ->get();
-        $totalOrderVat = Transaction::select(['meta->financing_order_id as order_id',
-            DB::raw('-1 * SUM(amount) as amount')])
+        $totalOrderVat = Transaction::select([
+            'meta->financing_order_id as order_id',
+            DB::raw('-1 * SUM(amount) as amount'),
+        ])
             ->whereIn('meta->financing_order_id', $ids)
             ->whereIn('reason', [TransactionReason::VatPercentageFee, TransactionReason::RefundVatPercentageFee])
             ->groupBy('order_id')

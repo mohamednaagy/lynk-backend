@@ -63,6 +63,9 @@ class OrderController extends Controller
                 'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
             ])
             ->handle()
+            ->withCount(['traderOrders as charged_trader_orders_count' => function ($query) {
+                $query->whereNull('data->refunded_at');
+            }])
             ->paginate();
 
         return fractal($financingOrders, new FinancingOrderTransformer())
@@ -72,6 +75,7 @@ class OrderController extends Controller
                 'reference_number',
                 'national_id',
                 'amount',
+                'charged_trader_orders_count',
                 'selling_price',
                 'status_reason',
                 'current_step',
