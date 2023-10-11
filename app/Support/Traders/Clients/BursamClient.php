@@ -286,8 +286,8 @@ class BursamClient
 
                 return Http::response([
                     'ECERTNO' => $traderOrder->reference,
-                    'SELLER' => 'LYNK LLC',
-                    'BUYER' => $traderOrder->order->customer_name,
+                    'SELLER' => $traderOrder->order->customer_name,
+                    'BUYER' => 'BURSA MALAYSIA ISLAMIC SERVICES',
                     'TOTALVALUE' => $traderOrder->order->amount->formatByDecimal(),
                     'CURRENCY' => 'SAR',
                     'PRICE' => $traderOrder->order->amount->formatByDecimal(),
