@@ -56,6 +56,8 @@ class FinancingOrderControllerUpdateTest extends TestCase
             'selling_price' => '320',
             'phone_country_code' => 'SA',
             'phone_number' => '500112233',
+            'customer_name' => '500112233',
+            'is_verification_required' => 1,
         ];
     }
 
@@ -135,16 +137,42 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ]);
     }
 
-    public function test_that_auth_user_without_phone_number_cant_update_order(): void
+    public function test_that_auth_user_without_phone_number_and_is_verification_required_true_cant_update_order(): void
     {
         $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
             ->putJson('api/v1/lender/orders/'.self::$order->id, Arr::except(self::$updatedOrderDetails, ['phone_number']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertExactJson([
-                'message' => 'The phone number field is required.',
+                'message' => 'The phone number field is required when is verification required is 1.',
                 'errors' => [
                     'phone_number' => [
-                        'The phone number field is required.',
+                        'The phone number field is required when is verification required is 1.',
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_that_auth_user_without_phone_number_and_is_verification_required_false_cant_update_order(): void
+    {
+        $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
+            ->putJson('api/v1/lender/orders/'.self::$order->id,
+                array_merge(Arr::except(self::$updatedOrderDetails, ['phone_number']), [
+                    'is_verification_required' => 0,
+                ])
+            )
+            ->assertStatus(Response::HTTP_OK);
+    }
+
+    public function test_that_auth_user_without_customer_name_cant_update_order(): void
+    {
+        $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
+            ->putJson('api/v1/lender/orders/'.self::$order->id, Arr::except(self::$updatedOrderDetails, ['customer_name']))
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertExactJson([
+                'message' => 'The customer name field is required.',
+                'errors' => [
+                    'customer_name' => [
+                        'The customer name field is required.',
                     ],
                 ],
             ]);
