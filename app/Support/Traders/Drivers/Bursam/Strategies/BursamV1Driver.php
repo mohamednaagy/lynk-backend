@@ -94,11 +94,12 @@ class BursamV1Driver implements TraderInterface
     public function fetchOrderResultYNN(TraderOrder $traderOrder)
     {
         $response = BursamClient::of($traderOrder)
-            ->fetchBuyResult($traderOrder->uuid_one);
+            ->fetchBuyResult();
 
         if ($response->json('status.processingCount') == 0 && ($response->json('body.0.bidErrNo') == '999')) {
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiHoldingCertificateDocument);
 
+            logs()->debug('test', [$response]);
             $traderOrder->update([
                 'original_data' => $response->json('body.0'),
                 'reference' => $response->json('body.0.ecertNo'),
@@ -183,8 +184,6 @@ class BursamV1Driver implements TraderInterface
             'total_value' => $response->json('TOTALVALUE'),
             'total_value_myr_equivalent' => parse_number($response->json('PRICE_MYR_EQUIVALENT')) * parse_number($response->json('PVOLUME')),
             'currency' => $response->json('CURRENCY'),
-            //            'price' => $response->json('PRICE'),
-            //            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
             'purchase_time_date' => $response->json('PURCHASETIMEDATE').'  Malaysia Time (MYT)',
             'value_date' => $response->json('VALUEDATE').'  Malaysia Time (MYT)',
             'p_name' => in_array($productName, BursamProductCode::getValues())
