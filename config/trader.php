@@ -41,6 +41,7 @@ return [
         ],
         'bursam' => [
             'latest' => 'v2',
+            'fake' => env('BURSAM_FAKE', false),
             'base_url' => env('BURSAM_BASE_URL', 'traderdcthh-erfmbxcc1323421.uselynk.com'),
             'verify_tls' => env('BURSAM_VERIFY_TLS', false),
             'member_short_name' => env('BURSAM_MEMBER_SHORT_NAME', 'LYNK'),
