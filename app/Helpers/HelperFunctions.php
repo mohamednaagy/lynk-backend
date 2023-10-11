@@ -2,8 +2,11 @@
 
 use App\Enums\MurabhaStep;
 use App\Models\Media;
+use App\Support\Money\Formatters\FormattedDecimalMoneyFormatter;
+use Cknow\Money\Money;
 use Illuminate\Support\Facades\Config;
 use Modules\Grantify\Facades\Grantify;
+use Money\Currencies\ISOCurrencies;
 use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\MediaLibrary\HasMedia;
 
@@ -179,5 +182,14 @@ if (! function_exists('cast_phone_number_if_exist')) {
         }
 
         return $data;
+    }
+}
+
+if (! function_exists('format_money_value')) {
+    function format_money_value(Money $money): string
+    {
+        $currencies = new ISOCurrencies();
+
+        return $money->formatByFormatter(new FormattedDecimalMoneyFormatter($currencies));
     }
 }

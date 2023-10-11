@@ -39,9 +39,6 @@ class FinancingOrderControllerUpdateTest extends TestCase
 
     private static array $updatedOrderDetails;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -62,9 +59,6 @@ class FinancingOrderControllerUpdateTest extends TestCase
         ];
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_update_order(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -75,9 +69,6 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_national_id_cant_update_order(): void
     {
         $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
@@ -93,9 +84,6 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_amount_cant_update_order(): void
     {
         $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
@@ -114,9 +102,6 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_selling_price_cant_update_order(): void
     {
         $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
@@ -132,9 +117,6 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_phone_country_code_cant_update_order(): void
     {
         $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
@@ -153,9 +135,6 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_phone_number_cant_update_order(): void
     {
         $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
@@ -171,9 +150,6 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_can_update_order_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -189,6 +165,8 @@ class FinancingOrderControllerUpdateTest extends TestCase
                         'national_id',
                         'amount',
                         'selling_price',
+                        'formatted_amount',
+                        'formatted_selling_price',
                         'is_approved',
                         'status_reason',
                         'phone_country_code',
@@ -200,9 +178,6 @@ class FinancingOrderControllerUpdateTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_supervisor_user_can_update_order_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderSupervisor)
@@ -218,6 +193,8 @@ class FinancingOrderControllerUpdateTest extends TestCase
                         'national_id',
                         'amount',
                         'selling_price',
+                        'formatted_amount',
+                        'formatted_selling_price',
                         'is_approved',
                         'status_reason',
                         'phone_country_code',
@@ -229,9 +206,6 @@ class FinancingOrderControllerUpdateTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_billing_user_cant_update_order_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderBilling)
@@ -240,9 +214,6 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_order_creator_user_cant_update_not_owned_order_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
@@ -251,9 +222,6 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_order_creator_user_can_update_owned_order_with_valid_data(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
@@ -269,6 +237,8 @@ class FinancingOrderControllerUpdateTest extends TestCase
                         'national_id',
                         'amount',
                         'selling_price',
+                        'formatted_amount',
+                        'formatted_selling_price',
                         'is_approved',
                         'status_reason',
                         'phone_country_code',
@@ -280,9 +250,6 @@ class FinancingOrderControllerUpdateTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_rejected_order_status_will_be_pending_approval_when_required_otherwise_pending_trader_order(): void
     {
         // Require approval case
