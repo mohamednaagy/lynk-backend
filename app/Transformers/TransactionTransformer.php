@@ -19,6 +19,7 @@ class TransactionTransformer extends TransformerAbstract
         'date',
         'description',
         'amount',
+        'amount_formatted',
         'receipt_url',
     ];
 
@@ -44,6 +45,13 @@ class TransactionTransformer extends TransformerAbstract
                 ? app(TransactionUtilInterface::class)->getDescription($transaction)
                 : null
         );
+    }
+
+    public function includeAmountFormatted(Transaction $transaction): Primitive
+    {
+        $transaction->amount_formatted = number_format($transaction->amount->getAmount() / 100, 2, '.', ',');
+
+        return $this->primitive($transaction->amount_formatted);
     }
 
     public function includeAmount(Transaction $transaction): Primitive

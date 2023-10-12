@@ -33,6 +33,7 @@ class GetWalletTransactions extends Controller
                 'date',
                 'description',
                 'amount',
+                'amount_formatted',
                 'receipt_url',
             ])
             ->respond();
