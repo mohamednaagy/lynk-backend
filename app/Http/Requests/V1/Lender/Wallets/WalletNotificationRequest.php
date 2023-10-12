@@ -27,7 +27,8 @@ class WalletNotificationRequest extends FormRequest
                     : new EnumValue(WalletNotificationType::class),
             ],
             'value' => [
-                'required',
+                'nullable',
+                'gte:0',
                 $this->input('type') === WalletNotificationType::ORDER_COUNT
                     ? 'integer'
                     : 'numeric',

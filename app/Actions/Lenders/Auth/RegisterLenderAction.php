@@ -35,7 +35,8 @@ class RegisterLenderAction implements RegisterLender
             'company_cr' => $data['company_cr'],
             'status' => $data['company_status'],
             'does_order_require_approval' => $data['does_order_require_approval'],
-            'require_initiate_trade_request' => ! $data['does_order_require_approval'],
+            'require_initiate_trade_request' => $data['require_initiate_trade_request'],
+            'notify_borrowers_about_order_updates' => $data['notify_borrowers_about_order_updates'],
         ]);
 
         tenancy()->initialize($company);

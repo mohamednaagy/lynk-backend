@@ -61,7 +61,6 @@ class Lender
             Action::Manage,
             Action::Index,
             Action::Create,
-            Action::Delete,
         ],
     ];
 }

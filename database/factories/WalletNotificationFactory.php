@@ -16,8 +16,27 @@ class WalletNotificationFactory extends Factory
         return [
             'type' => $this->faker->randomElement(WalletNotificationType::getValues()),
             'value' => $this->faker->randomNumber(),
+            'notified_at' => $this->faker->boolean ? now() : null,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ];
+    }
+
+    public function notified()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'notified_at' => now(),
+            ];
+        });
+    }
+
+    public function notNotified()
+    {
+        return $this->state(function (array $attribute) {
+            return [
+                'notified_at' => null,
+            ];
+        });
     }
 }

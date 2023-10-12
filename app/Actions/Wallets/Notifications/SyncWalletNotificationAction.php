@@ -11,8 +11,14 @@ use Illuminate\Support\Arr;
 
 class SyncWalletNotificationAction implements SyncWalletNotification
 {
-    public function handle(Company $company, array $data): WalletNotification
+    public function handle(Company $company, array $data): ?WalletNotification
     {
+        if (is_null($data['value'])) {
+            $company->walletNotification()->delete();
+
+            return null;
+        }
+
         $wallet = $company->getWallet(WalletType::CompanyWallet);
 
         $data['value'] = Money::parseByDecimal($data['value'], $wallet->currency);
@@ -24,6 +30,10 @@ class SyncWalletNotificationAction implements SyncWalletNotification
                     'wallet_id' => $wallet->id,
                 ]
             );
+
+        if ($walletNotification->wasChanged(['value', 'type'])) {
+            $walletNotification->markAsNotNotified();
+        }
 
         return $walletNotification;
     }
