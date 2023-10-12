@@ -30,6 +30,10 @@ class Register extends Controller
                         ->default_does_order_require_approval,
                     'company_status' => $getSettingsClassInstance->handle(Area::Lender)
                         ->default_company_registration_status,
+                    'require_initiate_trade_request' => $getSettingsClassInstance->handle(Area::Lender)
+                        ->require_initiate_trade_request,
+                    'notify_borrowers_about_order_updates' => $getSettingsClassInstance->handle(Area::Lender)
+                        ->notify_borrowers_about_order_updates,
                 ]
             );
 

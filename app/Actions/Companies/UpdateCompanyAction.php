@@ -3,6 +3,7 @@
 namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\UpdateCompany;
+use App\Enums\WalletNotificationType;
 use App\Models\Company;
 use App\Models\TieredPricing;
 use Illuminate\Support\Arr;
@@ -35,7 +36,15 @@ class UpdateCompanyAction implements UpdateCompany
         );
 
         if (isset($data['order_cost_tiers'])) {
+            $isTieredBeforeUpdate = $company->isTiered();
+
             $this->updateCompanyPricingTiers($company, collect($data['order_cost_tiers']));
+
+            $isTieredAfterUpdate = $company->isTiered();
+
+            if ($isTieredBeforeUpdate != $isTieredAfterUpdate && $isTieredAfterUpdate) {
+                $company->walletNotification()->where('type', WalletNotificationType::ORDER_COUNT)->delete();
+            }
         }
 
         return $company;
@@ -47,12 +56,12 @@ class UpdateCompanyAction implements UpdateCompany
         $deletedPricingTiersIds = $company->tieredPricing()->pluck('id')->diff($requestPricingTiersIds);
 
         foreach ($deletedPricingTiersIds as $tier_id) {
-            TieredPricing::query()->find($tier_id)->delete();
+            TieredPricing::find($tier_id)->delete();
         }
 
         foreach ($requestPricingTiersIds as $tier_id) {
             $tier = $requestPricingTiers->where('id', $tier_id)->first();
-            TieredPricing::query()->find($tier_id)?->update($tier);
+            TieredPricing::find($tier_id)?->update($tier);
         }
 
         $newTiers = $requestPricingTiers->whereNull('id');

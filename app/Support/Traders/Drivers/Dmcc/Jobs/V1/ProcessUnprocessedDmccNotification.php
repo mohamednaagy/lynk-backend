@@ -6,7 +6,6 @@ use App\Exceptions\TraderNotSupportedException;
 use App\Models\TraderOrder;
 use App\Support\Traders\Events\ProcessNotification;
 use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessUnprocessedDmccNotification implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected string $ttiId;
 
@@ -41,7 +40,6 @@ class ProcessUnprocessedDmccNotification implements ShouldQueue, ShouldBeUnique
     /**
      * Execute the job.
      *
-     * @return void
      *
      * @throws TraderNotSupportedException
      */

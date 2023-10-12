@@ -33,7 +33,13 @@ class ProcessBursamCancelTimeOutOrder implements ShouldQueue
     public function handle()
     {
         DB::transaction(function () {
-            $lockedFinancingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder->id);
+            $lockedFinancingOrder = FinancingOrder::query()
+                ->lockForUpdate()
+                ->find($this->financingOrder->id);
+
+            if (is_null($lockedFinancingOrder)) {
+                return;
+            }
 
             $lockedFinancingOrder->activeTraderOrder->each(function ($activeTraderOrder) {
                 Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)

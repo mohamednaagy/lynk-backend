@@ -3,7 +3,6 @@
 namespace App\Support\ZatcaEInvoice;
 
 use Cknow\Money\Money;
-
 use function Psl\Str\format_number;
 
 class PurchaseLine

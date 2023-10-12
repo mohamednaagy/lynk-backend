@@ -45,9 +45,12 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
             $traderOrder = TraderOrder::query()
                 ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::Initiated])
                 ->lockForUpdate()
-                ->findOrFail($this->traderOrderId);
+                ->find($this->traderOrderId);
 
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
+            if (
+                is_null($traderOrder)
+                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)
+            ) {
                 return;
             }
 
@@ -93,7 +96,7 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
                 'status' => TraderOrderStatus::Cancelled,
                 'failure_reason' => method_exists($exception, 'getContext') ?
                     $exception->getContext('failure_reason')
-                    : $exception->getMessage(),
+                    : '',
                 'cancel_reason' => TraderOrderCancelReason::FailureToPurchase,
             ]);
         });

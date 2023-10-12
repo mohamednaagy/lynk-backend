@@ -3,7 +3,6 @@
 namespace App\Http\Requests\V1\Lender\Orders;
 
 use App\Http\Requests\Traits\RequestHasMobileVerification;
-use App\Rules\ValidateSAID;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -30,7 +29,7 @@ class UpdateOrderRequest extends FormRequest
     {
         return [
             'reference_number' => ['nullable', 'string', 'max:100'],
-            'national_id' => ['required', 'string', 'size:10', new ValidateSAID()],
+            'national_id' => ['required', 'integer', 'digits:10', 'gt:0'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => [
                 Rule::requiredIf($this->order->is_verification_required),

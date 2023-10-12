@@ -5,12 +5,13 @@ namespace App\Notifications;
 use App\Enums\WalletNotificationType;
 use App\Models\WalletNotification;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Config;
 use NumberFormatter;
 
-class WalletReachedThreshold extends Notification
+class WalletReachedThreshold extends Notification implements ShouldQueue
 {
     use Queueable;
 

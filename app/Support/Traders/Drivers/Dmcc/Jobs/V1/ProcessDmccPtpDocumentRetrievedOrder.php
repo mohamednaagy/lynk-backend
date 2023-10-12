@@ -6,7 +6,6 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $traderOrder;
 
@@ -40,7 +39,6 @@ class ProcessDmccPtpDocumentRetrievedOrder implements ShouldQueue, ShouldBeUniqu
     /**
      * Execute the job.
      *
-     * @return void
      *
      * @throws \Throwable
      */
