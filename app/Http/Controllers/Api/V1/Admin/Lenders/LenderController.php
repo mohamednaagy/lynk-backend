@@ -187,8 +187,8 @@ class LenderController extends Controller
     {
         $currency = Money::getDefaultCurrency();
         foreach ($tiers as &$tier) {
-            $orderCostWithoutVat = precise_money_parse($tier['order_cost_without_vat'], $currency);
-            $orderCostWithVat = precise_money_parse($tier['order_cost_with_vat'], $currency);
+            $orderCostWithoutVat = Money::parseByDecimal($tier['order_cost_without_vat'], $currency);
+            $orderCostWithVat = Money::parseByDecimal($tier['order_cost_with_vat'], $currency);
             [$vatOfOrderCostAmount] = app(CalculateVatAmount::class)
                 ->setAmount($orderCostWithVat)
                 ->setIsVatIncludedInAmount(true)
@@ -198,7 +198,7 @@ class LenderController extends Controller
                 return false;
             }
 
-            $tier['order_cost_without_vat'] = precise_money_format($orderCostWithVat->subtract($vatOfOrderCostAmount));
+            $tier['order_cost_without_vat'] = $orderCostWithVat->subtract($vatOfOrderCostAmount)->formatByDecimal();
         }
 
         return true;
@@ -225,7 +225,7 @@ class LenderController extends Controller
 
         foreach ($tiers as &$tier) {
             $tier['order_value_start'] = Money::parseByDecimal($tier['order_value_start'], $currency);
-            $tier['order_cost_without_vat'] = precise_money_parse($tier['order_cost_without_vat'], $currency);
+            $tier['order_cost_without_vat'] = Money::parseByDecimal($tier['order_cost_without_vat'], $currency);
 
             if ($tier['order_value_end'] != null) {
                 $tier['order_value_end'] = Money::parseByDecimal($tier['order_value_end'], $currency);

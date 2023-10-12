@@ -6,7 +6,6 @@ use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Enums\OrderFeeType;
 use App\Exceptions\NoMatchOrderCostAndValueException;
 use App\Support\Money\Casts\MoneyStringCast;
-use App\Support\Money\Casts\PreciseMoneyStringCast;
 use Cknow\Money\Money;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -27,7 +26,7 @@ class TieredPricing extends Model
         'order_value_start' => MoneyStringCast::class,
         'order_value_end' => MoneyStringCast::class,
         'fee_type' => OrderFeeType::class,
-        'order_cost_without_vat' => PreciseMoneyStringCast::class.':4',
+        'order_cost_without_vat' => MoneyStringCast::class,
         'proration_amount' => MoneyStringCast::class,
     ];
 
