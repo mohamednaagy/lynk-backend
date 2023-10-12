@@ -146,19 +146,28 @@ class FinancingOrderControllerStoreTest extends TestCase
             ]);
     }
 
-    public function test_that_auth_user_without_phone_number_cant_create_order(): void
+    public function test_that_auth_user_without_phone_number_cant_create_order_if_verification_required(): void
     {
         $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
             ->postJson('api/v1/lender/orders', Arr::except(self::$orderDetails, ['phone_number']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertExactJson([
-                'message' => 'The phone number field is required.',
+                'message' => 'The phone number field is required when is verification required is true.',
                 'errors' => [
                     'phone_number' => [
-                        'The phone number field is required.',
+                        'The phone number field is required when is verification required is true.',
                     ],
                 ],
             ]);
+    }
+
+    public function test_that_auth_user_without_phone_number_can_create_order_if_verification_not_required(): void
+    {
+        self::$orderDetails['is_verification_required'] = false;
+
+        $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)
+            ->postJson('api/v1/lender/orders', Arr::except(self::$orderDetails, ['phone_number']))
+            ->assertStatus(Response::HTTP_OK);
     }
 
     public function test_that_auth_user_without_is_verification_required_cant_create_order(): void

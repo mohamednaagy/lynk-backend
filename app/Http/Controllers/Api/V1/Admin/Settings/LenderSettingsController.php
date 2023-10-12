@@ -29,9 +29,6 @@ class LenderSettingsController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param  GetSettingsClassInstance  $getSettingsClassInstance
-     * @return JsonResponse
      */
     public function index(GetSettingsClassInstance $getSettingsClassInstance): JsonResponse
     {
@@ -43,16 +40,14 @@ class LenderSettingsController extends Controller
                 'default_company_registration_status',
                 'default_company_status_created_by_operation',
                 'notify_admins_about_new_orders',
+                'require_initiate_trade_request',
+                'notify_borrowers_about_order_updates',
             ])
             ->respond();
     }
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  UpdateLenderSettingsRequest  $updateLenderSettingsRequest
-     * @param  UpdateSettings  $updateSettings
-     * @return JsonResponse
      */
     public function update(UpdateLenderSettingsRequest $updateLenderSettingsRequest, UpdateSettings $updateSettings): JsonResponse
     {

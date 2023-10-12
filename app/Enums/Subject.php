@@ -51,4 +51,6 @@ final class Subject extends Enum
     const Traders = 'traders';
 
     const TraderUserInvitation = 'traderUserInvitation';
+
+    const WalletNotifications = 'walletNotifications';
 }

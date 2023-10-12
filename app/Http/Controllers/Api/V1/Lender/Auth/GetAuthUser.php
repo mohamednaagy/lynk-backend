@@ -30,6 +30,7 @@ class GetAuthUser extends Controller
                 'company.id',
                 'company.public_status_comment',
                 'company.is_tiered',
+                'company.trading_mode',
                 'permissions',
                 'locale',
                 'phone_number',

@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Api\V1\Lender\Settings;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
+use App\Enums\TraderOrderMode;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Settings\UpdateSettingsRequest;
 use App\Transformers\CompanyTransformer;
+use Illuminate\Http\JsonResponse;
 
 class SettingsController extends Controller
 {
@@ -33,14 +35,20 @@ class SettingsController extends Controller
                 'order_cost',
                 'does_order_require_approval',
                 'webhook_secret_key',
+                'require_initiate_trade_request',
+                'notify_borrowers_about_order_updates',
             ])->respond();
     }
 
-    public function update(UpdateSettingsRequest $updateSettingsRequest)
+    public function update(UpdateSettingsRequest $updateSettingsRequest): JsonResponse
     {
         $company = tenant();
 
         $data = $updateSettingsRequest->validated();
+        if ($company->trading_mode->is(TraderOrderMode::Manual)) {
+            $data['require_initiate_trade_request'] = true;
+        }
+
         $company->update($data);
 
         return $this->successResponse([]);

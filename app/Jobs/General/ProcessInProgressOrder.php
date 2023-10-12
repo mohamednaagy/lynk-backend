@@ -52,7 +52,8 @@ class ProcessInProgressOrder implements ShouldQueue
             ])->count() > 0) {
                 return;
             }
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::InProgress)) {
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::InProgress)
+                || $financingOrder->company->require_initiate_trade_request) {
                 return;
             }
 

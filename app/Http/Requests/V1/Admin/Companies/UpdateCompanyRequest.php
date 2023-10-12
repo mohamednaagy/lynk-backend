@@ -57,6 +57,10 @@ class UpdateCompanyRequest extends FormRequest
                 'required',
                 'boolean',
             ],
+            'require_initiate_trade_request' => [
+                'required_if:trading_mode,'.TraderOrderMode::Automatic,
+                'boolean',
+            ],
             'order_cost_tiers' => [
                 'required',
                 'array',
@@ -129,6 +133,10 @@ class UpdateCompanyRequest extends FormRequest
                 'required',
                 'integer',
                 new EnumValue(CompanyNewOrderNotificationForAdminStatus::class, false),
+            ],
+            'notify_borrowers_about_order_updates' => [
+                'required',
+                'boolean',
             ],
             'trading_mode' => [
                 'required',

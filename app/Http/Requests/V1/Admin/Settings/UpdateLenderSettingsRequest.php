@@ -14,8 +14,6 @@ class UpdateLenderSettingsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -24,8 +22,6 @@ class UpdateLenderSettingsRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
     public function rules(): array
     {
@@ -36,6 +32,8 @@ class UpdateLenderSettingsRequest extends FormRequest
             'default_does_order_require_approval' => ['required', 'boolean'],
             'default_company_registration_status' => ['required', 'integer', new EnumValue(CompanyStatus::class)],
             'default_company_status_created_by_operation' => ['required', 'integer', new EnumValue(CompanyStatus::class)],
+            'require_initiate_trade_request' => ['required', 'boolean'],
+            'notify_borrowers_about_order_updates' => ['required', 'boolean'],
         ];
     }
 }
