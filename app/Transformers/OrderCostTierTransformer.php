@@ -63,7 +63,7 @@ class OrderCostTierTransformer extends TransformerAbstract
 
     public function includeOrderCostWithoutVat(TieredPricing $tieredPricing): Primitive
     {
-        return $this->primitive(precise_money_format($tieredPricing->order_cost_without_vat));
+        return $this->primitive($tieredPricing->order_cost_without_vat->formatByDecimal());
     }
 
     public function includeOrderCostWithVat(TieredPricing $tieredPricing): Primitive
@@ -75,7 +75,7 @@ class OrderCostTierTransformer extends TransformerAbstract
             ->setIsVatIncludedInAmount(false)
             ->handle();
 
-        return $this->primitive(precise_money_format($orderCostWithoutVat->add($vatAmount)));
+        return $this->primitive($orderCostWithoutVat->add($vatAmount)->formatByDecimal());
     }
 
     public function includeProrationAmount(TieredPricing $tieredPricing): Primitive
