@@ -109,6 +109,12 @@ return new class extends Migration
                 'currency' => config('app.currency'),
                 'amount' => DB::raw('CONCAT(`amount`, "00")'),
             ]);
+
+        DB::connection('wallet')
+            ->table('wallets')
+            ->update([
+                'currency' => config('app.currency'),
+            ]);
     }
 
     public function down(): void
