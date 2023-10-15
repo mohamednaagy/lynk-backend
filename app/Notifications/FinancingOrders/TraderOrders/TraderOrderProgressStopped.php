@@ -6,10 +6,11 @@ use App\Enums\MurabhaStep;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class TraderOrderProgressStopped extends Notification
+class TraderOrderProgressStopped extends Notification implements ShouldQueue
 {
     use Queueable;
 
