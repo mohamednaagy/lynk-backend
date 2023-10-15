@@ -47,6 +47,10 @@ return new class extends Migration
             ->select(['id', 'data'])
             ->chunkById(50, function ($traderOrders) {
                 foreach ($traderOrders as $traderOrder) {
+                    if (is_null($traderOrder->data)) {
+                        continue;
+                    }
+
                     $data = json_decode($traderOrder->data, true);
                     DB::table('trader_orders')
                         ->where('id', $traderOrder->id)
@@ -60,6 +64,10 @@ return new class extends Migration
             ->select(['id', 'data'])
             ->chunkById(50, function ($notifications) {
                 foreach ($notifications as $notification) {
+                    if (is_null($notification->data)) {
+                        continue;
+                    }
+
                     $data = json_decode($notification->data, true);
                     DB::table('notifications')
                         ->where('id', $notification->id)
@@ -81,6 +89,10 @@ return new class extends Migration
             ->select(['id', 'meta'])
             ->chunkById(50, function ($transactions) {
                 foreach ($transactions as $transaction) {
+                    if (is_null($transaction->meta)) {
+                        continue;
+                    }
+
                     $data = json_decode($transaction->meta, true);
                     DB::connection('wallet')
                         ->table('transactions')
