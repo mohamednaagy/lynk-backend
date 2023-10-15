@@ -32,9 +32,6 @@ class GetWalletTransactionsTest extends TestCase
 
     private static string $endpoint;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -58,6 +55,7 @@ class GetWalletTransactionsTest extends TestCase
                         'date',
                         'description',
                         'amount',
+                        'amount_formatted',
                         'receipt_url',
                     ])
                     ->respond()
@@ -80,6 +78,7 @@ class GetWalletTransactionsTest extends TestCase
                         'date',
                         'description',
                         'amount',
+                        'amount_formatted',
                         'receipt_url',
                     ])
                     ->respond()
@@ -103,6 +102,7 @@ class GetWalletTransactionsTest extends TestCase
                         'date',
                         'description',
                         'amount',
+                        'amount_formatted',
                         'receipt_url',
                     ])
                     ->respond()
@@ -126,6 +126,7 @@ class GetWalletTransactionsTest extends TestCase
                         'date',
                         'description',
                         'amount',
+                        'amount_formatted',
                         'receipt_url',
                     ])
                     ->respond()
@@ -149,6 +150,7 @@ class GetWalletTransactionsTest extends TestCase
                         'date',
                         'description',
                         'amount',
+                        'amount_formatted',
                         'receipt_url',
                     ])
                     ->respond()
