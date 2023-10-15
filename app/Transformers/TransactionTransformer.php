@@ -49,9 +49,7 @@ class TransactionTransformer extends TransformerAbstract
 
     public function includeAmountFormatted(Transaction $transaction): Primitive
     {
-        $transaction->amount_formatted = number_format($transaction->amount->getAmount() / 100, 2, '.', ',');
-
-        return $this->primitive($transaction->amount_formatted);
+        return $this->primitive(number_format($transaction->amount->formatByDecimal(), 2));
     }
 
     public function includeAmount(Transaction $transaction): Primitive
