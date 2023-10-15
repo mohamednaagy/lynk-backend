@@ -39,9 +39,9 @@ class FinancingOrderTransformer extends TransformerAbstract
         'customer_name',
         'national_id',
         'amount',
-        'formatted_amount',
+        'amount_formatted',
         'selling_price',
-        'formatted_selling_price',
+        'selling_price_formatted',
         'is_verification_required',
         'is_updatable',
         'is_cancellable',
@@ -130,9 +130,9 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive($financingOrder->amount->formatByDecimal());
     }
 
-    public function includeFormattedAmount(FinancingOrder $financingOrder)
+    public function includeAmountFormatted(FinancingOrder $financingOrder)
     {
-        return $this->primitive(format_money_value($financingOrder->amount));
+        return $this->primitive(number_format($financingOrder->amount->formatByDecimal(), 2));
     }
 
     public function includeSellingPrice(FinancingOrder $financingOrder)
@@ -140,9 +140,9 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive($financingOrder->selling_price->formatByDecimal());
     }
 
-    public function includeFormattedSellingPrice(FinancingOrder $financingOrder)
+    public function includeSellingPriceFormatted(FinancingOrder $financingOrder)
     {
-        return $this->primitive(format_money_value($financingOrder->selling_price));
+        return $this->primitive(number_format($financingOrder->selling_price->formatByDecimal(), 2));
     }
 
     public function includeCreator(FinancingOrder $financingOrder)
