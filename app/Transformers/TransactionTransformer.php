@@ -12,13 +12,14 @@ use League\Fractal\TransformerAbstract;
 
 class TransactionTransformer extends TransformerAbstract
 {
-    protected string|null $area = null;
+    protected ?string $area = null;
 
     protected array $availableIncludes = [
         'id',
         'date',
         'description',
         'amount',
+        'amount_formatted',
         'receipt_url',
     ];
 
@@ -44,6 +45,11 @@ class TransactionTransformer extends TransformerAbstract
                 ? app(TransactionUtilInterface::class)->getDescription($transaction)
                 : null
         );
+    }
+
+    public function includeAmountFormatted(Transaction $transaction): Primitive
+    {
+        return $this->primitive(number_format($transaction->amount->formatByDecimal(), 2));
     }
 
     public function includeAmount(Transaction $transaction): Primitive

@@ -85,8 +85,8 @@ class OrderControllerIndexTest extends TestCase
                         'id',
                         'amount',
                         'selling_price',
-                        'formatted_amount',
-                        'formatted_selling_price',
+                        'amount_formatted',
+                        'selling_price_formatted',
                         'status',
                     ])
                     ->respond()
@@ -108,8 +108,8 @@ class OrderControllerIndexTest extends TestCase
                         'id',
                         'amount',
                         'selling_price',
-                        'formatted_amount',
-                        'formatted_selling_price',
+                        'amount_formatted',
+                        'selling_price_formatted',
                         'status',
                     ])
                     ->respond()
