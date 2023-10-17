@@ -12,5 +12,8 @@ return [
     'isoCurrenciesPath' => __DIR__.'/../vendor/moneyphp/money/resources/currency.php',
     'currencies' => [
         'iso' => 'all',
+        'custom' => [
+            'SAR4' => 4,
+        ],
     ],
 ];

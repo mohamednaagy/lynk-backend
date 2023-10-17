@@ -41,11 +41,12 @@ class Kernel extends ConsoleKernel
             ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
             ->onOneServer();
 
-        $schedule->job(new InitiateTraderOrdersIfTimedOut())
-            ->timezone($timezone)
-            ->everyTwoMinutes()
-            ->between($marketOpeningStartTime, Carbon::parse($marketOpeningStartTime, $timezone)->addMinutes(15))
-            ->onOneServer();
+        // removed based on requirements in task LYNK-652
+        // $schedule->job(new InitiateTraderOrdersIfTimedOut())
+        //     ->timezone($timezone)
+        //     ->everyTwoMinutes()
+        //     ->between($marketOpeningStartTime, Carbon::parse($marketOpeningStartTime, $timezone)->addMinutes(15))
+        //     ->onOneServer();
     }
 
     /**

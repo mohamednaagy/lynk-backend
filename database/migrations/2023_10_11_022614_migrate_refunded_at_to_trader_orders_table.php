@@ -22,7 +22,7 @@ return new class extends Migration
             ->where('reason', TransactionReason::RefundOrderCreationFee)
             ->chunk(100, function (Collection $transactions) {
                 foreach ($transactions as $transaction) {
-                    TraderOrder::where('id', $transaction->trader_order_id)->update(['data->refunded_at' => $transaction->created_at]);
+                    TraderOrder::where('id', $transaction->trader_order_id)->update(['refunded_at' => $transaction->created_at]);
                 }
             });
     }

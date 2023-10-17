@@ -16,6 +16,19 @@ class TraderOrderObserver
      */
     public function created(TraderOrder $traderOrder)
     {
+        $order = $traderOrder->order;
+
+        $baseTraderOrder = $order->traderOrders()->where('is_base', true)->first();
+
+        if (
+            $order->traderOrders()->count() === 1
+            ||
+            $baseTraderOrder && $baseTraderOrder->created_at->lessThanOrEqualTo(now()->subDays(3))
+        ) {
+            $traderOrder->update([
+                'is_base' => true,
+            ]);
+        }
     }
 
     /**
