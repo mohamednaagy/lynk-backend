@@ -64,6 +64,9 @@ class OrderController extends Controller
             'creator',
         ])
             ->handle()
+            ->withCount(['traderOrders as charged_trader_orders_count' => function ($query) {
+                $query->whereNull('data->refunded_at');
+            }])
             ->paginate();
 
         return fractal($orders, new FinancingOrderTransformer())
@@ -80,6 +83,7 @@ class OrderController extends Controller
                 'current_step',
                 'creator',
                 'company_name',
+                'charged_trader_orders_count',
                 'created_at',
             ])
             ->respond();

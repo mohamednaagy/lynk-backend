@@ -47,6 +47,8 @@ class RefundOrderCreationFeesAction implements RefundOrderCreationFees
                 $reference
             );
         });
+
+        $traderOrder->update(['data->refunded_at' => now()]);
     }
 
     protected function getTransactionReasonForRefund($refundTransaction): int
