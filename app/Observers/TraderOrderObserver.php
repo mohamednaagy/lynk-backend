@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Enums\TraderOrderStatus;
-use App\Events\OrderCancelled;
+use App\Events\TraderOrderCancelled;
 use App\Models\TraderOrder;
 
 class TraderOrderObserver
@@ -23,10 +23,19 @@ class TraderOrderObserver
         if (
             $order->traderOrders()->count() === 1
             ||
-            $baseTraderOrder && $baseTraderOrder->created_at->lessThanOrEqualTo(now()->subDays(3))
+            $baseTraderOrder && now()->diffInHours($baseTraderOrder->created_at) >= 72
         ) {
             $traderOrder->update([
                 'is_base' => true,
+            ]);
+        }
+    }
+
+    public function updating(TraderOrder $traderOrder)
+    {
+        if ($traderOrder->isDirty(['status']) && $traderOrder->status->is(TraderOrderStatus::Cancelled)) {
+            $traderOrder->fill([
+                'cancelled_at' => now(),
             ]);
         }
     }
@@ -46,7 +55,7 @@ class TraderOrderObserver
     protected function takeActionsIfStatusWasChanged(TraderOrder $traderOrder): void
     {
         if ($traderOrder->status->is(TraderOrderStatus::Cancelled)) {
-            OrderCancelled::dispatch($traderOrder);
+            TraderOrderCancelled::dispatch($traderOrder);
             app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
         }
     }

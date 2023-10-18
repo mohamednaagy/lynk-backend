@@ -4,7 +4,8 @@ namespace App\Listeners;
 
 use App\Actions\Contracts\Orders\RefundOrderCreationFees;
 use App\Enums\TraderOrderRefundReason;
-use App\Events\OrderCancelled;
+use App\Enums\TraderOrderStatus;
+use App\Events\TraderOrderCancelled;
 use App\Models\TraderOrder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -26,7 +27,7 @@ class RefundOrderCost
      *
      * @return void
      */
-    public function handle(OrderCancelled $event)
+    public function handle(TraderOrderCancelled $event)
     {
         DB::multipleTransaction(function () use ($event) {
             $traderOrder = TraderOrder::lockForUpdate()
@@ -40,14 +41,17 @@ class RefundOrderCost
                 ->lockForUpdate()
                 ->first();
 
-            $latestRefundedTraderOrder = $order->traderOrders()
-                ->where('data->refunded_at', '>=', $baseTraderOrder->created_at->addHours(24))
+            $latestNonRefundedTraderOrder = $order->traderOrders()
+                ->where('status', TraderOrderStatus::Cancelled)
+                ->where('data->cancelled_at', '>=', $baseTraderOrder->created_at->addHours(24))
+                ->whereNull('data->refunded_at')
+                ->where('id', '!=', $traderOrder->id)
                 ->latest('id')
                 ->lockForUpdate()
                 ->first();
 
             try {
-                $refundReason = $this->resolveRefundReason($baseTraderOrder, $latestRefundedTraderOrder);
+                $refundReason = $this->resolveRefundReason($baseTraderOrder, $latestNonRefundedTraderOrder);
 
                 app(RefundOrderCreationFees::class)->handle($traderOrder, $refundReason);
             } catch (\Exception $exception) {
@@ -66,17 +70,18 @@ class RefundOrderCost
      */
     private function resolveRefundReason(
         TraderOrder $baseTraderOrder,
-        ?TraderOrder $latestRefundedTraderOrder,
+        ?TraderOrder $latestNonRefundedTraderOrder,
     ): int {
         $cancelledAt = now();
 
+        $hoursSinceCreation = $cancelledAt->diffInHours($baseTraderOrder->created_at);
+
         if (
-            $baseTraderOrder->created_at->greaterThan($cancelledAt->subHours(24))
+            $hoursSinceCreation <= 24
         ) {
             return TraderOrderRefundReason::WITHIN_24_HOUR;
         } elseif (
-            $baseTraderOrder->created_at->greaterThan($cancelledAt->subHours(72))
-            && $latestRefundedTraderOrder
+            $hoursSinceCreation <= 72 && $latestNonRefundedTraderOrder
         ) {
             return TraderOrderRefundReason::WITHIN_72_HOUR;
         }
