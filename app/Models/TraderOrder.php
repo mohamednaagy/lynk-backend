@@ -48,6 +48,7 @@ class TraderOrder extends Model implements HasMedia
             'provider',
             'version',
             'status',
+            'is_base',
             'reference',
             'updated_at',
             'created_at',

@@ -19,7 +19,7 @@ class RefundOrderCreationFeesAction implements RefundOrderCreationFees
     ) {
     }
 
-    public function handle(TraderOrder $traderOrder)
+    public function handle(TraderOrder $traderOrder, int $refundReason = null)
     {
         $financingOrder = $traderOrder->order;
         $company = $financingOrder->company()->withTrashed()->first();
@@ -47,6 +47,11 @@ class RefundOrderCreationFeesAction implements RefundOrderCreationFees
                 $reference
             );
         });
+
+        $traderOrder->update([
+            'refunded_at' => now(),
+            'refund_reason' => $refundReason,
+        ]);
     }
 
     protected function getTransactionReasonForRefund($refundTransaction): int

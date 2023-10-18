@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderErrorCode;
@@ -61,11 +62,11 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
                         'status' => FinancingOrderStatus::TradingFailure,
                     ]);
 
-                    $traderOrder->update([
-                        'status' => TraderOrderStatus::Cancelled,
-                        'failure_reason' => $exception->getContext('failure_reason'),
-                        'cancel_reason' => TraderOrderCancelReason::FailureToPurchase,
-                    ]);
+                    app(UpdateTraderOrderStatusToCancel::class)->handle(
+                        $traderOrder,
+                        TraderOrderCancelReason::FailureToPurchase,
+                        $exception->getContext('failure_reason')
+                    );
 
                     $this->delete();
                 } else {
@@ -90,13 +91,13 @@ class ProcessBursamOrderResultYNN implements ShouldQueue, ShouldBeUnique
                 'status' => FinancingOrderStatus::TradingFailure,
             ]);
 
-            $traderOrder->update([
-                'status' => TraderOrderStatus::Cancelled,
-                'failure_reason' => method_exists($exception, 'getContext') ?
+            app(UpdateTraderOrderStatusToCancel::class)->handle(
+                $traderOrder,
+                TraderOrderCancelReason::FailureToPurchase,
+                method_exists($exception, 'getContext') ?
                     $exception->getContext('failure_reason')
-                    : '',
-                'cancel_reason' => TraderOrderCancelReason::FailureToPurchase,
-            ]);
+                    : ''
+            );
         });
     }
 

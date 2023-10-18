@@ -97,7 +97,7 @@ class ProcessDmccSellingCommodityToCustomerOrderTest extends TestCase
                     ->moveToHistory($financeHistory)
                     ->getTraderOrder();
             } catch (\Throwable $exception) {
-                dump($financeHistory);
+
             }
             $processOrder = new ProcessDmccSellingCommodityToCustomerOrder($traderOrder->id);
             $processOrder->handle();

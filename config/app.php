@@ -18,7 +18,7 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
-    'currency' => env('APP_CURRENCY', 'SAR'),
+    'currency' => env('APP_CURRENCY', 'SAR4'),
 
     /*
     |--------------------------------------------------------------------------

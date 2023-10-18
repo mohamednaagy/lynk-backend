@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Events\OrderCancelled;
+use App\Events\TraderOrderCancelled;
 use App\Listeners\RefundOrderCost;
 use App\Models\FinancingOrder;
 use App\Models\TraderHistory;
@@ -27,7 +27,7 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
-        OrderCancelled::class => [
+        TraderOrderCancelled::class => [
             RefundOrderCost::class,
         ],
     ];
