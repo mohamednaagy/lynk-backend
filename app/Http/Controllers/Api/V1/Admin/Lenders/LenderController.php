@@ -10,7 +10,6 @@ use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\CompanyType;
-use App\Enums\ErrorCode;
 use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
@@ -78,13 +77,6 @@ class LenderController extends Controller
     ): JsonResponse {
         $data = $request->validated();
 
-        if (! $this->isOrderCostWithVatValid($data['order_cost_tiers'])) {
-            return $this->errorResponse(
-                message: __('error.order_cost_with_vat_and_without_vat_incorrect'),
-                code: ErrorCode::ORDER_COST_WITHOUT_VAT_AND_WITH_VAT_INCORRECT
-            );
-        }
-
         $data['order_cost_tiers'] = $this->unsetProrationAmounExceptForLastTier($data['order_cost_tiers']);
         $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers']);
 
@@ -150,13 +142,6 @@ class LenderController extends Controller
         return DB::transaction(function () use ($request, $updateCompany, $lender) {
             $data = $request->validated();
 
-            if (! $this->isOrderCostWithVatValid($data['order_cost_tiers'])) {
-                return $this->errorResponse(
-                    message: __('error.order_cost_with_vat_and_without_vat_incorrect'),
-                    code: ErrorCode::ORDER_COST_WITHOUT_VAT_AND_WITH_VAT_INCORRECT
-                );
-            }
-
             $currency = $lender->getWallet(WalletType::CompanyWallet)->currency;
             $data['order_cost_tiers'] = $this->unsetProrationAmounExceptForLastTier($data['order_cost_tiers']);
             $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers'], $currency);
@@ -182,27 +167,6 @@ class LenderController extends Controller
         return $this->successResponse();
     }
 
-    private function isOrderCostWithVatValid(array &$tiers): bool
-    {
-        $currency = Money::getDefaultCurrency();
-        foreach ($tiers as &$tier) {
-            $orderCostWithoutVat = Money::parseByDecimal($tier['order_cost_without_vat'], $currency);
-            $orderCostWithVat = Money::parseByDecimal($tier['order_cost_with_vat'], $currency);
-            [$vatOfOrderCostAmount] = app(CalculateVatAmount::class)
-                ->setAmount($orderCostWithVat)
-                ->setIsVatIncludedInAmount(true)
-                ->handle();
-
-            if ($orderCostWithoutVat->subtract($orderCostWithVat->subtract($vatOfOrderCostAmount))->getAmount() > 50) {
-                return false;
-            }
-
-            $tier['order_cost_without_vat'] = $orderCostWithVat->subtract($vatOfOrderCostAmount)->formatByDecimal();
-        }
-
-        return true;
-    }
-
     public function unsetProrationAmounExceptForLastTier(array $tiers): array
     {
         $tiersCount = count($tiers);
@@ -223,8 +187,15 @@ class LenderController extends Controller
         }
 
         foreach ($tiers as &$tier) {
+            $orderCostWithVat = Money::parseByDecimal($tier['order_cost_with_vat'], $currency);
+            [$vatOfOrderCostAmount] = app(CalculateVatAmount::class)
+                ->setAmount($orderCostWithVat)
+                ->setIsVatIncludedInAmount(true)
+                ->handle();
+
+            $tier['order_cost_without_vat'] = $orderCostWithVat->subtract($vatOfOrderCostAmount)->formatByDecimal();
+
             $tier['order_value_start'] = Money::parseByDecimal($tier['order_value_start'], $currency);
-            $tier['order_cost_without_vat'] = Money::parseByDecimal($tier['order_cost_without_vat'], $currency);
 
             if ($tier['order_value_end'] != null) {
                 $tier['order_value_end'] = Money::parseByDecimal($tier['order_value_end'], $currency);
