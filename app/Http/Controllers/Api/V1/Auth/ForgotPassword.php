@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\SendLinkRequest;
 use App\Models\Company;
-use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Support\Facades\Password;
 
 class ForgotPassword extends Controller
@@ -29,7 +28,7 @@ class ForgotPassword extends Controller
             }
         }
 
-        $result = Password::sendResetLink([
+        Password::sendResetLink([
             'email' => $request->only('email'),
             function ($query) use ($company) {
                 if ($company === null) {
@@ -37,10 +36,6 @@ class ForgotPassword extends Controller
                 }
             },
         ]);
-
-        if (! $result != PasswordBroker::RESET_LINK_SENT) {
-            $this->errorResponse();
-        }
 
         return $this->successResponse();
     }

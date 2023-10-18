@@ -3,10 +3,8 @@
 namespace App\Console;
 
 use App\Jobs\General\ProcessFinancingOrders;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\InitiateTraderOrdersIfTimedOut;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessDailySellingPendingCommodityToMarket;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccNotifications;
-use Carbon\Carbon;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Support\Facades\Config;
@@ -40,13 +38,6 @@ class Kernel extends ConsoleKernel
             ->everyTwoMinutes()
             ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
             ->onOneServer();
-
-        // removed based on requirements in task LYNK-652
-        // $schedule->job(new InitiateTraderOrdersIfTimedOut())
-        //     ->timezone($timezone)
-        //     ->everyTwoMinutes()
-        //     ->between($marketOpeningStartTime, Carbon::parse($marketOpeningStartTime, $timezone)->addMinutes(15))
-        //     ->onOneServer();
     }
 
     /**

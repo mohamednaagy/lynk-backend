@@ -6,7 +6,6 @@ use App\Actions\Contracts\Orders\RefundOrderCreationFees;
 use App\Enums\TraderOrderRefundReason;
 use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -61,7 +60,6 @@ class RefundOrderCost
      * @throws \Exception
      */
     private function resolveRefundReason(
-        FinancingOrder $order,
         TraderOrder $baseTraderOrder,
         TraderOrder $traderOrder,
     ): int {
@@ -70,11 +68,12 @@ class RefundOrderCost
         $hoursSinceCreation = $cancelledAt->diffInHours($baseTraderOrder->created_at);
 
         if (
-            $hoursSinceCreation <= 24
+            $hoursSinceCreation < 24
         ) {
             return TraderOrderRefundReason::WITHIN_24_HOUR;
         }
 
+        $order = $traderOrder->order;
         $latestNonRefundedTraderOrder = $order->traderOrders()
             ->where('status', TraderOrderStatus::Cancelled)
             ->where('data->cancelled_at', '>=', $baseTraderOrder->created_at->addHours(24))
@@ -85,7 +84,7 @@ class RefundOrderCost
             ->first();
 
         if (
-            $hoursSinceCreation <= 72 && $latestNonRefundedTraderOrder
+            $hoursSinceCreation < 72 && $latestNonRefundedTraderOrder
         ) {
             return TraderOrderRefundReason::WITHIN_72_HOUR;
         }
