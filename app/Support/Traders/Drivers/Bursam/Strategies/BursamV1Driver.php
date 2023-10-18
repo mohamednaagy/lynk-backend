@@ -210,7 +210,7 @@ class BursamV1Driver implements TraderInterface
     {
         try {
             $this->withLocale('ar', function () use ($traderOrder) {
-                $amount = $traderOrder->order->amount->formatByDecimal();
+                $amount = $traderOrder->order->amount->convertAndFormatByDecimal();
                 $currentTimeInUtcTz = CarbonImmutable::now();
                 $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
                 $products = collect($traderOrder->products)->map(fn ($product) => CommodityProductDto::fromArray($product));
@@ -269,7 +269,7 @@ class BursamV1Driver implements TraderInterface
                     ?->created_at;
                 $currentTimeInUtcTz = CarbonImmutable::parse($dateTime);
                 $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
-                $amount = $traderOrder->order->selling_price->formatByDecimal();
+                $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal();
 
                 $customerName = $traderOrder->order->customer_name;
 

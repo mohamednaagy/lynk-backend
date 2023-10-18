@@ -62,8 +62,8 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
     {
         $items = $this->filterExcludes([
             'id' => fn () => $order->id,
-            'amount' => fn () => number_format($order->amount->formatByDecimal(), 2),
-            'selling_price' => fn () => number_format($order->selling_price->formatByDecimal(), 2),
+            'amount' => fn () => number_format($order->amount->convertAndFormatByDecimal(), 2),
+            'selling_price' => fn () => number_format($order->selling_price->convertAndFormatByDecimal(), 2),
             'reference_number' => fn () => $order->reference_number,
             'national_id' => fn () => $order->national_id,
             'order_owner' => fn () => $order->creator?->full_name,
@@ -75,8 +75,8 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
             }),
             'created_date' => fn () => $order->created_at->clone()->tz('Asia/Riyadh')->format('Y-m-d'),
             'created_time' => fn () => $order->created_at->clone()->tz('Asia/Riyadh')->format('H:i:s'),
-            'cost_with_vat' => fn () => number_format($order->cost_with_vat?->formatByDecimal(), 2),
-            'cost_without_vat' => fn () => number_format($order->cost_without_vat?->formatByDecimal(), 2),
+            'cost_with_vat' => fn () => number_format($order->cost_with_vat?->convertAndFormatByDecimal(), 2),
+            'cost_without_vat' => fn () => number_format($order->cost_without_vat?->convertAndFormatByDecimal(), 2),
         ]);
 
         return array_map(fn ($item) => $item(), $items);

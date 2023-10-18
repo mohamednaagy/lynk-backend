@@ -112,7 +112,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeOrdersSumAmount(Company $company): Primitive
     {
-        $amount = (new Money($company->orders_sum_amount, Money::getDefaultCurrency()))->formatByDecimal();
+        $amount = (new Money($company->orders_sum_amount, Money::getDefaultCurrency()))->convertAndFormatByDecimal();
 
         return $this->primitive(
             number_format($amount, 2)

@@ -25,7 +25,7 @@ class CreateEdaatInvoiceAction implements CreateEdaatInvoice
 
         $invoice->creator()->associate(auth()->user());
 
-        $invoiceNumber = $this->edaatService->createInvoice($invoice->id, $amount->formatByDecimal());
+        $invoiceNumber = $this->edaatService->createInvoice($invoice->id, $amount->convertAndFormatByDecimal());
 
         $invoice->update([
             'invoice_number' => $invoiceNumber,

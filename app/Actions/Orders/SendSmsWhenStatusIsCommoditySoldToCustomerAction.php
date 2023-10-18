@@ -27,7 +27,7 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
 
     private function resolveSmsMessage(FinancingOrder $financingOrder, TraderOrder $traderOrder)
     {
-        $sellingPrice = optional($financingOrder->selling_price)->formatByDecimal() ?? '';
+        $sellingPrice = optional($financingOrder->selling_price)->convertAndFormatByDecimal() ?? '';
 
         $query = ['o' => $financingOrder->id];
         $host = Config::get('app.frontend_url.client');

@@ -49,12 +49,12 @@ class TransactionTransformer extends TransformerAbstract
 
     public function includeAmountFormatted(Transaction $transaction): Primitive
     {
-        return $this->primitive(number_format($transaction->amount->formatByDecimal(), 2));
+        return $this->primitive(number_format($transaction->amount->convertAndFormatByDecimal(), 2));
     }
 
     public function includeAmount(Transaction $transaction): Primitive
     {
-        return $this->primitive($transaction->amount->formatByDecimal());
+        return $this->primitive($transaction->amount->convertAndFormatByDecimal());
     }
 
     public function includeReceiptUrl(Transaction $transaction): Primitive|NullResource

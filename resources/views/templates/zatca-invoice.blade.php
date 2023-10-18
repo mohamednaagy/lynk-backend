@@ -801,7 +801,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </div>
 
                 <div class="w-2/12">
-                    <div>{{ $item->getItemPrice()->formatByDecimal() }}</div>
+                    <div>{{ $item->getItemPrice()->convertAndFormatByDecimal() }}</div>
                 </div>
 
                 <div class="w-2/12">
@@ -813,7 +813,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </div>
 
                 <div class="w-2/12">
-                    <div>{{ $item->getLineTotalWithoutVat()->formatByDecimal() }}</div>
+                    <div>{{ $item->getLineTotalWithoutVat()->convertAndFormatByDecimal() }}</div>
                 </div>
             </div>
         @endforeach
@@ -837,23 +837,23 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     @if ($order->getTotalDiscount()->getAmount() > 0)
                         <div>{{ __('zatca/e-invoice.total_discount') }}</div>
                         <div>
-                            {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalDiscount()->formatByDecimal()]) }}
+                            {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalDiscount()->convertAndFormatByDecimal()]) }}
                         </div>
                     @endif
 
                     <div>{{ __('zatca/e-invoice.total_before_vat') }}</div>
                     <div>
-                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalWithoutVat()->formatByDecimal()]) }}
+                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalWithoutVat()->convertAndFormatByDecimal()]) }}
                     </div>
 
                     <div>{{ __('zatca/e-invoice.vat_total') }}</div>
                     <div>
-                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalVat()->formatByDecimal()]) }}
+                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalVat()->convertAndFormatByDecimal()]) }}
                     </div>
 
                     <div>{{ __('zatca/e-invoice.total') }}</div>
                     <div class="font-bold text-gray-800">
-                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalAmount()->formatByDecimal()]) }}
+                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalAmount()->convertAndFormatByDecimal()]) }}
                     </div>
                 </div>
                 <div class="bg-slate-800 h-px w-full"></div>

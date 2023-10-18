@@ -20,17 +20,12 @@ class GetLenderBalance extends Controller
         );
     }
 
-    /**
-     * @param  Company  $lender
-     * @param  GetLenderBalanceInterface  $getBalance
-     * @return JsonResponse
-     */
     public function __invoke(Company $lender, GetLenderBalanceInterface $getBalance): JsonResponse
     {
         $balances = $getBalance->handle($lender);
 
         return $this->successResponse(data: [
-            'balance' => number_format($balances['balance']->formatByDecimal(), 2),
+            'balance' => number_format($balances['balance']->convertAndFormatByDecimal(), 2),
             'available_orders' => $balances['availableOrders'],
         ]);
     }

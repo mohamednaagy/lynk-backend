@@ -16,4 +16,9 @@ return [
             'SAR4' => 4,
         ],
     ],
+    'fixedExchange' => [
+        'SAR4' => [
+            'SAR' => '1',
+        ],
+    ],
 ];

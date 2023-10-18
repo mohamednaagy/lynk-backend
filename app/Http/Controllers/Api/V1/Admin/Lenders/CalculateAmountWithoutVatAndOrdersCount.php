@@ -36,7 +36,7 @@ class CalculateAmountWithoutVatAndOrdersCount extends Controller
         [$amountWithoutVat, $orderCount] = $calcHandler->handle($lender, $chargeAmountWithVatMoney);
 
         return $this->successResponse(data: [
-            'amount_without_vat' => $amountWithoutVat->formatByDecimal(),
+            'amount_without_vat' => $amountWithoutVat->convertAndFormatByDecimal(),
             'order_count' => $orderCount,
         ]);
     }
