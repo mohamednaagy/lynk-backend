@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
@@ -56,6 +57,8 @@ class BursamV2Driver extends BursamV1Driver
         int $cancelReason = TraderOrderCancelReason::Manual
     ): int {
         if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket)) {
+            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
+
             $traderOrder->update([
                 'status' => TraderOrderStatus::Cancelled,
                 'cancel_reason' => $cancelReason,

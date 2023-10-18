@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Log;
 
 class RefundOrderCost
 {
+    const ONE_DAY = 24 * 60 * 60;
+
+    const THREE_DAYS = 3 * 24 * 60 * 60;
+
     /**
      * Create the event listener.
      *
@@ -42,7 +46,7 @@ class RefundOrderCost
                 ->first();
 
             try {
-                $refundReason = $this->resolveRefundReason($order, $baseTraderOrder, $traderOrder);
+                $refundReason = $this->resolveRefundReason($baseTraderOrder, $traderOrder);
 
                 app(RefundOrderCreationFees::class)->handle($traderOrder, $refundReason);
             } catch (\Exception $exception) {
@@ -65,27 +69,30 @@ class RefundOrderCost
     ): int {
         $cancelledAt = now();
 
-        $hoursSinceCreation = $cancelledAt->diffInHours($baseTraderOrder->created_at);
+        $secondsSinceCreation = $cancelledAt->diffInSeconds($baseTraderOrder->created_at);
 
         if (
-            $hoursSinceCreation < 24
+            $secondsSinceCreation <= static::ONE_DAY
         ) {
             return TraderOrderRefundReason::WITHIN_24_HOUR;
+        }
+
+        if ($secondsSinceCreation >= static::THREE_DAYS) {
+            throw new \Exception('Order cannot be refunded');
         }
 
         $order = $traderOrder->order;
         $latestNonRefundedTraderOrder = $order->traderOrders()
             ->where('status', TraderOrderStatus::Cancelled)
-            ->where('data->cancelled_at', '>=', $baseTraderOrder->created_at->addHours(24))
+            ->where('data->cancelled_at', '>=', $baseTraderOrder->created_at->addSeconds(static::ONE_DAY))
+            ->where('data->cancelled_at', '<=', $baseTraderOrder->created_at->addSeconds(static::THREE_DAYS))
             ->whereNull('data->refunded_at')
             ->where('id', '!=', $traderOrder->id)
             ->latest('id')
             ->lockForUpdate()
             ->first();
 
-        if (
-            $hoursSinceCreation < 72 && $latestNonRefundedTraderOrder
-        ) {
+        if ($latestNonRefundedTraderOrder) {
             return TraderOrderRefundReason::WITHIN_72_HOUR;
         }
 

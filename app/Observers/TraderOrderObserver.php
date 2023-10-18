@@ -44,23 +44,6 @@ class TraderOrderObserver
     }
 
     /**
-     * Handle the TraderOrder "updating" event.
-     *
-     * @return void
-     */
-    public function updating(TraderOrder $traderOrder)
-    {
-        if (
-            $traderOrder->isDirty(['status'])
-            && $traderOrder->status->is(TraderOrderStatus::Cancelled)
-        ) {
-            $traderOrder->fill([
-                'cancelled_at' => now(),
-            ]);
-        }
-    }
-
-    /**
      * Handle the TraderOrder "updated" event.
      *
      * @return void

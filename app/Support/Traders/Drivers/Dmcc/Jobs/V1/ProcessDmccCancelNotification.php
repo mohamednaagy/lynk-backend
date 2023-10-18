@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Dmcc\Jobs\V1;
 
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
@@ -70,9 +71,7 @@ class ProcessDmccCancelNotification implements ShouldQueue, ShouldBeUnique
                 FinancingOrderHistory::OrderCancelled
             );
 
-            $this->traderOrder->update([
-                'status' => TraderOrderStatus::Cancelled,
-            ]);
+            app(UpdateTraderOrderStatusToCancel::class)->handle($this->traderOrder);
         });
     }
 
