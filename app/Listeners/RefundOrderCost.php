@@ -8,7 +8,6 @@ use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
 use App\Models\TraderOrder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class RefundOrderCost
 {
@@ -45,17 +44,10 @@ class RefundOrderCost
                 ->lockForUpdate()
                 ->first();
 
-            try {
-                $refundReason = $this->resolveRefundReason($baseTraderOrder, $traderOrder);
+            $refundReason = $this->resolveRefundReason($baseTraderOrder, $traderOrder);
 
+            if ($refundReason !== false) {
                 app(RefundOrderCreationFees::class)->handle($traderOrder, $refundReason);
-            } catch (\Exception $exception) {
-                Log::debug($exception->getMessage(), [
-                    'financing_order_id' => $order->id,
-                    'trader_order_id' => $traderOrder->id,
-                    'base_trader_order' => $baseTraderOrder->id,
-                    'cancelled_at' => now(),
-                ]);
             }
         });
     }
@@ -66,7 +58,7 @@ class RefundOrderCost
     private function resolveRefundReason(
         TraderOrder $baseTraderOrder,
         TraderOrder $traderOrder,
-    ): int {
+    ): int|false {
         $cancelledAt = now();
 
         $secondsSinceCreation = $cancelledAt->diffInSeconds($baseTraderOrder->created_at);
@@ -78,7 +70,7 @@ class RefundOrderCost
         }
 
         if ($secondsSinceCreation >= static::THREE_DAYS) {
-            throw new \Exception('Order cannot be refunded');
+            return false;
         }
 
         $order = $traderOrder->order;
@@ -96,6 +88,6 @@ class RefundOrderCost
             return TraderOrderRefundReason::WITHIN_72_HOUR;
         }
 
-        throw new \Exception('Order cannot be refunded');
+        return false;
     }
 }
