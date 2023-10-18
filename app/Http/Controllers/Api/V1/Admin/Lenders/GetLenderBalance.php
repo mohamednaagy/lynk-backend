@@ -25,7 +25,7 @@ class GetLenderBalance extends Controller
         $balances = $getBalance->handle($lender);
 
         return $this->successResponse(data: [
-            'balance' => number_format($balances['balance']->convertAndFormatByDecimal(), 2),
+            'balance' => $balances['balance']->convertAndFormatByDecimal(sperator: ','),
             'available_orders' => $balances['availableOrders'],
         ]);
     }

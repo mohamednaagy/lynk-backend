@@ -28,7 +28,7 @@ class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatu
     {
         $locale = app()->getLocale();
         $products = $traderOrder->products;
-        $amount = $financingOrder->amount?->convertAndFormatByDecimal() ?? '';
+        $amount = $financingOrder->amount?->convertAndFormatByDecimal(sperator: ',') ?? '';
         $documentUrl = $this->getMediaUrl($traderOrder);
 
         return __(ClientMessage::MurabahaSaleCompleted, [

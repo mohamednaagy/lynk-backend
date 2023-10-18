@@ -98,8 +98,8 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
             $project,
             $project->getVatId(),
             $transaction->created_at->clone(),
-            $totalAmountWithVat->convertAndFormatByDecimal(),
-            $vatAmount->convertAndFormatByDecimal(),
+            $totalAmountWithVat->convertAndFormatByDecimal(sperator: ','),
+            $vatAmount->convertAndFormatByDecimal(sperator: ','),
             new Order(
                 $transaction->reference_number,
                 [

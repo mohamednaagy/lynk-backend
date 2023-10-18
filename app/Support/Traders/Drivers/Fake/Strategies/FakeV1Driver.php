@@ -221,7 +221,7 @@ class FakeV1Driver implements TraderInterface
 
             $separator = ' و ';
             $products = collect($traderOrder->products);
-            $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal();
+            $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal(sperator: ',');
             $customerName = $traderOrder->order->customer_name;
             $productName = $products->pluck('product')->implode($separator);
             $data['created_at'] = $dateTime->clone();
@@ -290,7 +290,7 @@ class FakeV1Driver implements TraderInterface
         try {
             $separator = ' و ';
             $products = collect($traderOrder->products);
-            $amount = $traderOrder->order->amount->convertAndFormatByDecimal();
+            $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
 
             $previousOwner = $products->pluck('previous_owner')->implode($separator);
             $productName = $products->pluck('product')->implode($separator);

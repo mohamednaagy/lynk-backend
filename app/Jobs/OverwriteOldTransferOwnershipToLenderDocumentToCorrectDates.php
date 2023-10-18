@@ -55,7 +55,7 @@ class OverwriteOldTransferOwnershipToLenderDocumentToCorrectDates implements Sho
                     }
 
                     $separator = ' و ';
-                    $amount = $traderOrder->order->amount->convertAndFormatByDecimal();
+                    $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
                     $previousOwner = $products->pluck('previous_owner')->implode($separator);
                     $productName = $products->pluck('product')->implode($separator);
 
