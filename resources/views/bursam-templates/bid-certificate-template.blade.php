@@ -93,11 +93,11 @@
             </tr>
             <tr>
                 <td>Total Value (in {{$currency}}):</td>
-                <td>{{ $total_value }}</td>
+                <td>{{ number_format($total_value, 2) }}</td>
             </tr>
             <tr>
                 <td>Total Value (in MYR):</td>
-                <td>{{ $total_value_myr_equivalent }}</td>
+                <td>{{ number_format($total_value_myr_equivalent, 2) }}</td>
             </tr>
 {{--            <tr>--}}
 {{--                <td>Product Price:</td>--}}
