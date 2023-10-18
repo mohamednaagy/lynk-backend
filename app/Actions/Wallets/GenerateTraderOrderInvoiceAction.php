@@ -52,8 +52,8 @@ class GenerateTraderOrderInvoiceAction implements GenerateTraderOrderInvoice
             $seller,
             $seller->getVatId(),
             $traderOrder->created_at,
-            $company->order_cost->add($vatAmount)->convertAndFormatByDecimal(sperator: ','),
-            $vatAmount->convertAndFormatByDecimal(sperator: ','),
+            $company->order_cost->add($vatAmount)->formatByDecimal(),
+            $vatAmount->formatByDecimal(),
             $order,
             $company->name,
             $creationFeeTransaction

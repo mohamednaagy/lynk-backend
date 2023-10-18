@@ -102,8 +102,8 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
             $project,
             $project->getVatId(),
             $transaction->created_at->clone(),
-            $totalAmountWithVat->convertAndFormatByDecimal(sperator: ','),
-            $vatAmount,
+            $totalAmountWithVat->formatByDecimal(),
+            $vatAmount->formatByDecimal(),
             new Order(
                 $transaction->reference_number,
                 [

@@ -111,8 +111,8 @@ class WebhookController extends Controller
             $project,
             $project->getVatId(),
             $transaction->created_at->clone(),
-            $totalAmountWithVat,
-            $vatAmount,
+            $totalAmountWithVat->formatByDecimal(),
+            $vatAmount->formatByDecimal(),
             new Order(
                 $transaction->reference_number,
                 [
