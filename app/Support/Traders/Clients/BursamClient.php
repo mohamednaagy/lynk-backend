@@ -238,11 +238,11 @@ class BursamClient
 
                 return Http::response([
                     'ECERTNO' => $traderOrder->reference,
-                    'BUYER' => 'LYNK',
-                    'OWNER' => 'RHB',
+                    'BUYER' => 'LYNK LLC',
+                    'OWNER' => 'LYNK LLC',
                     'BIDNO' => '4',
                     'TOTALVALUE' => $traderOrder->order->amount->convertAndFormatByDecimal(),
-                    'CURRENCY' => 'MYR',
+                    'CURRENCY' => 'SAR',
                     'PRICE' => $traderOrder->order->amount->convertAndFormatByDecimal(),
                     'PRICE_MYR_EQUIVALENT' => $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
                     'PURCHASETIMEDATE' => $traderOrder->created_at->format('H:i:s.v d M Y'),
@@ -262,10 +262,10 @@ class BursamClient
 
                 return Http::response([
                     'ECERTNO' => $traderOrder->reference,
-                    'SELLER' => 'LYNK',
+                    'SELLER' => 'LYNK LLC',
                     'BUYER' => 'BSAS',
                     'TOTALVALUE' => $traderOrder->order->amount->convertAndFormatByDecimal(),
-                    'CURRENCY' => 'MYR',
+                    'CURRENCY' => 'SAR',
                     'PRICE' => $traderOrder->order->amount->convertAndFormatByDecimal(),
                     'PRICE_MYR_EQUIVALENT' => $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
                     'MURABAHAVALUE' => $traderOrder->order->amount->convertAndFormatByDecimal(),
@@ -286,10 +286,10 @@ class BursamClient
 
                 return Http::response([
                     'ECERTNO' => $traderOrder->reference,
-                    'SELLER' => 'LYNK',
-                    'BUYER' => 'BSAS',
+                    'SELLER' => $traderOrder->order->customer_name,
+                    'BUYER' => 'BURSA MALAYSIA ISLAMIC SERVICES',
                     'TOTALVALUE' => $traderOrder->order->amount->convertAndFormatByDecimal(),
-                    'CURRENCY' => 'MYR',
+                    'CURRENCY' => 'SAR',
                     'PRICE' => $traderOrder->order->amount->convertAndFormatByDecimal(),
                     'PRICE_MYR_EQUIVALENT' => $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
                     'MURABAHAVALUE' => $traderOrder->order->amount->convertAndFormatByDecimal(),

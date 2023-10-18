@@ -57,6 +57,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'history',
         'active_trader',
         'trader_orders',
+        'charged_trader_orders_count',
         'trader_order_history',
         'can_be_completed',
         'payment_proof_url',
@@ -257,6 +258,11 @@ class FinancingOrderTransformer extends TransformerAbstract
             $financingOrder->activeTraderOrder->first(),
             (new TraderOrderTransformer())->setArea($this->area)
         );
+    }
+
+    public function includeChargedTraderOrdersCount(FinancingOrder $financingOrder): Primitive
+    {
+        return $this->primitive($financingOrder->charged_trader_orders_count);
     }
 
     public function includeTraderOrderHistory(FinancingOrder $financingOrder): Primitive
