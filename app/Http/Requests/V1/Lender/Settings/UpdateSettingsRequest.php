@@ -11,8 +11,6 @@ class UpdateSettingsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -21,13 +19,13 @@ class UpdateSettingsRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
     public function rules(): array
     {
         return [
             'does_order_require_approval' => ['required', 'boolean'],
+            'require_initiate_trade_request' => ['required', 'boolean'],
+            'notify_borrowers_about_order_updates' => ['required', 'boolean'],
         ];
     }
 }

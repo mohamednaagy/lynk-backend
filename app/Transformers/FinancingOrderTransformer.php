@@ -73,7 +73,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includePhoneNumberFormatted(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->phone_number->formatInternational());
+        return $this->primitive($financingOrder->phone_number?->formatInternational());
     }
 
     public function includeId(FinancingOrder $financingOrder)

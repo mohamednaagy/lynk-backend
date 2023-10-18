@@ -18,6 +18,7 @@ class GetTransactionsAction implements GetTransactions
                     TransactionMediaCollection::ZatcaInvoice,
                 ]),
             ])
+            ->latest()
             ->paginate();
     }
 }

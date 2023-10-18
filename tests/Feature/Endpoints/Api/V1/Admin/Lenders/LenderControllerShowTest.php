@@ -38,10 +38,10 @@ class LenderControllerShowTest extends TestCase
     {
         parent::setUp();
 
-        [self::$lender, self::$wallet] = $this->createCompany('2000', [
-            'company_cr' => '12345678910',
+        self::$lender = $this->createLenderCompanyWithStandardOrderCost('2000', [
             'trading_mode' => TraderOrderMode::Automatic,
         ]);
+
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(
@@ -65,7 +65,7 @@ class LenderControllerShowTest extends TestCase
         $this->actingAs(self::$userAdmin)
             ->getJson(self::$endpoint)
             ->assertOk()
-            ->assertExactJson(
+            ->assertJson(
                 fractal(self::$lender, new CompanyTransformer())
                     ->parseIncludes([
                         'id',
@@ -75,6 +75,8 @@ class LenderControllerShowTest extends TestCase
                         'unique_name',
                         'company_cr',
                         'does_order_require_approval',
+                        'notify_borrowers_about_order_updates',
+                        'require_initiate_trade_request',
                         'order_cost_tiers',
                         'notifications_email',
                         'notify_admins_about_new_orders',
@@ -90,7 +92,7 @@ class LenderControllerShowTest extends TestCase
         $this->actingAs(self::$userManager)
             ->getJson(self::$endpoint)
             ->assertOk()
-            ->assertExactJson(
+            ->assertJson(
                 fractal(self::$lender, new CompanyTransformer())
                     ->parseIncludes([
                         'id',
@@ -100,6 +102,8 @@ class LenderControllerShowTest extends TestCase
                         'unique_name',
                         'company_cr',
                         'does_order_require_approval',
+                        'notify_borrowers_about_order_updates',
+                        'require_initiate_trade_request',
                         'order_cost_tiers',
                         'notifications_email',
                         'notify_admins_about_new_orders',

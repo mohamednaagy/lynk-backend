@@ -4,6 +4,7 @@ use App\Enums\MurabhaStep;
 use App\Models\Media;
 use Illuminate\Support\Facades\Config;
 use Modules\Grantify\Facades\Grantify;
+use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\MediaLibrary\HasMedia;
 
 if (! function_exists('validate_said')) {
@@ -167,5 +168,16 @@ if (! function_exists('parse_number')) {
     function parse_number($number): float
     {
         return (float) preg_replace('/[^\d.]/', '', $number);
+    }
+}
+
+if (! function_exists('cast_phone_number_if_exist')) {
+    function cast_phone_number_if_exist(array &$data): array
+    {
+        if (array_key_exists('phone_number', $data) && array_key_exists('phone_country_code', $data)) {
+            $data['phone_number'] = PhoneNumber::make($data['phone_number'], $data['phone_country_code']);
+        }
+
+        return $data;
     }
 }
