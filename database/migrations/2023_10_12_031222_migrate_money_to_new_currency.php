@@ -1,7 +1,5 @@
 <?php
 
-use App\Actions\Contracts\GetSettingsClassInstance;
-use App\Enums\Area;
 use Cknow\Money\Money;
 use Illuminate\Database\Migrations\Migration;
 
@@ -35,14 +33,6 @@ return new class extends Migration
                 'proration_amount' => DB::raw('CONCAT(`order_value_end`, "00")'),
             ]);
 
-        $settingInstance = app(GetSettingsClassInstance::class)->handle(Area::Lender);
-        $settingInstance->default_order_cost .= '00';
-        $settingInstance->save();
-
-        $settingInstance = app(GetSettingsClassInstance::class)->handle(Area::Trader);
-        $settingInstance->default_order_cost .= '00';
-        $settingInstance->save();
-
         DB::table('trader_orders')
             ->select(['id', 'data'])
             ->chunkById(50, function ($traderOrders) {
@@ -55,7 +45,7 @@ return new class extends Migration
                     DB::table('trader_orders')
                         ->where('id', $traderOrder->id)
                         ->update([
-                            'data' => $this->fixJsonColumns($data),
+                            'data' => $this->fixJsonColumnsIfMoneyObjectExists($data),
                         ]);
                 }
             });
@@ -72,7 +62,7 @@ return new class extends Migration
                     DB::table('notifications')
                         ->where('id', $notification->id)
                         ->update([
-                            'data' => $this->fixJsonColumns($data),
+                            'data' => $this->fixJsonColumnsIfMoneyObjectExists($data),
                         ]);
                 }
             });
@@ -98,7 +88,7 @@ return new class extends Migration
                         ->table('transactions')
                         ->where('id', $transaction->id)
                         ->update([
-                            'meta' => $this->fixJsonColumns($data),
+                            'meta' => $this->fixJsonColumnsIfMoneyObjectExists($data),
                         ]);
                 }
             });
@@ -122,7 +112,7 @@ return new class extends Migration
         //
     }
 
-    private function fixJsonColumns(array|string &$data): ?array
+    private function fixJsonColumnsIfMoneyObjectExists(array|string &$data): ?array
     {
         foreach ($data as $key => $value) {
             if (! is_array($value)) {
@@ -140,7 +130,7 @@ return new class extends Migration
                 continue;
             }
 
-            $this->fixJsonColumns($value);
+            $this->fixJsonColumnsIfMoneyObjectExists($value);
         }
 
         return $data;
