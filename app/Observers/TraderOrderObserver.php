@@ -5,35 +5,55 @@ namespace App\Observers;
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
+use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 
 class TraderOrderObserver
 {
     /**
-     * Handle the TraderOrder "created" event.
+     * Handle the TraderOrder "creating" event.
      *
      * @return void
      */
-    public function created(TraderOrder $traderOrder)
+    public function creating(TraderOrder $traderOrder)
     {
         $order = $traderOrder->order;
 
-        $baseTraderOrder = $order->traderOrders()->where('is_base', true)->first();
-
-        if (
-            $order->traderOrders()->count() === 1
-            ||
-            $baseTraderOrder && now()->diffInHours($baseTraderOrder->created_at) >= 72
-        ) {
-            $traderOrder->update([
+        if ($this->shouldSetAsBaseTraderOrder($order)) {
+            $traderOrder->fill([
                 'is_base' => true,
             ]);
         }
     }
 
+    /**
+     * Determine if the given order should have the current trader order set as the base trader order.
+     */
+    protected function shouldSetAsBaseTraderOrder(FinancingOrder $order): bool
+    {
+        if ($order->traderOrders()->count() === 1) {
+            return true;
+        }
+
+        $baseTraderOrder = $order->traderOrders()
+            ->where('is_base', true)
+            ->latest('id')
+            ->first();
+
+        return $baseTraderOrder && now()->diffInHours($baseTraderOrder->created_at) >= 72;
+    }
+
+    /**
+     * Handle the TraderOrder "updating" event.
+     *
+     * @return void
+     */
     public function updating(TraderOrder $traderOrder)
     {
-        if ($traderOrder->isDirty(['status']) && $traderOrder->status->is(TraderOrderStatus::Cancelled)) {
+        if (
+            $traderOrder->isDirty(['status'])
+            && $traderOrder->status->is(TraderOrderStatus::Cancelled)
+        ) {
             $traderOrder->fill([
                 'cancelled_at' => now(),
             ]);
