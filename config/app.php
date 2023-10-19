@@ -209,6 +209,7 @@ return [
         App\Providers\TransactionUtilServiceProvider::class,
         \Shivella\Bitly\BitlyServiceProvider::class,
         Jenssegers\Agent\AgentServiceProvider::class,
+        App\Providers\MoneyServiceProvider::class,
     ],
 
     /*

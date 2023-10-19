@@ -21,7 +21,7 @@ class GenerateVoucherReceiptAction implements GenerateVoucherReceipt
         $company = $transaction->wallet->holder;
 
         $content = __('invoices/voucher-receipt.content', [
-            'amount' => $amount->formatByDecimal(),
+            'amount' => $amount->convertAndFormatByDecimal(sperator: ','),
             'company_name' => $company->name,
         ], 'ar');
 

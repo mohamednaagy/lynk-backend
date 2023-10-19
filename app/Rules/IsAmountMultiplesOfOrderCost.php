@@ -54,7 +54,7 @@ class IsAmountMultiplesOfOrderCost implements Rule
     public function message()
     {
         return __('validation.amount_not_multiples_of_order_cost', [
-            'order_cost_with_vat' => $this->orderCostWithVat->formatByDecimal(),
+            'order_cost_with_vat' => $this->orderCostWithVat->convertAndFormatByDecimal(sperator: ','),
         ]);
     }
 }

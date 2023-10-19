@@ -170,8 +170,8 @@ class DmccV1Driver implements TraderInterface
             ->baseWsdl($this->prefixUrl('getTTIIDForIssuePTP'))
             ->call('getTTIIDForIssuePTP', $requestBody = [
                 'currency' => $financingOrder->currency,
-                'costPrice' => $financingOrder->amount->formatByDecimal(),
-                'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->formatByDecimal(),
+                'costPrice' => $financingOrder->amount->convertAndFormatByDecimal(),
+                'profit' => $financingOrder->selling_price->subtract($financingOrder->amount)->convertAndFormatByDecimal(),
                 'paymentTerms' => config('trader.providers.dmcc.tti.payment_terms'),
                 'unitOfDuration' => config('trader.providers.dmcc.tti.unit_of_duration'),
                 'product' => null,
@@ -300,7 +300,7 @@ class DmccV1Driver implements TraderInterface
             $data['created_at'] = $dateTime->clone();
             $separator = ' و ';
             $products = collect($traderOrder->products);
-            $amount = $traderOrder->order->selling_price->formatByDecimal();
+            $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal(sperator: ',');
             $customerName = $traderOrder->order->customer_name;
             $productName = $products->pluck('product')->implode($separator);
 
@@ -370,7 +370,7 @@ class DmccV1Driver implements TraderInterface
         try {
             $separator = ' و ';
             $products = collect($traderOrder->products);
-            $amount = $traderOrder->order->amount->formatByDecimal();
+            $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
             $previousOwner = $products->pluck('previous_owner')->implode($separator);
             $productName = $products->pluck('product')->implode($separator);
             $date = CarbonImmutable::now();

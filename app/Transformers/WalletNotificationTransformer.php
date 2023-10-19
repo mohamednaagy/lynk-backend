@@ -19,7 +19,7 @@ class WalletNotificationTransformer extends TransformerAbstract
             ],
             'value' => $walletNotification->type->is(WalletNotificationType::ORDER_COUNT)
                 ? $walletNotification->value->format(style: NumberFormatter::TYPE_INT32)
-                : $walletNotification->value->formatByDecimal(),
+                : $walletNotification->value->convertAndFormatByDecimal(),
         ];
     }
 }

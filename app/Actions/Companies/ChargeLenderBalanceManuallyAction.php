@@ -86,7 +86,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
         Transaction $transaction,
         Company $company,
         Money $totalAmountWithVat,
-        $vatAmount,
+        Money $vatAmount,
         $vatPercentage
     ): InvoiceSpecs {
         $project = $this->getProjectSettings->handle();
@@ -98,8 +98,8 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
             $project,
             $project->getVatId(),
             $transaction->created_at->clone(),
-            $totalAmountWithVat->formatByDecimal(),
-            $vatAmount->formatByDecimal(),
+            $totalAmountWithVat->convertAndFormatByDecimal(),
+            $vatAmount->convertAndFormatByDecimal(),
             new Order(
                 $transaction->reference_number,
                 [

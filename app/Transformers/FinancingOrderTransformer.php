@@ -128,22 +128,22 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeAmount(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->amount->formatByDecimal());
+        return $this->primitive($financingOrder->amount->convertAndFormatByDecimal());
     }
 
     public function includeAmountFormatted(FinancingOrder $financingOrder)
     {
-        return $this->primitive(number_format($financingOrder->amount->formatByDecimal(), 2));
+        return $this->primitive($financingOrder->amount->convertAndFormatByDecimal(sperator: ','));
     }
 
     public function includeSellingPrice(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->selling_price->formatByDecimal());
+        return $this->primitive($financingOrder->selling_price->convertAndFormatByDecimal());
     }
 
     public function includeSellingPriceFormatted(FinancingOrder $financingOrder)
     {
-        return $this->primitive(number_format($financingOrder->selling_price->formatByDecimal(), 2));
+        return $this->primitive($financingOrder->selling_price->convertAndFormatByDecimal(sperator: ','));
     }
 
     public function includeCreator(FinancingOrder $financingOrder)
