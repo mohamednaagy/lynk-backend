@@ -19,15 +19,16 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
 
     protected array $headings = [
         'id' => 'ID',
+        'reference_number' => 'Reference Number',
+        'created_date' => 'Created Date',
+        'created_time' => 'Created Time',
+        'national_id' => 'National ID / Iqama',
         'amount' => 'Commodity Price (SAR)',
         'selling_price' => 'Selling Price (SAR)',
-        'reference_number' => 'Reference Number',
-        'national_id' => 'National ID / Iqama',
+        'charged_transactions' => 'Charged Transactions',
         'order_owner' => 'Order Owner',
         'company_name' => 'Company Name',
         'status' => 'Status',
-        'created_date' => 'Created Date',
-        'created_time' => 'Created Time',
         'cost_with_vat' => 'Cost With Vat (SAR)',
         'cost_without_vat' => 'Cost Without Vat (SAR)',
     ];
@@ -40,7 +41,9 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
 
     public function query()
     {
-        return $this->ordersQuery;
+        return $this->ordersQuery->withCount(['traderOrders as charged_trader_orders_count' => function ($query) {
+            $query->whereNull('data->refunded_at');
+        }]);
     }
 
     public function headings(): array
@@ -62,10 +65,13 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
     {
         $items = $this->filterExcludes([
             'id' => fn () => $order->id,
-            'amount' => fn () => $order->amount->convertAndFormatByDecimal(sperator: ','),
-            'selling_price' => fn () => $order->selling_price->convertAndFormatByDecimal(sperator: ','),
             'reference_number' => fn () => $order->reference_number,
+            'created_date' => fn () => $order->created_at->clone()->tz('Asia/Riyadh')->format('Y-m-d'),
+            'created_time' => fn () => $order->created_at->clone()->tz('Asia/Riyadh')->format('H:i:s'),
             'national_id' => fn () => $order->national_id,
+            'amount' => fn () => number_format($order->amount->formatByDecimal(), 2),
+            'selling_price' => fn () => number_format($order->selling_price->formatByDecimal(), 2),
+            'charged_transactions' => fn () => (string) $order->charged_trader_orders_count,
             'order_owner' => fn () => $order->creator?->full_name,
             'company_name' => fn () => $order->company->name,
             'status' => fn () => $this->withLocale('en', function () use ($order) {
@@ -73,10 +79,8 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
                     || is_null($order->current_step)
                     ? $order->status->description : $order->current_step->description;
             }),
-            'created_date' => fn () => $order->created_at->clone()->tz('Asia/Riyadh')->format('Y-m-d'),
-            'created_time' => fn () => $order->created_at->clone()->tz('Asia/Riyadh')->format('H:i:s'),
-            'cost_with_vat' => fn () => $order->cost_with_vat?->convertAndFormatByDecimal(sperator: ','),
-            'cost_without_vat' => fn () => $order->cost_without_vat?->convertAndFormatByDecimal(sperator: ','),
+            'cost_with_vat' => fn () => number_format($order->cost_with_vat?->formatByDecimal(), 2),
+            'cost_without_vat' => fn () => number_format($order->cost_without_vat?->formatByDecimal(), 2),
         ]);
 
         return array_map(fn ($item) => $item(), $items);
