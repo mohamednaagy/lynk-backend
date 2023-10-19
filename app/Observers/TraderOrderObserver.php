@@ -31,7 +31,7 @@ class TraderOrderObserver
      */
     protected function shouldSetAsBaseTraderOrder(FinancingOrder $order): bool
     {
-        if ($order->traderOrders()->count() === 1) {
+        if ($order->traderOrders()->count() === 0) {
             return true;
         }
 
