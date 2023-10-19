@@ -17,6 +17,7 @@ class WalletNotificationRequest extends FormRequest
 
         return [
             'type' => [
+                'exclude_if:value,null',
                 'required',
                 $company->isTiered()
                     ? function (string $attribute, mixed $value, Closure $fail) {
