@@ -14,6 +14,7 @@ use App\Models\EdaatInvoice;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
+use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -38,11 +39,11 @@ trait InteractsWithCompany
     ): array {
         $company = $this->createCompanyWithoutWallet($data);
 
-        $wallet = $company->createWallet(WalletType::CompanyWallet, 'SAR');
+        $wallet = $company->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
 
         app()->make(TransactionServiceInterface::class)->deposit(
             $wallet,
-            \money($walletInitialAmount, 'SAR'),
+            \money($walletInitialAmount, Money::getDefaultCurrency()),
             1,
             1,
             [

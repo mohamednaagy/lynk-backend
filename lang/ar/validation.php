@@ -24,6 +24,7 @@ return [
     'date' => 'حقل :attribute ليس تاريخًا صحيحًا.',
     'date_equals' => 'يجب أن يكون حقل :attribute مطابقاً للتاريخ :date.',
     'date_format' => 'لا يتوافق حقل :attribute مع الشكل :format.',
+    'decimal' => 'يجب أن يحتوي الحقل :attribute على :decimal منزلة/منازل عشرية.',
     'declined' => 'يجب رفض :attribute.',
     'declined_if' => 'يجب رفض :attribute عندما يكون :other بقيمة :value.',
     'different' => 'يجب أن يكون الحقلان :attribute و :other مُختلفين.',
