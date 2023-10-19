@@ -105,7 +105,7 @@ class StoreCompanyRequest extends FormRequest
                 'exclude_unless:order_cost_tiers.'.$lastTierIndex.'.fee_type,'.OrderFeeType::Proration,
                 'required_if:order_cost_tiers.'.$lastTierIndex.'.fee_type,'.OrderFeeType::Proration,
                 'nullable',
-                'decimal:0,4',
+                'decimal:0,2',
             ],
             'public_status_comment' => [
                 'nullable',
