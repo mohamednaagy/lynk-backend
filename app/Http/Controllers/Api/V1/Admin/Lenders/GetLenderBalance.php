@@ -29,7 +29,7 @@ class GetLenderBalance extends Controller
             'balance_formatted' => $balances['balance']->convertAndFormatByDecimal(sperator: ','),
             'available_orders' => $balances['availableOrders'],
             'available_orders_formatted' => $balances['availableOrders']
-                ? number_format($balances['availableOrders'], 2)
+                ? number_format($balances['availableOrders'])
                 : null,
 
         ]);
