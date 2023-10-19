@@ -193,7 +193,7 @@ class LenderController extends Controller
                 ->setIsVatIncludedInAmount(true)
                 ->handle();
 
-            $tier['order_cost_without_vat'] = $orderCostWithVat->subtract($vatOfOrderCostAmount)->formatByDecimal();
+            $tier['order_cost_without_vat'] = $orderCostWithVat->subtract($vatOfOrderCostAmount);
 
             $tier['order_value_start'] = Money::parseByDecimal($tier['order_value_start'], $currency);
 
