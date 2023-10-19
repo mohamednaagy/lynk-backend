@@ -20,6 +20,10 @@ class CreateCompanyAction implements CreateCompany
             $data['webhook_secret_key'] = $this->generateWebhookSecretKey->handle();
         }
 
+        if (array_key_exists('require_initiate_trade_request', $data) && is_null($data['require_initiate_trade_request'])) {
+            unset($data['require_initiate_trade_request']);
+        }
+
         return Company::create(
             Arr::only(
                 $data,
@@ -36,7 +40,9 @@ class CreateCompanyAction implements CreateCompany
                     'driver',
                     'type',
                     'notify_admins_about_new_orders',
+                    'notify_borrowers_about_order_updates',
                     'trading_mode',
+                    'require_initiate_trade_request',
                 ]
             )
         );

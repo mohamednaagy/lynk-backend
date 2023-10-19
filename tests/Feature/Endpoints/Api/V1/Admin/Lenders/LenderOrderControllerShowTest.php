@@ -94,6 +94,7 @@ class LenderOrderControllerShowTest extends TestCase
                         'status',
                         'reference_number',
                         'customer_name',
+                        'company_name',
                         'national_id',
                         'amount',
                         'selling_price',

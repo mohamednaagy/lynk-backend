@@ -26,8 +26,8 @@ class TraderHistoryObserver
         $currentCompletedStepNode = app(StepHistoriesDictionary::class)->getCompletedStepByHistory($traderHistory->action);
         $this->fireWebhookWhenStatusIsMurabhaOfferIssued($traderOrder, $currentCompletedStepNode);
 
-        foreach ($this->getActionsOfProvider($traderOrder->provider, $currentCompletedStepNode) as $action) {
-            app($action)->handle($traderOrder->order, $traderHistory->traderOrder);
+        foreach ($this->getActionsOfProvider($traderOrder->provider, $currentCompletedStepNode) as $actionClass) {
+            app($actionClass)->handle($traderOrder->order, $traderHistory->traderOrder);
         }
     }
 

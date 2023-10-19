@@ -34,7 +34,7 @@ class TransactionTransformer extends TransformerAbstract
 
     public function includeDate(Transaction $transaction): Primitive
     {
-        return $this->primitive($transaction->created_at->format('Y-m-d'));
+        return $this->primitive($transaction->created_at?->format('Y-m-d'));
     }
 
     public function includeDescription(Transaction $transaction): Primitive

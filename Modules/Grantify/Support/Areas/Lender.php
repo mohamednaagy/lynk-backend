@@ -57,5 +57,10 @@ class Lender
         Subject::LenderWebhookSecret => [
             Action::Refresh,
         ],
+        Subject::WalletNotifications => [
+            Action::Manage,
+            Action::Index,
+            Action::Create,
+        ],
     ];
 }

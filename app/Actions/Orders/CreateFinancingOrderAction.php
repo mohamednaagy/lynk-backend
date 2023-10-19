@@ -7,14 +7,17 @@ use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use Cknow\Money\Money;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Propaganistas\LaravelPhone\PhoneNumber;
 
 class CreateFinancingOrderAction implements CreateFinancingOrder
 {
+    /**
+     * @return FinancingOrder|Model
+     */
     public function handle(Company $company, array $data): FinancingOrder
     {
-        $data['phone_number'] = PhoneNumber::make($data['phone_number'], $data['phone_country_code']);
+        $data = cast_phone_number_if_exist($data);
 
         $data['currency'] = $company->getWallet(WalletType::CompanyWallet)->currency;
 

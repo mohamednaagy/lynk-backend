@@ -12,6 +12,7 @@ use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
+use App\Enums\TraderOrderMode;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
@@ -148,7 +149,9 @@ class OrderController extends Controller
 
                 $status = $company->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval
-                    : FinancingOrderStatus::PendingTraderOrder;
+                    : ($company->trading_mode->is(TraderOrderMode::Automatic) && ! $company->require_initiate_trade_request
+                        ? FinancingOrderStatus::Approved
+                        : FinancingOrderStatus::PendingTraderOrder);
 
                 $user = $request->user();
 

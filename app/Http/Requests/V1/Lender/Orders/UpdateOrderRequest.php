@@ -4,6 +4,7 @@ namespace App\Http\Requests\V1\Lender\Orders;
 
 use App\Http\Requests\Traits\RequestHasMobileVerification;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateOrderRequest extends FormRequest
 {
@@ -30,7 +31,11 @@ class UpdateOrderRequest extends FormRequest
             'reference_number' => ['nullable', 'string', 'max:100'],
             'national_id' => ['required', 'integer', 'digits:10', 'gt:0'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
-            'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],
+            'phone_number' => [
+                Rule::requiredIf($this->order->is_verification_required),
+                'phone:phone_country_code,mobile',
+                'string',
+            ],
             'amount' => ['required', 'numeric', 'gt:0'],
             'selling_price' => ['required', 'numeric', 'gte:amount'],
         ];

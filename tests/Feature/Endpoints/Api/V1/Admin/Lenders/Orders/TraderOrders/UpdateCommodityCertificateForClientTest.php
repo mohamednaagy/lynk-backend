@@ -11,10 +11,12 @@ use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Sms\Events\SmsSent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Tests\Support\FinancingOrders\CommittedOrder;
 use Tests\Support\FinancingOrders\InProgressOrder;
@@ -221,5 +223,56 @@ class UpdateCommodityCertificateForClientTest extends TestCase
                     'url',
                 ],
             ]);
+    }
+
+    public function test_send_sms_on_update_selling_commodity_certificate_if_notify_borrowers_settings_on_and_phone_provided(): void
+    {
+        self::$lender->update(['notify_borrowers_about_order_updates' => true]);
+
+        Event::fake([
+            SmsSent::class,
+        ]);
+
+        $this->actingAs(self::$superAdminUser)
+            ->postJson(self::$endpoint, [
+                'document' => null,
+                'automatically_generate_file' => true,
+            ]);
+
+        Event::assertDispatched(SmsSent::class);
+    }
+
+    public function test_not_send_sms_on_update_selling_commodity_certificate_if_notify_borrowers_settings_off_and_phone_provided(): void
+    {
+        self::$lender->update(['notify_borrowers_about_order_updates' => false]);
+
+        Event::fake([
+            SmsSent::class,
+        ]);
+
+        $this->actingAs(self::$superAdminUser)
+            ->postJson(self::$endpoint, [
+                'document' => null,
+                'automatically_generate_file' => true,
+            ]);
+
+        Event::assertNotDispatched(SmsSent::class);
+    }
+
+    public function test_not_send_sms_on_update_selling_commodity_certificate_if_notify_borrowers_settings_on_and_phone_not_provided(): void
+    {
+        self::$lender->update(['notify_borrowers_about_order_updates' => false]);
+
+        Event::fake([
+            SmsSent::class,
+        ]);
+
+        $this->actingAs(self::$superAdminUser)
+            ->postJson(self::$endpoint, [
+                'document' => null,
+                'automatically_generate_file' => true,
+            ]);
+
+        Event::assertNotDispatched(SmsSent::class);
     }
 }

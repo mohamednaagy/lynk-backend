@@ -9,7 +9,6 @@ use App\Enums\Area;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\RegisterLenderRequest;
 use App\Jobs\Lenders\NotifyAdminsAboutLenderRegistration;
-use Cknow\Money\Money;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -31,11 +30,10 @@ class Register extends Controller
                         ->default_does_order_require_approval,
                     'company_status' => $getSettingsClassInstance->handle(Area::Lender)
                         ->default_company_registration_status,
-                    'order_cost' => Money::parseByDecimal(
-                        $getSettingsClassInstance
-                            ->handle(Area::Lender)->default_order_cost,
-                        Money::getDefaultCurrency()
-                    ),
+                    'require_initiate_trade_request' => $getSettingsClassInstance->handle(Area::Lender)
+                        ->require_initiate_trade_request,
+                    'notify_borrowers_about_order_updates' => $getSettingsClassInstance->handle(Area::Lender)
+                        ->notify_borrowers_about_order_updates,
                 ]
             );
 

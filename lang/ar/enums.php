@@ -8,6 +8,7 @@ use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MurabhaStep;
+use App\Enums\WalletNotificationType;
 
 return [
     CompanyStatus::class => [
@@ -71,5 +72,9 @@ return [
         BursamProductCode::RbdPalmOlein => 'زيت الأولين',
         BursamProductCode::TimberHardwood => 'خشب صلب',
         BursamProductCode::TimberSoftwood => 'خشب لين',
+    ],
+    WalletNotificationType::class => [
+        WalletNotificationType::ORDER_COUNT => 'الحد المتاح للطلبات',
+        WalletNotificationType::WALLET_BALANCE => 'الحد المتاح للرصيد',
     ],
 ];
