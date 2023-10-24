@@ -91,6 +91,8 @@ class OrderControllerShowTest extends TestCase
                         'id',
                         'amount',
                         'selling_price',
+                        'amount_formatted',
+                        'selling_price_formatted',
                         'status',
                         'active_trader.id',
                         'active_trader.reference',

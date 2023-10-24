@@ -98,6 +98,8 @@ class LenderOrderControllerShowTest extends TestCase
                         'national_id',
                         'amount',
                         'selling_price',
+                        'amount_formatted',
+                        'selling_price_formatted',
                         'phone_country_code',
                         'phone_number',
                         'phone_number_formatted',

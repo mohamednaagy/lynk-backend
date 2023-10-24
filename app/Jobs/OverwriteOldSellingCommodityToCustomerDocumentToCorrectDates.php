@@ -56,7 +56,7 @@ class OverwriteOldSellingCommodityToCustomerDocumentToCorrectDates implements Sh
 
                     $separator = ' و ';
                     $products = collect($traderOrder->products);
-                    $amount = $traderOrder->order->selling_price->formatByDecimal();
+                    $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal(sperator: ',');
                     $customerName = $traderOrder->order->customer_name;
                     $productName = $products->pluck('product')->implode($separator);
 

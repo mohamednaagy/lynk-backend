@@ -103,7 +103,7 @@ class UpdateCompanyRequest extends FormRequest
                 'required',
                 Rule::in(OrderFeeType::getValues()),
             ],
-            'order_cost_tiers.*.order_cost_without_vat' => [
+            'order_cost_tiers.*.order_cost_with_vat' => [
                 'required',
                 'decimal:0,2',
             ],

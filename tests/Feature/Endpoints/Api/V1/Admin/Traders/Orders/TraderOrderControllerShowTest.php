@@ -85,17 +85,20 @@ class TraderOrderControllerShowTest extends TestCase
             ->getJson(self::$baseURL)
             ->assertOk()
             ->assertExactJson(
-                fractal(self::$order, (new FinancingOrderTransformer(self::$traderCompany))
+                fractal(self::$order, (new FinancingOrderTransformer(self::$lenderCompany))
                     ->setArea(Area::SuperAdmin)
                     ->setCurrentUser(self::$userAdmin))
                     ->parseIncludes([
                         'id',
                         'status',
+                        'company_name',
                         'reference_number',
                         'customer_name',
                         'national_id',
                         'amount',
                         'selling_price',
+                        'amount_formatted',
+                        'selling_price_formatted',
                         'phone_country_code',
                         'phone_number',
                         'phone_number_formatted',

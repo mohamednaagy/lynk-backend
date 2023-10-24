@@ -48,12 +48,12 @@ class OrderCostTierTransformer extends TransformerAbstract
 
     public function includeOrderValueStart(TieredPricing $tieredPricing): Primitive
     {
-        return $this->primitive($tieredPricing->order_value_start->formatByDecimal());
+        return $this->primitive($tieredPricing->order_value_start->convertAndFormatByDecimal());
     }
 
     public function includeOrderValueEnd(TieredPricing $tieredPricing): Primitive
     {
-        return $this->primitive($tieredPricing->order_value_end?->formatByDecimal());
+        return $this->primitive($tieredPricing->order_value_end?->convertAndFormatByDecimal());
     }
 
     public function includeFeeType(TieredPricing $tieredPricing): Primitive
@@ -63,7 +63,7 @@ class OrderCostTierTransformer extends TransformerAbstract
 
     public function includeOrderCostWithoutVat(TieredPricing $tieredPricing): Primitive
     {
-        return $this->primitive($tieredPricing->order_cost_without_vat->formatByDecimal());
+        return $this->primitive($tieredPricing->order_cost_without_vat->convertAndFormatByDecimal());
     }
 
     public function includeOrderCostWithVat(TieredPricing $tieredPricing): Primitive
@@ -75,11 +75,11 @@ class OrderCostTierTransformer extends TransformerAbstract
             ->setIsVatIncludedInAmount(false)
             ->handle();
 
-        return $this->primitive($orderCostWithoutVat->add($vatAmount)->formatByDecimal());
+        return $this->primitive($orderCostWithoutVat->add($vatAmount)->convertAndFormatByDecimal());
     }
 
     public function includeProrationAmount(TieredPricing $tieredPricing): Primitive
     {
-        return $this->primitive($tieredPricing->proration_amount?->formatByDecimal());
+        return $this->primitive($tieredPricing->proration_amount?->convertAndFormatByDecimal());
     }
 }

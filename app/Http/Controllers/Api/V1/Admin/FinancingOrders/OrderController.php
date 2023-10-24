@@ -64,6 +64,9 @@ class OrderController extends Controller
             'creator',
         ])
             ->handle()
+            ->withCount(['traderOrders as charged_trader_orders_count' => function ($query) {
+                $query->whereNull('data->refunded_at');
+            }])
             ->paginate();
 
         return fractal($orders, new FinancingOrderTransformer())
@@ -74,10 +77,13 @@ class OrderController extends Controller
                 'national_id',
                 'amount',
                 'selling_price',
+                'amount_formatted',
+                'selling_price_formatted',
                 'status_reason',
                 'current_step',
                 'creator',
                 'company_name',
+                'charged_trader_orders_count',
                 'created_at',
             ])
             ->respond();
@@ -105,6 +111,8 @@ class OrderController extends Controller
                 'company_name',
                 'amount',
                 'selling_price',
+                'amount_formatted',
+                'selling_price_formatted',
                 'phone_country_code',
                 'phone_number',
                 'phone_number_formatted',
@@ -185,6 +193,8 @@ class OrderController extends Controller
                         'national_id',
                         'amount',
                         'selling_price',
+                        'amount_formatted',
+                        'selling_price_formatted',
                         'is_approved',
                         'status_reason',
                         'phone_country_code',
@@ -223,6 +233,8 @@ class OrderController extends Controller
                 'national_id',
                 'amount',
                 'selling_price',
+                'amount_formatted',
+                'selling_price_formatted',
                 'is_approved',
                 'status_reason',
                 'phone_country_code',

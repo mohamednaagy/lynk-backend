@@ -37,7 +37,7 @@ class CalculateOrderCost extends Controller
         }
 
         return $this->successResponse(data: [
-            'amount' => $amount?->formatByDecimal(),
+            'amount' => $amount?->convertAndFormatByDecimal(),
         ]);
     }
 }

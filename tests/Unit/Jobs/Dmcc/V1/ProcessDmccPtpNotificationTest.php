@@ -113,8 +113,6 @@ class ProcessDmccPtpNotificationTest extends TestCase
      */
     public function test_job_not_processed_if_current_financing_order_is_unsuitable_status($unsuitableOrderStatusData)
     {
-        dump($unsuitableOrderStatusData);
-
         self::$traderOrder = TraderOrderScenario::of(self::$traderOrder)
             ->reset()
             ->moveToHistory($unsuitableOrderStatusData)

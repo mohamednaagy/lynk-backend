@@ -84,6 +84,8 @@ class LenderOrderControllerIndexTest extends TestCase
                         'national_id',
                         'amount',
                         'selling_price',
+                        'amount_formatted',
+                        'selling_price_formatted',
                         'current_step',
                         'status_reason',
                         'creator',

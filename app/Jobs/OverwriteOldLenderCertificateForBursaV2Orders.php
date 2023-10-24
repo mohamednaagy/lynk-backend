@@ -66,7 +66,7 @@ class OverwriteOldLenderCertificateForBursaV2Orders implements ShouldQueue
             ]);
 
             $this->withLocale('ar', function () use ($traderOrder) {
-                $amount = $traderOrder->order->amount->formatByDecimal();
+                $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
 
                 $history = $traderOrder->traderHistories()
                     ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
