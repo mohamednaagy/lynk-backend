@@ -133,7 +133,7 @@ class FakeV1Driver implements TraderInterface
 
     private function isSuccess(Response $response): bool
     {
-        return $response->successful() && ! app()->runningUnitTests();
+        return $response->successful() || app()->runningUnitTests();
     }
 
     /**

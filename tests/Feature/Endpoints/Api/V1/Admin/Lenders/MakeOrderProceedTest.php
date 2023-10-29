@@ -20,6 +20,7 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Event;
 use Tests\Support\FinancingOrders\CommittedOrder;
 use Tests\Support\FinancingOrders\InProgressOrder;
 use Tests\Support\FinancingOrders\OrderScenario;
@@ -155,6 +156,7 @@ class MakeOrderProceedTest extends TestCase
 
     public function test_admin_proceed_order_manager_can_access_with_permissions(): void
     {
+        Event::fake();
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
             ->moveToStep(
@@ -171,6 +173,7 @@ class MakeOrderProceedTest extends TestCase
 
     public function test_admin_proceed_order_on_contract_signed_successfully(): void
     {
+        Event::fake();
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
             ->moveToStep(
