@@ -44,7 +44,7 @@ class OrderCreationFeeTypeTest extends TestCase
         self::$depositTransaction = app()->make(TransactionServiceInterface::class)
             ->deposit(
                 self::$wallet,
-                Money::parseByDecimal(-100, 'SAR'),
+                Money::parseByDecimal(-10000, Money::getDefaultCurrency()),
                 1,
                 null,
                 [
@@ -71,7 +71,7 @@ class OrderCreationFeeTypeTest extends TestCase
     {
         $transaction = self::$transactionTypeHandler->process(
             self::$wallet,
-            Money::parseByDecimal(100, 'SAR'),
+            Money::parseByDecimal(10000, Money::getDefaultCurrency()),
             TransactionReason::OrderCreationFee,
             null,
             []

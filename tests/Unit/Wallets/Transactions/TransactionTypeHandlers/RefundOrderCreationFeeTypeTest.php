@@ -44,7 +44,7 @@ class RefundOrderCreationFeeTypeTest extends TestCase
         self::$depositTransaction = app()->make(TransactionServiceInterface::class)
             ->deposit(
                 self::$wallet,
-                Money::parseByDecimal(115, 'SAR'),
+                Money::parseByDecimal(11500, Money::getDefaultCurrency()),
                 TransactionReason::RefundOrderCreationFee,
                 null,
                 [
@@ -71,7 +71,7 @@ class RefundOrderCreationFeeTypeTest extends TestCase
     {
         $transaction = self::$transactionTypeHandler->process(
             self::$wallet,
-            Money::parseByDecimal(100, 'SAR'),
+            Money::parseByDecimal(10000, Money::getDefaultCurrency()),
             TransactionReason::OrderCreationFee,
             null,
             []

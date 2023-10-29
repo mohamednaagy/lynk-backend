@@ -63,7 +63,7 @@ class GetWalletTransactionsTest extends TestCase
             );
 
         app()->make(TransactionServiceInterface::class)->deposit(
-            self::$wallet, new Money(20000, 'SAR'), TransactionReason::DepositByEdaat, 2, []
+            self::$wallet, new Money(2000000, Money::getDefaultCurrency()), TransactionReason::DepositByEdaat, 2, []
         );
 
         $this->actingAs(self::$userLender)
@@ -72,7 +72,7 @@ class GetWalletTransactionsTest extends TestCase
             ->assertJsonCount(2, 'data')
             ->assertExactJson(
                 fractal(
-                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer())
+                    self::$company->transactions(WalletType::CompanyWallet)->latest('id')->paginate(), new TransactionTransformer())
                     ->parseIncludes([
                         'id',
                         'date',
