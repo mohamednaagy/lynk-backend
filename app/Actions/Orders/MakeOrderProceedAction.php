@@ -118,6 +118,13 @@ class MakeOrderProceedAction implements MakeOrderProceed
         );
     }
 
+    protected function isCommodityPurchaseNotCompleted(TraderOrder $traderOrder): bool
+    {
+        return ! $traderOrder->checkOrderStepComplete(
+            MurabhaStep::PurchasingCommodity
+        );
+    }
+
     protected function isContractSignedStepCompleted(TraderOrder $traderOrder): bool
     {
         return $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
@@ -149,7 +156,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
         $lastHistory = $traderOrder->traderHistories()->latest('id')->first();
 
-        if (is_null($lastHistory)) {
+        if (is_null($lastHistory) || $this->isCommodityPurchaseNotCompleted($traderOrder)) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
