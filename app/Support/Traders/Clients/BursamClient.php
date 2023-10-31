@@ -40,7 +40,7 @@ class BursamClient
 
     private function isTraderOrderInitiatedByFake()
     {
-        return strpos($this->traderOrder->reference, '-') !== false;
+        return strpos($this->traderOrder->reference, '-') === false;
     }
 
     public static function of(TraderOrder $traderOrder)
