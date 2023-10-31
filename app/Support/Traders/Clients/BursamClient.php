@@ -22,7 +22,11 @@ class BursamClient
 
     private function __construct(protected $traderOrder)
     {
-        $this->fake = config('trader.providers.bursam.fake');
+        if ($traderOrder->reference === null) {
+            $this->fake = config('trader.providers.bursam.fake');
+        } else {
+            $this->fake = $this->isTraderOrderInitiatedByFake();
+        }
 
         if ($this->fake) {
             $this->registerFakeBursamResponses();
@@ -32,6 +36,11 @@ class BursamClient
                 }
             );
         }
+    }
+
+    private function isTraderOrderInitiatedByFake()
+    {
+        return strpos($this->traderOrder->reference, '-') !== false;
     }
 
     public static function of(TraderOrder $traderOrder)
@@ -60,12 +69,12 @@ class BursamClient
                         'purchaseType' => 'P',
                         'clientName' => '',
                         'currency' => 'SAR',
-                        'bidValue' => $financingOrder->amount->convertAndFormatByDecimal(),
+                        'bidValue' => (float) $financingOrder->amount->convertAndFormatByDecimal(),
                         'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
                         'tenor' => config('trader.providers.bursam.tenor'),
                         'otcCounterParty' => $financingOrder->customer_name,
                         'otcMurabaha' => '',
-                        'otcMurabahaValue' => $financingOrder->selling_price->convertAndFormatByDecimal(),
+                        'otcMurabahaValue' => (float) $financingOrder->selling_price->convertAndFormatByDecimal(),
                         'eCertNo' => '',
                     ],
                 ]
@@ -93,12 +102,12 @@ class BursamClient
                         'purchaseType' => 'P',
                         'clientName' => '',
                         'currency' => 'SAR',
-                        'bidValue' => $financingOrder->amount->convertAndFormatByDecimal(),
+                        'bidValue' => (float) $financingOrder->amount->convertAndFormatByDecimal(),
                         'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
                         'tenor' => '00090',
                         'otcCounterParty' => $financingOrder->customer_name,
                         'otcMurabaha' => '',
-                        'otcMurabahaValue' => $financingOrder->selling_price->convertAndFormatByDecimal(),
+                        'otcMurabahaValue' => (float) $financingOrder->selling_price->convertAndFormatByDecimal(),
                         'eCertNo' => $this->traderOrder->reference,
                     ],
                 ]
@@ -208,7 +217,7 @@ class BursamClient
                             'purchaseType' => 'P',
                             'clientName' => '',
                             'currency' => 'SAR',
-                            'bidValue' => $traderOrder->order->amount->convertAndFormatByDecimal(),
+                            'bidValue' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
                             'valueDate' => now()->format('Ymd'),
                             'tenor' => '00074',
                             'otcCounterParty' => 'TIOMAN',
@@ -228,7 +237,7 @@ class BursamClient
                             'reportTime' => now()->format('YmdHis'),
                             'sellingTime' => now()->format('YmdHis'),
                             'unit' => 'Tonnage',
-                            'price' => $traderOrder->order->amount->convertAndFormatByDecimal(),
+                            'price' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
                         ],
                     ],
                 ]);
@@ -241,10 +250,10 @@ class BursamClient
                     'BUYER' => 'LYNK LLC',
                     'OWNER' => 'LYNK LLC',
                     'BIDNO' => '4',
-                    'TOTALVALUE' => $traderOrder->order->amount->convertAndFormatByDecimal(),
+                    'TOTALVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
                     'CURRENCY' => 'SAR',
-                    'PRICE' => $traderOrder->order->amount->convertAndFormatByDecimal(),
-                    'PRICE_MYR_EQUIVALENT' => $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
+                    'PRICE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                    'PRICE_MYR_EQUIVALENT' => (float) $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
                     'PURCHASETIMEDATE' => $traderOrder->created_at->format('H:i:s.v d M Y'),
                     'VALUEDATE' => $traderOrder->created_at->format('d M Y'),
                     'PNAME' => $traderOrder->product_code,
@@ -264,11 +273,11 @@ class BursamClient
                     'ECERTNO' => $traderOrder->reference,
                     'SELLER' => 'LYNK LLC',
                     'BUYER' => 'BSAS',
-                    'TOTALVALUE' => $traderOrder->order->amount->convertAndFormatByDecimal(),
+                    'TOTALVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
                     'CURRENCY' => 'SAR',
-                    'PRICE' => $traderOrder->order->amount->convertAndFormatByDecimal(),
-                    'PRICE_MYR_EQUIVALENT' => $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
-                    'MURABAHAVALUE' => $traderOrder->order->amount->convertAndFormatByDecimal(),
+                    'PRICE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                    'PRICE_MYR_EQUIVALENT' => (float) $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
+                    'MURABAHAVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
                     'REPORTINGTIMEDATE' => $traderOrder->created_at->format('H:i:s.v d M Y'),
                     'VALUEDATE' => $traderOrder->created_at->format('d M Y'),
                     'PNAME' => $traderOrder->product_code,
@@ -288,11 +297,11 @@ class BursamClient
                     'ECERTNO' => $traderOrder->reference,
                     'SELLER' => $traderOrder->order->customer_name,
                     'BUYER' => 'BURSA MALAYSIA ISLAMIC SERVICES',
-                    'TOTALVALUE' => $traderOrder->order->amount->convertAndFormatByDecimal(),
+                    'TOTALVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
                     'CURRENCY' => 'SAR',
-                    'PRICE' => $traderOrder->order->amount->convertAndFormatByDecimal(),
-                    'PRICE_MYR_EQUIVALENT' => $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
-                    'MURABAHAVALUE' => $traderOrder->order->amount->convertAndFormatByDecimal(),
+                    'PRICE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                    'PRICE_MYR_EQUIVALENT' => (float) $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
+                    'MURABAHAVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
                     'REPORTINGTIMEDATE' => $traderOrder->created_at->format('H:i:s.v d M Y'),
                     'VALUEDATE' => $traderOrder->created_at->format('d M Y'),
                     'PNAME' => $traderOrder->product_code,
