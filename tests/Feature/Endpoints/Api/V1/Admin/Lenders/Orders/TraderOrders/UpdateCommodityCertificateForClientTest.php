@@ -57,6 +57,7 @@ class UpdateCommodityCertificateForClientTest extends TestCase
         self::$userLender = $this->createLenderUser(self::$lender->id);
 
         self::$financingOrder = OrderScenario::inProgress()
+            ->lender(self::$lender)
             ->creator(self::$userLender)
             ->commit();
 

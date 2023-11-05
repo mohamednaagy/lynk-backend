@@ -44,7 +44,7 @@ class TransactionUtilTest extends TestCase
         self::$depositTransaction = app()->make(TransactionServiceInterface::class)
             ->deposit(
                 self::$wallet,
-                Money::parseByDecimal(-100, 'SAR'),
+                Money::parseByDecimal(-10000, Money::getDefaultCurrency()),
                 1,
                 null,
                 [
@@ -78,7 +78,7 @@ class TransactionUtilTest extends TestCase
     {
         $transaction = self::$transactionUtil->process(
             self::$wallet,
-            Money::parseByDecimal(100, 'SAR'),
+            Money::parseByDecimal(10000, Money::getDefaultCurrency()),
             TransactionReason::ManualDeposit,
             null,
             []

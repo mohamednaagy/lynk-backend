@@ -20,7 +20,7 @@ class TransactionFactory extends Factory
         return [
             'uuid' => $this->faker->unique()->uuid(),
             'reference_number' => $this->faker->unique()->uuid(),
-            'amount' => Money::parseByDecimal($this->faker->randomNumber(), 'SAR'),
+            'amount' => Money::parseByDecimal($this->faker->randomNumber(), Money::getDefaultCurrency()),
             'meta' => ['meta' => $this->faker->text(100)],
         ];
     }

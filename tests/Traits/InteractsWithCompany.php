@@ -8,6 +8,7 @@ use App\Enums\CompanyType;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\OrderFeeType;
+use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\EdaatInvoice;
@@ -43,8 +44,8 @@ trait InteractsWithCompany
 
         app()->make(TransactionServiceInterface::class)->deposit(
             $wallet,
-            \money($walletInitialAmount, Money::getDefaultCurrency()),
-            1,
+            Money::parseByDecimal($walletInitialAmount, Money::getDefaultCurrency()),
+            TransactionReason::ManualDeposit,
             1,
             [
                 'is_vat_included' => true,
@@ -81,6 +82,7 @@ trait InteractsWithCompany
     public function addOrderCostTiersToCompany($company, $tiersCount)
     {
         $orderCostTiers = $this->generateOrderCostTiers($tiersCount);
+        $company->tieredPricing()->delete();
         $company->tieredPricing()->createMany($orderCostTiers);
 
         return $company;

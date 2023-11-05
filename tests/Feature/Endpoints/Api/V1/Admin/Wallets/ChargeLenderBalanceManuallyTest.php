@@ -49,7 +49,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
     {
         parent::setUp();
 
-        self::$lender = $this->createLenderCompanyWithStandardOrderCost('2000', ['company_cr' => '12345678910']);
+        self::$lender = $this->createLenderCompanyWithStandardOrderCost(data: ['company_cr' => '12345678910']);
         self::$userLenderAdmin = $this->createLenderUser(self::$lender->id);
         self::$managerHasPermission = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(self::$managerHasPermission, perm(Area::SuperAdmin, [Subject::LenderWallet, Action::Charge]));
@@ -118,7 +118,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
         ]);
 
         $balanceAfterDeposit = self::$lender->balance(WalletType::CompanyWallet);
-        $this->assertTrue($balance->add(Money::parseByDecimal(115000, 'SAR'))->equals($balanceAfterDeposit));
+        $this->assertTrue($balance->add(Money::parseByDecimal(115000, Money::getDefaultCurrency()))->equals($balanceAfterDeposit));
     }
 
     public function test_charge_lender_balance_manually_voucher_invoice_generated_successfully()

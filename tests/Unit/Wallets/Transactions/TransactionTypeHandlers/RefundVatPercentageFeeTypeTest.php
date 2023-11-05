@@ -44,7 +44,7 @@ class RefundVatPercentageFeeTypeTest extends TestCase
         self::$depositTransaction = app()->make(TransactionServiceInterface::class)
             ->deposit(
                 self::$wallet,
-                Money::parseByDecimal(15, 'SAR'),
+                Money::parseByDecimal(1500, Money::getDefaultCurrency()),
                 TransactionReason::RefundVatPercentageFee,
                 null,
                 [
@@ -72,7 +72,7 @@ class RefundVatPercentageFeeTypeTest extends TestCase
     {
         $transaction = self::$transactionTypeHandler->process(
             self::$wallet,
-            Money::parseByDecimal(15, 'SAR'),
+            Money::parseByDecimal(1500, Money::getDefaultCurrency()),
             TransactionReason::RefundVatPercentageFee,
             null,
             []
