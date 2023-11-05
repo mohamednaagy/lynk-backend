@@ -276,6 +276,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             || $this->isInCancellationState()
             || $this->isDefaultTraderAvailable() === false
             || $this->isInPendingTradingRequestState() === false
+            || $this->hasCompletedTraderOrder()
 
         ) {
             return false;
@@ -285,6 +286,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             || $this->isTradingMode(TraderOrderMode::Automatic);
 
         return $currentUserHasPermissionToCreate;
+    }
+
+    private function hasCompletedTraderOrder(): bool
+    {
+        return $this->traderOrders()->where('status', TraderOrderStatus::Completed)->exists();
     }
 
     private function isComplete(): bool
