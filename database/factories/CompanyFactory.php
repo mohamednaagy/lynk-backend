@@ -26,6 +26,7 @@ class CompanyFactory extends Factory
             'internal_status_comment' => $this->faker->randomLetter,
             'does_order_require_approval' => $this->faker->boolean,
             'notify_borrowers_about_order_updates' => $this->faker->boolean,
+            'force_unique_reference_number' => $this->faker->boolean,
             'require_initiate_trade_request' => $this->faker->boolean,
             'notifications_email' => $this->faker->email,
             'notify_admins_about_new_orders' => $this->faker->boolean,

@@ -101,6 +101,7 @@ class LenderController extends Controller
                     'does_order_require_approval',
                     'require_initiate_trade_request',
                     'notify_borrowers_about_order_updates',
+                    'force_unique_reference_number',
                     'order_cost',
                 ])
                 ->respond();
@@ -128,6 +129,7 @@ class LenderController extends Controller
                 'notifications_email',
                 'notify_admins_about_new_orders',
                 'notify_borrowers_about_order_updates',
+                'force_unique_reference_number',
                 'require_initiate_trade_request',
                 'trading_mode',
             ])
