@@ -459,7 +459,7 @@ class BursamV1Driver implements TraderInterface
             'seller' => $response->json('SELLER'),
             'buyer' => $response->json('BUYER'),
             'total_value' => number_unformat($response->json('TOTALVALUE')),
-            'total_value_myr_equivalent' => parse_number($response->json('PRICE_MYR_EQUIVALENT')) * parse_number($response->json('PVOLUME')),
+            'total_value_myr_equivalent' => number_unformat($response->json('PRICE_MYR_EQUIVALENT')) * number_unformat($response->json('PVOLUME')),
             'currency' => $response->json('CURRENCY'),
             //            'price' => $response->json('PRICE'),
             //            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
