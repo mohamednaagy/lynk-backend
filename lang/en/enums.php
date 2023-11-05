@@ -8,6 +8,7 @@ use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MurabhaStep;
+use App\Enums\TraderOrderRefundReason;
 use App\Enums\WalletNotificationType;
 
 return [
@@ -76,5 +77,9 @@ return [
     WalletNotificationType::class => [
         WalletNotificationType::ORDER_COUNT => 'Order Available Threshold',
         WalletNotificationType::WALLET_BALANCE => 'Amount Available Threshold',
+    ],
+    TraderOrderRefundReason::class => [
+        TraderOrderRefundReason::WITHIN_24_HOUR => 'Refunded because cancelled before 24 hours of :base_tr',
+        TraderOrderRefundReason::WITHIN_72_HOUR => 'Refunded because cancelled before 72 hours of :base_tr',
     ],
 ];

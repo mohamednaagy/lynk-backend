@@ -79,6 +79,7 @@ return [
         WalletNotificationType::WALLET_BALANCE => 'الحد المتاح للرصيد',
     ],
     TraderOrderRefundReason::class => [
-        TraderOrderRefundReason::WITHIN_24_HOUR => '',
+        TraderOrderRefundReason::WITHIN_24_HOUR => 'تم استرداد المبلغ لأنه تم إلغاؤه قبل 24 ساعة من :base_tr',
+        TraderOrderRefundReason::WITHIN_72_HOUR => 'تم استرداد المبلغ لأنه تم إلغاؤه قبل 72 ساعة من :base_tr',
     ],
 ];
