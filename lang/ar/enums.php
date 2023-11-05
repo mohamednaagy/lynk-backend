@@ -8,6 +8,7 @@ use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MurabhaStep;
+use App\Enums\TraderOrderRefundReason;
 use App\Enums\WalletNotificationType;
 
 return [
@@ -76,5 +77,8 @@ return [
     WalletNotificationType::class => [
         WalletNotificationType::ORDER_COUNT => 'الحد المتاح للطلبات',
         WalletNotificationType::WALLET_BALANCE => 'الحد المتاح للرصيد',
+    ],
+    TraderOrderRefundReason::class => [
+        TraderOrderRefundReason::WITHIN_24_HOUR => '',
     ],
 ];

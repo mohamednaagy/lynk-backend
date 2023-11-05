@@ -5,10 +5,12 @@ namespace App\Transformers;
 use App\Enums\BursamProductCode;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\TraderOrderRefundReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\NullResource;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -25,6 +27,8 @@ class TraderOrderTransformer extends TransformerAbstract
         'provider',
         'version',
         'failure_reason',
+        'refunded_at',
+        'refund_reason',
         'purchasing_commodity_information',
         'products',
         'status',
@@ -66,6 +70,22 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeFailureReason(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive($traderOrder->failure_reason);
+    }
+
+    public function includeRefundedAt(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->refunded_at);
+    }
+
+    public function includeRefundReason(TraderOrder $traderOrder): Primitive|NullResource
+    {
+        if (is_null($traderOrder->refund_reason)) {
+            return $this->null();
+        }
+
+        $refundReason = TraderOrderRefundReason::fromValue($traderOrder->refund_reason);
+
+        return $this->primitive($refundReason->description);
     }
 
     public function includeIsCancellable(TraderOrder $traderOrder): Primitive

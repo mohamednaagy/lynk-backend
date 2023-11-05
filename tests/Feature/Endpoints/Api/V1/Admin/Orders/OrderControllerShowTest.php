@@ -5,6 +5,7 @@ namespace Endpoints\Api\V1\Admin\Orders;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\MurabhaStep;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\Company;
@@ -15,6 +16,8 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Tests\Support\FinancingOrders\InProgressOrder;
+use Tests\Support\FinancingOrders\TraderOrderScenario;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
@@ -78,6 +81,9 @@ class OrderControllerShowTest extends TestCase
             },
         ]);
 
+        $traderOrder = InProgressOrder::of($order)->createTraderOrder();
+        TraderOrderScenario::of($traderOrder)->moveToStep(MurabhaStep::PurchasingCommodity);
+
         $this->actingAs(self::$admin)
             ->getJson('api/v1/admin/orders/'.$order->id)
             ->assertStatus(Response::HTTP_OK)
@@ -109,6 +115,9 @@ class OrderControllerShowTest extends TestCase
                         'trader_orders.id',
                         'trader_orders.reference',
                         'trader_orders.provider',
+                        'trader_orders.failure_reason',
+                        'trader_orders.refunded_at',
+                        'trader_orders.refund_reason',
                         'trader_orders.is_cancellable',
                         'trader_orders.history',
                         'trader_orders.products',
@@ -117,6 +126,7 @@ class OrderControllerShowTest extends TestCase
                         'creator',
                         'created_at',
                         'payment_proof_url',
+                        'version',
                     ])
                     ->respond()
                     ->getData(true)
