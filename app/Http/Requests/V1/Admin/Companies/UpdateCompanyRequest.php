@@ -138,6 +138,10 @@ class UpdateCompanyRequest extends FormRequest
                 'required',
                 'boolean',
             ],
+            'force_unique_reference_number' => [
+                'required',
+                'boolean',
+            ],
             'trading_mode' => [
                 'required',
                 'string',
