@@ -10,8 +10,8 @@
     "require": {
         "php": "^8.0.2",
         "ext-curl": "*",
-        "ext-pdo": "*",
         "ext-intl": "*",
+        "ext-pdo": "*",
         "bensampo/laravel-enum": "^5.3",
         "brainmaestro/composer-git-hooks": "v3.0.0-alpha.1",
         "brick/math": "^0.10.2",
@@ -40,6 +40,7 @@
         "spatie/laravel-webhook-server": "^3.2",
         "spatie/php-structure-discoverer": "^1.0",
         "stancl/tenancy": "^3.6",
+        "stillat/numeral.php": "^2.0",
         "symfony/http-client": "^6.1",
         "symfony/mailgun-mailer": "^6.1",
         "twilio/sdk": "^6.37"
