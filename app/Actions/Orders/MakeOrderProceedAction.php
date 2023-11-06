@@ -161,7 +161,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
         $lastHistory = $traderOrder->traderHistories()->latest('id')->first();
 
-        if (is_null($lastHistory) || $this->isPreviousStepOfContractAndClientWakalaNotCompleted($traderOrder)) {
+        if ($this->isPreviousStepOfContractAndClientWakalaNotCompleted($traderOrder) || is_null($lastHistory)) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
