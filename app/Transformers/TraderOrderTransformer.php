@@ -84,10 +84,9 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeRefundReason(TraderOrder $traderOrder): Primitive|NullResource
     {
-        /** @var TraderOrder $baseTraderOrder */
-        $baseTraderOrder = $this->findBaseTraderOrder($traderOrder);
+        $baseTraderOrder = $this->findBaseTraderOrder($traderOrder) ?? $traderOrder;
 
-        if (! $baseTraderOrder || $this->shouldSkipRefundReason($traderOrder)) {
+        if ($this->shouldSkipRefundReason($traderOrder)) {
             return $this->null();
         }
 
