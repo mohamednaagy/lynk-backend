@@ -181,3 +181,10 @@ if (! function_exists('cast_phone_number_if_exist')) {
         return $data;
     }
 }
+
+if (! function_exists('number_unformat')) {
+    function number_unformat($number)
+    {
+        return app('numeral')->unformat($number);
+    }
+}

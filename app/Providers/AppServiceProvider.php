@@ -10,13 +10,13 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Stillat\Numeral\Languages\LanguageManager;
+use Stillat\Numeral\Numeral;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -31,12 +31,18 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('trader.store', function ($app) {
             return $app->make('dmcc')->driver();
         });
+
+        $this->app->singleton('numeral', function () {
+            $numeralInstance = new Numeral();
+
+            $numeralInstance->setLanguageManager(new LanguageManager);
+
+            return $numeralInstance;
+        });
     }
 
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
     public function boot(): void
     {

@@ -89,15 +89,15 @@
             </tr>
             <tr>
                 <td>Total Value (in {{$currency}}):</td>
-                <td>{{ number_format($total_value, 2) }}</td>
+                <td>{{ number_format((float) $total_value, 2) }}</td>
             </tr>
             <tr>
                 <td>Total Value (in MYR):</td>
-                <td>{{ number_format($total_value_myr_equivalent, 2) }}</td>
+                <td>{{ number_format((float) $total_value_myr_equivalent, 2) }}</td>
             </tr>
             <tr>
                 <td>Murabha Value:</td>
-                <td>{{ number_format($murabaha_value, 2) }} {{ $currency }}</td>
+                <td>{{ number_format((float) $murabaha_value, 2) }} {{ $currency }}</td>
             </tr>
 {{--            <tr>--}}
 {{--                <td>Product Price:</td>--}}
