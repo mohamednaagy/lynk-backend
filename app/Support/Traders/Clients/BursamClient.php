@@ -22,7 +22,7 @@ class BursamClient
 
     private function __construct(protected $traderOrder)
     {
-        if (((bool) $traderOrder->reference) === false) {
+        if (empty($traderOrder->reference)) {
             $this->fake = config('trader.providers.bursam.fake');
         } else {
             $this->fake = $this->isTraderOrderInitiatedByFake();

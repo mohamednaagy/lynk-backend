@@ -41,14 +41,14 @@ class FakeV1DriverTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
+        config()->set('trader.default', 'fake');
         self::$company = $this->createCompanyWithoutWallet();
         self::$lender = $this->createLenderUser(self::$company->id);
 
         self::$order = OrderScenario::inProgress()
             ->lender(self::$company)
             ->creator(self::$lender)
-            ->amount(Money::parseByDecimal(1000, 'SAR'))
+            ->amount(Money::parseByDecimal(1000, Money::getDefaultCurrency()))
             ->commit()
             ->model();
 
@@ -62,7 +62,7 @@ class FakeV1DriverTest extends TestCase
     {
         $traderOrderCount = TraderOrder::query()->count();
         $traderOrderHistoryCount = TraderHistory::query()->count();
-
+        Event::fake();
         Http::fake(function () {
             return Http::response([
                 'data' => ['ttiId' => '1'],
@@ -262,6 +262,7 @@ class FakeV1DriverTest extends TestCase
      */
     public function test_create_transfer_ownership_to_lender_document_success(): void
     {
+        Event::fake();
         Storage::fake();
         UploadedFile::fake();
         (new FakeV1Driver())->getInventoryBasket(self::$traderOrder);
@@ -332,7 +333,7 @@ class FakeV1DriverTest extends TestCase
                 [
                     'product' => 'Yogurt',
                     'quantity' => '10',
-                    'amount' => self::$traderOrder->order->amount->formatByDecimal(),
+                    'amount' => self::$traderOrder->order->amount->convertAndFormatByDecimal(),
                     'currency' => 'SAR',
                     'warehouse' => 'Warehouse',
                     'owner' => 'Owner 1',

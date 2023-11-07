@@ -11,8 +11,8 @@ use App\Enums\Trader;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
+use App\Models\TraderHistory;
 use App\Models\User;
-use App\Observers\TraderOrderObserver;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -93,8 +93,9 @@ class TraderOrderControllerStoreTest extends TestCase
     public function test_trader_order_controller_store_super_admin_can_access($trader, $mode)
     {
         Event::fake([
-            TraderOrderObserver::class,
+            'eloquent.created: '.TraderHistory::class,
         ]);
+
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$apiUrl, [
                 'trader' => $trader,
@@ -109,6 +110,10 @@ class TraderOrderControllerStoreTest extends TestCase
      */
     public function test_trader_order_controller_store_that_manager_with_permissions_can_access($trader, $mode)
     {
+        Event::fake([
+            'eloquent.created: '.TraderHistory::class,
+        ]);
+
         $this->actingAs(self::$managerHasPermissions)
             ->postJson(self::$apiUrl, [
                 'trader' => $trader,
@@ -142,12 +147,21 @@ class TraderOrderControllerStoreTest extends TestCase
      */
     public function test_trader_order_controller_store_reference_number_is_required($trader, $mode): void
     {
-        $this->actingAs(self::$superAdminUser)
+        Event::fake([
+            'eloquent.created: '.TraderHistory::class,
+        ]);
+
+        $response = $this->actingAs(self::$superAdminUser)
             ->postJson(self::$apiUrl, [
                 'trader' => $trader,
                 'mode' => $mode,
-            ])
-            ->assertJsonValidationErrorFor('reference_number');
+            ]);
+
+        if ($mode === TraderOrderMode::Manual) {
+            $response->assertJsonValidationErrorFor('reference_number');
+        } else {
+            $response->assertOK();
+        }
     }
 
     public function test_trader_order_controller_store_trader_should_be_supported(): void
@@ -221,6 +235,10 @@ class TraderOrderControllerStoreTest extends TestCase
      */
     public function test_trader_order_controller_store_successfully($trader, $mode): void
     {
+        Event::fake([
+            'eloquent.created: '.TraderHistory::class,
+        ]);
+
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$apiUrl, [
                 'trader' => $trader,

@@ -5,6 +5,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\Company;
@@ -93,6 +94,19 @@ class FinancingOrderControllerStoreTest extends TestCase
             ->postJson('api/v1/lender/orders', Arr::except(self::$orderDetails, ['national_id']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonValidationErrorFor('national_id');
+    }
+
+    public function test_store_order_with_force_unique_reference_number(): void
+    {
+        self::$company->update(['force_unique_reference_number' => true]);
+
+        $this->createOrder(self::$company->id, self::$userLenderAdmin->id, ['status' => FinancingOrderStatus::InProgress, 'reference_number' => '123']);
+
+        $this->withHeader('X-Company', self::$company->id)
+            ->actingAs(self::$userLenderAdmin)
+            ->postJson('api/v1/lender/orders', array_merge(self::$orderDetails, ['reference_number' => '123']))
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('reference_number');
     }
 
     public function test_that_auth_user_without_amount_cant_create_order(): void

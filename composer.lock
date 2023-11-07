@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "610da4763ff6a307f3794909f0ff1153",
+    "content-hash": "d998e4c9430732eba5609181290e9394",
     "packages": [
         {
             "name": "amphp/amp",
@@ -9514,6 +9514,48 @@
             "time": "2023-02-16T10:34:42+00:00"
         },
         {
+            "name": "stillat/numeral.php",
+            "version": "v2.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Stillat/numeral.php.git",
+                "reference": "f6be779c6a839d0206963bac776b97b0001c6e7b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Stillat/numeral.php/zipball/f6be779c6a839d0206963bac776b97b0001c6e7b",
+                "reference": "f6be779c6a839d0206963bac776b97b0001c6e7b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.4"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~5.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Stillat\\Numeral\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Johnathon Koster",
+                    "email": "john@stillat.com"
+                }
+            ],
+            "description": "A PHP port of adamwdraper/Numeral-js",
+            "support": {
+                "source": "https://github.com/Stillat/numeral.php/tree/v2.0.2"
+            },
+            "time": "2022-08-27T17:28:10+00:00"
+        },
+        {
             "name": "symfony/console",
             "version": "v6.2.11",
             "source": {
@@ -16672,6 +16714,7 @@
     "platform": {
         "php": "^8.0.2",
         "ext-curl": "*",
+        "ext-intl": "*",
         "ext-pdo": "*"
     },
     "platform-dev": [],

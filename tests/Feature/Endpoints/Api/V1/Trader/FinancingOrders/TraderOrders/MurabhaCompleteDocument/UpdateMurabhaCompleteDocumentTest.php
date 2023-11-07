@@ -113,12 +113,13 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
     public function test_proceed_murabha_complete_document_succeed(): void
     {
+        Event::fake();
         $this->withHeader('X-Company', self::$trader->id)
             ->actingAs(self::$traderAdminUser)
             ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertJsonStructure(['data']);
 
-        //        $this->assertTrue(self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted));
+        $this->assertTrue(self::$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted));
 
         //        $freshTraderOrderStatus = self::$traderOrder->fresh()->status;
         //        $this->assertTrue($freshTraderOrderStatus->is(TraderOrderStatus::Completed));

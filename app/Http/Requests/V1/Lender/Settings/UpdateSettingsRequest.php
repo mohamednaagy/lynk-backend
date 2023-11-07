@@ -26,6 +26,7 @@ class UpdateSettingsRequest extends FormRequest
             'does_order_require_approval' => ['required', 'boolean'],
             'require_initiate_trade_request' => ['required', 'boolean'],
             'notify_borrowers_about_order_updates' => ['required', 'boolean'],
+            'force_unique_reference_number' => ['required', 'boolean'],
         ];
     }
 }

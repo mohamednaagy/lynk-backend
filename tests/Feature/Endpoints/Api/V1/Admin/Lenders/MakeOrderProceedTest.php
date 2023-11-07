@@ -13,12 +13,14 @@ use App\Enums\Subject;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Event;
 use Tests\Support\FinancingOrders\CommittedOrder;
 use Tests\Support\FinancingOrders\InProgressOrder;
 use Tests\Support\FinancingOrders\OrderScenario;
@@ -47,8 +49,6 @@ class MakeOrderProceedTest extends TestCase
     private static string $orderProceedUrl;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -80,9 +80,6 @@ class MakeOrderProceedTest extends TestCase
             .'/trader-orders/'.self::$traderOrder->id.'/proceed';
     }
 
-    /**
-     * @return void
-     */
     public function test_that_unauth_user_cant_admin_proceed_order(): void
     {
         $this->postJson(self::$orderProceedUrl)
@@ -92,9 +89,6 @@ class MakeOrderProceedTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_proceed_order_only_super_admin_can_access(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(401, [Area::SuperAdmin], function () {
@@ -102,9 +96,6 @@ class MakeOrderProceedTest extends TestCase
         });
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_proceed_order_manager_can_access_without_permissions(): void
     {
         $this->actingAs(self::$adminManagerWithoutPermissions)
@@ -112,9 +103,6 @@ class MakeOrderProceedTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_proceed_order_on_empty_case(): void
     {
         $this->actingAs(self::$admin)
@@ -134,9 +122,6 @@ class MakeOrderProceedTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_proceed_order_client_wakala_should_be_pdf_or_jpg_png_file(): void
     {
         self::$financingOrder->requireVerification(false)->commit();
@@ -150,9 +135,6 @@ class MakeOrderProceedTest extends TestCase
             ->assertJsonValidationErrorFor('client_wakala');
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_proceed_order_on_invalid_case(): void
     {
         $this->actingAs(self::$admin)
@@ -172,14 +154,15 @@ class MakeOrderProceedTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_proceed_order_manager_can_access_with_permissions(): void
     {
+        Event::fake();
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(MurabhaStep::PurchasingCommodity);
+            ->moveToStep(
+                (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version))
+                    ->getPreviousStepOf(MurabhaStep::ContractSigned)->step
+            );
 
         $this->actingAs(self::$adminManagerWithPermissions)
             ->postJson(self::$orderProceedUrl, [
@@ -188,14 +171,15 @@ class MakeOrderProceedTest extends TestCase
             ->assertStatus(200);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_proceed_order_on_contract_signed_successfully(): void
     {
+        Event::fake();
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(MurabhaStep::PurchasingCommodity);
+            ->moveToStep(
+                (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version))
+                    ->getPreviousStepOf(MurabhaStep::ContractSigned)->step
+            );
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
@@ -209,9 +193,6 @@ class MakeOrderProceedTest extends TestCase
         $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::ClientWakala));
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_reprocessed_order_on_contract_signed_successfully(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
@@ -228,16 +209,16 @@ class MakeOrderProceedTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_proceed_order_on_client_wakala_accepted_successfully_when_verification_is_not_required(): void
     {
         self::$financingOrder->requireVerification(false)->commit();
 
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(MurabhaStep::ContractSigned);
+            ->moveToStep(
+                (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version))
+                    ->getPreviousStepOf(MurabhaStep::ContractSigned)->step
+            );
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
@@ -252,16 +233,16 @@ class MakeOrderProceedTest extends TestCase
         $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::SignedClientWakala));
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_processed_order_on_client_wakala_accepted_successfully(): void
     {
         self::$financingOrder->requireVerification(true)->commit();
 
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(MurabhaStep::ContractSigned);
+            ->moveToStep(
+                (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version))
+                    ->getPreviousStepOf(MurabhaStep::ContractSigned)->step
+            );
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
@@ -275,16 +256,16 @@ class MakeOrderProceedTest extends TestCase
         $this->assertFalse(self::$traderOrder->hasMedia(TraderOrderMediaCollection::SignedClientWakala));
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_reproceed_order_on_client_wakala_accepted_successfully_when_verification_is_required(): void
     {
         self::$financingOrder->requireVerification(true)->commit();
 
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
-            ->moveToStep(MurabhaStep::ClientWakala);
+            ->moveToStep(
+                (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version))
+                    ->getPreviousStepOf(MurabhaStep::ContractSigned)->step
+            );
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
@@ -298,9 +279,6 @@ class MakeOrderProceedTest extends TestCase
         $this->assertFalse(self::$traderOrder->hasMedia(TraderOrderMediaCollection::SignedClientWakala));
     }
 
-    /**
-     * @return void
-     */
     public function test_make_order_proceed_on_order_status_doesnt_follow_sequence_for_contract_signed(): void
     {
         TraderOrderScenario::of(self::$traderOrder)->reset();
@@ -317,9 +295,6 @@ class MakeOrderProceedTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_make_order_proceed_on_order_status_doesnt_follow_sequence_for_client_wakala_accepted(): void
     {
         TraderOrderScenario::of(self::$traderOrder)->reset();

@@ -71,6 +71,19 @@ class FinancingOrderControllerUpdateTest extends TestCase
             ]);
     }
 
+    public function test_update_order_with_force_unique_reference_number(): void
+    {
+        self::$company->update(['force_unique_reference_number' => true]);
+
+        $this->createOrder(self::$company->id, self::$userLenderAdmin->id, ['status' => FinancingOrderStatus::InProgress, 'reference_number' => '123']);
+
+        $this->withHeader('X-Company', self::$company->id)
+            ->actingAs(self::$userLenderAdmin)
+            ->putJson('api/v1/lender/orders/'.self::$order->id, array_merge(self::$updatedOrderDetails, ['reference_number' => '123']))
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('reference_number');
+    }
+
     public function test_that_auth_user_without_national_id_cant_update_order(): void
     {
         $this->actingAs(self::$userLenderAdmin)->withHeader('X-Company', self::$company->id)

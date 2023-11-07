@@ -41,6 +41,7 @@ class CreateCompanyAction implements CreateCompany
                     'type',
                     'notify_admins_about_new_orders',
                     'notify_borrowers_about_order_updates',
+                    'force_unique_reference_number',
                     'trading_mode',
                     'require_initiate_trade_request',
                 ]

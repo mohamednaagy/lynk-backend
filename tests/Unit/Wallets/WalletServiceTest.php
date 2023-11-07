@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Support\Wallets\WalletService;
+use Cknow\Money\Money;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -32,7 +33,7 @@ class WalletServiceTest extends TestCase
 
         self::$walletInformation = [
             'name' => 'wallet name',
-            'currency' => 'SAR',
+            'currency' => Money::getDefaultCurrency(),
         ];
         self::$walletService = new WalletService();
         [self::$company, self::$wallet] = $this->createCompany(2000);

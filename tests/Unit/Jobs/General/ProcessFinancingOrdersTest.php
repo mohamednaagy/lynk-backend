@@ -33,6 +33,8 @@ class ProcessFinancingOrdersTest extends TestCase
     {
         parent::setUp();
 
+        config()->set('trader.default', 'dmcc');
+
         [self::$company] = $this->createCompany();
 
         self::$lender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);

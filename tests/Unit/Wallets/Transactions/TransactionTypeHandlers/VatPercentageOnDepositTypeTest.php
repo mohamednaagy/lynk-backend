@@ -44,7 +44,7 @@ class VatPercentageOnDepositTypeTest extends TestCase
         self::$depositTransaction = app()->make(TransactionServiceInterface::class)
             ->deposit(
                 self::$wallet,
-                Money::parseByDecimal(115000, 'SAR'),
+                Money::parseByDecimal(11500000, Money::getDefaultCurrency()),
                 TransactionReason::VatPercentageOnDeposit,
                 null,
                 [
@@ -71,7 +71,7 @@ class VatPercentageOnDepositTypeTest extends TestCase
     {
         $transaction = self::$transactionTypeHandler->process(
             self::$wallet,
-            Money::parseByDecimal(100, 'SAR'),
+            Money::parseByDecimal(10000, Money::getDefaultCurrency()),
             TransactionReason::VatPercentageOnDeposit,
             null,
             []
