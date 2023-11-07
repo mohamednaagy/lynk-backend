@@ -19,7 +19,7 @@ trait TraderOrderHelper
 
     private function shouldSkipRefundReason(TraderOrder $traderOrder): bool
     {
-        return $traderOrder->status->is(TraderOrderStatus::Cancelled) && is_null($traderOrder->refund_reason);
+        return $traderOrder->status->isNot(TraderOrderStatus::Cancelled);
     }
 
     private function getRefundReason(TraderOrder $traderOrder, ?TraderOrder $baseTraderOrder): string
@@ -27,8 +27,8 @@ trait TraderOrderHelper
         $secondsSinceCreation = $traderOrder->created_at->diffInSeconds($baseTraderOrder->created_at);
 
         return TraderOrderRefundReason::fromValue(match (true) {
-            $secondsSinceCreation > RefundOrderCost::ONE_DAY => TraderOrderRefundReason::NO_REFUNDED_AFTER_24_HOUR,
-            $secondsSinceCreation > RefundOrderCost::THREE_DAYS => TraderOrderRefundReason::NO_REFUNDED_AFTER_72_HOUR,
+            ! $traderOrder->refund_reason && $secondsSinceCreation > RefundOrderCost::ONE_DAY => TraderOrderRefundReason::NO_REFUNDED_AFTER_24_HOUR,
+            ! $traderOrder->refund_reason && $secondsSinceCreation > RefundOrderCost::THREE_DAYS => TraderOrderRefundReason::NO_REFUNDED_AFTER_72_HOUR,
             default => $traderOrder->refund_reason,
         })->description;
     }
