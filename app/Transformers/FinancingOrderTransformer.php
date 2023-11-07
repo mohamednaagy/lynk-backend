@@ -244,7 +244,7 @@ class FinancingOrderTransformer extends TransformerAbstract
     {
         return $this->collection(
             $financingOrder->traderOrders,
-            (new TraderOrderTransformer())->setArea($this->area)
+            (new TraderOrderTransformer())->setArea($this->area)->setTraderOrders($financingOrder->traderOrders)
         );
     }
 

@@ -5,10 +5,11 @@ namespace App\Transformers;
 use App\Enums\BursamProductCode;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
-use App\Enums\TraderOrderRefundReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
+use App\Support\FinancingOrders\TraderOrderHelper;
+use Illuminate\Support\Collection as LCollection;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\NullResource;
 use League\Fractal\Resource\Primitive;
@@ -16,7 +17,11 @@ use League\Fractal\TransformerAbstract;
 
 class TraderOrderTransformer extends TransformerAbstract
 {
+    use TraderOrderHelper;
+
     protected $area = null;
+
+    private ?LCollection $traderOrders = null;
 
     protected array $defaultIncludes = [];
 
@@ -79,13 +84,16 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeRefundReason(TraderOrder $traderOrder): Primitive|NullResource
     {
-        if (is_null($traderOrder->refund_reason)) {
+        /** @var TraderOrder $baseTraderOrder */
+        $baseTraderOrder = $this->findBaseTraderOrder($traderOrder);
+
+        if (! $baseTraderOrder || $this->shouldSkipRefundReason($traderOrder)) {
             return $this->null();
         }
 
-        $refundReason = TraderOrderRefundReason::fromValue($traderOrder->refund_reason);
+        $refundReason = $this->getRefundReason($traderOrder, $baseTraderOrder);
 
-        return $this->primitive($refundReason->description);
+        return $this->primitive($this->formatRefundReason($refundReason, $baseTraderOrder));
     }
 
     public function includeIsCancellable(TraderOrder $traderOrder): Primitive
@@ -151,9 +159,16 @@ class TraderOrderTransformer extends TransformerAbstract
         return $this->primitive($traderOrder->created_at?->clone()->tz('Asia/Riyadh')->toDateTimeString());
     }
 
-    public function setArea($area)
+    public function setArea($area): static
     {
         $this->area = $area;
+
+        return $this;
+    }
+
+    public function setTraderOrders(LCollection $traderOrders): static
+    {
+        $this->traderOrders = $traderOrders;
 
         return $this;
     }

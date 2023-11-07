@@ -81,5 +81,7 @@ return [
     TraderOrderRefundReason::class => [
         TraderOrderRefundReason::WITHIN_24_HOUR => 'Refunded because cancelled before 24 hours of :base_tr',
         TraderOrderRefundReason::WITHIN_72_HOUR => 'Refunded because cancelled before 72 hours of :base_tr',
+        TraderOrderRefundReason::NO_REFUNDED_AFTER_24_HOUR => 'Not refunded because cancelled after 24 hours of :base_tr',
+        TraderOrderRefundReason::NO_REFUNDED_AFTER_72_HOUR => 'Not refunded because cancelled after 72 hours of :base_tr',
     ],
 ];
