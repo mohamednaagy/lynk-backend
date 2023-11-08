@@ -8,13 +8,20 @@ use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
+use App\Support\FinancingOrders\TraderOrderHelper;
+use Illuminate\Support\Collection as IlluminateCollection;
 use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\NullResource;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
 class TraderOrderTransformer extends TransformerAbstract
 {
+    use TraderOrderHelper;
+
     protected $area = null;
+
+    private ?IlluminateCollection $currentOrderTraderOrders = null;
 
     protected array $defaultIncludes = [];
 
@@ -25,6 +32,8 @@ class TraderOrderTransformer extends TransformerAbstract
         'provider',
         'version',
         'failure_reason',
+        'refunded_at',
+        'refund_status',
         'purchasing_commodity_information',
         'products',
         'status',
@@ -66,6 +75,24 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeFailureReason(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive($traderOrder->failure_reason);
+    }
+
+    public function includeRefundedAt(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->refunded_at);
+    }
+
+    public function includeRefundStatus(TraderOrder $traderOrder): Primitive|NullResource
+    {
+        $baseTraderOrder = $this->findBaseTraderOrder($traderOrder) ?? $traderOrder;
+
+        if ($this->shouldSkipRefundStatus($traderOrder)) {
+            return $this->null();
+        }
+
+        $refundReason = $this->getRefundStatus($traderOrder, $baseTraderOrder);
+
+        return $this->primitive($this->formatRefundStatus($refundReason, $baseTraderOrder));
     }
 
     public function includeIsCancellable(TraderOrder $traderOrder): Primitive
@@ -131,9 +158,16 @@ class TraderOrderTransformer extends TransformerAbstract
         return $this->primitive($traderOrder->created_at?->clone()->tz('Asia/Riyadh')->toDateTimeString());
     }
 
-    public function setArea($area)
+    public function setArea($area): static
     {
         $this->area = $area;
+
+        return $this;
+    }
+
+    public function setCurrentOrderTraderOrders(IlluminateCollection $currentOrderTraderOrders): static
+    {
+        $this->currentOrderTraderOrders = $currentOrderTraderOrders;
 
         return $this;
     }
