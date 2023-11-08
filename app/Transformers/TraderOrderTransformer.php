@@ -9,7 +9,7 @@ use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\FinancingOrders\TraderOrderHelper;
-use Illuminate\Support\Collection as LCollection;
+use Illuminate\Support\Collection as IlluminateCollection;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\NullResource;
 use League\Fractal\Resource\Primitive;
@@ -21,7 +21,7 @@ class TraderOrderTransformer extends TransformerAbstract
 
     protected $area = null;
 
-    private ?LCollection $traderOrders = null;
+    private ?IlluminateCollection $currentOrderTraderOrders = null;
 
     protected array $defaultIncludes = [];
 
@@ -33,7 +33,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'version',
         'failure_reason',
         'refunded_at',
-        'refund_reason',
+        'refund_status',
         'purchasing_commodity_information',
         'products',
         'status',
@@ -82,17 +82,17 @@ class TraderOrderTransformer extends TransformerAbstract
         return $this->primitive($traderOrder->refunded_at);
     }
 
-    public function includeRefundReason(TraderOrder $traderOrder): Primitive|NullResource
+    public function includeRefundStatus(TraderOrder $traderOrder): Primitive|NullResource
     {
         $baseTraderOrder = $this->findBaseTraderOrder($traderOrder) ?? $traderOrder;
 
-        if ($this->shouldSkipRefundReason($traderOrder)) {
+        if ($this->shouldSkipRefundStatus($traderOrder)) {
             return $this->null();
         }
 
-        $refundReason = $this->getRefundReason($traderOrder, $baseTraderOrder);
+        $refundReason = $this->getRefundStatus($traderOrder, $baseTraderOrder);
 
-        return $this->primitive($this->formatRefundReason($refundReason, $baseTraderOrder));
+        return $this->primitive($this->formatRefundStatus($refundReason, $baseTraderOrder));
     }
 
     public function includeIsCancellable(TraderOrder $traderOrder): Primitive
@@ -165,9 +165,9 @@ class TraderOrderTransformer extends TransformerAbstract
         return $this;
     }
 
-    public function setTraderOrders(LCollection $traderOrders): static
+    public function setCurrentOrderTraderOrders(IlluminateCollection $currentOrderTraderOrders): static
     {
-        $this->traderOrders = $traderOrders;
+        $this->currentOrderTraderOrders = $currentOrderTraderOrders;
 
         return $this;
     }

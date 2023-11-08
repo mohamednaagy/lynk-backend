@@ -20,7 +20,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class TraderOrderControllerShowTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $traderCompany;
 
@@ -123,7 +123,7 @@ class TraderOrderControllerShowTest extends TestCase
                         'trader_orders.created_at',
                         'trader_orders.failure_reason',
                         'trader_orders.refunded_at',
-                        'trader_orders.refund_reason',
+                        'trader_orders.refund_status',
                         'creator',
                         'created_at',
                         'payment_proof_url',
