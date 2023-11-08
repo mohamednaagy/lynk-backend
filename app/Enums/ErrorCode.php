@@ -63,4 +63,6 @@ class ErrorCode
     public const COMPANY_NO_MATCH_ORDER_COST_AND_VALUE = 1028;
 
     public const ORDER_COST_WITHOUT_VAT_AND_WITH_VAT_INCORRECT = 1029;
+
+    public const ORDER_HAS_COMPLETED_TRADER_ORDER = 10230;
 }

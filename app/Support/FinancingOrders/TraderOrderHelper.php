@@ -12,7 +12,7 @@ trait TraderOrderHelper
 {
     private function findBaseTraderOrder(TraderOrder $traderOrder): ?TraderOrder
     {
-        return $this->currentOrderTraderOrders
+        return $this->currentOrderTraderOrders->sortByDesc('id', 'asc')
             ->where('id', '<=', $traderOrder->id)
             ->where('is_base', true)
             ->first();

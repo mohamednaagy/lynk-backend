@@ -31,6 +31,7 @@ return [
     'order_is_rejected' => 'تم رفض الطلب الرجاء التواصل مع الدعم الفني',
     'trader_not_supported' => 'هذه الشركة غير مدعومة',
     'order_is_already_completed' => 'الطلب مكتمل مسبقا',
+    'order_has_completed_trader_order' => 'الطلب رقم :order_id لدية طلب مرابحة مكتمل.',
     'order_already_has_active_trader_order' => 'هناك طلب قيد التنفيذ بالفعل',
     'commodity_market_is_unavailable' => 'سوق السلع غير متاح فى الوقت الحالي.',
     'trader_mode_not_supported' => 'لا يمكن إنشاء طلب باستخدام الوضع المعطى',
