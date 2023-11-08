@@ -12,10 +12,10 @@ trait TraderOrderHelper
 {
     private function findBaseTraderOrder(TraderOrder $traderOrder): ?TraderOrder
     {
-        return $this->currentOrderTraderOrders->sortByDesc('id', 'asc')
+        return $this->currentOrderTraderOrders
             ->where('id', '<=', $traderOrder->id)
             ->where('is_base', true)
-            ->first();
+            ->last();
     }
 
     private function shouldSkipRefundStatus(TraderOrder $traderOrder): bool
