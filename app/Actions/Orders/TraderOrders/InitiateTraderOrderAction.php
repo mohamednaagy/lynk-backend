@@ -7,6 +7,7 @@ use App\Actions\Contracts\Orders\TraderOrders\InitiateTraderOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Exceptions\CommodityMarketIsUnavailableException;
 use App\Exceptions\OrderAlreadyHasActiveTraderOrderException;
+use App\Exceptions\OrderHasCompletedTraderOrderException;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Support\Traders\Facades\Trader;
@@ -20,6 +21,9 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
             ->findOrFail($orderId);
 
         if (! $financingOrder->canCreateTraderOrder($user)) {
+            if ($financingOrder->hasCompletedTraderOrder()) {
+                throw new OrderHasCompletedTraderOrderException($orderId);
+            }
             throw new OrderAlreadyHasActiveTraderOrderException;
         }
 

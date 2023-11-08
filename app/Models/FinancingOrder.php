@@ -37,11 +37,11 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  */
 class FinancingOrder extends Model implements HasMedia, Otpifiable
 {
-    use HasFactory;
-    use InteractsWithMedia;
     use BelongsToTenant;
-    use LogsActivity;
+    use HasFactory;
     use HasScopes;
+    use InteractsWithMedia;
+    use LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -288,7 +288,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return $currentUserHasPermissionToCreate;
     }
 
-    private function hasCompletedTraderOrder(): bool
+    public function hasCompletedTraderOrder(): bool
     {
         return $this->traderOrders()->where('status', TraderOrderStatus::Completed)->exists();
     }

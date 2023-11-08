@@ -15,7 +15,7 @@ trait TraderOrderHelper
         return $this->currentOrderTraderOrders
             ->where('id', '<=', $traderOrder->id)
             ->where('is_base', true)
-            ->first();
+            ->last();
     }
 
     private function shouldSkipRefundStatus(TraderOrder $traderOrder): bool
