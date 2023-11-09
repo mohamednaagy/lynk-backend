@@ -15,9 +15,13 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessBursamOtcCertificate implements ShouldQueue, ShouldBeUnique
+class ProcessBursamOtcCertificate implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public $tries = 3;
+
+    public $backoff = 60;
 
     /**
      * Create a new job instance.
