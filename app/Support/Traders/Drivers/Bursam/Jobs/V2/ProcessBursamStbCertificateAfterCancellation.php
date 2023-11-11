@@ -21,10 +21,6 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
-    public $tries = 8;
-
-    public $backoff = 60;
-
     /**
      * Create a new job instance.
      *

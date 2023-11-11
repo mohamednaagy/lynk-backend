@@ -49,6 +49,7 @@ class TraderOrder extends Model implements HasMedia
             'version',
             'status',
             'reference',
+            'can_continue_progress',
             'updated_at',
             'created_at',
         ];
@@ -56,6 +57,7 @@ class TraderOrder extends Model implements HasMedia
 
     protected $casts = [
         'status' => TraderOrderStatus::class,
+        'can_continue_progress' => 'boolean',
     ];
 
     public function registerMediaCollections(): void

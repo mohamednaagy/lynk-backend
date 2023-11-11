@@ -58,6 +58,7 @@ class ProcessFinancingOrders implements ShouldQueue
         TraderOrder::query()
             ->withLastHistoryAction()
             ->where($this->scopeToProvidersWithVersionsClosure())
+            ->where('can_continue_progress', true)
             ->whereIn('status', [
                 TraderOrderStatus::InProgress,
             ])->chunk(10, function ($traderOrderCollection) {

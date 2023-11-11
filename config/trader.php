@@ -41,6 +41,11 @@ return [
         ],
         'bursam' => [
             'latest' => 'v2',
+            'rate_limit' => [
+                'decay_seconds' => env('BURSAM_RATE_LIMIT_DECAY_SECONDS', 1),
+                'max_attempts' => env('BURSAM_RATE_LIMIT_MAX_ATTEMPTS', 1),
+                'max_retries_before_exception' => env('BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION', 1),
+            ],
             'base_url' => env('BURSAM_BASE_URL', 'traderdcthh-erfmbxcc1323421.uselynk.com'),
             'verify_tls' => env('BURSAM_VERIFY_TLS', false),
             'member_short_name' => env('BURSAM_MEMBER_SHORT_NAME', 'LYNK'),

@@ -6,6 +6,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,12 +14,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
     /**
      * Create a new job instance.
@@ -57,11 +57,6 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
     public function middleware(): array
     {
         return [new WithoutOverlapping($this->uniqueId())];
-    }
-
-    public function retryUntil(): Carbon
-    {
-        return now()->addMinutes(30);
     }
 
     public function uniqueId(): string

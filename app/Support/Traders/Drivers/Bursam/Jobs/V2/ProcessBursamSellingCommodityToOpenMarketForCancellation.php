@@ -5,7 +5,7 @@ namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
-use Carbon\Carbon;
+use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessBursamSellingCommodityToOpenMarketForCancellation implements ShouldBeUnique, ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
     /**
      * Create a new job instance.
@@ -54,11 +54,6 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
     public function backoff()
     {
         return [120, 240, 300];
-    }
-
-    public function retryUntil(): Carbon
-    {
-        return now()->addMinutes(30);
     }
 
     public function middleware(): array
