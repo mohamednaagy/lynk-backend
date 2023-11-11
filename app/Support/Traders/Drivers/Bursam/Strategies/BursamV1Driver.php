@@ -706,7 +706,7 @@ class BursamV1Driver implements TraderInterface
 
     protected function rateLimitRequest($traderOrder, $callback, $remainingRetries = 0)
     {
-        if ($remainingRetries >= (int) config('trader.providers.bursam.rate_limit.max_retries_before_exception')) {
+        if ($remainingRetries > (int) config('trader.providers.bursam.rate_limit.max_retries_before_exception')) {
             $exception = new RateLimitExceededException('bursam_api');
 
             $exception->setContext([
