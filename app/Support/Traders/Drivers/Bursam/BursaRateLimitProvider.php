@@ -11,7 +11,7 @@ class BursaRateLimitProvider implements RateLimitProvider
 {
     protected float $requestTime;
 
-    public function __construct(protected Cache $cache, protected $ttl = 3)
+    public function __construct(protected Cache $cache, protected $ttl = 1)
     {
     }
 
@@ -42,6 +42,6 @@ class BursaRateLimitProvider implements RateLimitProvider
 
     protected function getCacheKey(RequestInterface $request): string
     {
-        return 'bursa_rate_limit_'.sha1($request->getUri()->getPath());
+        return 'bursa_rate_limit';
     }
 }
