@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use App\Support\Traders\Drivers\Bursam\BursaRateLimitProvider;
-use Concat\Http\Middleware\RateLimiter;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\ServiceProvider;
@@ -54,9 +52,6 @@ class BursamServiceProvider extends ServiceProvider
                 ->withOptions([
                     'verify' => config('trader.providers.bursam.verify_tls'),
                 ])
-                ->withMiddleware(
-                    new RateLimiter(new BursaRateLimitProvider(Cache::store()))
-                )
                 ->withToken($token)
                 ->baseUrl($baseUrl);
         });
