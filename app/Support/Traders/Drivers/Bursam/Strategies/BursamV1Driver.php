@@ -719,7 +719,7 @@ class BursamV1Driver implements TraderInterface
         }
 
         if ($remainingRetries > 0) {
-            sleep(config('trader.providers.bursam.rate_limit.decay_seconds'));
+            sleep(((int) config('trader.providers.bursam.rate_limit.decay_seconds')) + 1);
         }
 
         $executed = RateLimiter::attempt(
