@@ -15,7 +15,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessBursamSellingCommodityToOpenMarketForCancellation implements ShouldQueue, ShouldBeUnique
+class ProcessBursamSellingCommodityToOpenMarketForCancellation implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -26,14 +26,15 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
      */
     public function __construct(protected int $traderOrderId)
     {
+        $this->onQueue('bursam');
     }
 
     /**
      * Execute the job.
      *
-     * @return void
+     * @throws \Throwable
      */
-    public function handle()
+    public function handle(): void
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()

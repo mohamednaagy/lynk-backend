@@ -10,8 +10,8 @@
     "require": {
         "php": "^8.0.2",
         "ext-curl": "*",
-        "ext-pdo": "*",
         "ext-intl": "*",
+        "ext-pdo": "*",
         "bensampo/laravel-enum": "^5.3",
         "brainmaestro/composer-git-hooks": "v3.0.0-alpha.1",
         "brick/math": "^0.10.2",
@@ -28,6 +28,7 @@
         "nwidart/laravel-modules": "^9.0",
         "predis/predis": "^2.0",
         "propaganistas/laravel-phone": "^4.3",
+        "rtheunissen/guzzle-rate-limiter": "^3.0",
         "salla/zatca": "^2.0",
         "shivella/laravel-bitly": "^1.1",
         "spatie/fractalistic": "^2.9",

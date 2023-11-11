@@ -17,7 +17,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, ShouldBeUnique
+class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
@@ -32,14 +32,15 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldQueue, Shoul
      */
     public function __construct(protected int $traderOrderId, protected int $cancelReason)
     {
+        $this->onQueue('bursam');
     }
 
     /**
      * Execute the job.
      *
-     * @return void
+     * @throws \Throwable
      */
-    public function handle()
+    public function handle(): void
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
