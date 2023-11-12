@@ -64,8 +64,14 @@ class BursamV1Driver implements TraderInterface
      */
     public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
     {
-        /** @var TraderOrder $traderOrder */
-        $traderOrder = $this->getOrInitiateTraderOrder($financingOrder);
+        return $this->getOrInitiateTraderOrder($financingOrder);
+    }
+
+    /**
+     * @throws TraderException
+     */
+    public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
+    {
         $productCode = $this->getUnusedProductCode($traderOrder->provider);
         $requestBody = [
             'header' => [
@@ -81,12 +87,12 @@ class BursamV1Driver implements TraderInterface
                 'purchaseType' => 'P',
                 'clientName' => '',
                 'currency' => 'SAR',
-                'bidValue' => $financingOrder->amount->formatByDecimal(),
+                'bidValue' => $traderOrder->order->amount->formatByDecimal(),
                 'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
                 'tenor' => config('trader.providers.bursam.tenor'),
-                'otcCounterParty' => $financingOrder->customer_name,
+                'otcCounterParty' => $traderOrder->order->customer_name,
                 'otcMurabaha' => '',
-                'otcMurabahaValue' => $financingOrder->selling_price->formatByDecimal(),
+                'otcMurabahaValue' => $traderOrder->order->selling_price->formatByDecimal(),
                 'eCertNo' => '',
             ],
         ];
@@ -108,7 +114,7 @@ class BursamV1Driver implements TraderInterface
                     'version' => $this->version,
                     'provider_request_body' => $requestBody,
                     'provider_response_body' => $response->json(),
-                    'financing_order_id' => $financingOrder->id,
+                    'financing_order_id' => $traderOrder->order->id,
                 ]
             );
         }
