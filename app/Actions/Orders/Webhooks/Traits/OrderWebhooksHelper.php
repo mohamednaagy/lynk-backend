@@ -46,7 +46,7 @@ trait OrderWebhooksHelper
             ->toArray();
     }
 
-    public function getUiStepName(string $step): string
+    public function getUiStepName(?string $step): ?string
     {
         return match ($step) {
             MurabhaStep::CommoditySoldToCustomer => 'borrower_ownership_certificate',
