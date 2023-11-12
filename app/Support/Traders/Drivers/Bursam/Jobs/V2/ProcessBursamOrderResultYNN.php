@@ -72,7 +72,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
                     $this->delete();
                 } else {
                     Log::error($exception->getMessage(), $exception->getContext());
-                    throw $exception;
+                    $this->fail($exception);
                 }
             }
         });

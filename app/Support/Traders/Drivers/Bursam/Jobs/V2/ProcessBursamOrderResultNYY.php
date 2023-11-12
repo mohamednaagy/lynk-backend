@@ -20,6 +20,8 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
+    public $backoff = 10;
+
     /**
      * Create a new job instance.
      *
