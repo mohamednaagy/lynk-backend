@@ -6,6 +6,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -16,9 +17,9 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessBursamSellingCommodityToOpenMarket implements ShouldQueue, ShouldBeUnique
+class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
     /**
      * Create a new job instance.
@@ -27,14 +28,15 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldQueue, ShouldBe
      */
     public function __construct(protected int $traderOrderId)
     {
+        $this->onQueue('bursam');
     }
 
     /**
      * Execute the job.
      *
-     * @return void
+     * @throws \Throwable
      */
-    public function handle()
+    public function handle(): void
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()

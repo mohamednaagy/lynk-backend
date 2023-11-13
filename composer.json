@@ -10,8 +10,8 @@
     "require": {
         "php": "^8.0.2",
         "ext-curl": "*",
-        "ext-pdo": "*",
         "ext-intl": "*",
+        "ext-pdo": "*",
         "bensampo/laravel-enum": "^5.3",
         "brainmaestro/composer-git-hooks": "v3.0.0-alpha.1",
         "brick/math": "^0.10.2",

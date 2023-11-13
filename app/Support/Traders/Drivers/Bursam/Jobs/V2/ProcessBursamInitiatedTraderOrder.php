@@ -2,11 +2,10 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
-use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
-use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -15,10 +14,11 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
-class ProcessBursamTransferOwnershipToCustomer implements ShouldQueue, ShouldBeUnique
+class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
     /**
      * Create a new job instance.
@@ -27,31 +27,50 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldQueue, ShouldBeU
      */
     public function __construct(protected int $traderOrderId)
     {
+        $this->onQueue('bursam');
     }
 
     /**
      * Execute the job.
      *
-     * @return void
+     * @throws \Throwable
      */
-    public function handle()
+    public function handle(): void
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::InProgress)
+                ->where('status', TraderOrderStatus::Initiated)
                 ->lockForUpdate()
                 ->find($this->traderOrderId);
 
-            if (
-                is_null($traderOrder)
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)
-            ) {
+            if (is_null($traderOrder)) {
                 return;
             }
 
-            Trader::driver('bursam', $traderOrder->version)
-                ->createSellingCommodityToCustomerDocument($traderOrder);
+            Trader::driver('bursam', $traderOrder->version)->processInitiatedTraderOrder($traderOrder);
         });
+    }
+
+    public function failed($exception)
+    {
+        $traderOrder = null;
+
+        $traderOrder = TraderOrder::query()->find($this->traderOrderId);
+
+        if (! $traderOrder) {
+            return;
+        }
+
+        $traderOrder->update([
+            'status' => TraderOrderStatus::Cancelled,
+        ]);
+
+        Log::error(
+            method_exists('getMessage', $exception)
+                ? $exception->getMesage()
+                : 'Cannot proceed to buy product',
+            [$exception]
+        );
     }
 
     public function middleware(): array

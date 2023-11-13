@@ -6,6 +6,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -16,13 +17,9 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessBursamStbCertificate implements ShouldQueue, ShouldBeUnique
+class ProcessBursamStbCertificate implements ShouldBeUnique, ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
-
-    public $tries = 3;
-
-    public $backoff = 60;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait, StopsTraderOrderOnJobFailure;
 
     /**
      * Create a new job instance.
@@ -31,14 +28,15 @@ class ProcessBursamStbCertificate implements ShouldQueue, ShouldBeUnique
      */
     public function __construct(protected int $traderOrderId)
     {
+        $this->onQueue('bursam');
     }
 
     /**
      * Execute the job.
      *
-     * @return void
+     * @throws \Throwable
      */
-    public function handle()
+    public function handle(): void
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()

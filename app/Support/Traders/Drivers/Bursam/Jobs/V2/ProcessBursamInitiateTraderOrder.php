@@ -7,13 +7,14 @@ use App\Exceptions\OrderAlreadyHasActiveTraderOrderException;
 use App\Models\FinancingOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessBursamInitiateTraderOrder implements ShouldQueue
+class ProcessBursamInitiateTraderOrder implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -24,6 +25,7 @@ class ProcessBursamInitiateTraderOrder implements ShouldQueue
      */
     public function __construct(protected FinancingOrder $financingOrder)
     {
+        $this->onQueue('bursam');
     }
 
     /**
@@ -42,5 +44,10 @@ class ProcessBursamInitiateTraderOrder implements ShouldQueue
 
             return Command::SUCCESS;
         });
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->financingOrder->id;
     }
 }
