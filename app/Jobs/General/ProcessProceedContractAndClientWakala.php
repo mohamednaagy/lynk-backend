@@ -74,7 +74,7 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
             if ($this->job) {
                 $this->release(5);
             } else {
-                static::dispatch($this->traderOrderId);
+                static::dispatch($this->traderOrderId)->delay(5);
             }
         });
     }
