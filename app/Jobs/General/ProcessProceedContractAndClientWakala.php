@@ -23,8 +23,6 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
-    public $backoff = 30;
-
     /**
      * Create a new job instance.
      *
@@ -67,10 +65,16 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
             }
 
             if (
-                ! $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned)
-                || ! $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala)
+                $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned)
+                && $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala)
             ) {
+                return;
+            }
+
+            if ($this->job) {
                 $this->release(5);
+            } else {
+                static::dispatch($this->traderOrderId);
             }
         });
     }
