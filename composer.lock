@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0fd2fcae86b9f0a7c97912c369139193",
+    "content-hash": "aa6676c9d200106e4d8c319eb58235ff",
     "packages": [
         {
             "name": "amphp/amp",
@@ -8128,62 +8128,6 @@
                 "source": "https://github.com/robrichards/xmlseclibs/tree/3.1.1"
             },
             "time": "2020-09-05T13:00:25+00:00"
-        },
-        {
-            "name": "rtheunissen/guzzle-rate-limiter",
-            "version": "v3.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/rtheunissen/guzzle-rate-limiter.git",
-                "reference": "40f376850c9f93962e80b1fc76ef622eab2da9d9"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/rtheunissen/guzzle-rate-limiter/zipball/40f376850c9f93962e80b1fc76ef622eab2da9d9",
-                "reference": "40f376850c9f93962e80b1fc76ef622eab2da9d9",
-                "shasum": ""
-            },
-            "require": {
-                "guzzlehttp/guzzle": "~6.0|^7.0",
-                "guzzlehttp/promises": "^2.0",
-                "guzzlehttp/psr7": "^2.5",
-                "php": ">=7.2",
-                "psr/log": "^1.0|^2.0|^3.0"
-            },
-            "require-dev": {
-                "mockery/mockery": "^1.6",
-                "phpunit/phpunit": "^9.3"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Concat\\Http\\Middleware\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Rudi Theunissen",
-                    "email": "rudolf.theunissen@gmail.com"
-                }
-            ],
-            "description": "Guzzle 6 middleware used to delay requests dynamically",
-            "keywords": [
-                "Guzzle",
-                "Rate",
-                "http",
-                "middleware",
-                "psr7",
-                "throttle"
-            ],
-            "support": {
-                "issues": "https://github.com/rtheunissen/guzzle-rate-limiter/issues",
-                "source": "https://github.com/rtheunissen/guzzle-rate-limiter/tree/v3.0.0"
-            },
-            "time": "2023-07-19T21:39:40+00:00"
         },
         {
             "name": "salla/zatca",

@@ -28,7 +28,6 @@
         "nwidart/laravel-modules": "^9.0",
         "predis/predis": "^2.0",
         "propaganistas/laravel-phone": "^4.3",
-        "rtheunissen/guzzle-rate-limiter": "^3.0",
         "salla/zatca": "^2.0",
         "shivella/laravel-bitly": "^1.1",
         "spatie/fractalistic": "^2.9",
