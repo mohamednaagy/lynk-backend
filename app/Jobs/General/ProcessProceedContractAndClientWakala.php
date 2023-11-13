@@ -42,6 +42,7 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
      */
     public function handle(MakeOrderProceed $makeOrderProceed): void
     {
+        dd($this->job);
         \DB::transaction(function () use ($makeOrderProceed) {
             /** @var TraderOrder $traderOrder */
             $traderOrder = TraderOrder::query()->withLastHistoryAction()->lockForUpdate()->findOrFail($this->traderOrderId);
@@ -70,11 +71,10 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
             ) {
                 return;
             }
-
-            if ($this->job) {
-                $this->release(5);
+            if ($this->job && $this->job->getConnectionName() === 'sync') {
+                static::dispatch($this->traderOrderId)->delay(now()->addSeconds(5));
             } else {
-                static::dispatch($this->traderOrderId)->delay(5);
+                $this->release(5);
             }
         });
     }
