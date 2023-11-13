@@ -67,4 +67,11 @@ class WalletReachedThreshold extends Notification implements ShouldQueue
             //
         ];
     }
+
+    public function viaQueues()
+    {
+        return [
+            'mail' => 'notifications',
+        ];
+    }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Support\Traders\Traits;
 
-use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use Illuminate\Support\Facades\Log;
 
@@ -15,7 +14,9 @@ trait StopsTraderOrderOnJobFailure
         if (method_exists($this, 'getTraderOrder')) {
             $traderOrder = $this->getTraderOrder();
         } elseif (property_exists($this, 'traderOrderId')) {
-            $traderOrder = TraderOrder::query()->find($this->traderOrderId);
+            $traderOrder = TraderOrder::query()
+                ->lockForUpdate()
+                ->find($this->traderOrderId);
         }
 
         if (! $traderOrder) {
@@ -23,9 +24,11 @@ trait StopsTraderOrderOnJobFailure
         }
 
         $traderOrder->update([
-            'status' => TraderOrderStatus::FailureToProgress,
+            'can_continue_progress' => false,
         ]);
 
-        Log::error($exception->getMessage());
+        if (method_exists($exception, 'getMessage')) {
+            Log::error($exception->getMessage());
+        }
     }
 }

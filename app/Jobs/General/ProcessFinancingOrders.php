@@ -7,6 +7,7 @@ use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -57,7 +58,19 @@ class ProcessFinancingOrders implements ShouldQueue
 
         TraderOrder::query()
             ->withLastHistoryAction()
+            ->where('provider', 'bursam')
+            ->where('version', 'v2')
+            ->where('status', TraderOrderStatus::Initiated)
+            ->chunk(20, function ($traderOrderCollection) {
+                $traderOrderCollection->each(function (TraderOrder $traderOrder) {
+                    ProcessBursamInitiatedTraderOrder::dispatch($traderOrder->id);
+                });
+            });
+
+        TraderOrder::query()
+            ->withLastHistoryAction()
             ->where($this->scopeToProvidersWithVersionsClosure())
+            ->where('can_continue_progress', true)
             ->whereIn('status', [
                 TraderOrderStatus::InProgress,
             ])->chunk(10, function ($traderOrderCollection) {

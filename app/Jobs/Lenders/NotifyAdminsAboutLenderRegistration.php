@@ -26,13 +26,11 @@ class NotifyAdminsAboutLenderRegistration implements ShouldQueue
      */
     public function __construct(private Company $company)
     {
-        //
+        $this->onQueue('notifications');
     }
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {

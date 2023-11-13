@@ -32,7 +32,7 @@ use UnexpectedValueException;
  */
 class TraderOrder extends Model implements HasMedia
 {
-    use HasFactory, VirtualColumn, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, VirtualColumn;
 
     protected $fillable = [];
 
@@ -50,6 +50,7 @@ class TraderOrder extends Model implements HasMedia
             'status',
             'is_base',
             'reference',
+            'can_continue_progress',
             'updated_at',
             'created_at',
         ];
@@ -57,6 +58,7 @@ class TraderOrder extends Model implements HasMedia
 
     protected $casts = [
         'status' => TraderOrderStatus::class,
+        'can_continue_progress' => 'boolean',
     ];
 
     public function registerMediaCollections(): void

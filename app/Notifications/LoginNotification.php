@@ -86,4 +86,11 @@ class LoginNotification extends Notification implements ShouldQueue
     {
         return NotificationType::NewSignIn;
     }
+
+    public function viaQueues()
+    {
+        return [
+            'mail' => 'notifications',
+        ];
+    }
 }

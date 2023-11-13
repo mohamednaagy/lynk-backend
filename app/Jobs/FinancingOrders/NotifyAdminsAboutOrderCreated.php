@@ -32,6 +32,7 @@ class NotifyAdminsAboutOrderCreated implements ShouldQueue
      */
     public function __construct(private FinancingOrder $financingOrder, private User $user)
     {
+        $this->onQueue('notifications');
         $this->getSettingsClassInstance = app(GetSettingsClassInstance::class);
     }
 

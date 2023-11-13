@@ -25,6 +25,7 @@ class NotifyAdminsIfTraderOrderHasStopped implements ShouldQueue
      */
     public function __construct(protected TraderOrder $traderOrder, protected int $historyActionBeforeDispatching)
     {
+        $this->onQueue('notifications');
     }
 
     /**

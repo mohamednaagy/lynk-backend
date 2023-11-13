@@ -22,14 +22,13 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
      */
     public function __construct()
     {
+        $this->onQueue('bursam');
     }
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         FinancingOrder::query()
             ->whereHas('activeTraderOrder', function ($query) {
