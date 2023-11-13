@@ -70,7 +70,7 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
                 ! $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned)
                 || ! $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala)
             ) {
-                self::dispatch($this->traderOrderId)->delay(now()->addSeconds(5));
+                $this->release(5);
             }
         });
     }
