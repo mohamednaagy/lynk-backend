@@ -28,6 +28,7 @@ class NotifyAdminAndLenderAboutOrderCancelled implements ShouldQueue
      */
     public function __construct(private FinancingOrder $financingOrder, private User $canceller)
     {
+        $this->onQueue('notifications');
     }
 
     /**

@@ -5,11 +5,12 @@ namespace App\Notifications\FinancingOrders;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Config;
 
-class OrderCreated extends Notification
+class OrderCreated extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -68,6 +69,13 @@ class OrderCreated extends Notification
             'selling_price' => $this->financingOrder->selling_price,
             'user_id' => $this->user->id,
             'user_name' => $this->user->fullName,
+        ];
+    }
+
+    public function viaQueues()
+    {
+        return [
+            'mail' => 'notifications',
         ];
     }
 }

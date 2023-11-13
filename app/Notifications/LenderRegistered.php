@@ -25,7 +25,6 @@ class LenderRegistered extends Notification implements ShouldQueue
      * Get the notification's delivery channels.
      *
      * @param  mixed  $notifiable
-     * @return array
      */
     public function via($notifiable): array
     {
@@ -36,7 +35,6 @@ class LenderRegistered extends Notification implements ShouldQueue
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return MailMessage
      */
     public function toMail($notifiable): MailMessage
     {
@@ -56,7 +54,6 @@ class LenderRegistered extends Notification implements ShouldQueue
      * Get the array representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return array
      */
     public function toArray($notifiable): array
     {
@@ -65,6 +62,13 @@ class LenderRegistered extends Notification implements ShouldQueue
             'company_name' => $this->company->name,
             'registered_at' => $this->company->created_at,
             'company_status' => $this->company->status,
+        ];
+    }
+
+    public function viaQueues()
+    {
+        return [
+            'mail' => 'notifications',
         ];
     }
 }
