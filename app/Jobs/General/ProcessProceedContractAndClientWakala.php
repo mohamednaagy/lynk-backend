@@ -42,7 +42,6 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
      */
     public function handle(MakeOrderProceed $makeOrderProceed): void
     {
-        dd($this->job);
         \DB::transaction(function () use ($makeOrderProceed) {
             /** @var TraderOrder $traderOrder */
             $traderOrder = TraderOrder::query()->withLastHistoryAction()->lockForUpdate()->findOrFail($this->traderOrderId);
