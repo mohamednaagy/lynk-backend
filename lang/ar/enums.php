@@ -8,6 +8,8 @@ use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MurabhaStep;
+use App\Enums\TraderOrderNoRefundReason;
+use App\Enums\TraderOrderRefundReason;
 use App\Enums\WalletNotificationType;
 
 return [
@@ -76,5 +78,13 @@ return [
     WalletNotificationType::class => [
         WalletNotificationType::ORDER_COUNT => 'الحد المتاح للطلبات',
         WalletNotificationType::WALLET_BALANCE => 'الحد المتاح للرصيد',
+    ],
+    TraderOrderRefundReason::class => [
+        TraderOrderRefundReason::WITHIN_24_HOUR => 'تم استرداد المبلغ لأنه تم إلغاؤه قبل 24 ساعة من :base_tr',
+        TraderOrderRefundReason::WITHIN_72_HOUR => 'تم استرداد المبلغ لأنه تم إلغاؤه قبل 72 ساعة من :base_tr',
+    ],
+    TraderOrderNoRefundReason::class => [
+        TraderOrderNoRefundReason::AFTER_24_HOUR => 'لم يتم استرداد المبلغ لأنه تم إلغاؤه بعد 24 ساعة من :base_tr',
+        TraderOrderNoRefundReason::AFTER_72_HOUR => 'لم يتم استرداد المبلغ لأنه تم إلغاؤه بعد 72 ساعة من :base_tr',
     ],
 ];

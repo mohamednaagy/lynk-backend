@@ -15,7 +15,7 @@ use Tests\Traits\InteractsWithCompany;
 
 class TransactionServiceTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany;
+    use InteractsWithCompany, RefreshDatabase;
 
     private static TransactionService $transactionService;
 
@@ -35,46 +35,46 @@ class TransactionServiceTest extends TestCase
 
         self::$transactionService = app()->make(TransactionServiceInterface::class);
         [self::$company, self::$wallet] = $this->createCompany(2000);
-        [self::$secondCompany, self::$secondWallet] = $this->createCompany(2000, ['company_cr' => '12345678911']);
+        [self::$secondCompany, self::$secondWallet] = $this->createCompany(200000, ['company_cr' => '12345678911']);
     }
 
     public function test_transaction_service_withdraw_method_return_transaction_instance()
     {
-        $transaction = self::$transactionService->withdraw(self::$wallet, Money::parseByDecimal(100, 'SAR'), 1);
+        $transaction = self::$transactionService->withdraw(self::$wallet, Money::parseByDecimal(100, Money::getDefaultCurrency()), 1);
         $this->assertInstanceOf(Transaction::class, $transaction);
     }
 
     public function test_transaction_service_withdraw_method_always_convert_money_to_negative()
     {
-        $transaction = self::$transactionService->withdraw(self::$wallet, Money::parseByDecimal(100, 'SAR'), 1);
+        $transaction = self::$transactionService->withdraw(self::$wallet, Money::parseByDecimal(100, Money::getDefaultCurrency()), 1);
 
-        $this->assertEquals(-10000, $transaction->amount->getAmount());
+        $this->assertEquals(-1000000, $transaction->amount->getAmount());
     }
 
     public function test_transaction_service_deposit_method_return_transaction_instance()
     {
-        $transaction = self::$transactionService->deposit(self::$wallet, Money::parseByDecimal(-100, 'SAR'), 1);
+        $transaction = self::$transactionService->deposit(self::$wallet, Money::parseByDecimal(-100, Money::getDefaultCurrency()), 1);
 
         $this->assertInstanceOf(Transaction::class, $transaction);
     }
 
     public function test_transaction_service_deposit_method_always_convert_money_to_positive()
     {
-        $transaction = self::$transactionService->deposit(self::$wallet, Money::parseByDecimal(-100, 'SAR'), 1);
+        $transaction = self::$transactionService->deposit(self::$wallet, Money::parseByDecimal(-100, Money::getDefaultCurrency()), 1);
 
-        $this->assertEquals(10000, $transaction->amount->getAmount());
+        $this->assertEquals(1000000, $transaction->amount->getAmount());
     }
 
     public function test_transaction_service_transfer_method_return_transfer_instance()
     {
-        $transfer = self::$transactionService->transfer(self::$wallet, self::$secondWallet, Money::parseByDecimal(-100, 'SAR'), 1);
+        $transfer = self::$transactionService->transfer(self::$wallet, self::$secondWallet, Money::parseByDecimal(-100, Money::getDefaultCurrency()), 1);
 
         $this->assertInstanceOf(Transfer::class, $transfer);
     }
 
     public function test_transaction_service_transfer_money_transferred_successfully()
     {
-        $amount = Money::parseByDecimal(100, 'SAR');
+        $amount = Money::parseByDecimal(100, Money::getDefaultCurrency());
         $fromWallet = self::$wallet;
         $toWallet = self::$secondWallet;
         $toWalletBalanceBeforeTransfer = self::$secondWallet->balance;

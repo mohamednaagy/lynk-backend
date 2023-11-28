@@ -23,7 +23,7 @@ use Tests\Traits\InteractsWithLender;
 
 class ProcessFinancingOrdersTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use InteractsWithLender, RefreshDatabase;
 
     public static Company $company;
 
@@ -32,6 +32,8 @@ class ProcessFinancingOrdersTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        config()->set('trader.default', 'dmcc');
 
         [self::$company] = $this->createCompany();
 

@@ -38,5 +38,6 @@
         <env name="SMS_DEFAULT_DRIVER" value="fake"/>
         <env name="HOST_WHITELIST" value="bimventures.com,Lynk.com,localhost"/>
         <env name="OTPIFY_NATIONAL_ID_DEFAULT_DRIVER" value="fake_absher"/>
+        <env name="BURSAM_FAKE" value="false"/>
     </php>
 </phpunit>

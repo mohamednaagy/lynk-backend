@@ -19,7 +19,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class LenderControllerShowTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $lender;
 
@@ -76,6 +76,7 @@ class LenderControllerShowTest extends TestCase
                         'company_cr',
                         'does_order_require_approval',
                         'notify_borrowers_about_order_updates',
+                        'force_unique_reference_number',
                         'require_initiate_trade_request',
                         'order_cost_tiers',
                         'notifications_email',
@@ -103,6 +104,7 @@ class LenderControllerShowTest extends TestCase
                         'company_cr',
                         'does_order_require_approval',
                         'notify_borrowers_about_order_updates',
+                        'force_unique_reference_number',
                         'require_initiate_trade_request',
                         'order_cost_tiers',
                         'notifications_email',

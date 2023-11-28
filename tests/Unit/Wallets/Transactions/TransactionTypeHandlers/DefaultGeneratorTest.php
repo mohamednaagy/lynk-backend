@@ -17,7 +17,7 @@ use Tests\Traits\InteractsWithCompany;
 
 class DefaultGeneratorTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany;
+    use InteractsWithCompany, RefreshDatabase;
 
     private static TransactionTypeHandlerInterface $transactionTypeHandler;
 
@@ -41,7 +41,7 @@ class DefaultGeneratorTest extends TestCase
 
         self::$transactionTypeHandler = new DefaultGenerator();
         [self::$company, self::$wallet] = $this->createCompany(2000);
-        self::$depositTransaction = app()->make(TransactionServiceInterface::class)->deposit(self::$wallet, Money::parseByDecimal(-100, 'SAR'), 1);
+        self::$depositTransaction = app()->make(TransactionServiceInterface::class)->deposit(self::$wallet, Money::parseByDecimal(-10000, Money::getDefaultCurrency()), 1);
     }
 
     public function test_default_generator_handler_implements_transaction_type_handler_interface_instance()
@@ -61,7 +61,7 @@ class DefaultGeneratorTest extends TestCase
     {
         $transaction = self::$transactionTypeHandler->process(
             self::$wallet,
-            Money::parseByDecimal(100, 'SAR'),
+            Money::parseByDecimal(10000, Money::getDefaultCurrency()),
             TransactionReason::ManualDeposit,
             null,
             []

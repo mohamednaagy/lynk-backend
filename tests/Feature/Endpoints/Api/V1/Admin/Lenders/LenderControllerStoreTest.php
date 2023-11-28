@@ -26,7 +26,7 @@ use Tests\Traits\InteractsWithUser;
 
 class LenderControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $lender;
 
@@ -75,6 +75,7 @@ class LenderControllerStoreTest extends TestCase
             ],
             'does_order_require_approval' => '1',
             'notify_borrowers_about_order_updates' => '1',
+            'force_unique_reference_number' => '1',
             'require_initiate_trade_request' => '1',
             'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::On,
             'webhook_secret_key' => Str::random(Config::get('webhook-server.secret_key_length', 40)),
@@ -106,10 +107,11 @@ class LenderControllerStoreTest extends TestCase
                     'unique_name',
                     'company_cr',
                     'does_order_require_approval',
+                    'force_unique_reference_number',
                     'require_initiate_trade_request',
                     'notify_borrowers_about_order_updates',
                 ],
-            ]);
+            ])->dd();
 
         $lender = Company::query()
             ->where('unique_name', 'companyUniqueName')
@@ -118,10 +120,10 @@ class LenderControllerStoreTest extends TestCase
             ->default_company_status_created_by_operation;
         $hasWallet = $lender->getWallets(WalletType::CompanyWallet)->count() > 0;
 
-        $orderCost = $lender->tieredPricing()->first()?->order_cost_without_vat->getAmount();
+        $orderCost = $lender->tieredPricing()->first()?->order_cost_without_vat->formatByDecimal();
 
         $hasOrderCost = $orderCost > 0;
-        $isOrderCostCorrect = ($orderCost === (string) (self::$standardLenderDetails['order_cost_tiers'][0]['order_cost_without_vat'] * 100));
+        $isOrderCostCorrect = number_format($orderCost, 2) === number_format(self::$standardLenderDetails['order_cost_tiers'][0]['order_cost_without_vat'], 2);
 
         $this->assertEquals($defaultStatus, $lender->status->value);
         $this->assertTrue($hasWallet);
@@ -144,6 +146,9 @@ class LenderControllerStoreTest extends TestCase
                     'unique_name',
                     'company_cr',
                     'does_order_require_approval',
+                    'force_unique_reference_number',
+                    'require_initiate_trade_request',
+                    'notify_borrowers_about_order_updates',
                 ],
             ]);
 
@@ -154,10 +159,10 @@ class LenderControllerStoreTest extends TestCase
         $defaultStatus = $this->app->make(GetSettingsClassInstance::class)->handle(Area::Lender)
             ->default_company_status_created_by_operation;
         $hasWallet = $lender->getWallets(WalletType::CompanyWallet)->count() > 0;
-        $orderCost = $lender->tieredPricing()->first()?->order_cost_without_vat->getAmount();
+        $orderCost = $lender->tieredPricing()->first()?->order_cost_without_vat->formatByDecimal();
 
         $hasOrderCost = $orderCost > 0;
-        $isOrderCostCorrect = ($orderCost === (string) (self::$standardLenderDetails['order_cost_tiers'][0]['order_cost_without_vat'] * 100));
+        $isOrderCostCorrect = number_format($orderCost, 2) === number_format(self::$standardLenderDetails['order_cost_tiers'][0]['order_cost_without_vat'], 2);
 
         $this->assertEquals($defaultStatus, $lender->status->value);
         $this->assertTrue($hasWallet);

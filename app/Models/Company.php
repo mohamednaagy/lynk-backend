@@ -19,7 +19,7 @@ use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
 class Company extends BaseTenant
 {
-    use HasFactory, HasScopedValidationRules, SoftDeletes, HasWallet, LogsActivity, HasScopes;
+    use HasFactory, HasScopedValidationRules, HasScopes, HasWallet, LogsActivity, SoftDeletes;
 
     protected $table = 'companies';
 
@@ -31,6 +31,7 @@ class Company extends BaseTenant
         'status' => CompanyStatus::class,
         'does_order_require_approval' => 'boolean',
         'notify_borrowers_about_order_updates' => 'boolean',
+        'force_unique_reference_number' => 'boolean',
         'require_initiate_trade_request' => 'boolean',
         'webhook_secret_key' => 'encrypted',
         'type' => CompanyType::class,
@@ -52,6 +53,7 @@ class Company extends BaseTenant
             'does_order_require_approval',
             'require_initiate_trade_request',
             'notify_borrowers_about_order_updates',
+            'force_unique_reference_number',
             'webhook_secret_key',
             'created_at',
             'updated_at',

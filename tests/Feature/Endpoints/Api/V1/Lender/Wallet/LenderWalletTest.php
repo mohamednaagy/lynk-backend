@@ -16,7 +16,7 @@ use Tests\Traits\InteractsWithUser;
 
 class LenderWalletTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
@@ -59,8 +59,8 @@ class LenderWalletTest extends TestCase
     {
         parent::setUp();
 
-        self::$company = $this->createLenderCompanyWithStandardOrderCost('11500000', ['company_cr' => '12345678910', 'order_cost' => 200]);
-        [self::$pendingCompany, self::$pendingWallet] = $this->createCompany('115000', ['company_cr' => '12345678911', 'status' => CompanyStatus::Pending()->value]);
+        self::$company = $this->createLenderCompanyWithStandardOrderCost('1150000000', ['company_cr' => '12345678910', 'order_cost' => 200]);
+        [self::$pendingCompany, self::$pendingWallet] = $this->createCompany('11500000', ['company_cr' => '12345678911', 'status' => CompanyStatus::Pending()->value]);
         [self::$underReviewCompany, self::$underReviewWallet] = $this->createCompany('2000', ['company_cr' => '12345678912', 'status' => CompanyStatus::UnderReview()->value]);
         [self::$rejectedCompany, self::$rejectedWallet] = $this->createCompany('2000', ['company_cr' => '12345678913', 'status' => CompanyStatus::Rejected()->value]);
         [self::$approvedCompany, self::$approvedWallet] = $this->createCompany('2000', ['company_cr' => '12345678914', 'status' => CompanyStatus::Approved()->value]);
@@ -96,7 +96,9 @@ class LenderWalletTest extends TestCase
             ->assertExactJson([
                 'data' => [
                     'available_orders' => '1000',
-                    'balance' => '115,000.00',
+                    'available_orders_formatted' => '1,000',
+                    'balance' => '115000.00',
+                    'balance_formatted' => '115,000.00',
                 ],
             ]);
     }
@@ -110,7 +112,9 @@ class LenderWalletTest extends TestCase
             ->assertExactJson([
                 'data' => [
                     'available_orders' => '1000',
-                    'balance' => '115,000.00',
+                    'available_orders_formatted' => '1,000',
+                    'balance' => '115000.00',
+                    'balance_formatted' => '115,000.00',
                 ],
             ]);
     }
@@ -124,7 +128,9 @@ class LenderWalletTest extends TestCase
             ->assertExactJson([
                 'data' => [
                     'available_orders' => '1000',
-                    'balance' => '115,000.00',
+                    'available_orders_formatted' => '1,000',
+                    'balance' => '115000.00',
+                    'balance_formatted' => '115,000.00',
                 ],
             ]);
     }
@@ -138,7 +144,9 @@ class LenderWalletTest extends TestCase
             ->assertExactJson([
                 'data' => [
                     'available_orders' => '1000',
-                    'balance' => '115,000.00',
+                    'available_orders_formatted' => '1,000',
+                    'balance' => '115000.00',
+                    'balance_formatted' => '115,000.00',
                 ],
             ]);
     }

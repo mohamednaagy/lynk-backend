@@ -17,7 +17,7 @@ use Tests\Traits\InteractsWithCompany;
 
 class VatPercentageFeeTypeTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany;
+    use InteractsWithCompany, RefreshDatabase;
 
     private static TransactionTypeHandlerInterface $transactionTypeHandler;
 
@@ -44,7 +44,7 @@ class VatPercentageFeeTypeTest extends TestCase
         self::$depositTransaction = app()->make(TransactionServiceInterface::class)
             ->deposit(
                 self::$wallet,
-                Money::parseByDecimal(-100, 'SAR'),
+                Money::parseByDecimal(-10000, Money::getDefaultCurrency()),
                 1,
                 null,
                 [
@@ -72,7 +72,7 @@ class VatPercentageFeeTypeTest extends TestCase
     {
         $transaction = self::$transactionTypeHandler->process(
             self::$wallet,
-            Money::parseByDecimal(100, 'SAR'),
+            Money::parseByDecimal(10000, Money::getDefaultCurrency()),
             TransactionReason::VatPercentageFee,
             null,
             []

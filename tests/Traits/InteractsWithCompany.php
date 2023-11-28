@@ -82,6 +82,7 @@ trait InteractsWithCompany
     public function addOrderCostTiersToCompany($company, $tiersCount)
     {
         $orderCostTiers = $this->generateOrderCostTiers($tiersCount);
+        $company->tieredPricing()->delete();
         $company->tieredPricing()->createMany($orderCostTiers);
 
         return $company;
