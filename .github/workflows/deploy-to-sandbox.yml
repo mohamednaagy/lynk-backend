@@ -4,11 +4,6 @@ on:
   push:
     branches:
       - sandbox
-  pull_request:
-    types:
-      - closed
-    branches:
-      - sandbox
 
 jobs:
   deploy_to_sandbox:
