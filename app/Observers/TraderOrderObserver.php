@@ -26,7 +26,15 @@ class TraderOrderObserver
                 'is_base' => true,
             ]);
         }
+    }
 
+    /**
+     * Handle the TraderOrder "created" event.
+     *
+     * @return void
+     */
+    public function created(TraderOrder $traderOrder)
+    {
         if (
             $traderOrder->provider === 'bursam'
             && $traderOrder->version === 'v2'
