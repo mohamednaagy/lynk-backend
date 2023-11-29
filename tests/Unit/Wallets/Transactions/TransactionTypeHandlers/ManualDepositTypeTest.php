@@ -17,7 +17,7 @@ use Tests\Traits\InteractsWithCompany;
 
 class ManualDepositTypeTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany;
+    use InteractsWithCompany, RefreshDatabase;
 
     private static TransactionTypeHandlerInterface $transactionTypeHandler;
 

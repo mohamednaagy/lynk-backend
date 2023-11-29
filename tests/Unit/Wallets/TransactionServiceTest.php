@@ -15,7 +15,7 @@ use Tests\Traits\InteractsWithCompany;
 
 class TransactionServiceTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany;
+    use InteractsWithCompany, RefreshDatabase;
 
     private static TransactionService $transactionService;
 

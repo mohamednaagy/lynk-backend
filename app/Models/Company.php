@@ -19,7 +19,7 @@ use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
 class Company extends BaseTenant
 {
-    use HasFactory, HasScopedValidationRules, SoftDeletes, HasWallet, LogsActivity, HasScopes;
+    use HasFactory, HasScopedValidationRules, HasScopes, HasWallet, LogsActivity, SoftDeletes;
 
     protected $table = 'companies';
 

@@ -33,10 +33,10 @@ use Illuminate\Support\Traits\Localizable;
 
 class BursamV1Driver implements TraderInterface
 {
+    use Localizable;
     use TraderHelperTrait {
         createTraderOrder as traitCreateTraderOrder;
     }
-    use Localizable;
 
     protected $provider = 'bursam';
 
@@ -63,10 +63,15 @@ class BursamV1Driver implements TraderInterface
      */
     public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
     {
-        /** @var TraderOrder $traderOrder */
-        $traderOrder = $this->getOrInitiateTraderOrder($financingOrder);
-        $productCode = $this->getUnusedProductCode($traderOrder->provider);
+        return $this->getOrInitiateTraderOrder($financingOrder);
+    }
 
+    /**
+     * @throws TraderException
+     */
+    public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
+    {
+        $productCode = $this->getUnusedProductCode($traderOrder->provider);
         $response = BursamClient::of($traderOrder)->buyProduct($productCode);
 
         if (! empty($response->json('header.errorCode'))) {
@@ -77,7 +82,7 @@ class BursamV1Driver implements TraderInterface
                     'provider' => $this->provider,
                     'version' => $this->version,
                     'provider_response_body' => $response->json(),
-                    'financing_order_id' => $financingOrder->id,
+                    'financing_order_id' => $traderOrder->order->id,
                 ]
             );
         }
@@ -100,7 +105,6 @@ class BursamV1Driver implements TraderInterface
         if ($response->json('status.processingCount') == 0 && ($response->json('body.0.bidErrNo') == '999')) {
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiHoldingCertificateDocument);
 
-            logs()->debug('test', [$response]);
             $traderOrder->update([
                 'original_data' => $response->json('body.0'),
                 'reference' => $response->json('body.0.ecertNo'),

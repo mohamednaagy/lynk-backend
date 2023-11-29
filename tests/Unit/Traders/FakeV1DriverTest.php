@@ -28,7 +28,7 @@ use Tests\Traits\InteractsWithUser;
 
 class FakeV1DriverTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     protected static Company $company;
 

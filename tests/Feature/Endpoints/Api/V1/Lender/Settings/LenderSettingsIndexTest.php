@@ -16,7 +16,7 @@ use Tests\Traits\InteractsWithUser;
 
 class LenderSettingsIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     const BaseUrl = 'api/v1/lender/settings';
 

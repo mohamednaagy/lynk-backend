@@ -122,7 +122,8 @@ class MakeOrderProceedAction implements MakeOrderProceed
     {
         $murabhaSteps = array_keys(get_murabha_steps($traderOrder->provider, $traderOrder->version));
 
-        $firstStepIndex = min(collect([MurabhaStep::ClientWakala, MurabhaStep::ContractSigned])->map(fn ($step) => array_search($step, $murabhaSteps))->toArray());
+        $firstStepIndex = min(collect([MurabhaStep::ClientWakala, MurabhaStep::ContractSigned])
+            ->map(fn ($step) => array_search($step, $murabhaSteps))->toArray());
 
         return ! $traderOrder->checkOrderStepComplete(
             (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))

@@ -67,4 +67,11 @@ class OrderCancelled extends Notification implements ShouldQueue
             'user_name' => $this->user->fullName,
         ];
     }
+
+    public function viaQueues()
+    {
+        return [
+            'mail' => 'notifications',
+        ];
+    }
 }

@@ -18,7 +18,7 @@ use Tests\Traits\InteractsWithUser;
 
 class CalculateOrderCostTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany, InteractsWithSettings;
+    use InteractsWithCompany, InteractsWithSettings, InteractsWithUser, RefreshDatabase;
 
     protected static Company $company;
 

@@ -26,7 +26,7 @@ use Tests\Traits\InteractsWithUser;
 
 class LenderControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $lender;
 

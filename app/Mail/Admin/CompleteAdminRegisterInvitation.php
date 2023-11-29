@@ -38,6 +38,8 @@ class CompleteAdminRegisterInvitation extends Mailable implements ShouldQueue
         $this->url = $url;
         $this->invitee = $invitee;
         $this->inviter = $inviter;
+
+        $this->onQueue('notifications');
     }
 
     /**

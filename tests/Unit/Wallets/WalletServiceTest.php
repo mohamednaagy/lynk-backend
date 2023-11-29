@@ -17,7 +17,7 @@ use Tests\Traits\InteractsWithCompany;
 
 class WalletServiceTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany;
+    use InteractsWithCompany, RefreshDatabase;
 
     private static WalletService $walletService;
 

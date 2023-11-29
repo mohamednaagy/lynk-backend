@@ -23,7 +23,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class TraderOrderControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $company;
 

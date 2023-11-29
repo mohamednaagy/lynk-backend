@@ -28,6 +28,7 @@ class CheckWalletNotificaitonJob implements ShouldQueue
 
     public function __construct(protected Wallet $wallet)
     {
+        $this->onQueue('notifications');
     }
 
     public function handle(): void

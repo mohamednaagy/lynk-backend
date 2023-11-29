@@ -20,8 +20,8 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class ChargeLenderBalanceManuallyTest extends TestCase
 {
-    use RefreshDatabase;
     use AssertsAccessByRoleAndArea;
+    use RefreshDatabase;
 
     private static Company $lender;
 

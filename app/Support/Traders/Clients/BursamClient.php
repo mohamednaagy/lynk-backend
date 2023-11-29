@@ -2,11 +2,13 @@
 
 namespace App\Support\Traders\Clients\BursamClient;
 
+use App\Exceptions\RateLimitExceededException;
 use App\Models\TraderOrder;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
 
@@ -52,7 +54,7 @@ class BursamClient
     {
         $financingOrder = $this->traderOrder->order;
 
-        return $this->http()
+        return $this->rateLimitRequest(fn () => $this->http()
             ->post(
                 'api/process/svc/bsas/order.json',
                 [
@@ -78,40 +80,42 @@ class BursamClient
                         'eCertNo' => '',
                     ],
                 ]
-            );
+            ));
     }
 
     public function sellProduct()
     {
         $financingOrder = $this->traderOrder->order;
 
-        return $this->http()
-            ->post(
-                'api/process/svc/bsas/order.json',
-                [
-                    'header' => [
-                        'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                        'uuid' => $this->traderOrder->uuid_two,
-                    ],
-                    'request' => [
-                        'serialNumber' => '1',
-                        'bidOption' => 'N',
-                        'otcOption' => 'Y',
-                        'stbOption' => 'Y',
-                        'productCode' => $this->traderOrder->product_code,
-                        'purchaseType' => 'P',
-                        'clientName' => '',
-                        'currency' => 'SAR',
-                        'bidValue' => (float) $financingOrder->amount->convertAndFormatByDecimal(),
-                        'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
-                        'tenor' => '00090',
-                        'otcCounterParty' => $financingOrder->customer_name,
-                        'otcMurabaha' => '',
-                        'otcMurabahaValue' => (float) $financingOrder->selling_price->convertAndFormatByDecimal(),
-                        'eCertNo' => $this->traderOrder->reference,
-                    ],
-                ]
-            );
+        return $this->rateLimitRequest(
+            fn () => $this->http()
+                ->post(
+                    'api/process/svc/bsas/order.json',
+                    [
+                        'header' => [
+                            'memberShortName' => config('trader.providers.bursam.member_short_name'),
+                            'uuid' => $this->traderOrder->uuid_two,
+                        ],
+                        'request' => [
+                            'serialNumber' => '1',
+                            'bidOption' => 'N',
+                            'otcOption' => 'Y',
+                            'stbOption' => 'Y',
+                            'productCode' => $this->traderOrder->product_code,
+                            'purchaseType' => 'P',
+                            'clientName' => '',
+                            'currency' => 'SAR',
+                            'bidValue' => (float) $financingOrder->amount->convertAndFormatByDecimal(),
+                            'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
+                            'tenor' => '00090',
+                            'otcCounterParty' => $financingOrder->customer_name,
+                            'otcMurabaha' => '',
+                            'otcMurabahaValue' => (float) $financingOrder->selling_price->convertAndFormatByDecimal(),
+                            'eCertNo' => $this->traderOrder->reference,
+                        ],
+                    ]
+                )
+        );
     }
 
     public function fetchBuyResult()
@@ -126,64 +130,72 @@ class BursamClient
 
     private function fetchOrderResult($uuid)
     {
-        return $this->http()
-            ->post(
-                'api/process/svc/bsas/orderResult.json',
-                [
-                    'header' => [
-                        'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                        'uuid' => $uuid,
-                    ],
-                    'request' => [
-                        'serialNumber' => '1',
-                        'forceYN' => 'Y',
-                        'maxWaitTime' => '10',
-                        'waitAllDoneYN' => 'Y',
-                    ],
-                ]
-            );
+        return $this->rateLimitRequest(
+            fn () => $this->http()
+                ->post(
+                    'api/process/svc/bsas/orderResult.json',
+                    [
+                        'header' => [
+                            'memberShortName' => config('trader.providers.bursam.member_short_name'),
+                            'uuid' => $uuid,
+                        ],
+                        'request' => [
+                            'serialNumber' => '1',
+                            'forceYN' => 'Y',
+                            'maxWaitTime' => '10',
+                            'waitAllDoneYN' => 'Y',
+                        ],
+                    ]
+                )
+        );
     }
 
     public function getBidXml()
     {
-        return $this->http()
-            ->post(
-                'api/process/svc/bsas/bidXML.json',
-                [
-                    'input' => [
-                        'membershortname' => config('trader.providers.bursam.member_short_name'),
-                        'ecertno' => $this->traderOrder->reference,
-                    ],
-                ]
-            );
+        return $this->rateLimitRequest(
+            fn () => $this->http()
+                ->post(
+                    'api/process/svc/bsas/bidXML.json',
+                    [
+                        'input' => [
+                            'membershortname' => config('trader.providers.bursam.member_short_name'),
+                            'ecertno' => $this->traderOrder->reference,
+                        ],
+                    ]
+                )
+        );
     }
 
     public function getOtcXml()
     {
-        return $this->http()
-            ->post(
-                'api/process/svc/bsas/otcXML.json',
-                [
-                    'input' => [
-                        'membershortname' => config('trader.providers.bursam.member_short_name'),
-                        'ecertno' => $this->traderOrder->reference,
-                    ],
-                ]
-            );
+        return $this->rateLimitRequest(
+            fn () => $this->http()
+                ->post(
+                    'api/process/svc/bsas/otcXML.json',
+                    [
+                        'input' => [
+                            'membershortname' => config('trader.providers.bursam.member_short_name'),
+                            'ecertno' => $this->traderOrder->reference,
+                        ],
+                    ]
+                )
+        );
     }
 
     public function getStbXml()
     {
-        return $this->http()
-            ->post(
-                'api/process/svc/bsas/stbXML.json',
-                [
-                    'input' => [
-                        'membershortname' => config('trader.providers.bursam.member_short_name'),
-                        'ecertno' => $this->traderOrder->reference,
-                    ],
-                ]
-            );
+        return $this->rateLimitRequest(
+            fn () => $this->http()
+                ->post(
+                    'api/process/svc/bsas/stbXML.json',
+                    [
+                        'input' => [
+                            'membershortname' => config('trader.providers.bursam.member_short_name'),
+                            'ecertno' => $this->traderOrder->reference,
+                        ],
+                    ]
+                )
+        );
     }
 
     private function http(): PendingRequest
@@ -195,6 +207,38 @@ class BursamClient
         }
 
         return $instance;
+    }
+
+    protected function rateLimitRequest($callback, $remainingRetries = 0)
+    {
+        if ($remainingRetries > (int) config('trader.providers.bursam.rate_limit.max_retries_before_exception')) {
+            $exception = new RateLimitExceededException('bursam_api');
+
+            $exception->setContext([
+                'trader_order_id' => $this->traderOrder->id,
+                'provider' => $this->traderOrder->provider,
+                'version' => $this->traderOrder->version,
+            ]);
+
+            throw $exception;
+        }
+
+        if ($remainingRetries > 0) {
+            sleep(((int) config('trader.providers.bursam.rate_limit.decay_seconds')) + 1);
+        }
+
+        $executed = RateLimiter::attempt(
+            'bursam_api',
+            config('trader.providers.bursam.rate_limit.max_attempts'),
+            $callback,
+            config('trader.providers.bursam.rate_limit.decay_seconds'),
+        );
+
+        if ($executed === false) {
+            return $this->rateLimitRequest($callback, ++$remainingRetries);
+        }
+
+        return $executed;
     }
 
     private function registerFakeBursamResponses()

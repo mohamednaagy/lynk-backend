@@ -27,12 +27,11 @@ class VerifyEmail extends Mailable implements ShouldQueue
         $parameters = ['company_id' => $user->company_id, 'user' => $user->id];
         $url = URL::signedExternalRoute($externalUrl, 'api.v1.verify.email', $parameters);
         $this->url = $url;
+        $this->onQueue('notifications');
     }
 
     /**
      * Get the message envelope.
-     *
-     * @return Envelope
      */
     public function envelope(): Envelope
     {
@@ -43,8 +42,6 @@ class VerifyEmail extends Mailable implements ShouldQueue
 
     /**
      * Get the message content definition.
-     *
-     * @return Content
      */
     public function content(): Content
     {
@@ -55,8 +52,6 @@ class VerifyEmail extends Mailable implements ShouldQueue
 
     /**
      * Get the attachments for the message.
-     *
-     * @return array
      */
     public function attachments(): array
     {

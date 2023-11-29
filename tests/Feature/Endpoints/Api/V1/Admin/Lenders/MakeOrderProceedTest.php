@@ -30,7 +30,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class MakeOrderProceedTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $company;
 

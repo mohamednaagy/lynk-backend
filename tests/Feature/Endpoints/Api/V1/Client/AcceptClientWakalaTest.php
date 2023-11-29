@@ -25,7 +25,7 @@ use Tests\Traits\InteractsWithUser;
 
 class AcceptClientWakalaTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 

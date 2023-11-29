@@ -21,7 +21,7 @@ use Tests\Traits\InteractsWithUser;
 
 class TraderOrderControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $traderCompany;
 

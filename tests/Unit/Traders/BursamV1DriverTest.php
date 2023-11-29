@@ -39,7 +39,7 @@ use Tests\Traits\InteractsWithUser;
 
 class BursamV1DriverTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser, WithFaker;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase, WithFaker;
 
     protected static Company $company;
 

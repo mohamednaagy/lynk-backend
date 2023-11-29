@@ -19,7 +19,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class LenderControllerShowTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $lender;
 

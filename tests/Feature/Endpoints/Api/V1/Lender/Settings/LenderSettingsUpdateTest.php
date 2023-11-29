@@ -15,7 +15,7 @@ use Tests\Traits\InteractsWithUser;
 
 class LenderSettingsUpdateTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     const BaseUrl = 'api/v1/lender/settings';
 

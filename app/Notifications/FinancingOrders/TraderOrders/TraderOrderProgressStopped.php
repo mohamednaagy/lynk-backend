@@ -5,6 +5,7 @@ namespace App\Notifications\FinancingOrders\TraderOrders;
 use App\Enums\MurabhaStep;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionaryNode;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -40,18 +41,24 @@ class TraderOrderProgressStopped extends Notification implements ShouldQueue
     public function toMail(mixed $notifiable): MailMessage
     {
         $currentStepNode = $this->traderDictionary->getStepByHistory($this->traderOrder->last_history_action);
-        $nextStepNode = $this->traderDictionary->getNextStepOf($currentStepNode->step);
-        $nextStepEnum = $nextStepNode
-            ? MurabhaStep::fromValue($nextStepNode->step)->description
-            : null;
+
+        $nextStepEnum = null;
+        if ($currentStepNode instanceof StepHistoriesDictionaryNode) {
+            $nextStepNode = $this->traderDictionary->getNextStepOf($currentStepNode->step);
+            $nextStepEnum = $nextStepNode
+                ? MurabhaStep::fromValue($nextStepNode->step)->description
+                : null;
+        }
 
         return (new MailMessage)
             ->subject(__('emails/trader-order-stopped.subject', [
                 'order_id' => $this->traderOrder->financing_order_id,
             ]))
-            ->line(__('emails/trader-order-stopped.body', [
+            ->line($nextStepEnum ? __('emails/trader-order-stopped.body_with_step', [
                 'order_id' => $this->traderOrder->financing_order_id,
                 'next_step' => $nextStepEnum,
+            ]) : __('emails/trader-order-stopped.body_without_step', [
+                'order_id' => $this->traderOrder->financing_order_id,
             ]));
     }
 
@@ -67,6 +74,13 @@ class TraderOrderProgressStopped extends Notification implements ShouldQueue
             'order_id' => $this->traderOrder->financing_order_id,
             'time' => now(),
 
+        ];
+    }
+
+    public function viaQueues()
+    {
+        return [
+            'mail' => 'notifications',
         ];
     }
 }

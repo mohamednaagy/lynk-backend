@@ -23,7 +23,7 @@ use Tests\Traits\InteractsWithLender;
 
 class ProcessFinancingOrdersTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use InteractsWithLender, RefreshDatabase;
 
     public static Company $company;
 

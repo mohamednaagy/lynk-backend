@@ -17,7 +17,7 @@ use Tests\Traits\InteractsWithCompany;
 
 class OrderCreationFeeTypeTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany;
+    use InteractsWithCompany, RefreshDatabase;
 
     private static TransactionTypeHandlerInterface $transactionTypeHandler;
 
