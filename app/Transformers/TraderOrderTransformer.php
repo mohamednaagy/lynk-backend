@@ -92,6 +92,10 @@ class TraderOrderTransformer extends TransformerAbstract
 
         $refundReason = $this->getRefundStatus($traderOrder, $baseTraderOrder);
 
+        if (! $refundReason) {
+            return $this->null();
+        }
+
         return $this->primitive($this->formatRefundStatus($refundReason, $baseTraderOrder));
     }
 
