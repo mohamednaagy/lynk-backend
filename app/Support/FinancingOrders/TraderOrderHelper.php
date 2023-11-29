@@ -23,7 +23,7 @@ trait TraderOrderHelper
         return $traderOrder->status->isNot(TraderOrderStatus::Cancelled);
     }
 
-    private function getRefundStatus(TraderOrder $traderOrder, TraderOrder $baseTraderOrder): string
+    private function getRefundStatus(TraderOrder $traderOrder, TraderOrder $baseTraderOrder): ?string
     {
         $secondsSinceCreation = $traderOrder->created_at->diffInSeconds($baseTraderOrder->created_at);
 
