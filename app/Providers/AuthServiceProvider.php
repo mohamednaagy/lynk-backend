@@ -41,7 +41,7 @@ class AuthServiceProvider extends ServiceProvider
         ResetPassword::createUrlUsing(function ($user, string $token) {
             $query = http_build_query([
                 'email' => $user->email,
-                'company_name' => tenant('unique_name'),
+                'company_unique_name' => tenant('unique_name'),
             ]);
 
             return rtrim($this->app['request']->input('redirect_url'), '/').'/'.$token.'?'.$query;
