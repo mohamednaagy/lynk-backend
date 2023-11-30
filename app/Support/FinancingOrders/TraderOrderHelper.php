@@ -25,7 +25,7 @@ trait TraderOrderHelper
 
     private function getRefundStatus(TraderOrder $traderOrder, TraderOrder $baseTraderOrder): ?string
     {
-        $secondsSinceCreation = $traderOrder->created_at->diffInSeconds($baseTraderOrder->created_at);
+        $secondsSinceCreation = $traderOrder->cancelled_at->diffInSeconds($baseTraderOrder->created_at);
 
         $refundStatus = match (true) {
             ! $traderOrder->refund_reason && $secondsSinceCreation > RefundOrderCost::ONE_DAY => TraderOrderNoRefundReason::AFTER_24_HOUR(),
