@@ -35,8 +35,8 @@ trait TraderOrderHelper
         $refundStatus = match (true) {
             ! $traderOrder->refund_reason && $secondsSinceCancellation > RefundOrderCost::ONE_DAY => TraderOrderNoRefundReason::AFTER_24_HOUR(),
             ! $traderOrder->refund_reason && $secondsSinceCancellation > RefundOrderCost::THREE_DAYS => TraderOrderNoRefundReason::AFTER_72_HOUR(),
-            $traderOrder->refund_reason => TraderOrderRefundReason::fromValue($traderOrder->refund_reason),
-            default => null,
+            is_null($traderOrder->refund_reason) => null,
+            default => TraderOrderRefundReason::fromValue($traderOrder->refund_reason),
         };
 
         return $refundStatus?->description;
