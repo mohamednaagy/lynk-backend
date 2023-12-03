@@ -7,6 +7,7 @@ use App\Enums\TraderOrderRefundReason;
 use App\Enums\TraderOrderStatus;
 use App\Listeners\RefundOrderCost;
 use App\Models\TraderOrder;
+use Carbon\Carbon;
 
 trait TraderOrderHelper
 {
@@ -25,11 +26,15 @@ trait TraderOrderHelper
 
     private function getRefundStatus(TraderOrder $traderOrder, TraderOrder $baseTraderOrder): ?string
     {
-        $secondsSinceCreation = $traderOrder->created_at->diffInSeconds($baseTraderOrder->created_at);
+        $canceledAt = $traderOrder->cancelled_at
+            ? Carbon::parse($traderOrder->cancelled_at)
+            : null;
+
+        $secondsSinceCancellation = $canceledAt?->diffInSeconds($baseTraderOrder->created_at);
 
         $refundStatus = match (true) {
-            ! $traderOrder->refund_reason && $secondsSinceCreation > RefundOrderCost::ONE_DAY => TraderOrderNoRefundReason::AFTER_24_HOUR(),
-            ! $traderOrder->refund_reason && $secondsSinceCreation > RefundOrderCost::THREE_DAYS => TraderOrderNoRefundReason::AFTER_72_HOUR(),
+            ! $traderOrder->refund_reason && $secondsSinceCancellation > RefundOrderCost::ONE_DAY => TraderOrderNoRefundReason::AFTER_24_HOUR(),
+            ! $traderOrder->refund_reason && $secondsSinceCancellation > RefundOrderCost::THREE_DAYS => TraderOrderNoRefundReason::AFTER_72_HOUR(),
             $traderOrder->refund_reason => TraderOrderRefundReason::fromValue($traderOrder->refund_reason),
             default => null,
         };
