@@ -45,7 +45,6 @@ class RefundOrderCreationFeesAction implements RefundOrderCreationFees
                     'financing_order_id' => $financingOrder->id,
                     'trader_order_id' => $traderOrder->id,
                     'refunded_transaction_id' => $transaction->id,
-                    'vat_amount' => $transaction->vat_amount,
                 ], Arr::only($transaction->meta, ['order_cost', 'vat_amount'])),
                 $reference
             );
