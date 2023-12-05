@@ -7,8 +7,10 @@ use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Models\TraderOrder;
+use App\Models\Transaction;
 use App\Support\Generator\ReferenceNumber\Contracts\ReferenceNumberGeneratorInterface;
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
+use Illuminate\Support\Arr;
 
 class RefundOrderCreationFeesAction implements RefundOrderCreationFees
 {
@@ -34,16 +36,16 @@ class RefundOrderCreationFeesAction implements RefundOrderCreationFees
             ->get();
 
         $reference = $this->referenceGenerator->generate();
-        $transactions->each(function ($transaction) use ($wallet, $financingOrder, $traderOrder, $reference) {
+        $transactions->each(function (Transaction $transaction) use ($wallet, $financingOrder, $traderOrder, $reference) {
             $this->createTransactions->handle(
                 $wallet,
                 $this->getTransactionReasonForRefund($transaction),
                 $transaction->amount,
-                [
+                array_merge([
                     'financing_order_id' => $financingOrder->id,
                     'trader_order_id' => $traderOrder->id,
                     'refunded_transaction_id' => $transaction->id,
-                ],
+                ], Arr::only($transaction->meta, ['order_cost', 'vat_amount'])),
                 $reference
             );
         });
