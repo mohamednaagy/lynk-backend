@@ -35,7 +35,7 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
                 return $query->where('provider', 'bursam')
                     ->where('version', 'v2')
                     ->where('mode', TraderOrderMode::Automatic)
-                    ->whereDate('created_at', Carbon::today());
+                    ->whereDate('created_at', '>=', Carbon::now()->subDay());
             })
             ->select('id')
             ->lazyById()
