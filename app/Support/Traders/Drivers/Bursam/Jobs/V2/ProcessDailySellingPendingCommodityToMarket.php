@@ -7,9 +7,11 @@ use App\Models\FinancingOrder;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Config;
 
 class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
 {
@@ -30,12 +32,20 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
      */
     public function handle(): void
     {
+        $timezone = Config::get('services.bursam.timezone');
+        $marketOpeningStartTime = Carbon::parse(Config::get('services.bursam.market_opening_start_time'), $timezone);
+        $marketOpeningEndTime = Carbon::parse(Config::get('services.bursam.market_opening_end_time'), $timezone);
+
+        if ($marketOpeningStartTime->greaterThan($marketOpeningEndTime)) {
+            $marketOpeningStartTime->subDay();
+        }
+
         FinancingOrder::query()
-            ->whereHas('activeTraderOrder', function ($query) {
+            ->whereHas('activeTraderOrder', function (Builder $query) use ($marketOpeningEndTime, $marketOpeningStartTime) {
                 return $query->where('provider', 'bursam')
                     ->where('version', 'v2')
                     ->where('mode', TraderOrderMode::Automatic)
-                    ->whereDate('created_at', Carbon::today());
+                    ->whereBetween('created_at', [$marketOpeningStartTime->utc(), $marketOpeningEndTime->utc()]);
             })
             ->select('id')
             ->lazyById()
