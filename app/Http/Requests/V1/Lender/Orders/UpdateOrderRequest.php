@@ -2,9 +2,12 @@
 
 namespace App\Http\Requests\V1\Lender\Orders;
 
+use App\Enums\FinancingOrderStatus;
 use App\Http\Requests\Traits\RequestHasMobileVerification;
+use App\Models\Company;
+use App\Models\FinancingOrder;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 
 class UpdateOrderRequest extends FormRequest
 {
@@ -28,16 +31,33 @@ class UpdateOrderRequest extends FormRequest
     public function rules()
     {
         return [
-            'reference_number' => ['nullable', 'string', 'max:100'],
+            'reference_number' => ['nullable', 'string', 'max:100', $this->handleUniqueReferenceNumber()],
             'national_id' => ['required', 'integer', 'digits:10', 'gt:0'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => [
-                Rule::requiredIf($this->order->is_verification_required),
+                'required_if:is_verification_required,true',
                 'phone:phone_country_code,mobile',
                 'string',
             ],
             'amount' => ['required', 'numeric', 'gt:0'],
             'selling_price' => ['required', 'numeric', 'gte:amount'],
+            'customer_name' => ['required', 'string', 'max:255'],
+            'is_verification_required' => ['required', 'boolean'],
         ];
+    }
+
+    private function handleUniqueReferenceNumber(): ?Unique
+    {
+        /** @var Company $company */
+        $company = tenant();
+        /** @var FinancingOrder $financingOrder */
+        $financingOrder = $this->route('order');
+        if ($company->force_unique_reference_number) {
+            return $company->unique('financing_orders', 'reference_number')
+                ->whereNot('status', FinancingOrderStatus::Cancelled)
+                ->ignoreModel($financingOrder);
+        }
+
+        return null;
     }
 }

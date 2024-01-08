@@ -8,7 +8,7 @@ class RateLimitExceededException extends Exception
 {
     protected $context = [];
 
-    public function __construct($key, \Throwable|null $previous = null)
+    public function __construct($key, \Throwable $previous = null)
     {
         parent::__construct('Rate limit exceeded for key: '.$key, 0, $previous);
     }

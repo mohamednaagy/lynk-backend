@@ -17,10 +17,10 @@ class GetClientWakalaTextAction implements GetClientWakalaText
         $now = now('Asia/Riyadh');
         $date = $now->toDateString();
         $time = $now->toTimeString();
-        $amount = $financingOrder->selling_price->formatByDecimal();
+        $amount = $financingOrder->selling_price->convertAndFormatByDecimal(sperator: ',');
         $commodityNumber = $traderOrder->reference;
         $commodity = collect($traderOrder->products)->pluck('product')->implode(' و ') ?? '';
-        $commodityPrice = $financingOrder->amount->formatByDecimal();
+        $commodityPrice = $financingOrder->amount->convertAndFormatByDecimal(sperator: ',');
         $orderNumber = $financingOrder->id;
         $orderDate = $financingOrder->created_at->format('Y-m-d');
         $clientName = $financingOrder->customer_name;

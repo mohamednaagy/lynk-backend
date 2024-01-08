@@ -18,7 +18,7 @@ use Tests\Traits\InteractsWithUser;
 
 class CalculateOrderCostTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany, InteractsWithSettings;
+    use InteractsWithCompany, InteractsWithSettings, InteractsWithUser, RefreshDatabase;
 
     protected static Company $company;
 
@@ -78,7 +78,7 @@ class CalculateOrderCostTest extends TestCase
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson([
                 'data' => [
-                    'amount' => $total->formatByDecimal(),
+                    'amount' => $total->convertAndFormatByDecimal(),
                 ],
             ]);
     }
@@ -119,7 +119,7 @@ class CalculateOrderCostTest extends TestCase
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson([
                 'data' => [
-                    'amount' => $total->formatByDecimal(),
+                    'amount' => $total->convertAndFormatByDecimal(),
                 ],
             ]);
     }
@@ -138,7 +138,7 @@ class CalculateOrderCostTest extends TestCase
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson([
                 'data' => [
-                    'amount' => $total->formatByDecimal(),
+                    'amount' => $total->convertAndFormatByDecimal(),
                 ],
             ]);
     }
@@ -157,7 +157,7 @@ class CalculateOrderCostTest extends TestCase
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson([
                 'data' => [
-                    'amount' => $total->formatByDecimal(),
+                    'amount' => $total->convertAndFormatByDecimal(),
                 ],
             ]);
     }

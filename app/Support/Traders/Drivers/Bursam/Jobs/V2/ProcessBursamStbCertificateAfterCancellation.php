@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
@@ -51,10 +52,7 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
                 Trader::driver('bursam', $traderOrder->version)->getStbCertificateDetails($traderOrder);
             }
 
-            $traderOrder->update([
-                'status' => TraderOrderStatus::Cancelled,
-                'cancel_reason' => $this->cancelReason,
-            ]);
+            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $this->cancelReason);
         });
     }
 

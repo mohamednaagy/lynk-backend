@@ -118,6 +118,19 @@ class MakeOrderProceedAction implements MakeOrderProceed
         );
     }
 
+    protected function isPreviousStepOfContractAndClientWakalaNotCompleted(TraderOrder $traderOrder): bool
+    {
+        $murabhaSteps = array_keys(get_murabha_steps($traderOrder->provider, $traderOrder->version));
+
+        $firstStepIndex = min(collect([MurabhaStep::ClientWakala, MurabhaStep::ContractSigned])
+            ->map(fn ($step) => array_search($step, $murabhaSteps))->toArray());
+
+        return ! $traderOrder->checkOrderStepComplete(
+            (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+                ->getPreviousStepOf($murabhaSteps[$firstStepIndex])->step
+        );
+    }
+
     protected function isContractSignedStepCompleted(TraderOrder $traderOrder): bool
     {
         return $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
@@ -149,7 +162,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
         $lastHistory = $traderOrder->traderHistories()->latest('id')->first();
 
-        if (is_null($lastHistory)) {
+        if ($this->isPreviousStepOfContractAndClientWakalaNotCompleted($traderOrder) || is_null($lastHistory)) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 

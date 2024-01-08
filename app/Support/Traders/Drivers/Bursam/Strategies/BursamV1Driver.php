@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\BursamErrorCode;
 use App\Enums\BursamProductCode;
 use App\Enums\FinancingOrderHistory;
@@ -13,12 +14,12 @@ use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
-use App\Exceptions\RateLimitExceededException;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
+use App\Support\Traders\Clients\BursamClient\BursamClient;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -27,17 +28,15 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
 
 class BursamV1Driver implements TraderInterface
 {
+    use Localizable;
     use TraderHelperTrait {
         createTraderOrder as traitCreateTraderOrder;
     }
-    use Localizable;
 
     protected $provider = 'bursam';
 
@@ -73,37 +72,7 @@ class BursamV1Driver implements TraderInterface
     public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
     {
         $productCode = $this->getUnusedProductCode($traderOrder->provider);
-        $requestBody = [
-            'header' => [
-                'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                'uuid' => $traderOrder->uuid_one,
-            ],
-            'request' => [
-                'serialNumber' => '1',
-                'bidOption' => 'Y',
-                'otcOption' => 'N',
-                'stbOption' => 'N',
-                'productCode' => $productCode,
-                'purchaseType' => 'P',
-                'clientName' => '',
-                'currency' => 'SAR',
-                'bidValue' => $traderOrder->order->amount->formatByDecimal(),
-                'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
-                'tenor' => config('trader.providers.bursam.tenor'),
-                'otcCounterParty' => $traderOrder->order->customer_name,
-                'otcMurabaha' => '',
-                'otcMurabahaValue' => $traderOrder->order->selling_price->formatByDecimal(),
-                'eCertNo' => '',
-            ],
-        ];
-
-        $response = $this->rateLimitRequest(
-            $traderOrder,
-            fn () => Http::bursam()->post(
-                'api/process/svc/bsas/order.json',
-                $requestBody
-            )
-        );
+        $response = BursamClient::of($traderOrder)->buyProduct($productCode);
 
         if (! empty($response->json('header.errorCode'))) {
             throw new TraderException(
@@ -112,7 +81,6 @@ class BursamV1Driver implements TraderInterface
                     'trader_order_id' => $traderOrder->id,
                     'provider' => $this->provider,
                     'version' => $this->version,
-                    'provider_request_body' => $requestBody,
                     'provider_response_body' => $response->json(),
                     'financing_order_id' => $traderOrder->order->id,
                 ]
@@ -131,26 +99,8 @@ class BursamV1Driver implements TraderInterface
 
     public function fetchOrderResultYNN(TraderOrder $traderOrder)
     {
-        $requestBody = [
-            'header' => [
-                'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                'uuid' => $traderOrder->uuid_one,
-            ],
-            'request' => [
-                'serialNumber' => '1',
-                'forceYN' => 'Y',
-                'maxWaitTime' => '10',
-                'waitAllDoneYN' => 'Y',
-            ],
-        ];
-
-        $response = $this->rateLimitRequest(
-            $traderOrder,
-            fn () => Http::bursam()->post(
-                'api/process/svc/bsas/orderResult.json',
-                $requestBody
-            )
-        );
+        $response = BursamClient::of($traderOrder)
+            ->fetchBuyResult();
 
         if ($response->json('status.processingCount') == 0 && ($response->json('body.0.bidErrNo') == '999')) {
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiHoldingCertificateDocument);
@@ -172,7 +122,6 @@ class BursamV1Driver implements TraderInterface
                     'trader_order_id' => $traderOrder->id,
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
-                    'provider_request_body' => $requestBody,
                     'provider_response_body' => $response->json(),
                     'failure_reason' => $response->json('body.0.bidMsg'),
                     'failure_code' => TraderErrorCode::INSUFFICIENT_COMMODITY,
@@ -188,7 +137,6 @@ class BursamV1Driver implements TraderInterface
                     'trader_order_id' => $traderOrder->id,
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
-                    'provider_request_body' => $requestBody,
                     'provider_response_body' => $response->json(),
                     'failure_reason' => $response->json('body.0.bidMsg'),
                     'failure_code' => $response->json('body.0.bidErrNo'),
@@ -201,20 +149,7 @@ class BursamV1Driver implements TraderInterface
 
     public function getBidCertificateDetails(TraderOrder $traderOrder)
     {
-        $requestBody = [
-            'input' => [
-                'membershortname' => config('trader.providers.bursam.member_short_name'),
-                'ecertno' => $traderOrder->reference,
-            ],
-        ];
-
-        $response = $this->rateLimitRequest(
-            $traderOrder,
-            fn () => Http::bursam()->post(
-                'api/process/svc/bsas/bidXML.json',
-                $requestBody
-            )
-        );
+        $response = BursamClient::of($traderOrder)->getBidXml();
 
         if ($response->json('SUCCESSYN') == 'N') {
             throw new TraderException(
@@ -223,7 +158,6 @@ class BursamV1Driver implements TraderInterface
                     'trader_order_id' => $traderOrder->id,
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
-                    'provider_request_body' => $requestBody,
                     'provider_response_body' => $response->json(),
                 ]
             );
@@ -236,7 +170,7 @@ class BursamV1Driver implements TraderInterface
                 (new CommodityProductDto(
                     product: $response->json('PNAME'),
                     quantity: $response->json('PVOLUME'),
-                    amount: $response->json('TOTALVALUE'),
+                    amount: number_unformat($response->json('TOTALVALUE')),
                     previous_owner: Arr::pluck($response->json('LINE'), 'SUPPLIER'),
                     date_time_of_purchasing_commodity: $response->json('PURCHASETIMEDATE'),
                     uom: collect($traderOrder->original_data)->get('unit'),
@@ -252,11 +186,9 @@ class BursamV1Driver implements TraderInterface
             'buyer' => $response->json('BUYER'),
             'owner' => $response->json('OWNER'),
             'bid_no' => $response->json('BIDNO'),
-            'total_value' => $response->json('TOTALVALUE'),
-            'total_value_myr_equivalent' => parse_number($response->json('PRICE_MYR_EQUIVALENT')) * parse_number($response->json('PVOLUME')),
+            'total_value' => number_unformat($response->json('TOTALVALUE')),
+            'total_value_myr_equivalent' => number_unformat($response->json('PRICE_MYR_EQUIVALENT')) * number_unformat($response->json('PVOLUME')),
             'currency' => $response->json('CURRENCY'),
-            //            'price' => $response->json('PRICE'),
-            //            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
             'purchase_time_date' => $response->json('PURCHASETIMEDATE').'  Malaysia Time (MYT)',
             'value_date' => $response->json('VALUEDATE').'  Malaysia Time (MYT)',
             'p_name' => in_array($productName, BursamProductCode::getValues())
@@ -283,7 +215,7 @@ class BursamV1Driver implements TraderInterface
     {
         try {
             $this->withLocale('ar', function () use ($traderOrder) {
-                $amount = $traderOrder->order->amount->formatByDecimal();
+                $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
                 $currentTimeInUtcTz = CarbonImmutable::now();
                 $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
                 $products = collect($traderOrder->products)->map(fn ($product) => CommodityProductDto::fromArray($product));
@@ -342,7 +274,7 @@ class BursamV1Driver implements TraderInterface
                     ?->created_at;
                 $currentTimeInUtcTz = CarbonImmutable::parse($dateTime);
                 $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
-                $amount = $traderOrder->order->selling_price->formatByDecimal();
+                $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal(sperator: ',');
 
                 $customerName = $traderOrder->order->customer_name;
 
@@ -400,39 +332,7 @@ class BursamV1Driver implements TraderInterface
             ]);
         }
 
-        $financingOrder = $traderOrder->order;
-
-        $requestBody = [
-            'header' => [
-                'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                'uuid' => $traderOrder->uuid_two,
-            ],
-            'request' => [
-                'serialNumber' => '1',
-                'bidOption' => 'N',
-                'otcOption' => 'Y',
-                'stbOption' => 'Y',
-                'productCode' => $traderOrder->product_code,
-                'purchaseType' => 'P',
-                'clientName' => '',
-                'currency' => 'SAR',
-                'bidValue' => $financingOrder->amount->formatByDecimal(),
-                'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
-                'tenor' => '00090',
-                'otcCounterParty' => $financingOrder->customer_name,
-                'otcMurabaha' => '',
-                'otcMurabahaValue' => $financingOrder->selling_price->formatByDecimal(),
-                'eCertNo' => $traderOrder->reference,
-            ],
-        ];
-
-        $response = $this->rateLimitRequest(
-            $traderOrder,
-            fn () => Http::bursam()->post(
-                'api/process/svc/bsas/order.json',
-                $requestBody
-            )
-        );
+        $response = BursamClient::of($traderOrder)->sellProduct();
 
         if (! empty($response->json('header.errorCode')) || $response->json('body.0.statusCode') != 0) {
             throw new TraderException(
@@ -442,8 +342,6 @@ class BursamV1Driver implements TraderInterface
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
                     'provider_response_body' => $response->json(),
-                    'provider_request_body' => $requestBody,
-
                 ]
             );
         }
@@ -453,26 +351,7 @@ class BursamV1Driver implements TraderInterface
 
     public function fetchOrderResultNYY(TraderOrder $traderOrder)
     {
-        $requestBody = [
-            'header' => [
-                'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                'uuid' => $traderOrder->uuid_two,
-            ],
-            'request' => [
-                'serialNumber' => '1',
-                'forceYN' => 'Y',
-                'maxWaitTime' => '10',
-                'waitAllDoneYN' => 'Y',
-            ],
-        ];
-
-        $response = $this->rateLimitRequest(
-            $traderOrder,
-            fn () => Http::bursam()->post(
-                'api/process/svc/bsas/orderResult.json',
-                $requestBody
-            )
-        );
+        $response = BursamClient::of($traderOrder)->fetchSellResult($traderOrder->uuid_two);
 
         if (
             $response->json('status.processingCount') == 0
@@ -488,7 +367,6 @@ class BursamV1Driver implements TraderInterface
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
                     'uuid_two' => $traderOrder->uuid_two,
-                    'provider_request_body' => $requestBody,
                     'provider_response_body' => $response->json(),
                 ]
             );
@@ -499,20 +377,7 @@ class BursamV1Driver implements TraderInterface
 
     public function getOtcCertificateDetails(TraderOrder $traderOrder)
     {
-        $requestBody = [
-            'input' => [
-                'membershortname' => config('trader.providers.bursam.member_short_name'),
-                'ecertno' => $traderOrder->reference,
-            ],
-        ];
-
-        $response = $this->rateLimitRequest(
-            $traderOrder,
-            fn () => Http::bursam()->post(
-                'api/process/svc/bsas/otcXML.json',
-                $requestBody
-            )
-        );
+        $response = BursamClient::of($traderOrder)->getOtcXml();
 
         if ($response->json('SUCCESSYN') == 'N') {
             throw new TraderException(
@@ -522,8 +387,6 @@ class BursamV1Driver implements TraderInterface
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
                     'provider_response_body' => $response->json(),
-                    'provider_request_body' => $requestBody,
-
                 ]
             );
         }
@@ -539,8 +402,8 @@ class BursamV1Driver implements TraderInterface
             'seller' => $response->json('SELLER'),
             'buyer' => $response->json('BUYER'),
             'murabaha_value' => $response->json('MURABAHAVALUE'),
-            'total_value' => $response->json('TOTALVALUE'),
-            'total_value_myr_equivalent' => parse_number($response->json('PRICE_MYR_EQUIVALENT')) * parse_number($response->json('PVOLUME')),
+            'total_value' => number_unformat($response->json('TOTALVALUE')),
+            'total_value_myr_equivalent' => number_unformat($response->json('PRICE_MYR_EQUIVALENT')) * number_unformat($response->json('PVOLUME')),
             'currency' => $response->json('CURRENCY'),
             //            'price' => $response->json('PRICE'),
             //            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
@@ -574,20 +437,7 @@ class BursamV1Driver implements TraderInterface
 
     public function getStbCertificateDetails(TraderOrder $traderOrder)
     {
-        $requestBody = [
-            'input' => [
-                'membershortname' => config('trader.providers.bursam.member_short_name'),
-                'ecertno' => $traderOrder->reference,
-            ],
-        ];
-
-        $response = $this->rateLimitRequest(
-            $traderOrder,
-            fn () => Http::bursam()->post(
-                'api/process/svc/bsas/stbXML.json',
-                $requestBody
-            )
-        );
+        $response = BursamClient::of($traderOrder)->getStbXml();
 
         if ($response->json('SUCCESSYN') == 'N') {
             throw new TraderException(
@@ -597,7 +447,6 @@ class BursamV1Driver implements TraderInterface
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
                     'provider_response_body' => $response->json(),
-                    'provider_request_body' => $requestBody,
 
                 ]
             );
@@ -613,8 +462,8 @@ class BursamV1Driver implements TraderInterface
             'e_cert_no' => $response->json('ECERTNO'),
             'seller' => $response->json('SELLER'),
             'buyer' => $response->json('BUYER'),
-            'total_value' => $response->json('TOTALVALUE'),
-            'total_value_myr_equivalent' => parse_number($response->json('PRICE_MYR_EQUIVALENT')) * parse_number($response->json('PVOLUME')),
+            'total_value' => number_unformat($response->json('TOTALVALUE')),
+            'total_value_myr_equivalent' => number_unformat($response->json('PRICE_MYR_EQUIVALENT')) * number_unformat($response->json('PVOLUME')),
             'currency' => $response->json('CURRENCY'),
             //            'price' => $response->json('PRICE'),
             //            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
@@ -671,10 +520,7 @@ class BursamV1Driver implements TraderInterface
         TraderOrder $traderOrder,
         int $cancelReason = TraderOrderCancelReason::Manual
     ): int {
-        $traderOrder->update([
-            'status' => TraderOrderStatus::Cancelled,
-            'cancel_reason' => $cancelReason,
-        ]);
+        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
 
         $activeTraderOrdersCount = TraderOrder::where('status', TraderOrderStatus::InProgress)
             ->where('financing_order_id', $traderOrder->id)
@@ -708,37 +554,5 @@ class BursamV1Driver implements TraderInterface
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
         return true;
-    }
-
-    protected function rateLimitRequest($traderOrder, $callback, $remainingRetries = 0)
-    {
-        if ($remainingRetries > (int) config('trader.providers.bursam.rate_limit.max_retries_before_exception')) {
-            $exception = new RateLimitExceededException('bursam_api');
-
-            $exception->setContext([
-                'trader_order_id' => $traderOrder->id,
-                'provider' => $traderOrder->provider,
-                'version' => $traderOrder->version,
-            ]);
-
-            throw $exception;
-        }
-
-        if ($remainingRetries > 0) {
-            sleep(((int) config('trader.providers.bursam.rate_limit.decay_seconds')) + 1);
-        }
-
-        $executed = RateLimiter::attempt(
-            'bursam_api',
-            config('trader.providers.bursam.rate_limit.max_attempts'),
-            $callback,
-            config('trader.providers.bursam.rate_limit.decay_seconds'),
-        );
-
-        if ($executed === false) {
-            return $this->rateLimitRequest($traderOrder, $callback, ++$remainingRetries);
-        }
-
-        return $executed;
     }
 }

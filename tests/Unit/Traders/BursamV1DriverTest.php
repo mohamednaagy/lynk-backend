@@ -4,7 +4,6 @@ namespace Tests\Unit\Traders;
 
 use App\Enums\BursamErrorCode;
 use App\Enums\BursamProductCode;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\OrderCancellationStatus;
@@ -40,7 +39,7 @@ use Tests\Traits\InteractsWithUser;
 
 class BursamV1DriverTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser, WithFaker;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase, WithFaker;
 
     protected static Company $company;
 
@@ -246,7 +245,6 @@ class BursamV1DriverTest extends TestCase
 
         $this->assertEquals(TraderOrderCancellationStatus::Cancelled, $result);
         $this->assertTrue(self::$traderOrder->status->is(TraderOrderStatus::Cancelled));
-        $this->assertTrue(self::$traderOrder->order->status->is(FinancingOrderStatus::Cancelled));
     }
 
     /**

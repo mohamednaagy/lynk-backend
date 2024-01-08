@@ -21,7 +21,7 @@ use Tests\Traits\InteractsWithUser;
 
 class LenderSettingsUpdateTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithSettings, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithSettings, InteractsWithUser, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin/settings/lender';
 
@@ -39,9 +39,6 @@ class LenderSettingsUpdateTest extends TestCase
 
     private static array $lenderSettingsData = [];
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -59,14 +56,13 @@ class LenderSettingsUpdateTest extends TestCase
             'email_verification_enabled' => true,
             'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::On,
             'default_does_order_require_approval' => false,
+            'require_initiate_trade_request' => false,
+            'notify_borrowers_about_order_updates' => false,
             'default_company_registration_status' => CompanyStatus::UnderReview,
             'default_company_status_created_by_operation' => CompanyStatus::UnderReview,
         ];
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_update_lender_settings_failed(): void
     {
         $this->putJson(self::BaseUrl)
@@ -76,9 +72,6 @@ class LenderSettingsUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_authorized_user_without_right_role_cant_update_lender_settings_failed(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -88,8 +81,6 @@ class LenderSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_lender_settings_on_empty_default_order_cost_failed(): void
@@ -108,8 +99,6 @@ class LenderSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_lender_settings_notify_admins_about_new_orders_field_is_required(): void
@@ -127,8 +116,6 @@ class LenderSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_lender_settings_on_invalid_default_order_cost_failed(): void
@@ -150,8 +137,6 @@ class LenderSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_lender_settings_on_empty_email_verification_enabled_failed(): void
@@ -170,8 +155,6 @@ class LenderSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_lender_settings_on_invalid_email_verification_enabled_failed(): void
@@ -193,8 +176,6 @@ class LenderSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_lender_settings_on_empty_default_does_order_require_approval_failed(): void
@@ -213,8 +194,6 @@ class LenderSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_lender_settings_on_invalid_default_does_order_require_approval_failed(): void
@@ -236,8 +215,42 @@ class LenderSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
+     * @throws Exception
+     */
+    public function test_update_lender_settings_on_empty_require_initiate_trade_request_failed(): void
+    {
+        $this->actingAs(self::$admin)
+            ->putJson(self::BaseUrl, Arr::except(self::$lenderSettingsData, ['require_initiate_trade_request']))
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonFragment([
+                'message' => 'The require initiate trade request field is required.',
+                'errors' => [
+                    'require_initiate_trade_request' => [
+                        'The require initiate trade request field is required.',
+                    ],
+                ],
+            ]);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function test_update_lender_settings_on_empty_notify_borrowers_about_order_updates_failed(): void
+    {
+        $this->actingAs(self::$admin)
+            ->putJson(self::BaseUrl, Arr::except(self::$lenderSettingsData, ['notify_borrowers_about_order_updates']))
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonFragment([
+                'message' => 'The notify borrowers about order updates field is required.',
+                'errors' => [
+                    'notify_borrowers_about_order_updates' => [
+                        'The notify borrowers about order updates field is required.',
+                    ],
+                ],
+            ]);
+    }
+
+    /**
      * @throws Exception
      */
     public function test_update_lender_settings_on_empty_default_company_registration_status_failed(): void
@@ -256,8 +269,6 @@ class LenderSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_lender_settings_on_invalid_and_not_integer_default_company_registration_status_failed(): void
@@ -280,8 +291,6 @@ class LenderSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_lender_settings_on_invalid_default_company_registration_status_failed(): void
@@ -303,8 +312,6 @@ class LenderSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_lender_settings_on_empty_default_company_status_created_by_operation_failed(): void
@@ -323,8 +330,6 @@ class LenderSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_lender_settings_on_invalid_and_not_integer_default_company_status_created_by_operation_failed(): void
@@ -347,8 +352,6 @@ class LenderSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_lender_settings_on_invalid_default_company_status_created_by_operation_failed(): void
@@ -370,8 +373,6 @@ class LenderSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_that_auth_user_has_admin_role_can_update_lender_settings_succeed(): void
@@ -385,8 +386,6 @@ class LenderSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_that_auth_user_has_manager_role_and_right_permission_can_update_lender_settings_succeed(): void
@@ -399,9 +398,6 @@ class LenderSettingsUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_right_permissions_cannot_update_lender_settings_failed(): void
     {
         $this->actingAs(self::$manager)

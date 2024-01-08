@@ -4,6 +4,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Orders;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\Company;
@@ -19,11 +20,13 @@ use Tests\Traits\InteractsWithUser;
 
 class OrderControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
     private static Wallet $wallet;
+
+    private static User $userLenderAdmin;
 
     private static User $admin;
 
@@ -41,6 +44,7 @@ class OrderControllerStoreTest extends TestCase
         parent::setUp();
 
         [self::$company, self::$wallet] = $this->createCompany('2000');
+        self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$admin = $this->createSuperAdminUser();
         self::$mangerHasNoPermissions = $this->createSuperAdminUser(Role::Manager);
         self::$managerHasPermissions = $this->createSuperAdminUser(Role::Manager);
@@ -84,6 +88,18 @@ class OrderControllerStoreTest extends TestCase
             ->postJson('api/v1/admin/orders', Arr::except(self::$orderDetails, ['company_id']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonValidationErrorFor('company_id');
+    }
+
+    public function test_store_order_with_force_unique_reference_number(): void
+    {
+        self::$company->update(['force_unique_reference_number' => true]);
+
+        $this->createOrder(self::$company->id, self::$userLenderAdmin->id, ['status' => FinancingOrderStatus::InProgress, 'reference_number' => '123']);
+
+        $this->actingAs(self::$admin)
+            ->postJson('api/v1/admin/orders', array_merge(self::$orderDetails, ['reference_number' => '123']))
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('reference_number');
     }
 
     public function test_that_auth_user_without_amount_cant_create_order(): void
@@ -147,7 +163,9 @@ class OrderControllerStoreTest extends TestCase
                     'reference_number',
                     'national_id',
                     'amount',
+                    'amount_formatted',
                     'selling_price',
+                    'selling_price_formatted',
                     'is_approved',
                     'status_reason',
                 ],
@@ -180,7 +198,9 @@ class OrderControllerStoreTest extends TestCase
                     'reference_number',
                     'national_id',
                     'amount',
+                    'amount_formatted',
                     'selling_price',
+                    'selling_price_formatted',
                     'is_approved',
                     'status_reason',
                 ],

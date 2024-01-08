@@ -11,6 +11,7 @@ use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use Carbon\Carbon;
+use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -20,10 +21,6 @@ use Modules\Grantify\Facades\Grantify;
 
 trait InteractsWithLender
 {
-    /**
-     * @param  array  $data
-     * @return Company
-     */
     public function createCompanyWithoutWallet(
         array $data = []
     ): Company {
@@ -42,23 +39,19 @@ trait InteractsWithLender
     }
 
     /**
-     * @param  int  $walletInitialAmount
-     * @param  array  $data
-     * @return array
-     *
      * @throws BindingResolutionException
      */
     public function createCompany(
-        int $walletInitialAmount = 2000,
+        int $walletInitialAmount = 200000,
         array $data = []
     ): array {
         $company = $this->createCompanyWithoutWallet($data);
 
-        $wallet = $company->createWallet(WalletType::CompanyWallet, 'SAR');
+        $wallet = $company->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
 
         app()->make(TransactionServiceInterface::class)->deposit(
             $wallet,
-            \money($walletInitialAmount, 'SAR'),
+            \money($walletInitialAmount, Money::getDefaultCurrency()),
             1,
             1,
             []
@@ -71,10 +64,6 @@ trait InteractsWithLender
     }
 
     /**
-     * @param  int  $companyId
-     * @param  string  $role
-     * @param  string  $email
-     * @param  array  $data
      * @return Collection|Model|mixed
      */
     public function createLenderUser(
@@ -94,12 +83,6 @@ trait InteractsWithLender
         return $userLender;
     }
 
-    /**
-     * @param  int  $companyId
-     * @param  int  $userId
-     * @param  array  $data
-     * @return FinancingOrder|Model|Builder
-     */
     public function createOrder(int $companyId, int $userId, array $data = []): FinancingOrder|Model|Builder
     {
         return FinancingOrder::query()->create(array_merge([

@@ -17,7 +17,9 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
      */
     public function handle(FinancingOrder $financingOrder, array $data): FinancingOrder
     {
-        $data['phone_number'] = PhoneNumber::make($data['phone_number'], $data['phone_country_code']);
+        if (isset($data['phone_number'])) {
+            $data['phone_number'] = PhoneNumber::make($data['phone_number'], $data['phone_country_code']);
+        }
 
         if (isset($data['amount'])) {
             $data['amount'] = Money::parseByDecimal($data['amount'], $financingOrder->currency);
@@ -50,6 +52,8 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
                     'selling_price',
                     'status',
                     'status_reason',
+                    'customer_name',
+                    'is_verification_required',
                 ]
             )
         );

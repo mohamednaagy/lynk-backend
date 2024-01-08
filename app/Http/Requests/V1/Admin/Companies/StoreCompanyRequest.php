@@ -97,13 +97,8 @@ class StoreCompanyRequest extends FormRequest
                 'required',
                 Rule::in(OrderFeeType::getValues()),
             ],
-            'order_cost_tiers.*.order_cost_without_vat' => [
-                'required',
-                'decimal:0,2',
-            ],
             'order_cost_tiers.*.order_cost_with_vat' => [
                 'required',
-                'gt:order_cost_tiers.*.order_cost_without_vat',
                 'decimal:0,2',
             ],
             'order_cost_tiers.'.$lastTierIndex.'.proration_amount' => [
@@ -134,6 +129,10 @@ class StoreCompanyRequest extends FormRequest
                 new EnumValue(CompanyNewOrderNotificationForAdminStatus::class, false),
             ],
             'notify_borrowers_about_order_updates' => [
+                'required',
+                'boolean',
+            ],
+            'force_unique_reference_number' => [
                 'required',
                 'boolean',
             ],

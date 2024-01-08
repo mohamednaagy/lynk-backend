@@ -5,12 +5,29 @@ namespace App\Observers;
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
-use App\Events\OrderCancelled;
+use App\Events\TraderOrderCancelled;
+use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
 
 class TraderOrderObserver
 {
+    /**
+     * Handle the TraderOrder "creating" event.
+     *
+     * @return void
+     */
+    public function creating(TraderOrder $traderOrder)
+    {
+        $order = $traderOrder->order;
+
+        if ($this->shouldSetAsBaseTraderOrder($order)) {
+            $traderOrder->fill([
+                'is_base' => true,
+            ]);
+        }
+    }
+
     /**
      * Handle the TraderOrder "created" event.
      *
@@ -28,6 +45,23 @@ class TraderOrderObserver
     }
 
     /**
+     * Determine if the given order should have the current trader order set as the base trader order.
+     */
+    protected function shouldSetAsBaseTraderOrder(FinancingOrder $order): bool
+    {
+        if ($order->traderOrders()->count() === 0) {
+            return true;
+        }
+
+        $baseTraderOrder = $order->traderOrders()
+            ->where('is_base', true)
+            ->latest('id')
+            ->first();
+
+        return $baseTraderOrder && now()->diffInHours($baseTraderOrder->created_at) >= 72;
+    }
+
+    /**
      * Handle the TraderOrder "updated" event.
      *
      * @return void
@@ -42,7 +76,7 @@ class TraderOrderObserver
     protected function takeActionsIfStatusWasChanged(TraderOrder $traderOrder): void
     {
         if ($traderOrder->status->is(TraderOrderStatus::Cancelled)) {
-            OrderCancelled::dispatch($traderOrder);
+            TraderOrderCancelled::dispatch($traderOrder);
             app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
         }
     }

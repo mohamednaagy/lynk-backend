@@ -32,7 +32,7 @@ use UnexpectedValueException;
  */
 class TraderOrder extends Model implements HasMedia
 {
-    use HasFactory, VirtualColumn, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, VirtualColumn;
 
     protected $fillable = [];
 
@@ -48,6 +48,7 @@ class TraderOrder extends Model implements HasMedia
             'provider',
             'version',
             'status',
+            'is_base',
             'reference',
             'can_continue_progress',
             'updated_at',

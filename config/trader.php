@@ -41,6 +41,7 @@ return [
         ],
         'bursam' => [
             'latest' => 'v2',
+            'fake' => env('BURSAM_FAKE', false),
             'rate_limit' => [
                 'decay_seconds' => env('BURSAM_RATE_LIMIT_DECAY_SECONDS', 1),
                 'max_attempts' => env('BURSAM_RATE_LIMIT_MAX_ATTEMPTS', 1),

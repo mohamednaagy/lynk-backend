@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Modules\Otpify\Models\OtpifyCode;
@@ -24,7 +25,7 @@ use Tests\Traits\InteractsWithUser;
 
 class AcceptClientWakalaTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
@@ -57,6 +58,8 @@ class AcceptClientWakalaTest extends TestCase
 
     public function test_accept_client_wakala_successful()
     {
+        Event::fake();
+
         $cacheKey = sprintf('client_wakala_token_%s_%s', self::$order->id, self::$order->national_id);
 
         $token = Str::random(100);

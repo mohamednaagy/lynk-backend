@@ -39,6 +39,8 @@ class OrderController extends Controller
                 'id',
                 'amount',
                 'selling_price',
+                'amount_formatted',
+                'selling_price_formatted',
                 'status',
             ])
             ->respond();
@@ -65,6 +67,8 @@ class OrderController extends Controller
                 'id',
                 'amount',
                 'selling_price',
+                'amount_formatted',
+                'selling_price_formatted',
                 'status',
                 'active_trader.id',
                 'active_trader.reference',

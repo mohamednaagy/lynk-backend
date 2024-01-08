@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessBursamStbCertificate implements ShouldBeUnique, ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait, StopsTraderOrderOnJobFailure;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure, TraderHelperTrait;
 
     /**
      * Create a new job instance.

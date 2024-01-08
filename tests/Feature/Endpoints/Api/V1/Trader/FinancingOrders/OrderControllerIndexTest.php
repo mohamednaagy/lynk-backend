@@ -73,7 +73,7 @@ class OrderControllerIndexTest extends TestCase
 
     public function test_auth_user_with_proper_permission_can_access(): void
     {
-        $orders = app(BuildFinancingOrdersQuery::class)->setCompany(tenant())->handle()->paginate();
+        $orders = app(BuildFinancingOrdersQuery::class)->setCompany(self::$company)->handle()->paginate();
 
         $this->actingAs(self::$userTraderAdmin)
             ->withHeader('X-Company', self::$company->id)
@@ -85,6 +85,8 @@ class OrderControllerIndexTest extends TestCase
                         'id',
                         'amount',
                         'selling_price',
+                        'amount_formatted',
+                        'selling_price_formatted',
                         'status',
                     ])
                     ->respond()
@@ -94,7 +96,7 @@ class OrderControllerIndexTest extends TestCase
 
     public function test_can_see_only_current_trader_company_orders(): void
     {
-        $orders = app(BuildFinancingOrdersQuery::class)->setCompany(tenant())->handle()->paginate();
+        $orders = app(BuildFinancingOrdersQuery::class)->setCompany(self::$company)->handle()->paginate();
 
         $this->actingAs(self::$userTraderAdmin)
             ->withHeader('X-Company', self::$company->id)
@@ -106,6 +108,8 @@ class OrderControllerIndexTest extends TestCase
                         'id',
                         'amount',
                         'selling_price',
+                        'amount_formatted',
+                        'selling_price_formatted',
                         'status',
                     ])
                     ->respond()

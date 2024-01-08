@@ -6,6 +6,7 @@ use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
+use App\Models\TraderOrder;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Transformers\FinancingOrderTransformer;
@@ -19,7 +20,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class TraderOrderControllerShowTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $traderCompany;
 
@@ -56,9 +57,11 @@ class TraderOrderControllerShowTest extends TestCase
             'reference' => 123,
         ]);
 
-        self::$traderHistory = self::$traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::GetTtiId,
-        ]);
+        TraderOrder::withoutEvents(function () {
+            self::$traderHistory = self::$traderOrder->traderHistories()->create([
+                'action' => FinancingOrderHistory::GetTtiId,
+            ]);
+        });
 
         self::$baseURL = 'api/v1/admin/orders/'.self::$order->id;
     }
@@ -85,17 +88,20 @@ class TraderOrderControllerShowTest extends TestCase
             ->getJson(self::$baseURL)
             ->assertOk()
             ->assertExactJson(
-                fractal(self::$order, (new FinancingOrderTransformer(self::$traderCompany))
+                fractal(self::$order, (new FinancingOrderTransformer(self::$lenderCompany))
                     ->setArea(Area::SuperAdmin)
                     ->setCurrentUser(self::$userAdmin))
                     ->parseIncludes([
                         'id',
                         'status',
+                        'company_name',
                         'reference_number',
                         'customer_name',
                         'national_id',
                         'amount',
                         'selling_price',
+                        'amount_formatted',
+                        'selling_price_formatted',
                         'phone_country_code',
                         'phone_number',
                         'phone_number_formatted',
@@ -116,6 +122,8 @@ class TraderOrderControllerShowTest extends TestCase
                         'trader_orders.products',
                         'trader_orders.created_at',
                         'trader_orders.failure_reason',
+                        'trader_orders.refunded_at',
+                        'trader_orders.refund_status',
                         'creator',
                         'created_at',
                         'payment_proof_url',

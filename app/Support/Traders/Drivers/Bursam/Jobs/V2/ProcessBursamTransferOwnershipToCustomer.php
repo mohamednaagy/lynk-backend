@@ -16,7 +16,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessBursamTransferOwnershipToCustomer implements ShouldQueue, ShouldBeUnique
+class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 

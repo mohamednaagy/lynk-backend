@@ -16,7 +16,7 @@ use Tests\Traits\InteractsWithUser;
 
 class GetAuthUserTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
@@ -24,9 +24,6 @@ class GetAuthUserTest extends TestCase
 
     private static User $userLender;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -35,9 +32,6 @@ class GetAuthUserTest extends TestCase
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_fetch_his_details(): void
     {
         $this->withHeader('X-Company', self::$company->getOriginal('id'))
@@ -48,9 +42,6 @@ class GetAuthUserTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_lender_can_fetch_his_details(): void
     {
         $data = $this->actingAs(self::$userLender)
@@ -67,10 +58,11 @@ class GetAuthUserTest extends TestCase
                         'is_email_verified',
                         'role',
                         'company.id',
+                        'company.is_tiered',
                         'company.name',
                         'company.public_status_comment',
                         'company.status',
-                        'company.id',
+                        'company.trading_mode',
                         'permissions',
                         'locale',
                         'phone_number',

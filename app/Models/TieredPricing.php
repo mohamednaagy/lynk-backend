@@ -27,7 +27,6 @@ class TieredPricing extends Model
         'order_value_end' => MoneyStringCast::class,
         'fee_type' => OrderFeeType::class,
         'order_cost_without_vat' => MoneyStringCast::class,
-        'order_cost_with_vat' => MoneyStringCast::class,
         'proration_amount' => MoneyStringCast::class,
     ];
 

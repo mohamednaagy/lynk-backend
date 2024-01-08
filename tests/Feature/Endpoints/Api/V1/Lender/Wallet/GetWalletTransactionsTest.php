@@ -20,9 +20,9 @@ use Tests\Traits\InteractsWithUser;
 
 class GetWalletTransactionsTest extends TestCase
 {
-    use RefreshDatabase;
-    use InteractsWithUser;
     use InteractsWithCompany;
+    use InteractsWithUser;
+    use RefreshDatabase;
 
     private static Company $company;
 
@@ -32,9 +32,6 @@ class GetWalletTransactionsTest extends TestCase
 
     private static string $endpoint;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -58,6 +55,7 @@ class GetWalletTransactionsTest extends TestCase
                         'date',
                         'description',
                         'amount',
+                        'amount_formatted',
                         'receipt_url',
                     ])
                     ->respond()
@@ -65,7 +63,7 @@ class GetWalletTransactionsTest extends TestCase
             );
 
         app()->make(TransactionServiceInterface::class)->deposit(
-            self::$wallet, new Money(20000, 'SAR'), TransactionReason::DepositByEdaat, 2, []
+            self::$wallet, new Money(2000000, Money::getDefaultCurrency()), TransactionReason::DepositByEdaat, 2, []
         );
 
         $this->actingAs(self::$userLender)
@@ -74,12 +72,13 @@ class GetWalletTransactionsTest extends TestCase
             ->assertJsonCount(2, 'data')
             ->assertExactJson(
                 fractal(
-                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer())
+                    self::$company->transactions(WalletType::CompanyWallet)->latest('id')->paginate(), new TransactionTransformer())
                     ->parseIncludes([
                         'id',
                         'date',
                         'description',
                         'amount',
+                        'amount_formatted',
                         'receipt_url',
                     ])
                     ->respond()
@@ -103,6 +102,7 @@ class GetWalletTransactionsTest extends TestCase
                         'date',
                         'description',
                         'amount',
+                        'amount_formatted',
                         'receipt_url',
                     ])
                     ->respond()
@@ -126,6 +126,7 @@ class GetWalletTransactionsTest extends TestCase
                         'date',
                         'description',
                         'amount',
+                        'amount_formatted',
                         'receipt_url',
                     ])
                     ->respond()
@@ -149,6 +150,7 @@ class GetWalletTransactionsTest extends TestCase
                         'date',
                         'description',
                         'amount',
+                        'amount_formatted',
                         'receipt_url',
                     ])
                     ->respond()

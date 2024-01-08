@@ -11,6 +11,9 @@ class TraderHistoryObserver
 {
     use ObserverHelper;
 
+    /**
+     * @throws \Exception
+     */
     public function created(TraderHistory $traderHistory)
     {
         $traderOrder = $traderHistory->traderOrder()

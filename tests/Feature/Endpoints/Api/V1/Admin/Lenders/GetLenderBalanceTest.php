@@ -37,7 +37,7 @@ class GetLenderBalanceTest extends TestCase
     {
         parent::setUp();
 
-        self::$lender = $this->createLenderCompanyWithStandardOrderCost('20000', ['company_cr' => '12345678910']);
+        self::$lender = $this->createLenderCompanyWithStandardOrderCost('200000000', ['company_cr' => '12345678910']);
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(
@@ -66,8 +66,9 @@ class GetLenderBalanceTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    'available_orders' => '1',
-                    'balance' => '200.00',
+                    'available_orders' => null,
+                    'balance' => '20000.00',
+                    'balance_formatted' => '20,000.00',
                 ],
             ]);
     }
@@ -79,8 +80,9 @@ class GetLenderBalanceTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'data' => [
-                    'available_orders' => '1',
-                    'balance' => '200.00',
+                    'available_orders' => null,
+                    'balance' => '20000.00',
+                    'balance_formatted' => '20,000.00',
                 ],
             ]);
     }

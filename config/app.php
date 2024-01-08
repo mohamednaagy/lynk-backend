@@ -18,7 +18,7 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
-    'currency' => env('APP_CURRENCY', 'SAR'),
+    'currency' => env('APP_CURRENCY', 'SAR4'),
 
     /*
     |--------------------------------------------------------------------------
@@ -209,6 +209,7 @@ return [
         App\Providers\TransactionUtilServiceProvider::class,
         \Shivella\Bitly\BitlyServiceProvider::class,
         Jenssegers\Agent\AgentServiceProvider::class,
+        App\Providers\MoneyServiceProvider::class,
     ],
 
     /*

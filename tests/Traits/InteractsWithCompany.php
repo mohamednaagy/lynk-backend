@@ -8,12 +8,14 @@ use App\Enums\CompanyType;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\OrderFeeType;
+use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\EdaatInvoice;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
+use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -38,12 +40,12 @@ trait InteractsWithCompany
     ): array {
         $company = $this->createCompanyWithoutWallet($data);
 
-        $wallet = $company->createWallet(WalletType::CompanyWallet, 'SAR');
+        $wallet = $company->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
 
         app()->make(TransactionServiceInterface::class)->deposit(
             $wallet,
-            \money($walletInitialAmount, 'SAR'),
-            1,
+            Money::parseByDecimal($walletInitialAmount, Money::getDefaultCurrency()),
+            TransactionReason::ManualDeposit,
             1,
             [
                 'is_vat_included' => true,
@@ -80,6 +82,7 @@ trait InteractsWithCompany
     public function addOrderCostTiersToCompany($company, $tiersCount)
     {
         $orderCostTiers = $this->generateOrderCostTiers($tiersCount);
+        $company->tieredPricing()->delete();
         $company->tieredPricing()->createMany($orderCostTiers);
 
         return $company;

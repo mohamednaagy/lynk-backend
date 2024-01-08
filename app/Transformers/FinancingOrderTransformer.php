@@ -39,7 +39,9 @@ class FinancingOrderTransformer extends TransformerAbstract
         'customer_name',
         'national_id',
         'amount',
+        'amount_formatted',
         'selling_price',
+        'selling_price_formatted',
         'is_verification_required',
         'is_updatable',
         'is_cancellable',
@@ -55,6 +57,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'history',
         'active_trader',
         'trader_orders',
+        'charged_trader_orders_count',
         'trader_order_history',
         'can_be_completed',
         'payment_proof_url',
@@ -125,12 +128,22 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeAmount(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->amount->formatByDecimal());
+        return $this->primitive($financingOrder->amount->convertAndFormatByDecimal());
+    }
+
+    public function includeAmountFormatted(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->amount->convertAndFormatByDecimal(sperator: ','));
     }
 
     public function includeSellingPrice(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->selling_price->formatByDecimal());
+        return $this->primitive($financingOrder->selling_price->convertAndFormatByDecimal());
+    }
+
+    public function includeSellingPriceFormatted(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->selling_price->convertAndFormatByDecimal(sperator: ','));
     }
 
     public function includeCreator(FinancingOrder $financingOrder)
@@ -231,7 +244,7 @@ class FinancingOrderTransformer extends TransformerAbstract
     {
         return $this->collection(
             $financingOrder->traderOrders,
-            (new TraderOrderTransformer())->setArea($this->area)
+            (new TraderOrderTransformer())->setArea($this->area)->setCurrentOrderTraderOrders($financingOrder->traderOrders)
         );
     }
 
@@ -245,6 +258,11 @@ class FinancingOrderTransformer extends TransformerAbstract
             $financingOrder->activeTraderOrder->first(),
             (new TraderOrderTransformer())->setArea($this->area)
         );
+    }
+
+    public function includeChargedTraderOrdersCount(FinancingOrder $financingOrder): Primitive
+    {
+        return $this->primitive((int) $financingOrder->charged_trader_orders_count);
     }
 
     public function includeTraderOrderHistory(FinancingOrder $financingOrder): Primitive

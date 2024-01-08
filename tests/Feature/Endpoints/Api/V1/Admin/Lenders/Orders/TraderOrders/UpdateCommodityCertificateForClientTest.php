@@ -26,7 +26,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UpdateCommodityCertificateForClientTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin';
 
@@ -57,6 +57,7 @@ class UpdateCommodityCertificateForClientTest extends TestCase
         self::$userLender = $this->createLenderUser(self::$lender->id);
 
         self::$financingOrder = OrderScenario::inProgress()
+            ->lender(self::$lender)
             ->creator(self::$userLender)
             ->commit();
 

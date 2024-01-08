@@ -103,7 +103,7 @@ class UpdateCompanyRequest extends FormRequest
                 'required',
                 Rule::in(OrderFeeType::getValues()),
             ],
-            'order_cost_tiers.*.order_cost_without_vat' => [
+            'order_cost_tiers.*.order_cost_with_vat' => [
                 'required',
                 'decimal:0,2',
             ],
@@ -135,6 +135,10 @@ class UpdateCompanyRequest extends FormRequest
                 new EnumValue(CompanyNewOrderNotificationForAdminStatus::class, false),
             ],
             'notify_borrowers_about_order_updates' => [
+                'required',
+                'boolean',
+            ],
+            'force_unique_reference_number' => [
                 'required',
                 'boolean',
             ],

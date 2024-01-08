@@ -2,8 +2,11 @@
 
 namespace App\Http\Requests\V1\Lender\Orders;
 
+use App\Enums\FinancingOrderStatus;
 use App\Http\Requests\Traits\RequestHasMobileVerification;
+use App\Models\Company;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Unique;
 
 class StoreOrderRequest extends FormRequest
 {
@@ -28,7 +31,7 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             'customer_name' => ['required', 'string', 'max:255'],
-            'reference_number' => ['nullable', 'string', 'max:100'],
+            'reference_number' => ['nullable', 'string', 'max:100', $this->handleUniqueReferenceNumber()],
             'national_id' => ['required', 'integer', 'digits:10', 'gt:0'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required_if:is_verification_required,true', 'string', 'phone:phone_country_code,mobile'],
@@ -36,5 +39,17 @@ class StoreOrderRequest extends FormRequest
             'selling_price' => ['required', 'numeric', 'gte:amount'],
             'is_verification_required' => ['required', 'boolean'],
         ];
+    }
+
+    private function handleUniqueReferenceNumber(): ?Unique
+    {
+        /** @var Company $company */
+        $company = tenant();
+        if ($company->force_unique_reference_number) {
+            return $company->unique('financing_orders', 'reference_number')
+                ->whereNot('status', FinancingOrderStatus::Cancelled);
+        }
+
+        return null;
     }
 }

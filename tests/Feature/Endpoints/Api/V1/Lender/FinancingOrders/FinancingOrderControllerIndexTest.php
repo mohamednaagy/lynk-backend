@@ -18,7 +18,7 @@ use Tests\Traits\InteractsWithUser;
 
 class FinancingOrderControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $firstCompany;
 
@@ -86,9 +86,13 @@ class FinancingOrderControllerIndexTest extends TestCase
                         'reference_number',
                         'national_id',
                         'amount',
-                        'current_step',
                         'selling_price',
+                        'amount_formatted',
+                        'selling_price_formatted',
+                        'charged_trader_orders_count',
+                        'current_step',
                         'status_reason',
+                        'created_at',
                     ])
                     ->respond()
                     ->getData(true)
@@ -111,9 +115,13 @@ class FinancingOrderControllerIndexTest extends TestCase
                         'reference_number',
                         'national_id',
                         'amount',
-                        'current_step',
                         'selling_price',
+                        'amount_formatted',
+                        'selling_price_formatted',
+                        'charged_trader_orders_count',
+                        'current_step',
                         'status_reason',
+                        'created_at',
                     ])
                     ->respond()
                     ->getData(true)
@@ -146,9 +154,13 @@ class FinancingOrderControllerIndexTest extends TestCase
                         'reference_number',
                         'national_id',
                         'amount',
-                        'current_step',
                         'selling_price',
+                        'amount_formatted',
+                        'selling_price_formatted',
+                        'charged_trader_orders_count',
+                        'current_step',
                         'status_reason',
+                        'created_at',
                     ])
                     ->respond()
                     ->getData(true)

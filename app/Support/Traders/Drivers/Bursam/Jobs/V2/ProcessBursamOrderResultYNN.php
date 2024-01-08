@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderErrorCode;
@@ -19,7 +20,6 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 {
@@ -63,15 +63,14 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
                         'status' => FinancingOrderStatus::TradingFailure,
                     ]);
 
-                    $traderOrder->update([
-                        'status' => TraderOrderStatus::Cancelled,
-                        'failure_reason' => $exception->getContext('failure_reason'),
-                        'cancel_reason' => TraderOrderCancelReason::FailureToPurchase,
-                    ]);
+                    app(UpdateTraderOrderStatusToCancel::class)->handle(
+                        $traderOrder,
+                        TraderOrderCancelReason::FailureToPurchase,
+                        $exception->getContext('failure_reason')
+                    );
 
                     $this->delete();
                 } else {
-                    Log::error($exception->getMessage(), $exception->getContext());
                     $this->fail($exception);
                 }
             }
@@ -93,13 +92,13 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
                 'status' => FinancingOrderStatus::TradingFailure,
             ]);
 
-            $traderOrder->update([
-                'status' => TraderOrderStatus::Cancelled,
-                'failure_reason' => method_exists($exception, 'getContext') ?
+            app(UpdateTraderOrderStatusToCancel::class)->handle(
+                $traderOrder,
+                TraderOrderCancelReason::FailureToPurchase,
+                method_exists($exception, 'getContext') ?
                     $exception->getContext('failure_reason')
-                    : '',
-                'cancel_reason' => TraderOrderCancelReason::FailureToPurchase,
-            ]);
+                    : ''
+            );
         });
     }
 

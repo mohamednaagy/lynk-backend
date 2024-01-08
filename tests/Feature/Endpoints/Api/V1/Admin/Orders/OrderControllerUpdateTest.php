@@ -22,7 +22,7 @@ use Tests\Traits\InteractsWithUser;
 
 class OrderControllerUpdateTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
@@ -73,6 +73,18 @@ class OrderControllerUpdateTest extends TestCase
             ->assertExactJson([
                 'message' => 'Unauthenticated.',
             ]);
+    }
+
+    public function test_update_order_with_force_unique_reference_number(): void
+    {
+        self::$company->update(['force_unique_reference_number' => true]);
+
+        $this->createOrder(self::$company->id, self::$userLenderAdmin->id, ['status' => FinancingOrderStatus::InProgress, 'reference_number' => '123']);
+
+        $this->actingAs(self::$admin)
+            ->putJson('api/v1/admin/orders/'.self::$order->id, array_merge(self::$updatedOrderDetails, ['reference_number' => '123']))
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('reference_number');
     }
 
     public function test_that_auth_user_without_national_id_cant_update_order(): void
@@ -130,7 +142,9 @@ class OrderControllerUpdateTest extends TestCase
                         'reference_number',
                         'national_id',
                         'amount',
+                        'amount_formatted',
                         'selling_price',
+                        'selling_price_formatted',
                         'is_approved',
                         'status_reason',
                         'phone_country_code',
@@ -162,7 +176,9 @@ class OrderControllerUpdateTest extends TestCase
                         'reference_number',
                         'national_id',
                         'amount',
+                        'amount_formatted',
                         'selling_price',
+                        'selling_price_formatted',
                         'is_approved',
                         'status_reason',
                         'phone_country_code',

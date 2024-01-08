@@ -15,7 +15,7 @@ use Tests\Traits\InteractsWithUser;
 
 class LenderSettingsUpdateTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     const BaseUrl = 'api/v1/lender/settings';
 
@@ -45,6 +45,7 @@ class LenderSettingsUpdateTest extends TestCase
         self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
         self::$updatedLenderSettingsDetails = [
             'does_order_require_approval' => true,
+            'force_unique_reference_number' => true,
             'notify_borrowers_about_order_updates' => true,
             'require_initiate_trade_request' => true,
         ];
@@ -67,6 +68,15 @@ class LenderSettingsUpdateTest extends TestCase
             ->putJson(self::BaseUrl, \Arr::except(self::$updatedLenderSettingsDetails, 'does_order_require_approval'))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonValidationErrorFor('does_order_require_approval');
+    }
+
+    public function test_update_lender_settings_on_empty_force_unique_reference_number_fails(): void
+    {
+        $this->actingAs(self::$userLender)
+            ->withHeader('X-Company', self::$company->id)
+            ->putJson(self::BaseUrl, \Arr::except(self::$updatedLenderSettingsDetails, 'force_unique_reference_number'))
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('force_unique_reference_number');
     }
 
     public function test_update_lender_settings_on_empty_notify_borrowers_about_order_updates_fails(): void
@@ -97,6 +107,11 @@ class LenderSettingsUpdateTest extends TestCase
         $this->assertEquals(
             Company::find(self::$company->id)->does_order_require_approval,
             self::$updatedLenderSettingsDetails['does_order_require_approval']
+        );
+
+        $this->assertEquals(
+            Company::find(self::$company->id)->force_unique_reference_number,
+            self::$updatedLenderSettingsDetails['force_unique_reference_number']
         );
 
         $this->assertEquals(

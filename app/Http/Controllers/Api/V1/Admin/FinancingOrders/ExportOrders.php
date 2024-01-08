@@ -36,7 +36,7 @@ class ExportOrders extends Controller
             ->setExcludes(
                 $request->boolean('detailed')
                     ? ['reference_number']
-                    : ['reference_number', 'cost_with_vat', 'cost_without_vat']
+                    : ['reference_number', 'national_id', 'selling_price', 'cost_with_vat', 'cost_without_vat']
             );
 
         return Excel::download($export, $this->getFileName($request), null, [

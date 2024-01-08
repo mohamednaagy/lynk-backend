@@ -28,6 +28,7 @@ class CompanyTransformer extends TransformerAbstract
         'orders_sum_amount',
         'notify_admins_about_new_orders',
         'notify_borrowers_about_order_updates',
+        'force_unique_reference_number',
         'trading_mode',
         'require_initiate_trade_request',
     ];
@@ -112,7 +113,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeOrdersSumAmount(Company $company): Primitive
     {
-        $amount = (new Money($company->orders_sum_amount, Money::getDefaultCurrency()))->formatByDecimal();
+        $amount = (new Money($company->orders_sum_amount, Money::getDefaultCurrency()))->convertAndFormatByDecimal();
 
         return $this->primitive(
             number_format($amount, 2)
@@ -122,6 +123,11 @@ class CompanyTransformer extends TransformerAbstract
     public function includeNotifyAdminsAboutNewOrders(Company $company)
     {
         return $this->primitive($company->notify_admins_about_new_orders);
+    }
+
+    public function includeForceUniqueReferenceNumber(Company $company)
+    {
+        return $this->primitive($company->force_unique_reference_number);
     }
 
     public function includeNotifyBorrowersAboutOrderUpdates(Company $company)
