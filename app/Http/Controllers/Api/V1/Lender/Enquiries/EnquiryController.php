@@ -14,6 +14,7 @@ use App\Transformers\EnquiryTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class EnquiryController extends Controller
 {
@@ -40,10 +41,6 @@ class EnquiryController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param  Request  $request
-     * @param  GetPaginatedUserEnquiries  $getPaginatedUserEnquiries
-     * @return JsonResponse
      */
     public function index(
         Request $request,
@@ -63,10 +60,6 @@ class EnquiryController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  StoreEnquiryRequest  $storeEnquiryRequest
-     * @param  CreateEnquiry  $createEnquiry
-     * @return JsonResponse
      */
     public function store(StoreEnquiryRequest $storeEnquiryRequest, CreateEnquiry $createEnquiry): JsonResponse
     {
@@ -92,14 +85,18 @@ class EnquiryController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  Enquiry  $enquiry
-     * @return JsonResponse
      *
      * @throws AuthorizationException
      */
     public function show(Enquiry $enquiry): JsonResponse
     {
         $this->authorize('view', $enquiry);
+        if (is_null($enquiry->user) || $enquiry->user?->company_id != request()->header('X-Company')) {
+            return $this->errorResponse(
+                __('User does not have the right permissions.'),
+                Response::HTTP_FORBIDDEN
+            );
+        }
 
         return fractal($enquiry, new EnquiryTransformer())
             ->parseIncludes([
@@ -116,7 +113,6 @@ class EnquiryController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
