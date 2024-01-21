@@ -4,6 +4,7 @@ namespace Modules\Grantify\Support;
 
 use App\Enums\Role;
 use Modules\Grantify\Support\Roles\Admin;
+use Modules\Grantify\Support\Roles\ApiAdmin;
 use Modules\Grantify\Support\Roles\LenderAdmin;
 use Modules\Grantify\Support\Roles\LenderApiUser;
 use Modules\Grantify\Support\Roles\LenderBilling;
@@ -18,6 +19,7 @@ class RoleUtil
         Role::Admin => Admin::class,
         Role::Manager => Manager::class,
         Role::LenderAdmin => LenderAdmin::class,
+        Role::ApiAdmin => ApiAdmin::class,
         Role::LenderBilling => LenderBilling::class,
         Role::LenderOrderCreator => LenderOrderCreator::class,
         Role::LenderSupervisor => LenderSupervisor::class,
@@ -26,7 +28,6 @@ class RoleUtil
     ];
 
     /**
-     * @param  string  $roleName
      * @return array
      */
     public static function getPermissionsForRole(string $roleName): array|string

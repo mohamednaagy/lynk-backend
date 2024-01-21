@@ -12,7 +12,7 @@ use App\Support\Authorizations\Media\Contracts\MediaAuthorizerContract;
 
 class FinancingOrderMediaAuthorizer implements MediaAuthorizerContract
 {
-    public const AllowedRoles = [Role::Admin, Role::LenderSupervisor, Role::LenderAdmin];
+    public const AllowedRoles = [Role::Admin, Role::LenderSupervisor, Role::LenderAdmin, Role::ApiAdmin];
 
     protected $user;
 
@@ -24,9 +24,6 @@ class FinancingOrderMediaAuthorizer implements MediaAuthorizerContract
         $this->financingOrder = $financingOrder;
     }
 
-    /**
-     * @return bool
-     */
     public function canAccess(): bool
     {
         return $this->user->company_id == $this->financingOrder->company_id
