@@ -20,6 +20,11 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
         });
+
+        \App\Models\Enquiry::get()->each(function ($q) {
+            $q->update(['company_id' => $q->user->company_id]);
+        });
+
     }
 
     /**
