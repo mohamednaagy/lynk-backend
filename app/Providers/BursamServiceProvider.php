@@ -36,6 +36,9 @@ class BursamServiceProvider extends ServiceProvider
                 $response = Http::asForm()
                     ->withOptions([
                         'verify' => config('trader.providers.bursam.verify_tls'),
+                        'allow_redirects' => [
+                            'strict' => true,
+                        ],
                     ])
                     ->baseUrl($baseUrl)
                     ->post('api/process/svc/auth/token', [
@@ -51,6 +54,9 @@ class BursamServiceProvider extends ServiceProvider
                 ->asJson()
                 ->withOptions([
                     'verify' => config('trader.providers.bursam.verify_tls'),
+                    'allow_redirects' => [
+                        'strict' => true,
+                    ],
                 ])
                 ->withToken($token)
                 ->baseUrl($baseUrl);
