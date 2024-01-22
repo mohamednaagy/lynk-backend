@@ -91,7 +91,8 @@ class EnquiryController extends Controller
     public function show(Enquiry $enquiry): JsonResponse
     {
         $this->authorize('view', $enquiry);
-        if (is_null($enquiry->user) || $enquiry->user?->company_id != request()->header('X-Company')) {
+        $user = auth()->user();
+        if ($user->id != $enquiry->user_id) {
             return $this->errorResponse(
                 __('User does not have the right permissions.'),
                 Response::HTTP_FORBIDDEN
