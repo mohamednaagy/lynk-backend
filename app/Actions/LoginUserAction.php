@@ -3,30 +3,26 @@
 namespace App\Actions;
 
 use App\Actions\Contracts\LoginUser;
+use App\Http\Middleware\EnsureFrontendRequestsAreStatefulWithoutCookie;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 class LoginUserAction implements LoginUser
 {
-    /**
-     * @param  User  $user
-     * @param  string|null  $source
-     * @param  Request|null  $request
-     * @return array
-     */
     public function handle(User $user, string $source = null, Request $request = null): array
     {
         $auth = [];
 
-        if (App::runningInConsole() || false === EnsureFrontendRequestsAreStateful::fromFrontend(request())) {
+        if (App::runningInConsole() || EnsureFrontendRequestsAreStatefulWithoutCookie::fromFrontend(request()) === false) {
             $auth['token'] = $user->createToken($source)->plainTextToken;
             $auth['type'] = 'token';
         } else {
             Auth::login($user);
-            request()->session()->regenerate();
+            $auth['token'] = $user->createToken($source)->plainTextToken;
+
+            //            request()->session()->regenerate();
             $auth['type'] = 'session';
         }
 

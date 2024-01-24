@@ -26,11 +26,20 @@ class LoginRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $header = request()->header('Origin') || request()->header('Prefer');
+        $recaptchaRoles = [];
+        if ($header) {
+            $recaptchaRoles['g-recaptcha-response'] = 'required|recaptcha';
+        }
+
+        $validationRules = [
             'unique_name' => ['nullable', 'string', Rule::exists(Company::class, 'unique_name')],
             'email' => ['required', 'string', 'email:filter'],
             'password' => ['required', 'string'],
             'source' => ['required', 'string'],
+
         ];
+
+        return array_merge($recaptchaRoles, $validationRules);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Auth;
 use App\Actions\Contracts\LoginUser;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\EnsureFrontendRequestsAreStatefulWithoutCookie;
 use App\Http\Requests\V1\Auth\LoginRequest;
 use App\Models\Company;
 use App\Models\User;
@@ -17,7 +18,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Jenssegers\Agent\Facades\Agent;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
 
 class LoginController extends Controller
@@ -25,8 +25,6 @@ class LoginController extends Controller
     /**
      * Handle an authentication attempt.
      *
-     * @param  LoginRequest  $request
-     * @param  LoginUser  $loginUser
      * @return JsonResponse
      *
      * @throws ValidationException
@@ -73,12 +71,11 @@ class LoginController extends Controller
     /**
      * Handle logout attempt.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function logout(Request $request)
     {
-        if (EnsureFrontendRequestsAreStateful::fromFrontend($request)) {
+        if (EnsureFrontendRequestsAreStatefulWithoutCookie::fromFrontend($request)) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
