@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\V1\Auth;
 
+use App\Enums\Role;
+use App\Http\Middleware\EnsureFrontendRequestsAreStatefulWithoutCookie;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
@@ -26,9 +28,13 @@ class LoginRequest extends FormRequest
      */
     public function rules()
     {
-        $header = request()->header('Origin') || request()->header('Prefer');
+        // check it if is get from api integration or from api of system
+        $isItNeedRecaptcha = EnsureFrontendRequestsAreStatefulWithoutCookie::fromFrontend(request());
+
+        //check User doesnt has ApiAdmin Role
+        $user = User::where('email', $this->email)->first();
         $recaptchaRoles = [];
-        if ($header) {
+        if ($isItNeedRecaptcha && ! $user->hasRole('ApiAdmin')) {
             $recaptchaRoles['g-recaptcha-response'] = 'required|recaptcha';
         }
 
