@@ -19,7 +19,7 @@ class GetPaginatedLenderUsersAction implements GetPaginatedLenderUsers
                     Role::LenderOrderCreator,
                     Role::LenderBilling,
                     Role::LenderSupervisor,
-                    Role::ApiAdmin,
+                    Role::LenderApiAdmin,
                 ]);
             })
             ->where('company_id', $lender->id)

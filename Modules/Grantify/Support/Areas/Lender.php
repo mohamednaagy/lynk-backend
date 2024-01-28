@@ -14,7 +14,7 @@ class Lender
         Role::LenderSupervisor,
         Role::LenderOrderCreator,
         Role::LenderApiUser,
-        Role::ApiAdmin,
+        Role::LenderApiAdmin,
 
     ];
 
