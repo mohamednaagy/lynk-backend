@@ -30,11 +30,11 @@ class SendLinkRequest extends FormRequest
     {
 
         // check it if is get from api integration or from api of system
-        $isItNeedRecaptcha = EnsureFrontendRequestsAreStatefulWithoutCookie::fromFrontend(request());
+        $isRequestFromFromFrontend = EnsureFrontendRequestsAreStatefulWithoutCookie::fromFrontend(request());
 
         $recaptchaRoles = [];
-        if ($isItNeedRecaptcha) {
-            $recaptchaRoles['g-recaptcha-response'] = 'required|recaptcha';
+        if ($isRequestFromFromFrontend) {
+            $recaptchaRoles['g-recaptcha-response'] = ['required', 'recaptcha'];
         }
 
         $validationRules = [

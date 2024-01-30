@@ -29,13 +29,13 @@ class LoginRequest extends FormRequest
     public function rules()
     {
         // check it if is get from api integration or from api of system
-        $isItNeedRecaptcha = EnsureFrontendRequestsAreStatefulWithoutCookie::fromFrontend(request());
+        $isRequestFromFromFrontend = EnsureFrontendRequestsAreStatefulWithoutCookie::fromFrontend(request());
 
         //check User doesnt has ApiAdmin Role
         $user = User::where('email', $this->email)->first();
         $recaptchaRoles = [];
-        if ($isItNeedRecaptcha && ! $user->hasRole('ApiAdmin')) {
-            $recaptchaRoles['g-recaptcha-response'] = 'required|recaptcha';
+        if ($isRequestFromFromFrontend && ! $user->hasRole('ApiAdmin')) {
+            $recaptchaRoles['g-recaptcha-response'] = ['required', 'recaptcha'];
         }
 
         $validationRules = [
