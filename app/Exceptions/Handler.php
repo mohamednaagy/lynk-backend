@@ -57,7 +57,7 @@ class Handler extends ExceptionHandler
 
         $this->renderable(function (UnauthorizedException $e, $request) {
             return response()->errorResponse(
-                __('User does not have the right permissions.'),
+                __('error.user_doesnt_have_the_right_permissions'),
                 Response::HTTP_FORBIDDEN
             );
         });

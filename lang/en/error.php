@@ -37,4 +37,6 @@ return [
     'trader_mode_not_supported' => 'Selected mode is not available for this trader',
     'no_match_for_order_cost_and_value' => 'Not able to match order cost with order value',
     'order_cost_with_vat_and_without_vat_incorrect' => 'Entered value of order cost with VAT is incorrect',
+    'user_doesnt_have_the_right_permissions' => 'User Doesnt Have The Right Permission',
+
 ];

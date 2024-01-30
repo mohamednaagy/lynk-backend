@@ -6,15 +6,16 @@ use App\Actions\Contracts\Enquiries\CreateEnquiry;
 use App\Actions\Contracts\Enquiries\GetPaginatedUserEnquiries;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Enquiries\StoreEnquiryRequest;
 use App\Models\Enquiry;
 use App\Transformers\EnquiryTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class EnquiryController extends Controller
 {
@@ -92,11 +93,8 @@ class EnquiryController extends Controller
     {
         $this->authorize('view', $enquiry);
         $user = auth()->user();
-        if ($user->id != $enquiry->user_id) {
-            return $this->errorResponse(
-                __('User does not have the right permissions.'),
-                Response::HTTP_FORBIDDEN
-            );
+        if (! $user->hasRole(Role::LenderAdmin) && $user->id != $enquiry->user_id) {
+            throw new ModelNotFoundException();
         }
 
         return fractal($enquiry, new EnquiryTransformer())
