@@ -12,7 +12,7 @@ use App\Support\Authorizations\Media\Contracts\MediaAuthorizerContract;
 
 class FinancingOrderMediaAuthorizer implements MediaAuthorizerContract
 {
-    public const AllowedRoles = [Role::Admin, Role::LenderSupervisor, Role::LenderAdmin, Role::LenderApiAdmin];
+    public const AllowedRoles = [Role::Admin, Role::LenderSupervisor, Role::LenderAdmin, Role::LenderApiUser];
 
     protected $user;
 

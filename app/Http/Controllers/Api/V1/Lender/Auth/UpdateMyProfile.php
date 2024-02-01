@@ -18,8 +18,6 @@ class UpdateMyProfile extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  UpdateMyProfileRequest  $request
-     * @param  UpdateMyProfileInterface  $updateMyProfile
      * @return JsonResponse
      */
     public function __invoke(UpdateMyProfileRequest $request, UpdateMyProfileInterface $updateMyProfile)
@@ -28,9 +26,9 @@ class UpdateMyProfile extends Controller
         $user = $request->user();
         $data = $request->validated();
 
-        if ($user->hasRole(Role::LenderApiUser)) {
-            throw UnauthorizedException::forRoles([Role::LenderApiUser]);
-        }
+        //        if ($user->hasRole(Role::LenderApiUser)) {
+        //            throw UnauthorizedException::forRoles([Role::LenderApiUser]);
+        //        }
 
         if (empty($data['password'])) {
             $data = Arr::except($data, 'password');

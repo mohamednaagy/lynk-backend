@@ -17,7 +17,6 @@ use App\Mail\CompleteRegisterInvitation;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -105,9 +104,6 @@ class UserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
-        if ($user->hasRole(Role::LenderApiUser)) {
-            throw new ModelNotFoundException();
-        }
 
         $user->load('roles', 'permissions');
 
@@ -133,7 +129,11 @@ class UserController extends Controller
         UpdateLenderUserWithRoleAndPermission $updateLenderUserWithRoleAndPermission,
     ): JsonResponse {
         return DB::transaction((function () use ($updateUserRequest, $user, $updateLenderUserWithRoleAndPermission) {
-            if ($user->hasRole(Role::LenderApiUser) || $user->id == auth()->user()->getAuthIdentifier()) {
+            //            if ($user->hasRole(Role::LenderApiUser) || $user->id == auth()->user()->getAuthIdentifier()) {
+            //                throw new AuthorizationException();
+            //            }
+
+            if ($user->id == auth()->user()->getAuthIdentifier()) {
                 throw new AuthorizationException();
             }
 

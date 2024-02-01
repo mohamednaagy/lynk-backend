@@ -18,7 +18,7 @@ class GetPaginatedLenderUsersAction implements GetPaginatedLenderUsers
                     Role::LenderOrderCreator,
                     Role::LenderBilling,
                     Role::LenderSupervisor,
-                    Role::LenderApiAdmin,
+                    Role::LenderApiUser,
                 ]);
             })
             ->with('permissions', 'roles')
