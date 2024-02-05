@@ -11,17 +11,11 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 class LoginUserAction implements LoginUser
 {
-    /**
-     * @param  User  $user
-     * @param  string|null  $source
-     * @param  Request|null  $request
-     * @return array
-     */
-    public function handle(User $user, string $source = null, Request $request = null): array
+    public function handle(User $user, ?string $source = null, ?Request $request = null): array
     {
         $auth = [];
 
-        if (App::runningInConsole() || false === EnsureFrontendRequestsAreStateful::fromFrontend(request())) {
+        if (App::runningInConsole() || EnsureFrontendRequestsAreStateful::fromFrontend(request()) === false) {
             $auth['token'] = $user->createToken($source)->plainTextToken;
             $auth['type'] = 'token';
         } else {

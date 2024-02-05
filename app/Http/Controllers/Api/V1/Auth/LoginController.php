@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Actions\Contracts\LoginUser;
+use App\Actions\Contracts\SendOtp;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Auth\LoginRequest;
@@ -25,14 +26,12 @@ class LoginController extends Controller
     /**
      * Handle an authentication attempt.
      *
-     * @param  LoginRequest  $request
-     * @param  LoginUser  $loginUser
      * @return JsonResponse
      *
      * @throws ValidationException
      * @throws TenantCouldNotBeIdentifiedById
      */
-    public function authenticate(LoginRequest $request, LoginUser $loginUser)
+    public function authenticate(LoginRequest $request, LoginUser $loginUser, SendOtp $sendOtp)
     {
         $companyUniqueName = $request->validated('unique_name');
         $company = null;
@@ -50,6 +49,12 @@ class LoginController extends Controller
         if (! $user || ! Hash::check($request->validated('password'), $user->password)) {
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
+            ]);
+        }
+
+        if ($otpCode = $sendOtp->handle($user, $request)) {
+            return $this->successResponse([
+                'vid' => $otpCode->id,
             ]);
         }
 
@@ -73,7 +78,6 @@ class LoginController extends Controller
     /**
      * Handle logout attempt.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function logout(Request $request)

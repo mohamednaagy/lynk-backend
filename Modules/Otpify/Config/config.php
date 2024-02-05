@@ -18,6 +18,8 @@ return [
 
     'default' => env('OTPIFY_DEFAULT_DRIVER', 'email'),
 
+    'default_auth_driver' => env('OTPIFY_AUTH_DEFAULT_DRIVER', 'auth'),
+
     'default_ni_driver' => env('OTPIFY_NATIONAL_ID_DEFAULT_DRIVER', 'absher'),
     /*
      |--------------------------------------------------------------------------

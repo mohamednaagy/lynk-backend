@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Role;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\Grantify\Contracts\Grantifiable;
@@ -26,9 +28,9 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 /**
  * @method static create(array $data)
  */
-class User extends Authenticatable implements Otpifiable, Grantifiable, MustVerifyEmail, HasLocalePreference
+class User extends Authenticatable implements Grantifiable, HasLocalePreference, MustVerifyEmail, Otpifiable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes;
 
     const DELETED_MODEL_EMAIL_AND_STRING_SEPARATOR = '@@@';
 
@@ -115,18 +117,12 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
 
     /**
      * Check if this user requires verifying by OTP based on role.
-     *
-     * @param  Request  $request
-     * @return bool
      */
     public function doesRequireVerifyingByOtp(Request $request): bool
     {
-        return false;
+        return ! $this->hasRole(Role::LenderApiUser) && ! Cache::get('has_verified_otp_'.$this->id, fn () => false);
     }
 
-    /**
-     * @return HasMany
-     */
     public function authorizationTokens(): HasMany
     {
         return $this->hasMany(AuthorizationToken::class);
@@ -147,17 +143,11 @@ class User extends Authenticatable implements Otpifiable, Grantifiable, MustVeri
         return ! is_null($this->password);
     }
 
-    /**
-     * @return HasMany
-     */
     public function enquiries(): HasMany
     {
         return $this->hasMany(Enquiry::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function orders(): HasMany
     {
         return $this->hasMany(FinancingOrder::class, 'creator_id', 'id');

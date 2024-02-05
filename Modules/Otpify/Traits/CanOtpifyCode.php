@@ -21,17 +21,11 @@ trait CanOtpifyCode
 {
     /**
      *  createOtpifyCode
-     *
-     * @param  mixed  $code
-     * @param  Otpifiable  $otpifiable
-     * @param  Model|null  $initiator
-     * @param  array  $data
-     * @return OtpifyCode
      */
     public function createOtpifyCode(
-        $code,
+        string $code,
         Otpifiable $otpifiable,
-        Model|Otpifiable $initiator = null,
+        Model|Otpifiable|null $initiator = null,
         array $data = []
     ): OtpifyCode {
         return OtpifyCode::create([
@@ -47,19 +41,13 @@ trait CanOtpifyCode
     }
 
     /**
-     * @param  OtpifyCode  $otpifyCode
-     * @param  Request  $request
-     * @param $code
-     * @param  Closure|null  $additionalCheckCallback
-     * @return void
-     *
      * @throws OtpCodeAdditionalCheckException
      * @throws OtpCodeAlreadyUsedException
      * @throws OtpCodeExpiredException
      * @throws OtpCodeIncorrectException
      * @throws OtpifiableNotEqualAuthUserException
      */
-    public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, Closure $additionalCheckCallback = null): void
+    public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, ?Closure $additionalCheckCallback = null): void
     {
         if (auth()->user()->getAuthIdentifier() !== $otpifyCode->otpifiable_id) {
             throw new OtpifiableNotEqualAuthUserException();
@@ -85,9 +73,6 @@ trait CanOtpifyCode
     }
 
     /**
-     * @param $vid
-     * @return OtpifyCode
-     *
      * @throws OtpCodeNotFoundException
      */
     public function getOtpifyCode($vid): OtpifyCode
@@ -101,19 +86,11 @@ trait CanOtpifyCode
         return $otpifyCode;
     }
 
-    /**
-     * @param $expirationDate
-     * @return bool
-     */
     public function isCodeExpired($expirationDate): bool
     {
         return $expirationDate->lt(now());
     }
 
-    /**
-     * @param  OtpifyCode  $otpifyCode
-     * @return void
-     */
     public function setOtpExpiredAt(OtpifyCode $otpifyCode): void
     {
         $otpifyCode->update(['expired_at' => now()]);
