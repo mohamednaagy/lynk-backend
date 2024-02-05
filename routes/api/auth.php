@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->prefix('v1/auth')->group(function () {
 
 Route::prefix('v1/auth')->name('api.v1.')->group(function () {
     Route::post('login', [LoginController::class, 'authenticate']);
-    Route::post('send-otp', SendOtp::class);
+    Route::post('send-otp', SendOtp::class)->middleware('throttle:2,1');
     Route::post('verify-otp', VerifyOtp::class);
     Route::post('send-reset-password-link', ForgotPassword::class);
     Route::post('reset-password', ResetPassword::class);
