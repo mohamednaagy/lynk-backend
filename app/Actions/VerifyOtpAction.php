@@ -12,16 +12,25 @@ use Modules\Otpify\Models\OtpifyCode;
 
 class VerifyOtpAction implements VerifyOtp
 {
-    public function handle(string $vid, string $code, ?Request $request = null): User
+    public function handle(string $vid, string $code, Request $request = null): User
     {
         Otpify::driver(config('otpify.default_auth_driver'))
             ->verify($request, $vid, $code, function (Request $request, OtpifyCode $otpCode) {
-                return $otpCode->otpifiable instanceof User
-                    && Cache::put(
-                        'has_verified_otp_'.$otpCode->otpifiable->id,
-                        true,
-                        now()->addMinutes(5)
-                    );
+                if (! $otpCode->otpifiable instanceof User) {
+                    return false;
+                }
+
+                $user = $otpCode->otpifiable;
+
+                tenancy()->initialize($user->company_id);
+
+                Cache::put(
+                    'has_verified_otp_'.$otpCode->otpifiable->id,
+                    true,
+                    now()->addMinutes(5)
+                );
+
+                return true;
             });
 
         return Auth::getUser();
