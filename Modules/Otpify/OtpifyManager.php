@@ -6,7 +6,6 @@ use Illuminate\Support\Manager;
 use Illuminate\Validation\ValidationException;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
 use Modules\Otpify\Drivers\AbsherDriver;
-use Modules\Otpify\Drivers\AuthDriver;
 use Modules\Otpify\Drivers\EmailDriver;
 use Modules\Otpify\Drivers\FakeAbsherDriver;
 use Modules\Otpify\Drivers\TwilioSmsDriver;
@@ -22,14 +21,6 @@ class OtpifyManager extends Manager
     public function getDefaultDriver(): string
     {
         return config('otpify.default', 'email');
-    }
-
-    /**
-     * Send OTP via email.
-     */
-    public function createAuthDriver(): OtpifyDriverInterface
-    {
-        return new AuthDriver();
     }
 
     /**

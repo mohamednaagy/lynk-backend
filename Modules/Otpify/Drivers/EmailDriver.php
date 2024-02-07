@@ -4,6 +4,7 @@ namespace Modules\Otpify\Drivers;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
 use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
@@ -20,18 +21,9 @@ class EmailDriver implements OtpifyDriverInterface
 {
     use CanOtpifyCode;
 
-    /**
-     * Execute the driver logic.
-     *
-     * @param  Request  $request
-     * @param  Otpifiable  $otpifiable
-     * @param  array  $data
-     * @return OtpifyCode
-     */
     public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
         $code = generateRandomCode(config('otpify.code_length'));
-        $otpifiable = $request->get('otpifiable_id') ?? auth()->user();
         $otpifyCode = $this->createOtpifyCode($code, $otpifiable, auth()->user(), $data);
         $otpifiable->notify(new OtpifyCodeMessage($code, $otpifyCode->expiration_date));
 
@@ -44,28 +36,48 @@ class EmailDriver implements OtpifyDriverInterface
     }
 
     /**
-     * Execute the driver logic.
-     *
-     * @param  Request  $request
-     * @param $vid
-     * @param $code
-     * @param  Closure|null  $additionalCheckCallback
-     * @return bool
-     *
-     * @throws OtpCodeAlreadyUsedException
      * @throws OtpCodeAdditionalCheckException
+     * @throws OtpCodeAlreadyUsedException
      * @throws OtpCodeExpiredException
      * @throws OtpCodeIncorrectException
      * @throws OtpCodeNotFoundException
      * @throws OtpifiableNotEqualAuthUserException
      */
-    public function verify(Request $request, $vid, $code, Closure $additionalCheckCallback = null): bool|string
+    public function verify(Request $request, string $vid, string $code, Closure $additionalCheckCallback = null): bool
     {
         $otpifyCode = $this->getOtpifyCode($vid);
         $this->verifyOtpifyCode($otpifyCode, $request, $code, $additionalCheckCallback);
         $this->setOtpExpiredAt($otpifyCode);
-        $this->createAuthorizationToken($request->all());
+        Auth::setUser($otpifyCode->otpifiable);
 
         return true;
+    }
+
+    /**
+     * @throws OtpCodeAdditionalCheckException
+     * @throws OtpCodeAlreadyUsedException
+     * @throws OtpCodeExpiredException
+     * @throws OtpCodeIncorrectException
+     * @throws OtpifiableNotEqualAuthUserException
+     */
+    public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, Closure $additionalCheckCallback = null): void
+    {
+        if ($code !== $otpifyCode->otp_code) {
+            throw new OtpCodeIncorrectException();
+        }
+
+        if ($otpifyCode->expired_at != null) {
+            throw new OtpCodeAlreadyUsedException();
+        }
+
+        if ($this->isCodeExpired($otpifyCode->expiration_date)) {
+            throw new OtpCodeExpiredException();
+        }
+
+        if ($additionalCheckCallback) {
+            if (! $additionalCheckCallback($request, $otpifyCode)) {
+                throw new OtpCodeAdditionalCheckException();
+            }
+        }
     }
 }
