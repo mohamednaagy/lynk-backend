@@ -85,9 +85,14 @@ class LoginController extends Controller
      * Handle logout attempt.
      *
      * @return \Illuminate\Http\JsonResponse
+     *
+     * @throws TenantCouldNotBeIdentifiedById
      */
     public function logout(Request $request)
     {
+        if ($companyId = $request->user()->company_id) {
+            tenancy()->initialize($companyId);
+        }
         Cache::forget('has_verified_otp_'.$request->user()->id);
         if (EnsureFrontendRequestsAreStateful::fromFrontend($request)) {
             Auth::logout();
