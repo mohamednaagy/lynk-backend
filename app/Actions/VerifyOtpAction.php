@@ -22,7 +22,9 @@ class VerifyOtpAction implements VerifyOtp
 
                 $user = $otpCode->otpifiable;
 
-                tenancy()->initialize($user->company_id);
+                if ($user->company_id) {
+                    tenancy()->initialize($user->company_id);
+                }
 
                 Cache::put(
                     'has_verified_otp_'.$otpCode->otpifiable->id,
