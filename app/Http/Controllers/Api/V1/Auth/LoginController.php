@@ -23,6 +23,11 @@ use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
 
 class LoginController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('throttle:5,1')->only('authenticate');
+    }
+
     /**
      * Handle an authentication attempt.
      *

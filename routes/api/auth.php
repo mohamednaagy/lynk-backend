@@ -4,7 +4,6 @@ use App\Http\Controllers\Api\V1\Auth\ForgotPassword;
 use App\Http\Controllers\Api\V1\Auth\LoginController;
 use App\Http\Controllers\Api\V1\Auth\ResetPassword;
 use App\Http\Controllers\Api\V1\Auth\SendEmailVerification;
-use App\Http\Controllers\Api\V1\Auth\SendOtp;
 use App\Http\Controllers\Api\V1\Auth\VerifyEmail;
 use App\Http\Controllers\Api\V1\Auth\VerifyOtp;
 use Illuminate\Support\Facades\Route;
@@ -27,7 +26,6 @@ Route::middleware('auth:sanctum')->prefix('v1/auth')->group(function () {
 
 Route::prefix('v1/auth')->name('api.v1.')->group(function () {
     Route::post('login', [LoginController::class, 'authenticate']);
-    Route::post('send-otp', SendOtp::class)->middleware('throttle:2,1');
     Route::post('verify-otp', VerifyOtp::class);
     Route::post('send-reset-password-link', ForgotPassword::class);
     Route::post('reset-password', ResetPassword::class);

@@ -9,6 +9,11 @@ use App\Http\Requests\V1\Auth\VerifyOtpRequest;
 
 class VerifyOtp extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('throttle:5,1');
+    }
+
     public function __invoke(VerifyOtpRequest $request, VerifyOtpInterface $verifyOtp, LoginUser $loginUser)
     {
         $user = $verifyOtp->handle($request->validated('vid'), $request->validated('code'), $request);
