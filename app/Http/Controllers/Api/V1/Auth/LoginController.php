@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Jenssegers\Agent\Facades\Agent;
@@ -87,6 +88,7 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
+        Cache::forget('has_verified_otp_'.$request->user()->id);
         if (EnsureFrontendRequestsAreStateful::fromFrontend($request)) {
             Auth::logout();
             $request->session()->invalidate();
