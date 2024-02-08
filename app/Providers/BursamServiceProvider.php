@@ -36,8 +36,8 @@ class BursamServiceProvider extends ServiceProvider
                 $response = Http::asForm()
                     ->withOptions([
                         'verify' => config('trader.providers.bursam.verify_tls'),
-                        'connect_timeout' => 60 * 5,
-                        'timeout' => 60 * 5,
+                        'connect_timeout' => 0,
+                        'timeout' => 0,
                     ])
                     ->baseUrl($baseUrl)
                     ->post('api/process/svc/auth/token', [
@@ -53,8 +53,8 @@ class BursamServiceProvider extends ServiceProvider
                 ->asJson()
                 ->withOptions([
                     'verify' => config('trader.providers.bursam.verify_tls'),
-                    'connect_timeout' => 60 * 5,
-                    'timeout' => 60 * 5,
+                    'connect_timeout' => 0,
+                    'timeout' => 0,
                 ])
                 ->withToken($token)
                 ->baseUrl($baseUrl);
