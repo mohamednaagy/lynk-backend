@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
 class BursamServiceProvider extends ServiceProvider
@@ -32,7 +33,10 @@ class BursamServiceProvider extends ServiceProvider
     {
         Http::macro('bursam', function () {
             $baseUrl = config('trader.providers.bursam.base_url');
-            $token = Cache::remember('bursam_access_token', 79200, function () use ($baseUrl) {
+
+            $token = Cache::get('bursam_access_token');
+
+            if (! $token) {
                 $response = Http::asForm()
                     ->withOptions([
                         'verify' => config('trader.providers.bursam.verify_tls'),
@@ -46,8 +50,15 @@ class BursamServiceProvider extends ServiceProvider
                         'client_secret' => config('trader.providers.bursam.client_secret_key'),
                     ]);
 
-                return $response->json('access_token');
-            });
+                $token = $response->json('access_token');
+
+                if (! $token) {
+                    Log::error('Failed to get access token from Bursam', $response->json());
+                    throw new \Exception('Failed to get access token from Bursam');
+                }
+
+                Cache::put('bursam_access_token', $token, $response->json('expires_in') - 1000);
+            }
 
             return Http::acceptJson()
                 ->asJson()
