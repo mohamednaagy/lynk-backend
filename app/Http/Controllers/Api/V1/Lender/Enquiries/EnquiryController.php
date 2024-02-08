@@ -16,11 +16,13 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Modules\Grantify\Support\Roles\LenderAdmin;
 
 class EnquiryController extends Controller
 {
     public function __construct()
     {
+
         $this->middleware(
             'permission:'.
             perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Index])
@@ -92,8 +94,9 @@ class EnquiryController extends Controller
     public function show(Enquiry $enquiry): JsonResponse
     {
         $this->authorize('view', $enquiry);
-        $user = auth()->user();
-        if (! $user->hasRole(Role::LenderAdmin) && $user->id != $enquiry->user_id) {
+        //there is exist gate for each user has LenderAdmin Role so this user cant go to policy and can see enquiry of another companies
+        //but this condidtion will depand on tenancy if user not belong to company cant see enquiry
+        if (is_null($enquiry->user)) {
             throw new ModelNotFoundException();
         }
 
