@@ -17,7 +17,7 @@ class CalculateOrdersCostAction implements CalculateOrdersCost
     {
         $vatRate = $this->getProjectSettings->handle()->getVatRate();
 
-        $orderCostWithVat = $orderCostWithoutVat->multiply(($vatRate) + 1, \Money\Money::ROUND_HALF_DOWN);
+        $orderCostWithVat = $orderCostWithoutVat->multiply(($vatRate) + 1);
 
         return $orderCostWithVat->multiply($ordersCount);
     }
