@@ -7,5 +7,5 @@ use Illuminate\Http\Request;
 
 interface VerifyOtp
 {
-    public function handle(string $vid, string $code, ?Request $request = null): User;
+    public function handle(string $vid, string $code, Request $request = null): ?User;
 }

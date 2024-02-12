@@ -7,7 +7,7 @@
 
 {{ trans('otpify::email.expire_at', ['time' => $expirationDate->diffInRealMinutes()]) }}
 
-<p style="text-align: center;"><b>{{ implode(' ', str_split($otpCode)) }}</b></p>
+<p style="text-align: center;" dir="ltr"><b>{{ implode(' ', str_split($otpCode)) }}</b></p>
 
 <br>
 <br>

@@ -4,7 +4,6 @@ namespace Modules\Otpify\Drivers;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
 use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
@@ -20,6 +19,8 @@ use Modules\Otpify\Traits\CanOtpifyCode;
 class EmailDriver implements OtpifyDriverInterface
 {
     use CanOtpifyCode;
+
+    protected ?Otpifiable $otpifiable = null;
 
     public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
@@ -48,9 +49,19 @@ class EmailDriver implements OtpifyDriverInterface
         $otpifyCode = $this->getOtpifyCode($vid);
         $this->verifyOtpifyCode($otpifyCode, $request, $code, $additionalCheckCallback);
         $this->setOtpExpiredAt($otpifyCode);
-        Auth::setUser($otpifyCode->otpifiable);
+        $this->setOtpifiable($otpifyCode->otpifiable);
 
         return true;
+    }
+
+    public function setOtpifiable(Otpifiable $otpifiable): void
+    {
+        $this->otpifiable = $otpifiable;
+    }
+
+    public function getOtpifiable(): ?Otpifiable
+    {
+        return $this->otpifiable;
     }
 
     /**

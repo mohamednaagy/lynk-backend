@@ -5,36 +5,36 @@ namespace App\Actions;
 use App\Actions\Contracts\VerifyOtp;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Modules\Otpify\Facades\Otpify;
 use Modules\Otpify\Models\OtpifyCode;
 
 class VerifyOtpAction implements VerifyOtp
 {
-    public function handle(string $vid, string $code, Request $request = null): User
+    public function handle(string $vid, string $code, Request $request = null): ?User
     {
-        Otpify::driver(config('otpify.default_auth_driver'))
-            ->verify($request, $vid, $code, function (Request $request, OtpifyCode $otpCode) {
-                if (! $otpCode->otpifiable instanceof User) {
-                    return false;
-                }
+        $otpify = Otpify::driver(config('otpify.default_auth_driver'));
 
-                $user = $otpCode->otpifiable;
+        $otpify->verify($request, $vid, $code, function (Request $request, OtpifyCode $otpCode) {
+            if (! $otpCode->otpifiable instanceof User) {
+                return false;
+            }
 
-                if ($user->company_id) {
-                    tenancy()->initialize($user->company_id);
-                }
+            $user = $otpCode->otpifiable;
 
-                Cache::put(
-                    'has_verified_otp_'.$otpCode->otpifiable->id,
-                    true,
-                    now()->addMinutes(5)
-                );
+            if ($user->company_id) {
+                tenancy()->initialize($user->company_id);
+            }
 
-                return true;
-            });
+            Cache::put(
+                'has_verified_otp_'.$otpCode->otpifiable->id,
+                true,
+                now()->addMinutes(5)
+            );
 
-        return Auth::getUser();
+            return true;
+        });
+
+        return $otpify->getOtpifiable();
     }
 }
