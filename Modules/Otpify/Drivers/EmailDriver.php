@@ -22,8 +22,11 @@ class EmailDriver implements OtpifyDriverInterface
 
     protected ?Otpifiable $otpifiable = null;
 
+    protected static string $driver = 'email';
+
     public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
+        $data['driver'] = self::$driver;
         $code = generateRandomCode(config('otpify.code_length'));
         $otpifyCode = $this->createOtpifyCode($code, $otpifiable, auth()->user(), $data);
         $otpifiable->notify(new OtpifyCodeMessage($code, $otpifyCode->expiration_date));
@@ -73,7 +76,13 @@ class EmailDriver implements OtpifyDriverInterface
      */
     public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, Closure $additionalCheckCallback = null): void
     {
-        if ($code !== $otpifyCode->otp_code) {
+        $codeDriver = $otpifyCode->data['driver'] ?? null;
+
+        if (
+            $code !== $otpifyCode->otp_code
+            ||
+            $codeDriver !== self::$driver
+        ) {
             throw new OtpCodeIncorrectException();
         }
 
