@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Http\Middleware\EnsureFrontendRequestsAreStatefulWithoutCookie;
 use App\Models\User;
 use App\Rules\HostWhitelistRule;
 use App\Rules\UrlProtocolRule;
@@ -27,10 +28,22 @@ class SendLinkRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+
+        // check it if is get from api integration or from api of system
+        $isRequestFromFromFrontend = EnsureFrontendRequestsAreStatefulWithoutCookie::fromFrontend(request());
+
+        $recaptchaRoles = [];
+        if ($isRequestFromFromFrontend) {
+            $recaptchaRoles['g-recaptcha-response'] = ['required', 'recaptcha'];
+        }
+
+        $validationRules = [
             'email' => ['required', 'email:filter', Rule::exists(User::class, 'email')],
             'company_unique_name' => ['nullable', 'string'],
             'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
         ];
+
+        return array_merge($recaptchaRoles, $validationRules);
+
     }
 }
