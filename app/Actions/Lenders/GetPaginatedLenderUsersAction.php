@@ -9,9 +9,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class GetPaginatedLenderUsersAction implements GetPaginatedLenderUsers
 {
-    /**
-     * @return LengthAwarePaginator
-     */
     public function handle(): LengthAwarePaginator
     {
         return User::query()
@@ -21,6 +18,7 @@ class GetPaginatedLenderUsersAction implements GetPaginatedLenderUsers
                     Role::LenderOrderCreator,
                     Role::LenderBilling,
                     Role::LenderSupervisor,
+                    Role::LenderApiUser,
                 ]);
             })
             ->with('permissions', 'roles')

@@ -3,7 +3,6 @@
 namespace App\Http\Requests\V1\Lender\Users;
 
 use App\Enums\Area;
-use App\Enums\Role;
 use App\Models\User;
 use App\Rules\HostWhitelistRule;
 use App\Rules\UrlProtocolRule;
@@ -29,7 +28,7 @@ class StoreUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        return  [
+        return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
@@ -43,7 +42,7 @@ class StoreUserRequest extends FormRequest
             'role' => [
                 'required',
                 Rule::in(Area::roles(Area::Lender)),
-                Rule::notIn([Role::LenderApiUser]),
+
             ],
         ];
     }
