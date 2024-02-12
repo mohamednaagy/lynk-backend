@@ -4,9 +4,7 @@ namespace App\Exceptions;
 
 use App\Enums\ErrorCode;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Spatie\Permission\Exceptions\UnauthorizedException;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedByRequestDataException;
-use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -54,13 +52,5 @@ class Handler extends ExceptionHandler
         $this->renderable(function (TenantCouldNotBeIdentifiedByRequestDataException $e, $request) {
             return response()->errorResponse(trans('error.x_company_invalid'), code: ErrorCode::X_COMPANY_INVALID);
         });
-
-        $this->renderable(function (UnauthorizedException $e, $request) {
-            return response()->errorResponse(
-                __('error.user_doesnt_have_the_right_permissions'),
-                Response::HTTP_FORBIDDEN
-            );
-        });
-
     }
 }

@@ -19,8 +19,8 @@ class GetPaginatedUserEnquiriesAction implements GetPaginatedUserEnquiries
         $user = User::find($userId);
         $enquiries = Enquiry::query();
         if ($user->hasRole(Role::LenderAdmin)) {
-            $enquiries = $enquiries->whereHas('user', function ($q) {
-                $q->where('company_id', request()->header('X-Company'));
+            $enquiries = $enquiries->whereHas('user', function ($q) use ($user) {
+                $q->where('company_id', $user->company_id);
             });
         } else {
             $enquiries = $enquiries->where('user_id', $userId);

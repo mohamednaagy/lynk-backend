@@ -16,7 +16,6 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Modules\Grantify\Support\Roles\LenderAdmin;
 
 class EnquiryController extends Controller
 {
@@ -25,19 +24,19 @@ class EnquiryController extends Controller
 
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Index])
+                perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Index])
         )
             ->only('index');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Create])
+                perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Create])
         )
             ->only('store');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Show])
+                perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Show])
         )
             ->only('show');
     }
@@ -91,25 +90,39 @@ class EnquiryController extends Controller
      *
      * @throws AuthorizationException
      */
-    public function show(Enquiry $enquiry): JsonResponse
+    public function show(Request $request, Enquiry $enquiry): JsonResponse
     {
-        $this->authorize('view', $enquiry);
-        //there is exist gate for each user has LenderAdmin Role so this user cant go to policy and can see enquiry of another companies
-        //but this condidtion will depand on tenancy if user not belong to company cant see enquiry
-        if (is_null($enquiry->user)) {
-            throw new ModelNotFoundException();
+        $authUser = $request->user();
+
+        if (
+            $this->doesEnquiryBelongToCurrentLender($authUser, $enquiry)
+            || $this->doesEnquiryBelongToCurrentLender($authUser, $enquiry)
+        ) {
+            return fractal($enquiry, new EnquiryTransformer())
+                ->parseIncludes([
+                    'id',
+                    'subject',
+                    'status',
+                    'creation_date',
+                    'creator',
+                    'body',
+                ])
+                ->respond();
         }
 
-        return fractal($enquiry, new EnquiryTransformer())
-            ->parseIncludes([
-                'id',
-                'subject',
-                'status',
-                'creation_date',
-                'creator',
-                'body',
-            ])
-            ->respond();
+        throw new ModelNotFoundException();
+    }
+
+    protected function doesEnquiryBelongToCurrentLender($authUser, $enquiry)
+    {
+        return $authUser->company_id !== null
+            && $authUser->hasRole(Role::LenderAdmin)
+            && $enquiry->user?->company_id === $authUser->company_id;
+    }
+
+    protected function doesEnquiryBelongToCurrentUser($authUser, $enquiry)
+    {
+        return $authUser->id === $enquiry->user_id;
     }
 
     /**
