@@ -82,7 +82,10 @@ class TieredPricing extends Model
 
         return [
             'costWithoutVat' => $tier->order_cost_without_vat,
-            'costWithVat' => $tier->order_cost_without_vat->add($vatAmount),
+            'costWithVat' => $tier->order_cost_without_vat
+                ->add($vatAmount)
+                ->convertToDisplayableCurrency()
+                ->convertToCurrency(config('money.defaultCurrency')),
             'vatRate' => $vatRate,
         ];
     }
