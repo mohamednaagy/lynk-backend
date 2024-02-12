@@ -24,15 +24,13 @@ class CalculateVatAmountAction implements CalculateVatAmount
         if (! isset($this->amount) || ! isset($this->isVatIncludedInAmount)) {
             throw new \Exception('Amount or isVatIncludedInAmount are not set');
         }
-
         $vatRate = $this->vatRate ?? $this->getProjectSettings->handle()->getVatRate();
-
         if ($this->isVatIncludedInAmount) {
             $vatAmount = $this->amount->subtract(
                 $this->amount->divide(1 + $vatRate)
             );
         } else {
-            $vatAmount = $this->amount->multiply($vatRate);
+            $vatAmount = $this->amount->multiply($vatRate, \Money\Money::ROUND_HALF_DOWN);
         }
 
         return [$vatAmount, $vatRate];
