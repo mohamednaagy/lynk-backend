@@ -6,6 +6,7 @@ use App\Actions\Contracts\LoginUser;
 use App\Actions\Contracts\SendOtp;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\EnsureFrontendRequestsAreStatefulWithoutCookie;
 use App\Http\Requests\V1\Auth\LoginRequest;
 use App\Models\Company;
 use App\Models\User;
@@ -19,7 +20,6 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Jenssegers\Agent\Facades\Agent;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
 
 class LoginController extends Controller
@@ -94,7 +94,8 @@ class LoginController extends Controller
             tenancy()->initialize($companyId);
         }
         Cache::forget('has_verified_otp_'.$request->user()->id);
-        if (EnsureFrontendRequestsAreStateful::fromFrontend($request)) {
+      
+        if (EnsureFrontendRequestsAreStatefulWithoutCookie::fromFrontend($request)) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

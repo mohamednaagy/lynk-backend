@@ -164,6 +164,8 @@ class LenderUserController extends Controller
             Role::LenderOrderCreator,
             Role::LenderBilling,
             Role::LenderSupervisor,
+            Role::LenderApiUser,
+
         ])) {
             throw new AuthorizationException();
         }

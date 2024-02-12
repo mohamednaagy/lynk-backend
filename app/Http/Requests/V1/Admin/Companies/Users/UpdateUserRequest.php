@@ -3,7 +3,6 @@
 namespace App\Http\Requests\V1\Admin\Companies\Users;
 
 use App\Enums\Area;
-use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -12,8 +11,6 @@ class UpdateUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -27,7 +24,7 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        return  [
+        return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'email' => [
@@ -42,7 +39,6 @@ class UpdateUserRequest extends FormRequest
             'role' => [
                 'required',
                 Rule::in(Area::roles(Area::Lender)),
-                Rule::notIn(Role::LenderApiUser),
             ],
         ];
     }

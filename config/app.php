@@ -210,6 +210,7 @@ return [
         \Shivella\Bitly\BitlyServiceProvider::class,
         Jenssegers\Agent\AgentServiceProvider::class,
         App\Providers\MoneyServiceProvider::class,
+        Biscolab\ReCaptcha\ReCaptchaServiceProvider::class,
     ],
 
     /*
@@ -234,6 +235,7 @@ return [
         'Purifier' => Mews\Purifier\Facades\Purifier::class,
         'WebhookEvent' => \App\Support\Webhooks\Facades\WebhookEvent::class,
         'Agent' => Jenssegers\Agent\Facades\Agent::class,
+        'ReCaptcha' => Biscolab\ReCaptcha\Facades\ReCaptcha::class,
     ])->toArray(),
 
     /*

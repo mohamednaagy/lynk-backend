@@ -8,7 +8,6 @@ use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\CompanyType;
-use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Users\StoreUserRequest;
@@ -17,7 +16,6 @@ use App\Mail\CompleteRegisterInvitation;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -105,9 +103,6 @@ class UserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
-        if ($user->hasRole(Role::LenderApiUser)) {
-            throw new ModelNotFoundException();
-        }
 
         $user->load('roles', 'permissions');
 
@@ -133,7 +128,7 @@ class UserController extends Controller
         UpdateLenderUserWithRoleAndPermission $updateLenderUserWithRoleAndPermission,
     ): JsonResponse {
         return DB::transaction((function () use ($updateUserRequest, $user, $updateLenderUserWithRoleAndPermission) {
-            if ($user->hasRole(Role::LenderApiUser) || $user->id == auth()->user()->getAuthIdentifier()) {
+            if ($user->id == auth()->user()->getAuthIdentifier()) {
                 throw new AuthorizationException();
             }
 

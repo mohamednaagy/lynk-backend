@@ -26,7 +26,6 @@ class RoleUtil
     ];
 
     /**
-     * @param  string  $roleName
      * @return array
      */
     public static function getPermissionsForRole(string $roleName): array|string
