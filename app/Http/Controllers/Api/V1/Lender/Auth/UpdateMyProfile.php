@@ -4,14 +4,12 @@ namespace App\Http\Controllers\Api\V1\Lender\Auth;
 
 use App\Actions\Contracts\Auth\UpdateMyProfile as UpdateMyProfileInterface;
 use App\Enums\Area;
-use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\UpdateMyProfileRequest;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
-use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class UpdateMyProfile extends Controller
 {
@@ -25,10 +23,6 @@ class UpdateMyProfile extends Controller
         /** @var User $user */
         $user = $request->user();
         $data = $request->validated();
-
-        //        if ($user->hasRole(Role::LenderApiUser)) {
-        //            throw UnauthorizedException::forRoles([Role::LenderApiUser]);
-        //        }
 
         if (empty($data['password'])) {
             $data = Arr::except($data, 'password');

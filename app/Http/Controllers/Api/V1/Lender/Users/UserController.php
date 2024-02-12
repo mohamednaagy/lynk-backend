@@ -8,7 +8,6 @@ use App\Actions\Contracts\Lenders\UpdateLenderUserWithRoleAndPermission;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\CompanyType;
-use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Users\StoreUserRequest;
@@ -129,10 +128,6 @@ class UserController extends Controller
         UpdateLenderUserWithRoleAndPermission $updateLenderUserWithRoleAndPermission,
     ): JsonResponse {
         return DB::transaction((function () use ($updateUserRequest, $user, $updateLenderUserWithRoleAndPermission) {
-            //            if ($user->hasRole(Role::LenderApiUser) || $user->id == auth()->user()->getAuthIdentifier()) {
-            //                throw new AuthorizationException();
-            //            }
-
             if ($user->id == auth()->user()->getAuthIdentifier()) {
                 throw new AuthorizationException();
             }
