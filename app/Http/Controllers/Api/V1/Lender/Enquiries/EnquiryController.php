@@ -6,12 +6,14 @@ use App\Actions\Contracts\Enquiries\CreateEnquiry;
 use App\Actions\Contracts\Enquiries\GetPaginatedUserEnquiries;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Enquiries\StoreEnquiryRequest;
 use App\Models\Enquiry;
 use App\Transformers\EnquiryTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -19,31 +21,28 @@ class EnquiryController extends Controller
 {
     public function __construct()
     {
+
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Index])
+                perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Index])
         )
             ->only('index');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Create])
+                perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Create])
         )
             ->only('store');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Show])
+                perm(Area::Lender, [Subject::Enquiries, Action::Manage, Action::Show])
         )
             ->only('show');
     }
 
     /**
      * Display a listing of the resource.
-     *
-     * @param  Request  $request
-     * @param  GetPaginatedUserEnquiries  $getPaginatedUserEnquiries
-     * @return JsonResponse
      */
     public function index(
         Request $request,
@@ -63,10 +62,6 @@ class EnquiryController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  StoreEnquiryRequest  $storeEnquiryRequest
-     * @param  CreateEnquiry  $createEnquiry
-     * @return JsonResponse
      */
     public function store(StoreEnquiryRequest $storeEnquiryRequest, CreateEnquiry $createEnquiry): JsonResponse
     {
@@ -92,31 +87,47 @@ class EnquiryController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  Enquiry  $enquiry
-     * @return JsonResponse
      *
      * @throws AuthorizationException
      */
-    public function show(Enquiry $enquiry): JsonResponse
+    public function show(Request $request, Enquiry $enquiry): JsonResponse
     {
-        $this->authorize('view', $enquiry);
+        $authUser = $request->user();
 
-        return fractal($enquiry, new EnquiryTransformer())
-            ->parseIncludes([
-                'id',
-                'subject',
-                'status',
-                'creation_date',
-                'creator',
-                'body',
-            ])
-            ->respond();
+        if (
+            $this->doesEnquiryBelongToCurrentLender($authUser, $enquiry)
+            || $this->doesEnquiryBelongToCurrentLender($authUser, $enquiry)
+        ) {
+            return fractal($enquiry, new EnquiryTransformer())
+                ->parseIncludes([
+                    'id',
+                    'subject',
+                    'status',
+                    'creation_date',
+                    'creator',
+                    'body',
+                ])
+                ->respond();
+        }
+
+        throw new ModelNotFoundException();
+    }
+
+    protected function doesEnquiryBelongToCurrentLender($authUser, $enquiry)
+    {
+        return $authUser->company_id !== null
+            && $authUser->hasRole(Role::LenderAdmin)
+            && $enquiry->user?->company_id === $authUser->company_id;
+    }
+
+    protected function doesEnquiryBelongToCurrentUser($authUser, $enquiry)
+    {
+        return $authUser->id === $enquiry->user_id;
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
