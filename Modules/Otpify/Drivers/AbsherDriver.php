@@ -59,15 +59,17 @@ class AbsherDriver implements OtpifyDriverInterface
     /**
      * Execute the driver logic.
      *
-     * @param  mixed  $vid
-     * @param  mixed  $code
-     * @return string
+     * @throws OtpCodeNotFoundException
+     * @throws OtpCodeAlreadyUsedException
+     * @throws OtpCodeExpiredException
+     * @throws OtpCodeAdditionalCheckException
+     * @throws OtpCodeIncorrectException
      */
-    public function verify(Request $request, $vid, $code, ?Closure $additionalCheckCallback = null): string|bool
+    public function verify(Request $request, string $vid, string $code, ?Closure $additionalCheckCallback = null): string|bool
     {
         $otpifyCode = $this->getOtpifyCode($vid);
 
-        if (! $otpifyCode->tcn) {
+        if (! $otpifyCode->tcn || $otpifyCode->driver !== $this->getDriverName()) {
             throw new OtpCodeNotFoundException;
         }
 

@@ -82,4 +82,13 @@ class EmailDriverTest extends TestCase
             return false;
         });
     }
+
+    public function test_email_driver_otp_code_fails_if_driver_different()
+    {
+        $this->expectException(OtpCodeNotFoundException::class);
+
+        $otp = Otpify::send(new Request(), $this->user);
+        $otp->update(['driver' => 'fake']);
+        Otpify::verify(new Request(), $otp->id, '123456');
+    }
 }

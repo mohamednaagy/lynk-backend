@@ -76,9 +76,14 @@ class EmailDriver implements OtpifyDriverInterface
      * @throws OtpCodeExpiredException
      * @throws OtpCodeIncorrectException
      * @throws OtpifiableNotEqualAuthUserException
+     * @throws OtpCodeNotFoundException
      */
     public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, ?Closure $additionalCheckCallback = null): void
     {
+        if ($otpifyCode->driver !== $this->getDriverName()) {
+            throw new OtpCodeNotFoundException();
+        }
+
         if (! Hash::check($code, $otpifyCode->otp_code)) {
             throw new OtpCodeIncorrectException();
         }

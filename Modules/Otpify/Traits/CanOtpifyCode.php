@@ -56,6 +56,10 @@ trait CanOtpifyCode
      */
     public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, ?Closure $additionalCheckCallback = null): void
     {
+        if ($otpifyCode->driver !== $this->getDriverName()) {
+            throw new OtpCodeNotFoundException();
+        }
+
         if (auth()->user()->getAuthIdentifier() !== $otpifyCode->otpifiable_id) {
             throw new OtpifiableNotEqualAuthUserException();
         }
