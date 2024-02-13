@@ -11,7 +11,7 @@ use Modules\Otpify\Models\OtpifyCode;
 
 class VerifyOtpAction implements VerifyOtp
 {
-    public function handle(string $vid, string $code, Request $request = null): ?User
+    public function handle(string $vid, string $code, ?Request $request = null): ?User
     {
         $otpify = Otpify::driver(config('otpify.default_auth_driver'));
 

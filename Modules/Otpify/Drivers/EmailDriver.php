@@ -4,6 +4,7 @@ namespace Modules\Otpify\Drivers;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Contracts\OtpifyDriverInterface;
 use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
@@ -26,8 +27,10 @@ class EmailDriver implements OtpifyDriverInterface
 
     public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
-        $data['driver'] = self::$driver;
-        $code = generateRandomCode(config('otpify.code_length'));
+        $code = app()->runningUnitTests()
+            ? '123456'
+            : generateRandomCode(config('otpify.code_length'));
+
         $otpifyCode = $this->createOtpifyCode($code, $otpifiable, auth()->user(), $data);
         $otpifiable->notify(new OtpifyCodeMessage($code, $otpifyCode->expiration_date));
 
@@ -47,7 +50,7 @@ class EmailDriver implements OtpifyDriverInterface
      * @throws OtpCodeNotFoundException
      * @throws OtpifiableNotEqualAuthUserException
      */
-    public function verify(Request $request, string $vid, string $code, Closure $additionalCheckCallback = null): bool
+    public function verify(Request $request, string $vid, string $code, ?Closure $additionalCheckCallback = null): bool
     {
         $otpifyCode = $this->getOtpifyCode($vid);
         $this->verifyOtpifyCode($otpifyCode, $request, $code, $additionalCheckCallback);
@@ -74,15 +77,9 @@ class EmailDriver implements OtpifyDriverInterface
      * @throws OtpCodeIncorrectException
      * @throws OtpifiableNotEqualAuthUserException
      */
-    public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, Closure $additionalCheckCallback = null): void
+    public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, ?Closure $additionalCheckCallback = null): void
     {
-        $codeDriver = $otpifyCode->data['driver'] ?? null;
-
-        if (
-            $code !== $otpifyCode->otp_code
-            ||
-            $codeDriver !== self::$driver
-        ) {
+        if (! Hash::check($code, $otpifyCode->otp_code)) {
             throw new OtpCodeIncorrectException();
         }
 

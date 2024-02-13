@@ -2,12 +2,17 @@
 
 namespace Modules\Otpify\Traits;
 
+use App\Enums\VerificationMethod;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Modules\Otpify\Contracts\Otpifiable;
+use Modules\Otpify\Drivers\AbsherDriver;
+use Modules\Otpify\Drivers\EmailDriver;
+use Modules\Otpify\Drivers\FakeAbsherDriver;
+use Modules\Otpify\Drivers\TwilioSmsDriver;
 use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
 use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
 use Modules\Otpify\Exceptions\OtpCodeExpiredException;
@@ -23,12 +28,12 @@ trait CanOtpifyCode
      *  createOtpifyCode
      */
     public function createOtpifyCode(
-        string $code,
+        ?string $code,
         Otpifiable $otpifiable,
         Model|Otpifiable|null $initiator = null,
         array $data = []
     ): OtpifyCode {
-        return OtpifyCode::create([
+        return OtpifyCode::create(array_merge([
             'id' => (string) Str::uuid(),
             'initiator_id' => optional($initiator)->getKey(),
             'initiator_type' => optional($initiator)->getMorphClass(),
@@ -37,7 +42,9 @@ trait CanOtpifyCode
             'otp_code' => $code,
             'expiration_date' => now()->addMinutes(config('otpify.code_expiration_time')),
             'data' => $data,
-        ]);
+            'driver' => $this->getDriverName(),
+            'verification_method' => $this->getVerificationMethod(),
+        ], $data));
     }
 
     /**
@@ -99,5 +106,22 @@ trait CanOtpifyCode
     public function createAuthorizationToken(array $data): string
     {
         return Otpify::generateAuthorizationToken($data);
+    }
+
+    private function getDriverName(): string
+    {
+        $driverNameArray = explode('\\', get_class());
+        $driverName = end($driverNameArray);
+        $parts = explode('Driver', $driverName);
+
+        return Str::snake($parts[0]);
+    }
+
+    private function getVerificationMethod(): string
+    {
+        return match (get_class()) {
+            TwilioSmsDriver::class, AbsherDriver::class, FakeAbsherDriver::class => VerificationMethod::Phone,
+            EmailDriver::class => VerificationMethod::Email,
+        };
     }
 }

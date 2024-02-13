@@ -31,11 +31,6 @@ class AbsherDriver implements OtpifyDriverInterface
 
     /**
      * Execute the driver logic.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Modules\Otpify\Contracts\Otpifiable  $otpifiable
-     * @param  array  $data
-     * @return \Modules\Otpify\Models\OtpifyCode
      */
     public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
@@ -55,10 +50,6 @@ class AbsherDriver implements OtpifyDriverInterface
 
     /**
      * Execute the driver logic.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Modules\Otpify\Contracts\Otpifiable  $otpifiable
-     * @return bool
      */
     public function doesRequireVerifyingByOtp(Request $request, Otpifiable $otpifiable): bool
     {
@@ -68,17 +59,15 @@ class AbsherDriver implements OtpifyDriverInterface
     /**
      * Execute the driver logic.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  mixed  $vid
      * @param  mixed  $code
-     * @param  \Closure|null  $additionalCheckCallback
      * @return string
      */
-    public function verify(Request $request, $vid, $code, Closure $additionalCheckCallback = null): string|bool
+    public function verify(Request $request, $vid, $code, ?Closure $additionalCheckCallback = null): string|bool
     {
         $otpifyCode = $this->getOtpifyCode($vid);
 
-        if (! isset($otpifyCode->data['tcn'])) {
+        if (! $otpifyCode->tcn) {
             throw new OtpCodeNotFoundException;
         }
 
@@ -98,7 +87,7 @@ class AbsherDriver implements OtpifyDriverInterface
 
         $data = [
             'apiKey' => $this->apiKey,
-            'tcn' => $otpifyCode->data['tcn'],
+            'tcn' => $otpifyCode->tcn,
             'otp' => $code,
         ];
 
