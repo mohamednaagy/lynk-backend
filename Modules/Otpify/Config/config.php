@@ -33,6 +33,8 @@ return [
 
     'drivers' => [
         'email' => [
+            'code_length' => env('OTPIFY_EMAIL_CODE_LENGTH', 6),
+            'code_expiration_time' => env('OTPIFY_EMAIL_CODE_EXPIRATION_TIME', 5),
         ],
         'twilio' => [
             'sid' => env('OTPIFY_TWILIO_SID'),
