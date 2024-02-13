@@ -18,6 +18,8 @@ return [
 
     'default' => env('OTPIFY_DEFAULT_DRIVER', 'email'),
 
+    'default_auth_driver' => env('OTPIFY_AUTH_DEFAULT_DRIVER', 'email'),
+
     'default_ni_driver' => env('OTPIFY_NATIONAL_ID_DEFAULT_DRIVER', 'absher'),
     /*
      |--------------------------------------------------------------------------
@@ -31,6 +33,8 @@ return [
 
     'drivers' => [
         'email' => [
+            'code_length' => env('OTPIFY_EMAIL_CODE_LENGTH', 6),
+            'code_expiration_time' => env('OTPIFY_EMAIL_CODE_EXPIRATION_TIME', 5),
         ],
         'twilio' => [
             'sid' => env('OTPIFY_TWILIO_SID'),

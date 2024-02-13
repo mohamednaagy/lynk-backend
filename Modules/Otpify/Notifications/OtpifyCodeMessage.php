@@ -2,6 +2,7 @@
 
 namespace Modules\Otpify\Notifications;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -10,17 +11,14 @@ class OtpifyCodeMessage extends Notification
 {
     use Queueable;
 
-    protected $otpCode;
+    protected string $otpCode;
 
-    protected $expirationDate;
+    protected Carbon $expirationDate;
 
     /**
      * Create a new notification instance.
-     *
-     * @param $otpCode
-     * @param $expirationDate
      */
-    public function __construct($otpCode, $expirationDate)
+    public function __construct(string $otpCode, Carbon $expirationDate)
     {
         $this->otpCode = $otpCode;
         $this->expirationDate = $expirationDate;
@@ -46,10 +44,13 @@ class OtpifyCodeMessage extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->greeting(trans('otpify::email.greeting', ['name' => $notifiable->fullName]))
-            ->line(trans('otpify::email.otp_code', ['code' => $this->otpCode]))
-            ->line(trans('otpify::email.expire_at', ['time' => $this->expirationDate->diffInMinutes(now())]))
-            ->line(trans('otpify::email.ignore_message'));
+            ->subject(trans('otpify::email.subject'))
+            ->theme('default')
+            ->markdown('otpify::email.otp-email', [
+                'notifiable' => $notifiable,
+                'otpCode' => $this->otpCode,
+                'expirationDate' => $this->expirationDate,
+            ]);
     }
 
     /**

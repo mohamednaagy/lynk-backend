@@ -20,8 +20,8 @@ use Tests\Traits\InteractsWithUser;
 
 class AbsherDriverTest extends TestCase
 {
-    use InteractsWithUser;
     use InteractsWithCompany;
+    use InteractsWithUser;
     use RefreshDatabase;
 
     protected static FinancingOrder $financingOrder;
@@ -55,7 +55,7 @@ class AbsherDriverTest extends TestCase
         $this->expectException(OtpCodeNotFoundException::class);
 
         $otp = Otpify::send(new Request(), self::$financingOrder);
-        $otp->update(['data' => []]);
+        $otp->update(['tcn' => null]);
         Otpify::verify(new Request(), $otp->id, 123);
     }
 
@@ -94,5 +94,14 @@ class AbsherDriverTest extends TestCase
         Otpify::verify(new Request(), $otp->id, 123, function ($request, $otp) {
             return false;
         });
+    }
+
+    public function test_absher_driver_otp_code_fails_if_driver_different()
+    {
+        $this->expectException(OtpCodeNotFoundException::class);
+
+        $otp = Otpify::send(new Request(), self::$financingOrder);
+        $otp->update(['driver' => 'fake']);
+        Otpify::verify(new Request(), $otp->id, 123);
     }
 }

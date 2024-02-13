@@ -17,8 +17,6 @@ class OtpifyManager extends Manager
 
     /**
      * Get the default driver name.
-     *
-     * @return string
      */
     public function getDefaultDriver(): string
     {
@@ -27,8 +25,6 @@ class OtpifyManager extends Manager
 
     /**
      * Send OTP via email.
-     *
-     * @return OtpifyDriverInterface
      */
     public function createEmailDriver(): OtpifyDriverInterface
     {
@@ -37,8 +33,6 @@ class OtpifyManager extends Manager
 
     /**
      * Send OTP via SMS.
-     *
-     * @return OtpifyDriverInterface
      */
     public function createTwilioDriver(): OtpifyDriverInterface
     {
@@ -47,8 +41,6 @@ class OtpifyManager extends Manager
 
     /**
      * Send OTP via absher.
-     *
-     * @return OtpifyDriverInterface
      */
     public function createAbsherDriver(): OtpifyDriverInterface
     {
@@ -60,8 +52,6 @@ class OtpifyManager extends Manager
 
     /**
      * Send OTP via absher.
-     *
-     * @return OtpifyDriverInterface
      */
     public function createFakeAbsherDriver(): OtpifyDriverInterface
     {
@@ -70,8 +60,6 @@ class OtpifyManager extends Manager
 
     /**
      * Get all the drivers.
-     *
-     * @return array
      */
     public function getOtpifyDrivers(): array
     {
@@ -79,9 +67,6 @@ class OtpifyManager extends Manager
     }
 
     /**
-     * @param  array  $data
-     * @return string
-     *
      * @throws \Illuminate\Validation\ValidationException
      */
     public function generateAuthorizationToken(array $data): string
@@ -99,11 +84,6 @@ class OtpifyManager extends Manager
         }
     }
 
-    /**
-     * @param  string  $token
-     * @param  string  $area
-     * @return bool
-     */
     public function verifyAuthorizationToken(string $token, string $area): bool
     {
         return $this->verifyToken($token, $area);

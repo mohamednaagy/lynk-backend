@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Actions\Contracts\LoginUser;
+use App\Actions\Contracts\SendOtp;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\EnsureFrontendRequestsAreStatefulWithoutCookie;
@@ -15,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Jenssegers\Agent\Facades\Agent;
@@ -22,6 +24,11 @@ use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
 
 class LoginController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('throttle:5,1')->only('authenticate');
+    }
+
     /**
      * Handle an authentication attempt.
      *
@@ -30,7 +37,7 @@ class LoginController extends Controller
      * @throws ValidationException
      * @throws TenantCouldNotBeIdentifiedById
      */
-    public function authenticate(LoginRequest $request, LoginUser $loginUser)
+    public function authenticate(LoginRequest $request, LoginUser $loginUser, SendOtp $sendOtp)
     {
         $companyUniqueName = $request->validated('unique_name');
         $company = null;
@@ -48,6 +55,12 @@ class LoginController extends Controller
         if (! $user || ! Hash::check($request->validated('password'), $user->password)) {
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
+            ]);
+        }
+
+        if ($otpCode = $sendOtp->handle($user, $request)) {
+            return $this->successResponse([
+                'vid' => $otpCode->id,
             ]);
         }
 
@@ -72,9 +85,16 @@ class LoginController extends Controller
      * Handle logout attempt.
      *
      * @return \Illuminate\Http\JsonResponse
+     *
+     * @throws TenantCouldNotBeIdentifiedById
      */
     public function logout(Request $request)
     {
+        if ($companyId = $request->user()->company_id) {
+            tenancy()->initialize($companyId);
+        }
+        Cache::forget('has_verified_otp_'.$request->user()->id);
+      
         if (EnsureFrontendRequestsAreStatefulWithoutCookie::fromFrontend($request)) {
             Auth::logout();
             $request->session()->invalidate();
