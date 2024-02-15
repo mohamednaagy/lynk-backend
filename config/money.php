@@ -20,5 +20,11 @@ return [
         'SAR4' => [
             'SAR' => '1',
         ],
+        'SAR' => [
+            'SAR4' => '1',
+        ],
+    ],
+    'displayableCurrenciesMap' => [
+        'SAR4' => 'SAR',
     ],
 ];
