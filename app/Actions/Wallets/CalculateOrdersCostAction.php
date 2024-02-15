@@ -19,6 +19,8 @@ class CalculateOrdersCostAction implements CalculateOrdersCost
 
         $orderCostWithVat = $orderCostWithoutVat->multiply(($vatRate) + 1);
 
-        return $orderCostWithVat->multiply($ordersCount);
+        return $orderCostWithVat->convertToDisplayableCurrency()
+            ->convertToCurrency($orderCostWithoutVat->getCurrency())
+            ->multiply($ordersCount);
     }
 }

@@ -23,9 +23,10 @@ trait StopsTraderOrderOnJobFailure
             return;
         }
 
-        $traderOrder->update([
-            'can_continue_progress' => false,
-        ]);
+        // To be stopped temoporarily until UI is ready
+        // $traderOrder->update([
+        //     'can_continue_progress' => false,
+        // ]);
 
         if (method_exists($exception, 'getMessage')) {
             Log::error($exception->getMessage());
