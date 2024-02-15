@@ -6,7 +6,6 @@ use App\Actions\Contracts\LoginUser;
 use App\Actions\Contracts\SendOtp;
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\EnsureFrontendRequestsAreStatefulWithoutCookie;
 use App\Http\Requests\V1\Auth\LoginRequest;
 use App\Models\Company;
 use App\Models\User;
@@ -15,7 +14,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -94,14 +92,8 @@ class LoginController extends Controller
             tenancy()->initialize($companyId);
         }
         Cache::forget('has_verified_otp_'.$request->user()->id);
-      
-        if (EnsureFrontendRequestsAreStatefulWithoutCookie::fromFrontend($request)) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-        } else {
-            $request->user()->currentAccessToken()->delete();
-        }
+
+        $request->user()->currentAccessToken()->delete();
 
         return $this->successResponse(statusCode: Response::HTTP_NO_CONTENT);
     }
