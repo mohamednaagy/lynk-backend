@@ -51,6 +51,7 @@ class AuthServiceProvider extends ServiceProvider
             return match ($this->getAreaFromRequestPath()) {
                 RouteArea::Admin => $user->hasRole([Role::Admin]) ?: null,
                 RouteArea::Lender => $user->hasRole([Role::LenderAdmin]) ?: null,
+                RouteArea::Lender => $user->hasRole([Role::LenderApiUser]) ?: null,
                 RouteArea::Trader => $user->hasRole([Role::TraderAdmin]) ?: null,
                 default => null
             };
