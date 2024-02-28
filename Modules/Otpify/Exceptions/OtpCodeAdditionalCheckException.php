@@ -12,13 +12,12 @@ class OtpCodeAdditionalCheckException extends Exception
     /**
      * Render the exception into an HTTP response.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function render(Request $request)
     {
         $message = trans('otpify::response.otp_code_additional_check_error');
-        $code = Response::HTTP_UNAUTHORIZED;
+        $code = Response::HTTP_BAD_REQUEST;
 
         if ($request->expectsJson()) {
             return response()->errorResponse(
