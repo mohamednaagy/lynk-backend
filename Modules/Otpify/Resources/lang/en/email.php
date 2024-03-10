@@ -13,10 +13,13 @@ return [
     |
     */
 
+    'subject' => 'Your One-Time Passcode',
     'greeting' => 'Hello :name,',
-    'otp_code' => 'Your OTP Code is :code',
+    'thanks_security' => 'Thank you for allowing us to keep your access secure.',
+    'enter_otp' => 'Please enter the below One-Time Passcode to complete your login attempt.',
+    'otp_code' => ':code',
     'verify_here' => 'Verify Here',
-    'expire_at' => 'The code will expire in :time minutes',
+    'expire_at' => 'Please use this Passcode within the next :time minutes and DO NOT SHARE this code with anyone.',
     'ignore_message' => 'If you have not tried to login, ignore this message.',
 
 ];

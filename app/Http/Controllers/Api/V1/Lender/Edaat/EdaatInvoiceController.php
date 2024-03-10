@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api\V1\Lender\Edaat;
 use App\Actions\Contracts\Edaat\CreateEdaatInvoice as CreateEdaatInvoiceInterface;
 use App\Actions\Contracts\Edaat\GetEdaatInvoices as GetEdaatInvoicesInterface;
 use App\Actions\Contracts\Wallets\CalculateOrdersCost;
+use App\Enums\Action;
+use App\Enums\Area;
+use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Wallets\CalculateOrdersRequest;
@@ -19,6 +22,21 @@ use Illuminate\Support\Facades\DB;
 
 class EdaatInvoiceController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::LenderEdaatInvoices, Action::Manage, Action::Index])
+        )
+            ->only('index');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::LenderEdaatInvoices, Action::Manage, Action::Create])
+        )
+            ->only('store');
+    }
+
     public function index(
         Request $request,
         GetEdaatInvoicesInterface $getEdaatInvoices

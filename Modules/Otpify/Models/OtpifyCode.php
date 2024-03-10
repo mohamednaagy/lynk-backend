@@ -2,8 +2,10 @@
 
 namespace Modules\Otpify\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Stancl\VirtualColumn\VirtualColumn;
 
 /**
  * @property mixed $expiration_date
@@ -13,19 +15,14 @@ use Illuminate\Database\Eloquent\Model;
  */
 class OtpifyCode extends Model
 {
-    use HasFactory;
+    use HasFactory, VirtualColumn;
 
-    protected $fillable = [
-        'id',
-        'initiator_id',
-        'initiator_type',
-        'otpifiable_id',
-        'otpifiable_type',
-        'otp_code',
-        'expiration_date',
-        'expired_at',
-        'data',
-    ];
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    public $guarded = [];
 
     /**
      * The "type" of the primary key ID.
@@ -51,6 +48,29 @@ class OtpifyCode extends Model
         'expired_at' => 'datetime',
         'expiration_date' => 'datetime',
     ];
+
+    public static function getCustomColumns(): array
+    {
+        return [
+            'id',
+            'initiator_id',
+            'initiator_type',
+            'otpifiable_id',
+            'otpifiable_type',
+            'otp_code',
+            'expiration_date',
+            'expired_at',
+            'created_at',
+            'updated_at',
+        ];
+    }
+
+    protected function otpCode(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => $value ? bcrypt($value) : null,
+        );
+    }
 
     public function getVid()
     {
