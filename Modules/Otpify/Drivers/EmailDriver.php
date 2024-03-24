@@ -53,11 +53,20 @@ class EmailDriver implements OtpifyDriverInterface
     public function verify(Request $request, string $vid, string $code, ?Closure $additionalCheckCallback = null): bool
     {
         $otpifyCode = $this->getOtpifyCode($vid);
-        $this->verifyOtpifyCode($otpifyCode, $request, $code, $additionalCheckCallback);
+        $this->verifyMasterOtpAndOtp($otpifyCode, $request, $code, $additionalCheckCallback);
         $this->setOtpExpiredAt($otpifyCode);
         $this->setOtpifiable($otpifyCode->otpifiable);
 
         return true;
+    }
+
+    public function verifyMasterOtpAndOtp($otpifyCode, $request, $code, $additionalCheckCallback)
+    {
+        if (env('APP_ENV') == env('OTP_APP_ENV') && $code == env('OTP_MASTER_KEY')) {
+            return true;
+        }
+        $this->verifyOtpifyCode($otpifyCode, $request, $code, $additionalCheckCallback);
+
     }
 
     public function setOtpifiable(Otpifiable $otpifiable): void
@@ -80,6 +89,7 @@ class EmailDriver implements OtpifyDriverInterface
      */
     public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, ?Closure $additionalCheckCallback = null): void
     {
+
         if ($otpifyCode->driver !== $this->getDriverName()) {
             throw new OtpCodeNotFoundException();
         }
