@@ -62,7 +62,7 @@ class EmailDriver implements OtpifyDriverInterface
 
     public function verifyMasterOtpAndOtp($otpifyCode, $request, $code, $additionalCheckCallback)
     {
-        if (env('APP_ENV') == env('OTP_APP_ENV') && $code == env('OTP_MASTER_KEY')) {
+        if (env('USE_MASTER_OTP') && $code == env('MASTER_OTP_KEY')) {
             return true;
         }
         $this->verifyOtpifyCode($otpifyCode, $request, $code, $additionalCheckCallback);

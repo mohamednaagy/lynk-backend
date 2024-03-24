@@ -95,7 +95,7 @@ class EmailDriverTest extends TestCase
     public function test_return_success_if_master_otp_correct_and_env_development()
     {
         $otp = Otpify::send(new Request(), $this->user);
-        Otpify::verify(new Request(), $otp->id, env('OTP_MASTER_KEY'));
+        Otpify::verify(new Request(), $otp->id, env('MASTER_OTP_KEY'));
         $this->assertInstanceOf(OtpifyCode::class, $otp);
     }
 
@@ -109,15 +109,15 @@ class EmailDriverTest extends TestCase
     public function test_return_false_if_it_not_development_server()
     {
         $this->expectException(OtpCodeIncorrectException::class);
-        $_ENV['OTP_APP_ENV'] = '';
+        $_ENV['USE_MASTER_OTP'] = 'false';
         $otp = Otpify::send(new Request(), $this->user);
-        Otpify::verify(new Request(), $otp->id, env('OTP_MASTER_KEY'));
+        Otpify::verify(new Request(), $otp->id, env('MASTER_OTP_KEY'));
     }
 
     public function test_return_false_if_development_server_but_master_code_not_correct()
     {
         $this->expectException(OtpCodeIncorrectException::class);
         $otp = Otpify::send(new Request(), $this->user);
-        Otpify::verify(new Request(), $otp->id, env('OTP_MASTER_KEY').'2');
+        Otpify::verify(new Request(), $otp->id, env('MASTER_OTP_KEY').'2');
     }
 }
