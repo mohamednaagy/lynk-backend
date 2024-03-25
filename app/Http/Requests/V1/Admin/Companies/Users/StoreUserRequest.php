@@ -3,7 +3,6 @@
 namespace App\Http\Requests\V1\Admin\Companies\Users;
 
 use App\Enums\Area;
-use App\Enums\Role;
 use App\Models\User;
 use App\Rules\HostWhitelistRule;
 use App\Rules\UrlProtocolRule;
@@ -14,8 +13,6 @@ class StoreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -44,7 +41,6 @@ class StoreUserRequest extends FormRequest
             'role' => [
                 'required',
                 Rule::in(Area::roles(Area::Lender)),
-                Rule::notIn(Role::LenderApiUser),
             ],
         ];
     }

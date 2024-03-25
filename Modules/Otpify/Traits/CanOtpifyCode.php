@@ -2,12 +2,17 @@
 
 namespace Modules\Otpify\Traits;
 
+use App\Enums\VerificationMethod;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Modules\Otpify\Contracts\Otpifiable;
+use Modules\Otpify\Drivers\AbsherDriver;
+use Modules\Otpify\Drivers\EmailDriver;
+use Modules\Otpify\Drivers\FakeAbsherDriver;
+use Modules\Otpify\Drivers\TwilioSmsDriver;
 use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
 use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
 use Modules\Otpify\Exceptions\OtpCodeExpiredException;
@@ -21,20 +26,14 @@ trait CanOtpifyCode
 {
     /**
      *  createOtpifyCode
-     *
-     * @param  mixed  $code
-     * @param  Otpifiable  $otpifiable
-     * @param  Model|null  $initiator
-     * @param  array  $data
-     * @return OtpifyCode
      */
     public function createOtpifyCode(
-        $code,
+        ?string $code,
         Otpifiable $otpifiable,
-        Model|Otpifiable $initiator = null,
+        Model|Otpifiable|null $initiator = null,
         array $data = []
     ): OtpifyCode {
-        return OtpifyCode::create([
+        return OtpifyCode::create(array_merge([
             'id' => (string) Str::uuid(),
             'initiator_id' => optional($initiator)->getKey(),
             'initiator_type' => optional($initiator)->getMorphClass(),
@@ -43,24 +42,25 @@ trait CanOtpifyCode
             'otp_code' => $code,
             'expiration_date' => now()->addMinutes(config('otpify.code_expiration_time')),
             'data' => $data,
-        ]);
+            'driver' => $this->getDriverName(),
+            'verification_method' => $this->getVerificationMethod(),
+        ], $data));
     }
 
     /**
-     * @param  OtpifyCode  $otpifyCode
-     * @param  Request  $request
-     * @param $code
-     * @param  Closure|null  $additionalCheckCallback
-     * @return void
-     *
      * @throws OtpCodeAdditionalCheckException
      * @throws OtpCodeAlreadyUsedException
      * @throws OtpCodeExpiredException
      * @throws OtpCodeIncorrectException
      * @throws OtpifiableNotEqualAuthUserException
+     * @throws OtpCodeNotFoundException
      */
-    public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, Closure $additionalCheckCallback = null): void
+    public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, ?Closure $additionalCheckCallback = null): void
     {
+        if ($otpifyCode->driver !== $this->getDriverName()) {
+            throw new OtpCodeNotFoundException();
+        }
+
         if (auth()->user()->getAuthIdentifier() !== $otpifyCode->otpifiable_id) {
             throw new OtpifiableNotEqualAuthUserException();
         }
@@ -85,9 +85,6 @@ trait CanOtpifyCode
     }
 
     /**
-     * @param $vid
-     * @return OtpifyCode
-     *
      * @throws OtpCodeNotFoundException
      */
     public function getOtpifyCode($vid): OtpifyCode
@@ -101,19 +98,11 @@ trait CanOtpifyCode
         return $otpifyCode;
     }
 
-    /**
-     * @param $expirationDate
-     * @return bool
-     */
     public function isCodeExpired($expirationDate): bool
     {
         return $expirationDate->lt(now());
     }
 
-    /**
-     * @param  OtpifyCode  $otpifyCode
-     * @return void
-     */
     public function setOtpExpiredAt(OtpifyCode $otpifyCode): void
     {
         $otpifyCode->update(['expired_at' => now()]);
@@ -122,5 +111,22 @@ trait CanOtpifyCode
     public function createAuthorizationToken(array $data): string
     {
         return Otpify::generateAuthorizationToken($data);
+    }
+
+    private function getDriverName(): string
+    {
+        $driverNameArray = explode('\\', get_class());
+        $driverName = end($driverNameArray);
+        $parts = explode('Driver', $driverName);
+
+        return Str::snake($parts[0]);
+    }
+
+    private function getVerificationMethod(): string
+    {
+        return match (get_class()) {
+            TwilioSmsDriver::class, AbsherDriver::class, FakeAbsherDriver::class => VerificationMethod::Phone,
+            EmailDriver::class => VerificationMethod::Email,
+        };
     }
 }

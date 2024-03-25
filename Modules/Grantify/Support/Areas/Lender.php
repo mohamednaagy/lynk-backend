@@ -14,6 +14,7 @@ class Lender
         Role::LenderSupervisor,
         Role::LenderOrderCreator,
         Role::LenderApiUser,
+
     ];
 
     public static array $basePermissions = [
