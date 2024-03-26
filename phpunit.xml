@@ -39,7 +39,7 @@
         <env name="HOST_WHITELIST" value="bimventures.com,Lynk.com,localhost"/>
         <env name="OTPIFY_NATIONAL_ID_DEFAULT_DRIVER" value="fake_absher"/>
         <env name="BURSAM_FAKE" value="false"/>
-        <env name="USE_MASTER_OTP" value="true"/>
+        <env name="ALLOW_VERIFY_WITH_MASTER_KEY" value="true"/>
         <env name="MASTER_OTP_KEY" value="111111"/>
 
     </php>
