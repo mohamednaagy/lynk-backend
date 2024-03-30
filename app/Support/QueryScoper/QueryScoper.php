@@ -14,6 +14,7 @@ abstract class QueryScoper
      */
     public function apply($builder)
     {
+        // TODO: need to remove it try and catch
         try {
             $validated = $this->validator($this->prepareData())->validate();
         } catch (ValidationException $th) {

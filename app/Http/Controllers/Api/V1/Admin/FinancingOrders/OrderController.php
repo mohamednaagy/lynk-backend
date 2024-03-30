@@ -14,6 +14,7 @@ use App\Enums\Subject;
 use App\Enums\TraderOrderMode;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Admin\FinancingOrders\ListOrderRequest;
 use App\Http\Requests\V1\Admin\FinancingOrders\StoreOrderRequest;
 use App\Http\Requests\V1\Admin\FinancingOrders\UpdateOrderRequest;
 use App\Models\Company;
@@ -56,7 +57,7 @@ class OrderController extends Controller
             ->only('update');
     }
 
-    public function index(Request $request, BuildFinancingOrdersQuery $buildFinancingOrdersQuery): JsonResponse
+    public function index(ListOrderRequest $request, BuildFinancingOrdersQuery $buildFinancingOrdersQuery): JsonResponse
     {
         $orders = $buildFinancingOrdersQuery->setRelations([
             'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
