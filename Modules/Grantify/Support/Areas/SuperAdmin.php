@@ -104,5 +104,20 @@ class SuperAdmin
             Action::Delete,
             Action::Manage,
         ],
+        Subject::CommodityMarket => [
+            Action::Index,
+        ],
+
+        Subject::CommodityMarketSuppliers => [
+            Action::Index,
+        ],
+
+        Subject::CommodityMarketCommodityTypes => [
+            Action::Index,
+        ],
+
+        Subject::CommodityMarketCommodityItems => [
+            Action::Index,
+        ],
     ];
 }
