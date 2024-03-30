@@ -23,12 +23,11 @@ class UpdateUserAction implements UpdateUser
         }
 
         if ($user->email != $data['email']) {
-            Mail::to($user->email)->send(new ChangeEmail($user, $data['email']));
-            $user->update(['email_verified_at' => null]);
-            $user->tokens()->delete();
+            $this->changeEmailWithSendNotification($user, $data['email']);
         }
+
         if (array_key_exists('password', $data)) {
-            $user->tokens()->delete();
+            $this->removeTokensOfUser($user);
         }
 
         return $user->update(
@@ -47,5 +46,17 @@ class UpdateUserAction implements UpdateUser
                 ]
             )
         );
+    }
+
+    public function changeEmailWithSendNotification(User $user, $new_email): void
+    {
+        Mail::to($user->email)->send(new ChangeEmail($user, $new_email));
+        $user->update(['email_verified_at' => null]);
+        $this->removeTokensOfUser($user);
+    }
+
+    public function removeTokensOfUser(User $user): void
+    {
+        $user->tokens()->delete();
     }
 }

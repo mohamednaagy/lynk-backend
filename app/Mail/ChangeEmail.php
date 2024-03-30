@@ -23,7 +23,7 @@ class ChangeEmail extends Mailable implements ShouldQueue
      */
     public function __construct(User $user, $new_email)
     {
-        $this->name = $user->first_name.' '.$user->last_name;
+        $this->name = $user->full_name;
         $this->onQueue('notifications');
     }
 
@@ -33,7 +33,7 @@ class ChangeEmail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('Update Your Email'),
+            subject: __('Change Your Email'),
         );
     }
 
@@ -43,7 +43,7 @@ class ChangeEmail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.update-email'
+            markdown: 'emails.change-user-email'
         );
     }
 
