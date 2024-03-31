@@ -47,6 +47,7 @@ class Company extends BaseTenant
             'notifications_email',
             'unique_name',
             'company_cr',
+            'contract_number',
             'status',
             'public_status_comment',
             'internal_status_comment',
