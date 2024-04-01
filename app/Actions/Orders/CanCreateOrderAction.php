@@ -21,7 +21,6 @@ class CanCreateOrderAction implements CanCreateOrder
         $wallet = $company->getWallet(WalletType::CompanyWallet);
         $orderCostWithVat = TieredPricing::getOrderCostWithVat($company, $amount);
 
-        return true;
         if ($wallet->balance->greaterThanOrEqual($orderCostWithVat)) {
             return true;
         }
