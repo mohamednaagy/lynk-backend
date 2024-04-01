@@ -15,6 +15,7 @@ use App\Enums\Subject;
 use App\Enums\TraderOrderMode;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Lender\Orders\ListOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
 use App\Jobs\FinancingOrders\NotifyAdminsAboutOrderCreated;
@@ -52,7 +53,7 @@ class OrderController extends Controller
         )->only('update');
     }
 
-    public function index(Request $request, BuildFinancingOrdersQuery $buildOrdersQuery): JsonResponse
+    public function index(ListOrderRequest $request, BuildFinancingOrdersQuery $buildOrdersQuery): JsonResponse
     {
         if ($request->user()->hasRole(Role::LenderOrderCreator)) {
             $buildOrdersQuery->setCreator($request->user());
