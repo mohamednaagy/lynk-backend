@@ -51,6 +51,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     protected $fillable = [
         'reference_number',
         'national_id',
+        'contract_number',
         'phone_number',
         'amount',
         'selling_price',
@@ -267,7 +268,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return ! $this->canBeCompleted();
     }
 
-    public function canCreateTraderOrder(User $user = null): bool
+    public function canCreateTraderOrder(?User $user = null): bool
     {
         if (
             $this->isNotReadyToStartTrading()
