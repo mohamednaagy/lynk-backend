@@ -16,6 +16,7 @@ class OrderCreationFeeType implements TransactionTypeHandlerInterface
 
         return __('transaction-description.order_creation_fee', [
             'order_number' => $items['financing_order_id'] ?? '',
+            'trader_order_number' => $items['trader_order_id'] ?? '',
         ], $locale);
     }
 
