@@ -20,6 +20,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 {
@@ -100,6 +101,11 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
                     : ''
             );
         });
+
+        Log::error(
+            method_exists($exception, 'getMessage') ? $exception->getMessage() : 'Error and failed',
+            ['exception' => $exception]
+        );
     }
 
     public function middleware(): array

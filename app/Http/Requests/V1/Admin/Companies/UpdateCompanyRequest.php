@@ -5,6 +5,7 @@ namespace App\Http\Requests\V1\Admin\Companies;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\OrderFeeType;
 use App\Enums\TraderOrderMode;
+use App\Models\Company;
 use App\Rules\CompanyUniqueNameRule;
 use App\Rules\OrderCostTiersRangeRule;
 use BenSampo\Enum\Rules\EnumValue;
@@ -52,6 +53,12 @@ class UpdateCompanyRequest extends FormRequest
                 'size:10',
                 Rule::unique('companies', 'company_cr')
                     ->ignore($this->route('lender')),
+            ],
+            'contract_number' => [
+                'required',
+                'string',
+                Rule::unique(Company::class, 'contract_number'),
+                'size:4,16',
             ],
             'does_order_require_approval' => [
                 'required',
