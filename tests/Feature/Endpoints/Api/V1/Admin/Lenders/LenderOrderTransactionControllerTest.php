@@ -11,6 +11,7 @@ use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Transformers\TransactionTransformer;
+use Carbon\Carbon;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Grantify\Facades\Grantify;
@@ -20,7 +21,7 @@ use Tests\Traits\InteractsWithUser;
 
 class LenderOrderTransactionControllerTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $lender;
 
@@ -77,6 +78,97 @@ class LenderOrderTransactionControllerTest extends TestCase
                     'receipt_url',
                 ])->respond()->getData(true)
             );
+    }
+
+    public function test_admin_can_get_lender_transactions_with_filter_successfully(): void
+    {
+        $this->actingAs(self::$userAdmin)
+            ->getJson(self::$endpoint.self::$lender->id.'/transactions?amount_gte=2000')
+            ->assertOk()
+            ->assertExactJson(
+                fractal(
+                    self::$lender->transactions(WalletType::CompanyWallet)->paginate(),
+                    new TransactionTransformer()
+                )->parseIncludes([
+                    'id',
+                    'date',
+                    'description',
+                    'amount',
+                    'amount_formatted',
+                    'receipt_url',
+                ])->respond()->getData(true)
+            );
+
+        $this->actingAs(self::$userAdmin)
+            ->getJson(self::$endpoint.self::$lender->id.'/transactions?amount_gte=2001')
+            ->assertOk()
+            ->assertExactJson(
+                ['data' => [],
+                    'meta' => [
+                        'pagination' => [
+                            'count' => 0,
+                            'current_page' => 1,
+                            'links' => [],
+                            'per_page' => 15,
+                            'total' => 0,
+                            'total_pages' => 1,
+                        ],
+                    ],
+                ]
+            );
+
+        $this->actingAs(self::$userAdmin)
+            ->getJson(self::$endpoint.self::$lender->id.'/transactions?amount_lte=2000')
+            ->assertOk()
+            ->assertExactJson(
+                fractal(
+                    self::$lender->transactions(WalletType::CompanyWallet)->paginate(),
+                    new TransactionTransformer()
+                )->parseIncludes([
+                    'id',
+                    'date',
+                    'description',
+                    'amount',
+                    'amount_formatted',
+                    'receipt_url',
+                ])->respond()->getData(true)
+            );
+
+        $this->actingAs(self::$userAdmin)
+            ->getJson(self::$endpoint.self::$lender->id.'/transactions?amount_lte=1999')
+            ->assertOk()
+            ->assertExactJson(
+                ['data' => [],
+                    'meta' => [
+                        'pagination' => [
+                            'count' => 0,
+                            'current_page' => 1,
+                            'links' => [],
+                            'per_page' => 15,
+                            'total' => 0,
+                            'total_pages' => 1,
+                        ],
+                    ],
+                ]
+            );
+
+        $this->actingAs(self::$userAdmin)
+            ->getJson(self::$endpoint.self::$lender->id.'/transactions?date_from='.Carbon::now()->toDateString().'&date_to='.Carbon::now()->toDateString())
+            ->assertOk()
+            ->assertExactJson(
+                fractal(
+                    self::$lender->transactions(WalletType::CompanyWallet)->paginate(),
+                    new TransactionTransformer()
+                )->parseIncludes([
+                    'id',
+                    'date',
+                    'description',
+                    'amount',
+                    'amount_formatted',
+                    'receipt_url',
+                ])->respond()->getData(true)
+            );
+
     }
 
     public function test_manager_with_permissions_can_get_lender_transactions_successfully(): void
