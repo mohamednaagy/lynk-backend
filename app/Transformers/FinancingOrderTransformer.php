@@ -23,7 +23,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     protected User $user;
 
-    public function __construct(Company $company = null)
+    public function __construct(?Company $company = null)
     {
         $this->company = $company;
     }
@@ -38,6 +38,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'reference_number',
         'customer_name',
         'national_id',
+        'contract_number',
         'amount',
         'amount_formatted',
         'selling_price',
@@ -119,6 +120,11 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeNationalId(FinancingOrder $financingOrder)
     {
         return $this->primitive((string) $financingOrder->national_id);
+    }
+
+    public function includeContractNumber(FinancingOrder $financingOrder)
+    {
+        return $this->primitive((string) $financingOrder->contract_number);
     }
 
     public function includePhoneNumber(FinancingOrder $financingOrder)
