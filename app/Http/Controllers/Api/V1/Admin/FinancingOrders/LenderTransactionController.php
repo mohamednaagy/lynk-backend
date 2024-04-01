@@ -7,6 +7,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Admin\Companies\ListTransactionRequest;
 use App\Models\Company;
 use App\Transformers\TransactionTransformer;
 use Illuminate\Http\JsonResponse;
@@ -21,9 +22,10 @@ class LenderTransactionController extends Controller
         )->only('index');
     }
 
-    public function index(Company $lender, GetTransactions $getTransactions): JsonResponse
+    public function index(ListTransactionRequest $request, Company $lender, GetTransactions $getTransactions): JsonResponse
     {
-        $transactions = $getTransactions->handle($lender);
+        $data = $request->validated();
+        $transactions = $getTransactions->handle($lender, $data);
 
         tap($transactions)->loadZatcaInvoicesMedia();
 
