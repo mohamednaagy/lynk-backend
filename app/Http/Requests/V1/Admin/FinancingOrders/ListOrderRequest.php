@@ -25,8 +25,8 @@ class ListOrderRequest extends FormRequest
     public function rules()
     {
         return [
-            'creation_start_date' => ['nullable', 'date', 'before_or_equal:creation_end_date', 'before_or_equal:'.Carbon::now()->toDateString()],
-            'creation_end_date' => ['nullable', 'date', 'after_or_equal:creation_start_date', 'before_or_equal:'.Carbon::now()->toDateString()],
+            'creation_start_date' => ['nullable', 'date', 'before_or_equal:'.Carbon::now()->toDateString(), $this->has('creation_end_date') ? 'before_or_equal:creation_end_date' : ''],
+            'creation_end_date' => ['nullable', 'date', 'before_or_equal:'.Carbon::now()->toDateString(), $this->has('creation_start_date') ? 'after_or_equal:creation_start_date' : ''],
         ];
     }
 }
