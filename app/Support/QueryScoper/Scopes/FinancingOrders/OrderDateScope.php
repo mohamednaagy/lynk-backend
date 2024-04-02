@@ -49,9 +49,22 @@ class OrderDateScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data)
     {
-        $startDate = Carbon::parse($data['creation_start_date'])->startOfDay();
-        $endDate = Carbon::parse($data['creation_end_date'])->endOfDay();
+        $startDate = isset($data['creation_end_date']) ? Carbon::parse($data['creation_start_date'])->startOfDay() : null;
+        $endDate = isset($data['creation_end_date']) ? Carbon::parse($data['creation_end_date'])->endOfDay() : null;
 
-        return $builder->whereBetween('created_at', [$startDate, $endDate]);
+        if ($startDate && $endDate) {
+            return $builder->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        if ($startDate) {
+            return $builder->where('created_at', '<=', $startDate);
+        }
+
+        if ($endDate) {
+            return $builder->where('created_at', '>=', $endDate);
+        }
+
+        return $builder;
+
     }
 }
