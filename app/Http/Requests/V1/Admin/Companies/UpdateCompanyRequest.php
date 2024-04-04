@@ -58,7 +58,8 @@ class UpdateCompanyRequest extends FormRequest
                 'required',
                 'string',
                 Rule::unique(Company::class, 'contract_number'),
-                'size:4,16',
+                'min:4',
+                'max:16',
             ],
             'does_order_require_approval' => [
                 'required',
