@@ -35,6 +35,7 @@ jobs:
           fi
           echo "Execution Time: $(date)"
           echo "Workflow Status: ${{ job.status }}"
+          sleep 1
           curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Repository Name: '$GITHUB_REPOSITORY'\n"Branch Name: '$GITHUB_REF'\nExecution Time: '$(date)'\nWorkflow Status: ${{ job.status }}"}' https://hooks.slack.com/services/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
 
         continue-on-error: true
