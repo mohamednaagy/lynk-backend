@@ -15,7 +15,7 @@ jobs:
         id: install-ssh-key
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_ }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: pulling and build code
         id: pull-and-build
