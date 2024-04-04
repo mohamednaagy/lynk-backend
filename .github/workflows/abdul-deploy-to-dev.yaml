@@ -22,7 +22,7 @@ jobs:
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} \
          "cd /var/www/lynk-backend/; sudo git pull origin dev; php artisan migrate"
     
-    -name: print info
+    - name: print info
      run: |
        echo "Repository Name: $GITHUB_REPOSITORY"
        echo "Branch Name: $GITHUB_REF"
