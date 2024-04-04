@@ -1,13 +1,14 @@
-name: Clone private repo on remote server
+name: deploy on dev
 
 on:
   #push:
     #branches:
-      #- dev
+   #   - dev
   workflow_dispatch:
 
 jobs:
   deploy:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)  
     runs-on: ubuntu-latest
 
     steps:
@@ -19,4 +20,16 @@ jobs:
     - name: Clone private repository
       run: | 
         ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} \
-         "git clone -o StrictHostKeyChecking=no git@github.com:abdulrahman-mohd/pipeline-test.git"
+         "cd /var/www/lynk-backend/; sudo git pull origin dev; php artisan migrate"
+    
+    -name: print info
+     run: |
+       echo "Repository Name: $GITHUB_REPOSITORY"
+       echo "Branch Name: $GITHUB_REF"
+       if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+          echo "Pull Request Link: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$GITHUB_PULL_REQUEST"
+       else
+          echo "No pull request link available."
+       fi
+       echo "Execution Time: $(date)"
+       echo "Workflow Status: ${{ job.status }}"

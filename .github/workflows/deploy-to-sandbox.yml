@@ -1,9 +1,9 @@
 name: Deployment to Sandbox
 
 on:
-  push:
-    branches:
-      - sandbox
+  #push:
+   # branches:
+    #  - sandbox
 
 jobs:
   deploy_to_sandbox:
