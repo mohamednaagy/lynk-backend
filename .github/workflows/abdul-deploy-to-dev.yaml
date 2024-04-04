@@ -1,34 +1,34 @@
 name: deploy on dev
 
 on:
+  workflow_dispatch:
   #push:
     #branches:
-   #   - dev
-  workflow_dispatch:
+      #- dev
 
 jobs:
   deploy:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) 
     runs-on: ubuntu-latest
     steps:
-    - name: Install SSH key
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Clone private repository
-      run: | 
-        ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} \
-         "cd /var/www/lynk-backend/; sudo git pull origin dev; php artisan migrate"
-    
-    - name: print info
-     run: |
-       echo "Repository Name: $GITHUB_REPOSITORY"
-       echo "Branch Name: $GITHUB_REF"
-       if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
-          echo "Pull Request Link: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$GITHUB_PULL_REQUEST"
-       else
-          echo "No pull request link available."
-       fi
-       echo "Execution Time: $(date)"
-       echo "Workflow Status: ${{ job.status }}"
+      - name: Clone private repository
+        run: | 
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} \
+           "cd /var/www/lynk-backend/; sudo git pull origin dev; php artisan migrate"
+      
+      - name: print info
+        run: |
+          echo "Repository Name: $GITHUB_REPOSITORY"
+          echo "Branch Name: $GITHUB_REF"
+          if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+            echo "Pull Request Link: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$GITHUB_PULL_REQUEST"
+          else
+            echo "No pull request link available."
+          fi
+          echo "Execution Time: $(date)"
+          echo "Workflow Status: ${{ job.status }}"
