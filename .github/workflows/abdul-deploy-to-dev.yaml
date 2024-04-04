@@ -26,17 +26,16 @@ jobs:
           echo "Repository Name: $GITHUB_REPOSITORY"
           echo "Branch Name: $GITHUB_REF"
           if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
-            curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Pull Request Link: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$GITHUB_PULL_REQUEST""}' https://hooks.slack.com/services/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
-            echo "Pull Request Link: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/p
-            ull/$GITHUB_PULL_REQUEST"
+            echo "Pull Request Link: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$GITHUB_PULL_REQUEST"
+            pr_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$GITHUB_PULL_REQUEST"
           else
-            curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"No pull request link available."}' https://hooks.slack.com/services/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
             echo "No pull request link available."
+            pr_url="No pull request link available."
           fi
           echo "Execution Time: $(date)"
           echo "Workflow Status: ${{ job.status }}"
-          sleep 1
-          curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Repository Name: '$GITHUB_REPOSITORY'\n"Branch Name: '$GITHUB_REF'\nExecution Time: '$(date)'\nWorkflow Status: ${{ job.status }}"}' https://hooks.slack.com/services/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
+
+          curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Repository Name: '$GITHUB_REPOSITORY'\n"Branch Name: '$GITHUB_REF'\nExecution Time: '$(date)'\nWorkflow Status: ${{ job.status }}\n pull request URL: '$pr_url'"}' https://hooks.slack.com/services/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
 
         continue-on-error: true
 
