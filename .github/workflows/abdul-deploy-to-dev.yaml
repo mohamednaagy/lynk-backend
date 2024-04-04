@@ -12,16 +12,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install SSH key
+        id: install-ssh-key
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_ }}
 
       - name: pulling and build code
+        id: pull-and-build
         run: | 
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} \
            "cd /var/www/lynk-backend/; sudo git pull origin dev; php artisan migrate"
       
       - name: print info
+        if steps.install-ssh-key.outcome == 'failure' || steps.install-ssh-key.outcome == 'success' || steps.pull-and-build.outcome == 'failure' || steps.pull-and-build.outcome == 'success'
         run: |
           echo "Repository Name: $GITHUB_REPOSITORY"
           echo "Branch Name: $GITHUB_REF"
@@ -37,7 +40,5 @@ jobs:
 
           curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Repository Name: '"$GITHUB_REPOSITORY"'\nBranch Name: '"$GITHUB_REF"'\nExecution Time: '"$(date)"'\nWorkflow Status: '"${{ job.status }}"'\n pull request URL: '"$pr_url"'"}' https://hooks.slack.com/services/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
 
-
-        continue-on-error: true
 
 
