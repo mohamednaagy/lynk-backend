@@ -2,9 +2,9 @@ name: deploy on dev
 
 on:
   workflow_dispatch:
-  #push:
-    #branches:
-      #- dev
+  push:
+    branches:
+      - dev
 
 jobs:
   deploy:
@@ -16,7 +16,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Clone private repository
+      - name: pulling and build code
         run: | 
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} \
            "cd /var/www/lynk-backend/; sudo git pull origin dev; php artisan migrate"
@@ -26,9 +26,20 @@ jobs:
           echo "Repository Name: $GITHUB_REPOSITORY"
           echo "Branch Name: $GITHUB_REF"
           if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
-            echo "Pull Request Link: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$GITHUB_PULL_REQUEST"
+            curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Pull Request Link: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$GITHUB_PULL_REQUEST""}' https://hooks.slack.com/services/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
+            echo "Pull Request Link: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/p
+            ull/$GITHUB_PULL_REQUEST"
           else
+            curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"No pull request link available."}' https://hooks.slack.com/services/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
             echo "No pull request link available."
           fi
           echo "Execution Time: $(date)"
           echo "Workflow Status: ${{ job.status }}"
+          curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Repository Name: $GITHUB_REPOSITORY"}' https://hooks.slack.com/services/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
+          curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Branch Name: $GITHUB_REF"}' https://hooks.slack.com/services/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
+          curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Execution Time: $(date)"}' https://hooks.slack.com/services/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
+          curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Workflow Status: ${{ job.status }}"}' https://hooks.slack.com/services/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
+
+          continue-on-error: true
+
+
