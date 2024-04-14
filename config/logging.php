@@ -65,9 +65,9 @@ return [
             'path' => storage_path('logs/custom.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
-        'transaction' => [
+        'transactionUpdates' => [
             'driver' => 'single',
-            'path' => storage_path('logs/transaction.log'),
+            'path' => storage_path('logs/transaction-updates.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
 
