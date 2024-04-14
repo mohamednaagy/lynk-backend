@@ -27,8 +27,8 @@ class ListTransactionRequest extends FormRequest
         return [
             'date_from' => ['nullable', 'date',  'before_or_equal:'.Carbon::now()->toDateString(), $this->has('date_to') ? 'before_or_equal:date_to' : ''],
             'date_to' => ['nullable', 'date', 'before_or_equal:'.Carbon::now()->toDateString(),  $this->has('date_from') ? 'after_or_equal:date_from' : ''],
-            'amount_lte' => ['nullable', 'different:amount_gte', 'numeric', $this->has('amount_gte') ? 'gte:amount_gte' : ''],
-            'amount_gte' => ['nullable',  'numeric', $this->has('amount_lte') ? 'lte:amount_lte' : ''],
+            'amount_lte' => ['nullable', 'different:amount_gte', 'numeric', $this->has('amount_gte') && $this->amount_gte > 0 ? 'lte:amount_gte' : ''],
+            'amount_gte' => ['nullable',  'numeric', $this->has('amount_lte') && $this->amount_lte > 0 ? 'gte:amount_lte' : ''],
             'page' => ['nullable', 'numeric'],
         ];
     }
