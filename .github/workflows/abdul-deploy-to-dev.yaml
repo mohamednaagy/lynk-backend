@@ -28,6 +28,7 @@ jobs:
         run: |
           echo "Repository Name: $GITHUB_REPOSITORY"
           echo "Branch Name: $GITHUB_REF"
+          echo "github event name: $GITHUB_EVENT_NAME"
           if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
             echo "Pull Request Link: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$GITHUB_PULL_REQUEST"
             pr_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$GITHUB_PULL_REQUEST"
