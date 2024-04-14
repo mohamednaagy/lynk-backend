@@ -21,9 +21,10 @@ jobs:
         id: pull-and-build
         run: | 
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} \
-           "cd /var/www/lynk-backend/; sudo git pull origin dev; php artisan migrate"
+           "cd /var/www/lynk-backend/; sudo git pull origin dev; php artisan migra"
         
       - name: set pr url
+        if: always()
         id: pr-url
         uses: kceb/pull-request-url-action@v1
         with:
@@ -40,5 +41,3 @@ jobs:
           echo "Workflow Status: ${{ job.status }}"
 
           curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Repository Name: '"$GITHUB_REPOSITORY"'\nBranch Name: '"$GITHUB_REF"'\nExecution Time: '"$(date)"'\nWorkflow Status: '"${{ job.status }}"'\n pull request URL: '"${{ steps.pr-url.outputs.url }}"'"}' https://hooks.slack.com/services/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
-
-
