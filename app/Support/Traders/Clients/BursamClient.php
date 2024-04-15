@@ -8,6 +8,7 @@ use GuzzleHttp\Middleware;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
@@ -54,68 +55,97 @@ class BursamClient
     {
         $financingOrder = $this->traderOrder->order;
 
-        return $this->rateLimitRequest(fn () => $this->http()
+        $url = 'api/process/svc/bsas/order.json';
+
+        $request = [
+            'serialNumber' => '1',
+            'bidOption' => 'Y',
+            'otcOption' => 'N',
+            'stbOption' => 'N',
+            'productCode' => $productCode,
+            'purchaseType' => 'P',
+            'clientName' => '',
+            'currency' => 'SAR',
+            'bidValue' => (float) $financingOrder->amount->convertAndFormatByDecimal(),
+            'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
+            'tenor' => config('trader.providers.bursam.tenor'),
+            'otcCounterParty' => $financingOrder->customer_name,
+            'otcMurabaha' => '',
+            'otcMurabahaValue' => (float) $financingOrder->selling_price->convertAndFormatByDecimal(),
+            'eCertNo' => '',
+        ];
+
+        $requestHeader = [
+            'memberShortName' => config('trader.providers.bursam.member_short_name'),
+            'uuid' => $this->traderOrder->uuid_one,
+        ];
+
+        $response = $this->rateLimitRequest(fn () => $this->http()
             ->post(
-                'api/process/svc/bsas/order.json',
+                $url,
                 [
-                    'header' => [
-                        'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                        'uuid' => $this->traderOrder->uuid_one,
-                    ],
-                    'request' => [
-                        'serialNumber' => '1',
-                        'bidOption' => 'Y',
-                        'otcOption' => 'N',
-                        'stbOption' => 'N',
-                        'productCode' => $productCode,
-                        'purchaseType' => 'P',
-                        'clientName' => '',
-                        'currency' => 'SAR',
-                        'bidValue' => (float) $financingOrder->amount->convertAndFormatByDecimal(),
-                        'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
-                        'tenor' => config('trader.providers.bursam.tenor'),
-                        'otcCounterParty' => $financingOrder->customer_name,
-                        'otcMurabaha' => '',
-                        'otcMurabahaValue' => (float) $financingOrder->selling_price->convertAndFormatByDecimal(),
-                        'eCertNo' => '',
-                    ],
+                    'header' => $requestHeader,
+                    'request' => $request,
                 ]
             ));
+
+        Log::channel('bursam')->info('Malaysia Bursa buyProduct request: ...', [
+            'url' => $url,
+            'request' => $request,
+            'headers' => $requestHeader,
+            'response' => $response->json(),
+        ]);
+
+        return $response;
     }
 
     public function sellProduct()
     {
         $financingOrder = $this->traderOrder->order;
 
-        return $this->rateLimitRequest(
+        $url = 'api/process/svc/bsas/order.json';
+        $requestHeader = [
+            'memberShortName' => config('trader.providers.bursam.member_short_name'),
+            'uuid' => $this->traderOrder->uuid_two,
+        ];
+
+        $request = [
+            'serialNumber' => '1',
+            'bidOption' => 'N',
+            'otcOption' => 'Y',
+            'stbOption' => 'Y',
+            'productCode' => $this->traderOrder->product_code,
+            'purchaseType' => 'P',
+            'clientName' => '',
+            'currency' => 'SAR',
+            'bidValue' => (float) $financingOrder->amount->convertAndFormatByDecimal(),
+            'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
+            'tenor' => '00090',
+            'otcCounterParty' => $financingOrder->customer_name,
+            'otcMurabaha' => '',
+            'otcMurabahaValue' => (float) $financingOrder->selling_price->convertAndFormatByDecimal(),
+            'eCertNo' => $this->traderOrder->reference,
+        ];
+
+        $response = $this->rateLimitRequest(
             fn () => $this->http()
                 ->post(
-                    'api/process/svc/bsas/order.json',
+                    $url,
                     [
-                        'header' => [
-                            'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                            'uuid' => $this->traderOrder->uuid_two,
-                        ],
-                        'request' => [
-                            'serialNumber' => '1',
-                            'bidOption' => 'N',
-                            'otcOption' => 'Y',
-                            'stbOption' => 'Y',
-                            'productCode' => $this->traderOrder->product_code,
-                            'purchaseType' => 'P',
-                            'clientName' => '',
-                            'currency' => 'SAR',
-                            'bidValue' => (float) $financingOrder->amount->convertAndFormatByDecimal(),
-                            'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
-                            'tenor' => '00090',
-                            'otcCounterParty' => $financingOrder->customer_name,
-                            'otcMurabaha' => '',
-                            'otcMurabahaValue' => (float) $financingOrder->selling_price->convertAndFormatByDecimal(),
-                            'eCertNo' => $this->traderOrder->reference,
-                        ],
+                        'header' => $requestHeader,
+                        'request' => $request,
                     ]
                 )
         );
+
+        Log::channel('bursam')->info('Malaysia Bursa sellProduct request: ...', [
+            'url' => $url,
+            'request' => $request,
+            'headers' => $requestHeader,
+            'response' => $response->json(),
+        ]);
+
+        return $response;
     }
 
     public function fetchBuyResult()
@@ -130,72 +160,119 @@ class BursamClient
 
     private function fetchOrderResult($uuid)
     {
-        return $this->rateLimitRequest(
+        $url = 'api/process/svc/bsas/orderResult.json';
+
+        $requestHeader = [
+            'memberShortName' => config('trader.providers.bursam.member_short_name'),
+            'uuid' => $uuid,
+        ];
+
+        $request = [
+            'serialNumber' => '1',
+            'forceYN' => 'Y',
+            'maxWaitTime' => '10',
+            'waitAllDoneYN' => 'Y',
+        ];
+
+        $response = $this->rateLimitRequest(
             fn () => $this->http()
                 ->post(
-                    'api/process/svc/bsas/orderResult.json',
+                    $url,
                     [
-                        'header' => [
-                            'memberShortName' => config('trader.providers.bursam.member_short_name'),
-                            'uuid' => $uuid,
-                        ],
-                        'request' => [
-                            'serialNumber' => '1',
-                            'forceYN' => 'Y',
-                            'maxWaitTime' => '10',
-                            'waitAllDoneYN' => 'Y',
-                        ],
+                        'header' => $requestHeader,
+                        'request' => $request,
                     ]
                 )
         );
+
+        Log::channel('bursam')->info('Malaysia Bursa fetchOrderResult request: ...', [
+            'url' => $url,
+            'request' => $request,
+            'headers' => $requestHeader,
+            'response' => $response->json(),
+        ]);
+
+        return $response;
     }
 
     public function getBidXml()
     {
-        return $this->rateLimitRequest(
+        $url = 'api/process/svc/bsas/bidXML.json';
+        $request = [
+            'membershortname' => config('trader.providers.bursam.member_short_name'),
+            'ecertno' => $this->traderOrder->reference,
+        ];
+
+        $response = $this->rateLimitRequest(
             fn () => $this->http()
                 ->post(
-                    'api/process/svc/bsas/bidXML.json',
+                    $url,
                     [
-                        'input' => [
-                            'membershortname' => config('trader.providers.bursam.member_short_name'),
-                            'ecertno' => $this->traderOrder->reference,
-                        ],
+                        'input' => $request,
                     ]
                 )
         );
+
+        Log::channel('bursam')->info('Malaysia Bursa getBidXml request: ...', [
+            'url' => $url,
+            'request' => $request,
+            'response' => $response->json(),
+        ]);
+
+        return $response;
     }
 
     public function getOtcXml()
     {
-        return $this->rateLimitRequest(
+        $url = 'api/process/svc/bsas/otcXML.json';
+        $request = [
+            'membershortname' => config('trader.providers.bursam.member_short_name'),
+            'ecertno' => $this->traderOrder->reference,
+        ];
+        $response = $this->rateLimitRequest(
             fn () => $this->http()
                 ->post(
-                    'api/process/svc/bsas/otcXML.json',
+                    $url,
                     [
-                        'input' => [
-                            'membershortname' => config('trader.providers.bursam.member_short_name'),
-                            'ecertno' => $this->traderOrder->reference,
-                        ],
+                        'input' => $request,
                     ]
                 )
         );
+
+        Log::channel('bursam')->info('Malaysia Bursa getOtcXml request: ...', [
+            'url' => $url,
+            'request' => $request,
+            'response' => $response->json(),
+        ]);
+
+        return $response;
     }
 
     public function getStbXml()
     {
-        return $this->rateLimitRequest(
+        $url = 'api/process/svc/bsas/stbXML.json';
+        $request = [
+            'membershortname' => config('trader.providers.bursam.member_short_name'),
+            'ecertno' => $this->traderOrder->reference,
+        ];
+
+        $response = $this->rateLimitRequest(
             fn () => $this->http()
                 ->post(
-                    'api/process/svc/bsas/stbXML.json',
+                    $url,
                     [
-                        'input' => [
-                            'membershortname' => config('trader.providers.bursam.member_short_name'),
-                            'ecertno' => $this->traderOrder->reference,
-                        ],
+                        'input' => $request,
                     ]
                 )
         );
+
+        Log::channel('bursam')->info('Malaysia Bursa getStbXml request: ...', [
+            'url' => $url,
+            'request' => $request,
+            'response' => $response->json(),
+        ]);
+
+        return $response;
     }
 
     private function http(): PendingRequest

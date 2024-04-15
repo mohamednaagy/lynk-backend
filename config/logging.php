@@ -114,6 +114,13 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+
+        'bursam' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/bursam/bursam.log'),
+            'level' => 'debug',
+            'days' => 30,
+        ],
     ],
 
 ];
