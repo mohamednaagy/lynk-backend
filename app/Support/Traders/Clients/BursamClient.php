@@ -288,13 +288,16 @@ class BursamClient
 
     protected function rateLimitRequest($callback, $remainingRetries = 0)
     {
-        if ($remainingRetries > (int) config('trader.providers.bursam.rate_limit.max_retries_before_exception')) {
+        $maxRetriesBeforeException = (int) config('trader.providers.bursam.rate_limit.max_retries_before_exception');
+        if ($remainingRetries > $maxRetriesBeforeException) {
             $exception = new RateLimitExceededException('bursam_api');
 
             $exception->setContext([
                 'trader_order_id' => $this->traderOrder->id,
                 'provider' => $this->traderOrder->provider,
                 'version' => $this->traderOrder->version,
+                'remaining_retries' => $remainingRetries,
+                'max_retries_before_exception' => $maxRetriesBeforeException,
             ]);
 
             throw $exception;
