@@ -34,8 +34,8 @@ class OrderDateScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'creation_start_date' => ['nullable', 'date', 'before_or_equal:creation_end_date', 'before_or_equal:'.Carbon::now()->toDateString()],
-                'creation_end_date' => ['nullable', 'date', 'after_or_equal:creation_start_date', 'before_or_equal:'.Carbon::now()->toDateString()],
+                'creation_start_date' => ['nullable', 'date'],
+                'creation_end_date' => ['nullable', 'date'],
             ]
         );
     }
@@ -57,11 +57,11 @@ class OrderDateScope extends QueryScoper
         }
 
         if ($startDate) {
-            return $builder->where('created_at', '<=', $startDate);
+            return $builder->where('created_at', '>=', $startDate);
         }
 
         if ($endDate) {
-            return $builder->where('created_at', '>=', $endDate);
+            return $builder->where('created_at', '<=', $endDate);
         }
 
         return $builder;
