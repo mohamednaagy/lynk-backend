@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Exception;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class TraderException extends Exception
@@ -27,7 +28,16 @@ class TraderException extends Exception
             $context['version'] ?? null,
             'Provider Response Body '.json_encode($context['provider_response_body']),
             'Failure Reason '.$context['failure_reason'],
-            'Failure Code '.$context['failure_code'],
+            $message,
+        ]);
+
+        Log::channel('bursam')->error('Trader Request Issue : ...', [
+            'TRADER_ERROR',
+            $context['provider'] ?? null,
+            'Trader Order ID '.Arr::get($context, 'trader_order_id', '---'),
+            $context['version'] ?? null,
+            'Provider Response Body '.json_encode($context['provider_response_body']),
+            'Failure Reason '.$context['failure_reason'],
             $message,
         ]);
 
