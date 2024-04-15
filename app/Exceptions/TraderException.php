@@ -25,6 +25,9 @@ class TraderException extends Exception
             $context['provider'] ?? null,
             'Trader Order ID '.Arr::get($context, 'trader_order_id', '---'),
             $context['version'] ?? null,
+            'Provider Response Body '.$context['provider_response_body'],
+            'Failure Reason '.$context['failure_reason'],
+            'Failure Code '.$context['failure_code'],
             $message,
         ]);
 
