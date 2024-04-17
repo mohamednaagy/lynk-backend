@@ -16,6 +16,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Jenssegers\Agent\Facades\Agent;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
@@ -37,6 +38,8 @@ class LoginController extends Controller
      */
     public function authenticate(LoginRequest $request, LoginUser $loginUser, SendOtp $sendOtp)
     {
+        Log::channel('bursam')->error('check bursam log working as expected ');
+
         $companyUniqueName = $request->validated('unique_name');
         $company = null;
 
