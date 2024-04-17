@@ -35,10 +35,10 @@ class FinancingOrderTransformer extends TransformerAbstract
         'status',
         'company_id',
         'company_name',
+        'contract_number',
         'reference_number',
         'customer_name',
         'national_id',
-        'contract_number',
         'amount',
         'amount_formatted',
         'selling_price',
@@ -124,7 +124,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeContractNumber(FinancingOrder $financingOrder)
     {
-        return $this->primitive((string) $financingOrder->contract_number);
+        return $this->primitive((string) $financingOrder->company->contract_number);
     }
 
     public function includePhoneNumber(FinancingOrder $financingOrder)
