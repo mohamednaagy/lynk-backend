@@ -89,12 +89,12 @@ class BursamClient
                 ]
             ));
 
-        Log::channel('bursam')->info('Malaysia Bursa buyProduct request: ...', [
+        Log::channel('bursam')->info('Malaysia Bursa buyProduct request: ...'.json_encode([
             'url' => $url,
             'request' => $request,
             'headers' => $requestHeader,
             'response' => $response->json(),
-        ]);
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return $response;
     }
@@ -138,12 +138,12 @@ class BursamClient
                 )
         );
 
-        Log::channel('bursam')->info('Malaysia Bursa sellProduct request: ...', [
+        Log::channel('bursam')->info('Malaysia Bursa sellProduct request: ...'.json_encode([
             'url' => $url,
             'request' => $request,
             'headers' => $requestHeader,
             'response' => $response->json(),
-        ]);
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return $response;
     }
@@ -185,12 +185,12 @@ class BursamClient
                 )
         );
 
-        Log::channel('bursam')->info('Malaysia Bursa fetchOrderResult request: ...', [
+        Log::channel('bursam')->info('Malaysia Bursa fetchOrderResult request: ...'.json_encode([
             'url' => $url,
             'request' => $request,
             'headers' => $requestHeader,
             'response' => $response->json(),
-        ]);
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return $response;
     }
@@ -213,11 +213,11 @@ class BursamClient
                 )
         );
 
-        Log::channel('bursam')->info('Malaysia Bursa getBidXml request: ...', [
+        Log::channel('bursam')->info('Malaysia Bursa getBidXml request: ...'.json_encode([
             'url' => $url,
             'request' => $request,
             'response' => $response->json(),
-        ]);
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return $response;
     }
@@ -239,11 +239,11 @@ class BursamClient
                 )
         );
 
-        Log::channel('bursam')->info('Malaysia Bursa getOtcXml request: ...', [
+        Log::channel('bursam')->info('Malaysia Bursa getOtcXml request: ...'.json_encode([
             'url' => $url,
             'request' => $request,
             'response' => $response->json(),
-        ]);
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return $response;
     }
@@ -266,11 +266,11 @@ class BursamClient
                 )
         );
 
-        Log::channel('bursam')->info('Malaysia Bursa getStbXml request: ...', [
+        Log::channel('bursam')->info('Malaysia Bursa getStbXml request: ...'.json_encode([
             'url' => $url,
             'request' => $request,
             'response' => $response->json(),
-        ]);
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return $response;
     }
