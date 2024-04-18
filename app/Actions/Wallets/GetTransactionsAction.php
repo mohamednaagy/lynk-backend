@@ -29,6 +29,8 @@ class GetTransactionsAction implements GetTransactions
     public function filterQuery(Builder $builder, array $data): Builder
     {
 
+        // TODO: handle subtract in function
+
         /**
          *  Note
          *  All numbers are rounded up by money package
