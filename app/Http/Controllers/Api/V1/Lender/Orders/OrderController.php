@@ -72,7 +72,6 @@ class OrderController extends Controller
             ->parseIncludes([
                 'id',
                 'status',
-                //                'contract_number',
                 'reference_number',
                 'national_id',
                 'amount',
