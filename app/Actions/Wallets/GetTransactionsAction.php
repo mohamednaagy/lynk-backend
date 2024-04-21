@@ -39,7 +39,7 @@ class GetTransactionsAction implements GetTransactions
          *  This number will be returned from the database  any numbers like 502500, 502499, or 502489 .... etc to 502450 because all numbers equal 502500 after rounded
          */
         $amountLTE = isset($data['amount_lte'])
-            ? Money::parseByDecimal($data['amount_lte'], Money::getDefaultCurrency())->getAmount() - 50
+            ? Money::parseByDecimal($data['amount_lte'], Money::getDefaultCurrency())->getAmount()
             : null;
 
         $amountGTE = isset($data['amount_gte'])
