@@ -12,7 +12,7 @@ use Spatie\Permission\Models\Permission;
 
 class UserTransformer extends TransformerAbstract
 {
-    protected string|null $area = null;
+    protected ?string $area = null;
 
     protected array $defaultIncludes = [];
 
@@ -35,7 +35,7 @@ class UserTransformer extends TransformerAbstract
         'is_invitation_accepted',
     ];
 
-    public function __construct(string $area = null)
+    public function __construct(?string $area = null)
     {
         $this->area = $area;
     }
@@ -134,7 +134,7 @@ class UserTransformer extends TransformerAbstract
         return match ($this->area) {
             Area::Lender,
             Area::Trader,
-            Area::SuperAdmin => $permissions->filter(fn ($item) => false !== stripos($item, $this->area)),
+            Area::SuperAdmin => $permissions->filter(fn ($item) => stripos($item, $this->area) !== false),
             default => $permissions
         };
     }
@@ -160,6 +160,6 @@ class UserTransformer extends TransformerAbstract
 
     public function includeIsInvitationAccepted(User $user): Primitive
     {
-        return $this->primitive((bool) $user->password);
+        return $this->primitive((bool) ($user->password && $user->email_verified_at));
     }
 }

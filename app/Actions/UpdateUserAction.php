@@ -3,9 +3,11 @@
 namespace App\Actions;
 
 use App\Actions\Contracts\UpdateUser;
+use App\Mail\ChangeEmail;
 use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
 
 class UpdateUserAction implements UpdateUser
 {
@@ -20,8 +22,12 @@ class UpdateUserAction implements UpdateUser
             $data['locale'] = app()->getLocale();
         }
 
+        if ($user->email != $data['email']) {
+            $this->changeEmailWithSendNotification($user, $data['email']);
+        }
+
         if (array_key_exists('password', $data)) {
-            $user->tokens()->delete();
+            $this->removeTokensOfUser($user);
         }
 
         return $user->update(
@@ -40,5 +46,17 @@ class UpdateUserAction implements UpdateUser
                 ]
             )
         );
+    }
+
+    public function changeEmailWithSendNotification(User $user, $new_email): void
+    {
+        Mail::to($user->email)->send(new ChangeEmail($user, $new_email));
+        $user->update(['email_verified_at' => null]);
+        $this->removeTokensOfUser($user);
+    }
+
+    public function removeTokensOfUser(User $user): void
+    {
+        $user->tokens()->delete();
     }
 }

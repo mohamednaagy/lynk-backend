@@ -55,7 +55,7 @@ return [
         ],
 
         'single' => [
-            'driver' => 'single',
+            'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
@@ -64,7 +64,7 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
-            'days' => 14,
+            'days' => 30,
         ],
 
         'slack' => [
@@ -113,6 +113,19 @@ return [
 
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
+        ],
+
+        'bursam' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/bursam/bursam.log'),
+            'level' => 'debug',
+            'days' => 30,
+        ],
+        'orders' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/orders/order-log.log'),
+            'level' => 'debug',
+            'days' => 30,
         ],
     ],
 

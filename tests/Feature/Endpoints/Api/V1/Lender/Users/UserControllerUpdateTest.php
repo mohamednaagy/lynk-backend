@@ -4,11 +4,13 @@ namespace Tests\Feature\Endpoints\Api\V1\Lender\Users;
 
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
+use App\Mail\ChangeEmail;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
@@ -16,7 +18,7 @@ use Tests\Traits\InteractsWithUser;
 
 class UserControllerUpdateTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
@@ -34,9 +36,6 @@ class UserControllerUpdateTest extends TestCase
 
     private static array $lenderDetails;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -58,9 +57,6 @@ class UserControllerUpdateTest extends TestCase
         ];
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_update_lender_user_unsuccessful(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -71,9 +67,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_can_update_lender_user_with_valid_data_successful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -85,9 +78,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_update_lender_user_without_first_name_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -104,9 +94,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_update_lender_user_without_last_name_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -123,9 +110,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_update_lender_user_without_phone_country_code_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -145,9 +129,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_update_lender_user_without_phone_number_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -164,9 +145,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_update_lender_user_without_email_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -183,9 +161,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_can_update_lender_user_without_redirect_url_successful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -197,9 +172,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_update_lender_user_without_role_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -216,9 +188,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_supervisor_user_cant_update_lender_user_with_valid_data_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderSupervisor)
@@ -227,9 +196,6 @@ class UserControllerUpdateTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_billing_user_cant_update_lender_user_with_valid_data_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderBilling)
@@ -238,9 +204,6 @@ class UserControllerUpdateTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_order_creator_user_cant_update_lender_user_with_valid_data_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
@@ -249,9 +212,6 @@ class UserControllerUpdateTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_api_user_cant_update_lender_user_with_valid_data_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderApi)
@@ -260,9 +220,6 @@ class UserControllerUpdateTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_update_api_user_with_valid_data_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -271,9 +228,6 @@ class UserControllerUpdateTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_update_lender_users_case_company_pending_unsuccessful(): void
     {
         self::$company->update([
@@ -286,9 +240,6 @@ class UserControllerUpdateTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_lender_admin_user_cant_update_lender_users_case_company_under_review_unsuccessful(): void
     {
         self::$company->update([
@@ -301,9 +252,6 @@ class UserControllerUpdateTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_lender_admin_user_cant_update_lender_users_case_company_rejected_unsuccessful(): void
     {
         self::$company->update([
@@ -316,9 +264,6 @@ class UserControllerUpdateTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_lender_admin_user_cant_update_lender_users_case_email_not_verified_unsuccessful(): void
     {
         self::$userLenderAdmin->update([
@@ -329,5 +274,29 @@ class UserControllerUpdateTest extends TestCase
             ->withHeader('X-Company', self::$company->id)
             ->putJson('api/v1/lender/users/'.self::$userLenderSupervisor->id, self::$lenderDetails)
             ->assertForbidden();
+    }
+
+    public function test_change_and_re_verify_email_successful(): void
+    {
+
+        Mail::fake(); // Mock the mail facade
+
+        $this->actingAs(self::$userLenderAdmin)
+            ->withHeader('X-Company', self::$company->id)
+            ->putJson('api/v1/lender/users/'.self::$userLenderSupervisor->id, self::$lenderDetails)
+            ->assertOk()
+            ->assertJsonStructure([
+                'data',
+            ]);
+        Mail::assertQueued(ChangeEmail::class, function ($mail) {
+            return $mail->hasTo(self::$userLenderSupervisor->email);
+        });
+
+        $this->assertDatabaseHas('users', [
+            'id' => self::$userLenderSupervisor->id,
+            'email' => self::$lenderDetails['email'],
+            'email_verified_at' => null,
+        ]);
+
     }
 }
