@@ -28,8 +28,8 @@ class OrderCreationFeeTypeTest extends TestCase
     private static Wallet $wallet;
 
     private static array $messages = [
-        'ar' => 'رسوم إنشاء طلب #123456',
-        'en' => 'Order #123456 creation fee',
+        'ar' => 'رسوم إنشاء طلب #123456 / عملية تداول #123456',
+        'en' => 'Creation Fee - Order #123456/ Trade Request #123456',
     ];
 
     /**
