@@ -7,6 +7,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Lender\Wallets\ListTransactionRequest;
 use App\Transformers\TransactionTransformer;
 use Illuminate\Http\JsonResponse;
 
@@ -21,9 +22,11 @@ class GetWalletTransactions extends Controller
     }
 
     public function __invoke(
+        ListTransactionRequest $request,
         GetTransactions $getTransactions
     ): JsonResponse {
-        $paginatedTransactions = $getTransactions->handle(tenant());
+        $data = $request->validated();
+        $paginatedTransactions = $getTransactions->handle(tenant(), $data);
 
         tap($paginatedTransactions)->loadZatcaInvoicesMedia();
 
