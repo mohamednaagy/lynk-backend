@@ -8,6 +8,7 @@ use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderAmountScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderCompanyScope;
+use App\Support\QueryScoper\Scopes\FinancingOrders\OrderDateScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderFilterScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderNeedActionScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderSearchScope;
@@ -44,6 +45,7 @@ class BuildFinancingOrdersQueryAction implements BuildFinancingOrdersQuery
             // 'current_step' => new TraderOrderCurrentStepScope(),
             'filter' => new OrderFilterScope(),
             'company' => new OrderCompanyScope(),
+            'date' => new OrderDateScope(),
         ];
     }
 
