@@ -141,6 +141,14 @@ class StoreCompanyRequest extends FormRequest
                 'string',
                 new EnumValue(TraderOrderMode::class, false),
             ],
+
+            'contract_number' => [
+                'required',
+                'string',
+                Rule::unique(Company::class, 'contract_number'),
+                'min:4',
+                'max:16',
+            ],
         ];
     }
 }

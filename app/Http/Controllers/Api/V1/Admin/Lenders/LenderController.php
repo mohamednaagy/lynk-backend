@@ -132,6 +132,7 @@ class LenderController extends Controller
                 'force_unique_reference_number',
                 'require_initiate_trade_request',
                 'trading_mode',
+                'contract_number',
             ])
             ->respond();
     }

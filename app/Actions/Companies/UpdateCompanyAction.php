@@ -21,6 +21,7 @@ class UpdateCompanyAction implements UpdateCompany
                     'notifications_email',
                     'unique_name',
                     'company_cr',
+                    'contract_number',
                     'status',
                     'does_order_require_approval',
                     'webhook_secret_key',

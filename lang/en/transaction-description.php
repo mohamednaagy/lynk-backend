@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'order_creation_fee' => 'Order #:order_number creation fee',
+    'order_creation_fee' => 'Order #:order_number/Trade Request #:trader_order_number creation fee',
     'deposit_by_edaat' => 'Recharge balance by Sadad for invoice #:invoice_number',
     'vat_percentage' => 'VAT charges (:vat_percentage%) for order #:order_id',
     'manual_deposit' => 'Recharge the balance',

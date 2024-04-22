@@ -31,6 +31,7 @@ class CreateCompanyAction implements CreateCompany
                     'name',
                     'notifications_email',
                     'unique_name',
+                    'contract_number',
                     'company_cr',
                     'status',
                     'does_order_require_approval',

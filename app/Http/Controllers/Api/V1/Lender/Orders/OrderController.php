@@ -104,6 +104,7 @@ class OrderController extends Controller
                 'reference_number',
                 'customer_name',
                 'national_id',
+                'contract_number',
                 'amount',
                 'selling_price',
                 'amount_formatted',

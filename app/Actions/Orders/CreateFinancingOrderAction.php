@@ -25,11 +25,14 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
 
         $data['selling_price'] = Money::parseByDecimal($data['selling_price'], $data['currency']);
 
+        $data['contract_number'] = $company->contract_number;
+
         return $company->orders()->create(
             Arr::only($data, [
                 'customer_name',
                 'reference_number',
                 'national_id',
+                'contract_number',
                 'phone_number',
                 'amount',
                 'selling_price',
