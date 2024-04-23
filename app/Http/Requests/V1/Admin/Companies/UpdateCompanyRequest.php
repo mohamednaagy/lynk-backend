@@ -57,9 +57,8 @@ class UpdateCompanyRequest extends FormRequest
             'contract_number' => [
                 'required',
                 'string',
-                Rule::unique(Company::class, 'contract_number')->ignore($this->route('lender')),
-                'min:4',
-                'max:16',
+                Rule::unique(Company::class, 'contract_number'),
+                'size:4,16',
             ],
             'does_order_require_approval' => [
                 'required',
