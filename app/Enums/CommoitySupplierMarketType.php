@@ -11,7 +11,7 @@ use BenSampo\Enum\Enum;
  */
 final class CommoitySupplierMarketType extends Enum implements LocalizedEnum
 {
-    const Local = 1;
+    const Local = '1';
 
-    const International = 2;
+    const International = '2';
 }

@@ -11,7 +11,7 @@ use BenSampo\Enum\Enum;
  */
 final class CommoitySupplierStatus extends Enum implements LocalizedEnum
 {
-    const Active = 1;
+    const Active = '1';
 
-    const Inactive = 2;
+    const Inactive = '2';
 }

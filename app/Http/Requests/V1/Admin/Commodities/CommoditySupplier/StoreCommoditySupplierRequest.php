@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Http\Requests\V1\Admin\Commodities;
+namespace App\Http\Requests\V1\Admin\Commodities\CommoditySupplier;
 
+use App\Enums\CommoitySupplierMarketType;
+use App\Enums\CommoitySupplierStatus;
 use App\Models\CommoditySupplier;
 use App\Rules\CommodityUniqueNameRule;
+use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -50,8 +53,8 @@ class StoreCommoditySupplierRequest extends FormRequest
                 Rule::unique(CommoditySupplier::class, 'unique_name'),
 
             ],
-            'status' => ['required'],
-            'market_type' => ['required'],
+            'status' => ['required',  new EnumValue(CommoitySupplierStatus::class)],
+            'market_type' => ['required',  new EnumValue(CommoitySupplierMarketType::class)],
 
         ];
     }

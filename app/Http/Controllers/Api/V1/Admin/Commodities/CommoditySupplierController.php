@@ -8,7 +8,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Admin\Commodities\StoreCommoditySupplierRequest;
+use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\StoreCommoditySupplierRequest;
 use App\Transformers\CommoditySuppliersTransformer;
 use Illuminate\Http\JsonResponse;
 
