@@ -32,6 +32,7 @@ class CompanyTransformer extends TransformerAbstract
         'force_unique_reference_number',
         'trading_mode',
         'require_initiate_trade_request',
+        'contract_number',
     ];
 
     public function transform(Company $company): array

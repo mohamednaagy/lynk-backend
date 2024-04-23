@@ -43,38 +43,51 @@ class ProcessInProgressOrder implements ShouldQueue
      */
     public function handle(): void
     {
-        $driver = config('trader.default');
-        $trader = Trader::driver($driver, get_latest_version_of_trader($driver));
-        DB::multipleTransaction(function () use ($trader) {
-            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
-            if ($financingOrder->traderOrders()->whereIn('status', [
-                TraderOrderStatus::InProgress,
-            ])->count() > 0) {
-                return;
-            }
-            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::InProgress)
-                || $financingOrder->company->require_initiate_trade_request) {
-                return;
-            }
+        try {
+            $driver = config('trader.default');
+            $trader = Trader::driver($driver, get_latest_version_of_trader($driver));
+            DB::multipleTransaction(function () use ($trader) {
+                $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
+                if ($financingOrder->traderOrders()->whereIn('status', [
+                    TraderOrderStatus::InProgress,
+                ])->count() > 0) {
+                    return;
+                }
+                if (
+                    $financingOrder->status->cantMoveTo(FinancingOrderStatus::InProgress)
+                    || $financingOrder->company->require_initiate_trade_request
+                ) {
+                    return;
+                }
 
-            try {
-                app(CanCreateOrder::class)->handle($financingOrder->company, $financingOrder->amount);
-            } catch (BalanceIsNotEnoughException $e) {
-                Log::alert($financingOrder->id);
+                try {
+                    app(CanCreateOrder::class)->handle($financingOrder->company, $financingOrder->amount);
+                } catch (BalanceIsNotEnoughException $e) {
+                    Log::alert($financingOrder->id);
 
-                return;
-            }
+                    return;
+                }
 
-            $traderOrder = $trader->createTraderOrder($financingOrder);
+                $traderOrder = $trader->createTraderOrder($financingOrder);
 
-            // keep below action after createTraderOrder()
-            // to be sure we have a trader order and store his data in transaction meta
-            app(DeductBalanceForNewOrder::class)->handle($traderOrder);
+                // keep below action after createTraderOrder()
+                // to be sure we have a trader order and store his data in transaction meta
+                app(DeductBalanceForNewOrder::class)->handle($traderOrder);
 
-            $financingOrder->update([
-                'status' => FinancingOrderStatus::InProgress,
-            ]);
-        });
+                $financingOrder->update([
+                    'status' => FinancingOrderStatus::InProgress,
+                ]);
+            });
+        } catch (\Exception $e) {
+            Log::channel('orders')->error(
+                'An error occurred while processing the financing order.',
+                [
+                    'financing_order_id' => $this->financingOrder,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]
+            );
+        }
     }
 
     /**

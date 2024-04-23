@@ -13,7 +13,6 @@ class OrderCreationFeeType implements TransactionTypeHandlerInterface
 {
     public function generateMessage(Transaction $transaction, $locale): string
     {
-
         $items = Arr::only($transaction->meta, ['type', 'financing_order_id', 'trader_order_id']);
         $traderOrder = TraderOrder::find($items['trader_order_id']);
         $traderReferenceNumber = $traderOrder->reference ?? $items['trader_order_id'];
