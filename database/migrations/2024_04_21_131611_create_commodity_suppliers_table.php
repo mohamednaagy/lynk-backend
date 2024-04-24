@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('commodity_suppliers', function (Blueprint $table) {
             $table->id();
             $table->string('legal_name')->unique();
-            $table->string('unique_name')->unique()->nullable();
+            $table->string('unique_name')->unique();
             $table->text('description')->nullable();
             $table->unsignedTinyInteger('market_type')->default(\App\Enums\CommoitySupplierMarketType::Local)->comment('1 => local  , 2 => international');
             $table->unsignedTinyInteger('status')->default(\App\Enums\CommoitySupplierStatus::Inactive)->comment('1 => active  , 2 => inactive');
