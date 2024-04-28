@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\ResendAdminInvitation;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
+use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypeController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
@@ -116,6 +117,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::apiResource('lenders', LenderController::class);
         Route::apiResource('lenders.users', LenderUserController::class)->scoped();
+
+        Route::apiResource('commodity-types', CommodityTypeController::class);
 
         Route::get('orders/export', ExportOrders::class);
 

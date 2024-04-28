@@ -13,11 +13,10 @@ class CommodityType extends Model
     use HasFactory , LogsActivity;
 
     protected $fillable = [
-        'legal_name',
+        'name',
         'unique_name',
         'description',
         'status',
-        'market_type',
     ];
 
     protected $casts = [

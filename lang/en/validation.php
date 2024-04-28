@@ -151,6 +151,9 @@ return [
         'company_unique_name' => [
             'regex' => 'Identifier should contain only English letters, numbers and _. It should start with English letter',
         ],
+        'commodity' => [
+            'regex' => 'Identifier should contain only English letters, numbers and _. It should start with English letter',
+        ],
         'order_cost_amount_tiers_range' => 'Order value start must be greater than order value end of previous tier with only 0.01',
     ],
     /*

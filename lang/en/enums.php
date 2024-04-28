@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\BursamProductCode;
+use App\Enums\CommodityTypeStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
@@ -87,4 +88,10 @@ return [
         TraderOrderNoRefundReason::AFTER_24_HOUR => 'Not refunded because cancelled after 24 hours of :base_tr',
         TraderOrderNoRefundReason::AFTER_72_HOUR => 'Not refunded because cancelled after 72 hours of :base_tr',
     ],
+
+    CommodityTypeStatus::class => [
+        CommodityTypeStatus::Active => 'Active',
+        CommodityTypeStatus::Inactive => 'Inactive',
+    ],
+
 ];
