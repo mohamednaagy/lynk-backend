@@ -258,4 +258,5 @@ return [
         'client_wakala' => 'الوكالة',
         'payment_proof' => 'مستند إثبات التحويل للعميل',
     ],
+
 ];

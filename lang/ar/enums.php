@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\BursamProductCode;
+use App\Enums\CommodityTypeStatus;
 use App\Enums\CommoitySupplierMarketType;
 use App\Enums\CommoitySupplierStatus;
 use App\Enums\CompanyStatus;
@@ -98,4 +99,10 @@ return [
         TraderOrderNoRefundReason::AFTER_24_HOUR => 'لم يتم استرداد المبلغ لأنه تم إلغاؤه بعد 24 ساعة من :base_tr',
         TraderOrderNoRefundReason::AFTER_72_HOUR => 'لم يتم استرداد المبلغ لأنه تم إلغاؤه بعد 72 ساعة من :base_tr',
     ],
+
+    CommodityTypeStatus::class => [
+        CommodityTypeStatus::Active => 'مفعل',
+        CommodityTypeStatus::Inactive => 'غير مفعل',
+    ],
+
 ];
