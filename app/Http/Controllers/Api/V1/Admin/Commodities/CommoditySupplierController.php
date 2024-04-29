@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Api\V1\Admin\Commodities;
 
 use App\Actions\Contracts\Commodities\CommoditySupplier\BuildPaginatedCommoditySuppliersQuery;
 use App\Actions\Contracts\Commodities\CommoditySupplier\CreateCommoditySupplier;
+use App\Actions\Contracts\Commodities\CommoditySupplier\UpdateCommoditySupplier;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\StoreCommoditySupplierRequest;
+use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\UpdateCommoditySupplierRequest;
+use App\Models\CommoditySupplier;
 use App\Transformers\CommoditySuppliersTransformer;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class CommoditySupplierController extends Controller
 {
@@ -26,6 +30,15 @@ class CommoditySupplierController extends Controller
             perm(Area::SuperAdmin, [Subject::CommodityMarketSuppliers, Action::Create, Action::Manage])
         )->only('store');
 
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::CommodityMarketSuppliers, Action::Show, Action::Manage])
+        )->only('show');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::CommodityMarketSuppliers, Action::Edit, Action::Manage])
+        )->only('update');
     }
 
     public function index(
@@ -65,5 +78,32 @@ class CommoditySupplierController extends Controller
                 'status',
             ])
             ->respond();
+    }
+
+    public function show(CommoditySupplier $commoditySupplier): JsonResponse
+    {
+        return fractal($commoditySupplier, new CommoditySuppliersTransformer())
+            ->parseIncludes([
+                'id',
+                'legal_name',
+                'description',
+                'unique_name',
+                'market_type',
+                'status',
+            ])
+            ->respond();
+    }
+
+    public function update(
+        UpdateCommoditySupplierRequest $request,
+        UpdateCommoditySupplier $updateCommoditySupplier,
+        CommoditySupplier $commoditySupplier
+    ): JsonResponse {
+        return DB::transaction(function () use ($request, $updateCommoditySupplier, $commoditySupplier) {
+            $data = $request->validated();
+            $updateCommoditySupplier->handle($commoditySupplier, $data);
+
+            return $this->successResponse();
+        });
     }
 }
