@@ -29,19 +29,28 @@ class GetTransactionsAction implements GetTransactions
     public function filterQuery(Builder $builder, array $data): Builder
     {
 
+        // TODO: handle subtract in function
+
+        /**
+         *  Note
+         *  All numbers are rounded up by money package
+         *  So we Subtract 50 from the amount to get the smallest number that can be rounded to use in the filter
+         *  Ex if I need to search 50.25 this number will be converted in the package to 502500
+         *  This number will be returned from the database  any numbers like 502500, 502499, or 502489 .... etc to 502450 because all numbers equal 502500 after rounded
+         */
         $amountLTE = isset($data['amount_lte'])
             ? Money::parseByDecimal($data['amount_lte'], Money::getDefaultCurrency())->getAmount()
             : null;
 
         $amountGTE = isset($data['amount_gte'])
-            ? Money::parseByDecimal($data['amount_gte'], Money::getDefaultCurrency())->getAmount()
+            ? Money::parseByDecimal($data['amount_gte'], Money::getDefaultCurrency())->getAmount() - 50
             : null;
 
-        if ($amountLTE && $amountGTE) {
-            $builder->whereBetween('amount', [$amountGTE, $amountLTE]);
-        } elseif ($amountLTE) {
+        if ($amountLTE) {
             $builder->where('amount', '<=', $amountLTE);
-        } elseif ($amountGTE) {
+        }
+
+        if ($amountGTE) {
             $builder->where('amount', '>=', $amountGTE);
         }
 

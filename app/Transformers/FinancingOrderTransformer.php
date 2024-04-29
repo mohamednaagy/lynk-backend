@@ -35,6 +35,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'status',
         'company_id',
         'company_name',
+        'contract_number',
         'reference_number',
         'customer_name',
         'national_id',
