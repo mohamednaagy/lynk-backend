@@ -1,13 +1,10 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Commodity;
+namespace Endpoints\Api\V1\Admin\Commodity\CommoditySupplier;
 
-use App\Enums\Action;
-use App\Enums\Area;
 use App\Enums\CommoitySupplierMarketType;
 use App\Enums\CommoitySupplierStatus;
 use App\Enums\Role;
-use App\Enums\Subject;
 use App\Models\CommoditySupplier;
 use App\Models\User;
 use App\Transformers\CommoditySuppliersTransformer;
@@ -42,11 +39,6 @@ class CommoditySupplierControllerStoreTest extends TestCase
 
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
-        $this->assignPermissionToUser(
-            self::$userManager,
-            perm(Area::SuperAdmin, [Subject::Lenders, Action::Index])
-        );
-
         self::$commoditySuppllier = [
             'legal_name' => 'new legal name'.rand(11, 999),
             'unique_name' => 'new unique name'.rand(11, 999),

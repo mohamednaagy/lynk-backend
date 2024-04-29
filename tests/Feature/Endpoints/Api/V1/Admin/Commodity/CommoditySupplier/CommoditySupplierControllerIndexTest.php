@@ -1,11 +1,8 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Commodity;
+namespace Endpoints\Api\V1\Admin\Commodity\CommoditySupplier;
 
-use App\Enums\Action;
-use App\Enums\Area;
 use App\Enums\Role;
-use App\Enums\Subject;
 use App\Models\User;
 use App\Transformers\CommoditySuppliersTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -37,10 +34,6 @@ class CommoditySupplierControllerIndexTest extends TestCase
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
         self::$suppliers = $this->getCommoditySupplier(5, true);
 
-        $this->assignPermissionToUser(
-            self::$userManager,
-            perm(Area::SuperAdmin, [Subject::Lenders, Action::Index])
-        );
     }
 
     public function test_un_auth_user_cant_index_commodity_suppliers(): void
@@ -73,7 +66,7 @@ class CommoditySupplierControllerIndexTest extends TestCase
             );
     }
 
-    public function test_manager_without_permissions_cant_index_lenders(): void
+    public function test_manager_without_permissions_cant_index_commodity_suppliers(): void
     {
         $this->actingAs(self::$userManager)
             ->getJson($this->endpoint)
