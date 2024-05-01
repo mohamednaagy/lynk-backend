@@ -15,8 +15,11 @@ class OrderCreationFeeType implements TransactionTypeHandlerInterface
     {
 
         $items = Arr::only($transaction->meta, ['type', 'financing_order_id', 'trader_order_id']);
-        $traderOrder = TraderOrder::find($items['trader_order_id']);
-        $traderReferenceNumber = $traderOrder->reference ?? $items['trader_order_id'];
+        $traderOrder = '';
+        if (isset($items['trader_order_id'])) {
+            $traderOrder = TraderOrder::find($items['trader_order_id']);
+        }
+        $traderReferenceNumber = $traderOrder ? ($traderOrder->reference ? $traderOrder->reference : $traderOrder->id) : '';
 
         return __('transaction-description.order_creation_fee', [
             'order_number' => $items['financing_order_id'] ?? '',
