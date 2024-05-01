@@ -119,6 +119,8 @@ class SuperAdmin
         Subject::CommodityMarketCommodityTypes => [
             Action::Index,
             Action::Create,
+            Action::Show,
+            Action::Edit,
         ],
 
         Subject::CommodityMarketCommodityItems => [
