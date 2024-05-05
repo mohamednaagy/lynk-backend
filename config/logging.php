@@ -49,13 +49,13 @@ return [
 
     'channels' => [
         'stack' => [
-            'driver' => 'stack',
+            'driver' => 'daily',
             'channels' => ['single'],
             'ignore_exceptions' => false,
         ],
 
         'single' => [
-            'driver' => 'daily',
+            'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
