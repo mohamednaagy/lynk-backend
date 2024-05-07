@@ -60,6 +60,7 @@ class LenderControllerUpdateTest extends TestCase
             'notifications_email' => 'notifications_email@email.com',
             'unique_name' => 'companyUniqueName',
             'company_cr' => '1234567891',
+            'contract_number' => '44243943',
             'order_cost_tiers' => [
                 [
                     'id' => null,

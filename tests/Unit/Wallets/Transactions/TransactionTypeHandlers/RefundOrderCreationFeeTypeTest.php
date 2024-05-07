@@ -28,8 +28,8 @@ class RefundOrderCreationFeeTypeTest extends TestCase
     private static Wallet $wallet;
 
     private static array $messages = [
-        'ar' => 'استعادة رسوم لطلب المرابحة #123456',
-        'en' => 'Refund for trading request #123456',
+        'ar' => 'استعادة رسوم طلب #123456 / عملية تداول #123456',
+        'en' => 'Refund - Order #123456/ Trade Request #123456',
     ];
 
     /**

@@ -34,6 +34,7 @@ class LenderLiteList extends Controller
             ->parseIncludes([
                 'id',
                 'name',
+                'contract_number',
             ])
             ->respond();
     }

@@ -4,6 +4,7 @@ namespace Tests\Unit\Otpify\Drivers;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 use Modules\Otpify\Exceptions\OtpCodeAdditionalCheckException;
 use Modules\Otpify\Exceptions\OtpCodeAlreadyUsedException;
 use Modules\Otpify\Exceptions\OtpCodeExpiredException;
@@ -90,5 +91,34 @@ class EmailDriverTest extends TestCase
         $otp = Otpify::send(new Request(), $this->user);
         $otp->update(['driver' => 'fake']);
         Otpify::verify(new Request(), $otp->id, '123456');
+    }
+
+    public function test_return_success_if_master_otp_correct_and_env_development()
+    {
+        $otp = Otpify::send(new Request(), $this->user);
+        Otpify::verify(new Request(), $otp->id, config('master-otp.master_otp_key'));
+        $this->assertInstanceOf(OtpifyCode::class, $otp);
+    }
+
+    public function test_return_success_if_user_check_by_the_correct_otp_and_env_development()
+    {
+        $otp = Otpify::send(new Request(), $this->user);
+        Otpify::verify(new Request(), $otp->id, '123456');
+        $this->assertInstanceOf(OtpifyCode::class, $otp);
+    }
+
+    public function test_return_false_if_development_server_but_master_code_not_correct()
+    {
+        $this->expectException(OtpCodeIncorrectException::class);
+        $otp = Otpify::send(new Request(), $this->user);
+        Otpify::verify(new Request(), $otp->id, config('master-otp.master_otp_key').'2');
+    }
+
+    public function test_return_false_if_it_not_development_server()
+    {
+        $this->expectException(OtpCodeIncorrectException::class);
+        Config::set('master-otp.allow_verify_with_master_key', false);
+        $otp = Otpify::send(new Request(), $this->user);
+        Otpify::verify(new Request(), $otp->id, config('master-otp.master_otp_key'));
     }
 }
