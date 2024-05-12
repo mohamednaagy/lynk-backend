@@ -54,7 +54,6 @@ class OrderDateScope extends QueryScoper
 
         if ($startDate && $endDate) {
             return $builder->whereBetween('created_at', [$startDate, $endDate]);
-
         }
 
         if ($startDate) {
