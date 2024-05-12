@@ -50,7 +50,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single', 'daily'],
+            'channels' => ['daily'],
             'ignore_exceptions' => false,
         ],
 
@@ -69,18 +69,6 @@ return [
             'path' => storage_path('logs/transaction-updates.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
-
-        'custom' => [
-            'driver' => 'single',
-            'path' => storage_path('logs/custom.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-        ],
-        'transactionUpdates' => [
-            'driver' => 'single',
-            'path' => storage_path('logs/transaction-updates.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-        ],
-
         'daily' => [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
