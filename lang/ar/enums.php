@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Enums\BursamProductCode;
+use App\Enums\CommoitySupplierMarketType;
+use App\Enums\CommoitySupplierStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
@@ -50,6 +52,15 @@ return [
         EdaatInvoiceStatus::Pending => 'قيد الانتظار',
         EdaatInvoiceStatus::Paid => 'مدفوعة',
         EdaatInvoiceStatus::Expired => 'منتهية الصلاحية',
+    ],
+
+    CommoitySupplierStatus::class => [
+        CommoitySupplierStatus::Active => 'مفعل',
+        CommoitySupplierStatus::Inactive => 'غير مفعل',
+    ],
+    CommoitySupplierMarketType::class => [
+        CommoitySupplierMarketType::Local => 'محلي',
+        CommoitySupplierMarketType::International => 'دولي',
     ],
 
     MurabhaStep::class => [
