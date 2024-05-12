@@ -113,7 +113,6 @@ class SuperAdmin
             Action::Create,
             Action::Show,
             Action::Edit,
-
         ],
 
         Subject::CommodityMarketCommodityTypes => [
