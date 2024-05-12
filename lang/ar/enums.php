@@ -61,7 +61,7 @@ return [
     ],
     CommoitySupplierMarketType::class => [
         CommoitySupplierMarketType::Local => 'محلي',
-        CommoitySupplierMarketType::International => 'دولي',
+        //        CommoitySupplierMarketType::International => 'دولي',
     ],
 
     MurabhaStep::class => [

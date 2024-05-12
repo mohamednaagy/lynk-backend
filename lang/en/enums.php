@@ -55,7 +55,7 @@ return [
     ],
     CommoitySupplierMarketType::class => [
         CommoitySupplierMarketType::Local => 'Local',
-        CommoitySupplierMarketType::International => 'International',
+        //        CommoitySupplierMarketType::International => 'International',
     ],
 
     EdaatInvoiceStatus::class => [
