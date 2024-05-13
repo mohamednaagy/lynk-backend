@@ -3,6 +3,7 @@
 namespace App\Enums;
 
 use BenSampo\Enum\Enum;
+use Modules\Grantify\Support\Areas\CommoditySupplier;
 use Modules\Grantify\Support\Areas\Lender;
 use Modules\Grantify\Support\Areas\SuperAdmin;
 use Modules\Grantify\Support\Areas\Trader;
@@ -18,16 +19,20 @@ final class Area extends Enum
 
     const Trader = 'Trader';
 
+    const CommoditySupplier = 'CommoditySupplier';
+
     public static function roles(string $area = null): array
     {
         return match ($area) {
             self::SuperAdmin => SuperAdmin::$roles,
             self::Lender => Lender::$roles,
             self::Trader => Trader::$roles,
+            self::CommoditySupplier => CommoditySupplier::$roles,
             default => [
                 self::SuperAdmin => SuperAdmin::$roles,
                 self::Lender => Lender::$roles,
                 self::Trader => Trader::$roles,
+                self::CommoditySupplier => CommoditySupplier::$roles,
             ]
         };
     }
