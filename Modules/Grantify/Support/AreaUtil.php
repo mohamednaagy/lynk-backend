@@ -3,6 +3,7 @@
 namespace Modules\Grantify\Support;
 
 use App\Enums\Area;
+use Modules\Grantify\Support\Areas\CommoditySupplier;
 use Modules\Grantify\Support\Areas\Lender;
 use Modules\Grantify\Support\Areas\SuperAdmin;
 use Modules\Grantify\Support\Areas\Trader;
@@ -13,12 +14,10 @@ class AreaUtil
         Area::SuperAdmin => SuperAdmin::class,
         Area::Lender => Lender::class,
         Area::Trader => Trader::class,
+        Area::CommoditySupplier => CommoditySupplier::class,
+
     ];
 
-    /**
-     * @param  string  $areaName
-     * @return array|string
-     */
     public static function getAreaPermissions(string $areaName): array|string
     {
         if (isset(self::$areaMap[$areaName])) {
