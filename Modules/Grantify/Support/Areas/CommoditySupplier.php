@@ -6,20 +6,15 @@ use App\Enums\Action;
 use App\Enums\Role;
 use App\Enums\Subject;
 
-class Trader
+class CommoditySupplier
 {
     public static array $roles = [
-        Role::TraderAdmin,
+        Role::SupplierAdmin,
+        Role::SupplierApiAdmin,
     ];
 
     public static array $basePermissions = [
-        Subject::FinancingOrders => [
-            Action::Manage,
-            Action::Index,
-            Action::Show,
-            Action::Edit,
-        ],
-        Subject::TraderUsers => [
+        Subject::CommoditySupplierUsers => [
             Action::Manage,
             Action::Index,
             Action::Show,

@@ -63,6 +63,10 @@ class RouteServiceProvider extends ServiceProvider
                 ->prefix('api')
                 ->group(base_path('routes/api/trader.php'));
 
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/api/supplier.php'));
+
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });
@@ -78,6 +82,7 @@ class RouteServiceProvider extends ServiceProvider
                 ->where('type', CompanyType::Lender)
                 ->firstOrFail();
         });
+
     }
 
     /**
