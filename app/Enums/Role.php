@@ -26,4 +26,6 @@ final class Role extends Enum
     const SupplierAdmin = 'SupplierAdmin';
 
     const SupplierApiAdmin = 'SupplierApiAdmin';
+
+    const TraderAdmin = 'TraderAdmin';
 }

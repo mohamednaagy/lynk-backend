@@ -12,6 +12,7 @@ use Modules\Grantify\Support\Roles\LenderSupervisor;
 use Modules\Grantify\Support\Roles\Manager;
 use Modules\Grantify\Support\Roles\SupplierAdmin;
 use Modules\Grantify\Support\Roles\SupplierApiAdmin;
+use Modules\Grantify\Support\Roles\TraderAdmin;
 
 class RoleUtil
 {
@@ -25,6 +26,7 @@ class RoleUtil
         Role::LenderApiUser => LenderApiUser::class,
         Role::SupplierAdmin => SupplierAdmin::class,
         Role::SupplierApiAdmin => SupplierApiAdmin::class,
+        Role::TraderAdmin => TraderAdmin::class,
 
     ];
 
