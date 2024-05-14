@@ -10,17 +10,17 @@ class GetConstantApiAction implements GetConstantApi
 {
     public function handle(array $data): array
     {
-        $newData = [];
+        $constants = [];
         if (isset($data['constants'])) {
             if (in_array('currencies', $data['constants'])) {
-                $newData['currencies'] = Currency::get();
+                $constants['currencies'] = Currency::get();
             }
             if (in_array('measurements', $data['constants'])) {
-                $newData['measurements'] = Measurement::get();
+                $constants['measurements'] = Measurement::get();
             }
         }
 
-        return $newData;
+        return $constants;
 
     }
 }
