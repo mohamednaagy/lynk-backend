@@ -10,5 +10,7 @@ final class RouteArea extends Enum
 
     const Lender = 'lender';
 
+    const Trader = 'trader';
+
     const Supplier = 'supplier';
 }
