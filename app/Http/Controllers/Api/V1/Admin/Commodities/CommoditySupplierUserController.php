@@ -94,12 +94,7 @@ class CommoditySupplierUserController extends Controller
         CreateSupplierUserWithRoleAndPermission $createSupplierUserWithRoleAndPermission
     ): JsonResponse {
         return DB::transaction(function () use ($supplier, $request, $createSupplierUserWithRoleAndPermission) {
-            $user = $createSupplierUserWithRoleAndPermission->handle(
-                $request->validated() +
-                    [
-                        'commodity_supplier_id' => $supplier->id,
-                    ]
-            );
+            $user = $createSupplierUserWithRoleAndPermission->handle($request->validated());
             $user->suppliers()->attach($supplier->id);
 
             // $invitationUrl = $request->validated('redirect_url');
@@ -157,37 +152,37 @@ class CommoditySupplierUserController extends Controller
      * @param  UpdateSupplierUserWithRoleAndPermission  $updateSupplierUserWithRoleAndPermission
      * @return JsonResponse
      */
-    public function update(
-        UpdateUserRequest $updateUserRequest,
-        CommoditySupplier $supplier,
-        User $user,
-        UpdateSupplierUserWithRoleAndPermission $updateSupplierUserWithRoleAndPermission,
-    ): JsonResponse {
-        return DB::transaction((function () use ($updateUserRequest, $user, $updateSupplierUserWithRoleAndPermission) {
-            $this->checkIfUserDoesNotHaveSupplierAreaRole($user);
+    // public function update(
+    //     UpdateUserRequest $updateUserRequest,
+    //     CommoditySupplier $supplier,
+    //     User $user,
+    //     UpdateSupplierUserWithRoleAndPermission $updateSupplierUserWithRoleAndPermission,
+    // ): JsonResponse {
+    //     return DB::transaction((function () use ($updateUserRequest, $user, $updateSupplierUserWithRoleAndPermission) {
+    //         $this->checkIfUserDoesNotHaveSupplierAreaRole($user);
 
-            $updateSupplierUserWithRoleAndPermission->handle($updateUserRequest->validated(), $user);
+    //         $updateSupplierUserWithRoleAndPermission->handle($updateUserRequest->validated(), $user);
 
-            return $this->successResponse();
-        }));
-    }
+    //         return $this->successResponse();
+    //     }));
+    // }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  User  $user
-     * @param  CommoditySupplier  $supplier
-     * @return JsonResponse
-     */
-    public function destroy(CommoditySupplier $supplier, User $user): JsonResponse
-    {
-        $this->checkIfUserDoesNotHaveSupplierAreaRole($user);
+    // /**
+    //  * Remove the specified resource from storage.
+    //  *
+    //  * @param  User  $user
+    //  * @param  CommoditySupplier  $supplier
+    //  * @return JsonResponse
+    //  */
+    // public function destroy(CommoditySupplier $supplier, User $user): JsonResponse
+    // {
+    //     $this->checkIfUserDoesNotHaveSupplierAreaRole($user);
 
-        $user->update(['email' => $user->getEmailForSoftDeleting()]);
-        $user->delete();
+    //     $user->update(['email' => $user->getEmailForSoftDeleting()]);
+    //     $user->delete();
 
-        return $this->successResponse();
-    }
+    //     return $this->successResponse();
+    // }
 
     public function checkIfUserDoesNotHaveSupplierAreaRole(User $user)
     {

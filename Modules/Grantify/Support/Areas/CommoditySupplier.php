@@ -10,6 +10,7 @@ class CommoditySupplier
 {
     public static array $roles = [
         Role::SupplierAdmin,
+        Role::SupplierApiAdmin,
     ];
 
     public static array $basePermissions = [
