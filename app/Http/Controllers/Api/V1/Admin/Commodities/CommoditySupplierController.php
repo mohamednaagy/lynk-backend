@@ -16,6 +16,7 @@ use App\Transformers\CommoditySuppliersTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
+
 class CommoditySupplierController extends Controller
 {
     public function __construct()
@@ -30,7 +31,7 @@ class CommoditySupplierController extends Controller
             perm(Area::SuperAdmin, [Subject::CommodityMarketSuppliers, Action::Create, Action::Manage])
         )->only('store');
 
-        $this->middleware(
+      $this->middleware(
             'permission:'.
             perm(Area::SuperAdmin, [Subject::CommodityMarketSuppliers, Action::Show, Action::Manage])
         )->only('show');

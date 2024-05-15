@@ -1,7 +1,15 @@
 <?php
 
 use App\Enums\Role;
+// use App\Http\Controllers\Api\V1\Trader\Auth\CompleteRegister;
+// use App\Http\Controllers\Api\V1\Trader\Auth\GetAuthUser;
+// use App\Http\Controllers\Api\V1\Trader\Auth\ResendInvitationToUser;
+// use App\Http\Controllers\Api\V1\Trader\Auth\UpdateMyProfile;
+
+use App\Http\Controllers\Api\V1\Trader\Users\UserController;
 use Illuminate\Support\Facades\Route;
+use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +22,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
 Route::prefix('v1/commodity-suppliers')->name('api.v1.commodity-supplier.')->group(function () {
     Route::middleware([
         'auth:sanctum',
@@ -23,8 +32,8 @@ Route::prefix('v1/commodity-suppliers')->name('api.v1.commodity-supplier.')->gro
 
         ]),
     ])->group(function () {
+      
         Route::get('constants', [App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController::class, 'index']);
 
     });
-
 });

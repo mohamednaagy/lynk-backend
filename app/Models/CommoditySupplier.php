@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\CommoitySupplierMarketType;
 use App\Enums\CommoitySupplierStatus;
+use App\Enums\Role;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
@@ -30,5 +31,10 @@ class CommoditySupplier extends Model
     {
         return LogOptions::defaults()
             ->logOnly(['status']);
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'supplier_user');
     }
 }
