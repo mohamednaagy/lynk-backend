@@ -39,9 +39,9 @@ final class Area extends Enum
 
     public static function getAreaByRole(string $role)
     {
-        $areas = static::getValues();
+        $areas = self::getValues();
         foreach ($areas as $area) {
-            if (in_array($role, static::roles($area))) {
+            if (in_array($role, self::roles($area))) {
                 return $area;
             }
         }

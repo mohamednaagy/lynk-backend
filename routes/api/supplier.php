@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\Trader\Users\UserController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -21,20 +22,18 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 |
 */
 
-Route::prefix('v1/commodity-suppliers')->name('api.v1.supplier.')->group(function () {
+
+Route::prefix('v1/commodity-suppliers')->name('api.v1.commodity-supplier.')->group(function () {
     Route::middleware([
-        InitializeTenancyByRequestData::class,
         'auth:sanctum',
         'role:'.implode('|', [
             Role::SupplierAdmin,
+            Role::SupplierApiAdmin,
+
         ]),
     ])->group(function () {
-        //Route::get('auth', GetAuthUser::class);
+      
+        Route::get('constants', [App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController::class, 'index']);
 
-            //Route::put('auth/profile', UpdateMyProfile::class);
-
-           // Route::post('users/{user}/resend-invitation', ResendInvitationToUser::class);
-            Route::apiResource('users', UserController::class);
     });
-
 });

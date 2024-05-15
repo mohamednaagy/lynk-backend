@@ -64,4 +64,6 @@ final class Subject extends Enum
 
     const CommoditySupplierUsers = 'commoditySupplierUsers';
 
+    const ConstantApi = 'constantsApi';
+
 }
