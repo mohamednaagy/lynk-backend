@@ -66,7 +66,8 @@ class CommoditySupplierControllerUpdateTest extends TestCase
             ->assertExactJson([
                 'data' => [],
             ]);
-
+        $this->assertEquals(self::$supplier->company->refresh()->name, 'new legal supplier');
+        $this->assertEquals(self::$supplier->company->refresh()->unique_name, 'new unique name');
         $this->assertEquals(self::$supplier->refresh()->unique_name, 'new unique name');
     }
 
@@ -111,7 +112,8 @@ class CommoditySupplierControllerUpdateTest extends TestCase
 
     public function test_admin_cant_update_commodity_supplier_with_exist_unique_name(): void
     {
-        CommoditySupplier::query()->create(self::$supplierDetails);
+        //        CommoditySupplier::query()->create(self::$supplierDetails);
+        self::$supplier = $this->createCommoditySupplier(self::$supplierDetails['legal_name'], self::$supplierDetails['unique_name']);
 
         $this->actingAs(self::$userAdmin)
             ->putJson($this->endpoint, self::$supplierDetails)

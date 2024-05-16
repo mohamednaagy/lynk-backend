@@ -83,7 +83,7 @@ class CommoditySupplierController extends Controller
 
     public function show(CommoditySupplier $commoditySupplier): JsonResponse
     {
-        return fractal($commoditySupplier, new CommoditySuppliersTransformer())
+        return fractal($commoditySupplier->company, new CommoditySuppliersTransformer())
             ->parseIncludes([
                 'id',
                 'legal_name',
