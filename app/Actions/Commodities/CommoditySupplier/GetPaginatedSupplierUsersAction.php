@@ -4,20 +4,20 @@ namespace App\Actions\Commodities\CommoditySupplier;
 
 use App\Actions\Contracts\Commodities\CommoditySupplier\GetPaginatedSupplierUsers;
 use App\Enums\Role;
-use App\Models\CommoditySupplier;
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Stancl\Tenancy\Database\TenantScope;
 
 class GetPaginatedSupplierUsersAction implements GetPaginatedSupplierUsers
 {
-    protected ?CommoditySupplier $supplier = null;
+    protected ?Company $company = null;
 
     public function handle(): LengthAwarePaginator
     {
         return User::query()
-            ->when($this->supplier, function ($query) {
-                return $query->where('company_id', $this->supplier->company_id)
+            ->when($this->company, function ($query) {
+                return $query->where('company_id', $this->company->id)
                     ->withoutGlobalScope(TenantScope::class);
             })
             ->whereHas('roles', function ($query) {
@@ -31,9 +31,9 @@ class GetPaginatedSupplierUsersAction implements GetPaginatedSupplierUsers
             ->paginate();
     }
 
-    public function setSupplier(CommoditySupplier $supplier)
+    public function setSupplier(Company $company)
     {
-        $this->supplier = $supplier;
+        $this->company = $company;
 
         return $this;
     }

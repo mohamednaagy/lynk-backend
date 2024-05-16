@@ -56,7 +56,7 @@ class CommoditySupplierUserController extends Controller
      * Display a listing of the resource.
      */
     public function index(
-        CommoditySupplier $supplier,
+        Company $supplier,
         GetPaginatedSupplierUsers $getPaginatedUsers,
     ): JsonResponse {
         $getPaginatedUsers->setSupplier($supplier);
@@ -85,19 +85,19 @@ class CommoditySupplierUserController extends Controller
      */
     public function store(
         StoreUserRequest $request,
-        CommoditySupplier $supplier,
+        Company $supplier,
         CreateSupplierUserWithRoleAndPermission $createSupplierUserWithRoleAndPermission
     ): JsonResponse {
         return DB::transaction(function () use ($supplier, $request, $createSupplierUserWithRoleAndPermission) {
             $user = $createSupplierUserWithRoleAndPermission->handle(
                 $request->validated() +
                 [
-                    'company_id' => $supplier->company_id,
+                    'company_id' => $supplier->id,
                 ]
             );
 
             $invitationUrl = $request->validated('redirect_url');
-            // Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Supplier));
+            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Supplier));
 
             return fractal($user, new UserTransformer())
                 ->parseIncludes([
