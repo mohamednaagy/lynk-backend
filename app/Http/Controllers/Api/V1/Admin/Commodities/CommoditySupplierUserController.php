@@ -8,12 +8,12 @@ use App\Actions\Contracts\Commodities\CommoditySupplier\UpdateSupplierUserWithRo
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\CompanyType;
+use App\Models\Company;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\Users\StoreUserRequest;
 use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\Users\UpdateUserRequest;
 use App\Mail\CompleteRegisterInvitation;
-use App\Models\CommoditySupplier;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -55,16 +55,17 @@ class CommoditySupplierUserController extends Controller
      * Display a listing of the resource.
      *
      * @param  GetPaginatedSupplierUsers $getPaginatedUsers
-     * @param  CommoditySupplier  $supplier
+     * @param  Company  $supplier
      * @return JsonResponse
      */
     public function index(
-        CommoditySupplier $supplier,
+        Company $supplier,
         GetPaginatedSupplierUsers $getPaginatedUsers,
     ): JsonResponse {
+        $getPaginatedUsers->setSupplier($supplier);
 
         return fractal(
-            $getPaginatedUsers->handle($supplier),
+            $getPaginatedUsers->handle(),
             new UserTransformer(Area::CommoditySupplier)
         )->parseIncludes([
             'id',
@@ -84,21 +85,25 @@ class CommoditySupplierUserController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  StoreUserRequest  $storeUserRequest
-     * @param  CommoditySupplier  $supplier
+     * @param  Company  $supplier
      * @param  CreateSupplierUserWithRoleAndPermission  $createSupplierUserWithRoleAndPermission
      * @return JsonResponse
      */
     public function store(
         StoreUserRequest $request,
-        CommoditySupplier $supplier,
+        Company $supplier,
         CreateSupplierUserWithRoleAndPermission $createSupplierUserWithRoleAndPermission
     ): JsonResponse {
         return DB::transaction(function () use ($supplier, $request, $createSupplierUserWithRoleAndPermission) {
-            $user = $createSupplierUserWithRoleAndPermission->handle($request->validated());
-            $user->suppliers()->attach($supplier->id);
+            $user = $createSupplierUserWithRoleAndPermission->handle(
+                $request->validated() +
+                [
+                    'company_id' => $supplier->id,
+                ]
+        );
 
-            // $invitationUrl = $request->validated('redirect_url');
-            // Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Trader));
+            $invitationUrl = $request->validated('redirect_url');
+           // Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Supplier));
 
             return fractal($user, new UserTransformer())
                 ->parseIncludes([
@@ -118,11 +123,11 @@ class CommoditySupplierUserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  CommoditySupplier  $supplier
+     * @param  Company  $supplier
      * @param  User  $user
      * @return JsonResponse
      */
-    public function show(CommoditySupplier $supplier, User $user): JsonResponse
+    public function show(Company $supplier, User $user): JsonResponse
     {
         $this->checkIfUserDoesNotHaveSupplierAreaRole($user);
 
@@ -147,14 +152,14 @@ class CommoditySupplierUserController extends Controller
      * Update the specified resource in storage.
      *
      * @param  UpdateUserRequest  $updateUserRequest
-     * @param  CommoditySupplier  $supplier
+     * @param  Company  $supplier
      * @param  User  $user
      * @param  UpdateSupplierUserWithRoleAndPermission  $updateSupplierUserWithRoleAndPermission
      * @return JsonResponse
      */
     // public function update(
     //     UpdateUserRequest $updateUserRequest,
-    //     CommoditySupplier $supplier,
+    //     Company $supplier,
     //     User $user,
     //     UpdateSupplierUserWithRoleAndPermission $updateSupplierUserWithRoleAndPermission,
     // ): JsonResponse {
@@ -174,7 +179,7 @@ class CommoditySupplierUserController extends Controller
     //  * @param  CommoditySupplier  $supplier
     //  * @return JsonResponse
     //  */
-    // public function destroy(CommoditySupplier $supplier, User $user): JsonResponse
+    // public function destroy(Company $supplier, User $user): JsonResponse
     // {
     //     $this->checkIfUserDoesNotHaveSupplierAreaRole($user);
 

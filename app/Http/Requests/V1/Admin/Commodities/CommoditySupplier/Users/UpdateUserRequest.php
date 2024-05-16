@@ -34,13 +34,13 @@ class UpdateUserRequest extends FormRequest
                 'email:filter',
                 Rule::unique(User::class, 'email')
                     ->ignore($this->route('user')->id)
-                    ->where('company_id', $this->trader->id),
+                    ->where('company_id', $this->supplier->id),
             ],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],
             'role' => [
                 'required',
-                Rule::in(Area::roles(Area::Trader)),
+                Rule::in(Area::roles(Area::CommoditySupplier)),
             ],
             'is_active' => ['required', 'boolean'],
         ];

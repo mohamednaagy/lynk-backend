@@ -2,7 +2,7 @@
 
 namespace App\Actions\Contracts\Commodities\CommoditySupplier;
 
-use App\Models\CommoditySupplier;
+use App\Models\Company;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface GetPaginatedSupplierUsers
@@ -10,7 +10,7 @@ interface GetPaginatedSupplierUsers
     /**
      * @return LengthAwarePaginator
      */
-    public function handle(CommoditySupplier $supplier): LengthAwarePaginator;
+    public function handle(): LengthAwarePaginator;
 
-    //public function setSupplier(CommoditySupplier $supplier);
+    public function setSupplier(Company $supplier);
 }

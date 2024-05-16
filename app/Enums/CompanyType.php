@@ -11,5 +11,5 @@ final class CompanyType extends Enum implements LocalizedEnum
 
     const Trader = 2;
 
-    const Supplier = 2;
+    const Supplier = 3;
 }
