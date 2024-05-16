@@ -26,7 +26,7 @@ class CommoditySuppliersTransformer extends TransformerAbstract
 
     public function includeId(Company $company): Primitive
     {
-        return $this->primitive($company->commoditySupplier->id);
+        return $this->primitive($company->id);
     }
 
     public function includeLegalName(Company $company): Primitive
