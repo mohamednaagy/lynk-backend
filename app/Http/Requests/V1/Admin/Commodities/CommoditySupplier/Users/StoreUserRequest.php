@@ -5,7 +5,6 @@ namespace App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\Users;
 use App\Enums\Area;
 use App\Models\User;
 use App\Rules\HostWhitelistRule;
-use App\Rules\UniqueEmailWithinSupplier;
 use App\Rules\UrlProtocolRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -38,13 +37,14 @@ class StoreUserRequest extends FormRequest
                 'required',
                 'email:filter',
                 Rule::unique(User::class, 'email')
-                    ->where('company_id', $this->supplier->id),
+                    ->where('company_id', $this->supplier->company_id),
             ],
             'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
             'role' => [
                 'required',
                 Rule::in(Area::roles(Area::CommoditySupplier)),
             ],
+
         ];
     }
 }
