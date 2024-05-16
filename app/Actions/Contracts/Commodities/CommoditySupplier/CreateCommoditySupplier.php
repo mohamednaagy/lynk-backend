@@ -2,9 +2,9 @@
 
 namespace App\Actions\Contracts\Commodities\CommoditySupplier;
 
-use App\Models\CommoditySupplier;
+use App\Models\Company;
 
 interface CreateCommoditySupplier
 {
-    public function handle(array $data): CommoditySupplier;
+    public function handle(array $data): Company;
 }
