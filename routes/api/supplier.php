@@ -1,8 +1,8 @@
 <?php
 
 use App\Enums\Role;
+use App\Http\Controllers\Api\V1\Supplier\Auth\CompleteRegister;
 // use App\Http\Controllers\Api\V1\Trader\Auth\CompleteRegister;
-// use App\Http\Controllers\Api\V1\Trader\Auth\GetAuthUser;
 // use App\Http\Controllers\Api\V1\Trader\Auth\ResendInvitationToUser;
 // use App\Http\Controllers\Api\V1\Trader\Auth\UpdateMyProfile;
 
@@ -36,4 +36,6 @@ Route::prefix('v1/commodity-suppliers')->name('api.v1.commodity-supplier.')->gro
         Route::get('constants', [App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController::class, 'index']);
 
     });
+    Route::post('{user}/sign-up', CompleteRegister::class)->name('sign-up');
+
 });
