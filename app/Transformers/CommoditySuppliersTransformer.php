@@ -2,7 +2,7 @@
 
 namespace App\Transformers;
 
-use App\Models\CommoditySupplier;
+use App\Models\Company;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -19,49 +19,49 @@ class CommoditySuppliersTransformer extends TransformerAbstract
 
     ];
 
-    public function transform(CommoditySupplier $commoditySupplier): array
+    public function transform(Company $company): array
     {
         return [];
     }
 
-    public function includeId(CommoditySupplier $commoditySupplier): Primitive
+    public function includeId(Company $company): Primitive
     {
-        return $this->primitive($commoditySupplier->id);
+        return $this->primitive($company->commoditySupplier->id);
     }
 
-    public function includeLegalName(CommoditySupplier $commoditySupplier): Primitive
+    public function includeLegalName(Company $company): Primitive
     {
-        return $this->primitive($commoditySupplier->legal_name);
+        return $this->primitive($company->commoditySupplier->legal_name);
     }
 
-    public function includeDescription(CommoditySupplier $commoditySupplier): Primitive
+    public function includeDescription(Company $company): Primitive
     {
-        return $this->primitive($commoditySupplier->description);
+        return $this->primitive($company->commoditySupplier->description);
     }
 
-    public function includeUniqueName(CommoditySupplier $commoditySupplier): Primitive
+    public function includeUniqueName(Company $company): Primitive
     {
-        return $this->primitive($commoditySupplier->unique_name);
+        return $this->primitive($company->commoditySupplier->unique_name);
     }
 
-    public function includeStatus(CommoditySupplier $commoditySupplier): Primitive
+    public function includeStatus(Company $company): Primitive
     {
         return $this->primitive([
-            'value' => $commoditySupplier->status->value,
-            'description' => $commoditySupplier->status->description,
+            'value' => $company->commoditySupplier->status->value,
+            'description' => $company->commoditySupplier->status->description,
         ]);
     }
 
-    public function includeMarketType(CommoditySupplier $commoditySupplier): Primitive
+    public function includeMarketType(Company $company): Primitive
     {
         return $this->primitive([
-            'value' => $commoditySupplier->market_type->value,
-            'description' => $commoditySupplier->market_type->description,
+            'value' => $company->commoditySupplier->market_type->value,
+            'description' => $company->commoditySupplier->market_type->description,
         ]);
     }
 
-    public function includeCreatedAt(CommoditySupplier $commoditySupplier): Primitive
+    public function includeCreatedAt(Company $company): Primitive
     {
-        return $this->primitive(optional($commoditySupplier->created_at)->format('Y-m-d'));
+        return $this->primitive(optional($company->commoditySupplier->created_at)->format('Y-m-d'));
     }
 }
