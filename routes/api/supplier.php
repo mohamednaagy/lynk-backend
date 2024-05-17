@@ -22,7 +22,6 @@ Route::prefix('v1/supplier')->name('api.v1.supplier.')->group(function () {
         'role:'.implode('|', [
             Role::SupplierAdmin,
             Role::SupplierApiAdmin,
-
         ]),
     ])->group(function () {
 
