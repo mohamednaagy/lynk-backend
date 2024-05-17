@@ -2,9 +2,8 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
-use App\Models\Supplier;
 use App\Models\User;
+use Illuminate\Contracts\Validation\Rule;
 
 class UniqueEmailWithinSupplier implements Rule
 {
@@ -17,12 +16,9 @@ class UniqueEmailWithinSupplier implements Rule
 
     public function passes($attribute, $value)
     {
-        $count = User::where('email', $value)
-            ->whereHas('suppliers', function ($query) {
-                $query->where('commodity_supplier_id', $this->supplierId);
-            })->count();
-
-        return $count === 0;
+        return User::where('email', $value)
+            ->where('company_id', $this->supplierId)
+            ->doesntExist();
     }
 
     public function message()

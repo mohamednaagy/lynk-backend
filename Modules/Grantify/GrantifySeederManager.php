@@ -24,8 +24,6 @@ class GrantifySeederManager extends Manager
 
     /**
      * Seed All Roles into DB
-     *
-     * @return void
      */
     public function seedRoles(): void
     {
@@ -38,9 +36,6 @@ class GrantifySeederManager extends Manager
 
     /**
      * Seed All Permissions into DB
-     *
-     * @param  bool  $withSync
-     * @return void
      */
     public function seedPermissions(bool $withSync = false): void
     {
@@ -70,6 +65,7 @@ class GrantifySeederManager extends Manager
 
                 $rolePermissions = $this->storePermissions($permissions, $area, $defaultGuard, $role);
                 $allPermissions = array_merge($allPermissions, $rolePermissions);
+
             }
         }
 
@@ -92,7 +88,7 @@ class GrantifySeederManager extends Manager
         array $permissions,
         string $area,
         string $defaultGuard,
-        Role $role = null
+        ?Role $role = null
     ): array {
         $storedPermissions = [];
         foreach ($permissions as $subject => $actions) {
@@ -109,6 +105,6 @@ class GrantifySeederManager extends Manager
             }
         }
 
-        return  $storedPermissions;
+        return $storedPermissions;
     }
 }

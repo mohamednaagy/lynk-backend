@@ -14,6 +14,7 @@ use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\Users\StoreUserRequ
 use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\Users\UpdateUserRequest;
 use App\Mail\CompleteRegisterInvitation;
 use App\Models\CommoditySupplier;
+use App\Models\Company;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -54,17 +55,15 @@ class CommoditySupplierUserController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param  GetPaginatedSupplierUsers $getPaginatedUsers
      * @param  CommoditySupplier  $supplier
-     * @return JsonResponse
      */
     public function index(
-        CommoditySupplier $supplier,
+        Company $company,
         GetPaginatedSupplierUsers $getPaginatedUsers,
     ): JsonResponse {
 
         return fractal(
-            $getPaginatedUsers->handle($supplier),
+            $getPaginatedUsers->handle($company),
             new UserTransformer(Area::CommoditySupplier)
         )->parseIncludes([
             'id',
@@ -85,17 +84,14 @@ class CommoditySupplierUserController extends Controller
      *
      * @param  StoreUserRequest  $storeUserRequest
      * @param  CommoditySupplier  $supplier
-     * @param  CreateSupplierUserWithRoleAndPermission  $createSupplierUserWithRoleAndPermission
-     * @return JsonResponse
      */
     public function store(
         StoreUserRequest $request,
-        CommoditySupplier $supplier,
+        Company $company,
         CreateSupplierUserWithRoleAndPermission $createSupplierUserWithRoleAndPermission
     ): JsonResponse {
-        return DB::transaction(function () use ($supplier, $request, $createSupplierUserWithRoleAndPermission) {
-            $user = $createSupplierUserWithRoleAndPermission->handle($request->validated());
-            $user->suppliers()->attach($supplier->id);
+        return DB::transaction(function () use ($company, $request, $createSupplierUserWithRoleAndPermission) {
+            $user = $createSupplierUserWithRoleAndPermission->handle(array_merge($request->validated(), ['company_id' => $company->id]));
 
             // $invitationUrl = $request->validated('redirect_url');
             // Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Trader));
@@ -117,10 +113,6 @@ class CommoditySupplierUserController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  CommoditySupplier  $supplier
-     * @param  User  $user
-     * @return JsonResponse
      */
     public function show(CommoditySupplier $supplier, User $user): JsonResponse
     {
@@ -148,7 +140,6 @@ class CommoditySupplierUserController extends Controller
      *
      * @param  UpdateUserRequest  $updateUserRequest
      * @param  CommoditySupplier  $supplier
-     * @param  User  $user
      * @param  UpdateSupplierUserWithRoleAndPermission  $updateSupplierUserWithRoleAndPermission
      * @return JsonResponse
      */

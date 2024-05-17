@@ -37,7 +37,7 @@ class StoreUserRequest extends FormRequest
             'email' => [
                 'required',
                 'email:filter',
-                new UniqueEmailWithinSupplier($this->supplier->id)
+                new UniqueEmailWithinSupplier($this->company->id),
             ],
             'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
             'role' => [
