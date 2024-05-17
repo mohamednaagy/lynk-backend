@@ -11,24 +11,16 @@ use Illuminate\Support\Arr;
 
 class CreateSupplierUserWithRoleAndPermissionAction implements CreateSupplierUserWithRoleAndPermission
 {
-    /**
-     * @param  CreateUser  $createUser
-     * @param  AssignRoleToUser  $assignRoleToUser
-     * @param  AssignPermissionToUser  $assignPermissionToUser
-     */
     public function __construct(
         protected CreateUser $createUser,
         protected AssignRoleToUser $assignRoleToUser,
         protected AssignPermissionToUser $assignPermissionToUser
     ) {
     }
-    
 
     /**
      * Create new user.
-     *
-     * @param  array  $data
-     * @return User
+     *ç
      */
     public function handle(array $data): User
     {
@@ -40,7 +32,7 @@ class CreateSupplierUserWithRoleAndPermissionAction implements CreateSupplierUse
                 'email',
                 'phone_country_code',
                 'phone_number',
-                'commodity_supplier_id',
+                'company_id',
                 'password',
                 'is_active',
             ]
