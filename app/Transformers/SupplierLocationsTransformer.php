@@ -10,7 +10,7 @@ class SupplierLocationsTransformer extends TransformerAbstract
 {
     protected array $availableIncludes = [
         'id',
-        'unique_Identifier',
+        'unique_identifier',
         'name',
         'description',
         'supplier_id',
@@ -30,7 +30,7 @@ class SupplierLocationsTransformer extends TransformerAbstract
 
     public function includeUniqueIdentifier(SupplierLocation $supplierLocation): Primitive
     {
-        return $this->primitive($supplierLocation->unique_Identifier);
+        return $this->primitive($supplierLocation->unique_identifier);
     }
 
     public function includeDescription(SupplierLocation $supplierLocation): Primitive

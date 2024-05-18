@@ -2,20 +2,17 @@
 
 namespace App\Http\Controllers\Api\V1\Supplier\Location;
 
+use App\Actions\Commodities\CommoditySupplier\UpdateSupplierLocationAction;
 use App\Actions\Contracts\Commodities\CommodityLocation\CreateSupplierLocation;
 use App\Actions\Contracts\Commodities\CommodityLocation\GetPaginatedSupplierLocations;
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Supplier\Locations\StoreLocationRequest;
-use App\Models\Company;
-use App\Models\Enquiry;
-use App\Transformers\EnquiryTransformer;
+use App\Http\Requests\V1\Supplier\Locations\UpdateSupplierLocationRequest;
+use App\Models\SupplierLocation as ModelsSupplierLocation;
 use App\Transformers\SupplierLocationsTransformer;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -35,6 +32,11 @@ class SupplierLocation extends Controller
                 perm(Area::CommoditySupplier, [Subject::CommoditySupplierLocations, Action::Manage, Action::Create])
         )
             ->only('store');
+
+        $this->middleware(
+            'permission:'.
+                perm(Area::CommoditySupplier, [Subject::CommoditySupplierLocations, Action::Manage, Action::Edit])
+        )->only('update');
     }
 
     /**
@@ -53,7 +55,8 @@ class SupplierLocation extends Controller
             ->parseIncludes([
                 'id',
                 'name',
-                'unique_Identifier',
+                'unique_identifier',
+                'description',
                 'created_at',
             ])
             ->respond();
@@ -80,55 +83,23 @@ class SupplierLocation extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     *
-     * @throws AuthorizationException
-     */
-    public function show(Request $request, Enquiry $enquiry): JsonResponse
-    {
-        $authUser = $request->user();
-
-        if (
-            $this->doesEnquiryBelongToCurrentLender($authUser, $enquiry)
-            || $this->doesEnquiryBelongToCurrentLender($authUser, $enquiry)
-        ) {
-            return fractal($enquiry, new EnquiryTransformer())
-                ->parseIncludes([
-                    'id',
-                    'subject',
-                    'status',
-                    'creation_date',
-                    'creator',
-                    'body',
-                ])
-                ->respond();
-        }
-
-        throw new ModelNotFoundException();
-    }
-
-    protected function doesEnquiryBelongToCurrentLender($authUser, $enquiry)
-    {
-        return $authUser->company_id !== null
-            && $authUser->hasRole(Role::LenderAdmin)
-            && $enquiry->user?->company_id === $authUser->company_id;
-    }
-
-    protected function doesEnquiryBelongToCurrentUser($authUser, $enquiry)
-    {
-        return $authUser->id === $enquiry->user_id;
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateSupplierLocationRequest $updateSupplierLocationRequest, ModelsSupplierLocation $location, UpdateSupplierLocationAction $updateSupplierLocation): JsonResponse
     {
-        //
+        $location = $updateSupplierLocation->handle($location, $updateSupplierLocationRequest->validated());
+
+        return fractal($location, new SupplierLocationsTransformer())
+            ->parseIncludes([
+                'id',
+                'unique_identifier',
+                'name',
+                'description',
+            ])
+            ->respond();
     }
 
     /**
