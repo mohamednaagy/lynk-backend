@@ -20,7 +20,6 @@ class CreateSupplierUserWithRoleAndPermissionAction implements CreateSupplierUse
 
     /**
      * Create new user.
-     *ç
      */
     public function handle(array $data): User
     {
@@ -31,8 +30,8 @@ class CreateSupplierUserWithRoleAndPermissionAction implements CreateSupplierUse
                 'last_name',
                 'email',
                 'phone_country_code',
-                'phone_number',
                 'company_id',
+                'phone_number',
                 'password',
                 'is_active',
             ]

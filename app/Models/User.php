@@ -173,9 +173,4 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
 
         return $this->email;
     }
-
-    public function suppliers()
-    {
-        return $this->belongsToMany(CommoditySupplier::class, 'supplier_user');
-    }
 }

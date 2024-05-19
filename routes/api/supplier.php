@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Http\Controllers\Api\V1\Supplier\Auth\CompleteRegister;
 use App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController;
 use App\Http\Controllers\Api\V1\Supplier\Location\SupplierLocation;
 use Illuminate\Support\Facades\Route;
@@ -29,4 +30,6 @@ Route::prefix('v1/supplier')->name('api.v1.supplier.')->group(function () {
         Route::apiResource('locations', SupplierLocation::class);
 
     });
+    Route::post('{user}/complete-register', CompleteRegister::class)->name('sign-up');
+
 });

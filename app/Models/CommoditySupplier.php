@@ -34,11 +34,6 @@ class CommoditySupplier extends Model
             ->logOnly(['status']);
     }
 
-    public function users()
-    {
-        return $this->belongsToMany(User::class, 'supplier_user');
-    }
-
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id');

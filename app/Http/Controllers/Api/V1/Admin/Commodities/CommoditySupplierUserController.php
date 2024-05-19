@@ -54,14 +54,12 @@ class CommoditySupplierUserController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param  CommoditySupplier  $supplier
      */
     public function index(
-        Company $company,
+        Company $supplier,
+
         GetPaginatedSupplierUsers $getPaginatedUsers,
     ): JsonResponse {
-
         return fractal(
             $getPaginatedUsers->handle($company),
             new UserTransformer(Area::CommoditySupplier)
@@ -83,18 +81,21 @@ class CommoditySupplierUserController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  StoreUserRequest  $storeUserRequest
-     * @param  CommoditySupplier  $supplier
      */
     public function store(
         StoreUserRequest $request,
-        Company $company,
+        Company $supplier,
         CreateSupplierUserWithRoleAndPermission $createSupplierUserWithRoleAndPermission
     ): JsonResponse {
-        return DB::transaction(function () use ($company, $request, $createSupplierUserWithRoleAndPermission) {
-            $user = $createSupplierUserWithRoleAndPermission->handle(array_merge($request->validated(), ['company_id' => $company->id]));
-
-            // $invitationUrl = $request->validated('redirect_url');
-            // Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Trader));
+        return DB::transaction(function () use ($supplier, $request, $createSupplierUserWithRoleAndPermission) {
+            $user = $createSupplierUserWithRoleAndPermission->handle(
+                $request->validated() +
+                [
+                    'company_id' => $supplier->id,
+                ]
+            );
+            $invitationUrl = $request->validated('redirect_url');
+            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Supplier));
 
             return fractal($user, new UserTransformer())
                 ->parseIncludes([
@@ -114,7 +115,7 @@ class CommoditySupplierUserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(CommoditySupplier $supplier, User $user): JsonResponse
+    public function show(Company $supplier, User $user): JsonResponse
     {
         $this->checkIfUserDoesNotHaveSupplierAreaRole($user);
 
@@ -139,13 +140,14 @@ class CommoditySupplierUserController extends Controller
      * Update the specified resource in storage.
      *
      * @param  UpdateUserRequest  $updateUserRequest
-     * @param  CommoditySupplier  $supplier
+     * @param  Company  $supplier
+
      * @param  UpdateSupplierUserWithRoleAndPermission  $updateSupplierUserWithRoleAndPermission
      * @return JsonResponse
      */
     // public function update(
     //     UpdateUserRequest $updateUserRequest,
-    //     CommoditySupplier $supplier,
+    //     Company $supplier,
     //     User $user,
     //     UpdateSupplierUserWithRoleAndPermission $updateSupplierUserWithRoleAndPermission,
     // ): JsonResponse {
@@ -165,7 +167,7 @@ class CommoditySupplierUserController extends Controller
     //  * @param  CommoditySupplier  $supplier
     //  * @return JsonResponse
     //  */
-    // public function destroy(CommoditySupplier $supplier, User $user): JsonResponse
+    // public function destroy(Company $supplier, User $user): JsonResponse
     // {
     //     $this->checkIfUserDoesNotHaveSupplierAreaRole($user);
 
