@@ -30,9 +30,9 @@ class CommodityItem extends Model
             ->logAll();
     }
 
-    public function company()
+    public function supplier()
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(Supplier::class, 'company_id');
     }
 
     public function types()
