@@ -57,11 +57,10 @@ class CommoditySupplierUserController extends Controller
      */
     public function index(
         Company $supplier,
-
         GetPaginatedSupplierUsers $getPaginatedUsers,
     ): JsonResponse {
         return fractal(
-            $getPaginatedUsers->handle($company),
+            $getPaginatedUsers->handle($supplier),
             new UserTransformer(Area::CommoditySupplier)
         )->parseIncludes([
             'id',
