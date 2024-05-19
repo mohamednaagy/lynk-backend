@@ -56,8 +56,7 @@ class CommoditySupplierUserController extends Controller
      * Display a listing of the resource.
      */
     public function index(
-        Company $supplier,
-
+        Company $company,
         GetPaginatedSupplierUsers $getPaginatedUsers,
     ): JsonResponse {
         return fractal(
@@ -141,7 +140,6 @@ class CommoditySupplierUserController extends Controller
      *
      * @param  UpdateUserRequest  $updateUserRequest
      * @param  Company  $supplier
-
      * @param  UpdateSupplierUserWithRoleAndPermission  $updateSupplierUserWithRoleAndPermission
      * @return JsonResponse
      */
