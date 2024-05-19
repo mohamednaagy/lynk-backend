@@ -21,6 +21,8 @@ class SupplierLocation extends Controller
 {
     public function __construct()
     {
+        dd(Auth::user());
+        // dd(perm(Area::CommoditySupplier, [Subject::CommoditySupplierLocations, Action::Manage, Action::Index]));
         $this->middleware(
             'permission:'.
                 perm(Area::CommoditySupplier, [Subject::CommoditySupplierLocations, Action::Manage, Action::Index])
