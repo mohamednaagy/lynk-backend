@@ -59,10 +59,8 @@ class CommoditySupplierUserController extends Controller
         Company $supplier,
         GetPaginatedSupplierUsers $getPaginatedUsers,
     ): JsonResponse {
-        $getPaginatedUsers->setSupplier($supplier);
-
         return fractal(
-            $getPaginatedUsers->handle(),
+            $getPaginatedUsers->handle($supplier),
             new UserTransformer(Area::CommoditySupplier)
         )->parseIncludes([
             'id',

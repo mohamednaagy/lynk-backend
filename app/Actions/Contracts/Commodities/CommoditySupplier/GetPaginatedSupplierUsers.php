@@ -7,7 +7,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface GetPaginatedSupplierUsers
 {
-    public function handle(): LengthAwarePaginator;
+    public function handle(Company $supplier): LengthAwarePaginator;
 
-    public function setSupplier(Company $supplier);
+    // public function setSupplier(Company $supplier);
 }

@@ -11,30 +11,18 @@ use Stancl\Tenancy\Database\TenantScope;
 
 class GetPaginatedSupplierUsersAction implements GetPaginatedSupplierUsers
 {
-    protected ?Company $company = null;
 
-    public function handle(): LengthAwarePaginator
+    public function handle(Company $supplier): LengthAwarePaginator
     {
         return User::query()
-            ->when($this->company, function ($query) {
-                return $query->where('company_id', $this->company->id)
-                    ->withoutGlobalScope(TenantScope::class);
-            })
+            ->where('company_id', $supplier->id)
             ->whereHas('roles', function ($query) {
                 return $query->whereIn('name', [
-                    Role::Admin,
                     Role::SupplierAdmin,
                     Role::SupplierApiAdmin,
                 ]);
             })
             ->with('permissions', 'roles')
             ->paginate();
-    }
-
-    public function setSupplier(Company $company)
-    {
-        $this->company = $company;
-
-        return $this;
     }
 }
