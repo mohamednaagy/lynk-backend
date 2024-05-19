@@ -2,14 +2,9 @@
 
 use App\Enums\Role;
 use App\Http\Controllers\Api\V1\Supplier\Auth\CompleteRegister;
-// use App\Http\Controllers\Api\V1\Trader\Auth\CompleteRegister;
-// use App\Http\Controllers\Api\V1\Trader\Auth\ResendInvitationToUser;
-// use App\Http\Controllers\Api\V1\Trader\Auth\UpdateMyProfile;
-
-use App\Http\Controllers\Api\V1\Trader\Users\UserController;
+use App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController;
+use App\Http\Controllers\Api\V1\Supplier\Location\SupplierLocation;
 use Illuminate\Support\Facades\Route;
-use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -22,18 +17,17 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 |
 */
 
-
-Route::prefix('v1/commodity-suppliers')->name('api.v1.commodity-supplier.')->group(function () {
+Route::prefix('v1/supplier')->name('api.v1.supplier.')->group(function () {
     Route::middleware([
         'auth:sanctum',
         'role:'.implode('|', [
             Role::SupplierAdmin,
             Role::SupplierApiAdmin,
-
         ]),
     ])->group(function () {
-      
-        Route::get('constants', [App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController::class, 'index']);
+
+        Route::get('constants', [ConstantController::class, 'index']);
+        Route::apiResource('locations', SupplierLocation::class);
 
     });
     Route::post('{user}/complete-register', CompleteRegister::class)->name('sign-up');

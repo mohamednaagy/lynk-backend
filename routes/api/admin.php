@@ -176,8 +176,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::post('/upload-image', [UploadImage::class, 'store']);
 
         Route::prefix('commodity-suppliers')->group(function () {
-            Route::post('{supplier}/users', [CommoditySupplierUserController::class, 'store']);
-            Route::get('{supplier}/users', [CommoditySupplierUserController::class, 'index']);
+            Route::post('{company}/users', [CommoditySupplierUserController::class, 'store']);
+            Route::get('{company}/users', [CommoditySupplierUserController::class, 'index']);
         });
     });
 

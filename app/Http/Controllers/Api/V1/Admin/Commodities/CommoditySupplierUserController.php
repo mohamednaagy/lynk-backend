@@ -57,10 +57,11 @@ class CommoditySupplierUserController extends Controller
      */
     public function index(
         Company $supplier,
+
         GetPaginatedSupplierUsers $getPaginatedUsers,
     ): JsonResponse {
         return fractal(
-            $getPaginatedUsers->handle($supplier),
+            $getPaginatedUsers->handle($company),
             new UserTransformer(Area::CommoditySupplier)
         )->parseIncludes([
             'id',
@@ -93,7 +94,6 @@ class CommoditySupplierUserController extends Controller
                     'company_id' => $supplier->id,
                 ]
             );
-
             $invitationUrl = $request->validated('redirect_url');
             Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Supplier));
 
@@ -141,6 +141,7 @@ class CommoditySupplierUserController extends Controller
      *
      * @param  UpdateUserRequest  $updateUserRequest
      * @param  Company  $supplier
+
      * @param  UpdateSupplierUserWithRoleAndPermission  $updateSupplierUserWithRoleAndPermission
      * @return JsonResponse
      */
