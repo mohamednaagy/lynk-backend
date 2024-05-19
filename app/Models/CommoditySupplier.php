@@ -15,10 +15,12 @@ class CommoditySupplier extends Model
 
     protected $fillable = [
         'legal_name',
+        'description',
         'unique_name',
         'description',
-        'status',
         'market_type',
+        'status',
+        'company_id',
     ];
 
     protected $casts = [
@@ -30,5 +32,15 @@ class CommoditySupplier extends Model
     {
         return LogOptions::defaults()
             ->logOnly(['status']);
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'supplier_user');
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id');
     }
 }

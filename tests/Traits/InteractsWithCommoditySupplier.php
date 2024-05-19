@@ -4,7 +4,9 @@ namespace Tests\Traits;
 
 use App\Enums\CommoitySupplierMarketType;
 use App\Enums\CommoitySupplierStatus;
-use App\Models\CommoditySupplier;
+use App\Enums\CompanyStatus;
+use App\Enums\CompanyType;
+use App\Models\Company;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -18,7 +20,7 @@ trait InteractsWithCommoditySupplier
             $this->createCommoditySupplier();
         }
 
-        $suppliers = CommoditySupplier::query();
+        $suppliers = Company::query()->where('type', CompanyType::Supplier);
         if ($is_paginate) {
             return $suppliers->paginate();
         }
@@ -30,12 +32,20 @@ trait InteractsWithCommoditySupplier
     public function createCommoditySupplier(?string $legal_name = null, ?string $unique_name = null, ?string $description = null, int $status = 1, int $market_type = 1): Model|Builder
     {
 
-        return CommoditySupplier::query()->create([
-            'legal_name' => $legal_name ?? 'legal name'.rand(11, 999),
-            'unique_name' => $unique_name ?? 'unique name'.rand(11, 999),
-            'description' => $description ?? 'Test Description',
-            'status' => $status ?? CommoitySupplierStatus::Active(),
-            'market_type' => $market_Type ?? CommoitySupplierMarketType::Local(),
+        $data['legal_name'] = $legal_name ?? 'legal name'.rand(11, 999);
+        $data['unique_name'] = $unique_name ?? 'unique name'.rand(11, 99);
+        $data['description'] = $description ?? 'Test Description';
+        $data['status'] = $status ?? CommoitySupplierStatus::Active();
+        $data['market_type'] = $market_Type ?? CommoitySupplierMarketType::Local();
+        $supplier = Company::create([
+            'name' => $data['legal_name'],
+            'unique_name' => $data['unique_name'],
+            'status' => CompanyStatus::Approved(),
+            'type' => CompanyType::Supplier,
         ]);
+
+        $supplier->commoditySupplier()->create($data);
+
+        return $supplier->commoditySupplier;
     }
 }

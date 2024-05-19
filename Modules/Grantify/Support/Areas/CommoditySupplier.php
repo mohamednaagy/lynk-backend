@@ -21,5 +21,16 @@ class CommoditySupplier
             Action::Create,
             Action::Edit,
         ],
+        Subject::ConstantApi => [
+            Action::Manage,
+            Action::Index,
+        ],
+
+        Subject::CommoditySupplierLocations => [
+            Action::Manage,
+            Action::Index,
+            Action::Edit,
+            Action::Create,
+        ],
     ];
 }

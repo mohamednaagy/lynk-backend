@@ -1,6 +1,8 @@
 <?php
 
 use App\Enums\Role;
+use App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController;
+use App\Http\Controllers\Api\V1\Supplier\Location\SupplierLocation;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,17 +16,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('v1/commodity-suppliers')->name('api.v1.commodity-supplier.')->group(function () {
+Route::prefix('v1/supplier')->name('api.v1.supplier.')->group(function () {
     Route::middleware([
         'auth:sanctum',
         'role:'.implode('|', [
             Role::SupplierAdmin,
             Role::SupplierApiAdmin,
-
         ]),
     ])->group(function () {
-        Route::get('constants', [App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController::class, 'index']);
+
+        Route::get('constants', [ConstantController::class, 'index']);
+        Route::apiResource('locations', SupplierLocation::class);
 
     });
-
 });

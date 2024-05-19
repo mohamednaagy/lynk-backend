@@ -3,14 +3,14 @@
 namespace App\Actions\Commodities\CommoditySupplier;
 
 use App\Actions\Contracts\Commodities\CommoditySupplier\UpdateCommoditySupplier;
-use App\Models\CommoditySupplier;
+use App\Models\Company;
 use Illuminate\Support\Arr;
 
 class UpdateCommoditySupplierAction implements UpdateCommoditySupplier
 {
-    public function handle(CommoditySupplier $commoditySupplier, array $data): CommoditySupplier
+    public function handle(Company $company, array $data): Company
     {
-        $commoditySupplier->update(
+        $company->commoditySupplier->update(
             Arr::only(
                 $data,
                 [
@@ -22,7 +22,11 @@ class UpdateCommoditySupplierAction implements UpdateCommoditySupplier
                 ]
             )
         );
+        $company->update([
+            'name' => $data['legal_name'],
+            'unique_name' => $data['unique_name'],
+        ]);
 
-        return $commoditySupplier;
+        return $company;
     }
 }

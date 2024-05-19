@@ -21,7 +21,7 @@ final class Area extends Enum
 
     const CommoditySupplier = 'CommoditySupplier';
 
-    public static function roles(?string $area = null): array
+    public static function roles(string $area = null): array
     {
         return match ($area) {
             self::SuperAdmin => SuperAdmin::$roles,

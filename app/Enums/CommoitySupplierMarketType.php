@@ -7,7 +7,7 @@ use BenSampo\Enum\Enum;
 
 /**
  * @method static static Local()
-// * @method static static International()
+ * @method static static International()
  */
 final class CommoitySupplierMarketType extends Enum implements LocalizedEnum
 {

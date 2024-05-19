@@ -7,11 +7,12 @@ use App\Actions\Contracts\Commodities\CommoditySupplier\CreateCommoditySupplier;
 use App\Actions\Contracts\Commodities\CommoditySupplier\UpdateCommoditySupplier;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CompanyType;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\StoreCommoditySupplierRequest;
 use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\UpdateCommoditySupplierRequest;
-use App\Models\CommoditySupplier;
+use App\Models\Company;
 use App\Transformers\CommoditySuppliersTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +46,7 @@ class CommoditySupplierController extends Controller
         BuildPaginatedCommoditySuppliersQuery $buildPaginatedCommoditySuppliersQuery
     ): JsonResponse {
 
-        $commiditySuppliers = $buildPaginatedCommoditySuppliersQuery
+        $commiditySuppliers = $buildPaginatedCommoditySuppliersQuery->setType(CompanyType::Supplier)
             ->handle()
             ->paginate();
 
@@ -80,8 +81,9 @@ class CommoditySupplierController extends Controller
             ->respond();
     }
 
-    public function show(CommoditySupplier $commoditySupplier): JsonResponse
+    public function show(Company $commoditySupplier): JsonResponse
     {
+
         return fractal($commoditySupplier, new CommoditySuppliersTransformer())
             ->parseIncludes([
                 'id',
@@ -97,7 +99,7 @@ class CommoditySupplierController extends Controller
     public function update(
         UpdateCommoditySupplierRequest $request,
         UpdateCommoditySupplier $updateCommoditySupplier,
-        CommoditySupplier $commoditySupplier
+        Company $commoditySupplier
     ): JsonResponse {
         return DB::transaction(function () use ($request, $updateCommoditySupplier, $commoditySupplier) {
             $data = $request->validated();
