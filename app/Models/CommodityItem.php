@@ -15,15 +15,13 @@ class CommodityItem extends Model
         'name',
         'unique_name',
         'description',
-        'status',
-        'commodity_supplier_id',
+        'company_id',
         'commodity_type_id',
         'min_price',
         'max_price',
         'volume_sellable_unit',
         'currency_id',
         'measurement_id',
-
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -32,14 +30,14 @@ class CommodityItem extends Model
             ->logAll();
     }
 
-    public function supplier()
+    public function company()
     {
-        return $this->belongsTo(CommoditySupplier::class);
+        return $this->belongsTo(Company::class);
     }
 
-    public function type()
+    public function types()
     {
-        return $this->belongsTo(CommodityType::class);
+        return $this->belongsToMany(CommodityType::class, 'commodity_item_types', 'commodity_item_id', 'commodity_type_id');
     }
 
     public function currency()

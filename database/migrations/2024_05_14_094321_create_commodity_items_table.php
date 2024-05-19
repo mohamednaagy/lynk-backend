@@ -18,10 +18,8 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('unique_name');
-            $table->unsignedBigInteger('commodity_supplier_id');
-            $table->foreign('commodity_supplier_id')->references('id')->on('commodity_suppliers');
-            $table->unsignedBigInteger('commodity_type_id');
-            $table->foreign('commodity_type_id')->references('id')->on('commodity_types');
+            $table->unsignedBigInteger('company_id');
+            $table->foreign('company_id')->references('id')->on('companies');
             $table->decimal('min_price', 64, 2);
             $table->decimal('max_price', 64, 2);
             $table->decimal('volume_sellable_unit', 64, 5);
@@ -29,7 +27,7 @@ return new class extends Migration
             $table->foreign('currency_id')->references('id')->on('currencies');
             $table->unsignedBigInteger('measurement_id');
             $table->foreign('measurement_id')->references('id')->on('measurements');
-            $table->unique(['unique_name', 'commodity_supplier_id']);
+            $table->unique(['unique_name', 'company_id']);
             $table->timestamps();
         });
     }
