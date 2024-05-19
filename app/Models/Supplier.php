@@ -8,4 +8,9 @@ class Supplier extends Company
     {
         return $this->hasMany(SupplierLocation::class, 'company_id');
     }
+
+    public function commodityItems()
+    {
+        return $this->hasMany(CommodityItem::class, 'company_id');
+    }
 }

@@ -1,10 +1,12 @@
 <?php
 
 use App\Enums\Role;
+use App\Http\Controllers\Api\V1\Supplier\CommodityItem\CommodityItemController;
 use App\Http\Controllers\Api\V1\Supplier\Auth\CompleteRegister;
 use App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController;
 use App\Http\Controllers\Api\V1\Supplier\Location\SupplierLocation;
 use Illuminate\Support\Facades\Route;
+use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,10 +26,12 @@ Route::prefix('v1/supplier')->name('api.v1.supplier.')->group(function () {
             Role::SupplierAdmin,
             Role::SupplierApiAdmin,
         ]),
+        InitializeTenancyByRequestData::class,
     ])->group(function () {
 
         Route::get('constants', [ConstantController::class, 'index']);
         Route::apiResource('locations', SupplierLocation::class);
+        Route::apiResource('commodity-items', CommodityItemController::class);
 
     });
     Route::post('{user}/complete-register', CompleteRegister::class)->name('sign-up');
