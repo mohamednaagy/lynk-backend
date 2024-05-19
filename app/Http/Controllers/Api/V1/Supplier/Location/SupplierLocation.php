@@ -37,6 +37,11 @@ class SupplierLocation extends Controller
             'permission:'.
                 perm(Area::CommoditySupplier, [Subject::CommoditySupplierLocations, Action::Manage, Action::Edit])
         )->only('update');
+
+        $this->middleware(
+            'permission:'.
+                perm(Area::CommoditySupplier, [Subject::CommoditySupplierLocations, Action::Manage, Action::Show])
+        )->only('show');
     }
 
     /**
@@ -98,6 +103,22 @@ class SupplierLocation extends Controller
                 'unique_identifier',
                 'name',
                 'description',
+            ])
+            ->respond();
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(ModelsSupplierLocation $location): JsonResponse
+    {
+        return fractal($location, new SupplierLocationsTransformer())
+            ->parseIncludes([
+                'id',
+                'unique_identifier',
+                'name',
+                'description',
+                'created_at',
             ])
             ->respond();
     }
