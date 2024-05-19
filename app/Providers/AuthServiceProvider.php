@@ -14,6 +14,7 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Sanctum\Sanctum;
+use Modules\Grantify\Support\Areas\CommoditySupplier;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AuthServiceProvider extends ServiceProvider

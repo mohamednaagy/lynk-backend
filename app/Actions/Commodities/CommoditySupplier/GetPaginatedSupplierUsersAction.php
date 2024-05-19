@@ -3,24 +3,24 @@
 namespace App\Actions\Commodities\CommoditySupplier;
 
 use App\Actions\Contracts\Commodities\CommoditySupplier\GetPaginatedSupplierUsers;
+use App\Enums\Role;
 use App\Models\Company;
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Modules\Grantify\Support\Areas\CommoditySupplier;
+use Stancl\Tenancy\Database\TenantScope;
 
 class GetPaginatedSupplierUsersAction implements GetPaginatedSupplierUsers
 {
-    public function handle(Company $company): LengthAwarePaginator
+
+    public function handle(Company $supplier): LengthAwarePaginator
     {
-        return $company->users()
+        return User::query()
+            ->where('company_id', $supplier->id)
             ->whereHas('roles', function ($query) {
-                return $query->whereIn(
-                    'name',
-                    CommoditySupplier::$roles // TODO_LOCAL_MARKET replace role with area roles
-                );
+                return $query->whereIn('name', CommoditySupplier::$roles);
             })
-            // TODO_LOCAL_MARKET we don't need this
-            // ->withCount('orders')
-            // ->with('permissions', 'roles')
+            ->with('permissions', 'roles')
             ->paginate();
     }
 }
