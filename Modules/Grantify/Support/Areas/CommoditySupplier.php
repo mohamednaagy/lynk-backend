@@ -25,5 +25,12 @@ class CommoditySupplier
             Action::Manage,
             Action::Index,
         ],
+
+        Subject::CommoditySupplierLocations => [
+            Action::Manage,
+            Action::Index,
+            Action::Edit,
+            Action::Create,
+        ],
     ];
 }
