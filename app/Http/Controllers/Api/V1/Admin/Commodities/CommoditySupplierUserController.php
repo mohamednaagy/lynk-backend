@@ -15,6 +15,7 @@ use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\Users\UpdateUserReq
 use App\Mail\CompleteRegisterInvitation;
 use App\Models\CommoditySupplier;
 use App\Models\Company;
+use App\Models\Supplier;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -56,11 +57,11 @@ class CommoditySupplierUserController extends Controller
      * Display a listing of the resource.
      */
     public function index(
-        Company $company,
+        Supplier $supplier,
         GetPaginatedSupplierUsers $getPaginatedUsers,
     ): JsonResponse {
         return fractal(
-            $getPaginatedUsers->handle($company),
+            $getPaginatedUsers->handle($supplier),
             new UserTransformer(Area::CommoditySupplier)
         )->parseIncludes([
             'id',
@@ -83,7 +84,7 @@ class CommoditySupplierUserController extends Controller
      */
     public function store(
         StoreUserRequest $request,
-        Company $supplier,
+        Supplier $supplier,
         CreateSupplierUserWithRoleAndPermission $createSupplierUserWithRoleAndPermission
     ): JsonResponse {
         return DB::transaction(function () use ($supplier, $request, $createSupplierUserWithRoleAndPermission) {
