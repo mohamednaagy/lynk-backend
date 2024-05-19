@@ -7,6 +7,7 @@ use App\Enums\Role;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Modules\Grantify\Support\Areas\CommoditySupplier;
 use Stancl\Tenancy\Database\TenantScope;
 
 class GetPaginatedSupplierUsersAction implements GetPaginatedSupplierUsers
@@ -17,10 +18,7 @@ class GetPaginatedSupplierUsersAction implements GetPaginatedSupplierUsers
         return User::query()
             ->where('company_id', $supplier->id)
             ->whereHas('roles', function ($query) {
-                return $query->whereIn('name', [
-                    Role::SupplierAdmin,
-                    Role::SupplierApiAdmin,
-                ]);
+                return $query->whereIn('name', CommoditySupplier::$roles);
             })
             ->with('permissions', 'roles')
             ->paginate();
