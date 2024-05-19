@@ -141,7 +141,6 @@ class CommoditySupplierUserController extends Controller
      *
      * @param  UpdateUserRequest  $updateUserRequest
      * @param  Company  $supplier
-
      * @param  UpdateSupplierUserWithRoleAndPermission  $updateSupplierUserWithRoleAndPermission
      * @return JsonResponse
      */
