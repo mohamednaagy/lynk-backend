@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Commodities\CommoditySupplier;
+namespace App\Actions\Commodities\CommodityLocation;
 
 use App\Actions\Contracts\Commodities\CommodityLocation\UpdateSupplierLocation;
 use App\Models\SupplierLocation;
