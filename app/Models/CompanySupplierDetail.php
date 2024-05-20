@@ -9,14 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-class CommoditySupplier extends Model
+class CompanySupplierDetail extends Model
 {
     use HasFactory , LogsActivity;
 
     protected $fillable = [
-        'legal_name',
-        'description',
-        'unique_name',
         'description',
         'market_type',
         'status',

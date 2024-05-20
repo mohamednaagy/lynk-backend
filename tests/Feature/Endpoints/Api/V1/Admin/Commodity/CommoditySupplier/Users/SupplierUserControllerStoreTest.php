@@ -6,7 +6,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
-use App\Models\CommoditySupplier;
+use App\Models\CompanySupplierDetail;
 use App\Models\User;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,9 +18,9 @@ use Tests\Traits\InteractsWithUser;
 
 class SupplierUserControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCommoditySupplier;
+    use InteractsWithCommoditySupplier, InteractsWithUser, RefreshDatabase;
 
-    private static CommoditySupplier $supplier;
+    private static CompanySupplierDetail $supplier;
 
     private static User $userAdmin;
 

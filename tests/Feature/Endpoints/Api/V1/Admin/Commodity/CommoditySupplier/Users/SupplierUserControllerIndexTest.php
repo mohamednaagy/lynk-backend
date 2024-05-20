@@ -6,22 +6,21 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
-use App\Models\CommoditySupplier;
+use App\Models\CompanySupplierDetail;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCommoditySupplier;
 use Tests\Traits\InteractsWithUser;
 
 class SupplierUserControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCommoditySupplier;
+    use InteractsWithCommoditySupplier, InteractsWithUser, RefreshDatabase;
 
-    private static CommoditySupplier $supplier;
+    private static CompanySupplierDetail $supplier;
 
     private static User $userAdmin;
 

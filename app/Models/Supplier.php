@@ -13,4 +13,9 @@ class Supplier extends Company
     {
         return $this->hasMany(CommodityItem::class, 'company_id');
     }
+
+    public function detail()
+    {
+        return $this->hasOne(CompanySupplierDetail::class, 'company_id');
+    }
 }
