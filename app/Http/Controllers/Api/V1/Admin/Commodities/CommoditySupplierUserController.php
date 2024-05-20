@@ -13,7 +13,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\Users\StoreUserRequest;
 use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\Users\UpdateUserRequest;
 use App\Mail\CompleteRegisterInvitation;
-use App\Models\CommoditySupplier;
 use App\Models\Company;
 use App\Models\Supplier;
 use App\Models\User;

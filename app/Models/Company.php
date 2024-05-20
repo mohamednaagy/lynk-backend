@@ -133,7 +133,7 @@ class Company extends BaseTenant
 
     public function commoditySupplier()
     {
-        return $this->hasOne(CommoditySupplier::class, 'company_id');
+        return $this->hasOne(CompanySupplierDetail::class, 'company_id');
     }
 
     public function supplier()

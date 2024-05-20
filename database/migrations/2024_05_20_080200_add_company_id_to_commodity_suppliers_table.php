@@ -13,10 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('commodity_suppliers', function (Blueprint $table) {
-            $table->unsignedBigInteger('company_id')->nullable();
-            $table->foreign('company_id')->references('id')->on('companies');
-        });
+        if (! Schema::hasColumn('commodity_suppliers', 'company_id')) {
+            Schema::table('commodity_suppliers', function (Blueprint $table) {
+                $table->unsignedBigInteger('company_id')->nullable();
+                $table->foreign('company_id')->references('id')->on('companies');
+            });
+        }
+
     }
 
     /**

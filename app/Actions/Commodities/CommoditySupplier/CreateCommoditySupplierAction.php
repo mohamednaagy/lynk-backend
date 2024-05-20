@@ -27,7 +27,7 @@ class CreateCommoditySupplierAction implements CreateCommoditySupplier
                 ]
             )
         );
-        $supplier->commoditySupplier()->create(Arr::only(
+        $supplier->detail()->create(Arr::only(
             $data,
             [
                 'description',

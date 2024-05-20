@@ -3,7 +3,6 @@
 namespace Endpoints\Api\V1\Admin\Commodity\CommoditySupplier;
 
 use App\Enums\Role;
-use App\Models\CommoditySupplier;
 use App\Models\User;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;

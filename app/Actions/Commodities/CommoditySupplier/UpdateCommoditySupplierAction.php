@@ -10,7 +10,7 @@ class UpdateCommoditySupplierAction implements UpdateCommoditySupplier
 {
     public function handle(Supplier $supplier, array $data): Supplier
     {
-        $supplier->commoditySupplier->update(
+        $supplier->detail->update(
             Arr::only(
                 $data,
                 [
