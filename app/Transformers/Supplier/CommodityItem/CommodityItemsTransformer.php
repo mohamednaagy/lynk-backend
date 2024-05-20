@@ -18,9 +18,8 @@ class CommodityItemsTransformer extends TransformerAbstract
         'min_price',
         'max_price',
         'volume_sellable_unit',
-        'currency_id',
-        'measurement_id',
-        'measurement_id',
+        'currency',
+        'measurement',
         'available_units',
         'reserved_units',
         'created_at',
@@ -69,6 +68,37 @@ class CommodityItemsTransformer extends TransformerAbstract
         return $this->primitive([
             'id' => $type->id,
             'name' => $type->name,
+        ]);
+    }
+
+    public function includeMinPrice(CommodityItem $commodityItem): Primitive
+    {
+        return $this->primitive($commodityItem->min_price);
+    }
+
+    public function includeMaxPrice(CommodityItem $commodityItem): Primitive
+    {
+        return $this->primitive($commodityItem->max_price);
+    }
+
+    public function includeVolumeSellableUnit(CommodityItem $commodityItem): Primitive
+    {
+        return $this->primitive($commodityItem->volume_sellable_unit);
+    }
+
+    public function includeCurrency(CommodityItem $commodityItem): Primitive
+    {
+        return $this->primitive([
+            'id' => $commodityItem->currency_id,
+            'name' => $commodityItem->currency->name,
+        ]);
+    }
+
+    public function includeMeasurement(CommodityItem $commodityItem): Primitive
+    {
+        return $this->primitive([
+            'id' => $commodityItem->measurement_id,
+            'name' => $commodityItem->measurement->name,
         ]);
     }
 
