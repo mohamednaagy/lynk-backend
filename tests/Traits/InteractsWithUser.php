@@ -87,6 +87,28 @@ trait InteractsWithUser
         return $user;
     }
 
+
+    /**
+     * @param  int  $companyId
+     * @param  string  $role
+     * @param  array  $data
+     * @return User
+     */
+    public function createSupplierUser(
+        int $companyId,
+        string $role = Role::SupplierAdmin,
+        array $data = []
+    ): User {
+        $user = $this->createUser(array_merge([
+            'company_id' => $companyId,
+        ], $data));
+
+        $this->assignRoleToUser($user, $role);
+
+        return $user;
+    }
+
+
     /**
      * @param  int  $companyId
      * @param  string  $role
