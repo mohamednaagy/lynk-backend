@@ -45,6 +45,8 @@ trait InteractsWithCommoditySupplier
 
         $supplier->commoditySupplier()->create($data);
 
-        return $supplier->commoditySupplier;
+        $supplier->commoditySupplier;
+
+        return $supplier;
     }
 }
