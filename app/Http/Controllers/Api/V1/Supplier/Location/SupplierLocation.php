@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1\Supplier\Location;
 
-use App\Actions\Commodities\CommoditySupplier\UpdateSupplierLocationAction;
 use App\Actions\Contracts\Commodities\CommodityLocation\CreateSupplierLocation;
 use App\Actions\Contracts\Commodities\CommodityLocation\GetPaginatedSupplierLocations;
+use App\Actions\Contracts\Commodities\CommodityLocation\UpdateSupplierLocation;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
@@ -89,7 +89,7 @@ class SupplierLocation extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateSupplierLocationRequest $updateSupplierLocationRequest, ModelsSupplierLocation $location, UpdateSupplierLocationAction $updateSupplierLocation): JsonResponse
+    public function update(UpdateSupplierLocationRequest $updateSupplierLocationRequest, ModelsSupplierLocation $location, UpdateSupplierLocation $updateSupplierLocation): JsonResponse
     {
         $location = $updateSupplierLocation->handle($location, $updateSupplierLocationRequest->validated());
 
