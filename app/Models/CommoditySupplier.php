@@ -14,9 +14,6 @@ class CommoditySupplier extends Model
     use HasFactory , LogsActivity;
 
     protected $fillable = [
-        'legal_name',
-        'description',
-        'unique_name',
         'description',
         'market_type',
         'status',

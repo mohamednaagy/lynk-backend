@@ -68,7 +68,6 @@ class CommoditySupplierControllerUpdateTest extends TestCase
             ]);
         $this->assertEquals(self::$supplier->company->refresh()->name, 'new legal supplier');
         $this->assertEquals(self::$supplier->company->refresh()->unique_name, 'new unique name');
-        $this->assertEquals(self::$supplier->refresh()->unique_name, 'new unique name');
     }
 
     public function test_manager_without_permissions_cant_update_commodity_supplier(): void

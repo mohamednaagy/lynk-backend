@@ -3,30 +3,28 @@
 namespace App\Actions\Commodities\CommoditySupplier;
 
 use App\Actions\Contracts\Commodities\CommoditySupplier\UpdateCommoditySupplier;
-use App\Models\Company;
+use App\Models\Supplier;
 use Illuminate\Support\Arr;
 
 class UpdateCommoditySupplierAction implements UpdateCommoditySupplier
 {
-    public function handle(Company $company, array $data): Company
+    public function handle(Supplier $supplier, array $data): Supplier
     {
-        $company->commoditySupplier->update(
+        $supplier->commoditySupplier->update(
             Arr::only(
                 $data,
                 [
-                    'legal_name',
                     'description',
-                    'unique_name',
                     'market_type',
                     'status',
                 ]
             )
         );
-        $company->update([
+        $supplier->update([
             'name' => $data['legal_name'],
             'unique_name' => $data['unique_name'],
         ]);
 
-        return $company;
+        return $supplier;
     }
 }

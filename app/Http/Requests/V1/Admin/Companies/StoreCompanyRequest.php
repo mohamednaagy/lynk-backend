@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1\Admin\Companies;
 
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
+use App\Enums\CompanyType;
 use App\Enums\OrderFeeType;
 use App\Enums\TraderOrderMode;
 use App\Models\Company;
@@ -45,7 +46,7 @@ class StoreCompanyRequest extends FormRequest
                 'string',
                 'min:3',
                 new CompanyUniqueNameRule,
-                Rule::unique(Company::class, 'unique_name'),
+                Rule::unique(Company::class, 'unique_name')->where('type', CompanyType::Lender),
 
             ],
             'company_cr' => [

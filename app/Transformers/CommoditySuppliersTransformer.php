@@ -31,7 +31,7 @@ class CommoditySuppliersTransformer extends TransformerAbstract
 
     public function includeLegalName(Company $company): Primitive
     {
-        return $this->primitive($company->commoditySupplier->legal_name);
+        return $this->primitive($company->name);
     }
 
     public function includeDescription(Company $company): Primitive
@@ -41,7 +41,7 @@ class CommoditySuppliersTransformer extends TransformerAbstract
 
     public function includeUniqueName(Company $company): Primitive
     {
-        return $this->primitive($company->commoditySupplier->unique_name);
+        return $this->primitive($company->unique_name);
     }
 
     public function includeStatus(Company $company): Primitive
