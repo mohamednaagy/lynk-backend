@@ -2,8 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\SupplierFactory;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
 class Supplier extends Company
 {
+    protected static function newFactory(): Factory
+    {
+        return SupplierFactory::new();
+    }
+
     public function locations()
     {
         return $this->hasMany(SupplierLocation::class, 'company_id');

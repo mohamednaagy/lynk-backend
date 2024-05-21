@@ -31,7 +31,7 @@ class UpdateCommodityItemRequest extends FormRequest
                 'required',
                 'string',
                 'min:3',
-                'max:16',
+                'max:32',
                 new CommodityItemUniqueNameRole(),
                 Rule::unique(CommodityItem::class, 'unique_name')->where('company_id', tenant()->id)->ignore($this->route('commodity_item')),
             ],
