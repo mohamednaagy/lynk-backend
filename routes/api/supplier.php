@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController;
 use App\Http\Controllers\Api\V1\Supplier\Location\SupplierLocation;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
+use App\Http\Controllers\Api\V1\Supplier\Auth\GetAuthUser;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -28,12 +30,12 @@ Route::prefix('v1/supplier')->name('api.v1.supplier.')->group(function () {
         ]),
         InitializeTenancyByRequestData::class,
     ])->group(function () {
-
+        Route::get('auth', GetAuthUser::class);
         Route::get('constants', [ConstantController::class, 'index']);
         Route::apiResource('locations', SupplierLocation::class)->middleware('checkDataOfSupplier');
         Route::apiResource('commodity-items', CommodityItemController::class)->middleware('checkDataOfSupplier');
 
     });
-    Route::post('{user}/complete-register', CompleteRegister::class)->name('sign-up');
+    Route::post('{user}/sign-up', CompleteRegister::class)->name('sign-up');
 
 });

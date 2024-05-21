@@ -16,7 +16,7 @@ class GetAuthUser extends Controller
      */
     public function __invoke(Request $request)
     {
-        return fractal($request->user()->load(['roles']), new UserTransformer(Area::Lender))
+        return fractal($request->user()->load(['roles']), new UserTransformer(Area::CommoditySupplier))
             ->parseIncludes([
                 'id',
                 'first_name',
@@ -27,12 +27,8 @@ class GetAuthUser extends Controller
                 'company.id',
                 'company.name',
                 'company.status',
-                'company.id',
-                'company.public_status_comment',
-                'company.is_tiered',
-                'company.trading_mode',
-                'company.contract_number',
-
+                'company.unique_name',
+                'company.commoditySupplier.description',
                 'permissions',
                 'locale',
                 'phone_number',
