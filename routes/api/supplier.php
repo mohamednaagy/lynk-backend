@@ -36,6 +36,6 @@ Route::prefix('v1/supplier')->name('api.v1.supplier.')->group(function () {
         Route::apiResource('commodity-items', CommodityItemController::class)->middleware('checkDataOfSupplier');
 
     });
-    Route::post('{user}/complete-register', CompleteRegister::class)->name('sign-up');
+    Route::post('{user}/sign-up', CompleteRegister::class)->name('sign-up');
 
 });
