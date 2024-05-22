@@ -97,12 +97,13 @@ class CommodityItemController extends Controller
                 'unique_name',
                 'commodity_type',
                 'description',
-                'commodity_type',
                 'min_price',
                 'max_price',
                 'volume_sellable_unit',
                 'currency',
                 'measurement',
+                'available_units',
+                'reserved_units',
                 'created_at',
             ])
             ->respond();
