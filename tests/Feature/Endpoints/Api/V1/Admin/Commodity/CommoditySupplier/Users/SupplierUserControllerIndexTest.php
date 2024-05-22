@@ -7,6 +7,7 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\CompanySupplierDetail;
+use App\Models\Supplier;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -20,7 +21,7 @@ class SupplierUserControllerIndexTest extends TestCase
 {
     use InteractsWithCommoditySupplier, InteractsWithUser, RefreshDatabase;
 
-    private static CompanySupplierDetail $supplier;
+    private static Supplier $supplier;
 
     private static User $userAdmin;
 
@@ -41,8 +42,8 @@ class SupplierUserControllerIndexTest extends TestCase
             '1001280070'
         );
         self::$userAdmin = $this->createSuperAdminUser();
-        $this->assignPermissionToUser(self::$userAdmin, perm(Area::SuperAdmin, [Subject::CommoditySupplierUsers, Action::Index]));
-        self::$endpoint = 'api/v1/admin/commodity-suppliers/'.self::$supplier->id.'/users';
+        $this->assignPermissionToUser(self::$userAdmin, perm(Area::CommoditySupplier, [Subject::CommoditySupplierUsers, Action::Index]));
+        self::$endpoint = '/api/v1/admin/commodity-suppliers/'.self::$supplier->id.'/users';
         self::$users = self::$supplier->users()->whereHas('roles', function ($query) {
             return $query->whereIn('name', [
                 Role::SupplierAdmin,
