@@ -47,7 +47,7 @@ class LoginController extends Controller
             ]);
         }
 
-        if ($user->company->commoditySupplier->status != CommoitySupplierStatus::Active) {
+        if ($user->company->commoditySupplier->status->value != CommoitySupplierStatus::Active) {
             throw ValidationException::withMessages([
                 'email' => __('auth.inactive_supplier_status'),
             ]);
