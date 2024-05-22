@@ -6,7 +6,6 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
-use App\Models\CompanySupplierDetail;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -47,9 +46,9 @@ class SupplierUserControllerStoreTest extends TestCase
         );
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
-        $this->assignPermissionToUser(self::$userManager, perm(Area::CommoditySupplier, [Subject::CommoditySupplierUsers, Action::Create]));
+        $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::CommoditySupplierUsers, Action::Create]));
         self::$endpoint = 'api/v1/admin/commodity-suppliers/'.self::$supplier->id.'/users';
-        self::$email = 'user'.rand(0,9).'@lynk.sa';
+        self::$email = 'user'.rand(0, 9).'@lynk.sa';
         self::$userDetails = [
             'first_name' => 'first_name',
             'last_name' => 'last_name',
@@ -96,7 +95,7 @@ class SupplierUserControllerStoreTest extends TestCase
                 'last_name' => 'last_name',
                 'phone_number' => '500212233',
                 'phone_country_code' => 'SA',
-                'email' => 'user'.rand(0,9).'@lynk.sa',
+                'email' => 'user'.rand(0, 9).'@lynk.sa',
                 'redirect_url' => 'http://localhost:4200/complete-register',
                 'role' => Role::SupplierApiAdmin,
             ])

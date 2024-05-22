@@ -14,13 +14,7 @@ class CommoditySupplier
     ];
 
     public static array $basePermissions = [
-        Subject::CommoditySupplierUsers => [
-            Action::Manage,
-            Action::Index,
-            Action::Show,
-            Action::Create,
-            Action::Edit,
-        ],
+
         Subject::ConstantApi => [
             Action::Manage,
             Action::Index,
