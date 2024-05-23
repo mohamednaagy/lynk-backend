@@ -7,9 +7,9 @@ use App\Enums\CompanyType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Company>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Supplier>
  */
-class CompanyFactory extends Factory
+class SupplierFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -31,7 +31,7 @@ class CompanyFactory extends Factory
             'require_initiate_trade_request' => $this->faker->boolean,
             'notifications_email' => $this->faker->email,
             'notify_admins_about_new_orders' => $this->faker->boolean,
-            'type' => CompanyType::Lender,
+            'type' => CompanyType::Supplier,
         ];
     }
 }

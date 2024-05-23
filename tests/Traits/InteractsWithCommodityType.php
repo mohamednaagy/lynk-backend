@@ -29,7 +29,10 @@ trait InteractsWithCommodityType
     public function createCommodityType(?string $name = null, ?string $unique_name = null, ?string $description = null, int $status = 1): Model|Builder
     {
 
-        return CommodityType::query()->create([
+        return CommodityType::query()->firstOrCreate([
+            'name' => $name,
+            'unique_name' => $unique_name,
+        ], [
             'name' => $name ?? 'name'.rand(11, 999),
             'unique_name' => $unique_name ?? 'unique name'.rand(11, 999),
             'description' => $description ?? 'Test Description',

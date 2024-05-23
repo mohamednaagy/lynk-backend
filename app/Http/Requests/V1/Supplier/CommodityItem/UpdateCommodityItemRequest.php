@@ -7,7 +7,7 @@ use App\Rules\CommodityItemUniqueNameRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreCommodityItemRequest extends FormRequest
+class UpdateCommodityItemRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -33,7 +33,7 @@ class StoreCommodityItemRequest extends FormRequest
                 'min:3',
                 'max:32',
                 new CommodityItemUniqueNameRole(),
-                Rule::unique(CommodityItem::class, 'unique_name')->where('company_id', tenant()->id),
+                Rule::unique(CommodityItem::class, 'unique_name')->where('company_id', tenant()->id)->ignore($this->route('commodity_item')),
             ],
             'name' => ['required', 'string',  'max:32'],
             'description' => ['nullable', 'string', 'max:256'],
