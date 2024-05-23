@@ -310,10 +310,9 @@ class LoginTest extends TestCase
 
         $response->assertStatus(422)->assertExactJson([
             'message' => 'The selected unique name is invalid.',
-            'errors' => [
-                'email' => [
-                    'The selected unique name is invalid.',
-                ],
+            'errors' => ['unique_name' => [
+                'The selected unique name is invalid.',
+            ],
             ],
         ]);
 
