@@ -1,8 +1,9 @@
 <?php
 
 use App\Enums\Role;
-use App\Http\Controllers\Api\V1\Supplier\CommodityItem\CommodityItemController;
 use App\Http\Controllers\Api\V1\Supplier\Auth\CompleteRegister;
+use App\Http\Controllers\Api\V1\Supplier\CommodityItem\CommodityItemController;
+use App\Http\Controllers\Api\V1\Supplier\CommodityType\CommodityTypeController;
 use App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController;
 use App\Http\Controllers\Api\V1\Supplier\Location\SupplierLocation;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,8 @@ Route::prefix('v1/supplier')->name('api.v1.supplier.')->group(function () {
     ])->group(function () {
 
         Route::get('constants', [ConstantController::class, 'index']);
+        Route::get('commodity-types', [CommodityTypeController::class, 'index']);
+
         Route::apiResource('locations', SupplierLocation::class);
         Route::apiResource('commodity-items', CommodityItemController::class);
 
