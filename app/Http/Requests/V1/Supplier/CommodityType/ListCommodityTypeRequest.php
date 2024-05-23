@@ -32,8 +32,8 @@ class ListCommodityTypeRequest extends FormRequest
 
     public function prepareForValidation()
     {
-        $constants = $this->input('status');
-        if (is_null($constants)) {
+        $status = $this->input('status');
+        if (is_null($status)) {
             $this->merge(['status' => CommodityTypeStatus::Active]);
         }
     }
