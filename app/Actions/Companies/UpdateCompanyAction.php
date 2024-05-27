@@ -33,6 +33,7 @@ class UpdateCompanyAction implements UpdateCompany
                     'require_initiate_trade_request',
                     'notify_borrowers_about_order_updates',
                     'force_unique_reference_number',
+                    'preferred_market_type',
                 ]
             )
         );

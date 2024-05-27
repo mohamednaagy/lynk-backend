@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Companies;
 
+use App\Enums\CompanyMarketType;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyType;
 use App\Enums\OrderFeeType;
@@ -155,6 +156,11 @@ class UpdateCompanyRequest extends FormRequest
                 'required',
                 'string',
                 new EnumValue(TraderOrderMode::class, false),
+            ],
+            'preferred_market_type' => [
+                'required',
+                'integer',
+                new EnumValue(CompanyMarketType::class, false),
             ],
         ];
     }
