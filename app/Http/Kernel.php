@@ -75,5 +75,6 @@ class Kernel extends HttpKernel
         'verified.email' => \App\Http\Middleware\IsEmailVerified::class,
         'setAppLocale' => \App\Http\Middleware\SetLocalization::class,
         'checkCompanyStatus' => \App\Http\Middleware\CheckCompanyStatus::class,
+        'checkDataOfSupplier' => \App\Http\Middleware\EnsureDataOfUserSupplier::class,
     ];
 }

@@ -53,8 +53,6 @@ trait InteractsWithUser
     /**
      * Summary of createAdmin
      *
-     * @param  Role|string  $role
-     * @param  array  $data
      * @return mixed
      */
     public function createSuperAdminUser(
@@ -67,12 +65,6 @@ trait InteractsWithUser
         return $admin;
     }
 
-    /**
-     * @param  int  $companyId
-     * @param  string  $role
-     * @param  array  $data
-     * @return User
-     */
     public function createLenderUser(
         int $companyId,
         string $role = Role::LenderAdmin,
@@ -87,12 +79,20 @@ trait InteractsWithUser
         return $user;
     }
 
-    /**
-     * @param  int  $companyId
-     * @param  string  $role
-     * @param  array  $data
-     * @return User
-     */
+    public function createSupplierUser(
+        int $supplierId,
+        string $role = Role::SupplierAdmin,
+        array $data = []
+    ): User {
+        $user = $this->createUser(array_merge([
+            'company_id' => $supplierId,
+        ], $data));
+
+        $this->assignRoleToUser($user, $role);
+
+        return $user;
+    }
+
     public function createTraderUser(
         int $companyId,
         string $role = Role::TraderAdmin,

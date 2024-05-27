@@ -50,13 +50,13 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single'],
+            'channels' => ['daily'],
             'ignore_exceptions' => false,
         ],
 
         'single' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => storage_path('logs/'.php_sapi_name().'/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
         'custom' => [
@@ -69,10 +69,9 @@ return [
             'path' => storage_path('logs/transaction-updates.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
-
         'daily' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => storage_path('logs/'.php_sapi_name().'/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 30,
         ],

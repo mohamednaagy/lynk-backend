@@ -9,6 +9,9 @@ use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\ResendAdminInvitation;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
+use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierController;
+use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierUserController;
+use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypeController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
@@ -118,7 +121,11 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         });
 
         Route::apiResource('lenders', LenderController::class);
+        Route::apiResource('commodity-suppliers', CommoditySupplierController::class);
+
         Route::apiResource('lenders.users', LenderUserController::class)->scoped();
+
+        Route::apiResource('commodity-types', CommodityTypeController::class);
 
         Route::get('orders/export', ExportOrders::class);
 
@@ -170,6 +177,11 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::get('media/{media}/download', DownloadMedia::class);
 
         Route::post('/upload-image', [UploadImage::class, 'store']);
+
+        Route::prefix('commodity-suppliers')->group(function () {
+            Route::post('{supplier}/users', [CommoditySupplierUserController::class, 'store']);
+            Route::get('{supplier}/users', [CommoditySupplierUserController::class, 'index']);
+        });
     });
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.sign-up');
