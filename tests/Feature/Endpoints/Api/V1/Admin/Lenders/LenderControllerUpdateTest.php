@@ -4,6 +4,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CompanyMarketType;
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
@@ -60,7 +61,6 @@ class LenderControllerUpdateTest extends TestCase
             'notifications_email' => 'notifications_email@email.com',
             'unique_name' => 'companyUniqueName',
             'company_cr' => '1234567891',
-            'contract_number' => '44243943',
             'order_cost_tiers' => [
                 [
                     'id' => null,
@@ -97,6 +97,9 @@ class LenderControllerUpdateTest extends TestCase
             'require_initiate_trade_request' => '1',
             'webhook_secret_key' => Str::random(Config::get('webhook-server.secret_key_length', 40)),
             'trading_mode' => TraderOrderMode::Automatic,
+            'preferred_market_type' => CompanyMarketType::International,
+            'contract_number' => '1234567'.rand('111', '999'),
+
         ];
         self::$endpoint = 'api/v1/admin/lenders/';
     }
@@ -162,6 +165,37 @@ class LenderControllerUpdateTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_admin_cant_update_lender_without_preferred_market_type(): void
+    {
+        $this->actingAs(self::$userAdmin)
+            ->postJson(self::$endpoint, Arr::except(self::$lenderDetails, 'preferred_market_type'))
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The preferred market type field is required.',
+                'errors' => [
+                    'preferred_market_type' => [
+                        'The preferred market type field is required.',
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_admin_cant_update_lender_with_invalid_preferred_market_type(): void
+    {
+        self::$lenderDetails['preferred_market_type'] = 55;
+        $this->actingAs(self::$userAdmin)
+            ->putJson(self::$endpoint.self::$lender->id, self::$lenderDetails)
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The value you have entered is invalid.',
+                'errors' => [
+                    'preferred_market_type' => [
+                        'The value you have entered is invalid.',
+                    ],
+                ],
+            ]);
+    }
+
     public function test_admin_cant_update_lender_without_name(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -175,6 +209,19 @@ class LenderControllerUpdateTest extends TestCase
                     ],
                 ],
             ]);
+    }
+
+    public function test_admin_can_update_lender_preferred_market_type_successfully(): void
+    {
+        self::$lenderDetails['preferred_market_type'] = CompanyMarketType::Any;
+        $this->actingAs(self::$userAdmin)
+            ->putJson(self::$endpoint.self::$lender->id, self::$lenderDetails)
+            ->assertOk()
+            ->assertExactJson([
+                'data' => [],
+            ]);
+        $this->assertEquals(CompanyMarketType::Any, self::$lender->refresh()->preferred_market_type->value);
+
     }
 
     public function test_admin_can_update_lender_without_company_cr_successfully(): void
@@ -255,6 +302,7 @@ class LenderControllerUpdateTest extends TestCase
         Company::query()->create(array_merge(self::$lenderDetails, [
             'status' => CompanyStatus::Approved(),
         ]));
+        self::$lenderDetails['contract_number'] = '8528528522';
 
         $this->actingAs(self::$userAdmin)
             ->putJson(self::$endpoint.self::$lender->id, self::$lenderDetails)
@@ -277,6 +325,7 @@ class LenderControllerUpdateTest extends TestCase
         $lender = Company::query()->create(array_merge(self::$lenderDetails, [
             'status' => CompanyStatus::Approved(),
         ]));
+        self::$lenderDetails['contract_number'] = '8528528522';
 
         $this->actingAs(self::$userAdmin)
             ->putJson(self::$endpoint.self::$lender->id, self::$lenderDetails)

@@ -82,6 +82,7 @@ class LenderControllerShowTest extends TestCase
                         'notifications_email',
                         'notify_admins_about_new_orders',
                         'trading_mode',
+                        'preferred_market_type',
                     ])
                     ->respond()
                     ->getData(true)
@@ -110,6 +111,7 @@ class LenderControllerShowTest extends TestCase
                         'notifications_email',
                         'notify_admins_about_new_orders',
                         'trading_mode',
+                        'preferred_market_type',
                     ])
                     ->respond()
                     ->getData(true)

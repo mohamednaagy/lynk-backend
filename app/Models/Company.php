@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CompanyMarketType;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
@@ -37,6 +38,7 @@ class Company extends BaseTenant
         'type' => CompanyType::class,
         'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::class,
         'trading_mode' => TraderOrderMode::class,
+        'preferred_market_type' => CompanyMarketType::class,
     ];
 
     public static function getCustomColumns(): array
@@ -63,6 +65,7 @@ class Company extends BaseTenant
             'notify_admins_about_new_orders',
             'trading_mode',
             'deleted_at',
+            'preferred_market_type',
         ];
     }
 

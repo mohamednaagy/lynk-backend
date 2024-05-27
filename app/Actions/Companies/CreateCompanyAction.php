@@ -45,6 +45,7 @@ class CreateCompanyAction implements CreateCompany
                     'force_unique_reference_number',
                     'trading_mode',
                     'require_initiate_trade_request',
+                    'preferred_market_type',
                 ]
             )
         );

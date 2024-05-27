@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Companies;
 
+use App\Enums\CompanyMarketType;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\OrderFeeType;
 use App\Enums\TraderOrderMode;
@@ -148,6 +149,12 @@ class StoreCompanyRequest extends FormRequest
                 Rule::unique(Company::class, 'contract_number'),
                 'min:4',
                 'max:16',
+            ],
+
+            'preferred_market_type' => [
+                'required',
+                'integer',
+                new EnumValue(CompanyMarketType::class, false),
             ],
         ];
     }

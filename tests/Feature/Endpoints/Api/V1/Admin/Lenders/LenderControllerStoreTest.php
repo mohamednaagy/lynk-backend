@@ -5,6 +5,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CompanyMarketType;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
@@ -73,6 +74,7 @@ class LenderControllerStoreTest extends TestCase
                     'proration_amount' => null,
                 ],
             ],
+            'contract_number' => '1234567'.rand('111', '999'),
             'does_order_require_approval' => '1',
             'notify_borrowers_about_order_updates' => '1',
             'force_unique_reference_number' => '1',
@@ -80,6 +82,7 @@ class LenderControllerStoreTest extends TestCase
             'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::On,
             'webhook_secret_key' => Str::random(Config::get('webhook-server.secret_key_length', 40)),
             'trading_mode' => TraderOrderMode::Automatic,
+            'preferred_market_type' => CompanyMarketType::International,
         ];
         self::$endpoint = 'api/v1/admin/lenders';
     }
@@ -110,8 +113,9 @@ class LenderControllerStoreTest extends TestCase
                     'force_unique_reference_number',
                     'require_initiate_trade_request',
                     'notify_borrowers_about_order_updates',
+                    'preferred_market_type',
                 ],
-            ])->dd();
+            ]);
 
         $lender = Company::query()
             ->where('unique_name', 'companyUniqueName')
@@ -149,6 +153,8 @@ class LenderControllerStoreTest extends TestCase
                     'force_unique_reference_number',
                     'require_initiate_trade_request',
                     'notify_borrowers_about_order_updates',
+                    'preferred_market_type',
+
                 ],
             ]);
 
@@ -205,6 +211,37 @@ class LenderControllerStoreTest extends TestCase
                 'errors' => [
                     'company_cr' => [
                         'The company CR field is required.',
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_admin_cant_store_lender_without_preferred_market_type(): void
+    {
+        $this->actingAs(self::$userAdmin)
+            ->postJson(self::$endpoint, Arr::except(self::$standardLenderDetails, 'preferred_market_type'))
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The preferred market type field is required.',
+                'errors' => [
+                    'preferred_market_type' => [
+                        'The preferred market type field is required.',
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_admin_cant_store_lender_with_invalid_preferred_market_type(): void
+    {
+        self::$standardLenderDetails['preferred_market_type'] = 55;
+        $this->actingAs(self::$userAdmin)
+            ->postJson(self::$endpoint, self::$standardLenderDetails)
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The value you have entered is invalid.',
+                'errors' => [
+                    'preferred_market_type' => [
+                        'The value you have entered is invalid.',
                     ],
                 ],
             ]);
@@ -278,7 +315,7 @@ class LenderControllerStoreTest extends TestCase
         Company::query()->create(array_merge(self::$standardLenderDetails, [
             'status' => CompanyStatus::Approved(),
         ]));
-
+        self::$standardLenderDetails['contract_number'] = '8528528522';
         $this->actingAs(self::$userAdmin)
             ->postJson(self::$endpoint, self::$standardLenderDetails)
             ->assertUnprocessable()
@@ -300,7 +337,7 @@ class LenderControllerStoreTest extends TestCase
         $lender = Company::query()->create(array_merge(self::$standardLenderDetails, [
             'status' => CompanyStatus::Approved(),
         ]));
-
+        self::$standardLenderDetails['contract_number'] = '8528528522';
         $this->actingAs(self::$userAdmin)
             ->postJson(self::$endpoint, self::$standardLenderDetails)
             ->assertUnprocessable()
@@ -348,6 +385,7 @@ class LenderControllerStoreTest extends TestCase
                     'unique_name',
                     'company_cr',
                     'does_order_require_approval',
+                    'preferred_market_type',
                 ],
             ]);
     }

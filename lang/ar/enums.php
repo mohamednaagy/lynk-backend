@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\BursamProductCode;
+use App\Enums\CompanyMarketType;
 use App\Enums\CompanyStatus;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
@@ -86,5 +87,11 @@ return [
     TraderOrderNoRefundReason::class => [
         TraderOrderNoRefundReason::AFTER_24_HOUR => 'لم يتم استرداد المبلغ لأنه تم إلغاؤه بعد 24 ساعة من :base_tr',
         TraderOrderNoRefundReason::AFTER_72_HOUR => 'لم يتم استرداد المبلغ لأنه تم إلغاؤه بعد 72 ساعة من :base_tr',
+    ],
+
+    CompanyMarketType::class => [
+        CompanyMarketType::Local => 'محلي',
+        CompanyMarketType::International => 'عالمي',
+        CompanyMarketType::Any => 'كلاهما',
     ],
 ];
