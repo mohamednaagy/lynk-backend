@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Actions\LocalMurabaha;
+namespace App\Actions\ProjectSettings;
 
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Settings\Classes\ProjectSettings;
 use App\Support\ProjectSettings\Project;
 
-class GetLocalMurabahaSettingsAction implements GetProjectSettings
+class GetProjectSettingsAction implements GetProjectSettings
 {
     public function handle(): Project
     {

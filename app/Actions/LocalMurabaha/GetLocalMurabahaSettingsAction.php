@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Actions\ProjectSettings;
+namespace App\Actions\LocalMurabaha;
 
 use App\Actions\Contracts\LocalMurabaha\GetLocalMurabahaSettings;
 use App\Settings\Classes\LocalMurabahaSettings;
-use App\Support\ProjectSettings\Project;
+use App\Support\LocalMurabahaSettings\LocalMurabaha;
 
-class GetLocalMurabahaSettingsAction
+class GetLocalMurabahaSettingsAction implements GetLocalMurabahaSettings
 {
-    public function handle(): Project
+    public function handle()
     {
-        $projectSettings = app(LocalMurabahaSettings::class);
+        $murabahaSettings = app(LocalMurabahaSettings::class);
 
-        return Project::fromArray($projectSettings->toArray());
+        return LocalMurabaha::fromArray($murabahaSettings->toArray());
+
     }
 }
