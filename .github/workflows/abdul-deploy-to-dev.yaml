@@ -1,0 +1,43 @@
+name: deploy on dev
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install SSH key
+        id: install-ssh-key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: pulling and build code
+        id: pull-and-build
+        run: | 
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} \
+           "cd /var/www/lynk-backend/ && git pull origin dev && sudo php artisan migrate"
+        
+      - name: set pr url
+        if: always()
+        id: pr-url
+        uses: kceb/pull-request-url-action@v1
+        with:
+          github-oauth-token: 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
+        
+        
+      - name: print info
+        if: always()
+        run: |
+          echo "Repository Name: $GITHUB_REPOSITORY"
+          echo "Branch Name: $GITHUB_REF"
+          echo "pr-url: ${{ steps.pr-url.outputs.url }}"
+          echo "Execution Time: $(date)"
+          echo "Workflow Status: ${{ job.status }}"
+
+          curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Repository Name: '"$GITHUB_REPOSITORY"'\nBranch Name: '"$GITHUB_REF"'\nExecution Time: '"$(date)"'\nWorkflow Status: '"${{ job.status }}"'\n pull request URL: '"${{ steps.pr-url.outputs.url }}"'"}' https://hooks.slack.com/services/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

@@ -1,15 +1,15 @@
-name: Deployment to Sandbox
+name: Deployment to Dev
 
 on:
-  push:
-    branches:
-      - sandbox
+  #push:
+   # branches:
+    #  - dev
 
 jobs:
-  deploy_to_sandbox:
+  deploy_to_dev:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
-    environment: sandbox
+    environment: development
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
