@@ -35,9 +35,9 @@ class CommodityItem extends Model
         return $this->belongsTo(Supplier::class, 'company_id');
     }
 
-    public function types()
+    public function type()
     {
-        return $this->belongsToMany(CommodityType::class, 'commodity_item_types', 'commodity_item_id', 'commodity_type_id');
+        return $this->belongsTo(CommodityType::class, 'commodity_type_id');
     }
 
     public function currency()
