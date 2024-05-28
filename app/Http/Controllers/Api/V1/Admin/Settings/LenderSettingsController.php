@@ -18,12 +18,12 @@ class LenderSettingsController extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::LenderAreaSettings, Action::Index, Action::Manage])
+                perm(Area::Lender, [Subject::LenderAreaSettings, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::LenderAreaSettings, Action::Edit, Action::Manage])
+                perm(Area::Lender, [Subject::LenderAreaSettings, Action::Edit, Action::Manage])
         )->only('update');
     }
 
@@ -32,7 +32,7 @@ class LenderSettingsController extends Controller
      */
     public function index(GetSettingsClassInstance $getSettingsClassInstance): JsonResponse
     {
-        return fractal($getSettingsClassInstance->handle(Area::Lender), new LenderSettingsTransformer())
+        return fractal($getSettingsClassInstance->handle(Area::SuperAdmin), new LenderSettingsTransformer())
             ->parseIncludes([
                 'default_order_cost',
                 'email_verification_enabled',

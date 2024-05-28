@@ -53,6 +53,7 @@ use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\LenderSettingsController;
+use App\Http\Controllers\Api\V1\Admin\Settings\LocalMurabahaSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
 use App\Http\Controllers\Api\V1\Admin\Traders\ResendInvitationToUser as ResendTraderInvitationToUser;
@@ -95,6 +96,9 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
             Route::get('/project', [ProjectSettingsController::class, 'index']);
             Route::put('/project', [ProjectSettingsController::class, 'update']);
+
+            Route::get('/local-commodity', [LocalMurabahaSettingsController::class, 'index']);
+            Route::put('/local-commodity', [LocalMurabahaSettingsController::class, 'update']);
         });
 
         Route::get('wakala-templates/{type}', [WakalaTemplateController::class, 'index'])
