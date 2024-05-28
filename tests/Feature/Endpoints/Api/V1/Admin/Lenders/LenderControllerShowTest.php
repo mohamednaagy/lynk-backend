@@ -83,6 +83,7 @@ class LenderControllerShowTest extends TestCase
                         'notify_admins_about_new_orders',
                         'trading_mode',
                         'preferred_market_type',
+                        'preferred_commodity_types',
                     ])
                     ->respond()
                     ->getData(true)

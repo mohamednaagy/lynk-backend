@@ -103,6 +103,7 @@ class LenderController extends Controller
                     'force_unique_reference_number',
                     'order_cost',
                     'preferred_market_type',
+                    'preferred_commodity_types',
                 ])
                 ->respond();
         });
@@ -134,6 +135,7 @@ class LenderController extends Controller
                 'trading_mode',
                 'contract_number',
                 'preferred_market_type',
+                'preferred_commodity_types',
             ])
             ->respond();
     }
