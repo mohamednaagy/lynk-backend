@@ -8,6 +8,7 @@ use App\Settings\Classes\Areas\LenderSettings;
 use App\Settings\Classes\Areas\SuperAdminSettings;
 use App\Settings\Classes\Areas\TraderSettings;
 use App\Settings\Classes\GeneralSettings;
+use App\Settings\Classes\LocalMurabahaSettings;
 use Spatie\LaravelSettings\Settings;
 
 class GetSettingsClassInstanceAction implements GetSettingsClassInstance
@@ -16,6 +17,7 @@ class GetSettingsClassInstanceAction implements GetSettingsClassInstance
     {
         return match ($key) {
             'General' => app(GeneralSettings::class),
+            'LocalMurabaha' => app(LocalMurabahaSettings::class),
             Area::SuperAdmin => app(SuperAdminSettings::class),
             Area::Lender => app(LenderSettings::class),
             Area::Trader => app(TraderSettings::class),

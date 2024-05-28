@@ -49,9 +49,11 @@ class LocalMurabahaSettingsController extends Controller
     ): JsonResponse
     {
         $data = $updateLocalMurabahaSettingsRequest->validated();
-       // $updateSettings->handle($data);
+        $data['area'] = 'LocalMurabaha';
+        $updateSettings->handle($data);
 
-       // return $this->successResponse();
-        return fractal($updateSettings->handle($data), new LocalMurabahaSettingsTransformer())->respond();
+       return $this->successResponse([
+        'default_trade_order_roatation_count' => $data['default_trade_order_roatation_count']
+       ]);
     }
 }
