@@ -63,7 +63,7 @@ class CommodityItemsTransformer extends TransformerAbstract
 
     public function includeCommodityType(CommodityItem $commodityItem): Primitive
     {
-        $type = $commodityItem->types()->first();
+        $type = $commodityItem->type;
 
         return $this->primitive([
             'id' => $type->id,
