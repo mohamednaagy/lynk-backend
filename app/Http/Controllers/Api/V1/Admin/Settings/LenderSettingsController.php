@@ -18,12 +18,12 @@ class LenderSettingsController extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::LenderAreaSettings, Action::Index, Action::Manage])
+                perm(Area::Lender, [Subject::LenderAreaSettings, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::LenderAreaSettings, Action::Edit, Action::Manage])
+                perm(Area::Lender, [Subject::LenderAreaSettings, Action::Edit, Action::Manage])
         )->only('update');
     }
 
