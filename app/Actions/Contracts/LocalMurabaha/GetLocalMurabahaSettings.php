@@ -11,7 +11,7 @@ interface GetLocalMurabahaSettings
      *
      * @param  GetSettingsClassInstance  $getSettingsClassInstance
      */
-    //public function __construct(GetSettingsClassInstance $getSettingsClassInstance);
+    public function __construct(GetSettingsClassInstance $getSettingsClassInstance);
 
     public function handle();
 }

@@ -8,7 +8,6 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Admin\Settings\UpdateLenderSettingsRequest;
 use App\Http\Requests\V1\Admin\Settings\UpdateLocalMurabahaSettingsRequest;
 use App\Transformers\LocalMurabahaSettingsTransformer;
 use Illuminate\Http\JsonResponse;
