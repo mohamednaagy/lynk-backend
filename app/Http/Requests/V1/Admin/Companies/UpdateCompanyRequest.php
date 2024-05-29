@@ -158,7 +158,8 @@ class UpdateCompanyRequest extends FormRequest
                 new EnumValue(TraderOrderMode::class, false),
             ],
             'preferred_market_type' => [
-                'required',
+                'nullable',
+                'required_if:trading_mode,'.TraderOrderMode::Automatic,
                 'integer',
                 new EnumValue(CompanyMarketType::class, false),
             ],

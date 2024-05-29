@@ -222,10 +222,10 @@ class LenderControllerStoreTest extends TestCase
             ->postJson(self::$endpoint, Arr::except(self::$standardLenderDetails, 'preferred_market_type'))
             ->assertUnprocessable()
             ->assertExactJson([
-                'message' => 'The preferred market type field is required.',
+                'message' => 'The preferred market type field is required when trading mode is automatic.',
                 'errors' => [
                     'preferred_market_type' => [
-                        'The preferred market type field is required.',
+                        'The preferred market type field is required when trading mode is automatic.',
                     ],
                 ],
             ]);

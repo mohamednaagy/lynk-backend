@@ -153,7 +153,8 @@ class StoreCompanyRequest extends FormRequest
             ],
 
             'preferred_market_type' => [
-                'required',
+                'nullable',
+                'required_if:trading_mode,'.TraderOrderMode::Automatic,
                 'integer',
                 new EnumValue(CompanyMarketType::class, false),
             ],
