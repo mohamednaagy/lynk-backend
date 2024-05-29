@@ -5,6 +5,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CommodityTypeStatus;
 use App\Enums\CompanyMarketType;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyStatus;
@@ -12,6 +13,7 @@ use App\Enums\Role;
 use App\Enums\Subject;
 use App\Enums\TraderOrderMode;
 use App\Enums\WalletType;
+use App\Models\CommodityType;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
@@ -22,12 +24,13 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
+use Tests\Traits\InteractsWithCommodityType;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
 
 class LenderControllerStoreTest extends TestCase
 {
-    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
+    use InteractsWithCommodityType, InteractsWithCompany, InteractsWithUser , RefreshDatabase;
 
     private static Company $lender;
 
@@ -41,6 +44,10 @@ class LenderControllerStoreTest extends TestCase
 
     private static array $tieredLenderDetails;
 
+    private static CommodityType $inactiveCommodityType;
+
+    private static CommodityType $activeCommodityType;
+
     private static string $endpoint;
 
     /**
@@ -51,6 +58,9 @@ class LenderControllerStoreTest extends TestCase
         parent::setUp();
 
         [self::$lender, self::$wallet] = $this->createCompany('2000', ['company_cr' => '12345678910']);
+        self::$inactiveCommodityType = $this->createCommodityType(status: CommodityTypeStatus::Inactive);
+        self::$activeCommodityType = $this->createCommodityType(status: CommodityTypeStatus::Active);
+
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(
@@ -83,6 +93,7 @@ class LenderControllerStoreTest extends TestCase
             'webhook_secret_key' => Str::random(Config::get('webhook-server.secret_key_length', 40)),
             'trading_mode' => TraderOrderMode::Automatic,
             'preferred_market_type' => CompanyMarketType::International,
+            'preferred_commodity_types' => [self::$activeCommodityType->id],
         ];
         self::$endpoint = 'api/v1/admin/lenders';
     }
@@ -114,6 +125,7 @@ class LenderControllerStoreTest extends TestCase
                     'require_initiate_trade_request',
                     'notify_borrowers_about_order_updates',
                     'preferred_market_type',
+                    'preferred_commodity_types',
                 ],
             ]);
 
@@ -154,6 +166,49 @@ class LenderControllerStoreTest extends TestCase
                     'require_initiate_trade_request',
                     'notify_borrowers_about_order_updates',
                     'preferred_market_type',
+                    'preferred_commodity_types',
+
+                ],
+            ]);
+
+        $lender = Company::query()
+            ->where('unique_name', 'companyUniqueName')
+            ->first();
+
+        $defaultStatus = $this->app->make(GetSettingsClassInstance::class)->handle(Area::Lender)
+            ->default_company_status_created_by_operation;
+        $hasWallet = $lender->getWallets(WalletType::CompanyWallet)->count() > 0;
+        $orderCost = $lender->tieredPricing()->first()?->order_cost_without_vat->formatByDecimal();
+
+        $hasOrderCost = $orderCost > 0;
+        $isOrderCostCorrect = number_format($orderCost, 2) === number_format(self::$standardLenderDetails['order_cost_tiers'][0]['order_cost_without_vat'], 2);
+
+        $this->assertEquals($defaultStatus, $lender->status->value);
+        $this->assertTrue($hasWallet);
+        $this->assertTrue($hasOrderCost);
+        $this->assertTrue($isOrderCostCorrect);
+        $this->assertNotNull($lender->webhook_secret_key);
+    }
+
+    public function test_manager_with_permissions_can_store_lender_without_preferred_commodity_type_successfully(): void
+    {
+        $this->actingAs(self::$userManager)
+            ->postJson(self::$endpoint, Arr::except(self::$standardLenderDetails, 'preferred_commodity_type'))
+            ->assertOk()
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'status',
+                    'created_at',
+                    'unique_name',
+                    'company_cr',
+                    'does_order_require_approval',
+                    'force_unique_reference_number',
+                    'require_initiate_trade_request',
+                    'notify_borrowers_about_order_updates',
+                    'preferred_market_type',
+                    'preferred_commodity_types',
 
                 ],
             ]);
@@ -226,6 +281,38 @@ class LenderControllerStoreTest extends TestCase
                 'errors' => [
                     'preferred_market_type' => [
                         'The preferred market type field is required.',
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_admin_cant_store_lender_with_invalid_commodity_type_id(): void
+    {
+        self::$standardLenderDetails['preferred_commodity_types'] = [4000];
+        $this->actingAs(self::$userAdmin)
+            ->postJson(self::$endpoint, self::$standardLenderDetails)
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The selected preferred_commodity_types.0 is invalid or inactive.',
+                'errors' => [
+                    'preferred_commodity_types.0' => [
+                        'The selected preferred_commodity_types.0 is invalid or inactive.',
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_admin_cant_store_lender_with_inactive__preferred_commodity_type(): void
+    {
+        self::$standardLenderDetails['preferred_commodity_types'] = [self::$inactiveCommodityType->id];
+        $this->actingAs(self::$userAdmin)
+            ->postJson(self::$endpoint, self::$standardLenderDetails)
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The selected preferred_commodity_types.0 is invalid or inactive.',
+                'errors' => [
+                    'preferred_commodity_types.0' => [
+                        'The selected preferred_commodity_types.0 is invalid or inactive.',
                     ],
                 ],
             ]);
@@ -386,6 +473,7 @@ class LenderControllerStoreTest extends TestCase
                     'company_cr',
                     'does_order_require_approval',
                     'preferred_market_type',
+                    'preferred_commodity_types',
                 ],
             ]);
     }

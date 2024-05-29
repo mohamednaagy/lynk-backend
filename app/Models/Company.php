@@ -143,4 +143,9 @@ class Company extends BaseTenant
     {
         return $this->hasOne(Supplier::class, 'id');
     }
+
+    public function commodityTypes()
+    {
+        return $this->belongsToMany(CommodityType::class, 'company_commodity_types', 'company_id', 'commodity_type_id');
+    }
 }
