@@ -3,24 +3,39 @@
 namespace App\Actions\Commodities\CommoditySupplier;
 
 use App\Actions\Contracts\Commodities\CommoditySupplier\CreateCommoditySupplier;
-use App\Models\CommoditySupplier;
+use App\Enums\CompanyStatus;
+use App\Enums\CompanyType;
+use App\Models\Supplier;
 use Illuminate\Support\Arr;
 
 class CreateCommoditySupplierAction implements CreateCommoditySupplier
 {
-    public function handle(array $data): CommoditySupplier
+    public function handle(array $data): Supplier
     {
-        return CommoditySupplier::create(
+        $company['status'] = CompanyStatus::Approved();
+        $company['name'] = $data['legal_name'];
+        $company['unique_name'] = $data['unique_name'];
+        $company['type'] = CompanyType::Supplier;
+        $supplier = Supplier::create(
             Arr::only(
-                $data,
+                $company,
                 [
-                    'legal_name',
-                    'description',
+                    'name',
                     'unique_name',
                     'status',
-                    'market_type',
+                    'type',
                 ]
             )
         );
+        $supplier->detail()->create(Arr::only(
+            $data,
+            [
+                'description',
+                'market_type',
+                'status',
+            ]
+        ));
+
+        return $supplier;
     }
 }

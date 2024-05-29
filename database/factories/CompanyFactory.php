@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\CompanyStatus;
+use App\Enums\CompanyType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -30,6 +31,7 @@ class CompanyFactory extends Factory
             'require_initiate_trade_request' => $this->faker->boolean,
             'notifications_email' => $this->faker->email,
             'notify_admins_about_new_orders' => $this->faker->boolean,
+            'type' => CompanyType::Lender,
         ];
     }
 }

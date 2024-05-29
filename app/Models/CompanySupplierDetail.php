@@ -9,16 +9,15 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-class CommoditySupplier extends Model
+class CompanySupplierDetail extends Model
 {
     use HasFactory , LogsActivity;
 
     protected $fillable = [
-        'legal_name',
-        'unique_name',
         'description',
-        'status',
         'market_type',
+        'status',
+        'company_id',
     ];
 
     protected $casts = [
@@ -30,5 +29,10 @@ class CommoditySupplier extends Model
     {
         return LogOptions::defaults()
             ->logOnly(['status']);
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id');
     }
 }
