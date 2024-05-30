@@ -5,18 +5,18 @@ namespace App\Actions\Commodities\CommoditySupplier;
 use App\Actions\Contracts\Commodities\CommoditySupplier\CreateCommoditySupplier;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
-use App\Models\Company;
+use App\Models\Supplier;
 use Illuminate\Support\Arr;
 
 class CreateCommoditySupplierAction implements CreateCommoditySupplier
 {
-    public function handle(array $data): Company
+    public function handle(array $data): Supplier
     {
         $company['status'] = CompanyStatus::Approved();
-        $company['name'] = 'sup_'.$data['legal_name'];
+        $company['name'] = $data['legal_name'];
         $company['unique_name'] = $data['unique_name'];
         $company['type'] = CompanyType::Supplier;
-        $supplier = Company::create(
+        $supplier = Supplier::create(
             Arr::only(
                 $company,
                 [
@@ -27,11 +27,9 @@ class CreateCommoditySupplierAction implements CreateCommoditySupplier
                 ]
             )
         );
-        $supplier->commoditySupplier()->create(Arr::only(
+        $supplier->detail()->create(Arr::only(
             $data,
             [
-                'legal_name',
-                'unique_name',
                 'description',
                 'market_type',
                 'status',

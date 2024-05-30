@@ -12,7 +12,7 @@ use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\StoreCommoditySupplierRequest;
 use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\UpdateCommoditySupplierRequest;
-use App\Models\Company;
+use App\Models\Supplier;
 use App\Transformers\CommoditySuppliersTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -81,7 +81,7 @@ class CommoditySupplierController extends Controller
             ->respond();
     }
 
-    public function show(Company $commoditySupplier): JsonResponse
+    public function show(Supplier $commoditySupplier): JsonResponse
     {
 
         return fractal($commoditySupplier, new CommoditySuppliersTransformer())
@@ -99,7 +99,7 @@ class CommoditySupplierController extends Controller
     public function update(
         UpdateCommoditySupplierRequest $request,
         UpdateCommoditySupplier $updateCommoditySupplier,
-        Company $commoditySupplier
+        Supplier $commoditySupplier
     ): JsonResponse {
         return DB::transaction(function () use ($request, $updateCommoditySupplier, $commoditySupplier) {
             $data = $request->validated();

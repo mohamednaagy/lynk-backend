@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1\Supplier\Location;
 
-use App\Actions\Commodities\CommoditySupplier\UpdateSupplierLocationAction;
 use App\Actions\Contracts\Commodities\CommodityLocation\CreateSupplierLocation;
 use App\Actions\Contracts\Commodities\CommodityLocation\GetPaginatedSupplierLocations;
+use App\Actions\Contracts\Commodities\CommodityLocation\UpdateSupplierLocation;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
@@ -15,7 +15,6 @@ use App\Models\SupplierLocation as ModelsSupplierLocation;
 use App\Transformers\SupplierLocationsTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class SupplierLocation extends Controller
 {
@@ -37,6 +36,11 @@ class SupplierLocation extends Controller
             'permission:'.
                 perm(Area::CommoditySupplier, [Subject::CommoditySupplierLocations, Action::Manage, Action::Edit])
         )->only('update');
+
+        $this->middleware(
+            'permission:'.
+                perm(Area::CommoditySupplier, [Subject::CommoditySupplierLocations, Action::Manage, Action::Show])
+        )->only('show');
     }
 
     /**
@@ -46,9 +50,7 @@ class SupplierLocation extends Controller
         Request $request,
         GetPaginatedSupplierLocations $getPaginatedSupplierLocations
     ): JsonResponse {
-        // TODO_LOCAL_MARKET we need to get company id from tenant not from auth
-        $supplier = Auth::user()->supplier;
-
+        $supplier = tenant()->supplier;
         $enquiries = $getPaginatedSupplierLocations->handle($supplier);
 
         return fractal($enquiries, new SupplierLocationsTransformer())
@@ -68,8 +70,7 @@ class SupplierLocation extends Controller
     public function store(StoreLocationRequest $storeLocationRequest, CreateSupplierLocation $createSupplierLocation): JsonResponse
     {
         $data = $storeLocationRequest->validated();
-        // TODO_LOCAL_MARKET we need to get company id from tenant not from auth
-        $data['company_id'] = Auth::user()->company_id;
+        $data['company_id'] = tenant()->id;
         $location = $createSupplierLocation->handle($data);
 
         return fractal($location, new SupplierLocationsTransformer())
@@ -88,7 +89,7 @@ class SupplierLocation extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateSupplierLocationRequest $updateSupplierLocationRequest, ModelsSupplierLocation $location, UpdateSupplierLocationAction $updateSupplierLocation): JsonResponse
+    public function update(UpdateSupplierLocationRequest $updateSupplierLocationRequest, ModelsSupplierLocation $location, UpdateSupplierLocation $updateSupplierLocation): JsonResponse
     {
         $location = $updateSupplierLocation->handle($location, $updateSupplierLocationRequest->validated());
 
@@ -98,6 +99,22 @@ class SupplierLocation extends Controller
                 'unique_identifier',
                 'name',
                 'description',
+            ])
+            ->respond();
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(ModelsSupplierLocation $location): JsonResponse
+    {
+        return fractal($location, new SupplierLocationsTransformer())
+            ->parseIncludes([
+                'id',
+                'unique_identifier',
+                'name',
+                'description',
+                'created_at',
             ])
             ->respond();
     }

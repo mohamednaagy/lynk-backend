@@ -4,10 +4,13 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CommodityTypeStatus;
+use App\Enums\CompanyMarketType;
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Enums\TraderOrderMode;
+use App\Models\CommodityType;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
@@ -18,12 +21,13 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
+use Tests\Traits\InteractsWithCommodityType;
 use Tests\Traits\InteractsWithCompany;
 use Tests\Traits\InteractsWithUser;
 
 class LenderControllerUpdateTest extends TestCase
 {
-    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
+    use InteractsWithCommodityType, InteractsWithCompany, InteractsWithUser , RefreshDatabase;
 
     private static Company $lender;
 
@@ -36,6 +40,10 @@ class LenderControllerUpdateTest extends TestCase
     private static array $lenderDetails;
 
     private static string $endpoint;
+
+    private static CommodityType $inactiveCommodityType;
+
+    private static CommodityType $activeCommodityType;
 
     /**
      * @throws BindingResolutionException
@@ -50,6 +58,8 @@ class LenderControllerUpdateTest extends TestCase
         ]);
         self::$userAdmin = $this->createSuperAdminUser();
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
+        self::$inactiveCommodityType = $this->createCommodityType(status: CommodityTypeStatus::Inactive);
+        self::$activeCommodityType = $this->createCommodityType(status: CommodityTypeStatus::Active);
         $this->assignPermissionToUser(
             self::$userManager,
             perm(Area::SuperAdmin, [Subject::Lenders, Action::Edit])
@@ -60,7 +70,6 @@ class LenderControllerUpdateTest extends TestCase
             'notifications_email' => 'notifications_email@email.com',
             'unique_name' => 'companyUniqueName',
             'company_cr' => '1234567891',
-            'contract_number' => '44243943',
             'order_cost_tiers' => [
                 [
                     'id' => null,
@@ -97,6 +106,10 @@ class LenderControllerUpdateTest extends TestCase
             'require_initiate_trade_request' => '1',
             'webhook_secret_key' => Str::random(Config::get('webhook-server.secret_key_length', 40)),
             'trading_mode' => TraderOrderMode::Automatic,
+            'preferred_market_type' => CompanyMarketType::International,
+            'contract_number' => '1234567'.rand('111', '999'),
+            'preferred_commodity_types' => [self::$activeCommodityType->id],
+
         ];
         self::$endpoint = 'api/v1/admin/lenders/';
     }
@@ -112,6 +125,8 @@ class LenderControllerUpdateTest extends TestCase
 
     public function test_admin_can_update_lender_successfully(): void
     {
+        $commodity_type = $this->createCommodityType(status: CommodityTypeStatus::Active);
+        self::$lenderDetails['preferred_commodity_types'] = [$commodity_type->id];
         $this->actingAs(self::$userAdmin)
             ->putJson(self::$endpoint.self::$lender->id, self::$lenderDetails)
             ->assertOk()
@@ -120,6 +135,8 @@ class LenderControllerUpdateTest extends TestCase
             ]);
 
         $this->assertEquals(self::$lender->refresh()->unique_name, 'companyUniqueName');
+        $this->assertEquals(self::$lender->refresh()->commodityTypes()->first()->id, $commodity_type->id);
+
     }
 
     public function test_manager_with_permissions_can_update_lender_successfully(): void
@@ -162,6 +179,53 @@ class LenderControllerUpdateTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_admin_cant_update_lender_without_preferred_market_type(): void
+    {
+        self::$lenderDetails['preferred_commodity_types'] = [self::$inactiveCommodityType->id];
+        $this->actingAs(self::$userAdmin)
+            ->postJson(self::$endpoint, self::$lenderDetails)
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The selected preferred_commodity_types.0 is invalid or inactive.',
+                'errors' => [
+                    'preferred_commodity_types.0' => [
+                        'The selected preferred_commodity_types.0 is invalid or inactive.',
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_admin_cant_update_lender_with_invalid_preferred_commodity_type(): void
+    {
+        $this->actingAs(self::$userAdmin)
+            ->postJson(self::$endpoint, Arr::except(self::$lenderDetails, 'preferred_market_type'))
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The preferred market type field is required when trading mode is automatic.',
+                'errors' => [
+                    'preferred_market_type' => [
+                        'The preferred market type field is required when trading mode is automatic.',
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_admin_cant_update_lender_with_invalid_preferred_market_type(): void
+    {
+        self::$lenderDetails['preferred_market_type'] = 55;
+        $this->actingAs(self::$userAdmin)
+            ->putJson(self::$endpoint.self::$lender->id, self::$lenderDetails)
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The value you have entered is invalid.',
+                'errors' => [
+                    'preferred_market_type' => [
+                        'The value you have entered is invalid.',
+                    ],
+                ],
+            ]);
+    }
+
     public function test_admin_cant_update_lender_without_name(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -175,6 +239,19 @@ class LenderControllerUpdateTest extends TestCase
                     ],
                 ],
             ]);
+    }
+
+    public function test_admin_can_update_lender_preferred_market_type_successfully(): void
+    {
+        self::$lenderDetails['preferred_market_type'] = CompanyMarketType::Any;
+        $this->actingAs(self::$userAdmin)
+            ->putJson(self::$endpoint.self::$lender->id, self::$lenderDetails)
+            ->assertOk()
+            ->assertExactJson([
+                'data' => [],
+            ]);
+        $this->assertEquals(CompanyMarketType::Any, self::$lender->refresh()->preferred_market_type->value);
+
     }
 
     public function test_admin_can_update_lender_without_company_cr_successfully(): void
@@ -255,6 +332,7 @@ class LenderControllerUpdateTest extends TestCase
         Company::query()->create(array_merge(self::$lenderDetails, [
             'status' => CompanyStatus::Approved(),
         ]));
+        self::$lenderDetails['contract_number'] = '8528528522';
 
         $this->actingAs(self::$userAdmin)
             ->putJson(self::$endpoint.self::$lender->id, self::$lenderDetails)
@@ -277,6 +355,7 @@ class LenderControllerUpdateTest extends TestCase
         $lender = Company::query()->create(array_merge(self::$lenderDetails, [
             'status' => CompanyStatus::Approved(),
         ]));
+        self::$lenderDetails['contract_number'] = '8528528522';
 
         $this->actingAs(self::$userAdmin)
             ->putJson(self::$endpoint.self::$lender->id, self::$lenderDetails)

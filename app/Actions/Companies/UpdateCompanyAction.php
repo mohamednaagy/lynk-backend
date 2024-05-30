@@ -33,6 +33,8 @@ class UpdateCompanyAction implements UpdateCompany
                     'require_initiate_trade_request',
                     'notify_borrowers_about_order_updates',
                     'force_unique_reference_number',
+                    'preferred_market_type',
+
                 ]
             )
         );
@@ -47,6 +49,10 @@ class UpdateCompanyAction implements UpdateCompany
             if ($isTieredBeforeUpdate != $isTieredAfterUpdate && $isTieredAfterUpdate) {
                 $company->walletNotification()->where('type', WalletNotificationType::ORDER_COUNT)->delete();
             }
+        }
+
+        if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {
+            $company->commodityTypes()->sync($data['preferred_commodity_types']);
         }
 
         return $company;

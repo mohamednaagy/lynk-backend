@@ -6,22 +6,22 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
-use App\Models\CommoditySupplier;
+use App\Models\CompanySupplierDetail;
+use App\Models\Supplier;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Modules\Grantify\Facades\Grantify;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCommoditySupplier;
 use Tests\Traits\InteractsWithUser;
 
 class SupplierUserControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCommoditySupplier;
+    use InteractsWithCommoditySupplier, InteractsWithUser, RefreshDatabase;
 
-    private static CommoditySupplier $supplier;
+    private static Supplier $supplier;
 
     private static User $userAdmin;
 
@@ -42,8 +42,8 @@ class SupplierUserControllerIndexTest extends TestCase
             '1001280070'
         );
         self::$userAdmin = $this->createSuperAdminUser();
-        $this->assignPermissionToUser(self::$userAdmin, perm(Area::SuperAdmin, [Subject::CommoditySupplierUsers, Action::Index]));
-        self::$endpoint = 'api/v1/admin/commodity-suppliers/'.self::$supplier->id.'/users';
+        $this->assignPermissionToUser(self::$userAdmin, perm(Area::CommoditySupplier, [Subject::CommoditySupplierUsers, Action::Index]));
+        self::$endpoint = '/api/v1/admin/commodity-suppliers/'.self::$supplier->id.'/users';
         self::$users = self::$supplier->users()->whereHas('roles', function ($query) {
             return $query->whereIn('name', [
                 Role::SupplierAdmin,

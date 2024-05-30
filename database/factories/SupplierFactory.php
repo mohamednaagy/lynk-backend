@@ -1,0 +1,37 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Enums\CompanyStatus;
+use App\Enums\CompanyType;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Supplier>
+ */
+class SupplierFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition()
+    {
+        return [
+            'name' => $this->faker->company,
+            'unique_name' => $this->faker->unique()->domainName,
+            'company_cr' => $this->faker->unique()->text(20),
+            'status' => CompanyStatus::Approved,
+            'public_status_comment' => $this->faker->randomLetter,
+            'internal_status_comment' => $this->faker->randomLetter,
+            'does_order_require_approval' => $this->faker->boolean,
+            'notify_borrowers_about_order_updates' => $this->faker->boolean,
+            'force_unique_reference_number' => $this->faker->boolean,
+            'require_initiate_trade_request' => $this->faker->boolean,
+            'notifications_email' => $this->faker->email,
+            'notify_admins_about_new_orders' => $this->faker->boolean,
+            'type' => CompanyType::Supplier,
+        ];
+    }
+}

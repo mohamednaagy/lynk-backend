@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
 use App\Http\Controllers\Api\V1\Admin\Lenders\CalculateAmountWithoutVatAndOrdersCount;
 use App\Http\Controllers\Api\V1\Admin\Lenders\ChargeLenderBalanceManually;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderBalance;
+use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderMarketTypes;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderSetting;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderStatuses;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderController;
@@ -52,6 +53,7 @@ use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\LenderSettingsController;
+use App\Http\Controllers\Api\V1\Admin\Settings\LocalMurabahaSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
 use App\Http\Controllers\Api\V1\Admin\Traders\ResendInvitationToUser as ResendTraderInvitationToUser;
@@ -94,6 +96,9 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
             Route::get('/project', [ProjectSettingsController::class, 'index']);
             Route::put('/project', [ProjectSettingsController::class, 'update']);
+
+            Route::get('/local-commodity', [LocalMurabahaSettingsController::class, 'index']);
+            Route::put('/local-commodity', [LocalMurabahaSettingsController::class, 'update']);
         });
 
         Route::get('wakala-templates/{type}', [WakalaTemplateController::class, 'index'])
@@ -103,6 +108,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::prefix('lenders')->group(function () {
             Route::get('/statuses', GetLenderStatuses::class);
+            Route::get('/market_types', GetLenderMarketTypes::class);
+
             Route::get('/dropdown-list', LenderLiteList::class);
             Route::put('/{lender}/status', UpdateLenderStatus::class);
             Route::get('/{lender}/balance ', GetLenderBalance::class);

@@ -35,7 +35,7 @@ class LoginRequest extends FormRequest
         }
 
         $validationRules = [
-            'unique_name' => ['nullable', 'string',
+            'unique_name' => ['required', 'string',
                 Rule::exists('companies', 'unique_name')->where(function ($query) {
                     $query->where('type', CompanyType::Supplier);
                 }),

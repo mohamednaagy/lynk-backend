@@ -7,4 +7,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 interface BuildPaginatedCommodityTypeQuery
 {
     public function handle(): LengthAwarePaginator;
+
+    public function setStatus($status);
 }

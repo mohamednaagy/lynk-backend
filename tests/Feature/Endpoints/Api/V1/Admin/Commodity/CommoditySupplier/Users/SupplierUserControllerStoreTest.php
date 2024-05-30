@@ -6,7 +6,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
-use App\Models\CommoditySupplier;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,9 +18,9 @@ use Tests\Traits\InteractsWithUser;
 
 class SupplierUserControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCommoditySupplier;
+    use InteractsWithCommoditySupplier, InteractsWithUser, RefreshDatabase;
 
-    private static CommoditySupplier $supplier;
+    private static Supplier $supplier;
 
     private static User $userAdmin;
 
@@ -29,6 +29,8 @@ class SupplierUserControllerStoreTest extends TestCase
     private static array $userDetails;
 
     private static string $endpoint;
+
+    private static string $email;
 
     /**
      * @throws BindingResolutionException
@@ -46,13 +48,14 @@ class SupplierUserControllerStoreTest extends TestCase
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(self::$userManager, perm(Area::SuperAdmin, [Subject::CommoditySupplierUsers, Action::Create]));
         self::$endpoint = 'api/v1/admin/commodity-suppliers/'.self::$supplier->id.'/users';
+        self::$email = 'user'.rand(0, 9).'@lynk.sa';
         self::$userDetails = [
             'first_name' => 'first_name',
             'last_name' => 'last_name',
             'phone_number' => '500112233',
             'phone_country_code' => 'SA',
-            'email' => 'user@lynk.sa',
-            'redirect_url' => 'http://lynk.sa',
+            'email' => self::$email,
+            'redirect_url' => 'http://localhost:4200/complete-register',
             'role' => Role::SupplierAdmin,
         ];
     }
@@ -87,7 +90,15 @@ class SupplierUserControllerStoreTest extends TestCase
     public function test_auth_manager_user_can_store_supplier_user_with_valid_data_successfully(): void
     {
         $this->actingAs(self::$userManager)
-            ->postJson(self::$endpoint, self::$userDetails)
+            ->postJson(self::$endpoint, [
+                'first_name' => 'first_name',
+                'last_name' => 'last_name',
+                'phone_number' => '500212233',
+                'phone_country_code' => 'SA',
+                'email' => 'user'.rand(0, 9).'@lynk.sa',
+                'redirect_url' => 'http://localhost:4200/complete-register',
+                'role' => Role::SupplierApiAdmin,
+            ])
             ->assertOk()
             ->assertJsonStructure([
                 'data' => [
@@ -222,7 +233,7 @@ class SupplierUserControllerStoreTest extends TestCase
     public function test_auth_admin_user_cant_store_supplier_user_with_supplier_api_user_role(): void
     {
         $this->actingAs(self::$userAdmin)
-            ->postJson(self::$endpoint, array_merge(self::$userDetails, ['role' => Role::SupplierApiAdmin]))
+            ->postJson(self::$endpoint, array_merge(self::$userDetails, ['role' => Role::LenderApiUser]))
             ->assertUnprocessable()
             ->assertExactJson([
                 'message' => 'The selected role is invalid.',
@@ -238,7 +249,7 @@ class SupplierUserControllerStoreTest extends TestCase
     {
         User::factory()->create([
             'company_id' => self::$supplier->id,
-            'email' => 'user@bim.com',
+            'email' => self::$email,
         ]);
         $this->actingAs(self::$userAdmin)
             ->postJson(self::$endpoint, self::$userDetails)

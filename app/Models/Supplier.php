@@ -2,10 +2,28 @@
 
 namespace App\Models;
 
+use Database\Factories\SupplierFactory;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
 class Supplier extends Company
 {
+    protected static function newFactory(): Factory
+    {
+        return SupplierFactory::new();
+    }
+
     public function locations()
     {
         return $this->hasMany(SupplierLocation::class, 'company_id');
+    }
+
+    public function commodityItems()
+    {
+        return $this->hasMany(CommodityItem::class, 'company_id');
+    }
+
+    public function detail()
+    {
+        return $this->hasOne(CompanySupplierDetail::class, 'company_id');
     }
 }

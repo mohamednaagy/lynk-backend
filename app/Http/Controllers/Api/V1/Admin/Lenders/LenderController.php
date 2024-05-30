@@ -76,7 +76,6 @@ class LenderController extends Controller
         GetSettingsClassInstance $getSettingsClassInstance
     ): JsonResponse {
         $data = $request->validated();
-
         $data['order_cost_tiers'] = $this->unsetProrationAmounExceptForLastTier($data['order_cost_tiers']);
         $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers']);
 
@@ -103,6 +102,8 @@ class LenderController extends Controller
                     'notify_borrowers_about_order_updates',
                     'force_unique_reference_number',
                     'order_cost',
+                    'preferred_market_type',
+                    'preferred_commodity_types',
                 ])
                 ->respond();
         });
@@ -133,6 +134,8 @@ class LenderController extends Controller
                 'require_initiate_trade_request',
                 'trading_mode',
                 'contract_number',
+                'preferred_market_type',
+                'preferred_commodity_types',
             ])
             ->respond();
     }
