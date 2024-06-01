@@ -47,11 +47,11 @@ class LoginController extends Controller
             ]);
         }
 
-        if ($user->company->commoditySupplier->status->value != CommoitySupplierStatus::Active) {
-            throw ValidationException::withMessages([
-                'unique_name' => __('auth.inactive_supplier_status'),
-            ]);
-        }
+        // if ($user->company->commoditySupplier->status->value != CommoitySupplierStatus::Active) {
+        //     throw ValidationException::withMessages([
+        //         'unique_name' => __('auth.inactive_supplier_status'),
+        //     ]);
+        // }
 
         if ($otpCode = $sendOtp->handle($user, $request)) {
             return $this->successResponse([
