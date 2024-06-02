@@ -46,5 +46,13 @@ class CommoditySupplier
             Action::Create,
         ],
 
+        Subject::CommoditySupplierInventories => [
+            Action::Manage,
+            Action::Index,
+            Action::Show,
+            Action::Edit,
+            Action::Create,
+        ],
+
     ];
 }

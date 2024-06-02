@@ -72,4 +72,6 @@ final class Subject extends Enum
 
     const LocalMurabahaAreaSettings = 'LocalMurabahaAreaSettings';
 
+    const CommoditySupplierInventories = 'CommoditySupplierInventories';
+
 }
