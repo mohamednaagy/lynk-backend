@@ -17,7 +17,7 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
         })->paginate();
     }
 
-    public function setStatus($status)
+    public function setStatus($status = null)
     {
         $this->status = $status;
 

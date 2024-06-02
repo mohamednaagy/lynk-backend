@@ -9,6 +9,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Admin\Commodities\CommodityType\ListCommodityTypeRequest;
 use App\Http\Requests\V1\Admin\Commodities\CommodityType\StoreCommodityTypeRequest;
 use App\Http\Requests\V1\Admin\Commodities\CommodityType\UpdateCommodityTypeRequest;
 use App\Models\CommodityType;
@@ -43,10 +44,12 @@ class CommodityTypeController extends Controller
     }
 
     public function index(
+        ListCommodityTypeRequest $request,
         BuildPaginatedCommodityTypeQuery $buildPaginatedCommodityTypesQuery
     ): JsonResponse {
 
         $commidityTypes = $buildPaginatedCommodityTypesQuery
+            ->setStatus($request->status)
             ->handle();
 
         return fractal($commidityTypes, new CommodityTypeTransformer())
