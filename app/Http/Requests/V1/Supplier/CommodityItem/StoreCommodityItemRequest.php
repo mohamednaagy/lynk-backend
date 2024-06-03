@@ -35,7 +35,7 @@ class StoreCommodityItemRequest extends FormRequest
                 new CommodityItemUniqueNameRole(),
                 Rule::unique(CommodityItem::class, 'unique_name')->where('company_id', tenant()->id),
             ],
-            'name' => ['required', 'string',  'max:255'],
+            'name' => ['required', 'string',  'max:256'],
             'description' => ['nullable', 'string', 'max:512'],
             'commodity_type_id' => ['required', 'exists:commodity_types,id'],
             'max_price' => ['required', 'numeric', 'gt:0', 'gte:min_price'],
