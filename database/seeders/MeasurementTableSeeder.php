@@ -15,11 +15,17 @@ class MeasurementTableSeeder extends Seeder
     public function run()
     {
         $data = [
-            't' => 'Tons', 'kg' => 'Kilograms', 'g' => 'grams', 'm3' => 'Cubic Meters', 'ml' => 'Milliliters', 'pc' => 'Pieces',
+            't' => 'Tons',
+            'kg' => 'Kilograms',
+            'l' => 'Liters',
+            'g' => 'Grams',
+            'm3' => 'Cubic Meters',
+            'ml' => 'Milliliters',
+            'pc' => 'Pieces',
         ];
 
         foreach ($data as $key => $value) {
-            Measurement::create(['name' => $value, 'symbol' => $key]);
+            Measurement::firstOrCreate(['name' => $value, 'symbol' => $key]);
         }
     }
 }
