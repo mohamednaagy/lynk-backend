@@ -45,4 +45,11 @@ class UpdateCommodityItemRequest extends FormRequest
             'measurement_id' => ['required', 'exists:measurements,id'],
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'unique_name' => __('validation.unique_input'),
+        ];
+    }
 }
