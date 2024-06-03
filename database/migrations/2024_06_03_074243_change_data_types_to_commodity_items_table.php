@@ -28,7 +28,8 @@ return new class extends Migration
     public function down()
     {
         Schema::table('commodity_items', function (Blueprint $table) {
-            //
+            $table->string('name')->change();
+            $table->text('description')->nullable()->change();
         });
     }
 };
