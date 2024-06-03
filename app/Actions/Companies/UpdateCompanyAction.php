@@ -51,7 +51,7 @@ class UpdateCompanyAction implements UpdateCompany
             }
         }
 
-        if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {
+        if (isset($data['preferred_commodity_types'])) {
             $company->commodityTypes()->sync($data['preferred_commodity_types']);
         }
 

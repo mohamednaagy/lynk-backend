@@ -164,7 +164,7 @@ class UpdateCompanyRequest extends FormRequest
                 new EnumValue(CompanyMarketType::class, false),
             ],
 
-            'preferred_commodity_types ' => [
+            'preferred_commodity_types' => [
                 'nullable', 'array',
             ],
 
