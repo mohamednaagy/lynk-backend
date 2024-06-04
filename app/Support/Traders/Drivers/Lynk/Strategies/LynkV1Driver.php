@@ -38,7 +38,7 @@ class LynkV1Driver implements TraderInterface
         createTraderOrder as traitCreateTraderOrder;
     }
 
-    protected $provider = 'lynwk';
+    protected $provider = 'lynk';
 
     protected $version = 'v1';
 
