@@ -13,6 +13,8 @@ use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Http\Request;
 
+// TODO_LOCAL_MARKET need to review
+
 abstract class BaseLynkStrategy implements TraderStrategyInterface
 {
     use TraderHelperTrait;

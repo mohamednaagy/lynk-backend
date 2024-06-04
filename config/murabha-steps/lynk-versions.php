@@ -20,20 +20,10 @@ return [
         MurabhaStep::ContractSigned => [
             FinancingOrderHistory::ContractSigned => null,
         ],
-        MurabhaStep::ClientWakala => [
-            FinancingOrderHistory::WaitingClientWakala => null,
-            FinancingOrderHistory::ClientWakalaAccepted => null,
-        ],
         MurabhaStep::CommoditySoldToCustomer => [
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => null,
         ],
-        MurabhaStep::MurabhaOfferIssued => [
-            FinancingOrderHistory::IssueMurabahaOffer => null,
-            FinancingOrderHistory::GetMurabahaPurchaseOfferDocument => null,
-            FinancingOrderHistory::AttachMpoDocument => [
-                'collection' => TraderOrderMediaCollection::MurabahaPurchaseOrder,
-                'file' => 'document',
-            ],
+        MurabhaStep::CustomerDeliveryConfirmation => [
         ],
         MurabhaStep::MurabahaSaleCompleted => [
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
