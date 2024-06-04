@@ -66,6 +66,7 @@ class InventoryController extends Controller
                 'available_quantity',
                 'reserved_items',
                 'status',
+                'is_editable',
             ])
             ->respond();
     }
