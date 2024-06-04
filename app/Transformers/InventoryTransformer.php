@@ -23,6 +23,7 @@ class InventoryTransformer extends TransformerAbstract
         'available_quantity',
         'reserved_items',
         'status',
+        'is_editable',
 
     ];
 
@@ -127,6 +128,11 @@ class InventoryTransformer extends TransformerAbstract
             'unique_identifier' => $location->unique_identifier,
             'name' => $location->name,
         ]);
+    }
+
+    public function includeIsEditable(Inventory $inventory): Primitive
+    {
+        return $this->primitive($inventory->reserved_units == 0 ? true: false);
     }
     
 }
