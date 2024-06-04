@@ -53,7 +53,6 @@ class InventoryControllerIndexTest extends TestCase
             $this->createMeasurement()->id,
             $this->createCommodityType('type', 'test_item')->id,
         );
-        dd(self::$commodityItems);
         self::$supplierAdmin = $this->createSupplierUser(
             self::$supplier->id,
             Role::SupplierAdmin,
@@ -62,7 +61,7 @@ class InventoryControllerIndexTest extends TestCase
             ]
         );
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
-        self::$commodityItems = $this->getCommodityInventories(self::$supplier,self::$commodityItems, 5, true);
+        self::$commodityInventory = $this->getCommodityInventories(self::$supplier,self::$commodityItems, 5, true);
         
         self::$endpoint = 'api/v1/supplier/commodity-items/'.self::$commodityItems->id.'/inventory';
 
@@ -77,7 +76,7 @@ class InventoryControllerIndexTest extends TestCase
     {
         $this
             ->withHeader('X-Company', self::$supplier->id)
-            ->getJson($this->endpoint)
+            ->getJson(self::$endpoint)
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -90,7 +89,7 @@ class InventoryControllerIndexTest extends TestCase
         $this
             ->withHeader('X-Company', self::$supplier->id)
             ->actingAs(self::$supplierAdmin)
-            ->getJson($this->endpoint)
+            ->getJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson(
                 fractal(self::$commodityInventory, new InventoryTransformer())
@@ -120,7 +119,7 @@ class InventoryControllerIndexTest extends TestCase
     {
         $this->actingAs(self::$userManager)
             ->withHeader('X-Company', self::$supplier->id)
-            ->getJson($this->endpoint)
+            ->getJson(self::$endpoint)
             ->assertForbidden();
     }
 }
