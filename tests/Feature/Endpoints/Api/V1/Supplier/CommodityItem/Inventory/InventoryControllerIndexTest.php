@@ -31,7 +31,7 @@ class InventoryControllerIndexTest extends TestCase
 
     private static $supplier;
 
-    private $endpoint;
+    private static $endpoint;
 
     /**
      * @throws BindingResolutionException
@@ -53,7 +53,7 @@ class InventoryControllerIndexTest extends TestCase
             $this->createMeasurement()->id,
             $this->createCommodityType('type', 'test_item')->id,
         );
-
+        dd(self::$commodityItems);
         self::$supplierAdmin = $this->createSupplierUser(
             self::$supplier->id,
             Role::SupplierAdmin,
