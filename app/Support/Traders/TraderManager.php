@@ -10,7 +10,7 @@ use App\Support\Traders\Drivers\Dmcc\Strategies\DmccV1Driver;
 use App\Support\Traders\Drivers\Fake\Strategies\FakeV1Driver;
 use Illuminate\Support\Manager;
 
-class Lynk extends Manager
+class TraderManager extends Manager
 {
     public function driver($provider = null, $version = null)
     {
