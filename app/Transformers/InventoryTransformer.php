@@ -132,7 +132,7 @@ class InventoryTransformer extends TransformerAbstract
 
     public function includeIsEditable(Inventory $inventory): Primitive
     {
-        return $this->primitive($inventory->reserved_units == 0 ? true: false);
+        return $this->primitive($inventory->is_editable);
     }
     
 }

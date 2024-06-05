@@ -120,7 +120,7 @@ class InventoryController extends Controller
     public function update(CommodityItem $item, Inventory $inventory, UpdateInventoryRequest $updateInventoryRequest, UpdateCommodityInventory $updateCommodityInventory)
     {
         //double check if the inventory is editable
-        if ($inventory->reserved_items > 0)
+        if (! $inventory->is_editable)
             return $this->errorResponse(
                 __("error.inventory_cannot_be_updated"), 
                 Response::HTTP_BAD_REQUEST,

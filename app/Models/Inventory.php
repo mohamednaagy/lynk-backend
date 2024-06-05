@@ -58,4 +58,11 @@ class Inventory extends Model
     {
         return $this->available_quantity + $this->reserved_items;
     } 
+
+    public function getIsEditableAttribute(){
+        if ($this->reserved_items > 0)
+            return false;
+        else
+            return true;
+    }
 }
