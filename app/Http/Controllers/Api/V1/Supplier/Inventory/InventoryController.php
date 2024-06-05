@@ -148,5 +148,32 @@ class InventoryController extends Controller
             ])
             ->respond();
     }
+
+
+     /**
+     * Display the specified resource.
+     */
+    public function show(CommodityItem $item, Inventory $inventory): JsonResponse
+    {
+        return fractal($inventory, new InventoryTransformer())
+            ->parseIncludes([
+                'id',
+                'company_id',
+                'comapny_name',
+                'commodity_item_id',
+                'commodity_item',
+                'commodity_type',
+                'min_price',
+                'max_price',
+                'supplier_location_id',
+                'supplier_location',
+                'total_items',
+                'available_quantity',
+                'reserved_items',
+                'status',
+                'is_editable',
+            ])
+            ->respond();
+    }
     
 }
