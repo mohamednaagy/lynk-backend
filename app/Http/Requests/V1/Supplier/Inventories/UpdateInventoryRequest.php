@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\V1\Supplier\Inventories;
 
-use App\Models\SupplierLocation;
+use App\Models\Inventory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,15 +25,14 @@ class UpdateInventoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'unique_identifier' => [
-                'required',
-                'string',
-                'min:3',
-                'max:16',
-                Rule::unique(SupplierLocation::class, 'unique_identifier')->ignore($this->route('location')),
-            ],
-            'name' => ['required', 'string',  'max:32'],
-            'description' => ['nullable', 'string', 'max:256'],
+            'total_units' => ['required', 'integer', 'min:1'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'total_units.min' => 'This field requires a positive integer value greater than 0'
         ];
     }
 }
