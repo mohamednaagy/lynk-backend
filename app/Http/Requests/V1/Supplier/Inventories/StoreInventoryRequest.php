@@ -33,7 +33,7 @@ class StoreInventoryRequest extends FormRequest
                 Rule::unique(Inventory::class, 'id')->where('commodity_item_id', $this->item->id),
                 
             ],
-            'total_units' => ['required', 'numeric', 'min:1'],
+            'total_units' => ['required', 'integer', 'min:1'],
         ];
     }
 

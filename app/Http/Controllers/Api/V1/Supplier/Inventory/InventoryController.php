@@ -2,16 +2,22 @@
 
 namespace App\Http\Controllers\Api\V1\Supplier\Inventory;
 
+use App\Actions\Contracts\Commodities\CommodityLocation\UpdateCommodityInventory;
 use App\Actions\Contracts\Supplier\CommodityItem\Inventory\CreateCommodityInventory;
 use App\Actions\Contracts\Supplier\CommodityItem\Inventory\GetPaginatedCommodityInventories;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\ErrorCode;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Supplier\Inventories\StoreInventoryRequest;
+use App\Http\Requests\V1\Supplier\Inventories\UpdateInventoryRequest;
 use App\Models\CommodityItem;
+use App\Models\Inventory;
 use App\Transformers\InventoryTransformer;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+
 
 class InventoryController extends Controller
 {
@@ -104,5 +110,43 @@ class InventoryController extends Controller
             ->respond();
     }
 
+
+     /**
+     * Update the specified resource in storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(CommodityItem $item, Inventory $inventory, UpdateInventoryRequest $updateInventoryRequest, UpdateCommodityInventory $updateCommodityInventory)
+    {
+        //double check if the inventory is editable
+        if ($inventory->reserved_items > 0)
+            return $this->errorResponse(
+                __("error.inventory_cannot_be_updated"), 
+                Response::HTTP_BAD_REQUEST,
+                ErrorCode::INVENTORY_NOT_UPDATABLE
+            );
+            
+        $inventory = $updateCommodityInventory->handle($inventory, $updateInventoryRequest->validated());
+
+        return fractal($inventory, new InventoryTransformer())
+            ->parseIncludes([
+                'id',
+                'company_id',
+                'comapny_name',
+                'commodity_item_id',
+                'commodity_item',
+                'commodity_type',
+                'min_price',
+                'max_price',
+                'supplier_location_id',
+                'supplier_location',
+                'total_items',
+                'available_quantity',
+                'reserved_items',
+                'status',
+            ])
+            ->respond();
+    }
     
 }
