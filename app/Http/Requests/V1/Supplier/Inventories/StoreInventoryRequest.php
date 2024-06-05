@@ -30,7 +30,7 @@ class StoreInventoryRequest extends FormRequest
             'location_id' => [
                 'required',
                 Rule::exists(SupplierLocation::class, 'id')->where('company_id', Auth()->user()->company_id),
-                Rule::unique(Inventory::class, 'id')->where('commodity_item_id', $this->item->id),
+                Rule::unique(Inventory::class, 'supplier_location_id')->where('commodity_item_id', $this->item->id),
                 
             ],
             'total_units' => ['required', 'integer', 'min:1'],
