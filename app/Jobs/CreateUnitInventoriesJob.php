@@ -44,56 +44,53 @@ class CreateUnitInventoriesJob implements ShouldQueue
      */
     public function handle()
     {
-        // Log::alert('xxxx');
-        // echo 'xxxxx';
-        $numberOfUnits = $this->inventory->available_units/$this->volumeSellableUnits;
-        // $chunkSize = 1000;
-        // $totalChunks = ceil($numberOfUnits / $chunkSize);
-        // Log::info('starting chunk size');
-        // for ($i = 0; $i < $totalChunks; $i++) {
-        //     $start = $i * $chunkSize;
-        //     $end = min(($i + 1) * $chunkSize, $numberOfUnits);
-        //     $inventoryUnits = [];
+        $numberOfUnits = $this->inventory->available_quantity/$this->volumeSellableUnits;
+        $chunkSize = 1000;
+        $totalChunks = ceil($numberOfUnits / $chunkSize);
+        Log::info('starting chunk size');
+        for ($i = 0; $i < $totalChunks; $i++) {
+            $start = $i * $chunkSize;
+            $end = min(($i + 1) * $chunkSize, $numberOfUnits);
+            $inventoryUnits = [];
 
-        //     for ($j = $start; $j < $end; $j++) {
-        //         $qrCode = $this->type . $this->itemId . str_pad(mt_rand(10000, 99999), 6, '0', STR_PAD_LEFT);
-        //         Log::info($qrCode);
-        //         $inventoryUnits[] = [
-        //             'inventory_id' => $this->inventory->id,
-        //             'commodity_item_id' => $this->inventory->item->id,
-        //             'qr_code' => $qrCode,
-        //         ];
-        //     }
-        //     Log::error($inventoryUnits);
-        //     InventoryUnits::insert($inventoryUnits);
-        // }
+            for ($j = $start; $j < $end; $j++) {
+                $qrCode = $this->type . $this->itemId . str_pad(mt_rand(10000, 99999), 6, '0', STR_PAD_LEFT);
+                Log::info($qrCode);
+                $inventoryUnits[] = [
+                    'inventory_id' => $this->inventory->id,
+                    'commodity_item_id' => $this->inventory->item->id,
+                    'qr_code' => $qrCode,
+                ];
+            }
+            InventoryUnits::insert($inventoryUnits);
+        }
 
         $this->inventory->update([
             'status' => InventoryStatus::Active,
         ]);
 
-        $data = [];
-        for ($i = 0; $i < $numberOfUnits; $i++) {
-            $qrCode =  $qrCode = $this->type . $this->itemId . str_pad(mt_rand(10000, 99999), 6, '0', STR_PAD_LEFT);
-            $data [] = [
-                'inventory_id' => $this->inventory->id,
-                'commodity_item_id' => $this->inventory->item->id,
-                'qr_code' => $qrCode,
-            ];
-        }
-        DB::transaction(function() use ($data){
-            try {
+        // $data = [];
+        // for ($i = 0; $i < $numberOfUnits; $i++) {
+        //     $qrCode =  $qrCode = $this->type . $this->itemId . str_pad(mt_rand(10000, 99999), 6, '0', STR_PAD_LEFT);
+        //     $data [] = [
+        //         'inventory_id' => $this->inventory->id,
+        //         'commodity_item_id' => $this->inventory->item->id,
+        //         'qr_code' => $qrCode,
+        //     ];
+        // }
+        // DB::transaction(function() use ($data){
+        //     try {
         
-                InventoryUnits::insert($data);
-                $this->inventory->update([
-                    'status' => 'active',
-                ]);
+        //         InventoryUnits::insert($data);
+        //         $this->inventory->update([
+        //             'status' => 'active',
+        //         ]);
         
-            }
-            catch(Exception $e) {
-                return $e;
-            }
+        //     }
+        //     catch(Exception $e) {
+        //         return $e;
+        //     }
         
-        });
+        // });
     }
 }
