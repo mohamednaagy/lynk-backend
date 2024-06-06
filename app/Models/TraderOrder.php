@@ -122,7 +122,7 @@ class TraderOrder extends Model implements HasMedia
         $stepToHistoriesDictionary = trader_step_histories($this->provider, $this->version);
 
         if (! array_key_exists($step, $stepToHistoriesDictionary)) {
-            throw new UnexpectedValueException('No mapping for this step');
+            throw new UnexpectedValueException("No mapping for this step {$step}");
         }
 
         return (bool) $this->traderHistories()
