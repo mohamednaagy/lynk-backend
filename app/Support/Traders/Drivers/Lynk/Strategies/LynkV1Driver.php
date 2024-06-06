@@ -2,6 +2,8 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
+use App\Enums\FinancingOrderHistory;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\OrderCancellationStatus;
 use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderCancelReason;
@@ -10,8 +12,10 @@ use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Traits\TraderHelperTrait;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
@@ -42,6 +46,59 @@ class LynkV1Driver implements TraderInterface
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
         ]);
+    }
+
+    public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
+    {
+        try {
+            $this->withLocale('ar', function () use ($traderOrder) {
+                $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
+                $currentTimeInUtcTz = CarbonImmutable::now();
+                $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
+                $products = collect($traderOrder->products)->map(fn ($product) => LynkCommodityProductDto::fromArray($product));
+
+                $this->storeOrderDocumentAsPdf(
+                    'local-commodity-market.transfer-ownership-to-lender',
+                    [
+                        'order_id' => $traderOrder->order->id,
+                        'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products),
+                        'reference_number' => $traderOrder->id,
+                        'trader_order_reference' => $traderOrder->reference,
+                        'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
+                        'order_number' => $traderOrder->financing_order_id,
+                        'amount' => $amount,
+                        'previous_owner' => $products->map(
+                            fn ($item) => $item->getPreviousOwnerAsArray()
+                        )
+                            ->flatten()
+                            ->implode('،'),
+                        'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
+                        'date' => $currentTimeInRiyadhTz->toDateString(),
+                        'time' => $currentTimeInRiyadhTz->toTimeString(),
+                    ],
+                    $traderOrder,
+                    TraderOrderMediaCollection::TransferOwnershipToLender
+                );
+
+                $this->createTraderOrderHistory(
+                    $traderOrder,
+                    FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
+                    [
+                        'created_at' => $currentTimeInUtcTz,
+                    ]
+                );
+            });
+        } catch (\Throwable $exception) {
+            throw new TraderException(
+                'Failed to create lender ownership certificate',
+                [
+                    'trader_order_id' => $traderOrder->id,
+                    'provider' => $traderOrder->provider,
+                    'version' => $traderOrder->version,
+                ],
+                $exception
+            );
+        }
     }
 
     /**

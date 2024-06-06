@@ -112,6 +112,23 @@ trait TraderHelperTrait
         });
     }
 
+    public function transformProductsToLocalCommodityProductsDTO($products): Collection
+    {
+        return collect($products)->map(function ($product) {
+            return CommodityProductDto::fromArray([
+                'product' => $product['product'],
+                'type' => $product['type'],
+                'quantity' => $product['quantity'],
+                'unit_of_measurement' => $product['unit_of_measurement'],
+                'amount' => $product['amount'],
+                'location' => $product['location'],
+                'currency' => $product['currency'],
+                'original_supplier' => $product['original_supplier'],
+                'previous_owner' => $product['previous_owner'],
+            ]);
+        });
+    }
+
     public function getUnusedProductCode($provider)
     {
         $productCodes = TraderProduct::query()
