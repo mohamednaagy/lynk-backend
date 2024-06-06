@@ -737,24 +737,24 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
                 </p>
                 <p class="text-lg font-semibold text-center text-black">بيانات السلع/ـة</p>
-                    <table class="min-w-full mt-4">
-                        <tbody>
-                            @if (isset($trader_order_reference))
-                                <tr>
-                                    <td class="w-1/2 px-4 text-right border border-black">رقم الشهادة</td>
-                                    <td class="w-1/2 border border-black">{{ $trader_order_reference }}</td>
-                                </tr>
-                            @endif
+                <table class="min-w-full mt-4">
+                    <tbody>
+                        @if (isset($trader_order_reference))
                             <tr>
-                                <td class="w-1/2 px-4 text-right border border-black"> السلعة</td>
-                                <td class="w-1/2 px-4 text-right border border-black"> نوع السلعة</td>
-                                <td class="w-1/2 px-4 text-right border border-black"> الكمية</td>
-                                <td class="w-1/2 px-4 text-right border border-black"> قيمة السلعة</td>
-                                <td class="w-1/2 px-4 text-right border border-black"> المالك السابق</td>
-                                <td class="w-1/2 px-4 text-right border border-black"> المورد الأصلي</td>
-                                <td class="w-1/2 px-4 text-right border border-black"> مكان السلعة</td>
+                                <td class="w-1/2 px-4 text-right border border-black">رقم الشهادة</td>
+                                <td class="w-1/2 border border-black">{{ $trader_order_reference }}</td>
                             </tr>
-                            @foreach ($products ?? [] as $product)
+                        @endif
+                        <tr>
+                            <td class="w-1/2 px-4 text-right border border-black"> السلعة</td>
+                            <td class="w-1/2 px-4 text-right border border-black"> نوع السلعة</td>
+                            <td class="w-1/2 px-4 text-right border border-black"> الكمية</td>
+                            <td class="w-1/2 px-4 text-right border border-black"> قيمة السلعة</td>
+                            <td class="w-1/2 px-4 text-right border border-black"> المالك السابق</td>
+                            <td class="w-1/2 px-4 text-right border border-black"> المورد الأصلي</td>
+                            <td class="w-1/2 px-4 text-right border border-black"> مكان السلعة</td>
+                        </tr>
+                        @foreach ($products ?? [] as $product)
                             <tr>
                                 <td class="w-1/2 border border-black">{{ $product->getProduct() }}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getType() }}</td>
@@ -764,9 +764,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                                 <td class="w-1/2 border border-black">{{ $product->getOriginalSupplier() }}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getLocation() }}</td>
                             </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                        @endforeach
+                    </tbody>
+                </table>
                 <p class="text-lg text-center text-black">سيتم حفظ السلعة
 
                     ، بالنيابة عن {{ $company_name }}
@@ -788,8 +788,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </p>
 
                 <div class="flex justify-end">
-                    <img class="h-20" src="{{ asset('cradised-logo.png') }}" alt="">
-                </div>            </div>
+                    <img class="h-20" src="{{ asset('radised-logo.png') }}" alt="">
+                </div>
+            </div>
             <div class="flex flex-row justify-between pt-8 font-semibold">
                 <p class="text-right text-[11px] text-cyan-900">www.lynk.sa</p>
                 <p class="text-right text-[11px] text-cyan-900">الرمز البريدي 13522</p>
