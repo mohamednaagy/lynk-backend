@@ -13,10 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('order_has_inventories', function (Blueprint $table) {
+        Schema::create('local_market_order_has_inventories', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('order_id');
-            $table->foreign('order_id')->references('id')->on('orders');
+            $table->unsignedBigInteger('local_market_order_id');
+            $table->foreign('local_market_order_id')->references('id')->on('local_market_orders');
             $table->unsignedBigInteger('inventory_id');
             $table->foreign('inventory_id')->references('id')->on('inventories');
             $table->integer('quantity');
@@ -45,6 +45,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('order_has_inventories');
+        Schema::dropIfExists('local_market_order_has_inventories');
     }
 };

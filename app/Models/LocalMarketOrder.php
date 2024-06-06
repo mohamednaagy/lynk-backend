@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Order extends Model
+class LocalMarketOrder extends Model
 {
     use HasFactory;
 
@@ -21,6 +21,6 @@ class Order extends Model
 
     public function orderInventories()
     {
-        return $this->hasMany(OrderHasInventory::class, 'order_id');
+        return $this->hasMany(LocalMarketOrderHasInventory::class, 'local_market_order_id');
     }
 }

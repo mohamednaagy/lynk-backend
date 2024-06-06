@@ -5,7 +5,7 @@ namespace App\Enums;
 use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
 
-final class OrderStatus extends Enum implements LocalizedEnum
+final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
 {
     const InProgress = 1;
 

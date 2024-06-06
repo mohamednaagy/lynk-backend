@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class OrderHasInventory extends Model
+class LocalMarketOrderHasInventory extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'order_id',
+        'local_market_order_id',
         'inventory_id',
         'quantity',
         'price',

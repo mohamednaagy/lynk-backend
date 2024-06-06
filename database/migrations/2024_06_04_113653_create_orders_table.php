@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('local_market_orders', function (Blueprint $table) {
             $table->id();
             $table->string('source');
             $table->decimal('amount', 64, 0);
@@ -35,6 +35,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('local_market_orders');
     }
 };
