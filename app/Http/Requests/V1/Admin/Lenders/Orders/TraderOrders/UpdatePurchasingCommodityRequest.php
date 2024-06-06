@@ -49,7 +49,7 @@ class UpdatePurchasingCommodityRequest extends FormRequest
                 'products.*.product' => ['required', 'string'],
                 'products.*.type' => ['required', 'string'],
                 'products.*.quantity' => ['required', 'numeric'],
-                'products.*.unit_of_measurement' => ['required', 'string'],
+                'products.*.uom' => ['required', 'string'],
                 'products.*.amount' => ['required', 'numeric'],
                 'products.*.location' => ['required', 'string'],
                 'products.*.currency' => ['required', 'string'],

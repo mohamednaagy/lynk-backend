@@ -717,18 +717,26 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             <div class="py-8 space-y-6 text-base leading-7">
                 <p class="text-black">التاريخ: {{ $date ?? '' }}</p>
                 <p class="text-black">الوقت: {{ $time ?? '' }}</p>
-                <p class="text-xl text-center text-black">شهادة حيازة</p>
-                <p class="text-center text-black">نؤكد نحن لينك أن السلع المشار لها
-                    @if ($products->first()?->getWarehouse())
-                        في الموقع أدناه
-                    @endif
-                    ؛ في حيازتنا بالنيابة
-                    عن {{ $company_name }} من
-                    تاريخ وتوقيت هذه الشهادة، وقد تم شراؤها من {{ $previous_owner }} بناء على طلب الشركة مقابل مبلغ
-                    وقدره {{ $amount }} ريال سعودي
+                <p class="text-xl text-center text-black">شهادة ملكية و ضمان</p>
+                <p class="text-center text-black">
+                    استناداً إلى أحكام المادة (3/سادساً) من الاتفاقية الاطارية فيما بين المورد ولينك المؤرخة في
+                    {{ $financing_order->contract_number }}
+                    نفيدكم بأن السلعة التي جرى نقل ملكيتها من المورد إلى
+                    {{ $financing_order->company_id }} - {{ $financing_order->company->name }}
+                    بموجب أمر الشراء رقم
+                    {{ $financing_order->id }}
+                    وتاريخ
+                    {{ $date }}
+                    هي في ملك
+                    {{ $financing_order->company_id }} - {{ $financing_order->company->name }}
+                    ابتداءً من تاريخ {{ $date }} الساعة
+                    {{ $time }}
+                    مقابل مبلغ وقدره
+                    {{ $financing_order->amount }}
+                    ريال سعودي وتفاصيلها أدناه
+
                 </p>
                 <p class="text-lg font-semibold text-center text-black">بيانات السلع/ـة</p>
-                @foreach ($products ?? [] as $product)
                     <table class="min-w-full mt-4">
                         <tbody>
                             @if (isset($trader_order_reference))
@@ -738,39 +746,47 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                                 </tr>
                             @endif
                             <tr>
-                                <td class="w-1/2 px-4 text-right border border-black">نوع السلعة</td>
+                                <td class="w-1/2 px-4 text-right border border-black"> السلعة</td>
+                                <td class="w-1/2 px-4 text-right border border-black"> نوع السلعة</td>
+                                <td class="w-1/2 px-4 text-right border border-black"> الكمية</td>
+                                <td class="w-1/2 px-4 text-right border border-black"> قيمة السلعة</td>
+                                <td class="w-1/2 px-4 text-right border border-black"> المالك السابق</td>
+                                <td class="w-1/2 px-4 text-right border border-black"> المورد الأصلي</td>
+                                <td class="w-1/2 px-4 text-right border border-black"> مكان السلعة</td>
+                            </tr>
+                            @foreach ($products ?? [] as $product)
+                            <tr>
                                 <td class="w-1/2 border border-black">{{ $product->getProduct() }}</td>
+                                <td class="w-1/2 border border-black">{{ $product->getType() }}</td>
+                                <td class="w-1/2 border border-black">{{ $product->getQuantity() }}</td>
+                                <td class="w-1/2 border border-black">{{ $product->getAmount() }}</td>
+                                <td class="w-1/2 border border-black">{{ $product->getPreviousOwner() }}</td>
+                                <td class="w-1/2 border border-black">{{ $product->getOriginalSupplier() }}</td>
+                                <td class="w-1/2 border border-black">{{ $product->getLocation() }}</td>
                             </tr>
-                            <tr>
-                                <td class="w-1/2 px-4 text-right border border-black">الكمية</td>
-                                <td class="w-1/2 border border-black">{{ $product->getQuantity() }}
-                                    {{ $product->getUom() }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="w-1/2 px-4 text-right border border-black">قيمة السلعة</td>
-                                <td class="w-1/2 border border-black">{{ number_format((float) $product->getAmount(), 2) }} ريال سعودي</td>
-                            </tr>
-                            @if ($product->getWarehouse())
-                                <tr>
-                                    <td class="w-1/2 px-4 text-right border border-black">موقع السلعة</td>
-                                    <td class="w-1/2 border border-black">{{ $product->getWarehouse() }}</td>
-                                </tr>
-                            @endif
+                            @endforeach
                         </tbody>
                     </table>
-                @endforeach
                 <p class="text-lg text-center text-black">سيتم حفظ السلعة
-                    @if ($products->first()?->getWarehouse())
-                        بالموقع المشار له أعلاه
-                    @endif
+
                     ، بالنيابة عن {{ $company_name }}
                     إلى أن يتم إشعارنا بالتصرف.
                 </p>
-                <p class="text-lg text-center text-black">{{ $company_name }} سيكون مسؤولًا عن رسوم التخزين والحفظ إذا
-                    تم
-                    الاحتفاظ
-                    بـ\{{ $product_name }} لأكثر من يوم عمل</p>
+                <p class="text-lg text-center text-black">
+                    سيكون مسؤولا عن رسوم التخزين والحفظ إذا تم الإحتفاظ بالسلع المذكورة أعلاه لأكثر من
+                    <Settings> Default Contract Signing Timer value>
+                        ساعة.
+                        carriage return/new line
+                </p>
+                <p class="text-lg text-center text-black">
+                    استناداً إلى أحكام المادة (2/سادساً) من الاتفاقية الإطارية فيما بين المورد ولينك؛ تضمن لينك بأن
+                    السلعة التي جرى نقل ملكيتها من المورد إلى
+                    {{ $financing_order->company_id }} - {{ $financing_order->company->name }}
+                    بموجب أمر الشراء رقم
+                    {{ $financing_order->id }}
+                    .خالية من أي امتياز أو عبء، وأن المواد المستخدمة فيها مطابقة للمواصفات والمقاييس السعودية
+                </p>
+
                 <p class="pt-2 text-center text-black">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
             </div>
             <div class="flex flex-row justify-between pt-8 font-semibold">

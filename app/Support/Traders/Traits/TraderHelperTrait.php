@@ -8,6 +8,7 @@ use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\TraderProduct;
 use App\Support\DataTransferObjects\CommodityProductDto;
+use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -115,11 +116,11 @@ trait TraderHelperTrait
     public function transformProductsToLocalCommodityProductsDTO($products): Collection
     {
         return collect($products)->map(function ($product) {
-            return CommodityProductDto::fromArray([
+            return LynkCommodityProductDto::fromArray([
                 'product' => $product['product'],
                 'type' => $product['type'],
                 'quantity' => $product['quantity'],
-                'unit_of_measurement' => $product['unit_of_measurement'],
+                'uom' => $product['uom'],
                 'amount' => $product['amount'],
                 'location' => $product['location'],
                 'currency' => $product['currency'],

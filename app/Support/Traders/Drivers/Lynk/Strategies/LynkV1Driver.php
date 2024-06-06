@@ -75,6 +75,8 @@ class LynkV1Driver implements TraderInterface
                         'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
                         'date' => $currentTimeInRiyadhTz->toDateString(),
                         'time' => $currentTimeInRiyadhTz->toTimeString(),
+                        'trade_order' => $traderOrder,
+                        'financing_order' => $traderOrder->order,
                     ],
                     $traderOrder,
                     TraderOrderMediaCollection::TransferOwnershipToLender
@@ -89,6 +91,8 @@ class LynkV1Driver implements TraderInterface
                 );
             });
         } catch (\Throwable $exception) {
+
+            dd($exception->getMessage(), $exception->getTrace());
             throw new TraderException(
                 'Failed to create lender ownership certificate',
                 [

@@ -8,7 +8,7 @@ class LynkCommodityProductDto
         protected string $product,
         protected string $type,
         protected string $quantity,
-        protected string $unit_of_measurement,
+        protected string $uom,
         protected $amount,
         protected string $location,
         protected string $currency,
@@ -34,7 +34,7 @@ class LynkCommodityProductDto
 
     public function getUnitOfMeasurement(): string
     {
-        return $this->unit_of_measurement;
+        return $this->uom;
     }
 
     public function getAmount(): string
@@ -80,7 +80,7 @@ class LynkCommodityProductDto
             $data['product'],
             $data['type'],
             $data['quantity'],
-            $data['unit_of_measurement'] ?? '--',
+            $data['uom'] ?? '--',
             $data['amount'],
             $data['location'] ?? '',
             $data['currency'] ?? 'SAR',
@@ -95,7 +95,7 @@ class LynkCommodityProductDto
             'product' => $this->product,
             'type' => $this->type,
             'quantity' => $this->quantity,
-            'unit_of_measurement' => $this->unit_of_measurement,
+            'uom' => $this->uom,
             'amount' => $this->amount,
             'location' => $this->location,
             'currency' => $this->currency,
