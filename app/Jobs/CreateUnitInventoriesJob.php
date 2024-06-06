@@ -5,9 +5,7 @@ namespace App\Jobs;
 use App\Enums\InventoryStatus;
 use App\Models\Inventory;
 use App\Models\InventoryUnits;
-use Exception;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -20,8 +18,11 @@ class CreateUnitInventoriesJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $inventory;
+
     protected $type;
+
     protected $itemId;
+
     protected $volumeSellableUnits;
 
     /**
@@ -35,6 +36,7 @@ class CreateUnitInventoriesJob implements ShouldQueue
         $this->type = $type;
         $this->itemId = $itemId;
         $this->volumeSellableUnits = $volumeSellableUnits;
+
     }
 
     /**
@@ -44,53 +46,37 @@ class CreateUnitInventoriesJob implements ShouldQueue
      */
     public function handle()
     {
-        $numberOfUnits = $this->inventory->available_quantity/$this->volumeSellableUnits;
-        $chunkSize = 1000;
-        $totalChunks = ceil($numberOfUnits / $chunkSize);
-        Log::info('starting chunk size');
+        //        DB::transaction(function(){
+        //             try {
+        //        Log::channel('daily')->info(['sss inventory : '.$this->inventory , ' -    -  qunatity => ' . $this->inventory->available_quantity]);
+        //
+        ini_set('memory_limit', '-1');
+        $numberOfUnits = $this->inventory->available_quantity;
+        $chunkSize = 10000;
+        $totalChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
+        Log::info('total of chunks : '.$totalChunks);
         for ($i = 0; $i < $totalChunks; $i++) {
             $start = $i * $chunkSize;
             $end = min(($i + 1) * $chunkSize, $numberOfUnits);
             $inventoryUnits = [];
-
             for ($j = $start; $j < $end; $j++) {
-                $qrCode = $this->type . $this->itemId . str_pad(mt_rand(10000, 99999), 6, '0', STR_PAD_LEFT);
-                Log::info($qrCode);
+                $qrCode = $this->type.$this->itemId.str_pad(mt_rand(10000, 99999), 6, '0', STR_PAD_LEFT);
+
                 $inventoryUnits[] = [
                     'inventory_id' => $this->inventory->id,
                     'commodity_item_id' => $this->inventory->item->id,
                     'qr_code' => $qrCode,
                 ];
             }
-            InventoryUnits::insert($inventoryUnits);
-        }
 
+            Log::info('Processing chunk '.$i.' from '.$start.' to '.$end);
+            InventoryUnits::insert($inventoryUnits);
+            unset($inventoryUnits);
+
+        }
         $this->inventory->update([
             'status' => InventoryStatus::Active,
         ]);
 
-        // $data = [];
-        // for ($i = 0; $i < $numberOfUnits; $i++) {
-        //     $qrCode =  $qrCode = $this->type . $this->itemId . str_pad(mt_rand(10000, 99999), 6, '0', STR_PAD_LEFT);
-        //     $data [] = [
-        //         'inventory_id' => $this->inventory->id,
-        //         'commodity_item_id' => $this->inventory->item->id,
-        //         'qr_code' => $qrCode,
-        //     ];
-        // }
-        // DB::transaction(function() use ($data){
-        //     try {
-        
-        //         InventoryUnits::insert($data);
-        //         $this->inventory->update([
-        //             'status' => 'active',
-        //         ]);
-        
-        //     }
-        //     catch(Exception $e) {
-        //         return $e;
-        //     }
-        
-        // });
     }
 }
