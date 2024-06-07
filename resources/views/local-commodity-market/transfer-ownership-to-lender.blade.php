@@ -773,10 +773,11 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     إلى أن يتم إشعارنا بالتصرف.
                 </p>
                 <p class="text-lg text-center text-black">
-                    سيكون مسؤولا عن رسوم التخزين والحفظ إذا تم الإحتفاظ بالسلع المذكورة أعلاه لأكثر من
-                    <Settings> Default Contract Signing Timer value>
+                    {{ $company_name }} سيكون مسؤولا عن رسوم التخزين والحفظ إذا تم الإحتفاظ بالسلع المذكورة أعلاه لأكثر
+                    من
+                    <Settings> 48
                         ساعة.
-                        carriage return/new line
+
                 </p>
                 <p class="text-lg text-center text-black">
                     استناداً إلى أحكام المادة (2/سادساً) من الاتفاقية الإطارية فيما بين المورد ولينك؛ تضمن لينك بأن
@@ -788,7 +789,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </p>
 
                 <div class="flex justify-end">
-                    <img class="h-20" src="{{ asset('radised-logo.png') }}" alt="">
+                    <img src="{{ asset('radised-logo.png') }}" alt="">
                 </div>
             </div>
             <div class="flex flex-row justify-between pt-8 font-semibold">
