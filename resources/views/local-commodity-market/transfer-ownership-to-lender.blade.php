@@ -789,7 +789,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </p>
 
                 <div class="flex justify-end">
-                    <img class="h-25" src="{{ asset('radised-logo.png') }}" alt="">
+                    <img class="h-21" src="{{ asset('radised-logo.png') }}" alt="">
                 </div>
             </div>
             <div class="flex flex-row justify-between pt-8 font-semibold">
