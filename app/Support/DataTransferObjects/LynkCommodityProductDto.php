@@ -2,7 +2,9 @@
 
 namespace App\Support\DataTransferObjects;
 
-class LynkCommodityProductDto
+// TODO_LOCAL_MARKET refactor this class to make a base model with two child classes for lynk and bursam
+// double check create a new trader order and show order details
+class LynkCommodityProductDto extends CommodityProductDto
 {
     public function __construct(
         protected string $product,
@@ -13,7 +15,7 @@ class LynkCommodityProductDto
         protected string $location,
         protected string $currency,
         protected string $original_supplier,
-        protected string $previous_owner,
+        protected array|string $previous_owner,
     ) {
     }
 
@@ -57,7 +59,7 @@ class LynkCommodityProductDto
         return $this->original_supplier;
     }
 
-    public function getPreviousOwner(): string
+    public function getPreviousOwner(): string|array
     {
         return $this->previous_owner;
     }
