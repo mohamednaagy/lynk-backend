@@ -58,4 +58,20 @@ class Inventory extends Model
     {
         return $this->available_quantity + $this->reserved_items;
     } 
+
+    // Method to generate QR Code
+    public function generateQrCode()
+    {
+        $type = substr($this->item->commodity_type, 0, 2);
+        $itemId = substr($this->item->unique_name, 0, 2);
+        $lastInsertedId = self::getLastInsertedId();
+        $randomNumber = str_pad(mt_rand(1000000, 9999999), 6, '0', STR_PAD_LEFT);
+
+        return $type . $itemId . $lastInsertedId . $randomNumber;
+    }
+
+    public static function getLastInsertedId()
+    {
+        return static::latest('id')->first()->id + 1 ?? 1;
+    }
 }

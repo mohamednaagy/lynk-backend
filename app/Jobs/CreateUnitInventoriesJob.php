@@ -19,29 +19,23 @@ class CreateUnitInventoriesJob implements ShouldQueue
 
     protected $inventory;
 
-    protected $type;
-
-    protected $itemId;
-
-    protected $volumeSellableUnits;
-
     protected $startChunk;
 
     protected $endChunk;
+
+    protected $is_last_chunk;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(Inventory $inventory, $type, $itemId, $volumeSellableUnits, $startChunk, $endChunk)
+    public function __construct(Inventory $inventory, $startChunk, $endChunk, $is_last_chunk = false)
     {
         $this->inventory = $inventory;
-        $this->type = $type;
-        $this->itemId = $itemId;
-        $this->volumeSellableUnits = $volumeSellableUnits;
         $this->startChunk = $startChunk;
         $this->endChunk = $endChunk;
+        $this->is_last_chunk = $is_last_chunk;
     }
 
     /**
@@ -53,20 +47,21 @@ class CreateUnitInventoriesJob implements ShouldQueue
     {
         $inventoryUnits = [];           
         for ($j = $this->startChunk; $j < $this->endChunk; $j++) {
-            $qrCode = $this->type . $this->itemId . $j . str_pad(mt_rand(1000000, 9999999), 6, '0', STR_PAD_LEFT);
 
             $inventoryUnits[] = [
                 'inventory_id' => $this->inventory->id,
                 'commodity_item_id' => $this->inventory->item->id,
-                'qr_code' => $qrCode,
+                'qr_code' => $this->inventory->generateQrCode(),
             ];
         }
 
         InventoryUnits::insert($inventoryUnits);
         unset($inventoryUnits);
 
-        $this->inventory->update([
-            'status' => InventoryStatus::Active,
-        ]);
+        if ($this->is_last_chunk) {
+            $this->inventory->update([
+                'status' => InventoryStatus::Active,
+            ]);
+        }
     }
 }
