@@ -31,7 +31,7 @@ class StoreLocationRequest extends FormRequest
                 'string',
                 'min:3',
                 'max:16',
-                Rule::unique(SupplierLocation::class, 'unique_identifier')->where('company_id', Auth()->user()->company_id),
+                Rule::unique(SupplierLocation::class, 'unique_identifier')->where('company_id', tenant()->id),
             ],
             'name' => ['required', 'string',  'max:32'],
             'description' => ['nullable', 'string', 'max:256'],
