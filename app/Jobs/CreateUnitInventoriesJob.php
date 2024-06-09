@@ -25,18 +25,23 @@ class CreateUnitInventoriesJob implements ShouldQueue
 
     protected $volumeSellableUnits;
 
+    protected $startChunk;
+
+    protected $endChunk;
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(Inventory $inventory, $type, $itemId, $volumeSellableUnits)
+    public function __construct(Inventory $inventory, $type, $itemId, $volumeSellableUnits, $startChunk, $endChunk)
     {
         $this->inventory = $inventory;
         $this->type = $type;
         $this->itemId = $itemId;
         $this->volumeSellableUnits = $volumeSellableUnits;
-
+        $this->startChunk = $startChunk;
+        $this->endChunk = $endChunk;
     }
 
     /**
@@ -46,37 +51,22 @@ class CreateUnitInventoriesJob implements ShouldQueue
      */
     public function handle()
     {
-        //        DB::transaction(function(){
-        //             try {
-        //        Log::channel('daily')->info(['sss inventory : '.$this->inventory , ' -    -  qunatity => ' . $this->inventory->available_quantity]);
-        //
-        ini_set('memory_limit', '-1');
-        $numberOfUnits = $this->inventory->available_quantity;
-        $chunkSize = 10000;
-        $totalChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
-        Log::info('total of chunks : '.$totalChunks);
-        for ($i = 0; $i < $totalChunks; $i++) {
-            $start = $i * $chunkSize;
-            $end = min(($i + 1) * $chunkSize, $numberOfUnits);
-            $inventoryUnits = [];
-            for ($j = $start; $j < $end; $j++) {
-                $qrCode = $this->type.$this->itemId.str_pad(mt_rand(10000, 99999), 6, '0', STR_PAD_LEFT);
+        $inventoryUnits = [];           
+        for ($j = $this->startChunk; $j < $this->endChunk; $j++) {
+            $qrCode = $this->type . $this->itemId . $j . str_pad(mt_rand(1000000, 9999999), 6, '0', STR_PAD_LEFT);
 
-                $inventoryUnits[] = [
-                    'inventory_id' => $this->inventory->id,
-                    'commodity_item_id' => $this->inventory->item->id,
-                    'qr_code' => $qrCode,
-                ];
-            }
-
-            Log::info('Processing chunk '.$i.' from '.$start.' to '.$end);
-            InventoryUnits::insert($inventoryUnits);
-            unset($inventoryUnits);
-
+            $inventoryUnits[] = [
+                'inventory_id' => $this->inventory->id,
+                'commodity_item_id' => $this->inventory->item->id,
+                'qr_code' => $qrCode,
+            ];
         }
+
+        InventoryUnits::insert($inventoryUnits);
+        unset($inventoryUnits);
+
         $this->inventory->update([
             'status' => InventoryStatus::Active,
         ]);
-
     }
 }

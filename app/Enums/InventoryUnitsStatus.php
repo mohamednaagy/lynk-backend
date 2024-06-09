@@ -11,6 +11,6 @@ use BenSampo\Enum\Enum;
  */
 final class InventoryUnitsStatus extends Enum implements LocalizedEnum
 {
-    const Free      = 'FREE';
-    const Reserved  = 'RESERVED';
+    const Free      = '0';
+    const Reserved  = '1';
 }
