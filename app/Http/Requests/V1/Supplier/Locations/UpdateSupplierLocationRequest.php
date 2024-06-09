@@ -36,4 +36,11 @@ class UpdateSupplierLocationRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:256'],
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'unique_identifier.unique' => __('validation.unique_input'),
+        ];
+    }
 }
