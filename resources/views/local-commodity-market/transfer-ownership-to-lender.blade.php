@@ -722,13 +722,13 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     استناداً إلى أحكام المادة (3/سادساً) من الاتفاقية الاطارية فيما بين المورد ولينك المؤرخة في
                     {{ $financing_order->contract_number }}
                     نفيدكم بأن السلعة التي جرى نقل ملكيتها من المورد إلى
-                    {{ $financing_order->company_id }} - {{ $financing_order->company->name }}
+                    {{ $financing_order->company->name }}
                     بموجب أمر الشراء رقم
                     {{ $financing_order->id }}
                     وتاريخ
                     {{ $date }}
                     هي في ملك
-                    {{ $financing_order->company_id }} - {{ $financing_order->company->name }}
+                    {{ $financing_order->company->name }}
                     ابتداءً من تاريخ {{ $date }} الساعة
                     {{ $time }}
                     مقابل مبلغ وقدره
@@ -758,8 +758,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                             <tr>
                                 <td class="w-1/2 border border-black">{{ $product->getProduct() }}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getType() }}</td>
-                                <td class="w-1/2 border border-black">{{ $product->getQuantity() }}</td>
-                                <td class="w-1/2 border border-black">{{ $product->getAmount() }}</td>
+                                <td class="w-1/2 border border-black">{{ $product->getQuantity() }} {{$product->getUnitOfMeasurement()}}</td>
+                                <td class="w-1/2 border border-black">{{ $product->getAmount() }} {{$product->getCurrency()}}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getPreviousOwner() }}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getOriginalSupplier() }}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getLocation() }}</td>
@@ -782,7 +782,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 <p class="text-lg text-center text-black">
                     استناداً إلى أحكام المادة (2/سادساً) من الاتفاقية الإطارية فيما بين المورد ولينك؛ تضمن لينك بأن
                     السلعة التي جرى نقل ملكيتها من المورد إلى
-                    {{ $financing_order->company_id }} - {{ $financing_order->company->name }}
+                    {{ $financing_order->company->name }}
                     بموجب أمر الشراء رقم
                     {{ $financing_order->id }}
                     .خالية من أي امتياز أو عبء، وأن المواد المستخدمة فيها مطابقة للمواصفات والمقاييس السعودية
