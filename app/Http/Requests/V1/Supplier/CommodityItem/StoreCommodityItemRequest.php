@@ -49,7 +49,7 @@ class StoreCommodityItemRequest extends FormRequest
     public function messages()
     {
         return [
-            'unique_name' => __('validation.unique_input'),
+            'unique_name.unique' => __('validation.unique_input'),
         ];
     }
 }
