@@ -66,6 +66,7 @@ return [
         'lender' => env('LENDER_URL', 'http://localhost:4200'),
         'trader' => env('TRADER_URL', 'http://localhost:4200'),
         'admin' => env('ADMIN_URL', 'http://localhost:4200'),
+        'supplier' => env('SUPPLIER_URL', 'http://localhost:4200'),
     ],
 
     /*
