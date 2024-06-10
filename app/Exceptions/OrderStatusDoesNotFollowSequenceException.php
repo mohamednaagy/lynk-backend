@@ -13,7 +13,6 @@ class OrderStatusDoesNotFollowSequenceException extends Exception
     {
         $message = __('error.order_status_doesnt_follow_sequence');
         $code = Response::HTTP_BAD_REQUEST;
-
         if ($request->expectsJson()) {
             return response()->errorResponse(
                 $message,
