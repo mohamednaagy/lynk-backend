@@ -11,9 +11,9 @@ use BenSampo\Enum\Enum;
  */
 final class InventoryStatus extends Enum implements LocalizedEnum
 {
-    const Pending = 'PENDING';
+    const Pending = '0';
 
-    const Active = 'ACTIVE';
+    const Active = '1';
 
-    const Inactive = 'INACTIVE';
+    const Inactive = '2';
 }
