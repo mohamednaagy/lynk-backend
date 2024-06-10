@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'unique_input' => 'هذا القيمه متواجده بالفعل',
     'accepted' => 'يجب قبول :attribute.',
     'accepted_if' => 'يجب قبول :attribute في حالة :other يساوي :value.',
     'active_url' => 'حقل :attribute لا يُمثّل رابطًا صحيحًا.',
