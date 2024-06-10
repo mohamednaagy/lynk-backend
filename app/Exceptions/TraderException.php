@@ -21,7 +21,6 @@ class TraderException extends Exception
 
     public function formatMessage($message, $context)
     {
-        dd($message, $context);
         $messageParts = array_filter([
             'TRADER_ERROR',
             $context['provider'] ?? null,
