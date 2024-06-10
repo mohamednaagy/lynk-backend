@@ -5,6 +5,7 @@ namespace App\Actions\Supplier\CommodityItem;
 use App\Actions\Contracts\Supplier\CommodityItem\UpdateCommodityItem;
 use App\Models\CommodityItem;
 use App\Models\Company;
+use App\Models\Inventory;
 use App\Models\Supplier;
 use Illuminate\Support\Arr;
 
@@ -32,6 +33,7 @@ class UpdateCommodityItemAction implements UpdateCommodityItem
                 ]
             )
         );
+        
 
         return $item;
     }
