@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1\Auth;
 
+use App\Enums\CompanyType;
 use App\Enums\Role;
 use App\Http\Middleware\EnsureFrontendRequestsAreStatefulWithoutCookie;
 use App\Models\Company;
@@ -39,7 +40,7 @@ class LoginRequest extends FormRequest
         }
 
         $validationRules = [
-            'unique_name' => ['nullable', 'string', Rule::exists(Company::class, 'unique_name')],
+            'unique_name' => ['nullable', 'string', Rule::exists(Company::class, 'unique_name')->where('type', CompanyType::Lender)],
             'email' => ['required', 'string', 'email:filter'],
             'password' => ['required', 'string'],
             'source' => ['required', 'string'],

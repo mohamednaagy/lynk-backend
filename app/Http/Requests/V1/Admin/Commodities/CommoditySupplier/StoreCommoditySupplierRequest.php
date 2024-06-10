@@ -4,7 +4,8 @@ namespace App\Http\Requests\V1\Admin\Commodities\CommoditySupplier;
 
 use App\Enums\CommoitySupplierMarketType;
 use App\Enums\CommoitySupplierStatus;
-use App\Models\CommoditySupplier;
+use App\Enums\CompanyType;
+use App\Models\Company;
 use App\Rules\CommodityUniqueNameRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
@@ -35,7 +36,7 @@ class StoreCommoditySupplierRequest extends FormRequest
                 'string',
                 'min:3',
                 'max:64',
-                Rule::unique(CommoditySupplier::class, 'legal_name'),
+                Rule::unique(Company::class, 'name')->where('type', CompanyType::Supplier),
             ],
 
             'description' => [
@@ -50,7 +51,7 @@ class StoreCommoditySupplierRequest extends FormRequest
                 'string',
                 'min:3',
                 new CommodityUniqueNameRule(),
-                Rule::unique(CommoditySupplier::class, 'unique_name'),
+                Rule::unique(Company::class, 'unique_name')->where('type', CompanyType::Supplier),
 
             ],
             'status' => ['required',  new EnumValue(CommoitySupplierStatus::class)],

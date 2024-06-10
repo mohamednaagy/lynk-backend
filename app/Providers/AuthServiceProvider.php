@@ -14,6 +14,7 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Sanctum\Sanctum;
+use Modules\Grantify\Support\Areas\CommoditySupplier;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AuthServiceProvider extends ServiceProvider
@@ -52,6 +53,7 @@ class AuthServiceProvider extends ServiceProvider
                 RouteArea::Admin => $user->hasRole([Role::Admin]) ?: null,
                 RouteArea::Lender => $user->hasRole([Role::LenderAdmin, Role::LenderApiUser]) ?: null,
                 RouteArea::Trader => $user->hasRole([Role::TraderAdmin]) ?: null,
+                RouteArea::Supplier => $user->hasRole([Role::SupplierAdmin, Role::SupplierApiAdmin]) ?: null,
                 default => null
             };
         });

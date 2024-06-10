@@ -130,4 +130,14 @@ class Company extends BaseTenant
                 ->limit(1),
         ]);
     }
+
+    public function commoditySupplier()
+    {
+        return $this->hasOne(CompanySupplierDetail::class, 'company_id');
+    }
+
+    public function supplier()
+    {
+        return $this->hasOne(Supplier::class, 'id');
+    }
 }

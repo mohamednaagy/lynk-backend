@@ -6,9 +6,10 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\CommoitySupplierMarketType;
 use App\Enums\CommoitySupplierStatus;
+use App\Enums\CompanyType;
 use App\Enums\Role;
 use App\Enums\Subject;
-use App\Models\CommoditySupplier;
+use App\Models\Company;
 use App\Models\User;
 use App\Transformers\CommoditySuppliersTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -113,7 +114,7 @@ class CommoditySupplierControllerStoreTest extends TestCase
             ->postJson($this->endpoint, self::$commoditySuppllier)
             ->assertOk()
             ->assertExactJson(
-                fractal(CommoditySupplier::latest()->first(), new CommoditySuppliersTransformer())
+                fractal(Company::where('type', CompanyType::Supplier)->latest()->first(), new CommoditySuppliersTransformer())
                     ->parseIncludes([
                         'id',
                         'legal_name',

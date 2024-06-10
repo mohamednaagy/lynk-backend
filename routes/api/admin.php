@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\ResendAdminInvitation;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierController;
+use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierUserController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypeController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
@@ -173,6 +174,11 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::get('media/{media}/download', DownloadMedia::class);
 
         Route::post('/upload-image', [UploadImage::class, 'store']);
+
+        Route::prefix('commodity-suppliers')->group(function () {
+            Route::post('{supplier}/users', [CommoditySupplierUserController::class, 'store']);
+            Route::get('{supplier}/users', [CommoditySupplierUserController::class, 'index']);
+        });
     });
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.sign-up');
