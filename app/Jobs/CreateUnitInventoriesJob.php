@@ -12,6 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Ramsey\Uuid\Uuid;
 
 class CreateUnitInventoriesJob implements ShouldQueue
 {
@@ -19,9 +20,7 @@ class CreateUnitInventoriesJob implements ShouldQueue
 
     protected $inventory;
 
-    protected $startChunk;
-
-    protected $endChunk;
+    protected $chunkSize;
 
     protected $is_last_chunk;
 
@@ -30,11 +29,10 @@ class CreateUnitInventoriesJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(Inventory $inventory, $startChunk, $endChunk, $is_last_chunk = false)
+    public function __construct(Inventory $inventory, $chunkSize, $is_last_chunk = false)
     {
         $this->inventory = $inventory;
-        $this->startChunk = $startChunk;
-        $this->endChunk = $endChunk;
+        $this->chunkSize = $chunkSize;
         $this->is_last_chunk = $is_last_chunk;
     }
 
@@ -45,20 +43,22 @@ class CreateUnitInventoriesJob implements ShouldQueue
      */
     public function handle()
     {
-        $inventoryUnits = [];           
-        for ($j = $this->startChunk; $j < $this->endChunk; $j++) {
-
+        $inventoryUnits = [];   
+        $baseName = $this->inventory->generateQrCode();        
+        for ($j = 0; $j < $this->chunkSize; $j++) {
+            $randomNumber = str_pad(mt_rand(10000, 99999), 5, '0', STR_PAD_LEFT);
+            $uuid = Uuid::uuid4()->toString();
+            $time = time();
             $inventoryUnits[] = [
                 'inventory_id' => $this->inventory->id,
                 'commodity_item_id' => $this->inventory->item->id,
-                'qr_code' => $this->inventory->generateQrCode(),
+                'qr_code' => $baseName .'-'. $randomNumber .'-'. $uuid . '-' . $time,
             ];
         }
 
         InventoryUnits::insert($inventoryUnits);
         unset($inventoryUnits);
-
-        if ($this->is_last_chunk) {
+        if ($this->is_last_chunk && $this->inventory->CountOfUnits() == $this->inventory->available_quantity) {
             $this->inventory->update([
                 'status' => InventoryStatus::Active,
             ]);

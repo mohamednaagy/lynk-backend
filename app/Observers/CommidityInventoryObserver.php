@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Jobs\CreateUnitInventoriesJob;
 use App\Models\Inventory;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CommidityInventoryObserver
 {
@@ -34,13 +35,11 @@ class CommidityInventoryObserver
         DB::transaction(function () use ($inventory) {
             try {
                 $numberOfUnits = $inventory->available_quantity;
-                $chunkSize = 20000;
+                $chunkSize = ($numberOfUnits <= 20000) ? $numberOfUnits : 20000;
                 $totalChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
                 for ($i = 0; $i < $totalChunks; $i++) {
-                    $start = $i * $chunkSize;
-                    $end = min(($i + 1) * $chunkSize, $numberOfUnits);
-                    ($end == $numberOfUnits) ? $is_last_chunk = true : $is_last_chunk= false; 
-                    CreateUnitInventoriesJob::dispatch($inventory, $start, $end, $is_last_chunk)->onQueue('unit-inventory');
+                    ($i == $totalChunks-1) ? $is_last_chunk = true : $is_last_chunk= false; 
+                    CreateUnitInventoriesJob::dispatch($inventory, $chunkSize, $is_last_chunk)->onQueue('unit-inventory');
                 }
             } catch (\Exception $e) {
                 DB::rollBack();

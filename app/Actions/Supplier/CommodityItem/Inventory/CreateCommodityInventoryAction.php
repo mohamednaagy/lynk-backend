@@ -3,6 +3,7 @@
 namespace App\Actions\Supplier\CommodityItem\Inventory;
 
 use App\Actions\Contracts\Supplier\CommodityItem\Inventory\CreateCommodityInventory;
+use App\Enums\InventoryStatus;
 use App\Models\CommodityItem;
 use App\Models\Company;
 use App\Models\Inventory;
@@ -27,7 +28,7 @@ class CreateCommodityInventoryAction implements CreateCommodityInventory
                 'max_price'             => $this->item->max_price,
                 'reserved_items'        => 0,
                 'available_quantity'    => $data['total_units'],
-                'status'                => 'PENDING',
+                'status'                => InventoryStatus::Pending,
             ]
         );
 
