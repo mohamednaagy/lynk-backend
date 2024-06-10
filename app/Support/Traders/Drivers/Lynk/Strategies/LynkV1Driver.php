@@ -16,6 +16,7 @@ use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
@@ -91,8 +92,6 @@ class LynkV1Driver implements TraderInterface
                 );
             });
         } catch (\Throwable $exception) {
-
-            dd($exception->getMessage(), $exception->getTrace());
             throw new TraderException(
                 'Failed to create lender ownership certificate',
                 [
@@ -114,7 +113,56 @@ class LynkV1Driver implements TraderInterface
     }
 
     public function createSellingCommodityToCustomerDocument(TraderOrder $traderOrder)
-    {        // TODO_LOCAL_MARKET need to implement
+    {
+        try {
+            $this->withLocale('ar', function () use ($traderOrder) {
+                $dateTime = $traderOrder->traderHistories()
+                    ->where('action', FinancingOrderHistory::ContractSigned)
+                    ->first()
+                    ?->created_at;
+                $currentTimeInUtcTz = CarbonImmutable::parse($dateTime);
+                $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
+                $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal(sperator: ',');
+
+                $customerName = $traderOrder->order->customer_name;
+
+                $this->storeOrderDocumentAsPdf(
+                    'local-commodity-market.selling-commodity-to-customer',
+                    [
+                        'reference_number' => $traderOrder->id,
+                        'trader_order_reference' => $traderOrder->reference,
+                        'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
+                        'order_number' => $traderOrder->financing_order_id,
+                        'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products),
+                        'amount' => $amount,
+                        'customer_name' => $customerName,
+                        'contract_signed_date' => $currentTimeInRiyadhTz->toDateString(),
+                        'contract_signed_time' => $currentTimeInRiyadhTz->toTimeString(),
+                    ],
+                    $traderOrder,
+                    TraderOrderMediaCollection::SellingCommodityToCustomer,
+                );
+
+                $this->createTraderOrderHistory(
+                    $traderOrder,
+                    FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+                    [
+                        'created_at' => $currentTimeInUtcTz,
+                    ]
+                );
+            });
+        } catch (Exception $exception) {
+            dd($exception->getMessage());
+            throw new TraderException(
+                'Failed to create customer ownership document',
+                [
+                    'trader_order_id' => $traderOrder->id,
+                    'provider' => $traderOrder->provider,
+                    'version' => $traderOrder->version,
+                ],
+                $exception
+            );
+        }
 
     }
 
