@@ -43,8 +43,8 @@ class CreateUnitInventoriesJob implements ShouldQueue
      */
     public function handle()
     {
-        $inventoryUnits = [];   
-        $baseName = $this->inventory->generateQrCode();        
+        $inventoryUnits = [];
+        $baseName = $this->inventory->generateQrCode();
         for ($j = 0; $j < $this->chunkSize; $j++) {
             $randomNumber = str_pad(mt_rand(10000, 99999), 5, '0', STR_PAD_LEFT);
             $uuid = Uuid::uuid4()->toString();
@@ -52,16 +52,52 @@ class CreateUnitInventoriesJob implements ShouldQueue
             $inventoryUnits[] = [
                 'inventory_id' => $this->inventory->id,
                 'commodity_item_id' => $this->inventory->item->id,
-                'qr_code' => $baseName .'-'. $randomNumber .'-'. $uuid . '-' . $time,
+                'qr_code' => $baseName . '-' . $randomNumber . '-' . $uuid . '-' . $time,
             ];
         }
 
         InventoryUnits::insert($inventoryUnits);
-        unset($inventoryUnits);
-        if ($this->is_last_chunk && $this->inventory->CountOfUnits() == $this->inventory->available_quantity) {
-            $this->inventory->update([
-                'status' => InventoryStatus::Active,
-            ]);
+
+        if ($this->is_last_chunk) {
+            $totalUnitsCreated = $this->inventory->CountOfUnits();
+            $availableQuantity = $this->inventory->available_quantity;
+
+            if ($totalUnitsCreated < $availableQuantity) {
+                $missingUnits = $availableQuantity - $totalUnitsCreated;
+                $this->createMissingUnits($missingUnits);
+            }
+
+            // Update the inventory status to active if the unit count matches
+            if ($this->inventory->CountOfUnits() == $this->inventory->available_quantity) {
+                $this->inventory->update([
+                    'status' => InventoryStatus::Active,
+                ]);
+            }
         }
+
+        unset($inventoryUnits);
+        // if ($this->is_last_chunk && $this->inventory->CountOfUnits() == $this->inventory->available_quantity) {
+        //     $this->inventory->update([
+        //         'status' => InventoryStatus::Active,
+        //     ]);
+        // }
+    }
+
+    private function createMissingUnits($missingUnits)
+    {
+        $inventoryUnits = [];
+        $baseName = $this->inventory->generateQrCode();
+        for ($j = 0; $j < $missingUnits; $j++) {
+            $randomNumber = str_pad(mt_rand(10000, 99999), 5, '0', STR_PAD_LEFT);
+            $uuid = Uuid::uuid4()->toString();
+            $time = time();
+            $inventoryUnits[] = [
+                'inventory_id' => $this->inventory->id,
+                'commodity_item_id' => $this->inventory->item->id,
+                'qr_code' => $baseName . '-' . $randomNumber . '-' . $uuid . '-' . $time,
+            ];
+        }
+
+        InventoryUnits::insert($inventoryUnits);
     }
 }

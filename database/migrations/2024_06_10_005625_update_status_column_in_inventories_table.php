@@ -16,7 +16,7 @@ return new class extends Migration
     {
         Schema::table('inventories', function (Blueprint $table) {
             // Change the default value of the status column
-            $table->string('status')->default(InventoryStatus::Pending)->comment('PENDING=>0|ACTIVE=>1|INACTIVE=>2')->change();
+            $table->string('status')->default(InventoryStatus::Pending)->comment(InventoryStatus::Pending.'|'.InventoryStatus::Active.'|'.InventoryStatus::Inactive)->change();
 
         });
     }
@@ -30,7 +30,7 @@ return new class extends Migration
     {
         Schema::table('inventories', function (Blueprint $table) {
             // Revert the status column back to its original state
-            $table->string('status')->default('PENDING')->comment('PENDING|ACTIVE|INACTIVE')->change();
+            $table->string('status')->default(InventoryStatus::Pending)->comment(InventoryStatus::Pending.'|'.InventoryStatus::Active.'|'.InventoryStatus::Inactive)->change();
 
         });
     }
