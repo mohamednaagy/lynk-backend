@@ -38,7 +38,7 @@ class CommidityInventoryObserver
                 $chunkSize = ($numberOfUnits <= 20000) ? $numberOfUnits : 20000;
                 $totalChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
                 for ($i = 0; $i < $totalChunks; $i++) {
-                    ($i == $totalChunks-1) ? $is_last_chunk = true : $is_last_chunk= false; 
+                    $is_last_chunk = ($i == $totalChunks-1);
                     CreateUnitInventoriesJob::dispatch($inventory, $chunkSize, $is_last_chunk)->onQueue('unit-inventory');
                 }
             } catch (\Exception $e) {

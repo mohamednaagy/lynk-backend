@@ -59,8 +59,8 @@ class Inventory extends Model
         return $this->available_quantity + $this->reserved_items;
     } 
 
-    // Method to generate QR Code
-    public function generateQrCode()
+    // Method to generate QR Code Base Name
+    public function generateQrCodeBaseName()
     {
         $type = substr($this->type->unique_name, 0, 2);
         $itemId = substr($this->item->unique_name, 0, 2);

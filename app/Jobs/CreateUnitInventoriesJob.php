@@ -44,7 +44,7 @@ class CreateUnitInventoriesJob implements ShouldQueue
     public function handle()
     {
         $inventoryUnits = [];
-        $baseName = $this->inventory->generateQrCode();
+        $baseName = $this->inventory->generateQrCodeBaseName();
         for ($j = 0; $j < $this->chunkSize; $j++) {
             $randomNumber = str_pad(mt_rand(10000, 99999), 5, '0', STR_PAD_LEFT);
             $uuid = Uuid::uuid4()->toString();
@@ -76,17 +76,12 @@ class CreateUnitInventoriesJob implements ShouldQueue
         }
 
         unset($inventoryUnits);
-        // if ($this->is_last_chunk && $this->inventory->CountOfUnits() == $this->inventory->available_quantity) {
-        //     $this->inventory->update([
-        //         'status' => InventoryStatus::Active,
-        //     ]);
-        // }
     }
 
     private function createMissingUnits($missingUnits)
     {
         $inventoryUnits = [];
-        $baseName = $this->inventory->generateQrCode();
+        $baseName = $this->inventory->generateQrCodeBaseName();
         for ($j = 0; $j < $missingUnits; $j++) {
             $randomNumber = str_pad(mt_rand(10000, 99999), 5, '0', STR_PAD_LEFT);
             $uuid = Uuid::uuid4()->toString();
