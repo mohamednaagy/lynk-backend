@@ -111,22 +111,13 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
 
     protected function sellCommodityToCustomer($traderOrder, $request)
     {
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
+
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
 
-        if ($request->boolean('automatically_generate_file')) {
-            $trader->createSellingCommodityToCustomerDocument($traderOrder);
-        } else {
-            $traderOrder->addMediaFromBase64(
-                base64_encode(file_get_contents($request->file('document')))
-            )
-                ->usingFileName("client-certificate-{$traderOrder->id}.pdf")
-                ->toMediaCollection(TraderOrderMediaCollection::SellingCommodityToCustomer);
-
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
-        }
+        $trader->createSellingCommodityToCustomerDocument($traderOrder);
 
         // automatic complete the order
-
         $this->updateMurabhaCompleteDocument($traderOrder, $request);
     }
 }
