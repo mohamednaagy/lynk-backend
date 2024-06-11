@@ -46,13 +46,11 @@ class CreateUnitInventoriesJob implements ShouldQueue
         $inventoryUnits = [];
         $baseName = $this->inventory->generateQrCodeBaseName();
         for ($j = 0; $j < $this->chunkSize; $j++) {
-            $randomNumber = str_pad(mt_rand(10000, 99999), 5, '0', STR_PAD_LEFT);
             $uuid = Uuid::uuid4()->toString();
-            $time = time();
             $inventoryUnits[] = [
                 'inventory_id' => $this->inventory->id,
                 'commodity_item_id' => $this->inventory->item->id,
-                'qr_code' => $baseName . '-' . $randomNumber . '-' . $uuid . '-' . $time,
+                'qr_code' => $baseName . '-' . $uuid ,
             ];
         }
 
@@ -64,7 +62,7 @@ class CreateUnitInventoriesJob implements ShouldQueue
 
             if ($totalUnitsCreated < $availableQuantity) {
                 $missingUnits = $availableQuantity - $totalUnitsCreated;
-                $this->createMissingUnits($missingUnits);
+                CreateUnitInventoriesJob::dispatch($this->inventory, $missingUnits, true)->onQueue('unit-inventory');
             }
 
             // Update the inventory status to active if the unit count matches
@@ -76,23 +74,5 @@ class CreateUnitInventoriesJob implements ShouldQueue
         }
 
         unset($inventoryUnits);
-    }
-
-    private function createMissingUnits($missingUnits)
-    {
-        $inventoryUnits = [];
-        $baseName = $this->inventory->generateQrCodeBaseName();
-        for ($j = 0; $j < $missingUnits; $j++) {
-            $randomNumber = str_pad(mt_rand(10000, 99999), 5, '0', STR_PAD_LEFT);
-            $uuid = Uuid::uuid4()->toString();
-            $time = time();
-            $inventoryUnits[] = [
-                'inventory_id' => $this->inventory->id,
-                'commodity_item_id' => $this->inventory->item->id,
-                'qr_code' => $baseName . '-' . $randomNumber . '-' . $uuid . '-' . $time,
-            ];
-        }
-
-        InventoryUnits::insert($inventoryUnits);
     }
 }
