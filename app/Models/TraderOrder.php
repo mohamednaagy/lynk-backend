@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader as EnumsTrader;
+use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -217,5 +219,14 @@ class TraderOrder extends Model implements HasMedia
     public function isCommodityPurchased(): bool
     {
         return $this->checkOrderStepComplete(MurabhaStep::PurchasingCommodity);
+    }
+
+    public function isNeedToGenerateWakalaDocument()
+    {
+        if ($this->trader == EnumsTrader::Lynk && $this->mode = TraderOrderMode::Manual) {
+            return false;
+        }
+
+        return ! $this->hasMedia(TraderOrderMediaCollection::ClientWakala);
     }
 }

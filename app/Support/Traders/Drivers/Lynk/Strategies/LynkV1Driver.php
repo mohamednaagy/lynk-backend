@@ -150,9 +150,15 @@ class LynkV1Driver implements TraderInterface
                         'created_at' => $currentTimeInUtcTz,
                     ]
                 );
+                $this->createTraderOrderHistory(
+                    $traderOrder,
+                    FinancingOrderHistory::InitialCustomerDeliveryConfirmation,
+                    [
+                        'created_at' => $currentTimeInUtcTz,
+                    ]
+                );
             });
         } catch (Exception $exception) {
-            dd($exception->getMessage());
             throw new TraderException(
                 'Failed to create customer ownership document',
                 [
@@ -163,7 +169,6 @@ class LynkV1Driver implements TraderInterface
                 $exception
             );
         }
-
     }
 
     public function sellCommodityToOpenMarket(TraderOrder $traderOrder)
