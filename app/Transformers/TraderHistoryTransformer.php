@@ -158,6 +158,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $warrantyDocumentMediaFile = match ($this->traderOrder->provider) {
             'dmcc', 'fake' => $this->getMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo),
             'bursam' => $this->getMedia(TraderOrderMediaCollection::BursamTtiHoldingCertificate),
+            'lynk' => $this->getMedia(TraderOrderMediaCollection::LynkSalePledgeCertificate),
         };
 
         return $this->primitive([
@@ -230,5 +231,19 @@ class TraderHistoryTransformer extends TransformerAbstract
     public function getMedia($media)
     {
         return $this->traderOrder->getFirstMedia($media);
+    }
+
+    public function includeCustomerDeliveryConfirmation($historiesActions): Primitive
+    {
+        [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
+            $historiesActions, MurabhaStep::CommoditySoldToCustomer
+        );
+
+        return $this->primitive([
+            'step' => 'customer_delivery_confirmation',
+            'is_complete' => (bool) $history,
+            'completed_at' => $history?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
+            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+        ]);
     }
 }

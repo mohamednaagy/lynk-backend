@@ -33,6 +33,8 @@ class CompanyTransformer extends TransformerAbstract
         'trading_mode',
         'require_initiate_trade_request',
         'contract_number',
+        'preferred_market_type',
+        'preferred_commodity_types',
     ];
 
     public function transform(Company $company): array
@@ -154,5 +156,34 @@ class CompanyTransformer extends TransformerAbstract
     public function includeRequireInitiateTradeRequest(Company $company)
     {
         return $this->primitive($company->require_initiate_trade_request);
+    }
+
+    public function includePreferredMarketType(Company $company): Primitive
+    {
+        $market_type = $company->preferred_market_type;
+        if (is_null($market_type)) {
+            return $this->primitive(null);
+        }
+
+        return $this->primitive([
+            'value' => $market_type->value,
+            'description' => $market_type->description,
+        ]);
+
+    }
+
+    public function includePreferredCommodityTypes(Company $company): Primitive
+    {
+        $type = $company->commodityTypes()->first();
+
+        if (is_null($type)) {
+            return $this->primitive(null);
+        }
+
+        return $this->primitive([
+            'id' => $type->id,
+            'name' => $type->name,
+        ]);
+
     }
 }

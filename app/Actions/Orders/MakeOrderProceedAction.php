@@ -103,7 +103,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
 
-        if (! $traderOrder->hasMedia(TraderOrderMediaCollection::ClientWakala)) {
+        if ($traderOrder->isNeedToGenerateWakalaDocument()) {
             app()->make(GenerateClientWakala::class)->handle($traderOrder);
         }
 

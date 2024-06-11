@@ -24,7 +24,7 @@ class CreateCompanyAction implements CreateCompany
             unset($data['require_initiate_trade_request']);
         }
 
-        return Company::create(
+        $company = Company::create(
             Arr::only(
                 $data,
                 [
@@ -45,8 +45,15 @@ class CreateCompanyAction implements CreateCompany
                     'force_unique_reference_number',
                     'trading_mode',
                     'require_initiate_trade_request',
+                    'preferred_market_type',
                 ]
             )
         );
+
+        if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {
+            $company->commodityTypes()->attach($data['preferred_commodity_types']);
+        }
+
+        return $company;
     }
 }

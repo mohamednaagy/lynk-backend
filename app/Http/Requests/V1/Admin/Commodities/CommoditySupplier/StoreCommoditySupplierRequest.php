@@ -59,4 +59,12 @@ class StoreCommoditySupplierRequest extends FormRequest
 
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'legal_name.unique' => __('validation.unique_input'),
+            'unique_name.unique' => __('validation.unique_input'),
+        ];
+    }
 }
