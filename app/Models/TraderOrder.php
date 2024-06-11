@@ -193,7 +193,6 @@ class TraderOrder extends Model implements HasMedia
     public function ensureCanAccessStep(string $step)
     {
         if (! $this->checkOrderStepComplete($step)) {
-            dd('why am here');
             throw new OrderStatusDoesNotFollowSequenceException();
         }
     }
