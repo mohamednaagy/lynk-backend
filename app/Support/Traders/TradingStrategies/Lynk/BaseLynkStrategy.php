@@ -66,7 +66,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
 
     public function updateCommodityCertificateForClient(TraderOrder $traderOrder, Request $request)
     {
-        $traderOrder->ensureCanAccessStep(MurabhaStep::ContractSigned);
+        $traderOrder->ensureCanAccessStep(MurabhaStep::PurchasingCommodity);
 
         $this->sellCommodityToCustomer($traderOrder, $request);
     }
@@ -112,7 +112,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
     protected function sellCommodityToCustomer($traderOrder, $request)
     {
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
-
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
 
         $trader->createSellingCommodityToCustomerDocument($traderOrder);
