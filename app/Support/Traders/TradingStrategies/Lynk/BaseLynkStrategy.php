@@ -6,7 +6,6 @@ use App\Actions\Contracts\Orders\UpdateTraderOrder;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
-use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -25,12 +24,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
         $traderOrder->ensureCanAccessStep(MurabhaStep::TraderOrderCreated);
 
         app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
-
-        if ($traderOrder->mode == TraderOrderMode::Manual) {
-            $traderOrder->update([
-                'status' => TraderOrderStatus::InProgress,
-            ]);
-        }
 
         $this->createStepHistories(
             $request,
