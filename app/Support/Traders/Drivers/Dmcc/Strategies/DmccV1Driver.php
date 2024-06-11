@@ -6,6 +6,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderMode;
+use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\FinancingOrder;
@@ -99,6 +100,11 @@ class DmccV1Driver implements TraderInterface
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $traderOrder;
+    }
+
+    public function getStatusWhenInitaitedNewTradeRequest()
+    {
+        return TraderOrderStatus::InProgress;
     }
 
     /**

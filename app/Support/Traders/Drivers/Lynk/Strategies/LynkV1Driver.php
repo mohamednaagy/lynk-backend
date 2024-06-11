@@ -112,6 +112,11 @@ class LynkV1Driver implements TraderInterface
         return $this->getOrInitiateTraderOrder($financingOrder);
     }
 
+    public function getStatusWhenInitaitedNewTradeRequest()
+    {
+        return TraderOrderStatus::Initiated;
+    }
+
     public function createSellingCommodityToCustomerDocument(TraderOrder $traderOrder)
     {
         try {

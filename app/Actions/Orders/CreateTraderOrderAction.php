@@ -61,7 +61,7 @@ class CreateTraderOrderAction implements CreateTraderOrder
             'reference' => Arr::get($data, 'reference_number'),
             'version' => Arr::get($data, 'version'),
             'mode' => Arr::get($data, 'mode'),
-            'status' => $data['trader'] == 'lynk' ? TraderOrderStatus::Initiated : TraderOrderStatus::InProgress,
+            'status' => Trader::driver($data['trader'], $data['version'])->getStatusWhenInitaitedNewTradeRequest(),
         ]);
 
         $traderOrder->traderHistories()->create([
