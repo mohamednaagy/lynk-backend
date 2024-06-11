@@ -20,7 +20,6 @@ class OrderStatusDoesNotFollowSequenceException extends Exception
                 ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE
             );
         }
-
         abort($code, $message);
     }
 }

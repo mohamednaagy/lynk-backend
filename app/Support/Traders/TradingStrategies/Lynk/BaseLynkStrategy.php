@@ -72,7 +72,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
 
     public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
     {
-        $traderOrder->ensureCanAccessStep(MurabhaStep::MurabhaOfferIssued);
+        $traderOrder->ensureCanAccessStep(MurabhaStep::CommoditySoldToCustomer);
 
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
             MurabhaStep::MurabahaSaleCompleted
@@ -108,6 +108,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
         }
 
         // automatic complete the order
+
         $this->updateMurabhaCompleteDocument($traderOrder, $request);
     }
 }

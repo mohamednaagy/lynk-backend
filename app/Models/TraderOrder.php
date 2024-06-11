@@ -193,6 +193,7 @@ class TraderOrder extends Model implements HasMedia
     public function ensureCanAccessStep(string $step)
     {
         if (! $this->checkOrderStepComplete($step)) {
+            dd('why am here');
             throw new OrderStatusDoesNotFollowSequenceException();
         }
     }
@@ -223,7 +224,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function isNeedToGenerateWakalaDocument()
     {
-        if ($this->trader == EnumsTrader::Lynk && $this->mode = TraderOrderMode::Manual) {
+        if ($this->provider == EnumsTrader::Lynk && $this->mode = TraderOrderMode::Manual) {
             return false;
         }
 
