@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\InventoryStatus;
+use App\Enums\LocalMarketInventoryStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +16,7 @@ return new class extends Migration
     {
         Schema::table('inventories', function (Blueprint $table) {
             // Change the default value of the status column
-            $table->string('status')->default(InventoryStatus::Pending)->comment(InventoryStatus::Pending.'|'.InventoryStatus::Active.'|'.InventoryStatus::Inactive)->change();
+            $table->string('status')->default(LocalMarketInventoryStatus::Pending)->comment(LocalMarketInventoryStatus::Pending.'|'.LocalMarketInventoryStatus::Active.'|'.LocalMarketInventoryStatus::Inactive)->change();
 
         });
     }
@@ -30,7 +30,7 @@ return new class extends Migration
     {
         Schema::table('inventories', function (Blueprint $table) {
             // Revert the status column back to its original state
-            $table->string('status')->default(InventoryStatus::Pending)->comment(InventoryStatus::Pending.'|'.InventoryStatus::Active.'|'.InventoryStatus::Inactive)->change();
+            $table->string('status')->default(LocalMarketInventoryStatus::Pending)->comment(LocalMarketInventoryStatus::Pending.'|'.LocalMarketInventoryStatus::Active.'|'.LocalMarketInventoryStatus::Inactive)->change();
 
         });
     }

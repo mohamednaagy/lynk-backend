@@ -7,9 +7,9 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\CommodityItem;
-use App\Models\Inventory;
+use App\Models\LocalMarketInventory;
 use App\Models\User;
-use App\Transformers\InventoryTransformer;
+use App\Transformers\LocalMarketInventoryTransformer;
 use App\Transformers\Supplier\CommodityItem\CommodityItemsTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -99,7 +99,7 @@ class InventoryControllerStoreTest extends TestCase
             'location_id' => self::$location->id,
             'total_units' => 200,
         ];
-        
+
     }
 
     public function test_that_un_auth_user_cant_commodity_item_Invemtory(): void
@@ -144,7 +144,7 @@ class InventoryControllerStoreTest extends TestCase
             ->postJson(self::$endpoint, self::$inventory)
             ->assertOk()
             ->assertExactJson(
-                fractal(Inventory::orderBy('id', 'desc')->first(), new InventoryTransformer())
+                fractal(LocalMarketInventory::orderBy('id', 'desc')->first(), new LocalMarketInventoryTransformer())
                     ->parseIncludes([
                         'id',
                         'company_id',

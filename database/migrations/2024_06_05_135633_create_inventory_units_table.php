@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\InventoryUnitsStatus;
+use App\Enums\LocalMarketInventoryUnitsStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('inventory_id')->index();
             $table->unsignedBigInteger('commodity_item_id');
             $table->string('qr_code');
-            $table->string('status')->default(InventoryUnitsStatus::Free)->comment('FREE=>0|RESERVED=>1');
+            $table->string('status')->default(LocalMarketInventoryUnitsStatus::Free)->comment('FREE=>0|RESERVED=>1');
 
             $table->foreign('inventory_id')->references('id')->on('inventories')->cascadeOnDelete();
             $table->foreign('commodity_item_id')->references('id')->on('commodity_items')->cascadeOnDelete();
