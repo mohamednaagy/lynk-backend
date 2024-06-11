@@ -142,7 +142,6 @@ class LynkV1Driver implements TraderInterface
                     $traderOrder,
                     TraderOrderMediaCollection::SellingCommodityToCustomer,
                 );
-
                 $this->createTraderOrderHistory(
                     $traderOrder,
                     FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
@@ -150,6 +149,7 @@ class LynkV1Driver implements TraderInterface
                         'created_at' => $currentTimeInUtcTz,
                     ]
                 );
+
                 $this->createTraderOrderHistory(
                     $traderOrder,
                     FinancingOrderHistory::InitialCustomerDeliveryConfirmation,
@@ -157,6 +157,7 @@ class LynkV1Driver implements TraderInterface
                         'created_at' => $currentTimeInUtcTz,
                     ]
                 );
+
             });
         } catch (Exception $exception) {
             throw new TraderException(

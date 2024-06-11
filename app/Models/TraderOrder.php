@@ -223,7 +223,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function isNeedToGenerateWakalaDocument()
     {
-        if ($this->trader == EnumsTrader::Lynk && $this->mode = TraderOrderMode::Manual) {
+        if ($this->provider == EnumsTrader::Lynk && $this->mode = TraderOrderMode::Manual) {
             return false;
         }
 
