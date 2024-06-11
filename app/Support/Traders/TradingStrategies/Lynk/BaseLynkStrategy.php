@@ -11,6 +11,7 @@ use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
 use App\Support\Traders\Traits\TraderHelperTrait;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 
 // TODO_LOCAL_MARKET need to review
@@ -82,6 +83,23 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             $request,
             $traderOrder,
             MurabhaStep::MurabahaSaleCompleted
+        );
+
+        $trader = Trader::driver($traderOrder->provider);
+        $currentTimeInUtcTz = CarbonImmutable::now();
+        $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
+        $financeOrder = $traderOrder->order;
+        $trader->storeOrderDocumentAsPdf(
+            'local-commodity-market.selling-pledge-certificate',
+            [
+                'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products),
+                'amount' => $financeOrder->amount,
+                'customer_name' => $financeOrder->customer_name,
+                'current_date' => $currentTimeInRiyadhTz->toDateString(),
+                'current_time' => $currentTimeInRiyadhTz->toTimeString(),
+            ],
+            $traderOrder,
+            TraderOrderMediaCollection::LynkSalePledgeCertificate,
         );
 
         if ($canUpdateOrderStatus) {
