@@ -2,12 +2,12 @@
 
 namespace App\Http\Requests\V1\Supplier\Inventories;
 
-use App\Models\Inventory;
+use App\Models\LocalMarketInventory;
 use App\Models\SupplierLocation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreInventoryRequest extends FormRequest
+class StoreLocalMarketInventoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -30,8 +30,8 @@ class StoreInventoryRequest extends FormRequest
             'location_id' => [
                 'required',
                 Rule::exists(SupplierLocation::class, 'id')->where('company_id', Auth()->user()->company_id),
-                Rule::unique(Inventory::class, 'id')->where('commodity_item_id', $this->item->id),
-                
+                Rule::unique(LocalMarketInventory::class, 'id')->where('commodity_item_id', $this->item->id),
+
             ],
             'total_units' => ['required', 'numeric', 'min:1'],
         ];

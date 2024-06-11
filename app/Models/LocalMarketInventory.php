@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use App\Enums\InventoryStatus;
+use App\Enums\LocalMarketInventoryStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-class Inventory extends Model
+class LocalMarketInventory extends Model
 {
     use HasFactory , LogsActivity;
 
@@ -25,7 +25,7 @@ class Inventory extends Model
     ];
 
     protected $casts = [
-        'status' => InventoryStatus::class,
+        'status' => LocalMarketInventoryStatus::class,
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -57,7 +57,7 @@ class Inventory extends Model
     public function getTotalItemsAttribute()
     {
         return $this->available_quantity + $this->reserved_items;
-    } 
+    }
 
     // Method to generate QR Code Base Name
     public function generateQrCodeBaseName()
@@ -70,7 +70,7 @@ class Inventory extends Model
 
     public function units()
     {
-        return $this->hasMany(InventoryUnits::class, 'inventory_id');
+        return $this->hasMany(LocalMarketInventoryUnits::class, 'local_market_inventory_id');
     }
 
     public function CountOfUnits()

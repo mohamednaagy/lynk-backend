@@ -2,33 +2,33 @@
 
 namespace App\Actions\Supplier\CommodityItem\Inventory;
 
-use App\Actions\Contracts\Supplier\CommodityItem\Inventory\CreateCommodityInventory;
-use App\Enums\InventoryStatus;
+use App\Actions\Contracts\Supplier\CommodityItem\Inventory\CreateLocalMarketInventory;
+use App\Enums\LocalMarketInventoryStatus;
 use App\Models\CommodityItem;
 use App\Models\Company;
-use App\Models\Inventory;
+use App\Models\LocalMarketInventory;
 use App\Models\Supplier;
 use Illuminate\Support\Arr;
 
-class CreateCommodityInventoryAction implements CreateCommodityInventory
+class CreateLocalMarketInventoryAction implements CreateLocalMarketInventory
 {
     private $supplier;
     private $item;
 
-    public function handle(array $data): Inventory
+    public function handle(array $data): LocalMarketInventory
     {
         $data['company_id'] = $this->supplier->id;
-        $item = Inventory::create(
+        $item = LocalMarketInventory::create(
             [
                 'company_id'            => $data['company_id'],
                 'commodity_item_id'     => $this->item->id,
                 'commodity_type_id'     => $this->item->commodity_type_id,
-                'supplier_location_id'  => $data['location_id'], 
+                'supplier_location_id'  => $data['location_id'],
                 'min_price'             => $this->item->min_price,
                 'max_price'             => $this->item->max_price,
                 'reserved_items'        => 0,
                 'available_quantity'    => $data['total_units'],
-                'status'                => InventoryStatus::Pending,
+                'status'                => LocalMarketInventoryStatus::Pending,
             ]
         );
 

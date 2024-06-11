@@ -9,7 +9,7 @@ use Illuminate\Validation\Rule;
 /**
  * @property string $area
  */
-class UpdateInventoryRequest extends FormRequest
+class UpdateLocalMarketInventoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

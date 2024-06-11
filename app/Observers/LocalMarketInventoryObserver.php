@@ -2,35 +2,35 @@
 
 namespace App\Observers;
 
-use App\Jobs\CreateUnitInventoriesJob;
-use App\Models\Inventory;
+use App\Jobs\CreateLocalMarketUnitInventoriesJob;
+use App\Models\LocalMarketInventory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class CommidityInventoryObserver
+class LocalMarketInventoryObserver
 {
     public $afterCommit = true;
 
     /**
-     * Handle the Inventory "created" event.
+     * Handle the LocalMarketInventory "created" event.
      *
      * @return void
      */
-    public function created(Inventory $inventory)
+    public function created(LocalMarketInventory $inventory)
     {
         $this->createItemUnits($inventory);
     }
 
     /**
-     * Handle the Inventory "updated" event.
+     * Handle the LocalMarketInventory "updated" event.
      *
      * @return void
      */
-    public function updated(Inventory $inventory)
+    public function updated(LocalMarketInventory $inventory)
     {
     }
 
-    public function createItemUnits(Inventory $inventory)
+    public function createItemUnits(LocalMarketInventory $inventory)
     {
         DB::transaction(function () use ($inventory) {
             try {
@@ -39,7 +39,7 @@ class CommidityInventoryObserver
                 $totalChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
                 for ($i = 0; $i < $totalChunks; $i++) {
                     $is_last_chunk = ($i == $totalChunks-1);
-                    CreateUnitInventoriesJob::dispatch($inventory, $chunkSize, $is_last_chunk)->onQueue('unit-inventory');
+                    CreateLocalMarketUnitInventoriesJob::dispatch($inventory, $chunkSize, $is_last_chunk)->onQueue('unit-inventory');
                 }
             } catch (\Exception $e) {
                 DB::rollBack();

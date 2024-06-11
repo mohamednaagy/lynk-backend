@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Api\V1\Supplier\Inventory;
 
-use App\Actions\Contracts\Supplier\CommodityItem\Inventory\CreateCommodityInventory;
+use App\Actions\Contracts\Supplier\CommodityItem\Inventory\CreateLocalMarketInventory;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Supplier\Inventories\StoreInventoryRequest;
+use App\Http\Requests\V1\Supplier\Inventories\StoreLocalMarketInventoryRequest;
 use App\Models\CommodityItem;
-use App\Transformers\InventoryTransformer;
+use App\Transformers\LocalMarketInventoryTransformer;
 use Illuminate\Http\JsonResponse;
 
-class InventoryController extends Controller
+class LocalMarketInventoryController extends Controller
 {
     public function __construct()
     {
@@ -39,21 +39,21 @@ class InventoryController extends Controller
         )->only('show');
     }
 
-    
+
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CommodityItem $item, StoreInventoryRequest $storeInventoryRequest, CreateCommodityInventory $createSupplierInventory): JsonResponse
+    public function store(CommodityItem $item, StoreLocalMarketInventoryRequest $storeInventoryRequest, CreateLocalMarketInventory $createSupplierInventory): JsonResponse
     {
         $data = $storeInventoryRequest->validated();
         $data['company_id'] = tenant()->id;
         $createSupplierInventory->setSupplier(tenant());
         $createSupplierInventory->setItem($item);
         $inventory = $createSupplierInventory->handle($data);
-        
 
-        return fractal($inventory, new InventoryTransformer())
+
+        return fractal($inventory, new LocalMarketInventoryTransformer())
             ->parseIncludes([
                 'id',
                 'company_id',
@@ -73,5 +73,5 @@ class InventoryController extends Controller
             ->respond();
     }
 
-    
+
 }

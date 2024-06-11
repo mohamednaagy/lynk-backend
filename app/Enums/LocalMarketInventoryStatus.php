@@ -9,8 +9,11 @@ use BenSampo\Enum\Enum;
  * @method static static Active()
  * @method static static Inactive()
  */
-final class InventoryUnitsStatus extends Enum implements LocalizedEnum
+final class LocalMarketInventoryStatus extends Enum implements LocalizedEnum
 {
-    const Free      = '0';
-    const Reserved  = '1';
+    const Pending = '0';
+
+    const Active = '1';
+
+    const Inactive = '2';
 }
