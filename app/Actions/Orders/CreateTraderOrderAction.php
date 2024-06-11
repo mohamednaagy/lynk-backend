@@ -22,6 +22,7 @@ class CreateTraderOrderAction implements CreateTraderOrder
      */
     public function handle($orderId, array $data): TraderOrder
     {
+
         $financingOrder = FinancingOrder::query()
             ->lockForUpdate()
             ->findOrFail($orderId);

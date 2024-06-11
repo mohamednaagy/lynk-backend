@@ -30,7 +30,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             $traderOrder,
             MurabhaStep::PurchasingCommodity
         );
-
         $this->transferOwnershipToLender($traderOrder, $request);
     }
 
