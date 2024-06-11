@@ -158,8 +158,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $warrantyDocumentMediaFile = match ($this->traderOrder->provider) {
             'dmcc', 'fake' => $this->getMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo),
             'bursam' => $this->getMedia(TraderOrderMediaCollection::BursamTtiHoldingCertificate),
-            // TODO_LOCAL_MARKET get the write certification fr sale competed
-            'lynk' => $this->getMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo),
+            'lynk' => $this->getMedia(TraderOrderMediaCollection::LynkSalePledgeCertificate),
         };
 
         return $this->primitive([

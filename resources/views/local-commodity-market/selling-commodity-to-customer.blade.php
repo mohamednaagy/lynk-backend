@@ -752,7 +752,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                                     {{ $product->getUnitOfMeasurement() }}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getAmount() }}
                                     {{ $product->getCurrency() }}</td>
-                                <td class="w-1/2 border border-black">{{ $product->getPreviousOwner() }}</td>
+                                <td class="w-1/2 border border-black">{{ $company_name }}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getOriginalSupplier() }}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getLocation() }}</td>
                             </tr>
