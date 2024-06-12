@@ -23,6 +23,7 @@ class LocalMarketInventoryTransformer extends TransformerAbstract
         'available_quantity',
         'reserved_items',
         'status',
+        'is_editable',
 
     ];
 
@@ -113,6 +114,7 @@ class LocalMarketInventoryTransformer extends TransformerAbstract
     public function includeCommodityItem(LocalMarketInventory $inventory): Primitive
     {
         $item = $inventory->item;
+
         return $this->primitive([
             'id' => $item->id,
             'name' => $item->name,
@@ -122,6 +124,7 @@ class LocalMarketInventoryTransformer extends TransformerAbstract
     public function includeSupplierLocation(LocalMarketInventory $inventory): Primitive
     {
         $location = $inventory->location;
+
         return $this->primitive([
             'id' => $location->id,
             'unique_identifier' => $location->unique_identifier,
@@ -129,4 +132,8 @@ class LocalMarketInventoryTransformer extends TransformerAbstract
         ]);
     }
 
+    public function includeIsEditable(LocalMarketInventory $inventory): Primitive
+    {
+        return $this->primitive($inventory->is_editable);
+    }
 }

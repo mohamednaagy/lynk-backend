@@ -6,7 +6,7 @@ use App\Enums\Contracts\Murabha\TraderMurabhaStepInterface;
 use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
 
-final class MurabhaStep extends Enum implements TraderMurabhaStepInterface, LocalizedEnum
+final class MurabhaStep extends Enum implements LocalizedEnum, TraderMurabhaStepInterface
 {
     const TraderOrderCreated = 'trader_order_created';
 
@@ -24,7 +24,9 @@ final class MurabhaStep extends Enum implements TraderMurabhaStepInterface, Loca
 
     const MurabahaSaleCompleted = 'murabaha_sale_completed';
 
-    public static function getSteps(string $driver = null, string $version = null): array
+    const CustomerDeliveryConfirmation = 'customer_delivery_confirmation';
+
+    public static function getSteps(?string $driver = null, ?string $version = null): array
     {
         $driver ??= config('trader.default');
         $version ??= get_latest_version_of_trader($driver);

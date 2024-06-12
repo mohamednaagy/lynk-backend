@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader as EnumsTrader;
+use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -122,7 +124,7 @@ class TraderOrder extends Model implements HasMedia
         $stepToHistoriesDictionary = trader_step_histories($this->provider, $this->version);
 
         if (! array_key_exists($step, $stepToHistoriesDictionary)) {
-            throw new UnexpectedValueException('No mapping for this step');
+            throw new UnexpectedValueException("No mapping for this step {$step}");
         }
 
         return (bool) $this->traderHistories()
@@ -217,5 +219,14 @@ class TraderOrder extends Model implements HasMedia
     public function isCommodityPurchased(): bool
     {
         return $this->checkOrderStepComplete(MurabhaStep::PurchasingCommodity);
+    }
+
+    public function isNeedToGenerateWakalaDocument()
+    {
+        if ($this->provider == EnumsTrader::Lynk && $this->mode = TraderOrderMode::Manual) {
+            return false;
+        }
+
+        return ! $this->hasMedia(TraderOrderMediaCollection::ClientWakala);
     }
 }

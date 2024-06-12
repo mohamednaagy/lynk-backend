@@ -5,9 +5,11 @@ namespace App\Transformers;
 use App\Enums\BursamProductCode;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
+use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\FinancingOrders\TraderOrderHelper;
 use Illuminate\Support\Collection as IlluminateCollection;
 use League\Fractal\Resource\Collection;
@@ -123,7 +125,8 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeProducts(TraderOrder $traderOrder): Collection
     {
         $products = collect($traderOrder->products)->map(
-            fn ($product) => CommodityProductDto::fromArray($product)
+            // TODO_LOCAL_MARKET need to enhance this method
+            fn ($product) => $traderOrder->provider == Trader::Lynk ? LynkCommodityProductDto::fromArray($product) : CommodityProductDto::fromArray($product)
         );
 
         return $this->collection($products, new ProductTransformer());

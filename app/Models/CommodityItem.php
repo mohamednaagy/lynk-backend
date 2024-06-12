@@ -9,7 +9,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class CommodityItem extends Model
 {
-    use HasFactory , LogsActivity;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
         'name',

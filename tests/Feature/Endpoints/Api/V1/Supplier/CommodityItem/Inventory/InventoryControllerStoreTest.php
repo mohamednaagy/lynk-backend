@@ -6,23 +6,22 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
-use App\Models\CommodityItem;
 use App\Models\LocalMarketInventory;
 use App\Models\User;
 use App\Transformers\LocalMarketInventoryTransformer;
-use App\Transformers\Supplier\CommodityItem\CommodityItemsTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
+use Tests\Traits\InteractsWithCommodityInventory;
 use Tests\Traits\InteractsWithCommodityItem;
 use Tests\Traits\InteractsWithSupplier;
 
 class InventoryControllerStoreTest extends TestCase
 {
-    use AssertsAccessByRoleAndArea, InteractsWithCommodityItem ,  InteractsWithSupplier, RefreshDatabase;
+    use AssertsAccessByRoleAndArea, InteractsWithCommodityInventory, InteractsWithCommodityItem, InteractsWithSupplier, RefreshDatabase;
 
     private static User $supplierAdmin;
 
@@ -43,6 +42,8 @@ class InventoryControllerStoreTest extends TestCase
     private static array $commodityItem;
 
     private static $inventory;
+
+    private static $inventory2;
 
     /**
      * @throws BindingResolutionException
@@ -96,6 +97,11 @@ class InventoryControllerStoreTest extends TestCase
         self::$endpoint = 'api/v1/supplier/commodity-items/'.self::$commodityItems->id.'/inventory';
 
         self::$inventory = [
+            'location_id' => self::$location->id,
+            'total_units' => 200,
+        ];
+
+        self::$inventory2 = [
             'location_id' => self::$location->id,
             'total_units' => 200,
         ];
@@ -166,15 +172,16 @@ class InventoryControllerStoreTest extends TestCase
             );
     }
 
+    public function test_supplier_user_cant_create_commodity_item_inventory_with_duplicate_location(): void
+    {
+        $inventory = $this->createInventory(self::$supplier, 200);
+        self::$inventory2['location_id'] = $inventory->location_id;
+        $this
+            ->withHeader('X-Company', self::$supplier->id)
+            ->actingAs(self::$supplierAdmin)
+            ->postJson(self::$endpoint, self::$inventory2)
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('location_id');
 
-    // public function test_supplier_user_cant_create_commodity_item_inventory_with_duplicate_location(): void
-    // {
-    //     $this
-    //         ->withHeader('X-Company', self::$supplier->id)
-    //         ->actingAs(self::$supplierAdmin)
-    //         ->postJson(self::$endpoint, self::$inventory)
-    //         ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-    //         ->assertJsonValidationErrorFor('location_id');
-
-    // }
+    }
 }

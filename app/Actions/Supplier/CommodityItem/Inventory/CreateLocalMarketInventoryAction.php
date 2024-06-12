@@ -8,11 +8,11 @@ use App\Models\CommodityItem;
 use App\Models\Company;
 use App\Models\LocalMarketInventory;
 use App\Models\Supplier;
-use Illuminate\Support\Arr;
 
 class CreateLocalMarketInventoryAction implements CreateLocalMarketInventory
 {
     private $supplier;
+
     private $item;
 
     public function handle(array $data): LocalMarketInventory
@@ -20,15 +20,15 @@ class CreateLocalMarketInventoryAction implements CreateLocalMarketInventory
         $data['company_id'] = $this->supplier->id;
         $item = LocalMarketInventory::create(
             [
-                'company_id'            => $data['company_id'],
-                'commodity_item_id'     => $this->item->id,
-                'commodity_type_id'     => $this->item->commodity_type_id,
-                'supplier_location_id'  => $data['location_id'],
-                'min_price'             => $this->item->min_price,
-                'max_price'             => $this->item->max_price,
-                'reserved_items'        => 0,
-                'available_quantity'    => $data['total_units'],
-                'status'                => LocalMarketInventoryStatus::Pending,
+                'company_id' => $this->supplier->id,
+                'commodity_item_id' => $this->item->id,
+                'commodity_type_id' => $this->item->commodity_type_id,
+                'supplier_location_id' => $data['location_id'],
+                'min_price' => $this->item->min_price,
+                'max_price' => $this->item->max_price,
+                'reserved_items' => 0,
+                'available_quantity' => $data['total_units'],
+                'status' => LocalMarketInventoryStatus::Pending,
             ]
         );
 
