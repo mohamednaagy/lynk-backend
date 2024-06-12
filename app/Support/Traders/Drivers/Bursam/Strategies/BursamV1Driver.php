@@ -66,6 +66,11 @@ class BursamV1Driver implements TraderInterface
         return $this->getOrInitiateTraderOrder($financingOrder);
     }
 
+    public function getDefaultInitialTradeOrderStatus()
+    {
+        return TraderOrderStatus::InProgress;
+    }
+
     /**
      * @throws TraderException
      */
