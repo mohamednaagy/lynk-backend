@@ -10,8 +10,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
 
 class CreateLocalMarketUnitInventoriesJob implements ShouldQueue
@@ -22,18 +20,18 @@ class CreateLocalMarketUnitInventoriesJob implements ShouldQueue
 
     protected $chunkSize;
 
-    protected $is_last_chunk;
+    protected $isLastChunk;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(LocalMarketInventory $inventory, $chunkSize, $is_last_chunk = false)
+    public function __construct(LocalMarketInventory $inventory, $chunkSize, $isLastChunk = false)
     {
         $this->inventory = $inventory;
         $this->chunkSize = $chunkSize;
-        $this->is_last_chunk = $is_last_chunk;
+        $this->isLastChunk = $isLastChunk;
     }
 
     /**
@@ -50,26 +48,27 @@ class CreateLocalMarketUnitInventoriesJob implements ShouldQueue
             $inventoryUnits[] = [
                 'local_market_inventory_id' => $this->inventory->id,
                 'commodity_item_id' => $this->inventory->item->id,
-                'qr_code' => $baseName . '-' . $uuid ,
+                'qr_code' => $baseName.'-'.$uuid,
             ];
         }
 
         LocalMarketInventoryUnits::insert($inventoryUnits);
 
-        if ($this->is_last_chunk) {
+        if ($this->isLastChunk) {
             $totalUnitsCreated = $this->inventory->CountOfUnits();
             $availableQuantity = $this->inventory->available_quantity;
 
-            if ($totalUnitsCreated < $availableQuantity) {
-                $missingUnits = $availableQuantity - $totalUnitsCreated;
-                CreateLocalMarketUnitInventoriesJob::dispatch($this->inventory, $missingUnits, true)->onQueue('unit-inventory');
-            }
-
             // Update the inventory status to active if the unit count matches
-            if ($this->inventory->CountOfUnits() == $this->inventory->available_quantity) {
+            if ($totalUnitsCreated == $availableQuantity) {
                 $this->inventory->update([
                     'status' => LocalMarketInventoryStatus::Active,
                 ]);
+            } elseif ($totalUnitsCreated < $availableQuantity) {
+                $missingUnits = $availableQuantity - $totalUnitsCreated;
+                CreateLocalMarketUnitInventoriesJob::dispatch($this->inventory, $missingUnits, true)->onQueue('unit-inventory');
+            } else {
+                // throw exception
+                // change inventory status to be having a problem status
             }
         }
 

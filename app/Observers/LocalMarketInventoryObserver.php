@@ -4,8 +4,6 @@ namespace App\Observers;
 
 use App\Jobs\CreateLocalMarketUnitInventoriesJob;
 use App\Models\LocalMarketInventory;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class LocalMarketInventoryObserver
 {
@@ -32,28 +30,23 @@ class LocalMarketInventoryObserver
 
     public function createItemUnits(LocalMarketInventory $inventory)
     {
-        DB::transaction(function () use ($inventory) {
-            try {
-                $numberOfUnits = $inventory->available_quantity;
-                $chunkSize = ($numberOfUnits <= 20000) ? $numberOfUnits : 20000;
-                $totalChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
-                //setup the remaining units
-                $remainingUnits = $numberOfUnits;
-                //loop through the chunks
-                for ($i = 0; $i < $totalChunks; $i++) {
-                    // Get if this is the last chunk
-                    $is_last_chunk = ($i == $totalChunks-1);
-                    //chk if is last chunk then calculate remaining chunk size
-                    if ($is_last_chunk)
-                        $chunkSize = ($remainingUnits > $chunkSize) ? $chunkSize : $remainingUnits;
-                    //dispatch job
-                    CreateLocalMarketUnitInventoriesJob::dispatch($inventory, $chunkSize, $is_last_chunk)->onQueue('unit-inventory');
-                    //decrease remaining units
-                    $remainingUnits = $numberOfUnits - $chunkSize;
+        try {
+            $numberOfUnits = $inventory->available_quantity;
+            $chunkSize = ($numberOfUnits <= 20000) ? $numberOfUnits : 20000;
+            $numberOfChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
+
+            //loop through the chunks
+            for ($i = 0; $i < $numberOfChunks; $i++) {
+                $isLastChunk = ($i == $numberOfChunks - 1);
+                if ($isLastChunk) { // Get if this is the last chunk
+                    $chunkSize = $numberOfUnits - ($i * $chunkSize);
                 }
-            } catch (\Exception $e) {
-                DB::rollBack();
+
+                //dispatch job
+                CreateLocalMarketUnitInventoriesJob::dispatch($inventory, $chunkSize, $isLastChunk)->onQueue('unit-inventory');
             }
-        });
+        } catch (\Exception $e) {
+            // TODO create a custom exception for inventory unit creation
+        }
     }
 }
