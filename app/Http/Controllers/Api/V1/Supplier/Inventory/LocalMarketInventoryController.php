@@ -2,24 +2,23 @@
 
 namespace App\Http\Controllers\Api\V1\Supplier\Inventory;
 
-use App\Actions\Contracts\Commodities\CommodityLocation\UpdateCommodityInventory;
-use App\Actions\Contracts\Supplier\CommodityItem\Inventory\CreateCommodityInventory;
+use App\Actions\Contracts\Supplier\CommodityItem\Inventory\CreateLocalMarketInventory;
 use App\Actions\Contracts\Supplier\CommodityItem\Inventory\GetPaginatedCommodityInventories;
+use App\Actions\Contracts\Supplier\CommodityItem\Inventory\UpdateCommodityInventory;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\ErrorCode;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Supplier\Inventories\StoreInventoryRequest;
-use App\Http\Requests\V1\Supplier\Inventories\UpdateInventoryRequest;
+use App\Http\Requests\V1\Supplier\Inventories\StoreLocalMarketInventoryRequest;
+use App\Http\Requests\V1\Supplier\Inventories\UpdateLocalMarketInventoryRequest;
 use App\Models\CommodityItem;
-use App\Models\Inventory;
-use App\Transformers\InventoryTransformer;
+use App\Models\LocalMarketInventory;
+use App\Transformers\LocalMarketInventoryTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
-
-class InventoryController extends Controller
+class LocalMarketInventoryController extends Controller
 {
     public function __construct()
     {
@@ -56,7 +55,7 @@ class InventoryController extends Controller
         $supplier = tenant()->supplier;
         $data = $getPaginatedCommodityInventory->handle($supplier, $item);
 
-        return fractal($data, new InventoryTransformer())
+        return fractal($data, new LocalMarketInventoryTransformer())
             ->parseIncludes([
                 'id',
                 'company_id',
@@ -77,20 +76,18 @@ class InventoryController extends Controller
             ->respond();
     }
 
-
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CommodityItem $item, StoreInventoryRequest $storeInventoryRequest, CreateCommodityInventory $createSupplierInventory): JsonResponse
+    public function store(CommodityItem $item, StoreLocalMarketInventoryRequest $storeInventoryRequest, CreateLocalMarketInventory $createSupplierInventory): JsonResponse
     {
         $data = $storeInventoryRequest->validated();
         $data['company_id'] = tenant()->id;
         $createSupplierInventory->setSupplier(tenant());
         $createSupplierInventory->setItem($item);
         $inventory = $createSupplierInventory->handle($data);
-        
 
-        return fractal($inventory, new InventoryTransformer())
+        return fractal($inventory, new LocalMarketInventoryTransformer())
             ->parseIncludes([
                 'id',
                 'company_id',
@@ -110,26 +107,26 @@ class InventoryController extends Controller
             ->respond();
     }
 
-
-     /**
+    /**
      * Update the specified resource in storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(CommodityItem $item, Inventory $inventory, UpdateInventoryRequest $updateInventoryRequest, UpdateCommodityInventory $updateCommodityInventory)
+    public function update(CommodityItem $item, LocalMarketInventory $inventory, UpdateLocalMarketInventoryRequest $updateInventoryRequest, UpdateCommodityInventory $updateCommodityInventory)
     {
         //double check if the inventory is editable
-        if (! $inventory->is_editable)
+        if (! $inventory->is_editable) {
             return $this->errorResponse(
-                __("error.inventory_cannot_be_updated"), 
+                __('error.inventory_cannot_be_updated'),
                 Response::HTTP_BAD_REQUEST,
                 ErrorCode::INVENTORY_NOT_UPDATABLE
             );
-            
+        }
+
         $inventory = $updateCommodityInventory->handle($inventory, $updateInventoryRequest->validated());
 
-        return fractal($inventory, new InventoryTransformer())
+        return fractal($inventory, new LocalMarketInventoryTransformer())
             ->parseIncludes([
                 'id',
                 'company_id',
@@ -149,13 +146,12 @@ class InventoryController extends Controller
             ->respond();
     }
 
-
-     /**
+    /**
      * Display the specified resource.
      */
-    public function show(CommodityItem $item, Inventory $inventory): JsonResponse
+    public function show(CommodityItem $item, LocalMarketInventory $inventory): JsonResponse
     {
-        return fractal($inventory, new InventoryTransformer())
+        return fractal($inventory, new LocalMarketInventoryTransformer())
             ->parseIncludes([
                 'id',
                 'company_id',
@@ -175,5 +171,4 @@ class InventoryController extends Controller
             ])
             ->respond();
     }
-    
 }

@@ -6,11 +6,9 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
-use App\Models\CommodityItem;
-use App\Models\Inventory;
+use App\Models\LocalMarketInventory;
 use App\Models\User;
-use App\Transformers\InventoryTransformer;
-use App\Transformers\Supplier\CommodityItem\CommodityItemsTransformer;
+use App\Transformers\LocalMarketInventoryTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
@@ -23,7 +21,7 @@ use Tests\Traits\InteractsWithSupplier;
 
 class InventoryControllerStoreTest extends TestCase
 {
-    use AssertsAccessByRoleAndArea, InteractsWithCommodityItem, InteractsWithCommodityInventory, InteractsWithSupplier, RefreshDatabase;
+    use AssertsAccessByRoleAndArea, InteractsWithCommodityInventory, InteractsWithCommodityItem, InteractsWithSupplier, RefreshDatabase;
 
     private static User $supplierAdmin;
 
@@ -42,7 +40,7 @@ class InventoryControllerStoreTest extends TestCase
     private static string $endpoint;
 
     private static array $commodityItem;
-    
+
     private static $inventory;
 
     private static $inventory2;
@@ -107,7 +105,7 @@ class InventoryControllerStoreTest extends TestCase
             'location_id' => self::$location->id,
             'total_units' => 200,
         ];
-        
+
     }
 
     public function test_that_un_auth_user_cant_commodity_item_Invemtory(): void
@@ -152,7 +150,7 @@ class InventoryControllerStoreTest extends TestCase
             ->postJson(self::$endpoint, self::$inventory)
             ->assertOk()
             ->assertExactJson(
-                fractal(Inventory::orderBy('id', 'desc')->first(), new InventoryTransformer())
+                fractal(LocalMarketInventory::orderBy('id', 'desc')->first(), new LocalMarketInventoryTransformer())
                     ->parseIncludes([
                         'id',
                         'company_id',
@@ -173,7 +171,6 @@ class InventoryControllerStoreTest extends TestCase
                     ->getData(true)
             );
     }
-
 
     public function test_supplier_user_cant_create_commodity_item_inventory_with_duplicate_location(): void
     {

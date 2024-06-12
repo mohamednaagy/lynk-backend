@@ -6,7 +6,6 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
-use App\Models\Inventory;
 use App\Models\User;
 use App\Transformers\InventoryTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -21,7 +20,7 @@ use Tests\Traits\InteractsWithSupplier;
 
 class InventoryControllerUpdateTest extends TestCase
 {
-    use AssertsAccessByRoleAndArea, InteractsWithCommodityItem, InteractsWithCommodityInventory, InteractsWithSupplier, RefreshDatabase;
+    use AssertsAccessByRoleAndArea, InteractsWithCommodityInventory, InteractsWithCommodityItem, InteractsWithSupplier, RefreshDatabase;
 
     private static User $supplierAdmin;
 
@@ -40,7 +39,7 @@ class InventoryControllerUpdateTest extends TestCase
     private static string $endpoint;
 
     private static array $commodityItem;
-    
+
     private static $inventory;
 
     private static $inventory2;
@@ -105,7 +104,7 @@ class InventoryControllerUpdateTest extends TestCase
             'location_id' => self::$location->id,
             'total_units' => 200,
         ];
-        
+
     }
 
     public function test_un_auth_user_cant_update_commodity_inventory(): void
@@ -176,7 +175,7 @@ class InventoryControllerUpdateTest extends TestCase
             ->assertExactJson([
                 'message' => 'Inventory can be updated only if the reserved units is 0',
                 'code' => 1031,
-                ],
+            ],
             );
     }
 

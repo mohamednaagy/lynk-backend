@@ -32,7 +32,9 @@ class CreateTraderOrderAction implements CreateTraderOrder
         }
         $doesInProgressTraderOrderExists = $financingOrder
             ->traderOrders()
-            ->where('status', TraderOrderStatus::InProgress)
+            ->where(function ($q) {
+                $q->where('status', TraderOrderStatus::InProgress)->orWhere('status', TraderOrderStatus::Initiated);
+            })
             ->exists();
 
         if ($doesInProgressTraderOrderExists) {
@@ -59,7 +61,7 @@ class CreateTraderOrderAction implements CreateTraderOrder
             'reference' => Arr::get($data, 'reference_number'),
             'version' => Arr::get($data, 'version'),
             'mode' => Arr::get($data, 'mode'),
-            'status' => TraderOrderStatus::InProgress,
+            'status' => Trader::driver($data['trader'], $data['version'])->getDefaultInitialTradeOrderStatus(),
         ]);
 
         $traderOrder->traderHistories()->create([
