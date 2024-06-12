@@ -62,7 +62,7 @@ class FakeV1Driver implements TraderInterface
         return $traderOrder;
     }
 
-    public function getStatusWhenInitaitedNewTradeRequest()
+    public function getDefaultInitialTradeOrderStatus()
     {
         return TraderOrderStatus::InProgress;
     }

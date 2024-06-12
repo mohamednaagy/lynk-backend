@@ -23,5 +23,5 @@ interface TraderInterface
         int $cancelReason = TraderOrderCancelReason::Manual
     ): mixed;
 
-    public function getStatusWhenInitaitedNewTradeRequest();
+    public function getDefaultInitialTradeOrderStatus();
 }
