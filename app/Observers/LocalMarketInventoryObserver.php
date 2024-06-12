@@ -37,9 +37,19 @@ class LocalMarketInventoryObserver
                 $numberOfUnits = $inventory->available_quantity;
                 $chunkSize = ($numberOfUnits <= 20000) ? $numberOfUnits : 20000;
                 $totalChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
+                //setup the remaining units
+                $remainingUnits = $numberOfUnits;
+                //loop through the chunks
                 for ($i = 0; $i < $totalChunks; $i++) {
+                    // Get if this is the last chunk
                     $is_last_chunk = ($i == $totalChunks-1);
+                    //chk if is last chunk then calculate remaining chunk size
+                    if ($is_last_chunk)
+                        $chunkSize = ($remainingUnits > $chunkSize) ? $chunkSize : $remainingUnits;
+                    //dispatch job
                     CreateLocalMarketUnitInventoriesJob::dispatch($inventory, $chunkSize, $is_last_chunk)->onQueue('unit-inventory');
+                    //decrease remaining units
+                    $remainingUnits = $numberOfUnits - $chunkSize;
                 }
             } catch (\Exception $e) {
                 DB::rollBack();
