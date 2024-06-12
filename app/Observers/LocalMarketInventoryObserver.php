@@ -28,6 +28,9 @@ class LocalMarketInventoryObserver
      */
     public function updated(LocalMarketInventory $inventory)
     {
+        //TODO: Handle the LocalMarketInventory "updated" event
+        //DROP OLD CREATED UNITS FROM LocalMarketInventoryUnits
+        //$this->createItemUnits($inventory);
     }
 
     public function createItemUnits(LocalMarketInventory $inventory)

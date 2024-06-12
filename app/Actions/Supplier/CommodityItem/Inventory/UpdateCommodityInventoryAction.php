@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Actions\Commodities\CommodityLocation;
+namespace App\Actions\Supplier\CommodityItem\Inventory;
 
-use App\Actions\Contracts\Commodities\CommodityLocation\UpdateCommodityInventory;
-use App\Enums\InventoryStatus;
-use App\Models\Inventory;
+use App\Actions\Contracts\Supplier\CommodityItem\Inventory\UpdateCommodityInventory;
+use App\Enums\LocalMarketInventoryStatus;
+use App\Models\LocalMarketInventory;
 
 class UpdateCommodityInventoryAction implements UpdateCommodityInventory
 {
-    public function handle(Inventory $inventory, array $data): Inventory
+    public function handle(LocalMarketInventory $inventory, array $data): LocalMarketInventory
     {
         $inventory->update([
             'available_quantity' => $data['total_units'],
-            'status' => InventoryStatus::Pending,
+            'status' => LocalMarketInventoryStatus::Pending,
         ]
         );
 
