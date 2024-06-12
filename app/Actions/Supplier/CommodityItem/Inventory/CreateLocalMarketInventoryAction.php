@@ -17,7 +17,6 @@ class CreateLocalMarketInventoryAction implements CreateLocalMarketInventory
 
     public function handle(array $data): LocalMarketInventory
     {
-        $data['company_id'] = $this->supplier->id;
         $item = LocalMarketInventory::create(
             [
                 'company_id' => $this->supplier->id,
