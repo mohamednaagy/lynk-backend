@@ -106,6 +106,7 @@ class OrderController extends Controller
                 'national_id',
                 'contract_number',
                 'amount',
+                'provider',
                 'selling_price',
                 'amount_formatted',
                 'selling_price_formatted',
