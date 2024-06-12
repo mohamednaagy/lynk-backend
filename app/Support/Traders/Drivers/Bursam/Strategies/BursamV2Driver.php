@@ -49,6 +49,11 @@ class BursamV2Driver extends BursamV1Driver
         ]);
     }
 
+    public function getDefaultInitialTradeOrderStatus()
+    {
+        return TraderOrderStatus::InProgress;
+    }
+
     /**
      * @throws TraderException
      */
