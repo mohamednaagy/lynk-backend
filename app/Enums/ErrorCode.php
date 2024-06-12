@@ -65,4 +65,8 @@ class ErrorCode
     public const ORDER_COST_WITHOUT_VAT_AND_WITH_VAT_INCORRECT = 1029;
 
     public const ORDER_HAS_COMPLETED_TRADER_ORDER = 1030;
+
+    public const ERROR_CREATING_UNITS = 1035;
+
+    public const ERROR_CHEKING_UNITS = 1036;
 }
