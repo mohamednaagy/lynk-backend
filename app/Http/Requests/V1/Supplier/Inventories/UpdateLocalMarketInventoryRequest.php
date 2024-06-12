@@ -2,14 +2,12 @@
 
 namespace App\Http\Requests\V1\Supplier\Inventories;
 
-use App\Models\Inventory;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 /**
  * @property string $area
  */
-class UpdateInventoryRequest extends FormRequest
+class UpdateLocalMarketInventoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -32,7 +30,7 @@ class UpdateInventoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'total_units.min' => 'This field requires a positive integer value greater than 0'
+            'total_units.min' => 'This field requires a positive integer value greater than 0',
         ];
     }
 }

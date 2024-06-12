@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use App\Enums\InventoryUnitsStatus;
+use App\Enums\LocalMarketInventoryUnitsStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-class InventoryUnits extends Model
+class LocalMarketInventoryUnits extends Model
 {
     use HasFactory, LogsActivity;
 
@@ -20,7 +20,7 @@ class InventoryUnits extends Model
     ];
 
     protected $casts = [
-        'status' => InventoryUnitsStatus::class,
+        'status' => LocalMarketInventoryUnitsStatus::class,
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -36,6 +36,6 @@ class InventoryUnits extends Model
 
     public function inventory()
     {
-        return $this->belongsTo(Inventory::class, 'inventory_id');
+        return $this->belongsTo(LocalMarketInventory::class, 'local_market_inventory_id');
     }
 }

@@ -4,12 +4,12 @@ namespace App\Actions\Contracts\Supplier\CommodityItem\Inventory;
 
 use App\Models\CommodityItem;
 use App\Models\Company;
-use App\Models\Inventory;
+use App\Models\LocalMarketInventory;
 use App\Models\Supplier;
 
-interface CreateCommodityInventory
+interface CreateLocalMarketInventory
 {
-    public function handle(array $data): Inventory;
+    public function handle(array $data): LocalMarketInventory;
 
     public function setSupplier(Supplier|Company $supplier): self;
 

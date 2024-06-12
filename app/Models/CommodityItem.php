@@ -49,5 +49,4 @@ class CommodityItem extends Model
     {
         return $this->belongsTo(Measurement::class);
     }
-
 }

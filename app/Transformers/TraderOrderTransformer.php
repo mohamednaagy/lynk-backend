@@ -32,6 +32,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'financing_order_id',
         'reference',
         'provider',
+        'mode',
         'version',
         'failure_reason',
         'refunded_at',
@@ -67,6 +68,11 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeProvider(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive($traderOrder->provider);
+    }
+
+    public function includeMode(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->mode);
     }
 
     public function includeVersion(TraderOrder $traderOrder): Primitive
