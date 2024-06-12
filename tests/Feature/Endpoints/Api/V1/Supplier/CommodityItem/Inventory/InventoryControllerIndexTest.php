@@ -8,7 +8,6 @@ use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\User;
 use App\Transformers\InventoryTransformer;
-use App\Transformers\Supplier\CommodityItem\CommodityItemsTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -61,8 +60,8 @@ class InventoryControllerIndexTest extends TestCase
             ]
         );
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
-        self::$commodityInventory = $this->getCommodityInventories(self::$supplier,self::$commodityItems, 5, true);
-        
+        self::$commodityInventory = $this->getCommodityInventories(self::$supplier, self::$commodityItems, 5, true);
+
         self::$endpoint = 'api/v1/supplier/commodity-items/'.self::$commodityItems->id.'/inventory';
 
         $this->assignPermissionToUser(

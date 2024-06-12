@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Actions\Contracts\Commodities\CommodityLocation;
+namespace App\Actions\Contracts\Supplier\CommodityItem\Inventory;
 
-use App\Models\Inventory;
+use App\Models\LocalMarketInventory;
 
 interface UpdateCommodityInventory
 {
-    public function handle(Inventory $inventory, array $data): Inventory;
+    public function handle(LocalMarketInventory $inventory, array $data): LocalMarketInventory;
 }

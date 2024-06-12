@@ -68,4 +68,7 @@ class ErrorCode
 
     public const INVENTORY_NOT_UPDATABLE = 1031;
 
+    public const ERROR_CREATING_UNITS = 1035;
+
+    public const ERROR_CHEKING_UNITS = 1036;
 }
