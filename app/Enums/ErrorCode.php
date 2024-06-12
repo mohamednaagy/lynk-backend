@@ -67,4 +67,8 @@ class ErrorCode
     public const ORDER_HAS_COMPLETED_TRADER_ORDER = 1030;
 
     public const INVENTORY_NOT_UPDATABLE = 1031;
+
+    public const ERROR_CREATING_UNITS = 1035;
+
+    public const ERROR_CHEKING_UNITS = 1036;
 }

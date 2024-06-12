@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Exceptions\ErrorCreatingUnitsForThisINventory;
 use App\Jobs\CreateLocalMarketUnitInventoriesJob;
 use App\Models\LocalMarketInventory;
 use Exception;
@@ -39,16 +40,16 @@ class LocalMarketInventoryObserver
             //loop through the chunks
             for ($i = 0; $i < $numberOfChunks; $i++) {
                 $isLastChunk = ($i == $numberOfChunks - 1);
-                // if ($isLastChunk) { // Get if this is the last chunk
-                //     $chunkSize = $numberOfUnits - ($i * $chunkSize);
-                // }
+                if ($isLastChunk) { // Get if this is the last chunk
+                    $chunkSize = $numberOfUnits - ($i * $chunkSize);
+                }
 
                 //dispatch job
                 CreateLocalMarketUnitInventoriesJob::dispatch($inventory, $chunkSize, $isLastChunk)->onQueue('unit-inventory');
             }
         } catch (\Exception $e) {
             // TODO create a custom exception for inventory unit creation
-            throw new Exception("Error creating units for this innventory", 400);
+            throw new ErrorCreatingUnitsForThisINventory();
         }
     }
 }
