@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Enums\LocalMarketInventoryStatus;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -69,6 +70,10 @@ class CreateLocalMarketUnitInventoriesJob implements ShouldQueue
             } else {
                 // throw exception
                 // change inventory status to be having a problem status
+                $this->inventory->update([
+                    'status' => LocalMarketInventoryStatus::Problem,
+                ]);
+                throw new Exception('Need to manually check the units count and update the inventory status', 400);
             }
         }
 

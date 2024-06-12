@@ -16,4 +16,6 @@ final class LocalMarketInventoryStatus extends Enum implements LocalizedEnum
     const Active = '1';
 
     const Inactive = '2';
+
+    const Problem = '3';
 }
