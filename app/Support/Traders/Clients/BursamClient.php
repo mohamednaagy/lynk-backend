@@ -4,6 +4,7 @@ namespace App\Support\Traders\Clients\BursamClient;
 
 use App\Exceptions\RateLimitExceededException;
 use App\Models\TraderOrder;
+use Exception;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Request;
@@ -289,6 +290,8 @@ class BursamClient
     protected function rateLimitRequest($callback, $remainingRetries = 0)
     {
         // check if we have issue in rate limit
+        Log::info('making a request directly to rate limit');
+
         return RateLimiter::attempt(
             'bursam_api',
             config('trader.providers.bursam.rate_limit.max_attempts'),
@@ -331,122 +334,126 @@ class BursamClient
 
     private function registerFakeBursamResponses()
     {
-        Http::fake([
-            $this->buildUrl('/api/process/svc/bsas/order.json') => Http::response(),
-            $this->buildUrl('/api/process/svc/bsas/orderResult.json') => function (Request $request) {
-                $traderOrder = $this->getTraderOrderUsingFakeRequest($request);
+        try {
+            Http::fake([
+                $this->buildUrl('/api/process/svc/bsas/order.json') => Http::response(),
+                $this->buildUrl('/api/process/svc/bsas/orderResult.json') => function (Request $request) {
+                    $traderOrder = $this->getTraderOrderUsingFakeRequest($request);
 
-                return Http::response([
-                    'processingCount' => 0,
-                    'body' => [
-                        [
-                            'bidErrNo' => '999',
-                            'serialNumber' => 1,
-                            'bidOption' => $traderOrder->uuid_two ? 'N' : 'Y',
-                            'otcOption' => $traderOrder->uuid_two ? 'Y' : 'N',
-                            'stbOption' => $traderOrder->uuid_two ? 'Y' : 'N',
-                            'productCode' => $traderOrder->product_code,
-                            'purchaseType' => 'P',
-                            'clientName' => '',
-                            'currency' => 'SAR',
-                            'bidValue' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
-                            'valueDate' => now()->format('Ymd'),
-                            'tenor' => '00074',
-                            'otcCounterParty' => 'TIOMAN',
-                            'otcMurabaha' => '',
-                            'otcMurabahaValue' => '',
-                            'ecertNo' => strtoupper(Str::random()),
-                            'bidErrNo' => '999',
-                            'bidMsg' => 'OK',
-                            'otcErrNo' => '999',
-                            'otcMsg' => 'OK',
-                            'stbErrNo' => '999',
-                            'stbMsg' => 'OK',
-                            'regTime' => now()->format('YmdHis'),
-                            'orderTime' => now()->format('YmdHis'),
-                            'resultTime' => now()->format('YmdHis'),
-                            'purchaseTime' => now()->format('YmdHis'),
-                            'reportTime' => now()->format('YmdHis'),
-                            'sellingTime' => now()->format('YmdHis'),
-                            'unit' => 'Tonnage',
-                            'price' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                    return Http::response([
+                        'processingCount' => 0,
+                        'body' => [
+                            [
+                                'bidErrNo' => '999',
+                                'serialNumber' => 1,
+                                'bidOption' => $traderOrder->uuid_two ? 'N' : 'Y',
+                                'otcOption' => $traderOrder->uuid_two ? 'Y' : 'N',
+                                'stbOption' => $traderOrder->uuid_two ? 'Y' : 'N',
+                                'productCode' => $traderOrder->product_code,
+                                'purchaseType' => 'P',
+                                'clientName' => '',
+                                'currency' => 'SAR',
+                                'bidValue' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                                'valueDate' => now()->format('Ymd'),
+                                'tenor' => '00074',
+                                'otcCounterParty' => 'TIOMAN',
+                                'otcMurabaha' => '',
+                                'otcMurabahaValue' => '',
+                                'ecertNo' => strtoupper(Str::random()),
+                                'bidErrNo' => '999',
+                                'bidMsg' => 'OK',
+                                'otcErrNo' => '999',
+                                'otcMsg' => 'OK',
+                                'stbErrNo' => '999',
+                                'stbMsg' => 'OK',
+                                'regTime' => now()->format('YmdHis'),
+                                'orderTime' => now()->format('YmdHis'),
+                                'resultTime' => now()->format('YmdHis'),
+                                'purchaseTime' => now()->format('YmdHis'),
+                                'reportTime' => now()->format('YmdHis'),
+                                'sellingTime' => now()->format('YmdHis'),
+                                'unit' => 'Tonnage',
+                                'price' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                            ],
                         ],
-                    ],
-                ]);
-            },
-            $this->buildUrl('/api/process/svc/bsas/bidXML.json') => function (Request $request) {
-                $traderOrder = $this->getTraderOrderUsingFakeRequest($request);
+                    ]);
+                },
+                $this->buildUrl('/api/process/svc/bsas/bidXML.json') => function (Request $request) {
+                    $traderOrder = $this->getTraderOrderUsingFakeRequest($request);
 
-                return Http::response([
-                    'ECERTNO' => $traderOrder->reference,
-                    'BUYER' => 'LYNK LLC',
-                    'OWNER' => 'LYNK LLC',
-                    'BIDNO' => '4',
-                    'TOTALVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
-                    'CURRENCY' => 'SAR',
-                    'PRICE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
-                    'PRICE_MYR_EQUIVALENT' => (float) $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
-                    'PURCHASETIMEDATE' => $traderOrder->created_at->format('H:i:s.v d M Y'),
-                    'VALUEDATE' => $traderOrder->created_at->format('d M Y'),
-                    'PNAME' => $traderOrder->product_code,
-                    'PVOLUME' => $volume = rand(1, 20),
-                    'LINE' => [
-                        [
-                            'SUPPLIER' => 'SPTT301',
-                            'VOLUME' => $volume,
+                    return Http::response([
+                        'ECERTNO' => $traderOrder->reference,
+                        'BUYER' => 'LYNK LLC',
+                        'OWNER' => 'LYNK LLC',
+                        'BIDNO' => '4',
+                        'TOTALVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'CURRENCY' => 'SAR',
+                        'PRICE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'PRICE_MYR_EQUIVALENT' => (float) $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
+                        'PURCHASETIMEDATE' => $traderOrder->created_at->format('H:i:s.v d M Y'),
+                        'VALUEDATE' => $traderOrder->created_at->format('d M Y'),
+                        'PNAME' => $traderOrder->product_code,
+                        'PVOLUME' => $volume = rand(1, 20),
+                        'LINE' => [
+                            [
+                                'SUPPLIER' => 'SPTT301',
+                                'VOLUME' => $volume,
+                            ],
                         ],
-                    ],
-                ]);
-            },
-            $this->buildUrl('/api/process/svc/bsas/otcXML.json') => function (Request $request) {
-                $traderOrder = $this->getTraderOrderUsingFakeRequest($request);
+                    ]);
+                },
+                $this->buildUrl('/api/process/svc/bsas/otcXML.json') => function (Request $request) {
+                    $traderOrder = $this->getTraderOrderUsingFakeRequest($request);
 
-                return Http::response([
-                    'ECERTNO' => $traderOrder->reference,
-                    'SELLER' => 'LYNK LLC',
-                    'BUYER' => 'BSAS',
-                    'TOTALVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
-                    'CURRENCY' => 'SAR',
-                    'PRICE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
-                    'PRICE_MYR_EQUIVALENT' => (float) $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
-                    'MURABAHAVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
-                    'REPORTINGTIMEDATE' => $traderOrder->created_at->format('H:i:s.v d M Y'),
-                    'VALUEDATE' => $traderOrder->created_at->format('d M Y'),
-                    'PNAME' => $traderOrder->product_code,
-                    'PVOLUME' => $traderOrder->products[0]['quantity'],
-                    'LINE' => [
-                        [
-                            'SUPPLIER' => 'RAH54',
-                            'VOLUME' => $traderOrder->products[0]['quantity'],
+                    return Http::response([
+                        'ECERTNO' => $traderOrder->reference,
+                        'SELLER' => 'LYNK LLC',
+                        'BUYER' => 'BSAS',
+                        'TOTALVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'CURRENCY' => 'SAR',
+                        'PRICE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'PRICE_MYR_EQUIVALENT' => (float) $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
+                        'MURABAHAVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'REPORTINGTIMEDATE' => $traderOrder->created_at->format('H:i:s.v d M Y'),
+                        'VALUEDATE' => $traderOrder->created_at->format('d M Y'),
+                        'PNAME' => $traderOrder->product_code,
+                        'PVOLUME' => $traderOrder->products[0]['quantity'],
+                        'LINE' => [
+                            [
+                                'SUPPLIER' => 'RAH54',
+                                'VOLUME' => $traderOrder->products[0]['quantity'],
+                            ],
                         ],
-                    ],
-                ]);
-            },
-            $this->buildUrl('api/process/svc/bsas/stbXML.json') => function (Request $request) {
-                $traderOrder = $this->getTraderOrderUsingFakeRequest($request);
+                    ]);
+                },
+                $this->buildUrl('api/process/svc/bsas/stbXML.json') => function (Request $request) {
+                    $traderOrder = $this->getTraderOrderUsingFakeRequest($request);
 
-                return Http::response([
-                    'ECERTNO' => $traderOrder->reference,
-                    'SELLER' => $traderOrder->order->customer_name,
-                    'BUYER' => 'BURSA MALAYSIA ISLAMIC SERVICES',
-                    'TOTALVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
-                    'CURRENCY' => 'SAR',
-                    'PRICE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
-                    'PRICE_MYR_EQUIVALENT' => (float) $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
-                    'MURABAHAVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
-                    'REPORTINGTIMEDATE' => $traderOrder->created_at->format('H:i:s.v d M Y'),
-                    'VALUEDATE' => $traderOrder->created_at->format('d M Y'),
-                    'PNAME' => $traderOrder->product_code,
-                    'PVOLUME' => $traderOrder->products[0]['quantity'],
-                    'LINE' => [
-                        [
-                            'SUPPLIER' => 'RAH54',
-                            'VOLUME' => $traderOrder->products[0]['quantity'],
+                    return Http::response([
+                        'ECERTNO' => $traderOrder->reference,
+                        'SELLER' => $traderOrder->order->customer_name,
+                        'BUYER' => 'BURSA MALAYSIA ISLAMIC SERVICES',
+                        'TOTALVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'CURRENCY' => 'SAR',
+                        'PRICE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'PRICE_MYR_EQUIVALENT' => (float) $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
+                        'MURABAHAVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'REPORTINGTIMEDATE' => $traderOrder->created_at->format('H:i:s.v d M Y'),
+                        'VALUEDATE' => $traderOrder->created_at->format('d M Y'),
+                        'PNAME' => $traderOrder->product_code,
+                        'PVOLUME' => $traderOrder->products[0]['quantity'],
+                        'LINE' => [
+                            [
+                                'SUPPLIER' => 'RAH54',
+                                'VOLUME' => $traderOrder->products[0]['quantity'],
+                            ],
                         ],
-                    ],
-                ]);
-            },
-        ]);
+                    ]);
+                },
+            ]);
+        } catch (Exception $e) {
+            Log::error($e->getMessage(), ['line' => $e->getLine(), 'file' => $e->getFile()]);
+        }
     }
 
     private function getTraderOrderUsingFakeRequest(Request $request)
