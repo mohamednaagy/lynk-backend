@@ -290,7 +290,10 @@ class BursamClient
     protected function rateLimitRequest($callback, $remainingRetries = 0)
     {
         // check if we have issue in rate limit
-        Log::info('making a request directly to rate limit');
+        Log::info('making a request directly to rate limit', [
+            'max_attempts' => config('trader.providers.bursam.rate_limit.max_attempts'),
+            'decay_seconds' => config('trader.providers.bursam.rate_limit.decay_seconds'),
+        ]);
 
         return RateLimiter::attempt(
             'bursam_api',
