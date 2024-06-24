@@ -288,6 +288,14 @@ class BursamClient
 
     protected function rateLimitRequest($callback, $remainingRetries = 0)
     {
+        // check if we have issue in rate limit
+        return RateLimiter::attempt(
+            'bursam_api',
+            config('trader.providers.bursam.rate_limit.max_attempts'),
+            $callback,
+            config('trader.providers.bursam.rate_limit.decay_seconds'),
+        );
+
         $maxRetriesBeforeException = (int) config('trader.providers.bursam.rate_limit.max_retries_before_exception');
         if ($remainingRetries > $maxRetriesBeforeException) {
             $exception = new RateLimitExceededException('bursam_api');
