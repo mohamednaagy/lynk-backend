@@ -25,7 +25,7 @@ class LocalMarketOrderHasInventory extends Model
 
     public function inventory()
     {
-        return $this->belongsTo(Inventory::class, 'inventory_id');
+        return $this->belongsTo(LocalMarketInventory::class, 'inventory_id');
     }
 
     public function measurement()
@@ -56,5 +56,10 @@ class LocalMarketOrderHasInventory extends Model
     public function commodityType()
     {
         return $this->belongsTo(CommodityType::class, 'commodity_type_id');
+    }
+
+    public function traderOrderUnits()
+    {
+        return $this->hasMany(LocalMarketTraderOrderUnit::class, 'order_has_inventory_id');
     }
 }
