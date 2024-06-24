@@ -95,6 +95,7 @@ class BursamClient
             'request' => $request,
             'headers' => $requestHeader,
             'response' => $response->json(),
+            'statusCode' => $response->getStatusCode(),
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return $response;
@@ -144,6 +145,7 @@ class BursamClient
             'request' => $request,
             'headers' => $requestHeader,
             'response' => $response->json(),
+            'statusCode' => $response->getStatusCode(),
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return $response;
@@ -191,6 +193,7 @@ class BursamClient
             'request' => $request,
             'headers' => $requestHeader,
             'response' => $response->json(),
+            'statusCode' => $response->getStatusCode(),
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return $response;
@@ -218,6 +221,7 @@ class BursamClient
             'url' => $url,
             'request' => $request,
             'response' => $response->json(),
+            'statusCode' => $response->getStatusCode(),
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return $response;
@@ -244,6 +248,7 @@ class BursamClient
             'url' => $url,
             'request' => $request,
             'response' => $response->json(),
+            'statusCode' => $response->getStatusCode(),
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return $response;
@@ -271,6 +276,7 @@ class BursamClient
             'url' => $url,
             'request' => $request,
             'response' => $response->json(),
+            'statusCode' => $response->getStatusCode(),
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return $response;
@@ -295,13 +301,6 @@ class BursamClient
             'decay_seconds' => config('trader.providers.bursam.rate_limit.decay_seconds'),
         ]);
 
-        return RateLimiter::attempt(
-            'bursam_api',
-            config('trader.providers.bursam.rate_limit.max_attempts'),
-            $callback,
-            config('trader.providers.bursam.rate_limit.decay_seconds'),
-        );
-
         $maxRetriesBeforeException = (int) config('trader.providers.bursam.rate_limit.max_retries_before_exception');
         if ($remainingRetries > $maxRetriesBeforeException) {
             $exception = new RateLimitExceededException('bursam_api');
@@ -313,11 +312,13 @@ class BursamClient
                 'remaining_retries' => $remainingRetries,
                 'max_retries_before_exception' => $maxRetriesBeforeException,
             ]);
-
+            Log::error('there is no limit', ['remainingRetries' => $remainingRetries, 'maxRetriesBeforeException' => $maxRetriesBeforeException]);
             throw $exception;
         }
 
         if ($remainingRetries > 0) {
+            Log::info('remaining of retry more than 0 so we need to sleep for two seconds', ['remainingRetries' => $remainingRetries, 'decay_seconds' => config('trader.providers.bursam.rate_limit.decay_seconds')]);
+
             sleep(((int) config('trader.providers.bursam.rate_limit.decay_seconds')) + 1);
         }
 
@@ -329,8 +330,11 @@ class BursamClient
         );
 
         if ($executed === false) {
+            Log::error('i can not execute the request so we will retry again', ['remainingRetries' => $remainingRetries]);
+
             return $this->rateLimitRequest($callback, ++$remainingRetries);
         }
+        Log::info('ok everything is ok');
 
         return $executed;
     }
