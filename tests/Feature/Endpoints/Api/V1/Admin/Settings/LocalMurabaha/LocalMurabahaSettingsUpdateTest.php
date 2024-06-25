@@ -78,7 +78,7 @@ class LocalMurabahaSettingsUpdateTest extends TestCase
     public function test_update_local_murabaha_settings_on_empty_default_trade_order_roatation_count_failed(): void
     {
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, Arr::except(self::$localMurabahaSettingsData, ['default_trade_order_roatation_count']))
+            ->putJson(self::BaseUrl, Arr::except(self::$localMurabahaSettingsData, ['default_trade_order_roatation_count', 'default_contract_sign_time_limit']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
                 'message' => 'The default trade order roatation count field is required. (and 1 more error)',
