@@ -90,6 +90,7 @@ class LocalMurabahaSettingsIndexTest extends TestCase
                 fractal(self::$localMurabahaSettings, new LocalMurabahaSettingsTransformer())
                     ->parseIncludes([
                         'default_trade_order_roatation_count',
+                        'default_contract_sign_time_limit',
                     ])
                     ->respond()
                     ->getData(true)
@@ -110,6 +111,7 @@ class LocalMurabahaSettingsIndexTest extends TestCase
                 fractal(self::$localMurabahaSettings, new LocalMurabahaSettingsTransformer())
                     ->parseIncludes([
                         'default_trade_order_roatation_count',
+                        'default_contract_sign_time_limit',
                     ])
                     ->respond()
                     ->getData(true)

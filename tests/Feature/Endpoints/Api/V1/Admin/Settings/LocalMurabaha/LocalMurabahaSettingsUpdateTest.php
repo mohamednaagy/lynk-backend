@@ -51,6 +51,7 @@ class LocalMurabahaSettingsUpdateTest extends TestCase
         self::$localMurabahaSettings = $this->getLocalMurabahaSettingsClass('LocalMurabaha');
         self::$localMurabahaSettingsData = [
             'default_trade_order_roatation_count' => 1,
+            'default_contract_sign_time_limit'  => 45,
         ];
     }
 
@@ -80,16 +81,19 @@ class LocalMurabahaSettingsUpdateTest extends TestCase
             ->putJson(self::BaseUrl, Arr::except(self::$localMurabahaSettingsData, ['default_trade_order_roatation_count']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
-                'message' => 'The default trade order roatation count field is required.',
+                'message' => 'The default trade order roatation count field is required. (and 1 more error)',
                 'errors' => [
                     'default_trade_order_roatation_count' => [
                         'The default trade order roatation count field is required.',
+                    ],
+                    'default_contract_sign_time_limit' => [
+                        'The default contract sign time limit field is required.',
                     ],
                 ],
             ]);
     }
 
-    
+
     /**
      * @throws Exception
      */
@@ -98,20 +102,24 @@ class LocalMurabahaSettingsUpdateTest extends TestCase
         $this->actingAs(self::$admin)
             ->putJson(self::BaseUrl, array_merge(
                 self::$localMurabahaSettingsData,
-                ['default_trade_order_roatation_count' => 'invalid']
+                ['default_trade_order_roatation_count' => 'invalid',
+                    'default_contract_sign_time_limit' => 0]
             ))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
-                'message' => 'The selected default trade order roatation count is invalid.',
+                'message' => 'The selected default trade order roatation count is invalid. (and 1 more error)',
                 'errors' => [
                     'default_trade_order_roatation_count' => [
                         'The selected default trade order roatation count is invalid.',
+                    ],
+                    'default_contract_sign_time_limit' => [
+                        'The default contract sign time limit must be greater than 0.',
                     ],
                 ],
             ]);
     }
 
-   
+
     /**
      * @throws Exception
      */
