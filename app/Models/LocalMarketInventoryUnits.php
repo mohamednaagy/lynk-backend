@@ -41,7 +41,7 @@ class LocalMarketInventoryUnits extends Model
 
     public function traderOrderUnits()
     {
-        return $this->hasMany(LocalMarketTraderOrderUnit::class, 'inventory_unit_id');
+        return $this->hasMany(LocalMarketOrderHasUnit::class, 'inventory_unit_id');
     }
 
     public function unitRotations()

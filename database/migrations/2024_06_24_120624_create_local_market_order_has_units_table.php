@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('local_market_trader_order_units', function (Blueprint $table) {
+        Schema::create('local_market_order_has_units', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('inventory_unit_id');
             $table->foreign('inventory_unit_id')->references('id')->on('local_market_inventory_units')->onDelete('cascade');
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('local_market_trader_order_units');
+        Schema::dropIfExists('local_market_order_has_units');
     }
 };

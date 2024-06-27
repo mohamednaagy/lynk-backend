@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('company_id')->index();
             $table->unsignedBigInteger('inventory_unit_id');
             $table->foreign('inventory_unit_id')->references('id')->on('local_market_inventory_units')->onDelete('cascade');
-            $table->boolean('is_need_rotations_update')->comment('True=>1|False=>0');
+            $table->boolean('is_need_rotations_update');
             $table->integer('number_of_rotations');
             $table->timestamps();
         });
