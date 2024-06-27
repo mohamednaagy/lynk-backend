@@ -7,6 +7,7 @@ use Spatie\LaravelSettings\Settings;
 class LocalMurabahaSettings extends Settings
 {
     public int $default_trade_order_roatation_count;
+    public int $default_contract_sign_time_limit;
 
     public static function group(): string
     {

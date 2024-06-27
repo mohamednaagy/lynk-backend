@@ -10,7 +10,8 @@ class LocalMurabahaSettingsTransformer extends TransformerAbstract
     public function transform(LocalMurabaha $settings): array
     {
         return [
-            'default_trade_order_roatation_count' => $settings->getDefaultTradeOrderRoatationCount(),
+            'default_trade_order_roatation_count'   => $settings->getDefaultTradeOrderRoatationCount(),
+            'default_contract_sign_time_limit'      => $settings->getDefaultContractSignTimeLimit()
         ];
     }
 }
