@@ -2,7 +2,9 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\OrderCancellationStatus;
 use App\Enums\TraderOrderCancellationStatus;
@@ -35,6 +37,7 @@ class LynkV1Driver implements TraderInterface
 
     public function getOrInitiateTraderOrder(FinancingOrder $financingOrder): ?Model
     {
+
         if ($financingOrder->initiatedTraderOrders()->exists()) {
             return $financingOrder->initiatedTraderOrders()->first();
         }
@@ -199,8 +202,23 @@ class LynkV1Driver implements TraderInterface
         TraderOrder $traderOrder,
         int $cancelReason = TraderOrderCancelReason::Manual
     ): int {
-        // TODO_LOCAL_MARKET need to implement
-        return TraderOrderCancellationStatus::Cancelled;
+        if ($traderOrder->mode == TraderOrderMode::Manual) {
+            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
+            $traderOrder->update([
+                'cancel_reason' => __('order.user_cancel_request'),
+            ]);
+
+            $order = $traderOrder->order()->first();
+
+            if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
+                $order->update([
+                    'status' => FinancingOrderStatus::Cancelled,
+                    'status_reason' => __('order.user_cancel_order'),
+                ]);
+            }
+
+            return TraderOrderCancellationStatus::Cancelled;
+        }
     }
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void

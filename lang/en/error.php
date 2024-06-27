@@ -31,6 +31,8 @@ return [
     'order_is_rejected' => 'Order has been rejected please contact customer support',
     'trader_not_supported' => 'Trader Not Supported',
     'order_is_already_completed' => 'Order is already completed',
+    'order_is_already_cancelled' => 'Order is already cancelled',
+
     'order_has_completed_trader_order' => 'Order ID #:order_id already has a completed trading request.',
     'order_already_has_active_trader_order' => 'Order already has active trading request',
     'commodity_market_is_unavailable' => 'The commodity market service is currently unavailable.',
