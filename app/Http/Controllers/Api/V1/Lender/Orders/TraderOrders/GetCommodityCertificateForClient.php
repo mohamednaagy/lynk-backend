@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1\Lender\Orders\TraderOrders;
+
+use App\Enums\Action;
+use App\Enums\Area;
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\Subject;
+use App\Http\Controllers\Controller;
+use App\Models\Company;
+use App\Models\TraderOrder;
+use Illuminate\Http\JsonResponse;
+
+class GetCommodityCertificateForClient extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::FinancingOrders, Action::Show, Action::Manage])
+        );
+    }
+
+    /**
+     * @param  Company  $lender
+     * @param  int  $order
+     * @param  TraderOrder  $traderOrder
+     * @return JsonResponse
+     */
+    public function __invoke(Company $lender, int $order, TraderOrder $traderOrder): JsonResponse
+    {
+        $media = $traderOrder->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer);
+
+        return $this->successResponse([
+            'url' => $media?->file_url,
+        ]);
+    }
+}
