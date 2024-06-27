@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\LocalMarketUnitRotationStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
@@ -15,12 +14,8 @@ class LocalMarketUnitRotation extends Model
     protected $fillable = [
         'company_id',
         'inventory_unit_id',
-        'need_update_status',
+        'is_need_rotations_update',
         'number_of_rotations',
-    ];
-
-    protected $casts = [
-        'need_update_status' => LocalMarketUnitRotationStatus::class,
     ];
 
     public function getActivitylogOptions(): LogOptions

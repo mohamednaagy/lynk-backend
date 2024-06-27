@@ -16,10 +16,9 @@ return new class extends Migration
         Schema::create('local_market_unit_rotations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('company_id')->index();
-            $table->foreign('company_id')->references('id')->on('companies')->cascadeOnDelete();
             $table->unsignedBigInteger('inventory_unit_id');
             $table->foreign('inventory_unit_id')->references('id')->on('local_market_inventory_units')->onDelete('cascade');
-            $table->string('need_update_status')->default(\App\Enums\LocalMarketUnitRotationStatus::False)->comment('True=>1|False=>0');
+            $table->boolean('is_need_rotations_update')->comment('True=>1|False=>0');
             $table->integer('number_of_rotations');
             $table->timestamps();
         });
