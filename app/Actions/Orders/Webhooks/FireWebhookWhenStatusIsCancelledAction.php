@@ -25,21 +25,21 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
         $documentMediaFile = get_media_of_model($traderOrder, $warrantyMediaCollection);
         $lastCompletedStep = $this->getDictionaryOfTraderOrder($traderOrder)->getLastCompletedStepOf($traderOrder);
 
-        //        WebhookEvent::fire($financingOrder->company, WebhookType::OrderUpdates, [
-        //            'order_id' => $financingOrder->id,
-        //            'order_status' => [
-        //                'value' => $financingOrder->status->value,
-        //                'label' => $financingOrder->status->description,
-        //            ],
-        //            'trading_information' => [
-        //                'trading_id' => $traderOrder->id,
-        //                'trading_reference' => $traderOrder->reference,
-        //                'current_trading_step' => 'cancelled',
-        //                'completed_murabaha_step' => $this->getUiStepName($lastCompletedStep?->step),
-        //                'warranty_document_url' => get_file_url($documentMediaFile),
-        //            ],
-        //            'updated_at' => $this->getFormattedDateTime($traderOrder),
-        //        ]);
+        WebhookEvent::fire($financingOrder->company, WebhookType::OrderUpdates, [
+            'order_id' => $financingOrder->id,
+            'order_status' => [
+                'value' => $financingOrder->status->value,
+                'label' => $financingOrder->status->description,
+            ],
+            'trading_information' => [
+                'trading_id' => $traderOrder->id,
+                'trading_reference' => $traderOrder->reference,
+                'current_trading_step' => 'cancelled',
+                'completed_murabaha_step' => $this->getUiStepName($lastCompletedStep?->step),
+                'warranty_document_url' => get_file_url($documentMediaFile),
+            ],
+            'updated_at' => $this->getFormattedDateTime($traderOrder),
+        ]);
 
     }
 
