@@ -331,6 +331,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             || $this->status->is(FinancingOrderStatus::Cancelled);
     }
 
+    public function isInPendingCancellationState(): bool
+    {
+        return $this->status->is(FinancingOrderStatus::PendingCancellation);
+    }
+
     public function isTradingMode(TraderOrderMode|string $mode)
     {
         return $this->company->trading_mode->is($mode);
