@@ -290,17 +290,15 @@ class BursamClient
             $instance->withMiddleware($middleware);
         }
 
+        $instance->throw(function ($response, $e) {
+            Log::error('Error in request with BURSAM', ['message' => $e->getMessage()]);
+        });
+
         return $instance;
     }
 
     protected function rateLimitRequest($callback, $remainingRetries = 0)
     {
-        // check if we have issue in rate limit
-        Log::info('making a request directly to rate limit', [
-            'max_attempts' => config('trader.providers.bursam.rate_limit.max_attempts'),
-            'decay_seconds' => config('trader.providers.bursam.rate_limit.decay_seconds'),
-        ]);
-
         $maxRetriesBeforeException = (int) config('trader.providers.bursam.rate_limit.max_retries_before_exception');
         if ($remainingRetries > $maxRetriesBeforeException) {
             $exception = new RateLimitExceededException('bursam_api');
@@ -312,7 +310,7 @@ class BursamClient
                 'remaining_retries' => $remainingRetries,
                 'max_retries_before_exception' => $maxRetriesBeforeException,
             ]);
-            Log::error('there is no limit', ['remainingRetries' => $remainingRetries, 'maxRetriesBeforeException' => $maxRetriesBeforeException]);
+            Log::error('Reached The Maximum number Of allowed retries', ['remainingRetries' => $remainingRetries, 'maxRetriesBeforeException' => $maxRetriesBeforeException]);
             throw $exception;
         }
 
@@ -330,10 +328,11 @@ class BursamClient
         );
 
         if ($executed === false) {
-            Log::error('i can not execute the request so we will retry again', ['remainingRetries' => $remainingRetries]);
+            Log::error('not allowed to send BURSAM request already send one in less than one second', ['remainingRetries' => $remainingRetries]);
 
             return $this->rateLimitRequest($callback, ++$remainingRetries);
         }
+
         Log::info('ok everything is ok');
 
         return $executed;
