@@ -10,6 +10,7 @@ use App\Models\TraderProduct;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
+use App\Support\Traders\TraderManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -86,10 +87,8 @@ trait TraderHelperTrait
 
     public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
     {
-        $fileName = $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
-        if ($traderOrder->provider == 'lynk') {
-            $fileName = $this->generatePdfFileName($traderOrder, $collectionName);
-        }
+        $traderManager = new TraderManager($this->app);
+        $fileName = $traderManager->getDefaultDriver()->generatePdfFileName($traderOrder, $collectionName);
         if (! is_null($type)) {
             $traderOrder->addMediaFromBase64(
                 $document
@@ -101,27 +100,7 @@ trait TraderHelperTrait
         }
     }
 
-    /**
-     * @param $traderOrder
-     * @param $collectionName
-     * @return string <Driver>_<collectionName>_<companies.unique_name>_<financing_orders.id>_<trader_orders.reference_number>_YYYYMMDD.pdf
-     */
-    public function generatePdfFileName($traderOrder, $collectionName) : string
-    {
-        switch ($collectionName) {
-            case 'selling_commodity_to_customer':
-                $fileType = 'SellCommCert';
-                break;
-            case 'transfer_ownership_to_lender':
-                $fileType = 'CommCert';
-                break;
-            case 'lynk_sale_pledge_certificate':
-                $fileType = 'BorrOwnCert';
-                break;
-        }
 
-        return 'LYNK_'.$fileType.'_'.$traderOrder->order->company->unique_name.'_'.$traderOrder->financing_order_id.'_'.$traderOrder->reference.'_'.date('Ymd').'.pdf';
-    }
 
     public function transformProductsToCommodityProductsDTO($products): Collection
     {

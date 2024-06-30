@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Traders\Drivers\Bursam\Strategies;
+namespace App\Support\Traders\Drivers\Lynk\Strategies;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\FinancingOrderHistory;
@@ -220,5 +220,27 @@ class LynkV1Driver implements TraderInterface
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
     {
+    }
+
+    /**
+     * @param $traderOrder
+     * @param $collectionName
+     * @return string <Driver>_<collectionName>_<companies.unique_name>_<financing_orders.id>_<trader_orders.reference_number>_YYYYMMDD.pdf
+     */
+    public function generatePdfFileName($traderOrder, $collectionName) : string
+    {
+        switch ($collectionName) {
+            case 'transfer_ownership_to_lender':
+                $fileType = 'CommCert';
+                break;
+            case 'selling_commodity_to_customer':
+                $fileType = 'BorrOwnCert';
+                break;
+            case 'lynk_sale_pledge_certificate':
+                $fileType = 'SellCommCert';
+                break;
+        }
+
+        return 'LYNK_'.$fileType.'_'.$traderOrder->order->company->unique_name.'_'.$traderOrder->financing_order_id.'_'.$traderOrder->reference.'_'.date('Ymd').'.pdf';
     }
 }
