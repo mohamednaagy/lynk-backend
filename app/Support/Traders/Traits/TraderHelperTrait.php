@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
 trait TraderHelperTrait
@@ -87,8 +88,8 @@ trait TraderHelperTrait
 
     public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
     {
-        $traderManager = new TraderManager($this->app);
-        $fileName = $traderManager->getDefaultDriver()->generatePdfFileName($traderOrder, $collectionName);
+        $traderManager = new TraderManager(app());
+        $fileName = $traderManager->driver($traderOrder->provider)->generatePdfFileName($traderOrder, $collectionName);
         if (! is_null($type)) {
             $traderOrder->addMediaFromBase64(
                 $document
