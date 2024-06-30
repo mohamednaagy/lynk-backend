@@ -2,9 +2,9 @@
 
 namespace App\Support\Traders\Drivers\Lynk\Strategies;
 
+use App\Actions\Contracts\Orders\CancelOrder;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\FinancingOrderHistory;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\OrderCancellationStatus;
 use App\Enums\TraderOrderCancellationStatus;
@@ -200,18 +200,14 @@ class LynkV1Driver implements TraderInterface
 
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::Manual
+        int $cancelReason = TraderOrderCancelReason::Manual,
     ): int {
         if ($traderOrder->mode == TraderOrderMode::Manual) {
             app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
 
-            $order = $traderOrder->order()->first();
-
-            if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
-                $order->update([
-                    'status' => FinancingOrderStatus::Cancelled,
-                    'status_reason' => __('order.user_cancel_order'),
-                ]);
+            $order = $traderOrder->order;
+            if ($order->isInPendingCancellationState()) {
+                app(CancelOrder::class)->handle($order, auth()->user(), ['status_reason' => __('order.user_cancel_order', [], 'en')]);
             }
 
             return TraderOrderCancellationStatus::Cancelled;
