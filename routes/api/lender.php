@@ -85,7 +85,6 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                         Route::post('/complete', CompleteOrder::class);
                         Route::put('/payment-proof', UpdateOrderPaymentProof::class);
                         Route::prefix('/trader-orders/{trader_order}')->group(function () {
-                            Route::get('/selling-commodity-to-client', GetCommodityCertificateForClient::class);
                             Route::post('/selling-commodity-to-client', UpdateCommodityCertificateForClient::class);
                             Route::put('/cancel', CancelTraderOrder::class);
                         });
