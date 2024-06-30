@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersVolume;
 use App\Http\Controllers\Api\V1\Lender\Orders\MakeOrderProceed;
 use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Orders\RejectOrder;
+use App\Http\Controllers\Api\V1\Lender\Orders\TraderOrders\UpdateCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Lender\Orders\UpdateOrderPaymentProof;
 use App\Http\Controllers\Api\V1\Lender\Settings\GetLenderAreaSettings;
 use App\Http\Controllers\Api\V1\Lender\Settings\SettingsController;
@@ -34,8 +35,6 @@ use App\Http\Controllers\Api\V1\Lender\Wallets\WalletNotificationController;
 use App\Http\Controllers\Api\V1\Lender\Webhooks\WebhookController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
-use App\Http\Controllers\Api\V1\Lender\Orders\TraderOrders\UpdateCommodityCertificateForClient;
-use App\Http\Controllers\Api\V1\Lender\Orders\TraderOrders\GetCommodityCertificateForClient;
 
 /*
 |--------------------------------------------------------------------------
@@ -85,7 +84,6 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                         Route::post('/complete', CompleteOrder::class);
                         Route::put('/payment-proof', UpdateOrderPaymentProof::class);
                         Route::prefix('/trader-orders/{trader_order}')->group(function () {
-                            Route::get('/selling-commodity-to-client', GetCommodityCertificateForClient::class);
                             Route::post('/selling-commodity-to-client', UpdateCommodityCertificateForClient::class);
                             Route::put('/cancel', CancelTraderOrder::class);
                         });
