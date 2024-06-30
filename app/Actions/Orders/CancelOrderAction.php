@@ -18,11 +18,12 @@ class CancelOrderAction implements CancelOrder
         int $cancelReason = TraderOrderCancelReason::Manual
     ): void {
         $activeTraderOrders = $financingOrder->activeTraderOrder()->lockForUpdate()->get();
+        $status_reason = $data['status_reason'] ?? __('order.user_cancel_order', [], 'en');
 
         if ($activeTraderOrders->count() === 0) {
             $financingOrder->update([
                 'status' => FinancingOrderStatus::Cancelled,
-                'status_reason' => $data['status_reason'] ?? null,
+                'status_reason' => $status_reason,
             ]);
 
             return;

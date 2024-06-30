@@ -207,7 +207,7 @@ class LynkV1Driver implements TraderInterface
 
             $order = $traderOrder->order;
             if ($order->isInPendingCancellationState()) {
-                app(CancelOrder::class)->handle($order, auth()->user(), ['status_reason' => __('order.user_cancel_order')]);
+                app(CancelOrder::class)->handle($order, auth()->user(), ['status_reason' => __('order.user_cancel_order', [], 'en')]);
             }
 
             return TraderOrderCancellationStatus::Cancelled;
