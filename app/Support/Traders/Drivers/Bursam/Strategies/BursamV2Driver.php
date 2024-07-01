@@ -155,6 +155,10 @@ class BursamV2Driver extends BursamV1Driver
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
+        if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+            return false;
+        }
+
         return $this->isNotInTransitionStateForSellingOrBuying($traderOrder)
             && $this->isNotInContractSignedForLenderArea($traderOrder, $area);
     }
@@ -172,11 +176,9 @@ class BursamV2Driver extends BursamV1Driver
     }
 
     /**
-     * @param $traderOrder
-     * @param $collectionName
      * @return string <Driver>_<trader_orders.reference_number>.pdf
      */
-    public function generatePdfFileName($traderOrder, $collectionName) : string
+    public function generatePdfFileName($traderOrder, $collectionName): string
     {
         return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
     }
