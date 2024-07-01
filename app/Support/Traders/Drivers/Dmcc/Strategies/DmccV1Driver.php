@@ -568,4 +568,14 @@ class DmccV1Driver implements TraderInterface
 
         return empty(array_intersect(self::notCancellableActions, $traderHistoryActions));
     }
+
+    /**
+     * @param $traderOrder
+     * @param $collectionName
+     * @return string <Driver>_<trader_orders.reference_number>.pdf
+     */
+    public function generatePdfFileName($traderOrder, $collectionName) : string
+    {
+        return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
+    }
 }

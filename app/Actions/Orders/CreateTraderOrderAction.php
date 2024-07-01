@@ -9,6 +9,7 @@ use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderAlreadyHasActiveTraderOrderException;
 use App\Exceptions\OrderIsAlreadyCompletedException;
+use App\Exceptions\OrderIsCancelledException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -30,6 +31,11 @@ class CreateTraderOrderAction implements CreateTraderOrder
         if ($financingOrder->status->is(FinancingOrderStatus::Completed)) {
             throw new OrderIsAlreadyCompletedException;
         }
+
+        if ($financingOrder->status->is(FinancingOrderStatus::Cancelled)) {
+            throw new OrderIsCancelledException;
+        }
+
         $doesInProgressTraderOrderExists = $financingOrder
             ->traderOrders()
             ->where(function ($q) {

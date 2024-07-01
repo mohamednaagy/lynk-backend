@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Support\Traders\Drivers\Bursam\Strategies;
+namespace App\Support\Traders\Drivers\Lynk\Strategies;
 
+use App\Actions\Contracts\Orders\CancelOrder;
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\OrderCancellationStatus;
@@ -35,6 +37,7 @@ class LynkV1Driver implements TraderInterface
 
     public function getOrInitiateTraderOrder(FinancingOrder $financingOrder): ?Model
     {
+
         if ($financingOrder->initiatedTraderOrders()->exists()) {
             return $financingOrder->initiatedTraderOrders()->first();
         }
@@ -197,13 +200,43 @@ class LynkV1Driver implements TraderInterface
 
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::Manual
+        int $cancelReason = TraderOrderCancelReason::Manual,
     ): int {
-        // TODO_LOCAL_MARKET need to implement
-        return TraderOrderCancellationStatus::Cancelled;
+        if ($traderOrder->mode == TraderOrderMode::Manual) {
+            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
+
+            $order = $traderOrder->order;
+            if ($order->isInPendingCancellationState()) {
+                app(CancelOrder::class)->handle($order, auth()->user(), ['status_reason' => __('order.user_cancel_order', [], 'en')]);
+            }
+
+            return TraderOrderCancellationStatus::Cancelled;
+        }
     }
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
     {
+    }
+
+    /**
+     * @param $traderOrder
+     * @param $collectionName
+     * @return string <Driver>_<collectionName>_<companies.unique_name>_<financing_orders.id>_<trader_orders.reference_number>_YYYYMMDD.pdf
+     */
+    public function generatePdfFileName($traderOrder, $collectionName) : string
+    {
+        switch ($collectionName) {
+            case 'transfer_ownership_to_lender':
+                $fileType = 'CommCert';
+                break;
+            case 'selling_commodity_to_customer':
+                $fileType = 'BorrOwnCert';
+                break;
+            case 'lynk_sale_pledge_certificate':
+                $fileType = 'SellCommCert';
+                break;
+        }
+
+        return 'LYNK_'.$fileType.'_'.$traderOrder->order->company->unique_name.'_'.$traderOrder->financing_order_id.'_'.$traderOrder->reference.'_'.date('Ymd').'.pdf';
     }
 }

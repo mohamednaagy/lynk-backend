@@ -170,4 +170,14 @@ class BursamV2Driver extends BursamV1Driver
         return $area !== Area::Lender
             || ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::ContractSigned);
     }
+
+    /**
+     * @param $traderOrder
+     * @param $collectionName
+     * @return string <Driver>_<trader_orders.reference_number>.pdf
+     */
+    public function generatePdfFileName($traderOrder, $collectionName) : string
+    {
+        return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
+    }
 }

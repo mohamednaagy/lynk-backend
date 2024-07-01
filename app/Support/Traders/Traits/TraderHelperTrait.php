@@ -10,11 +10,13 @@ use App\Models\TraderProduct;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
+use App\Support\Traders\TraderManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
 trait TraderHelperTrait
@@ -86,7 +88,8 @@ trait TraderHelperTrait
 
     public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
     {
-        $fileName = $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
+        $traderManager = new TraderManager(app());
+        $fileName = $traderManager->driver($traderOrder->provider)->generatePdfFileName($traderOrder, $collectionName);
         if (! is_null($type)) {
             $traderOrder->addMediaFromBase64(
                 $document
@@ -97,6 +100,8 @@ trait TraderHelperTrait
             )->usingFileName($fileName)->toMediaCollection($collectionName);
         }
     }
+
+
 
     public function transformProductsToCommodityProductsDTO($products): Collection
     {

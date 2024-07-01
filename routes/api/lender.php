@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersVolume;
 use App\Http\Controllers\Api\V1\Lender\Orders\MakeOrderProceed;
 use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Orders\RejectOrder;
+use App\Http\Controllers\Api\V1\Lender\Orders\TraderOrders\UpdateCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Lender\Orders\UpdateOrderPaymentProof;
 use App\Http\Controllers\Api\V1\Lender\Settings\GetLenderAreaSettings;
 use App\Http\Controllers\Api\V1\Lender\Settings\SettingsController;
@@ -75,7 +76,6 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                     Route::post('orders/{order}/complete', CompleteOrder::class);
                     Route::put('orders/{order}/payment-proof', UpdateOrderPaymentProof::class);
                     Route::put('orders/{order}/cancel', CancelOrder::class);
-                    Route::put('orders/{order}/trader-orders/{trader_order}/cancel', CancelTraderOrder::class);
                     Route::prefix('orders/{order}')->group(function () {
                         Route::post('/trader-orders', CreateTraderOrder::class);
                         Route::post('/proceed', MakeOrderProceed::class);
@@ -83,6 +83,10 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                         Route::put('/reject', RejectOrder::class);
                         Route::post('/complete', CompleteOrder::class);
                         Route::put('/payment-proof', UpdateOrderPaymentProof::class);
+                        Route::prefix('/trader-orders/{trader_order}')->group(function () {
+                            Route::post('/selling-commodity-to-client', UpdateCommodityCertificateForClient::class);
+                            Route::put('/cancel', CancelTraderOrder::class);
+                        });
                     });
                     Route::apiResource('orders', OrderController::class);
                     Route::post('users/{user}/resend-invitation', ResendInvitation::class);

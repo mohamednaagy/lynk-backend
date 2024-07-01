@@ -38,4 +38,14 @@ class LocalMarketInventoryUnits extends Model
     {
         return $this->belongsTo(LocalMarketInventory::class, 'local_market_inventory_id');
     }
+
+    public function traderOrderUnits()
+    {
+        return $this->hasMany(LocalMarketOrderHasUnit::class, 'inventory_unit_id');
+    }
+
+    public function unitRotations()
+    {
+        return $this->hasMany(LocalMarketUnitRotation::class, 'inventory_unit_id');
+    }
 }

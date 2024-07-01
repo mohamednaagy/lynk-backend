@@ -11,6 +11,7 @@ use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\FinancingOrders\TraderOrderHelper;
+use Carbon\Carbon;
 use Illuminate\Support\Collection as IlluminateCollection;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\NullResource;
@@ -43,6 +44,9 @@ class TraderOrderTransformer extends TransformerAbstract
         'is_cancellable',
         'history',
         'created_at',
+        'cancel_reason_message',
+        'cancelled_at',
+
     ];
 
     public function transform(TraderOrder $traderOrder)
@@ -169,6 +173,23 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeCreatedAt(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive($traderOrder->created_at?->clone()->tz('Asia/Riyadh')->toDateTimeString());
+    }
+
+    public function includeCancelledAt(TraderOrder $traderOrder): Primitive
+    {
+
+        if ($traderOrder->cancelled_at) {
+            $cancelledAt = Carbon::make($traderOrder->cancelled_at)->clone()->tz('Asia/Riyadh');
+
+            return $this->primitive(convertDateTimeToHumanDate($cancelledAt));
+        }
+
+        return $this->primitive(null);
+    }
+
+    public function includeCancelReasonMessage(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->cancel_reason_message);
     }
 
     public function setArea($area): static
