@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -48,5 +49,29 @@ class CommodityItem extends Model
     public function measurement()
     {
         return $this->belongsTo(Measurement::class);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function inventories() :HasMany
+    {
+        return $this->hasMany(LocalMarketInventory::class);
+    }
+
+    /**
+     * @return int
+     */
+    public function getAvailableUnitsAttribute() :int
+    {
+        return $this->inventories()->sum('available_quantity');
+    }
+
+    /**
+     * @return int
+     */
+    public function getReservedUnitsAttribute() :int
+    {
+        return $this->inventories()->sum('reserved_items');
     }
 }
