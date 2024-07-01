@@ -111,10 +111,6 @@ class TraderOrder extends Model implements HasMedia
 
     public function isCancellable(?string $area): bool
     {
-        if ($this->status->isNot(TraderOrderStatus::InProgress)) {
-            return false;
-        }
-
         return Trader::driver($this->provider, $this->version)
             ->isTraderOrderCancellable($this, $area);
     }

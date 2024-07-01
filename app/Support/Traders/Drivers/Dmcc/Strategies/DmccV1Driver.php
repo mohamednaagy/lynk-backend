@@ -564,17 +564,19 @@ class DmccV1Driver implements TraderInterface
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
+        if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+            return false;
+        }
+
         $traderHistoryActions = $traderOrder->traderHistories->pluck('action')->toArray();
 
         return empty(array_intersect(self::notCancellableActions, $traderHistoryActions));
     }
 
     /**
-     * @param $traderOrder
-     * @param $collectionName
      * @return string <Driver>_<trader_orders.reference_number>.pdf
      */
-    public function generatePdfFileName($traderOrder, $collectionName) : string
+    public function generatePdfFileName($traderOrder, $collectionName): string
     {
         return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
     }
