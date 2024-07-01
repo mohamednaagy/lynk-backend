@@ -559,15 +559,17 @@ class BursamV1Driver implements TraderInterface
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
+        if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+            return false;
+        }
+
         return true;
     }
 
     /**
-     * @param $traderOrder
-     * @param $collectionName
      * @return string <Driver>_<trader_orders.reference_number>.pdf
      */
-    public function generatePdfFileName($traderOrder, $collectionName) : string
+    public function generatePdfFileName($traderOrder, $collectionName): string
     {
         return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
     }

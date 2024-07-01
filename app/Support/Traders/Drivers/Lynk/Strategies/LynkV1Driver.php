@@ -193,9 +193,11 @@ class LynkV1Driver implements TraderInterface
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
-        // TODO_LOCAL_MARKET need to implement
+        if ($traderOrder->status->is(TraderOrderStatus::Initiated) || $traderOrder->status->is(TraderOrderStatus::InProgress)) {
+            return true;
+        }
 
-        return true;
+        return false;
     }
 
     public function cancelTraderOrder(
@@ -219,11 +221,9 @@ class LynkV1Driver implements TraderInterface
     }
 
     /**
-     * @param $traderOrder
-     * @param $collectionName
      * @return string <Driver>_<collectionName>_<companies.unique_name>_<financing_orders.id>_<trader_orders.reference_number>_YYYYMMDD.pdf
      */
-    public function generatePdfFileName($traderOrder, $collectionName) : string
+    public function generatePdfFileName($traderOrder, $collectionName): string
     {
         switch ($collectionName) {
             case 'transfer_ownership_to_lender':
