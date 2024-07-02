@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('local_market_order_id');
             $table->foreign('local_market_order_id')->references('id')->on('local_market_orders');
-            $table->unsignedBigInteger('inventory_id');
-            $table->foreign('inventory_id')->references('id')->on('inventories');
+            $table->unsignedBigInteger('local_market_inventory_id');
+            $table->foreign('local_market_inventory_id')->references('id')->on('local_market_inventories');
             $table->integer('quantity');
             $table->decimal('price', 64, 0);
             $table->unsignedBigInteger('measurement_id');
