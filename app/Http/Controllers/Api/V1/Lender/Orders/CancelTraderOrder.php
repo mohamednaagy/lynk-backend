@@ -8,9 +8,7 @@ use App\Enums\Area;
 use App\Enums\ErrorCode;
 use App\Enums\MurabhaStep;
 use App\Enums\Subject;
-use App\Enums\Trader;
 use App\Enums\TraderOrderCancelReason;
-use App\Enums\TraderOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\CancelOrderRequest;
 use App\Models\TraderOrder;
@@ -45,22 +43,12 @@ class CancelTraderOrder extends Controller
         return DB::transaction(function () use ($request, $cancelTraderOrder, $traderOrder) {
             $traderOrder = TraderOrder::lockForUpdate()->findOrFail($traderOrder);
 
-            if ($traderOrder->provider == Trader::Lynk) {
-                if ($traderOrder->status->isNot(TraderOrderStatus::InProgress) && $traderOrder->status->isNot(TraderOrderStatus::Initiated)) {
-                    return $this->errorResponse(
-                        __('error.unable_to_cancel_order'),
-                        Response::HTTP_FORBIDDEN,
-                        ErrorCode::UNABLE_TO_CANCEL_ORDER
-                    );
-                }
-            } else {
-                if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
-                    return $this->errorResponse(
-                        __('error.unable_to_cancel_order'),
-                        Response::HTTP_FORBIDDEN,
-                        ErrorCode::UNABLE_TO_CANCEL_ORDER
-                    );
-                }
+            if ($traderOrder->cantBeCancelled()) {
+                return $this->errorResponse(
+                    __('error.unable_to_cancel_order'),
+                    Response::HTTP_FORBIDDEN,
+                    ErrorCode::UNABLE_TO_CANCEL_ORDER
+                );
             }
 
             $lastHistoryOfContractSignedStep = $this->getContractSignedLastHistory($traderOrder);

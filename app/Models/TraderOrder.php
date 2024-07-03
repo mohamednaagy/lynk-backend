@@ -231,19 +231,13 @@ class TraderOrder extends Model implements HasMedia
         return $this->status->is(TraderOrderStatus::Cancelled);
     }
 
-    public function getCancelStep()
+    public function cantBeCancelled(): bool
     {
-        if ($this->provider == EnumsTrader::Lynk && $this->mode = TraderOrderMode::Manual) {
-            if ($this->isCancelled()) {
-                $last_completed_step = (new StepHistoriesDictionary($this->provider, $this->version))
-                    ->getLastCompletedStepOf($this);
-                $next_step = (new StepHistoriesDictionary($this->provider, $this->version))
-                    ->getNextStepOf($last_completed_step->step);
+        return $this->status->isNot(TraderOrderStatus::InProgress) && $this->status->isNot(TraderOrderStatus::Initiated);
+    }
 
-                return $next_step->step;
-            }
-        }
-
-        return null;
+    public function getCancelStep(): string
+    {
+        return (new StepHistoriesDictionary($this->provider, $this->version))->getCancelStep($this)->step;
     }
 }
