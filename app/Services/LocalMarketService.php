@@ -36,9 +36,9 @@ class LocalMarketService
         if (empty($inventory)) {
             // we can't go with this order there is no suitable inventory
             // the loan is not completed
+            //throw new \Exception("NO_SUITABLE_INVENTORIES", 400);
             return false;
         } else {
-            dd($inventory);
             // try to get the inventory for preferred types (happy scenario)
             // TODO : refactor this code with form to handle : reserved units , total cost , remaining total
             $suitableUnits = $this->getUnits($companyId, $inventory, $loanAmount, $rotations);
@@ -85,7 +85,7 @@ class LocalMarketService
                 [$preferredItemTypesSql, $usedInventoriesSql, $amount]
             );
         }
-    return $inventory;
+    return $inventory[0] ?? null;
     }
 
     //================ second step check ownership ==================
@@ -97,29 +97,30 @@ class LocalMarketService
     }
     public function getSuitableUnits($companyId, $inventory, $loan, $needToCheckOwnerShip = false, $rotations = 0)
     {
-    $numberOfNeededUnits = $loan / $inventory->price;
+    $numberOfNeededUnits = ceil($loan / $inventory->max_price);
+    dd($numberOfNeededUnits);
     // TODO discuess i can add limit with numberOfNeededUnits but may be i need more
     // i can check for ownership in database engine or in laravel code we can check the best performance
     if ($needToCheckOwnerShip) {
-    $availableUnits = DB::row("
-    select * from inventoryUnits
-    join unit_ownership on unit_ownership.unit_id = inventoryUnits.id and unit_ownership.company_id = $companyId
-    where inventoryId = $inventory->id
-    and unit_ownership.number_of_rotations >= $rotations limit $numberOfNeededUnits
-    order by unit_ownership desc // get the last row of ownership for this company
+    $availableUnits = DB::select("
+    SELECT * FROM local_market_inventory_units
+    JOIN unit_ownership on unit_ownership.unit_id = inventoryUnits.id AND unit_ownership.company_id = $companyId
+    WHERE inventoryId = $inventory->id
+    AND unit_ownership.number_of_rotations >= $rotations limit $numberOfNeededUnits
+    order by unit_ownership desc
     limit 1
     ");
     } else {
-    $availableUnits = DB::row("
-    select * from inventoryUnits where status = free limit $numberOfNeededUnits and inventory_id = $inventory
+    $availableUnits = DB::select("
+    SELECT * FROM local_market_inventory_units WHERE status = free limit $numberOfNeededUnits and inventory_id = $inventory
     ");
     }
-    $totalAvailableUnitsCost = count($availableUnits) * $inventory->price;
-    $remeningLoan = $loan - $totalAvailableUnitsCost;
+    $totalAvailableUnitsCost = count($availableUnits) * $inventory->max_price;
+    $remainingLoan = $loan - $totalAvailableUnitsCost;
     return [
     'availableUnits' => $availableUnits,
     'totalCost' => $totalAvailableUnitsCost,
-    'remeningLoan' => $remeningLoan,
+    'remainingLoan' => $remainingLoan,
     ];
     }
     // helper functions
@@ -148,10 +149,15 @@ class LocalMarketService
     }
     private function ifCompanyBuyFromInventoryBefore($companyId, $inventoryId): bool
     {
-    $result = DB::row("
-    select * from companyInventoryHistory where companyId = $companyId and
-    inventoryId = $inventoryId limit 1
-    ");
+    $result = DB::select("
+    SELECT orders.*, inventories.*
+    FROM local_market_orders orders
+    LEFT JOIN local_market_order_has_inventories inventories
+        ON orders.id = inventories.local_market_order_id
+        WHERE orders.company_id = ?
+          AND inventories.inventory_id = ?
+    inventoryId = ? limit 1
+    ", [$companyId, $inventoryId]);
     return !empty($result);
     }
 }
