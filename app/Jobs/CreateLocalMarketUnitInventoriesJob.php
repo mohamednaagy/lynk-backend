@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Enums\LocalMarketInventoryStatus;
+use App\Enums\LocalMarketInventoryUnitsStatus;
 use App\Exceptions\NeedManuallyCheckUnitsAndStatus;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
@@ -51,6 +52,7 @@ class CreateLocalMarketUnitInventoriesJob implements ShouldQueue
                 'local_market_inventory_id' => $this->inventory->id,
                 'commodity_item_id' => $this->inventory->item->id,
                 'qr_code' => $baseName.'-'.$uuid,
+                'status'  => LocalMarketInventoryUnitsStatus::Free,
             ];
         }
 

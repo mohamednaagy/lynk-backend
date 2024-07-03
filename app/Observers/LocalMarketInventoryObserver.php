@@ -37,7 +37,7 @@ class LocalMarketInventoryObserver
     {
         try {
             $numberOfUnits = $inventory->available_quantity;
-            $chunkSize = ($numberOfUnits <= 20000) ? $numberOfUnits : 20000;
+            $chunkSize = ($numberOfUnits <= 15000) ? $numberOfUnits : 15000;
             $numberOfChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
 
             //loop through the chunks
