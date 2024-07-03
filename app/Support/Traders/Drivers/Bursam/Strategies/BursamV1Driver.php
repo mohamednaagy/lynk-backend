@@ -524,7 +524,7 @@ class BursamV1Driver implements TraderInterface
      */
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::Manual
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
     ): int {
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
 

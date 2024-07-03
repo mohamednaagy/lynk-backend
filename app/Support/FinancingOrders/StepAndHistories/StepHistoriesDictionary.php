@@ -114,4 +114,13 @@ class StepHistoriesDictionary
             }
         }
     }
+
+    public function getCancelStep(TraderOrder $traderOrder)
+    {
+
+        $last_completed_step = $this->getLastCompletedStepOf($traderOrder);
+        $next_step = $this->getNextStepOf($last_completed_step->step);
+
+        return $next_step;
+    }
 }

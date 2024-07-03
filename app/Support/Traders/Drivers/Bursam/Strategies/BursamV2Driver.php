@@ -59,7 +59,7 @@ class BursamV2Driver extends BursamV1Driver
      */
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::Manual
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
     ): int {
         if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket)) {
             app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);

@@ -9,7 +9,6 @@ use App\Enums\ErrorCode;
 use App\Enums\MurabhaStep;
 use App\Enums\Subject;
 use App\Enums\TraderOrderCancelReason;
-use App\Enums\TraderOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\CancelOrderRequest;
 use App\Models\TraderOrder;
@@ -31,7 +30,7 @@ class CancelTraderOrder extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  CancelTraderOrderInterface  $cancelTraderOrder ,
+     * @param  CancelTraderOrderInterface  $cancelTraderOrder  ,
      *
      * @throws \Throwable
      */
@@ -44,7 +43,7 @@ class CancelTraderOrder extends Controller
         return DB::transaction(function () use ($request, $cancelTraderOrder, $traderOrder) {
             $traderOrder = TraderOrder::lockForUpdate()->findOrFail($traderOrder);
 
-            if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+            if ($traderOrder->cantBeCancelled()) {
                 return $this->errorResponse(
                     __('error.unable_to_cancel_order'),
                     Response::HTTP_FORBIDDEN,
@@ -66,7 +65,7 @@ class CancelTraderOrder extends Controller
                 $traderOrder,
                 $request->user(),
                 $request->validated(),
-                TraderOrderCancelReason::Manual
+                TraderOrderCancelReason::TraderOrderIsCancelled
             );
 
             return $this->successResponse();

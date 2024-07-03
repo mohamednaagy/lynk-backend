@@ -9,7 +9,7 @@ use App\Models\TraderOrder;
 
 class UpdateTraderOrderStatusToCancelAction implements UpdateTraderOrderStatusToCancel
 {
-    public function handle(TraderOrder $traderOrder, int $cancelReason = TraderOrderCancelReason::Manual, string $failureReason = null): void
+    public function handle(TraderOrder $traderOrder, int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled, ?string $failureReason = null): void
     {
         $traderOrder->update([
             'status' => TraderOrderStatus::Cancelled,

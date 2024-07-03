@@ -225,4 +225,19 @@ class TraderOrder extends Model implements HasMedia
 
         return ! $this->hasMedia(TraderOrderMediaCollection::ClientWakala);
     }
+
+    public function isCancelled(): bool
+    {
+        return $this->status->is(TraderOrderStatus::Cancelled);
+    }
+
+    public function cantBeCancelled(): bool
+    {
+        return $this->status->isNot(TraderOrderStatus::InProgress) && $this->status->isNot(TraderOrderStatus::Initiated);
+    }
+
+    public function getCancelStep(): string
+    {
+        return (new StepHistoriesDictionary($this->provider, $this->version))->getCancelStep($this)->step;
+    }
 }
