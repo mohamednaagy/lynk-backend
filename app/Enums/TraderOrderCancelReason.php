@@ -12,4 +12,8 @@ final class TraderOrderCancelReason extends Enum implements LocalizedEnum
     const MurabhaTimeout = 2;
 
     const FailureToPurchase = 3;
+
+    const FinancingOrderIsCancelled = 4;
+
+    const TraderOrderIsCancelled = 5;
 }

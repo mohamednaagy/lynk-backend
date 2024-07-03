@@ -6,8 +6,8 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -183,18 +183,15 @@ class TraderHistoryTransformer extends TransformerAbstract
         }
 
         $previousAction = $this->getLatestTraderHistoryOfPreviousStep($CurrentStep);
-        $latestAction = $this->getLatestTraderHistoryOfStep($CurrentStep);
+        if ($this->traderOrder->isCancelled()) {
+            $endTime = $this->traderOrder->cancelled_at;
+        } else {
+            $latestAction = $this->getLatestTraderHistoryOfStep($CurrentStep);
+            $endTime = $latestAction?->created_at;
+        }
 
-        if ($previousAction?->created_at && $latestAction?->created_at) {
-            $diffTime = $previousAction->created_at->diffForHumans(
-                $latestAction->created_at, [
-                    'parts' => 3,
-                    'join' => true,
-                ]);
-
-            $ignoredWords = ['ago', 'before', 'after', 'منذ', 'قبل'];
-
-            return Str::remove($ignoredWords, $diffTime);
+        if ($previousAction?->created_at && $endTime) {
+            return convertDateTimeToHumanDate(Carbon::make($previousAction->created_at), Carbon::make($endTime));
         }
 
         return null;

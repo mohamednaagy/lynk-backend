@@ -6,6 +6,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Role;
+use App\Enums\Trader;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Enums\TransactionReason;
@@ -240,8 +241,22 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function activeTraderOrder(): HasMany
     {
         return $this->traderOrders()
-            ->where('status', TraderOrderStatus::InProgress)
+            ->where(function ($query) {
+                $query->where('provider', Trader::Lynk)
+                    ->where(function ($query) {
+                        $query->where('status', TraderOrderStatus::InProgress)
+                            ->orWhere('status', TraderOrderStatus::Initiated);
+                    })
+                    ->orWhere(function ($query) {
+                        $query->where('provider', '!=', Trader::Lynk)
+                            ->where('status', TraderOrderStatus::InProgress);
+                    });
+            })
             ->latest();
+        //
+        //        return $this->traderOrders()
+        //            ->where('status', TraderOrderStatus::InProgress)
+        //            ->latest();
     }
 
     public function latestTraderOrder(): HasOne

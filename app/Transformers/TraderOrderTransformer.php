@@ -44,8 +44,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'is_cancellable',
         'history',
         'created_at',
-        'cancel_reason_message',
-        'cancelled_at',
+        'cancel_details',
 
     ];
 
@@ -175,21 +174,17 @@ class TraderOrderTransformer extends TransformerAbstract
         return $this->primitive($traderOrder->created_at?->clone()->tz('Asia/Riyadh')->toDateTimeString());
     }
 
-    public function includeCancelledAt(TraderOrder $traderOrder): Primitive
+    public function includeCancelDetails(TraderOrder $traderOrder)
     {
-
-        if ($traderOrder->cancelled_at) {
-            $cancelledAt = Carbon::make($traderOrder->cancelled_at)->clone()->tz('Asia/Riyadh');
-
-            return $this->primitive(convertDateTimeToHumanDate($cancelledAt));
+        if (! $traderOrder->isCancelled()) {
+            return $this->primitive(null);
         }
 
-        return $this->primitive(null);
-    }
-
-    public function includeCancelReasonMessage(TraderOrder $traderOrder): Primitive
-    {
-        return $this->primitive($traderOrder->cancel_reason_message);
+        return $this->primitive([
+            'cancelled_at' => Carbon::make($traderOrder->cancelled_at)?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
+            'cancel_step' => $traderOrder->getCancelStep(),
+            'cancel_reason' => $traderOrder->cancel_reason,
+        ]);
     }
 
     public function setArea($area): static

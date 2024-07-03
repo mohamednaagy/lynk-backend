@@ -225,4 +225,25 @@ class TraderOrder extends Model implements HasMedia
 
         return ! $this->hasMedia(TraderOrderMediaCollection::ClientWakala);
     }
+
+    public function isCancelled(): bool
+    {
+        return $this->status->is(TraderOrderStatus::Cancelled);
+    }
+
+    public function getCancelStep()
+    {
+        if ($this->provider == EnumsTrader::Lynk && $this->mode = TraderOrderMode::Manual) {
+            if ($this->isCancelled()) {
+                $last_completed_step = (new StepHistoriesDictionary($this->provider, $this->version))
+                    ->getLastCompletedStepOf($this);
+                $next_step = (new StepHistoriesDictionary($this->provider, $this->version))
+                    ->getNextStepOf($last_completed_step->step);
+
+                return $next_step->step;
+            }
+        }
+
+        return null;
+    }
 }

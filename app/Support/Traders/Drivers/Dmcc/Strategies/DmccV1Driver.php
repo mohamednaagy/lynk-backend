@@ -236,7 +236,7 @@ class DmccV1Driver implements TraderInterface
      */
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::Manual
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
     ): object {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('cancelTTI'))
