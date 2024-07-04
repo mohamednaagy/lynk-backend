@@ -55,6 +55,7 @@ class TraderOrder extends Model implements HasMedia
             'can_continue_progress',
             'updated_at',
             'created_at',
+            'default_contract_sign_time_limit',
         ];
     }
 
