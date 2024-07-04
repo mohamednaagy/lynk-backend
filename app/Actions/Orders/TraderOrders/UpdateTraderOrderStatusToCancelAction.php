@@ -17,5 +17,11 @@ class UpdateTraderOrderStatusToCancelAction implements UpdateTraderOrderStatusTo
             'failure_reason' => $failureReason,
             'cancelled_at' => now(),
         ]);
+
+        $traderOrder->cancelDetail()->create([
+            'cancelled_by' => auth()->user()->getAuthIdentifier(),
+            'cancel_step' => $traderOrder->getCancelStep(),
+            'cancel_reason' => $cancelReason,
+        ]);
     }
 }

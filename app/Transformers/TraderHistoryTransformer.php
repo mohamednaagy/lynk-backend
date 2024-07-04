@@ -54,7 +54,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $ownershipDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::TransferOwnershipToLender);
 
         return $this->primitive([
-            'step' => 'commodity_purchased',
+            'step' => MurabhaStep::PurchasingCommodity,
             'is_complete' => (bool) $history,
             'completed_at' => optional($history)->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'cert_document' => [
@@ -78,7 +78,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $signedWakalaDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::SignedClientWakala);
 
         return $this->primitive([
-            'step' => 'client_wakala',
+            'step' => MurabhaStep::ClientWakala,
             'is_complete' => (bool) $history,
             'completed_at' => $history?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'signed_wakala_document' => [
@@ -98,7 +98,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $wakalaDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::ClientWakala);
 
         return $this->primitive([
-            'step' => 'contract_signed',
+            'step' => MurabhaStep::ContractSigned,
             'is_complete' => (bool) $history,
             'completed_at' => optional($history)->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'wakala_document' => [
@@ -118,7 +118,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $documentMediaFile = $this->getMedia(TraderOrderMediaCollection::SellingCommodityToCustomer);
 
         return $this->primitive([
-            'step' => 'selling_commodity_to_customer',
+            'step' => MurabhaStep::CommoditySoldToCustomer,
             'is_complete' => (bool) $history,
             'completed_at' => $history?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'borrower_document' => [
@@ -138,7 +138,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $mpoDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder);
 
         return $this->primitive([
-            'step' => 'selling_commodity_to_open_market',
+            'step' => MurabhaStep::SellingCommodityToOpenMarket,
             'is_complete' => (bool) $history,
             'completed_at' => $history?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'mpo_document' => [
@@ -161,8 +161,9 @@ class TraderHistoryTransformer extends TransformerAbstract
             'lynk' => $this->getMedia(TraderOrderMediaCollection::LynkSalePledgeCertificate),
         };
 
+        ///*****///
         return $this->primitive([
-            'step' => 'murabha_sale_completed',
+            'step' => MurabhaStep::MurabahaSaleCompleted,
             'is_complete' => (bool) $history,
             'completed_at' => optional($history)->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'warranty_document' => [
@@ -237,7 +238,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         );
 
         return $this->primitive([
-            'step' => 'customer_delivery_confirmation',
+            'step' => MurabhaStep::CustomerDeliveryConfirmation,
             'is_complete' => (bool) $history,
             'completed_at' => $history?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),

@@ -240,4 +240,9 @@ class TraderOrder extends Model implements HasMedia
     {
         return (new StepHistoriesDictionary($this->provider, $this->version))->getCancelStep($this)->step;
     }
+
+    public function cancelDetail()
+    {
+        return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
+    }
 }
