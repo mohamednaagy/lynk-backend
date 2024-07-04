@@ -145,7 +145,7 @@ class LocalMarketService
     {
         $values = [];
         foreach ($units as $unit) {
-            $values[] = "($unit, $companyId)";
+            $values[] = "($unit->id, $companyId)";
         }
         $unitsSql = implode(',', array_map('intval', array_column($units, 'id')));
 
