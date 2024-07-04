@@ -102,7 +102,7 @@ class LocalMarketService
     }
     public function getSuitableUnits($companyId, $inventory, $loan, $needToCheckOwnerShip = false, $usedUnits, $rotations = 0)
     {
-        $numberOfNeededUnits = $loan / $inventory->max_price;
+        $numberOfNeededUnits = floor($loan / $inventory->max_price);
         dd($numberOfNeededUnits);
         $whereClause = '';
 
