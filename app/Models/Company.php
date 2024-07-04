@@ -7,6 +7,7 @@ use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
 use App\Enums\OrderFeeType;
+use App\Enums\Trader;
 use App\Enums\TraderOrderMode;
 use App\Support\QueryScoper\HasScopes;
 use App\Support\Wallets\Traits\HasWallet;
@@ -152,5 +153,30 @@ class Company extends BaseTenant
     public function unitRotations()
     {
         return $this->hasMany(LocalMarketUnitRotation::class, 'company_id');
+    }
+
+    public function isLocalMarketType(): bool
+    {
+        return $this->preferred_market_type->is(CompanyMarketType::Local());
+    }
+
+    public function isInternationalMarketType()
+    {
+        return $this->preferred_market_type->is(CompanyMarketType::International());
+    }
+
+    public function isAnyMarketType(): bool
+    {
+        return $this->preferred_market_type->is(CompanyMarketType::Any());
+    }
+
+    public function getPreferredDriverForAutomaicTrader()
+    {
+        if ($this->isInternationalMarketType()) {
+            return Trader::Bursam;
+        }
+
+        return Trader::Lynk;
+
     }
 }

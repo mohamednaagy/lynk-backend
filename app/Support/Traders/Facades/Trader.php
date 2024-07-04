@@ -2,18 +2,19 @@
 
 namespace App\Support\Traders\Facades;
 
+use App\Models\Company;
 use Illuminate\Support\Facades\Facade;
 use RuntimeException;
 
 /**
  * @method static \App\Support\Traders\Contracts\TraderInterface driver(string $driver= null, string $version= null)
+ * @method static \App\Support\Traders\Contracts\TraderInterface getDriverBasedOnCompanyMarketType(Company $company)
  */
 class Trader extends Facade
 {
     /**
      * Get the registered name of the component.
      *
-     * @return string
      *
      * @throws RuntimeException
      */

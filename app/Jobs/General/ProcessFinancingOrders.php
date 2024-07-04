@@ -33,6 +33,11 @@ class ProcessFinancingOrders implements ShouldQueue
             'provider' => 'bursam',
             'versions' => ['v2'],
         ],
+
+        [
+            'provider' => 'lynk',
+            'versions' => ['v1'],
+        ],
     ];
 
     /**
