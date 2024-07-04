@@ -102,7 +102,8 @@ class LocalMarketService
     }
     public function getSuitableUnits($companyId, $inventory, $loan, $needToCheckOwnerShip = false, $usedUnits, $rotations = 0)
     {
-        $numberOfNeededUnits = floor($loan / $inventory->max_price);
+        $numberOfNeededUnits = $loan / $inventory->max_price;
+        dd($numberOfNeededUnits);
         $whereClause = '';
 
         if ($usedUnits) {
@@ -183,4 +184,18 @@ class LocalMarketService
 
         return !empty($result);
     }
+
+    // function findValidPrice($minPrice, $maxPrice, $loanAmount)
+    // {
+    //     $startPrice = ceil($maxPrice);
+    //     $endPrice = floor($minPrice);
+
+    //     for ($price = $startPrice; $price > $endPrice; $price--) {
+    //         if (fmod($loanAmount, $price) == 0) {
+    //             return $price;
+    //         }
+    //     }
+
+    //     throw new \Exception("Invalid price with item", 400);
+    // }
 }
