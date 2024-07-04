@@ -63,8 +63,11 @@ class TraderManager extends Manager
         return new FakeV1Driver();
     }
 
-    public function getDriverBasedOnCompanyMarketType(Company $company)
+    public function getSuitableDriverForCompany(Company $company)
     {
-        return $company->getPreferredDriverForAutomaicTrader();
+        $driver = $company->getPreferredTrader();
+
+        return $this->driver($driver, get_latest_version_of_trader($driver));
+
     }
 }

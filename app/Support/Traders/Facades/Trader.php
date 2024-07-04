@@ -8,7 +8,7 @@ use RuntimeException;
 
 /**
  * @method static \App\Support\Traders\Contracts\TraderInterface driver(string $driver= null, string $version= null)
- * @method static \App\Support\Traders\Contracts\TraderInterface getDriverBasedOnCompanyMarketType(Company $company)
+ * @method static \App\Support\Traders\Contracts\TraderInterface getSuitableDriverForCompany(Company $company)
  */
 class Trader extends Facade
 {

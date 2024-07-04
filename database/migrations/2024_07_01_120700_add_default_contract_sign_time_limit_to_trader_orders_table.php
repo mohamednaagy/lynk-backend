@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('trader_orders', function (Blueprint $table) {
-            $table->integer('default_contract_sign_time_limit')->after('version')->nullable();
+            $table->integer('default_contract_sign_time_limit')->after('version')->comment('default measurement unit (hours)')->nullable();
         });
     }
 

@@ -155,22 +155,12 @@ class Company extends BaseTenant
         return $this->hasMany(LocalMarketUnitRotation::class, 'company_id');
     }
 
-    public function isLocalMarketType(): bool
-    {
-        return $this->preferred_market_type->is(CompanyMarketType::Local());
-    }
-
     public function isInternationalMarketType()
     {
         return $this->preferred_market_type->is(CompanyMarketType::International());
     }
 
-    public function isAnyMarketType(): bool
-    {
-        return $this->preferred_market_type->is(CompanyMarketType::Any());
-    }
-
-    public function getPreferredDriverForAutomaicTrader()
+    public function getPreferredTrader()
     {
         if ($this->isInternationalMarketType()) {
             return Trader::Bursam;
