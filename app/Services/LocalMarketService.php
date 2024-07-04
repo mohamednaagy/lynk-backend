@@ -43,6 +43,7 @@ class LocalMarketService
             //throw new \Exception("NO_SUITABLE_INVENTORIES", 400);
             return false;
         } else {
+            Log::info("inventories_nasr". $inventory->id);
             // try to get the inventory for preferred types (happy scenario)
             // TODO : refactor this code with form to handle : reserved units , total cost , remaining total
             $suitableUnits = $this->getUnits($companyId, $inventory, $loanAmount, $usedUnits, $rotations);
@@ -103,7 +104,7 @@ class LocalMarketService
     public function getSuitableUnits($companyId, $inventory, $loan, $needToCheckOwnerShip = false, $usedUnits, $rotations = 0)
     {
         $numberOfNeededUnits = floor($loan / $inventory->max_price);
-        dd($numberOfNeededUnits);
+        Log::info("numberofUnits" . $numberOfNeededUnits);
         $whereClause = '';
 
         if ($usedUnits) {
@@ -144,23 +145,23 @@ class LocalMarketService
     // helper functions
     private function bulkInsertUnitsOwnerSHip($companyId, $units)
     {
-        $values = [];
-        foreach ($units as $unit) {
-            $values[] = "($unit->id, $companyId)";
-        }
-        $unitsSql = implode(',', array_map('intval', array_column($units, 'id')));
+        // $values = [];
+        // foreach ($units as $unit) {
+        //     $values[] = "($unit->id, $companyId)";
+        // }
+        // $unitsSql = implode(',', array_map('intval', array_column($units, 'id')));
 
-        $query =  DB::select(
-            "UPDATE local_market_inventory_units
-             SET status = ?
-             WHERE `id` IN ($unitsSql)",
-            [LocalMarketInventoryUnitsStatus::Reserved]
-        );
+        // $query =  DB::select(
+        //     "UPDATE local_market_inventory_units
+        //      SET status = ?
+        //      WHERE `id` IN ($unitsSql)",
+        //     [LocalMarketInventoryUnitsStatus::Reserved]
+        // );
 
-        $query = "INSERT INTO unit_ownership (owner_type, unit_id,owner_id,owner_name) VALUES " . implode(', ', $values);
-        // update number of rotations column for all old ownersip records
-        // update need update number of rotations column FALSE to the last same company id and unit id
-        DB::statement($query);
+        // $query = "INSERT INTO unit_ownership (owner_type, unit_id,owner_id,owner_name) VALUES " . implode(', ', $values);
+        // // update number of rotations column for all old ownersip records
+        // // update need update number of rotations column FALSE to the last same company id and unit id
+        // DB::statement($query);
     }
     private function isNeedCheckUnitsOwnerShip($companyId, $inventoryId, $rotations = 0)
     {
@@ -184,18 +185,4 @@ class LocalMarketService
 
         return !empty($result);
     }
-
-    // function findValidPrice($minPrice, $maxPrice, $loanAmount)
-    // {
-    //     $startPrice = ceil($maxPrice);
-    //     $endPrice = floor($minPrice);
-
-    //     for ($price = $startPrice; $price > $endPrice; $price--) {
-    //         if (fmod($loanAmount, $price) == 0) {
-    //             return $price;
-    //         }
-    //     }
-
-    //     throw new \Exception("Invalid price with item", 400);
-    // }
 }
