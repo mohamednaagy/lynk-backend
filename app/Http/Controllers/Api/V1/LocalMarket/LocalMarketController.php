@@ -17,7 +17,7 @@ class LocalMarketController extends Controller
      */
     public function initOrder(
         Request $request
-    ): JsonResponse {
+    ){
         return app(LocalMarketService::class)->createInitialOrder($request->company_id, $request->preferred_types, $request->amount, $request->rotation);
     }
 }
