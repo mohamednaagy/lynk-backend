@@ -177,10 +177,12 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeCancelDetails(TraderOrder $traderOrder)
     {
         if ($traderOrder->isCancelled()) {
+            $cancelDetail = $traderOrder->cancelDetail;
+
             return $this->primitive([
-                'cancelled_at' => Carbon::make($traderOrder->cancelled_at)?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
-                'cancel_step' => $traderOrder->getCancelStep(),
-                'cancel_reason' => $traderOrder->cancel_reason,
+                'cancelled_at' => Carbon::make($cancelDetail->created_at)?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
+                'cancel_step' => $cancelDetail->cancel_step,
+                'cancel_reason' => $cancelDetail->cancel_reason,
             ]);
         }
 
