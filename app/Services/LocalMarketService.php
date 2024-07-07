@@ -11,6 +11,9 @@ use phpDocumentor\Reflection\Types\Null_;
 
 class LocalMarketService
 {
+    private $usedUnits = array();
+    private $usedInventories = array();
+    
     /**
      * @param $companyId
      * @param array $preferredTypes
@@ -32,7 +35,7 @@ class LocalMarketService
      * @param $usedUnits
      * @return bool|void
      */
-    public function reserveSuitableUnits($companyId, $preferredTypes, $loanAmount, $rotations, array $usedInventories = [], array $usedUnits = [])
+    public function reserveSuitableUnits($companyId, $preferredTypes, $loanAmount, $rotations, array $usedInventories = [], array $usedUnitsIDs = [])
     {
         // try to get the best inventory
         // we can enhance to get 5 inventories not one and try with them before call the same function
@@ -46,11 +49,12 @@ class LocalMarketService
             Log::info("inventories_nasr". $inventory->id);
             // try to get the inventory for preferred types (happy scenario)
             // TODO : refactor this code with form to handle : reserved units , total cost , remaining total
-            $suitableUnits = $this->getUnits($companyId, $inventory, $loanAmount, $usedUnits, $rotations);
-            $usedUnits[] = $suitableUnits['availableUnits']; // hold the units for future use
-            $usedUnitsIDs[] = collect($suitableUnits['availableUnits'])->pluck('id')->toArray();
+            $suitableUnits = $this->getUnits($companyId, $inventory, $loanAmount, $usedUnitsIDs, $rotations);
+            $this->usedUnits[] = $suitableUnits['availableUnits']; // hold the units for future use
+            $this->usedInventories[] = $inventory; // hold the units for future use
+            $usedUnitsIDs[] =  $this->generateUnitsIDs($suitableUnits['availableUnits']);
             if (empty($suitableUnits['remainingLoan'])) { // no need to get another inventory
-                $this->bulkInsertUnitsOwnerSHip($companyId, $suitableUnits['availableUnits']);
+                $this->bulkInsertUnitsOwnerSHip($companyId, $this->usedUnits, $this->usedInventories);
                 return true;
             } else {
                 Log::info("remaining" . $suitableUnits['remainingLoan']);
@@ -143,22 +147,28 @@ class LocalMarketService
         ];
     }
     // helper functions
-    private function bulkInsertUnitsOwnerSHip($companyId, $units)
+    private function bulkInsertUnitsOwnerSHip($companyId, $units, $usedInventories)
     {
-        // $values = [];
-        // foreach ($units as $unit) {
-        //     $values[] = "($unit->id, $companyId)";
-        // }
-        // $unitsSql = implode(',', array_map('intval', array_column($units, 'id')));
+        $values = [];
+        foreach ($units as $items) {
+            foreach ($items as $unit) {
+                $values [] = $unit->id;
+            }
+        }
+        Log::info($values);
+        Log::info($usedInventories);
+        $unitsSql = implode(',', $values);
 
-        // $query =  DB::select(
-        //     "UPDATE local_market_inventory_units
-        //      SET status = ?
-        //      WHERE `id` IN ($unitsSql)",
-        //     [LocalMarketInventoryUnitsStatus::Reserved]
-        // );
+        $query =  DB::select(
+            "UPDATE local_market_inventory_units
+             SET status = ?
+             WHERE `id` IN ($unitsSql)",
+            [LocalMarketInventoryUnitsStatus::Reserved]
+        );
 
-        // $query = "INSERT INTO unit_ownership (owner_type, unit_id,owner_id,owner_name) VALUES " . implode(', ', $values);
+        $query = "INSERT INTO local_market_order_has_inventories (owner_type, unit_id,owner_id,owner_name) VALUES " . implode(', ', $values);
+        $query = "INSERT INTO local_market_order_has_units (inventory_unit_id, order_has_inventory_id) VALUES " . implode(', ', $values);
+
         // // update number of rotations column for all old ownersip records
         // // update need update number of rotations column FALSE to the last same company id and unit id
         // DB::statement($query);
@@ -184,5 +194,11 @@ class LocalMarketService
         );
 
         return !empty($result);
+    }
+
+    private function generateUnitsIDs($usedUnits)
+    {
+        $usedUnitsIDs = collect($usedUnits)->pluck('id')->toArray();
+        return $usedUnitsIDs;
     }
 }
