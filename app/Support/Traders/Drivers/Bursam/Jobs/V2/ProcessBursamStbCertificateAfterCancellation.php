@@ -6,6 +6,7 @@ use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
+use App\Models\User;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
@@ -27,8 +28,11 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
      *
      * @return void
      */
-    public function __construct(protected int $traderOrderId, protected int $cancelReason)
+    public User $user;
+
+    public function __construct(protected int $traderOrderId, protected int $cancelReason, User $user)
     {
+        $this->user = $user;
         $this->onQueue('bursam');
     }
 
@@ -52,7 +56,7 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
                 Trader::driver('bursam', $traderOrder->version)->getStbCertificateDetails($traderOrder);
             }
 
-            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $this->cancelReason);
+            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $this->cancelReason, user: $this->user);
         });
     }
 
