@@ -353,16 +353,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return true;
     }
 
-    public function checkAllTradersHaveCompleted($area)
-    {
-        return $this->traderOrders()->count() > 0 && $this->traderOrders->every(fn ($traderOrder) => $traderOrder->isCompleted($area));
-    }
-
     public function isCancellable($area)
     {
         $canMoveToPendingCancellation = $this->status->canMoveTo(FinancingOrderStatus::PendingCancellation);
 
-        if ($canMoveToPendingCancellation === false || $this->checkAllTradersHaveCompleted($area) == true) {
+        if ($canMoveToPendingCancellation === false) {
             return false;
         }
 
