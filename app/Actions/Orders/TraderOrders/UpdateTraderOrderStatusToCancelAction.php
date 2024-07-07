@@ -6,10 +6,11 @@ use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
+use App\Models\User;
 
 class UpdateTraderOrderStatusToCancelAction implements UpdateTraderOrderStatusToCancel
 {
-    public function handle(TraderOrder $traderOrder, int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled, ?string $failureReason = null): void
+    public function handle(TraderOrder $traderOrder, int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled, ?string $failureReason = null, ?User $user = null): void
     {
         $traderOrder->update([
             'status' => TraderOrderStatus::Cancelled,
@@ -19,7 +20,8 @@ class UpdateTraderOrderStatusToCancelAction implements UpdateTraderOrderStatusTo
         ]);
 
         $traderOrder->cancelDetail()->create([
-            'cancelled_by' => auth()->user()->getAuthIdentifier(),
+            'cancelled_by' => $user?->id,
+            'cancel_type' => $user ? 'user' : 'system',
             'cancel_step' => $traderOrder->getCancelStep(),
             'cancel_reason' => $cancelReason,
         ]);

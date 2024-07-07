@@ -514,7 +514,7 @@ class BursamV1Driver implements TraderInterface
             'status' => TraderOrderStatus::PendingCancellation,
         ]);
 
-        ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id, TraderOrderCancelReason::Manual);
+        ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id, TraderOrderCancelReason::Manual, user: auth()->user());
 
         return OrderCancellationStatus::PendingCancellation;
     }
@@ -526,7 +526,7 @@ class BursamV1Driver implements TraderInterface
         TraderOrder $traderOrder,
         int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
     ): int {
-        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
+        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, user: auth()->user());
 
         $activeTraderOrdersCount = TraderOrder::where('status', TraderOrderStatus::InProgress)
             ->where('financing_order_id', $traderOrder->id)

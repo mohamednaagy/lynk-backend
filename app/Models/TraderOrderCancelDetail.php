@@ -15,6 +15,7 @@ class TraderOrderCancelDetail extends Model
         'cancel_reason',
         'cancel_step',
         'trader_order_id',
+        'cancel_type',
     ];
 
     protected $casts = [
