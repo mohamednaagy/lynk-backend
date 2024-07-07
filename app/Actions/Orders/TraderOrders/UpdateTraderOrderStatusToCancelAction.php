@@ -4,6 +4,7 @@ namespace App\Actions\Orders\TraderOrders;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Models\User;
@@ -21,7 +22,7 @@ class UpdateTraderOrderStatusToCancelAction implements UpdateTraderOrderStatusTo
 
         $traderOrder->cancelDetail()->create([
             'cancelled_by' => $user?->id,
-            'cancel_type' => $user ? 'user' : 'system',
+            'cancel_type' => $user ? TraderOrderCancelType::User : TraderOrderCancelType::System,
             'cancel_step' => $traderOrder->getCancelStep(),
             'cancel_reason' => $cancelReason,
         ]);

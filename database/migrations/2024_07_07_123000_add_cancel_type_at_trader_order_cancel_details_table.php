@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('trader_order_cancel_details', function (Blueprint $table) {
-            $table->string('cancel_type')->nullable();
+            $table->unsignedTinyInteger('cancel_type')->nullable();
             $table->unsignedBigInteger('cancelled_by')->nullable()->after('id')->change();
 
         });
