@@ -237,7 +237,7 @@ class TraderOrder extends Model implements HasMedia
         return $this->status->is(TraderOrderStatus::InProgress) || $this->status->is(TraderOrderStatus::Initiated);
     }
 
-    public function getCancelStep(): string
+    public function getCancelStep(): ?string
     {
         return (new StepHistoriesDictionary($this->provider, $this->version))->getCancelStep($this)->step;
     }

@@ -117,10 +117,8 @@ class StepHistoriesDictionary
 
     public function getCancelStep(TraderOrder $traderOrder)
     {
-
         $last_completed_step = $this->getLastCompletedStepOf($traderOrder);
-        $next_step = $this->getNextStepOf($last_completed_step->step);
 
-        return $next_step;
+        return is_null($last_completed_step) ? $this->getStepOf($traderOrder->currentStep) : $this->getNextStepOf($last_completed_step->step);
     }
 }
