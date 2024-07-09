@@ -17,15 +17,21 @@ class BulkInsertUnitsOwnershipAction
 
         $this->associateUnitsWithInventories($usedInventories, $units);
 
-        $unitsSql = implode(',', $unitIds);
-        
-        DB::transaction(function () use ($financialOrder, $companyId, $unitsSql, $preferredTypes, $usedInventories) {
+        $unitsSql = implode(',', $unitIds); 
+        $orderId = null;
+
+        DB::transaction(function () use ($financialOrder, $companyId, $unitsSql, $preferredTypes, $usedInventories, &$orderId) {
             $this->updateInventoryUnitsStatus($unitsSql);
             $orderId = $this->createOrder($financialOrder, $preferredTypes, $companyId);
             $this->processUsedInventories($usedInventories, $orderId);
         });
 
-        return response()->json(['order' => $financialOrder, 'products' => $usedInventories, 'success' => true]);
+        return response()->json([
+            'local_market_order_id' => $orderId,
+            'order' => $financialOrder,
+            'products' => $usedInventories,
+            'success' => true
+        ]);
     }
 
     protected function extractUnitIds($units)
