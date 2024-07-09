@@ -2,6 +2,7 @@
 
 namespace App\Actions\LocalMarket;
 
+use App\Enums\CompanyType;
 use App\Enums\LocalMarketInventoryUnitsStatus;
 use App\Enums\LocalMarketOrderStatus;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,7 @@ class BulkInsertUnitsOwnershipAction
         DB::transaction(function () use ($financialOrder, $companyId, $unitsSql, $preferredTypes, $usedInventories, &$orderId) {
             $this->updateInventoryUnitsStatus($unitsSql);
             $orderId = $this->createOrder($financialOrder, $preferredTypes, $companyId);
-            $this->processUsedInventories($usedInventories, $orderId);
+            $this->processUsedInventories($usedInventories, $orderId, $companyId);
         });
 
         return response()->json([
@@ -79,7 +80,7 @@ class BulkInsertUnitsOwnershipAction
             ]);
     }
 
-    protected function processUsedInventories($usedInventories, $orderId)
+    protected function processUsedInventories($usedInventories, $orderId, $companyId)
     {
         foreach ($usedInventories as $inventory) {
             $item = DB::table('commodity_items')->find($inventory->commodity_item_id);
@@ -87,6 +88,7 @@ class BulkInsertUnitsOwnershipAction
 
             $this->insertOrderUnits($inventory->units, $inventoryId);
             $this->updateInventoryUnitCounts($inventory, count($inventory->units));
+            $this->updateOwnership($inventory, $companyId);
         }
     }
 
@@ -135,5 +137,32 @@ class BulkInsertUnitsOwnershipAction
                 'reserved_items' => $unitCount,
                 'available_quantity' => DB::raw('available_quantity - ' . $unitCount),
             ]);
+    }
+
+    protected function updateOwnership($inventory, $companyId)
+    {
+        $ownershipData = [];
+        $company = DB::table('companies')->where('id', $companyId)->first();
+        foreach ($inventory->units as $unit) {
+            $previousOwner = DB::table('local_market_unit_ownership')
+                ->where('unit_id', $unit->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            $ownershipData[] = [
+                'unit_id' => $unit->id,
+                'owner_type' => $company->type, // Adjust this based on your needs
+                'owner_id' => $companyId,
+                'owner_name' => $company->unique_name,
+                'previous_owner' => $previousOwner ? $previousOwner->owner_id : $inventory->company_id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        $chunks = array_chunk($ownershipData, 3000);
+        foreach ($chunks as $chunk) {
+            DB::table('local_market_unit_ownership')->insert($chunk);
+        }
     }
 }
