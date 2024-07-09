@@ -145,12 +145,12 @@ class BulkInsertUnitsOwnershipAction
         $company = DB::table('companies')->where('id', $companyId)->first();
         foreach ($inventory->units as $unit) {
             $previousOwner = DB::table('local_market_unit_ownership')
-                ->where('unit_id', $unit->id)
-                ->orderBy('created_at', 'desc')
+                ->where('inventory_unit_id', $unit->id)
+                ->latest()
                 ->first();
 
             $ownershipData[] = [
-                'unit_id' => $unit->id,
+                'inventory_unit_id' => $unit->id,
                 'owner_type' => $company->type, // Adjust this based on your needs
                 'owner_id' => $companyId,
                 'owner_name' => $company->unique_name,
