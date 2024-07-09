@@ -37,13 +37,7 @@ class BulkInsertUnitsOwnershipAction
 
     protected function extractUnitIds($units)
     {
-        $unitIds = [];
-        foreach ($units as $items) {
-            foreach ($items as $unit) {
-                $unitIds[] = $unit->id;
-            }
-        }
-        return $unitIds;
+        return collect($units)->flatten()->pluck('id')->toArray();
     }
 
     protected function associateUnitsWithInventories(&$usedInventories, $units)
