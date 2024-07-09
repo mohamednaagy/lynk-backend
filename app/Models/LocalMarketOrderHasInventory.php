@@ -62,4 +62,5 @@ class LocalMarketOrderHasInventory extends Model
     {
         return $this->hasMany(LocalMarketOrderHasUnit::class, 'order_has_inventory_id');
     }
+
 }

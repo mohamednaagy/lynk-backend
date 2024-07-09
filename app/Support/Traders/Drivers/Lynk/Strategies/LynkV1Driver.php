@@ -15,6 +15,7 @@ use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
+use App\Support\Traders\Clients\LynkClient;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
@@ -50,6 +51,38 @@ class LynkV1Driver implements TraderInterface
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
         ]);
+    }
+
+     /**
+     * @throws TraderException
+     */
+    public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
+    {
+        $productCode = $this->getUnusedProductCode($traderOrder->provider);
+        $response = LynkClient::of($traderOrder)->buyProduct($productCode);
+
+        if (! empty($response->json('header.errorCode'))) {
+            throw new TraderException(
+                'Failed to create trader order',
+                [
+                    'trader_order_id' => $traderOrder->id,
+                    'provider' => $this->provider,
+                    'version' => $this->version,
+                    'provider_response_body' => $response->json(),
+                    'financing_order_id' => $traderOrder->order->id,
+                    'failure_reason' => $response->json('body.0.bidMsg'),
+                ]
+            );
+        }
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+
+        $traderOrder->update([
+            'status' => TraderOrderStatus::InProgress,
+            'product_code' => $productCode,
+        ]);
+
+        return $traderOrder;
     }
 
     public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)

@@ -10,7 +10,7 @@ class ReserveUnitsAction
     private $usedUnits = array();
     private $usedInventories = array();
 
-    public function execute($companyId, $preferredTypes, $loanAmount, $rotations, array $usedInventories = [], array $usedUnitsIDs = [])
+    public function execute($financial_order, $companyId, $preferredTypes, $loanAmount, $rotations, array $usedInventories = [], array $usedUnitsIDs = [])
     {
         $inventory = app(GetInventoryAction::class)->execute($preferredTypes, $loanAmount, $usedInventories);
 
@@ -24,12 +24,11 @@ class ReserveUnitsAction
             $usedUnitsIDs[] = $this->generateUnitsIDsAction($suitableUnits['availableUnits']);
 
             if (empty($suitableUnits['remainingLoan'])) {
-                app(BulkInsertUnitsOwnershipAction::class)->execute($companyId, $this->usedUnits, $this->usedInventories);
-                return true;
+                return app(BulkInsertUnitsOwnershipAction::class)->execute($financial_order, $preferredTypes, $companyId, $this->usedUnits, $this->usedInventories);
             } else {
                 Log::info("remaining" . $suitableUnits['remainingLoan']);
                 $usedInventories[] = $inventory->id;
-                return $this->execute($companyId, $preferredTypes, $suitableUnits['remainingLoan'], $rotations, $usedInventories, $usedUnitsIDs);
+                return $this->execute($financial_order, $companyId, $preferredTypes, $suitableUnits['remainingLoan'], $rotations, $usedInventories, $usedUnitsIDs);
             }
         }
     }

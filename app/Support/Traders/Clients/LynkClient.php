@@ -1,0 +1,476 @@
+<?php
+
+namespace App\Support\Traders\Clients;
+
+use App\Actions\LocalMarket\ReserveUnitsAction;
+use App\Exceptions\RateLimitExceededException;
+use App\Models\TraderOrder;
+use App\Settings\Classes\LocalMurabahaSettings;
+use Exception;
+use GuzzleHttp\Middleware;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
+use Illuminate\Support\Traits\Localizable;
+
+class LynkClient
+{
+    use Localizable;
+
+    protected $middlewares = [];
+
+    protected $fake;
+
+    protected $traderOrderIdHeaderKey = 'X-TRADER-ORDER-ID';
+
+    private function __construct(protected $traderOrder)
+    {
+        if (empty($traderOrder->reference)) {
+            $this->fake = config('trader.providers.lynk.fake');
+        } else {
+            $this->fake = $this->isTraderOrderInitiatedByFake();
+        }
+
+        if ($this->fake) {
+            $this->registerFakeBursamResponses();
+            $this->middlewares[] = Middleware::mapRequest(
+                function ($request) use ($traderOrder) {
+                    return $request->withHeader($this->traderOrderIdHeaderKey, $traderOrder->id);
+                }
+            );
+        }
+    }
+
+    private function isTraderOrderInitiatedByFake()
+    {
+        return strpos($this->traderOrder->reference, '-') === false;
+    }
+
+    public static function of(TraderOrder $traderOrder)
+    {
+        return new static($traderOrder);
+    }
+
+    public function buyProduct($productCode)
+    {
+        $financingOrder = $this->traderOrder->order;
+        $number_of_rotations = app(LocalMurabahaSettings::class)->default_trade_order_roatation_count ?? 0;
+        // $request = [
+        //     'serialNumber' => '1',
+        //     'bidOption' => 'Y',
+        //     'otcOption' => 'N',
+        //     'stbOption' => 'N',
+        //     'productCode' => $productCode,
+        //     'purchaseType' => 'P',
+        //     'clientName' => '',
+        //     'currency' => 'SAR',
+        //     'bidValue' => (float) $financingOrder->amount->convertAndFormatByDecimal(),
+        //     'valueDate' => now('Asia/Riyadh')->format('Ymd'),
+        //     'tenor' => config('trader.providers.lynk.tenor'),
+        //     'otcCounterParty' => $financingOrder->customer_name,
+        //     'otcMurabaha' => '',
+        //     'otcMurabahaValue' => (float) $financingOrder->selling_price->convertAndFormatByDecimal(),
+        //     'eCertNo' => '',
+        // ];
+
+        // $requestHeader = [
+        //     'memberShortName' => config('trader.providers.lynk.member_short_name'),
+        //     'uuid' => $this->traderOrder->uuid_one,
+        // ];
+
+        return app(ReserveUnitsAction::class)->execute($financingOrder, $financingOrder->company_id, $financingOrder->company->preferred_market_type, $financingOrder->amount->convertAndFormatByDecimal(), $number_of_rotations);
+
+        // $response = $this->rateLimitRequest(fn () => $this->http()
+        //     ->post(
+        //         $url,
+        //         [
+        //             'header' => $requestHeader,
+        //             'request' => $request,
+        //         ]
+        //     ));
+
+        // Log::channel('bursam')->info('Malaysia Bursa buyProduct request: ...'.json_encode([
+        //     'url' => $url,
+        //     'request' => $request,
+        //     'headers' => $requestHeader,
+        //     'response' => $response->json(),
+        //     'statusCode' => $response->getStatusCode(),
+        // ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        
+    }
+
+    public function sellProduct()
+    {
+        $financingOrder = $this->traderOrder->order;
+
+        $url = 'api/process/svc/bsas/order.json';
+        $requestHeader = [
+            'memberShortName' => config('trader.providers.bursam.member_short_name'),
+            'uuid' => $this->traderOrder->uuid_two,
+        ];
+
+        $request = [
+            'serialNumber' => '1',
+            'bidOption' => 'N',
+            'otcOption' => 'Y',
+            'stbOption' => 'Y',
+            'productCode' => $this->traderOrder->product_code,
+            'purchaseType' => 'P',
+            'clientName' => '',
+            'currency' => 'SAR',
+            'bidValue' => (float) $financingOrder->amount->convertAndFormatByDecimal(),
+            'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
+            'tenor' => '00090',
+            'otcCounterParty' => $financingOrder->customer_name,
+            'otcMurabaha' => '',
+            'otcMurabahaValue' => (float) $financingOrder->selling_price->convertAndFormatByDecimal(),
+            'eCertNo' => $this->traderOrder->reference,
+        ];
+
+        $response = $this->rateLimitRequest(
+            fn () => $this->http()
+                ->post(
+                    $url,
+                    [
+                        'header' => $requestHeader,
+                        'request' => $request,
+                    ]
+                )
+        );
+
+        Log::channel('bursam')->info('Malaysia Bursa sellProduct request: ...'.json_encode([
+            'url' => $url,
+            'request' => $request,
+            'headers' => $requestHeader,
+            'response' => $response->json(),
+            'statusCode' => $response->getStatusCode(),
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        return $response;
+    }
+
+    public function fetchBuyResult()
+    {
+        return $this->fetchOrderResult($this->traderOrder->uuid_one);
+    }
+
+    public function fetchSellResult()
+    {
+        return $this->fetchOrderResult($this->traderOrder->uuid_two);
+    }
+
+    private function fetchOrderResult($uuid)
+    {
+        $url = 'api/process/svc/bsas/orderResult.json';
+
+        $requestHeader = [
+            'memberShortName' => config('trader.providers.bursam.member_short_name'),
+            'uuid' => $uuid,
+        ];
+
+        $request = [
+            'serialNumber' => '1',
+            'forceYN' => 'Y',
+            'maxWaitTime' => '10',
+            'waitAllDoneYN' => 'Y',
+        ];
+
+        $response = $this->rateLimitRequest(
+            fn () => $this->http()
+                ->post(
+                    $url,
+                    [
+                        'header' => $requestHeader,
+                        'request' => $request,
+                    ]
+                )
+        );
+
+        Log::channel('bursam')->info('Malaysia Bursa fetchOrderResult request: ...'.json_encode([
+            'url' => $url,
+            'request' => $request,
+            'headers' => $requestHeader,
+            'response' => $response->json(),
+            'statusCode' => $response->getStatusCode(),
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        return $response;
+    }
+
+    public function getBidXml()
+    {
+        $url = 'api/process/svc/bsas/bidXML.json';
+        $request = [
+            'membershortname' => config('trader.providers.bursam.member_short_name'),
+            'ecertno' => $this->traderOrder->reference,
+        ];
+
+        $response = $this->rateLimitRequest(
+            fn () => $this->http()
+                ->post(
+                    $url,
+                    [
+                        'input' => $request,
+                    ]
+                )
+        );
+
+        Log::channel('bursam')->info('Malaysia Bursa getBidXml request: ...'.json_encode([
+            'url' => $url,
+            'request' => $request,
+            'response' => $response->json(),
+            'statusCode' => $response->getStatusCode(),
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        return $response;
+    }
+
+    public function getOtcXml()
+    {
+        $url = 'api/process/svc/bsas/otcXML.json';
+        $request = [
+            'membershortname' => config('trader.providers.bursam.member_short_name'),
+            'ecertno' => $this->traderOrder->reference,
+        ];
+        $response = $this->rateLimitRequest(
+            fn () => $this->http()
+                ->post(
+                    $url,
+                    [
+                        'input' => $request,
+                    ]
+                )
+        );
+
+        Log::channel('bursam')->info('Malaysia Bursa getOtcXml request: ...'.json_encode([
+            'url' => $url,
+            'request' => $request,
+            'response' => $response->json(),
+            'statusCode' => $response->getStatusCode(),
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        return $response;
+    }
+
+    public function getStbXml()
+    {
+        $url = 'api/process/svc/bsas/stbXML.json';
+        $request = [
+            'membershortname' => config('trader.providers.bursam.member_short_name'),
+            'ecertno' => $this->traderOrder->reference,
+        ];
+
+        $response = $this->rateLimitRequest(
+            fn () => $this->http()
+                ->post(
+                    $url,
+                    [
+                        'input' => $request,
+                    ]
+                )
+        );
+
+        Log::channel('bursam')->info('Malaysia Bursa getStbXml request: ...'.json_encode([
+            'url' => $url,
+            'request' => $request,
+            'response' => $response->json(),
+            'statusCode' => $response->getStatusCode(),
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        return $response;
+    }
+
+    private function http(): PendingRequest
+    {
+        $instance = Http::bursam();
+
+        foreach ($this->middlewares as $middleware) {
+            $instance->withMiddleware($middleware);
+        }
+
+        $instance->throw(function ($response, $e) {
+            Log::error('Error in request with BURSAM', ['message' => $e->getMessage()]);
+        });
+
+        return $instance;
+    }
+
+    protected function rateLimitRequest($callback, $remainingRetries = 0)
+    {
+        $maxRetriesBeforeException = (int) config('trader.providers.bursam.rate_limit.max_retries_before_exception');
+        if ($remainingRetries > $maxRetriesBeforeException) {
+            $exception = new RateLimitExceededException('bursam_api');
+
+            $exception->setContext([
+                'trader_order_id' => $this->traderOrder->id,
+                'provider' => $this->traderOrder->provider,
+                'version' => $this->traderOrder->version,
+                'remaining_retries' => $remainingRetries,
+                'max_retries_before_exception' => $maxRetriesBeforeException,
+            ]);
+            Log::error('Reached The Maximum number Of allowed retries', ['remainingRetries' => $remainingRetries, 'maxRetriesBeforeException' => $maxRetriesBeforeException]);
+            throw $exception;
+        }
+
+        if ($remainingRetries > 0) {
+            Log::info('remaining of retry more than 0 so we need to sleep for two seconds', ['remainingRetries' => $remainingRetries, 'decay_seconds' => config('trader.providers.bursam.rate_limit.decay_seconds')]);
+
+            sleep(((int) config('trader.providers.bursam.rate_limit.decay_seconds')) + 1);
+        }
+
+        $executed = RateLimiter::attempt(
+            'bursam_api',
+            config('trader.providers.bursam.rate_limit.max_attempts'),
+            $callback,
+            config('trader.providers.bursam.rate_limit.decay_seconds'),
+        );
+
+        if ($executed === false) {
+            Log::error('not allowed to send BURSAM request already send one in less than one second', ['remainingRetries' => $remainingRetries]);
+
+            return $this->rateLimitRequest($callback, ++$remainingRetries);
+        }
+
+        Log::info('ok everything is ok');
+
+        return $executed;
+    }
+
+    private function registerFakeBursamResponses()
+    {
+        try {
+            Http::fake([
+                $this->buildUrl('/api/process/svc/bsas/order.json') => Http::response(),
+                $this->buildUrl('/api/process/svc/bsas/orderResult.json') => function (Request $request) {
+                    $traderOrder = $this->getTraderOrderUsingFakeRequest($request);
+
+                    return Http::response([
+                        'processingCount' => 0,
+                        'body' => [
+                            [
+                                'bidErrNo' => '999',
+                                'serialNumber' => 1,
+                                'bidOption' => $traderOrder->uuid_two ? 'N' : 'Y',
+                                'otcOption' => $traderOrder->uuid_two ? 'Y' : 'N',
+                                'stbOption' => $traderOrder->uuid_two ? 'Y' : 'N',
+                                'productCode' => $traderOrder->product_code,
+                                'purchaseType' => 'P',
+                                'clientName' => '',
+                                'currency' => 'SAR',
+                                'bidValue' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                                'valueDate' => now()->format('Ymd'),
+                                'tenor' => '00074',
+                                'otcCounterParty' => 'TIOMAN',
+                                'otcMurabaha' => '',
+                                'otcMurabahaValue' => '',
+                                'ecertNo' => strtoupper(Str::random()),
+                                'bidErrNo' => '999',
+                                'bidMsg' => 'OK',
+                                'otcErrNo' => '999',
+                                'otcMsg' => 'OK',
+                                'stbErrNo' => '999',
+                                'stbMsg' => 'OK',
+                                'regTime' => now()->format('YmdHis'),
+                                'orderTime' => now()->format('YmdHis'),
+                                'resultTime' => now()->format('YmdHis'),
+                                'purchaseTime' => now()->format('YmdHis'),
+                                'reportTime' => now()->format('YmdHis'),
+                                'sellingTime' => now()->format('YmdHis'),
+                                'unit' => 'Tonnage',
+                                'price' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                            ],
+                        ],
+                    ]);
+                },
+                $this->buildUrl('/api/process/svc/bsas/bidXML.json') => function (Request $request) {
+                    $traderOrder = $this->getTraderOrderUsingFakeRequest($request);
+
+                    return Http::response([
+                        'ECERTNO' => $traderOrder->reference,
+                        'BUYER' => 'LYNK LLC',
+                        'OWNER' => 'LYNK LLC',
+                        'BIDNO' => '4',
+                        'TOTALVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'CURRENCY' => 'SAR',
+                        'PRICE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'PRICE_MYR_EQUIVALENT' => (float) $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
+                        'PURCHASETIMEDATE' => $traderOrder->created_at->format('H:i:s.v d M Y'),
+                        'VALUEDATE' => $traderOrder->created_at->format('d M Y'),
+                        'PNAME' => $traderOrder->product_code,
+                        'PVOLUME' => $volume = rand(1, 20),
+                        'LINE' => [
+                            [
+                                'SUPPLIER' => 'SPTT301',
+                                'VOLUME' => $volume,
+                            ],
+                        ],
+                    ]);
+                },
+                $this->buildUrl('/api/process/svc/bsas/otcXML.json') => function (Request $request) {
+                    $traderOrder = $this->getTraderOrderUsingFakeRequest($request);
+
+                    return Http::response([
+                        'ECERTNO' => $traderOrder->reference,
+                        'SELLER' => 'LYNK LLC',
+                        'BUYER' => 'BSAS',
+                        'TOTALVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'CURRENCY' => 'SAR',
+                        'PRICE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'PRICE_MYR_EQUIVALENT' => (float) $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
+                        'MURABAHAVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'REPORTINGTIMEDATE' => $traderOrder->created_at->format('H:i:s.v d M Y'),
+                        'VALUEDATE' => $traderOrder->created_at->format('d M Y'),
+                        'PNAME' => $traderOrder->product_code,
+                        'PVOLUME' => $traderOrder->products[0]['quantity'],
+                        'LINE' => [
+                            [
+                                'SUPPLIER' => 'RAH54',
+                                'VOLUME' => $traderOrder->products[0]['quantity'],
+                            ],
+                        ],
+                    ]);
+                },
+                $this->buildUrl('api/process/svc/bsas/stbXML.json') => function (Request $request) {
+                    $traderOrder = $this->getTraderOrderUsingFakeRequest($request);
+
+                    return Http::response([
+                        'ECERTNO' => $traderOrder->reference,
+                        'SELLER' => $traderOrder->order->customer_name,
+                        'BUYER' => 'BURSA MALAYSIA ISLAMIC SERVICES',
+                        'TOTALVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'CURRENCY' => 'SAR',
+                        'PRICE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'PRICE_MYR_EQUIVALENT' => (float) $traderOrder->order->amount->multiply(1.26)->convertAndFormatByDecimal(),
+                        'MURABAHAVALUE' => (float) $traderOrder->order->amount->convertAndFormatByDecimal(),
+                        'REPORTINGTIMEDATE' => $traderOrder->created_at->format('H:i:s.v d M Y'),
+                        'VALUEDATE' => $traderOrder->created_at->format('d M Y'),
+                        'PNAME' => $traderOrder->product_code,
+                        'PVOLUME' => $traderOrder->products[0]['quantity'],
+                        'LINE' => [
+                            [
+                                'SUPPLIER' => 'RAH54',
+                                'VOLUME' => $traderOrder->products[0]['quantity'],
+                            ],
+                        ],
+                    ]);
+                },
+            ]);
+        } catch (Exception $e) {
+            Log::error($e->getMessage(), ['line' => $e->getLine(), 'file' => $e->getFile()]);
+        }
+    }
+
+    private function getTraderOrderUsingFakeRequest(Request $request)
+    {
+        return TraderOrder::find($request->header($this->traderOrderIdHeaderKey)[0]);
+    }
+
+    private function buildUrl($path)
+    {
+        return rtrim(config('trader.providers.bursam.base_url'), '/').'/'.ltrim($path, '/');
+    }
+}

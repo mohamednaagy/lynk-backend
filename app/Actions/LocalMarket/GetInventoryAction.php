@@ -11,12 +11,8 @@ class GetInventoryAction
 {
     public function execute($preferredItemTypes, $amount, $usedInventories)
     {
-        Log::info("inventory", $usedInventories);
-        Log::info("amount" . $amount);
-
         $preferredItemTypesSql = DB::raw("'" . implode("','", $preferredItemTypes) . "'");
         $whereClause = '';
-
         if ($usedInventories) {
             $usedInventoriesSql = DB::raw("'" . implode("','", Arr::flatten($usedInventories)) . "'");
             $whereClause = " AND `id` NOT IN ($usedInventoriesSql)";

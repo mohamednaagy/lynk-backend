@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Actions\LocalMarket\ReserveUnitsAction;
 use App\Enums\LocalMarketInventoryStatus;
 use App\Enums\LocalMarketInventoryUnitsStatus;
+use App\Models\FinancingOrder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -24,7 +25,8 @@ class LocalMarketService
      */
     public function createInitialOrder($companyId, array $preferredTypes, $amount, int $rotations = 0)
     {
-        return app(ReserveUnitsAction::class)->execute($companyId, $preferredTypes, $amount, $rotations);
+        $financial_order = FinancingOrder::latest()->first();
+        return app(ReserveUnitsAction::class)->execute($financial_order, $companyId, $preferredTypes, $amount, $rotations);
 
        // return $this->reserveSuitableUnits($companyId, $preferredTypes, $amount, $rotations);
     }
