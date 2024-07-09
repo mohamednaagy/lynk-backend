@@ -241,7 +241,7 @@ class TraderOrder extends Model implements HasMedia
     {
         // nagy_todo
         // if trader history is empty return the first step
-        return (new StepHistoriesDictionary($this->provider, $this->version))->getCancelStep($this)?->step;
+        return (new StepHistoriesDictionary($this->provider, $this->version))->getCancelStep($this)->step;
     }
 
     public function cancelDetail()
