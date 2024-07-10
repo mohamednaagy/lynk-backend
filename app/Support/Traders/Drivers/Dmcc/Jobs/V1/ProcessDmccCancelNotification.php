@@ -18,7 +18,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccCancelNotification implements ShouldQueue, ShouldBeUnique
+class ProcessDmccCancelNotification implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -71,7 +71,7 @@ class ProcessDmccCancelNotification implements ShouldQueue, ShouldBeUnique
                 FinancingOrderHistory::OrderCancelled
             );
 
-            app(UpdateTraderOrderStatusToCancel::class)->handle($this->traderOrder);
+            app(UpdateTraderOrderStatusToCancel::class)->handle($this->traderOrder, user: $this->user);
         });
     }
 

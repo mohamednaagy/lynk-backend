@@ -8,7 +8,6 @@ use App\Enums\Area;
 use App\Enums\ErrorCode;
 use App\Enums\Subject;
 use App\Enums\TraderOrderCancelReason;
-use App\Enums\TraderOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\CancelOrderRequest;
 use App\Jobs\FinancingOrders\NotifyAdminAndLenderAboutTraderOrderCancelled;
@@ -30,7 +29,7 @@ class CancelTraderOrder extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  CancelTraderOrderInterface  $cancelTraderOrder ,
+     * @param  CancelTraderOrderInterface  $cancelTraderOrder  ,
      */
     public function __invoke(
         CancelOrderRequest $request,
@@ -40,8 +39,7 @@ class CancelTraderOrder extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($request, $cancelTraderOrder, $traderOrder) {
             $traderOrder = TraderOrder::lockForUpdate()->findOrFail($traderOrder);
-
-            if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+            if (! $traderOrder->canBeCancelled()) {
                 return $this->errorResponse(
                     __('error.unable_to_cancel_order'),
                     Response::HTTP_FORBIDDEN,
@@ -54,7 +52,7 @@ class CancelTraderOrder extends Controller
                 $traderOrder,
                 $canceller,
                 $request->validated(),
-                TraderOrderCancelReason::Manual
+                TraderOrderCancelReason::TraderOrderIsCancelled
             );
 
             dispatch(new NotifyAdminAndLenderAboutTraderOrderCancelled($traderOrder, $canceller));

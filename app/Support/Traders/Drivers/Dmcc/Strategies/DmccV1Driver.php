@@ -236,7 +236,7 @@ class DmccV1Driver implements TraderInterface
      */
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::Manual
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
     ): object {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('cancelTTI'))
@@ -564,8 +564,20 @@ class DmccV1Driver implements TraderInterface
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
+        if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+            return false;
+        }
+
         $traderHistoryActions = $traderOrder->traderHistories->pluck('action')->toArray();
 
         return empty(array_intersect(self::notCancellableActions, $traderHistoryActions));
+    }
+
+    /**
+     * @return string <Driver>_<trader_orders.reference_number>.pdf
+     */
+    public function generatePdfFileName($traderOrder, $collectionName): string
+    {
+        return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
     }
 }

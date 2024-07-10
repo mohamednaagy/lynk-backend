@@ -240,8 +240,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function activeTraderOrder(): HasMany
     {
         return $this->traderOrders()
-            ->where('status', TraderOrderStatus::InProgress)
+            ->where(function ($query) {
+                $query->where('status', TraderOrderStatus::InProgress)->orWhere('status', TraderOrderStatus::Initiated);
+            })
             ->latest();
+
     }
 
     public function latestTraderOrder(): HasOne
@@ -329,6 +332,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     {
         return $this->status->is(FinancingOrderStatus::PendingCancellation)
             || $this->status->is(FinancingOrderStatus::Cancelled);
+    }
+
+    public function isInPendingCancellationState(): bool
+    {
+        return $this->status->is(FinancingOrderStatus::PendingCancellation);
     }
 
     public function isTradingMode(TraderOrderMode|string $mode)

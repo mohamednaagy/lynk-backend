@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Support\Traders\Drivers\Bursam\Strategies;
+namespace App\Support\Traders\Drivers\Lynk\Strategies;
 
+use App\Actions\Contracts\Orders\CancelOrder;
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\OrderCancellationStatus;
@@ -12,6 +14,7 @@ use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Settings\Classes\LocalMurabahaSettings;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -35,6 +38,7 @@ class LynkV1Driver implements TraderInterface
 
     public function getOrInitiateTraderOrder(FinancingOrder $financingOrder): ?Model
     {
+
         if ($financingOrder->initiatedTraderOrders()->exists()) {
             return $financingOrder->initiatedTraderOrders()->first();
         }
@@ -46,6 +50,7 @@ class LynkV1Driver implements TraderInterface
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
+            'default_contract_sign_time_limit' => app(LocalMurabahaSettings::class)->default_contract_sign_time_limit,
         ]);
     }
 
@@ -190,20 +195,50 @@ class LynkV1Driver implements TraderInterface
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
-        // TODO_LOCAL_MARKET need to implement
+        if ($traderOrder->status->is(TraderOrderStatus::Initiated) || $traderOrder->status->is(TraderOrderStatus::InProgress)) {
+            return true;
+        }
 
-        return true;
+        return false;
     }
 
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::Manual
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
     ): int {
-        // TODO_LOCAL_MARKET need to implement
-        return TraderOrderCancellationStatus::Cancelled;
+        if ($traderOrder->mode == TraderOrderMode::Manual) {
+            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, user: auth()->user());
+
+            $order = $traderOrder->order;
+            if ($order->isInPendingCancellationState()) {
+                app(CancelOrder::class)->handle($order, auth()->user(), []);
+            }
+
+            return TraderOrderCancellationStatus::Cancelled;
+        }
     }
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
     {
+    }
+
+    /**
+     * @return string <Driver>_<collectionName>_<companies.unique_name>_<financing_orders.id>_<trader_orders.reference_number>_YYYYMMDD.pdf
+     */
+    public function generatePdfFileName($traderOrder, $collectionName): string
+    {
+        switch ($collectionName) {
+            case 'transfer_ownership_to_lender':
+                $fileType = 'CommCert';
+                break;
+            case 'selling_commodity_to_customer':
+                $fileType = 'BorrOwnCert';
+                break;
+            case 'lynk_sale_pledge_certificate':
+                $fileType = 'SellCommCert';
+                break;
+        }
+
+        return 'LYNK_'.$fileType.'_'.$traderOrder->order->company->unique_name.'_'.$traderOrder->financing_order_id.'_'.$traderOrder->reference.'_'.date('Ymd').'.pdf';
     }
 }

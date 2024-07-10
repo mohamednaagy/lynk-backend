@@ -131,6 +131,7 @@ class OrderController extends Controller
                 'trader_orders.history',
                 'trader_orders.products',
                 'trader_orders.status',
+                'trader_orders.cancel_details',
                 'trader_orders.created_at',
                 'history',
             ])->respond();
