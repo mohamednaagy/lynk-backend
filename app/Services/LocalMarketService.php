@@ -2,146 +2,65 @@
 
 namespace App\Services;
 
-use App\Actions\LocalMarket\ReserveUnitsAction;
 use App\Enums\LocalMarketInventoryStatus;
 use App\Enums\LocalMarketInventoryUnitsStatus;
-use App\Models\FinancingOrder;
-use Illuminate\Support\Arr;
+use App\Enums\LocalMarketOrderStatus;
+use DragonCode\Support\Facades\Helpers\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use phpDocumentor\Reflection\Types\Null_;
 
 class LocalMarketService
 {
-    private $usedUnits = array();
-    private $usedInventories = array();
-    
-    /**
-     * @param $companyId
-     * @param array $preferredTypes
-     * @param $amount
-     * @param int $rotations
-     * @return bool|null
-     */
-    public function createInitialOrder($companyId, array $preferredTypes, $amount, int $rotations = 0)
-    {
-        $financial_order = FinancingOrder::latest()->first();
-        return app(ReserveUnitsAction::class)->execute($financial_order, $companyId, $preferredTypes, $amount, $rotations);
-
-       // return $this->reserveSuitableUnits($companyId, $preferredTypes, $amount, $rotations);
-    }
-
-    /**
-     * @param $companyId
-     * @param $preferredTypes
-     * @param $loanAmount
-     * @param $rotations
-     * @param $usedInventories
-     * @param $usedUnits
-     * @return bool|void
-     */
-    public function reserveSuitableUnits($companyId, $preferredTypes, $loanAmount, $rotations, array $usedInventories = [], array $usedUnitsIDs = [])
-    {
-        // try to get the best inventory
-        // we can enhance to get 5 inventories not one and try with them before call the same function
-        $inventory = $this->getInventory($preferredTypes, $loanAmount, $usedInventories);
-        if (empty($inventory)) {
-            // we can't go with this order there is no suitable inventory
-            // the loan is not completed
-            //throw new \Exception("NO_SUITABLE_INVENTORIES", 400);
-            return false;
-        } else {
-            Log::info("inventories_nasr". $inventory->id);
-            // try to get the inventory for preferred types (happy scenario)
-            // TODO : refactor this code with form to handle : reserved units , total cost , remaining total
-            $suitableUnits = $this->getUnits($companyId, $inventory, $loanAmount, $usedUnitsIDs, $rotations);
-            $this->usedUnits[] = $suitableUnits['availableUnits']; // hold the units for future use
-            $this->usedInventories[] = $inventory; // hold the units for future use
-            $usedUnitsIDs[] =  $this->generateUnitsIDs($suitableUnits['availableUnits']);
-            if (empty($suitableUnits['remainingLoan'])) { // no need to get another inventory
-                $this->bulkInsertUnitsOwnerSHip($companyId, $this->usedUnits, $this->usedInventories);
-                return true;
-            } else {
-                Log::info("remaining" . $suitableUnits['remainingLoan']);
-                // there is a need to get another inventory
-                // recall the same function to get another inventory
-                $usedInventories[] = $inventory->id;
-                $this->reserveSuitableUnits($companyId, $preferredTypes, $suitableUnits['remainingLoan'], $rotations, $usedInventories, $usedUnitsIDs);
-            }
-        }
-    }
-    // ===========.  First Step getting  inventory  =====================
     public function getInventory($preferredItemTypes, $amount, $usedInventories)
     {
-        Log::info("inventory", $usedInventories);
-        Log::info("amount" . $amount);
-
         $preferredItemTypesSql = DB::raw("'" . implode("','", $preferredItemTypes) . "'");
-        $usedInventoriesSql = DB::raw("'" . implode("','", $usedInventories) . "'");
+        $usedInventoriesSql = $usedInventories ? DB::raw("'" . implode("','", $usedInventories) . "'") : null;
+        $whereClause = $usedInventoriesSql ? " AND `id` NOT IN ($usedInventoriesSql)" : '';
 
         $inventory = DB::select(
             "SELECT * FROM `local_market_inventories`
                 WHERE `commodity_type_id` IN ($preferredItemTypesSql)
-                AND `id` NOT IN ($usedInventoriesSql)
+                $whereClause
                 AND `max_price` <= ?
                 AND `status` = ?
                 ORDER BY (`available_quantity` * `max_price`) DESC
                 LIMIT 1",
             [$amount, LocalMarketInventoryStatus::Active]
         );
-        if (empty($inventory)) {
-            $inventory = DB::select(
-                "SELECT * FROM `local_market_inventories`
-                    WHERE `commodity_type_id` IN ($preferredItemTypesSql)
-                    AND `id` NOT IN ($usedInventoriesSql)
-                    AND `max_price` <= ?
-                    AND `status` = ?
-                    ORDER BY (`available_quantity` * `max_price`) DESC
-                    limit 1",
-                [$preferredItemTypesSql, $usedInventoriesSql, $amount, LocalMarketInventoryStatus::Active]
-            );
-        }
+
         return $inventory[0] ?? null;
     }
 
-    //================ second step check ownership ==================
-    public function getUnits($companyId, $inventory, $loan, $usedUnits, $rotations = 0)
+    public function getSuitableUnits($companyId, $inventory, $loan, $usedUnits, $rotations = 0)
     {
-        $needToCheckOwnership = $this->isNeedCheckUnitsOwnership($companyId, $inventory->id, $rotations);
-        return $this->getSuitableUnits($companyId, $inventory, $loan, $needToCheckOwnership, $usedUnits, $rotations);
-    }
-    public function getSuitableUnits($companyId, $inventory, $loan, $needToCheckOwnerShip = false, $usedUnits, $rotations = 0)
-    {
+        $needToCheckOwnership = $this->ifCompanyBoughtFromInventoryBefore($companyId, $inventory->id, $rotations);
+
         $numberOfNeededUnits = floor($loan / $inventory->max_price);
-        Log::info("numberofUnits" . $numberOfNeededUnits);
         $whereClause = '';
 
         if ($usedUnits) {
             $usedUnitsSql = DB::raw("'" . implode("','", Arr::flatten($usedUnits)) . "'");
             $whereClause = " AND `id` NOT IN ($usedUnitsSql)";
         }
-
-        if ($needToCheckOwnerShip) {
-            $availableUnits = DB::select(
-                "SELECT * FROM local_market_inventory_units units
-                    JOIN unit_ownership ON unit_ownership.unit_id = units.id AND unit_ownership.company_id = ?
-                    WHERE units.local_market_inventory_id = ?
-                    AND unit_ownership.number_of_rotations >= ?
-                    ORDER BY unit_ownership.id DESC
-                    LIMIT ?",
-                [$companyId, $inventory->id, $rotations, $numberOfNeededUnits]
-            );
+        if ($needToCheckOwnership && $needToCheckOwnership > 1) {
+            //TODO To fix rotations
+            // $availableUnits = DB::select(
+            //     "SELECT * FROM local_market_inventory_units units
+            //     JOIN local_market_unit_ownership ownership ON ownership.inventory_unit_id = units.id AND ownership.owner_id = ?
+            //     WHERE units.local_market_inventory_id = ?
+            //     ORDER BY ownership.id DESC
+            //     LIMIT ?",
+            // [$companyId, $inventory->id, $numberOfNeededUnits]
+            // );
         } else {
-            $availableUnits = DB::select(
-                "SELECT * FROM local_market_inventory_units
-                    WHERE status = ?
-                    $whereClause
-                    AND local_market_inventory_id = ?
-                    LIMIT ?",
-                [LocalMarketInventoryUnitsStatus::Free, $inventory->id, $numberOfNeededUnits]
-            );
-        }
+            $availableUnits = DB::table('local_market_inventory_units')
+                                ->whereNotIn('id', Arr::flatten($usedUnits))
+                                ->where('status', (int) LocalMarketInventoryUnitsStatus::Free)
+                                ->where('local_market_inventory_id', $inventory->id)
+                                ->limit($numberOfNeededUnits)
+                                ->get();
 
+        }
         $totalAvailableUnitsCost = count($availableUnits) * $inventory->max_price;
         $remainingLoan = $loan - $totalAvailableUnitsCost;
 
@@ -151,41 +70,38 @@ class LocalMarketService
             'remainingLoan' => $remainingLoan,
         ];
     }
-    // helper functions
-    private function bulkInsertUnitsOwnerSHip($companyId, $units, $usedInventories)
-    {
-        $values = [];
-        foreach ($units as $items) {
-            foreach ($items as $unit) {
-                $values [] = $unit->id;
-            }
-        }
-        Log::info($values);
-        Log::info($usedInventories);
-        $unitsSql = implode(',', $values);
 
-        $query =  DB::select(
-            "UPDATE local_market_inventory_units
-             SET status = ?
-             WHERE `id` IN ($unitsSql)",
-            [LocalMarketInventoryUnitsStatus::Reserved]
+    public function getUnitsWithOwnershipCheck($companyId, $inventory, $rotations, $numberOfNeededUnits)
+    {
+        return DB::select(
+            "SELECT * FROM local_market_inventory_units units
+                JOIN local_market_unit_ownership ownership ON ownership.inventory_unit_id = units.id AND ownership.company_id = ?
+                WHERE units.local_market_inventory_id = ?
+                AND ownership.number_of_rotations >= ?
+                ORDER BY ownership.id DESC
+                LIMIT ?",
+            [$companyId, $inventory->id, $rotations, $numberOfNeededUnits]
         );
-
-        $query = "INSERT INTO local_market_order_has_inventories (owner_type, unit_id,owner_id,owner_name) VALUES " . implode(', ', $values);
-        $query = "INSERT INTO local_market_order_has_units (inventory_unit_id, order_has_inventory_id) VALUES " . implode(', ', $values);
-
-        // // update number of rotations column for all old ownersip records
-        // // update need update number of rotations column FALSE to the last same company id and unit id
-        // DB::statement($query);
     }
-    private function isNeedCheckUnitsOwnerShip($companyId, $inventoryId, $rotations = 0)
+
+    public function getUnitsWithoutOwnershipCheck($inventory, $numberOfNeededUnits, $whereClause)
     {
-        if ($rotations == 0) {
-            return false;
-        }
-        return $this->ifCompanyBuyFromInventoryBefore($companyId, $inventoryId);
+        return DB::select(
+            "SELECT * FROM local_market_inventory_units
+                WHERE status = ?
+                $whereClause
+                AND local_market_inventory_id = ?
+                LIMIT ?",
+            [LocalMarketInventoryUnitsStatus::Free, $inventory->id, $numberOfNeededUnits]
+        );
     }
-    private function ifCompanyBuyFromInventoryBefore($companyId, $inventoryId): bool
+
+    public function checkUnitsOwnership($companyId, $inventoryId, $rotations = 0)
+    {
+        return $rotations > 0 && $this->ifCompanyBoughtFromInventoryBefore($companyId, $inventoryId);
+    }
+
+    public function ifCompanyBoughtFromInventoryBefore($companyId, $inventoryId)
     {
         $result = DB::select(
             "SELECT orders.*, inventories.*
@@ -193,17 +109,116 @@ class LocalMarketService
                 LEFT JOIN local_market_order_has_inventories inventories
                 ON orders.id = inventories.local_market_order_id
                 WHERE orders.company_id = ?
-                AND inventories.inventory_id = ?
+                AND inventories.id = ?
                 LIMIT 1",
             [$companyId, $inventoryId]
         );
-
         return !empty($result);
     }
 
-    private function generateUnitsIDs($usedUnits)
+    public function updateInventoryUnitsStatus($unitsSql)
     {
-        $usedUnitsIDs = collect($usedUnits)->pluck('id')->toArray();
-        return $usedUnitsIDs;
+        DB::update(
+            "UPDATE local_market_inventory_units
+             SET status = ?
+             WHERE `id` IN ($unitsSql)",
+            [LocalMarketInventoryUnitsStatus::Reserved]
+        );
+    }
+
+    public function createOrder($financialOrder, $preferredTypes, $companyId)
+    {
+        return DB::table('local_market_orders')
+            ->insertGetId([
+                'source' => 'LYNK',
+                'amount' => $financialOrder->amount->convertAndFormatByDecimal(),
+                'national_id' => $financialOrder->national_id,
+                'customer_name' => $financialOrder->customer_name,
+                'preferred_commodity_type' => json_encode($preferredTypes),
+                'company_id' => $companyId,
+                'comment' => null,
+                'status' => LocalMarketOrderStatus::InProgress,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+    }
+
+    public function findCommodityItem($commodityItemId)
+    {
+        return DB::table('commodity_items')->find($commodityItemId);
+    }
+
+    public function createOrderInventory($orderId, $inventory, $item)
+    {
+        return DB::table('local_market_order_has_inventories')
+            ->insertGetId([
+                'local_market_order_id' => $orderId,
+                'local_market_inventory_id' => $inventory->id,
+                'quantity' => count($inventory->units),
+                'price' => $inventory->max_price,
+                'measurement_id' => $item->measurement_id,
+                'currency_id' => $item->currency_id,
+                'location_id' => $inventory->supplier_location_id,
+                'supplier_id' => $inventory->company_id,
+                'previous_owner' => '',
+                'commodity_item_id' => $inventory->commodity_item_id,
+                'commodity_type_id' => $inventory->commodity_type_id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+    }
+
+    public function insertOrderUnits($units, $inventoryId)
+    {
+        $chunks = array_chunk($units->toArray(), 3000);
+        foreach ($chunks as $chunk) {
+            $insertData = [];
+            foreach ($chunk as $unit) {
+                $insertData[] = [
+                    'inventory_unit_id' => $unit->id,
+                    'order_has_inventory_id' => $inventoryId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+            DB::table('local_market_order_has_units')->insert($insertData);
+        }
+    }
+
+    public function updateInventoryUnitCounts($inventory, $unitCount)
+    {
+        DB::table('local_market_inventories')
+            ->where('id', $inventory->id)
+            ->update([
+                'reserved_items' => $unitCount,
+                'available_quantity' => DB::raw('available_quantity - ' . $unitCount),
+            ]);
+    }
+
+    public function updateOwnership($inventory, $companyId)
+    {
+        $ownershipData = [];
+        $company = DB::table('companies')->where('id', $companyId)->first();
+        foreach ($inventory->units as $unit) {
+            $previousOwner = DB::table('local_market_unit_ownership')
+                ->where('inventory_unit_id', $unit->id)
+                ->latest()
+                ->first();
+
+            $ownershipData[] = [
+                'inventory_unit_id' => $unit->id,
+                'owner_type' => $company->type,
+                'owner_id' => $companyId,
+                'owner_name' => $company->unique_name,
+                'previous_owner' => $previousOwner ? $previousOwner->owner_id : $inventory->company_id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        $chunks = array_chunk($ownershipData, 3000);
+        foreach ($chunks as $chunk) {
+            DB::table('local_market_unit_ownership')->insert($chunk);
+        }
     }
 }

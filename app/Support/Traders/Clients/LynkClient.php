@@ -2,7 +2,7 @@
 
 namespace App\Support\Traders\Clients;
 
-use App\Actions\LocalMarket\ReserveUnitsAction;
+use App\Actions\LocalMarket\PurchaseProductAction;
 use App\Exceptions\RateLimitExceededException;
 use App\Models\TraderOrder;
 use App\Settings\Classes\LocalMurabahaSettings;
@@ -81,7 +81,7 @@ class LynkClient
         //     'uuid' => $this->traderOrder->uuid_one,
         // ];
 
-        return app(ReserveUnitsAction::class)->execute($financingOrder, $financingOrder->company_id, $financingOrder->company->preferred_market_type, $financingOrder->amount->convertAndFormatByDecimal(), $number_of_rotations);
+        return app(PurchaseProductAction::class)->handle($financingOrder, $financingOrder->company_id, $financingOrder->company->preferred_market_type, $financingOrder->amount->convertAndFormatByDecimal(), $number_of_rotations);
 
         // $response = $this->rateLimitRequest(fn () => $this->http()
         //     ->post(
