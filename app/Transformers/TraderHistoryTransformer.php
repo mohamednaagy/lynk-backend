@@ -6,8 +6,8 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -54,7 +54,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $ownershipDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::TransferOwnershipToLender);
 
         return $this->primitive([
-            'step' => 'commodity_purchased',
+            'step' => MurabhaStep::PurchasingCommodity,
             'is_complete' => (bool) $history,
             'completed_at' => optional($history)->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'cert_document' => [
@@ -78,7 +78,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $signedWakalaDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::SignedClientWakala);
 
         return $this->primitive([
-            'step' => 'client_wakala',
+            'step' => MurabhaStep::ClientWakala,
             'is_complete' => (bool) $history,
             'completed_at' => $history?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'signed_wakala_document' => [
@@ -98,7 +98,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $wakalaDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::ClientWakala);
 
         return $this->primitive([
-            'step' => 'contract_signed',
+            'step' => MurabhaStep::ContractSigned,
             'is_complete' => (bool) $history,
             'completed_at' => optional($history)->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'wakala_document' => [
@@ -118,7 +118,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $documentMediaFile = $this->getMedia(TraderOrderMediaCollection::SellingCommodityToCustomer);
 
         return $this->primitive([
-            'step' => 'selling_commodity_to_customer',
+            'step' => MurabhaStep::CommoditySoldToCustomer,
             'is_complete' => (bool) $history,
             'completed_at' => $history?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'borrower_document' => [
@@ -138,7 +138,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $mpoDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder);
 
         return $this->primitive([
-            'step' => 'selling_commodity_to_open_market',
+            'step' => MurabhaStep::SellingCommodityToOpenMarket,
             'is_complete' => (bool) $history,
             'completed_at' => $history?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'mpo_document' => [
@@ -161,8 +161,9 @@ class TraderHistoryTransformer extends TransformerAbstract
             'lynk' => $this->getMedia(TraderOrderMediaCollection::LynkSalePledgeCertificate),
         };
 
+        ///*****///
         return $this->primitive([
-            'step' => 'murabha_sale_completed',
+            'step' => MurabhaStep::MurabahaSaleCompleted,
             'is_complete' => (bool) $history,
             'completed_at' => optional($history)->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'warranty_document' => [
@@ -184,17 +185,13 @@ class TraderHistoryTransformer extends TransformerAbstract
 
         $previousAction = $this->getLatestTraderHistoryOfPreviousStep($CurrentStep);
         $latestAction = $this->getLatestTraderHistoryOfStep($CurrentStep);
+        $endTime = $latestAction?->created_at;
+        if ($this->traderOrder->isCancelled()) {
+            $endTime = $this->traderOrder->cancelDetail->created_at;
+        }
 
-        if ($previousAction?->created_at && $latestAction?->created_at) {
-            $diffTime = $previousAction->created_at->diffForHumans(
-                $latestAction->created_at, [
-                    'parts' => 3,
-                    'join' => true,
-                ]);
-
-            $ignoredWords = ['ago', 'before', 'after', 'منذ', 'قبل'];
-
-            return Str::remove($ignoredWords, $diffTime);
+        if ($previousAction?->created_at && $endTime) {
+            return convertDateTimeToHumanDate(Carbon::make($previousAction->created_at), Carbon::make($endTime));
         }
 
         return null;
@@ -240,7 +237,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         );
 
         return $this->primitive([
-            'step' => 'customer_delivery_confirmation',
+            'step' => MurabhaStep::CustomerDeliveryConfirmation,
             'is_complete' => (bool) $history,
             'completed_at' => $history?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),

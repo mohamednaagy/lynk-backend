@@ -514,7 +514,7 @@ class BursamV1Driver implements TraderInterface
             'status' => TraderOrderStatus::PendingCancellation,
         ]);
 
-        ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id, TraderOrderCancelReason::Manual);
+        ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id, TraderOrderCancelReason::Manual, user: auth()->user());
 
         return OrderCancellationStatus::PendingCancellation;
     }
@@ -524,9 +524,9 @@ class BursamV1Driver implements TraderInterface
      */
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::Manual
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
     ): int {
-        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
+        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, user: auth()->user());
 
         $activeTraderOrdersCount = TraderOrder::where('status', TraderOrderStatus::InProgress)
             ->where('financing_order_id', $traderOrder->id)
@@ -559,6 +559,18 @@ class BursamV1Driver implements TraderInterface
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
+        if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+            return false;
+        }
+
         return true;
+    }
+
+    /**
+     * @return string <Driver>_<trader_orders.reference_number>.pdf
+     */
+    public function generatePdfFileName($traderOrder, $collectionName): string
+    {
+        return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
     }
 }

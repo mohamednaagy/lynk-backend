@@ -26,6 +26,8 @@ final class MurabhaStep extends Enum implements LocalizedEnum, TraderMurabhaStep
 
     const CustomerDeliveryConfirmation = 'customer_delivery_confirmation';
 
+    const SellingCommodityToOpenMarket = 'selling_commodity_to_open_market';
+
     public static function getSteps(?string $driver = null, ?string $version = null): array
     {
         $driver ??= config('trader.default');

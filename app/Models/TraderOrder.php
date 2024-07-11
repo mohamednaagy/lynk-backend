@@ -55,6 +55,7 @@ class TraderOrder extends Model implements HasMedia
             'can_continue_progress',
             'updated_at',
             'created_at',
+            'default_contract_sign_time_limit',
         ];
     }
 
@@ -111,10 +112,6 @@ class TraderOrder extends Model implements HasMedia
 
     public function isCancellable(?string $area): bool
     {
-        if ($this->status->isNot(TraderOrderStatus::InProgress)) {
-            return false;
-        }
-
         return Trader::driver($this->provider, $this->version)
             ->isTraderOrderCancellable($this, $area);
     }
@@ -228,5 +225,25 @@ class TraderOrder extends Model implements HasMedia
         }
 
         return ! $this->hasMedia(TraderOrderMediaCollection::ClientWakala);
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status->is(TraderOrderStatus::Cancelled);
+    }
+
+    public function canBeCancelled(): bool
+    {
+        return $this->status->is(TraderOrderStatus::InProgress) || $this->status->is(TraderOrderStatus::Initiated);
+    }
+
+    public function getCancelStep(): ?string
+    {
+        return (new StepHistoriesDictionary($this->provider, $this->version))->getCancelStep($this)->step;
+    }
+
+    public function cancelDetail()
+    {
+        return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
     }
 }

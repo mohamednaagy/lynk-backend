@@ -71,4 +71,6 @@ class ErrorCode
     public const ERROR_CREATING_UNITS = 1035;
 
     public const ERROR_CHEKING_UNITS = 1036;
+
+    public const ORDER_IS_CANCELLED = 1037;
 }
