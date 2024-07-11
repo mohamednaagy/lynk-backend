@@ -39,7 +39,7 @@ class BursamV2Driver extends BursamV1Driver
             return $financingOrder->initiatedTraderOrders()->first();
         }
 
-        return $financingOrder->traderOrders()->create([
+        $traderOrder = $financingOrder->traderOrders()->create([
             'uuid_one' => Str::uuid(),
             'provider' => $this->provider,
             'reference' => '',
@@ -47,6 +47,9 @@ class BursamV2Driver extends BursamV1Driver
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
         ]);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+
+        return $traderOrder;
     }
 
     public function getDefaultInitialTradeOrderStatus()
@@ -63,11 +66,6 @@ class BursamV2Driver extends BursamV1Driver
     ): int {
         if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket)) {
             app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, user: auth()->user());
-
-            $traderOrder->update([
-                'status' => TraderOrderStatus::Cancelled,
-                'cancel_reason' => $cancelReason,
-            ]);
 
             return TraderOrderCancellationStatus::Cancelled;
         }
