@@ -15,6 +15,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class ProcessFinancingOrders implements ShouldQueue
 {
@@ -80,8 +81,12 @@ class ProcessFinancingOrders implements ShouldQueue
                 TraderOrderStatus::InProgress,
             ])->chunk(10, function ($traderOrderCollection) {
                 $traderOrderCollection->each(function (TraderOrder $traderOrder) {
-                    Trader::driver($traderOrder->provider, $traderOrder->version)
-                        ->dispatchJobForTransitioningFlow($traderOrder);
+                    try {
+                        Trader::driver($traderOrder->provider, $traderOrder->version)
+                            ->dispatchJobForTransitioningFlow($traderOrder);
+                    } catch (\Exception $e) {
+                        Log::error('There is an issue with this trader order and provider', $traderOrder);
+                    }
                 });
             });
     }
