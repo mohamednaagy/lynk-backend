@@ -67,14 +67,11 @@ class BursamServiceProvider extends ServiceProvider
                     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
                     if (! $token) {
-                        Log::error('Failed to get access token from Bursam', $response->json());
-                        throw new \Exception('Failed to get access token from Bursam');
+                        throw new BursamAccessTokenException('Failed to get access token from Bursam Response');
                     }
 
                     Cache::put('bursam_access_token', $token, $response->json('expires_in') - 1000);
                 } catch (BursamAccessTokenException $e) {
-                    // Handle the exception here
-                    Log::error('Failed to retrieve access token from Bursam', ['exception' => $e->getMessage()]);
                     throw $e;
                 }
             }
