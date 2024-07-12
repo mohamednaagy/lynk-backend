@@ -72,8 +72,6 @@ class BursamServiceProvider extends ServiceProvider
 
                     Cache::put('bursam_access_token', $token, $response->json('expires_in') - 1000);
                 } catch (BursamAccessTokenException $e) {
-                    // Handle the exception here
-                    Log::error('Error While Trying To Get Token From BURSAM', ['exception' => $e->getMessage()]);
                     throw $e;
                 }
             }
