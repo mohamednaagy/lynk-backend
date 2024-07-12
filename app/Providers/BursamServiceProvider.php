@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Exceptions\BURSAM\BursamAccessTokenException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -37,30 +38,45 @@ class BursamServiceProvider extends ServiceProvider
             $token = Cache::get('bursam_access_token');
 
             if (! $token) {
-                $response = Http::asForm()
-                    ->withOptions([
-                        'verify' => config('trader.providers.bursam.verify_tls'),
-                        'allow_redirects' => [
-                            'strict' => true,
-                        ],
-                        'connect_timeout' => 0,
-                        'timeout' => 0,
-                    ])
-                    ->baseUrl($baseUrl)
-                    ->post('api/process/svc/auth/token', [
+                try {
+                    $data = [
                         'grant_type' => config('trader.providers.bursam.grant_type'),
                         'client_id' => config('trader.providers.bursam.member_short_name'),
                         'client_secret' => config('trader.providers.bursam.client_secret_key'),
-                    ]);
+                    ];
 
-                $token = $response->json('access_token');
+                    $response = Http::asForm()
+                        ->withOptions([
+                            'verify' => config('trader.providers.bursam.verify_tls'),
+                            'allow_redirects' => [
+                                'strict' => true,
+                            ],
+                            'connect_timeout' => 0,
+                            'timeout' => 0,
+                        ])
+                        ->baseUrl($baseUrl)
+                        ->post('api/process/svc/auth/token', $data);
 
-                if (! $token) {
-                    Log::error('Failed to get access token from Bursam', $response->json());
-                    throw new \Exception('Failed to get access token from Bursam');
+                    $token = $response->json('access_token');
+
+                    Log::channel('bursam')->info('Malaysia Bursa Get token request: ...'.json_encode([
+                        'url' => $baseUrl.'api/process/svc/auth/token',
+                        'request' => $data,
+                        'response' => $response->json(),
+                        'statusCode' => $response->getStatusCode(),
+                    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+                    if (! $token) {
+                        Log::error('Failed to get access token from Bursam', $response->json());
+                        throw new \Exception('Failed to get access token from Bursam');
+                    }
+
+                    Cache::put('bursam_access_token', $token, $response->json('expires_in') - 1000);
+                } catch (BursamAccessTokenException $e) {
+                    // Handle the exception here
+                    Log::error('Failed to retrieve access token from Bursam', ['exception' => $e->getMessage()]);
+                    throw $e;
                 }
-
-                Cache::put('bursam_access_token', $token, $response->json('expires_in') - 1000);
             }
 
             return Http::acceptJson()
