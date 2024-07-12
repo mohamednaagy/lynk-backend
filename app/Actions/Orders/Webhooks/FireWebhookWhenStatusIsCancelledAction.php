@@ -18,7 +18,7 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
     {
         $financingOrder = $traderOrder->order;
         $warrantyMediaCollection = match ($traderOrder->provider) {
-            'dmcc', 'fake' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
+            'dmcc', 'fake' , 'lynk' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
             'bursam' => TraderOrderMediaCollection::BursamTtiHoldingCertificate,
         };
 
@@ -40,6 +40,7 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
             ],
             'updated_at' => $this->getFormattedDateTime($traderOrder),
         ]);
+
     }
 
     protected function getCompletedStepOfTrader($provider)

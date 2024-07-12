@@ -52,8 +52,8 @@ trait InteractsWithCommodityItem
             'volume_sellable_unit' => $volume_sellable_unit,
             'currency_id' => $currency->id,
             'measurement_id' => $measurement->id,
+            'commodity_type_id' => $commodity_type->id,
         ]);
-        $commodity_item->types()->attach($commodity_type->id);
 
         return $commodity_item;
     }

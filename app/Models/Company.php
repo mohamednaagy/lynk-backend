@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\CompanyMarketType;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
 use App\Enums\OrderFeeType;
+use App\Enums\Trader;
 use App\Enums\TraderOrderMode;
 use App\Support\QueryScoper\HasScopes;
 use App\Support\Wallets\Traits\HasWallet;
@@ -37,6 +39,7 @@ class Company extends BaseTenant
         'type' => CompanyType::class,
         'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::class,
         'trading_mode' => TraderOrderMode::class,
+        'preferred_market_type' => CompanyMarketType::class,
     ];
 
     public static function getCustomColumns(): array
@@ -63,6 +66,7 @@ class Company extends BaseTenant
             'notify_admins_about_new_orders',
             'trading_mode',
             'deleted_at',
+            'preferred_market_type',
         ];
     }
 
@@ -139,5 +143,30 @@ class Company extends BaseTenant
     public function supplier()
     {
         return $this->hasOne(Supplier::class, 'id');
+    }
+
+    public function commodityTypes()
+    {
+        return $this->belongsToMany(CommodityType::class, 'company_commodity_types', 'company_id', 'commodity_type_id');
+    }
+
+    public function unitRotations()
+    {
+        return $this->hasMany(LocalMarketUnitRotation::class, 'company_id');
+    }
+
+    public function isInternationalMarketType()
+    {
+        return $this->preferred_market_type->is(CompanyMarketType::International());
+    }
+
+    public function getPreferredTrader()
+    {
+        if ($this->isInternationalMarketType()) {
+            return Trader::Bursam;
+        }
+
+        return Trader::Lynk;
+
     }
 }

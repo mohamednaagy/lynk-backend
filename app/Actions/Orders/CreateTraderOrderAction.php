@@ -9,6 +9,7 @@ use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderAlreadyHasActiveTraderOrderException;
 use App\Exceptions\OrderIsAlreadyCompletedException;
+use App\Exceptions\OrderIsCancelledException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -22,6 +23,7 @@ class CreateTraderOrderAction implements CreateTraderOrder
      */
     public function handle($orderId, array $data): TraderOrder
     {
+
         $financingOrder = FinancingOrder::query()
             ->lockForUpdate()
             ->findOrFail($orderId);
@@ -29,9 +31,16 @@ class CreateTraderOrderAction implements CreateTraderOrder
         if ($financingOrder->status->is(FinancingOrderStatus::Completed)) {
             throw new OrderIsAlreadyCompletedException;
         }
+
+        if ($financingOrder->status->is(FinancingOrderStatus::Cancelled)) {
+            throw new OrderIsCancelledException;
+        }
+
         $doesInProgressTraderOrderExists = $financingOrder
             ->traderOrders()
-            ->where('status', TraderOrderStatus::InProgress)
+            ->where(function ($q) {
+                $q->where('status', TraderOrderStatus::InProgress)->orWhere('status', TraderOrderStatus::Initiated);
+            })
             ->exists();
 
         if ($doesInProgressTraderOrderExists) {
@@ -58,7 +67,7 @@ class CreateTraderOrderAction implements CreateTraderOrder
             'reference' => Arr::get($data, 'reference_number'),
             'version' => Arr::get($data, 'version'),
             'mode' => Arr::get($data, 'mode'),
-            'status' => TraderOrderStatus::InProgress,
+            'status' => Trader::driver($data['trader'], $data['version'])->getDefaultInitialTradeOrderStatus(),
         ]);
 
         $traderOrder->traderHistories()->create([

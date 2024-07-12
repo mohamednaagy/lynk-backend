@@ -6,6 +6,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderMode;
+use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\FinancingOrder;
@@ -59,6 +60,11 @@ class FakeV1Driver implements TraderInterface
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $traderOrder;
+    }
+
+    public function getDefaultInitialTradeOrderStatus()
+    {
+        return TraderOrderStatus::InProgress;
     }
 
     /**
@@ -175,7 +181,7 @@ class FakeV1Driver implements TraderInterface
 
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::Manual
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
     ): bool {
         return true;
     }
@@ -438,8 +444,20 @@ class FakeV1Driver implements TraderInterface
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area): bool
     {
+        if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+            return false;
+        }
+
         $traderHistoryActions = $traderOrder->traderHistories->pluck('action')->toArray();
 
         return empty(array_intersect(self::notCancellableActions, $traderHistoryActions));
+    }
+
+    /**
+     * @return string <Driver>_<trader_orders.reference_number>.pdf
+     */
+    public function generatePdfFileName($traderOrder, $collectionName): string
+    {
+        return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
     }
 }

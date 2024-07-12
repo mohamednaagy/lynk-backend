@@ -31,6 +31,8 @@ return [
     'order_is_rejected' => 'Order has been rejected please contact customer support',
     'trader_not_supported' => 'Trader Not Supported',
     'order_is_already_completed' => 'Order is already completed',
+    'order_is_already_cancelled' => 'Order is already cancelled',
+
     'order_has_completed_trader_order' => 'Order ID #:order_id already has a completed trading request.',
     'order_already_has_active_trader_order' => 'Order already has active trading request',
     'commodity_market_is_unavailable' => 'The commodity market service is currently unavailable.',
@@ -38,5 +40,5 @@ return [
     'no_match_for_order_cost_and_value' => 'Not able to match order cost with order value',
     'order_cost_with_vat_and_without_vat_incorrect' => 'Entered value of order cost with VAT is incorrect',
     'user_doesnt_have_the_right_permissions' => 'User Doesnt Have The Right Permission',
-
+    'inventory_cannot_be_updated' => 'Inventory can be updated only if the reserved units is 0',
 ];

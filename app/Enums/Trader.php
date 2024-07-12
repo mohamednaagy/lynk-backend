@@ -11,4 +11,6 @@ final class Trader extends Enum
     const Dmcc = 'dmcc';
 
     const FakeDmcc = 'fake';
+
+    const Lynk = 'lynk';
 }

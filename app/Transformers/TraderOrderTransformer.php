@@ -5,10 +5,13 @@ namespace App\Transformers;
 use App\Enums\BursamProductCode;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
+use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\FinancingOrders\TraderOrderHelper;
+use Carbon\Carbon;
 use Illuminate\Support\Collection as IlluminateCollection;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\NullResource;
@@ -30,6 +33,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'financing_order_id',
         'reference',
         'provider',
+        'mode',
         'version',
         'failure_reason',
         'refunded_at',
@@ -40,6 +44,8 @@ class TraderOrderTransformer extends TransformerAbstract
         'is_cancellable',
         'history',
         'created_at',
+        'cancel_details',
+
     ];
 
     public function transform(TraderOrder $traderOrder)
@@ -65,6 +71,11 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeProvider(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive($traderOrder->provider);
+    }
+
+    public function includeMode(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->mode);
     }
 
     public function includeVersion(TraderOrder $traderOrder): Primitive
@@ -123,7 +134,8 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeProducts(TraderOrder $traderOrder): Collection
     {
         $products = collect($traderOrder->products)->map(
-            fn ($product) => CommodityProductDto::fromArray($product)
+            // TODO_LOCAL_MARKET need to enhance this method
+            fn ($product) => $traderOrder->provider == Trader::Lynk ? LynkCommodityProductDto::fromArray($product) : CommodityProductDto::fromArray($product)
         );
 
         return $this->collection($products, new ProductTransformer());
@@ -160,6 +172,21 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeCreatedAt(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive($traderOrder->created_at?->clone()->tz('Asia/Riyadh')->toDateTimeString());
+    }
+
+    public function includeCancelDetails(TraderOrder $traderOrder)
+    {
+        if ($traderOrder->isCancelled()) {
+            $cancelDetail = $traderOrder->cancelDetail;
+
+            return $this->primitive([
+                'cancelled_at' => Carbon::make($cancelDetail->created_at)?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
+                'cancel_step' => $cancelDetail->cancel_step,
+                'cancel_reason' => $cancelDetail->cancel_reason,
+            ]);
+        }
+
+        return $this->primitive(null);
     }
 
     public function setArea($area): static

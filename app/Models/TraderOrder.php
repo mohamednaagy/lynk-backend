@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader as EnumsTrader;
+use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -53,6 +55,7 @@ class TraderOrder extends Model implements HasMedia
             'can_continue_progress',
             'updated_at',
             'created_at',
+            'default_contract_sign_time_limit',
         ];
     }
 
@@ -109,10 +112,6 @@ class TraderOrder extends Model implements HasMedia
 
     public function isCancellable(?string $area): bool
     {
-        if ($this->status->isNot(TraderOrderStatus::InProgress)) {
-            return false;
-        }
-
         return Trader::driver($this->provider, $this->version)
             ->isTraderOrderCancellable($this, $area);
     }
@@ -122,7 +121,7 @@ class TraderOrder extends Model implements HasMedia
         $stepToHistoriesDictionary = trader_step_histories($this->provider, $this->version);
 
         if (! array_key_exists($step, $stepToHistoriesDictionary)) {
-            throw new UnexpectedValueException('No mapping for this step');
+            throw new UnexpectedValueException("No mapping for this step {$step}");
         }
 
         return (bool) $this->traderHistories()
@@ -217,5 +216,34 @@ class TraderOrder extends Model implements HasMedia
     public function isCommodityPurchased(): bool
     {
         return $this->checkOrderStepComplete(MurabhaStep::PurchasingCommodity);
+    }
+
+    public function isNeedToGenerateWakalaDocument()
+    {
+        if ($this->provider == EnumsTrader::Lynk && $this->mode = TraderOrderMode::Manual) {
+            return false;
+        }
+
+        return ! $this->hasMedia(TraderOrderMediaCollection::ClientWakala);
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status->is(TraderOrderStatus::Cancelled);
+    }
+
+    public function canBeCancelled(): bool
+    {
+        return $this->status->is(TraderOrderStatus::InProgress) || $this->status->is(TraderOrderStatus::Initiated);
+    }
+
+    public function getCancelStep(): ?string
+    {
+        return (new StepHistoriesDictionary($this->provider, $this->version))->getCancelStep($this)->step;
+    }
+
+    public function cancelDetail()
+    {
+        return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
     }
 }

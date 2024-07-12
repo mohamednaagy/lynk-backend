@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class CommodityItem extends Model
 {
-    use HasFactory , LogsActivity;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
         'name',
@@ -35,9 +36,9 @@ class CommodityItem extends Model
         return $this->belongsTo(Supplier::class, 'company_id');
     }
 
-    public function types()
+    public function type()
     {
-        return $this->belongsToMany(CommodityType::class, 'commodity_item_types', 'commodity_item_id', 'commodity_type_id');
+        return $this->belongsTo(CommodityType::class, 'commodity_type_id');
     }
 
     public function currency()
@@ -48,5 +49,29 @@ class CommodityItem extends Model
     public function measurement()
     {
         return $this->belongsTo(Measurement::class);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function inventories() :HasMany
+    {
+        return $this->hasMany(LocalMarketInventory::class);
+    }
+
+    /**
+     * @return int
+     */
+    public function getAvailableUnitsAttribute() :int
+    {
+        return $this->inventories()->sum('available_quantity');
+    }
+
+    /**
+     * @return int
+     */
+    public function getReservedUnitsAttribute() :int
+    {
+        return $this->inventories()->sum('reserved_items');
     }
 }

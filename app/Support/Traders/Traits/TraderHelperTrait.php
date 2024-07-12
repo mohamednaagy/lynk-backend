@@ -8,12 +8,15 @@ use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\TraderProduct;
 use App\Support\DataTransferObjects\CommodityProductDto;
+use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
+use App\Support\Traders\TraderManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
 trait TraderHelperTrait
@@ -85,7 +88,8 @@ trait TraderHelperTrait
 
     public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
     {
-        $fileName = $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
+        $traderManager = new TraderManager(app());
+        $fileName = $traderManager->driver($traderOrder->provider)->generatePdfFileName($traderOrder, $collectionName);
         if (! is_null($type)) {
             $traderOrder->addMediaFromBase64(
                 $document
@@ -96,6 +100,8 @@ trait TraderHelperTrait
             )->usingFileName($fileName)->toMediaCollection($collectionName);
         }
     }
+
+
 
     public function transformProductsToCommodityProductsDTO($products): Collection
     {
@@ -108,6 +114,23 @@ trait TraderHelperTrait
                 'warehouse' => $product['warehouse'],
                 'previous_owner' => $product['previous_owner'],
                 'date_time_of_purchasing_commodity' => $product['date_time_of_purchasing_commodity'],
+            ]);
+        });
+    }
+
+    public function transformProductsToLocalCommodityProductsDTO($products): Collection
+    {
+        return collect($products)->map(function ($product) {
+            return LynkCommodityProductDto::fromArray([
+                'product' => $product['product'],
+                'type' => $product['type'],
+                'quantity' => $product['quantity'],
+                'uom' => $product['uom'],
+                'amount' => $product['amount'],
+                'location' => $product['location'],
+                'currency' => $product['currency'],
+                'original_supplier' => $product['original_supplier'],
+                'previous_owner' => $product['previous_owner'],
             ]);
         });
     }

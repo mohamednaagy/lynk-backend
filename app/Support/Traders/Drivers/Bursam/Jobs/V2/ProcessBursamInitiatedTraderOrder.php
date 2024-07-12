@@ -2,6 +2,8 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
+use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -60,10 +62,7 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
         if (! $traderOrder) {
             return;
         }
-
-        $traderOrder->update([
-            'status' => TraderOrderStatus::Cancelled,
-        ]);
+        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
 
         Log::error(
             method_exists('getMessage', $exception)

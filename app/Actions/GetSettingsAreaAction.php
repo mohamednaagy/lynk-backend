@@ -16,6 +16,7 @@ class GetSettingsAreaAction implements GetSettingsArea
     {
         return match ($key) {
             'General' => app(GeneralSettingsAction::class),
+            'LocalMurabaha' => app(LocalMurabahaSettingsAction::class),
             Area::SuperAdmin => app(SuperAdminSettingsAction::class),
             Area::Lender => app(LenderSettingsAction::class),
         };

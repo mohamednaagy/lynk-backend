@@ -26,6 +26,7 @@ class Lender
             Action::Approve,
             Action::Reject,
             Action::Cancel,
+            Action::Edit,
         ],
         Subject::LenderWallet => [
             Action::Manage,
