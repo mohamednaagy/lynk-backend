@@ -39,7 +39,7 @@ class BursamV2Driver extends BursamV1Driver
             return $financingOrder->initiatedTraderOrders()->first();
         }
 
-        return $financingOrder->traderOrders()->create([
+        $traderOrder = $financingOrder->traderOrders()->create([
             'uuid_one' => Str::uuid(),
             'provider' => $this->provider,
             'reference' => '',
@@ -47,6 +47,14 @@ class BursamV2Driver extends BursamV1Driver
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
         ]);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+
+        return $traderOrder;
+    }
+
+    public function getDefaultInitialTradeOrderStatus()
+    {
+        return TraderOrderStatus::InProgress;
     }
 
     /**
@@ -54,15 +62,10 @@ class BursamV2Driver extends BursamV1Driver
      */
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::Manual
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
     ): int {
         if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket)) {
-            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
-
-            $traderOrder->update([
-                'status' => TraderOrderStatus::Cancelled,
-                'cancel_reason' => $cancelReason,
-            ]);
+            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, user: auth()->user());
 
             return TraderOrderCancellationStatus::Cancelled;
         }
@@ -79,7 +82,7 @@ class BursamV2Driver extends BursamV1Driver
 
         Bus::chain([
             new ProcessBursamSellingCommodityToOpenMarketForCancellation($traderOrder->id),
-            new ProcessBursamStbCertificateAfterCancellation($traderOrder->id, $cancelReason),
+            new ProcessBursamStbCertificateAfterCancellation($traderOrder->id, $cancelReason, user: auth()->user()),
             function () use ($traderOrder) {
                 $activeTraderOrdersCount = TraderOrder::where('status', TraderOrderStatus::InProgress)
                     ->where('financing_order_id', $traderOrder->id)
@@ -150,6 +153,10 @@ class BursamV2Driver extends BursamV1Driver
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
+        if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+            return false;
+        }
+
         return $this->isNotInTransitionStateForSellingOrBuying($traderOrder)
             && $this->isNotInContractSignedForLenderArea($traderOrder, $area);
     }
@@ -164,5 +171,13 @@ class BursamV2Driver extends BursamV1Driver
     {
         return $area !== Area::Lender
             || ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::ContractSigned);
+    }
+
+    /**
+     * @return string <Driver>_<trader_orders.reference_number>.pdf
+     */
+    public function generatePdfFileName($traderOrder, $collectionName): string
+    {
+        return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
     }
 }

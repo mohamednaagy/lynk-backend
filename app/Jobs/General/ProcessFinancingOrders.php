@@ -3,12 +3,12 @@
 namespace App\Jobs\General;
 
 use App\Enums\FinancingOrderStatus;
+use App\Enums\Trader;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
-use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -22,16 +22,21 @@ class ProcessFinancingOrders implements ShouldQueue
 
     protected array $providersWithVersions = [
         [
-            'provider' => 'dmcc',
+            'provider' => Trader::Dmcc,
             'versions' => ['v1'],
         ],
         [
-            'provider' => 'fake',
+            'provider' => Trader::FakeDmcc,
             'versions' => ['v1'],
         ],
         [
-            'provider' => 'bursam',
+            'provider' => Trader::Bursam,
             'versions' => ['v2'],
+        ],
+
+        [
+            'provider' => Trader::Lynk,
+            'versions' => ['v1'],
         ],
     ];
 

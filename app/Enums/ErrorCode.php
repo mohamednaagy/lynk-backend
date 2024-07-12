@@ -66,5 +66,15 @@ class ErrorCode
 
     public const ORDER_HAS_COMPLETED_TRADER_ORDER = 1030;
 
-    public const CAN_NOT_DEAL_WITH_BURSAM_SYSTEM = 1031;
+    public const INVENTORY_NOT_UPDATABLE = 1031;
+
+    public const ERROR_CREATING_UNITS = 1035;
+
+    public const ERROR_CHEKING_UNITS = 1036;
+
+    public const ORDER_IS_CANCELLED = 1037;
+  
+    public const CAN_NOT_DEAL_WITH_BURSAM_SYSTEM = 1038;
+
+
 }

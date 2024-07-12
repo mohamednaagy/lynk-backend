@@ -2,6 +2,7 @@
 
 use App\Enums\MurabhaStep;
 use App\Models\Media;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
 use Modules\Grantify\Facades\Grantify;
 use Propaganistas\LaravelPhone\PhoneNumber;
@@ -110,7 +111,7 @@ if (! function_exists('get_latest_version_of_trader')) {
 }
 
 if (! function_exists('get_murabha_steps')) {
-    function get_murabha_steps($provider, string $version = null, bool $withFiles = false): array
+    function get_murabha_steps($provider, ?string $version = null, bool $withFiles = false): array
     {
         $version = $version ?? get_latest_version_of_trader($provider);
         $stepHistories = config('murabha-steps.'.$provider.'-versions.'.$version);
@@ -187,4 +188,18 @@ if (! function_exists('number_unformat')) {
     {
         return app('numeral')->unformat($number);
     }
+}
+
+function convertDateTimeToHumanDate(Carbon $dataTime, ?Carbon $endDateTime = null)
+{
+    $endDateTime = $endDateTime ?? Carbon::now();
+    $diffTime = $dataTime->diffForHumans(
+        $endDateTime, [
+            'parts' => 3,
+            'join' => true,
+        ]);
+
+    $ignoredWords = ['ago', 'before', 'after', 'منذ', 'قبل'];
+
+    return \Illuminate\Support\Str::remove($ignoredWords, $diffTime);
 }

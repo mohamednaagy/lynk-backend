@@ -27,11 +27,6 @@ class UpdateCommodityCertificateForClient extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  UpdateSellingCommodityToClientRequest  $request
-     * @param  Company  $lender
-     * @param  int  $order
-     * @param  int  $traderOrder
-     * @return JsonResponse
      *
      * @throws \Throwable
      */

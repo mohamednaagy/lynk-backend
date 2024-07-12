@@ -28,11 +28,10 @@ class UpdateCommodityItemAction implements UpdateCommodityItem
                     'volume_sellable_unit',
                     'currency_id',
                     'measurement_id',
+                    'commodity_type_id',
                 ]
             )
         );
-
-        $item->types()->sync($data['commodity_type_id']);
 
         return $item;
     }

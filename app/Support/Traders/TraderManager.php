@@ -2,11 +2,13 @@
 
 namespace App\Support\Traders;
 
+use App\Models\Company;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Strategies\BursamV1Driver;
 use App\Support\Traders\Drivers\Bursam\Strategies\BursamV2Driver;
 use App\Support\Traders\Drivers\Dmcc\Strategies\DmccV1Driver;
 use App\Support\Traders\Drivers\Fake\Strategies\FakeV1Driver;
+use App\Support\Traders\Drivers\Lynk\Strategies\LynkV1Driver;
 use Illuminate\Support\Manager;
 
 class TraderManager extends Manager
@@ -51,8 +53,21 @@ class TraderManager extends Manager
         return new DmccV1Driver();
     }
 
+    public function createLynkV1Driver(): TraderInterface
+    {
+        return new LynkV1Driver();
+    }
+
     public function createFakeV1Driver(): TraderInterface
     {
         return new FakeV1Driver();
+    }
+
+    public function getSuitableDriverForCompany(Company $company)
+    {
+        $driver = $company->getPreferredTrader();
+
+        return $this->driver($driver, get_latest_version_of_trader($driver));
+
     }
 }

@@ -51,19 +51,19 @@ class CommodityItemsTransformer extends TransformerAbstract
         return $this->primitive($commodityItem->description);
     }
 
-    public function includeAvailableUnits()
+    public function includeAvailableUnits(CommodityItem $commodityItem)
     {
-        return $this->primitive(0);
+        return $this->primitive($commodityItem->available_units);
     }
 
-    public function includeReservedUnits()
+    public function includeReservedUnits(CommodityItem $commodityItem)
     {
-        return $this->primitive(0);
+        return $this->primitive($commodityItem->reserved_units);
     }
 
     public function includeCommodityType(CommodityItem $commodityItem): Primitive
     {
-        $type = $commodityItem->types()->first();
+        $type = $commodityItem->type;
 
         return $this->primitive([
             'id' => $type->id,

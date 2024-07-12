@@ -56,4 +56,12 @@ class UpdateCommodityTypeRequest extends FormRequest
 
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'name.unique' => __('validation.unique_input'),
+            'unique_name.unique' => __('validation.unique_input'),
+        ];
+    }
 }

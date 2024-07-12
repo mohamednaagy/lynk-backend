@@ -133,5 +133,11 @@ class SuperAdmin
             Action::Create,
             Action::Edit,
         ],
+
+        Subject::LocalMurabahaAreaSettings => [
+            Action::Index,
+            Action::Edit,
+            Action::Manage,
+        ],
     ];
 }

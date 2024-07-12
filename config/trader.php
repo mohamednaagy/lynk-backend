@@ -64,5 +64,27 @@ return [
                 ],
             ],
         ],
+        'lynk' => [
+            'latest' => 'v1',
+            'fake' => env('LYNK_LOCAL_COMMODITY_MARKET_FAKE', false),
+            'rate_limit' => [
+                'decay_seconds' => env('LYNK_LOCAL_COMMODITY_MARKET_LIMIT_DECAY_SECONDS', 1),
+                'max_attempts' => env('LYNK_LOCAL_COMMODITY_MARKET_LIMIT_MAX_ATTEMPTS', 1),
+                'max_retries_before_exception' => env('LYNK_LOCAL_COMMODITY_MARKET_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION', 1),
+            ],
+            'base_url' => env('LYNK_LOCAL_COMMODITY_MARKET_BASE_URL', 'traderdcthh-erfmbxcc1323421.uselynk.com'),
+            'verify_tls' => env('LYNK_LOCAL_COMMODITY_MARKET_VERIFY_TLS', false),
+            'member_short_name' => env('LYNK_LOCAL_COMMODITY_MARKET_MEMBER_SHORT_NAME', 'LYNK'),
+            'client_secret_key' => env('LYNK_LOCAL_COMMODITY_MARKET_CLIENT_SECRET_KEY', 'B347B6AFEA16EFA062B6DA'),
+            'grant_type' => env('LYNK_LOCAL_COMMODITY_MARKET_GRANT_TYPE', 'client_credentials'),
+            'tenor' => env('LYNK_LOCAL_COMMODITY_MARKET_TENOR', '00090'),
+            'purchasing_commodity_job_backoff_time' => env('LYNK_LOCAL_COMMODITY_MARKET_PURCHASING_COMMODITY_JOB_BACKOFF_TIME', 10),
+            'modes' => [
+                'v1' => [
+                    TraderOrderMode::Automatic,
+                    TraderOrderMode::Manual,
+                ],
+            ],
+        ],
     ],
 ];
