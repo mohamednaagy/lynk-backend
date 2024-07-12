@@ -65,4 +65,6 @@ class ErrorCode
     public const ORDER_COST_WITHOUT_VAT_AND_WITH_VAT_INCORRECT = 1029;
 
     public const ORDER_HAS_COMPLETED_TRADER_ORDER = 1030;
+
+    public const CAN_NOT_DEAL_WITH_BURSAM_SYSTEM = 1031;
 }

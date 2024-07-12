@@ -16,3 +16,5 @@ yarn-error.log
 report.html
 **/.DS_Store
 storage/.DS_Store
+
+dump.rdb
