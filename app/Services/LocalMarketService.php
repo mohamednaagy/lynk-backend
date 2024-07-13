@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\LocalMarketInventoryStatus;
 use App\Enums\LocalMarketInventoryUnitsStatus;
 use App\Enums\LocalMarketOrderStatus;
+use App\Enums\Trader;
 use App\Models\LocalMarketOrder;
 use App\Models\LocalMarketOrderHasInventory;
 use DragonCode\Support\Facades\Helpers\Arr;
@@ -125,7 +126,7 @@ class LocalMarketService
     public function createOrder($traderOrder, $financialOrder, $preferredTypes, $companyId)
     {
         return LocalMarketOrder::create([
-            'source' => 'LYNK',
+            'source' => Trader::Lynk,
             'trader_order_id' => $traderOrder->id,
             'amount' => $financialOrder->amount->convertAndFormatByDecimal(),
             'national_id' => $financialOrder->national_id,
