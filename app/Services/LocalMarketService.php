@@ -16,21 +16,23 @@ use Illuminate\Support\Facades\DB;
 class LocalMarketService
 {
     /**
-     * Get the suitable inventory based on loan amount, preferred item types, and used inventories.
+     * Retrieves an inventory item from the local market based on the loan amount, preferred item types, and used inventories.
      *
-     * @param  float  $loanAmount
-     * @param  array  $preferredItemTypes
-     * @param  array  $usedInventories
-     * @return LocalMarketInventory|null
+     * @param  int  $loanAmount  The loan amount.
+     * @param  array  $preferredItemTypes  The preferred item types.
+     * @param  array  $usedInventories  The used inventories.
+     * @return LocalMarketInventory|null The retrieved inventory item, or null if not found.
      */
     public function getInventory($loanAmount, $preferredItemTypes = [], $usedInventories = [])
     {
         return LocalMarketInventory::where('max_price', '<=', $loanAmount)
-            ->when(! empty($preferredItemTypes), function ($query) use ($preferredItemTypes) {
-                return $query->whereIn('commodity_type_id', $preferredItemTypes);
-            })
-            ->orWhere(function ($query) use ($preferredItemTypes) {
-                return $query->whereNotIn('commodity_type_id', $preferredItemTypes);
+            ->where(function ($query) use ($preferredItemTypes) {
+                if (! empty($preferredItemTypes)) {
+                    $query->whereIn('commodity_type_id', $preferredItemTypes)
+                        ->orWhere(function ($query) use ($preferredItemTypes) {
+                            $query->whereNotIn('commodity_type_id', $preferredItemTypes);
+                        });
+                }
             })
             ->where('status', LocalMarketInventoryStatus::Active)
             ->when(! empty($usedInventories), function ($query) use ($usedInventories) {
@@ -47,11 +49,7 @@ class LocalMarketService
     {
         $numberOfNeededUnits = floor($loan / $inventory->price());
 
-        if ($inventory->hasCompanyBoughtFromInventory($companyId)) {
-            $availableUnits = $this->getUnitsWithOwnershipCheck($inventory, $numberOfNeededUnits, $companyId);
-        } else {
-            $availableUnits = $this->getUnitsWithoutOwnershipCheck($inventory, $numberOfNeededUnits);
-        }
+        $availableUnits = $this->extractValidUnitsForCompany($inventory, $companyId, $numberOfNeededUnits);
 
         $totalAvailableUnitsCost = count($availableUnits) * $inventory->price();
         $remainingLoan = $loan - $totalAvailableUnitsCost;
@@ -65,6 +63,15 @@ class LocalMarketService
             'remainingLoan' => $remainingLoan,
             'isLoanCovered' => ($remainingLoan == 0),
         ];
+    }
+
+    private function extractValidUnitsForCompany($inventory, $companyId, $numberOfNeededUnits)
+    {
+        if ($inventory->hasCompanyBoughtFromInventory($companyId)) {
+            return $this->getUnitsWithOwnershipCheck($inventory, $numberOfNeededUnits, $companyId);
+        } else {
+            return $this->getUnitsWithoutOwnershipCheck($inventory, $numberOfNeededUnits);
+        }
     }
 
     private function getUnitsWithOwnershipCheck($inventory, $numberOfNeededUnits, $companyId)
