@@ -3,12 +3,11 @@
 namespace App\Observers;
 
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
-use App\Enums\TraderOrderMode;
+use App\Enums\Trader;
 use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
 
 class TraderOrderObserver
 {
@@ -35,12 +34,8 @@ class TraderOrderObserver
      */
     public function created(TraderOrder $traderOrder)
     {
-        if (
-            $traderOrder->provider === 'bursam'
-            && $traderOrder->version === 'v2'
-            && $traderOrder->mode === TraderOrderMode::Automatic
-        ) {
-            ProcessBursamInitiatedTraderOrder::dispatch($traderOrder->id);
+        if ($traderOrder->needsProcessingAfterInitiation()) {
+            $traderOrder->processInitiatedTraderOrder();
         }
     }
 

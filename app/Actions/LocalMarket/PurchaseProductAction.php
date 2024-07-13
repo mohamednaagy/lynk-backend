@@ -4,14 +4,16 @@ namespace App\Actions\LocalMarket;
 
 use App\Jobs\UpdateOwnershipJob;
 use App\Services\LocalMarketService;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 class PurchaseProductAction
 {
     private $localMarketService;
+
     private $usedUnits = [];
+
     private $usedInventories = [];
+
     private $remainingAmount;
 
     public function __construct(LocalMarketService $localMarketService)
@@ -36,6 +38,7 @@ class PurchaseProductAction
         }
 
         $usedInventories[] = $inventory->id;
+
         return $this->handle($financialOrder, $companyId, $preferredTypes, $this->remainingAmount, $rotations, $usedInventories, $usedUnitsIDs);
     }
 
@@ -56,10 +59,9 @@ class PurchaseProductAction
             'local_market_order_id' => $orderId,
             'order' => $financialOrder,
             'products' => $usedInventories,
-            'success' => true
+            'success' => true,
         ]);
     }
-
 
     protected function associateUnitsWithInventories(&$usedInventories, $units)
     {

@@ -39,6 +39,11 @@ class LocalMarketInventory extends Model
         return $this->belongsTo(Supplier::class, 'company_id');
     }
 
+    public function localMarketOrderHasInventory()
+    {
+        return $this->hasMany(LocalMarketOrderHasInventory::class, 'local_market_inventory_id');
+    }
+
     public function type()
     {
         return $this->belongsTo(CommodityType::class, 'commodity_type_id');
@@ -85,5 +90,24 @@ class LocalMarketInventory extends Model
         } else {
             return true;
         }
+    }
+
+    /**
+     * Check if the company has bought from this inventory before.
+     *
+     * @param  int  $companyId
+     * @return bool
+     */
+    public function hasCompanyBoughtFromInventory($companyId)
+    {
+        return $this->whereHas('localMarketOrderHasInventory', function ($query) use ($companyId) {
+            $query->where('company_id', $companyId);
+        })
+            ->exists();
+    }
+
+    public function price()
+    {
+        return $this->max_price;
     }
 }

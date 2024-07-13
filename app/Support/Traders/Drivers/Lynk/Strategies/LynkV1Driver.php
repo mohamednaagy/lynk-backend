@@ -46,20 +46,19 @@ class LynkV1Driver implements TraderInterface
         return $financingOrder->traderOrders()->create([
             'uuid_one' => Str::uuid(),
             'provider' => $this->provider,
-            'reference' => '',
+            'reference' => 'random_to_no_be_fake',
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
         ]);
     }
 
-     /**
+    /**
      * @throws TraderException
      */
     public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
     {
-        $productCode = $this->getUnusedProductCode($traderOrder->provider);
-        $response = LynkClient::of($traderOrder)->buyProduct($productCode);
+        $response = LynkClient::of($traderOrder)->buyProduct();
 
         if (! empty($response->json('header.errorCode'))) {
             throw new TraderException(
@@ -79,7 +78,6 @@ class LynkV1Driver implements TraderInterface
 
         $traderOrder->update([
             'status' => TraderOrderStatus::InProgress,
-            'product_code' => $productCode,
         ]);
 
         return $traderOrder;

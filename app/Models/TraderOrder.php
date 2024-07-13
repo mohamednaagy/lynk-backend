@@ -10,6 +10,8 @@ use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessLynkInitiatedTraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -224,5 +226,40 @@ class TraderOrder extends Model implements HasMedia
         }
 
         return ! $this->hasMedia(TraderOrderMediaCollection::ClientWakala);
+    }
+
+    /**
+     * Check if the trader order needs to be automatically processed.
+     *
+     *
+     * @return bool Returns true if the trader order needs to be processed, false otherwise.
+     */
+    public function needsProcessingAfterInitiation()
+    {
+        if ($this->provider == EnumsTrader::Bursam && $this->version !== 'v2') {
+            return false;
+        }
+
+        return $this->mode === TraderOrderMode::Automatic;
+    }
+
+    /**
+     * Process the initiated trader order.
+     *
+     *
+     * @return void
+     */
+    public function processInitiatedTraderOrder()
+    {
+        if ($this->provider == EnumsTrader::Bursam) {
+            ProcessBursamInitiatedTraderOrder::dispatch($this->id);
+        } elseif ($this->provider == EnumsTrader::Lynk) {
+            ProcessLynkInitiatedTraderOrder::dispatch($this->id);
+        }
+    }
+
+    public function company()
+    {
+        return $this->order->company;
     }
 }

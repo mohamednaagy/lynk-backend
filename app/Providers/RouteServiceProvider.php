@@ -76,7 +76,7 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware('api')
                 ->prefix('api')
-                ->group(base_path('routes/api/LocalMarket.php'));
+                ->group(base_path('routes/api/test.php'));
         });
 
         Route::bind('trader', function ($id) {

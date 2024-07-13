@@ -194,10 +194,12 @@ function convertDateTimeToHumanDate(Carbon $dataTime, ?Carbon $endDateTime = nul
 {
     $endDateTime = $endDateTime ?? Carbon::now();
     $diffTime = $dataTime->diffForHumans(
-        $endDateTime, [
+        $endDateTime,
+        [
             'parts' => 3,
             'join' => true,
-        ]);
+        ]
+    );
 
     $ignoredWords = ['ago', 'before', 'after', 'منذ', 'قبل'];
 
