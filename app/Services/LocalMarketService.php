@@ -122,10 +122,11 @@ class LocalMarketService
         );
     }
 
-    public function createOrder($financialOrder, $preferredTypes, $companyId)
+    public function createOrder($traderOrder, $financialOrder, $preferredTypes, $companyId)
     {
         return LocalMarketOrder::create([
             'source' => 'LYNK',
+            'trader_order_id' => $traderOrder->id,
             'amount' => $financialOrder->amount->convertAndFormatByDecimal(),
             'national_id' => $financialOrder->national_id,
             'customer_name' => $financialOrder->customer_name,

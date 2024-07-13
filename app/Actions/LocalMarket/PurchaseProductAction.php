@@ -19,9 +19,9 @@ class PurchaseProductAction
         $this->localMarketService = $localMarketService;
     }
 
-    public function handle($financialOrder, $companyId, $preferredTypes, $loanAmount, $rotations, array $usedInventories = [], array $usedUnitsIDs = []): bool
+    public function handle($traderOrder, $financialOrder, $companyId, $preferredTypes, $loanAmount, $rotations, array $usedInventories = [], array $usedUnitsIDs = []): bool
     {
-        // try {
+        try {
         $inventory = $this->localMarketService->getInventory($preferredTypes, $loanAmount, $usedInventories);
         if (empty($inventory)) {
             throw new Exception("Loan_amount_can_not_be_fullfilled", 422);
@@ -33,27 +33,27 @@ class PurchaseProductAction
 
         $usedUnitsIDs[] = $this->retrieveUnitIDs($suitableUnits['availableUnits']);
         if (empty($suitableUnits['remainingLoan'])) {
-            return $this->bulkInsertUnits($financialOrder, $preferredTypes, $companyId, $this->usedUnits, $this->usedInventories);
+            return $this->bulkInsertUnits($traderOrder, $financialOrder, $preferredTypes, $companyId, $this->usedUnits, $this->usedInventories);
         }
 
         $usedInventories[] = $inventory->id;
-        return $this->handle($financialOrder, $companyId, $preferredTypes, $this->remainingAmount, $rotations, $usedInventories, $usedUnitsIDs);
-        // } catch (\Throwable $th) {
-        //     throw new Exception($th->getMessage(),$th->getCode());
-        // }
+        return $this->handle($traderOrder, $financialOrder, $companyId, $preferredTypes, $this->remainingAmount, $rotations, $usedInventories, $usedUnitsIDs);
+        } catch (\Throwable $th) {
+            throw new Exception($th->getMessage());
+        }
 
     }
 
-    private function bulkInsertUnits($financialOrder, $preferredTypes, $companyId, $units, $usedInventories)
+    private function bulkInsertUnits($traderOrder, $financialOrder, $preferredTypes, $companyId, $units, $usedInventories)
     {
         $unitIds = $this->retrieveUnitIDs($units);
 
         $this->associateUnitsWithInventories($usedInventories, $units);
 
         $unitsSql = implode(',', $unitIds);
-        DB::transaction(function () use ($financialOrder, $companyId, $unitsSql, $preferredTypes, $usedInventories) {
+        DB::transaction(function () use ($traderOrder, $financialOrder, $companyId, $unitsSql, $preferredTypes, $usedInventories) {
             $this->localMarketService->updateInventoryUnitsStatus($unitsSql);
-            $order = $this->localMarketService->createOrder($financialOrder, $preferredTypes, $companyId);
+            $order = $this->localMarketService->createOrder($traderOrder, $financialOrder, $preferredTypes, $companyId);
             $this->processUsedInventories($usedInventories, $order->id, $companyId);
         });
 

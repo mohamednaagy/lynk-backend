@@ -54,12 +54,12 @@ class LynkClient
         return new static($traderOrder);
     }
 
-    public function buyProduct($productCode)
+    public function buyProduct()
     {
         $financingOrder = $this->traderOrder->order;
         $number_of_rotations = app(LocalMurabahaSettings::class)->default_trade_order_roatation_count ?? 0;
 
-        return app(PurchaseProductAction::class)->handle($financingOrder, $financingOrder->company_id, $financingOrder->company->preferred_market_type, $financingOrder->amount->convertAndFormatByDecimal(), $number_of_rotations);
+        return app(PurchaseProductAction::class)->handle($this->traderOrder, $financingOrder, $financingOrder->company_id, $financingOrder->company->preferred_market_type, $financingOrder->amount->convertAndFormatByDecimal(), $number_of_rotations);
     }
 
     public function sellProduct()
