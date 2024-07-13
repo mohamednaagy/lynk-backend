@@ -79,7 +79,6 @@ class LynkV1Driver implements TraderInterface
 
         $traderOrder->update([
             'status' => TraderOrderStatus::InProgress,
-            'product_code' => $productCode,
         ]);
 
         return $traderOrder;

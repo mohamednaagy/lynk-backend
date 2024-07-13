@@ -58,49 +58,8 @@ class LynkClient
     {
         $financingOrder = $this->traderOrder->order;
         $number_of_rotations = app(LocalMurabahaSettings::class)->default_trade_order_roatation_count ?? 0;
-        // $request = [
-        //     'serialNumber' => '1',
-        //     'bidOption' => 'Y',
-        //     'otcOption' => 'N',
-        //     'stbOption' => 'N',
-        //     'productCode' => $productCode,
-        //     'purchaseType' => 'P',
-        //     'clientName' => '',
-        //     'currency' => 'SAR',
-        //     'bidValue' => (float) $financingOrder->amount->convertAndFormatByDecimal(),
-        //     'valueDate' => now('Asia/Riyadh')->format('Ymd'),
-        //     'tenor' => config('trader.providers.lynk.tenor'),
-        //     'otcCounterParty' => $financingOrder->customer_name,
-        //     'otcMurabaha' => '',
-        //     'otcMurabahaValue' => (float) $financingOrder->selling_price->convertAndFormatByDecimal(),
-        //     'eCertNo' => '',
-        // ];
-
-        // $requestHeader = [
-        //     'memberShortName' => config('trader.providers.lynk.member_short_name'),
-        //     'uuid' => $this->traderOrder->uuid_one,
-        // ];
 
         return app(PurchaseProductAction::class)->handle($financingOrder, $financingOrder->company_id, $financingOrder->company->preferred_market_type, $financingOrder->amount->convertAndFormatByDecimal(), $number_of_rotations);
-
-        // $response = $this->rateLimitRequest(fn () => $this->http()
-        //     ->post(
-        //         $url,
-        //         [
-        //             'header' => $requestHeader,
-        //             'request' => $request,
-        //         ]
-        //     ));
-
-        // Log::channel('bursam')->info('Malaysia Bursa buyProduct request: ...'.json_encode([
-        //     'url' => $url,
-        //     'request' => $request,
-        //     'headers' => $requestHeader,
-        //     'response' => $response->json(),
-        //     'statusCode' => $response->getStatusCode(),
-        // ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-
-        
     }
 
     public function sellProduct()
