@@ -10,7 +10,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class LocalMarketInventory extends Model
 {
-    use HasFactory , LogsActivity;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
         'commodity_item_id',
@@ -101,7 +101,7 @@ class LocalMarketInventory extends Model
     public function hasCompanyBoughtFromInventory($companyId)
     {
         return $this->whereHas('localMarketOrderHasInventory', function ($query) use ($companyId) {
-            $query->where('company_id', $companyId);
+            $query->where('supplier_id', $companyId);
         })
             ->exists();
     }

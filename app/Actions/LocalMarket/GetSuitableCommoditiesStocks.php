@@ -2,18 +2,14 @@
 
 namespace App\Actions\LocalMarket;
 
-use App\Jobs\UpdateOwnershipJob;
 use App\Services\LocalMarketService;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class GetSuitableCommoditiesStocks
 {
     private $localMarketService;
 
-    private $loanUnits = [];
-
-    private $loanInventories = [];
+    private $loanDetails = ['isLoanCovered' => false];
 
     public function __construct(LocalMarketService $localMarketService)
     {
@@ -22,31 +18,31 @@ class GetSuitableCommoditiesStocks
 
     public function handle($companyId, $loanAmount, $preferredTypes = [])
     {
-        return $this->getSuitableStocks($companyId, $loanAmount, $preferredTypes);
+        $this->getSuitableStocks($companyId, $loanAmount, $preferredTypes);
+
+        return $this->loanDetails;
     }
 
     private function getSuitableStocks($companyId, $loanAmount, $preferredTypes = [], array $loanInventories = [])
     {
         $inventory = $this->localMarketService->getInventory($loanAmount, $preferredTypes, $loanInventories);
+
         if (empty($inventory)) {
-            Log::info('getSuitableStocksdetails: No suitable inventory found for the loan amount', ['company_id' => $companyId, 'loan_amount' => $loanAmount, 'preferred_types' => $preferredTypes, 'used_inventories' => $loanInventories]);
+            Log::info('getSuitableStocksdetails: Cannot processed with this loan', ['company_id' => $companyId, 'loan_amount' => $loanAmount, 'preferred_types' => $preferredTypes, 'loan_details' => $this->loanDetails]);
 
-            return false;
+            return $this->loanDetails;
         }
 
-        $suitableUnits = $this->localMarketService->getSuitableUnitsFromInventory($companyId, $inventory, $loanAmount);
-        $this->loanUnits[] = $suitableUnits['availableUnits'];
-        $this->loanInventories[] = $inventory;
+        $inventorySuitableUnits = $this->localMarketService->getSuitableUnitsFromInventory($companyId, $inventory, $loanAmount);
+        $this->loanDetails['inventories'][] = $inventorySuitableUnits;
+        $this->loanDetails['inventories_id'][] = $inventorySuitableUnits['inventoryId'];
+        $this->loanDetails['isLoanCovered'] = $inventorySuitableUnits['isLoanCovered'];
 
-        if (empty($suitableUnits['remainingLoan'])) {
-            return [
-                'units' => $this->loanUnits,
-                'inventories' => $this->loanInventories,
-                'can_continue_with_loan' => ($suitableUnits['remainingAmount'] == 0),
-            ];
+        if ($this->loanDetails['isLoanCovered']) {
+            return $this->loanDetails;
         }
 
-        return $this->getSuitableStocks($companyId, $suitableUnits['remainingAmount'], $preferredTypes, $loanInventories);
+        return $this->getSuitableStocks($companyId, $inventorySuitableUnits['remainingLoan'], $preferredTypes, $this->loanDetails['inventories_id']);
     }
 
     // private function bulkInsertUnits($financialOrder, $preferredTypes, $companyId, $units, $loanInventories)
@@ -70,23 +66,23 @@ class GetSuitableCommoditiesStocks
     //     ]);
     // }
 
-    protected function associateUnitsWithInventories(&$loanInventories, $units)
-    {
-        foreach ($loanInventories as $i => $inventory) {
-            $inventory->units = $units[$i];
-        }
-    }
+    // protected function associateUnitsWithInventories(&$loanInventories, $units)
+    // {
+    //     foreach ($loanInventories as $i => $inventory) {
+    //         $inventory->units = $units[$i];
+    //     }
+    // }
 
-    protected function processloanInventories($loanInventories, $orderId, $companyId)
-    {
-        foreach ($loanInventories as $inventory) {
-            $item = $this->localMarketService->findCommodityItem($inventory->commodity_item_id);
-            $inventoryId = $this->localMarketService->createOrderInventory($orderId, $inventory, $item);
+    // protected function processloanInventories($loanInventories, $orderId, $companyId)
+    // {
+    //     foreach ($loanInventories as $inventory) {
+    //         $item = $this->localMarketService->findCommodityItem($inventory->commodity_item_id);
+    //         $inventoryId = $this->localMarketService->createOrderInventory($orderId, $inventory, $item);
 
-            $this->localMarketService->insertOrderUnits($inventory->units, $inventoryId);
-            $this->localMarketService->updateInventoryUnitCounts($inventory, count($inventory->units));
-            //run job to update ownership of used untis
-            UpdateOwnershipJob::dispatch($inventory, $companyId);
-        }
-    }
+    //         $this->localMarketService->insertOrderUnits($inventory->units, $inventoryId);
+    //         $this->localMarketService->updateInventoryUnitCounts($inventory, count($inventory->units));
+    //         //run job to update ownership of used untis
+    //         UpdateOwnershipJob::dispatch($inventory, $companyId);
+    //     }
+    // }
 }

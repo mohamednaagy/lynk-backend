@@ -10,6 +10,7 @@ use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
 use App\Models\LocalMarketOrderHasInventory;
+use App\Settings\Classes\LocalMurabahaSettings;
 use Illuminate\Support\Facades\DB;
 
 class LocalMarketService
@@ -28,9 +29,15 @@ class LocalMarketService
             ->when(! empty($preferredItemTypes), function ($query) use ($preferredItemTypes) {
                 return $query->whereIn('commodity_type_id', $preferredItemTypes);
             })
+            ->orWhere(function ($query) use ($preferredItemTypes) {
+                return $query->whereNotIn('commodity_type_id', $preferredItemTypes);
+            })
             ->where('status', LocalMarketInventoryStatus::Active)
             ->when(! empty($usedInventories), function ($query) use ($usedInventories) {
                 return $query->whereNotIn('id', $usedInventories);
+            })
+            ->when(! empty($preferredItemTypes), function ($query) use ($preferredItemTypes) {
+                return $query->orderByRaw('CASE WHEN `commodity_type_id` IN ('.implode(',', $preferredItemTypes).') THEN 0 ELSE 1 END');
             })
             ->orderByRaw('(`available_quantity` * `max_price`) DESC')
             ->first();
@@ -40,10 +47,8 @@ class LocalMarketService
     {
         $numberOfNeededUnits = floor($loan / $inventory->price());
 
-        dd($inventory->hasCompanyBoughtFromInventory($companyId), $inventory->id, $companyId);
-        if ($inventory->hasCompanyBoughtFromInventory($companyId)) { // check for rotations
-            $rotations = 5;
-            $availableUnits = $this->getUnitsWithOwnershipCheck($inventory, $numberOfNeededUnits, $companyId, $rotations);
+        if ($inventory->hasCompanyBoughtFromInventory($companyId)) {
+            $availableUnits = $this->getUnitsWithOwnershipCheck($inventory, $numberOfNeededUnits, $companyId);
         } else {
             $availableUnits = $this->getUnitsWithoutOwnershipCheck($inventory, $numberOfNeededUnits);
         }
@@ -52,19 +57,28 @@ class LocalMarketService
         $remainingLoan = $loan - $totalAvailableUnitsCost;
 
         return [
+            'inventoryId' => $inventory->id,
+            'numberOfNeededUnits' => $numberOfNeededUnits,
+            'numberOfSuitableUnits' => count($availableUnits),
             'availableUnits' => $availableUnits,
             'totalCost' => $totalAvailableUnitsCost,
             'remainingLoan' => $remainingLoan,
+            'isLoanCovered' => ($remainingLoan == 0),
         ];
     }
 
-    private function getUnitsWithOwnershipCheck($inventory, $numberOfNeededUnits, $companyId, $rotations)
+    private function getUnitsWithOwnershipCheck($inventory, $numberOfNeededUnits, $companyId)
     {
-        return LocalMarketInventoryUnits::join('local_market_unit_ownership', 'local_market_unit_ownership.inventory_unit_id', '=', 'local_market_inventory_units.id')
-            ->where('local_market_unit_ownership.owner_id', $companyId)
+        $number_of_rotations = app(LocalMurabahaSettings::class)->default_trade_order_roatation_count ?? 0;
+
+        return LocalMarketInventoryUnits::join('local_market_unit_rotations', 'local_market_unit_rotations.inventory_unit_id', '=', 'local_market_inventory_units.id')
+            ->where('local_market_inventory_units.status', LocalMarketInventoryUnitsStatus::Free)
             ->where('local_market_inventory_units.local_market_inventory_id', $inventory->id)
+            ->where('local_market_unit_rotations.company_id', $companyId)
+            ->where('local_market_unit_rotations.number_of_rotations', '>=', $number_of_rotations)
             ->limit($numberOfNeededUnits)
-            ->get();
+            ->get()
+            ->toArray();
     }
 
     private function getUnitsWithoutOwnershipCheck($inventory, $numberOfNeededUnits)
@@ -72,7 +86,8 @@ class LocalMarketService
         return LocalMarketInventoryUnits::where('status', LocalMarketInventoryUnitsStatus::Free)
             ->where('local_market_inventory_id', $inventory->id)
             ->limit($numberOfNeededUnits)
-            ->get();
+            ->get()
+            ->toArray();
     }
 
     public function updateInventoryUnitsStatus($unitsSql)
