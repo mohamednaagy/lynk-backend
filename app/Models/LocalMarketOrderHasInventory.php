@@ -21,6 +21,7 @@ class LocalMarketOrderHasInventory extends Model
         'previous_owner',
         'commodity_item_id',
         'commodity_type_id',
+        'local_market_inventory_id',
     ];
 
     public function inventory()
@@ -62,5 +63,4 @@ class LocalMarketOrderHasInventory extends Model
     {
         return $this->hasMany(LocalMarketOrderHasUnit::class, 'order_has_inventory_id');
     }
-
 }

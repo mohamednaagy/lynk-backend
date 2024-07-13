@@ -17,6 +17,8 @@ class LocalMarketOrder extends Model
         'customer_name',
         'status',
         'comment',
+        'company_id',
+        'trader_order_id',
     ];
 
     public function orderInventories()

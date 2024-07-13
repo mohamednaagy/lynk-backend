@@ -4,6 +4,7 @@ namespace App\Actions\LocalMarket;
 
 use App\Jobs\UpdateOwnershipJob;
 use App\Services\LocalMarketService;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class PurchaseProductAction
@@ -21,46 +22,46 @@ class PurchaseProductAction
         $this->localMarketService = $localMarketService;
     }
 
-    public function handle($financialOrder, $companyId, $preferredTypes, $loanAmount, $rotations, array $usedInventories = [], array $usedUnitsIDs = [])
+    public function handle($traderOrder, $financialOrder, $companyId, $preferredTypes, $loanAmount, $rotations, array $usedInventories = [], array $usedUnitsIDs = []): bool
     {
-        $inventory = $this->localMarketService->getInventory($preferredTypes, $loanAmount, $usedInventories);
-        if (empty($inventory)) {
-            return false;
+        try {
+            $inventory = $this->localMarketService->getInventory($preferredTypes, $loanAmount, $usedInventories);
+            if (empty($inventory)) {
+                throw new Exception('Loan_amount_can_not_be_fullfilled', 422);
+            }
+            $suitableUnits = $this->localMarketService->getSuitableUnits($companyId, $inventory, $loanAmount, $usedUnitsIDs, $rotations);
+            $this->usedUnits[] = $suitableUnits['availableUnits'];
+            $this->usedInventories[] = $inventory;
+            $this->remainingAmount = $suitableUnits['remainingLoan'];
+
+            $usedUnitsIDs[] = $this->retrieveUnitIDs($suitableUnits['availableUnits']);
+            if (empty($suitableUnits['remainingLoan'])) {
+                return $this->bulkInsertUnits($traderOrder, $financialOrder, $preferredTypes, $companyId, $this->usedUnits, $this->usedInventories);
+            }
+
+            $usedInventories[] = $inventory->id;
+
+            return $this->handle($traderOrder, $financialOrder, $companyId, $preferredTypes, $this->remainingAmount, $rotations, $usedInventories, $usedUnitsIDs);
+        } catch (\Throwable $th) {
+            throw new Exception($th->getMessage());
         }
-        $suitableUnits = $this->localMarketService->getSuitableUnits($companyId, $inventory, $loanAmount, $usedUnitsIDs, $rotations);
-        $this->usedUnits[] = $suitableUnits['availableUnits'];
-        $this->usedInventories[] = $inventory;
-        $this->remainingAmount = $suitableUnits['remainingLoan'];
 
-        $usedUnitsIDs[] = $this->generateUnitIDs($suitableUnits['availableUnits']);
-        if (empty($suitableUnits['remainingLoan'])) {
-            return $this->bulkInsertUnits($financialOrder, $preferredTypes, $companyId, $this->usedUnits, $this->usedInventories);
-        }
-
-        $usedInventories[] = $inventory->id;
-
-        return $this->handle($financialOrder, $companyId, $preferredTypes, $this->remainingAmount, $rotations, $usedInventories, $usedUnitsIDs);
     }
 
-    private function bulkInsertUnits($financialOrder, $preferredTypes, $companyId, $units, $usedInventories)
+    private function bulkInsertUnits($traderOrder, $financialOrder, $preferredTypes, $companyId, $units, $usedInventories)
     {
-        $unitIds = collect($units)->flatten()->pluck('id')->toArray();
+        $unitIds = $this->retrieveUnitIDs($units);
 
         $this->associateUnitsWithInventories($usedInventories, $units);
 
         $unitsSql = implode(',', $unitIds);
-        DB::transaction(function () use ($financialOrder, $companyId, $unitsSql, $preferredTypes, $usedInventories, &$orderId) {
+        DB::transaction(function () use ($traderOrder, $financialOrder, $companyId, $unitsSql, $preferredTypes, $usedInventories) {
             $this->localMarketService->updateInventoryUnitsStatus($unitsSql);
-            $orderId = $this->localMarketService->createOrder($financialOrder, $preferredTypes, $companyId);
-            $this->processUsedInventories($usedInventories, $orderId, $companyId);
+            $order = $this->localMarketService->createOrder($traderOrder, $financialOrder, $preferredTypes, $companyId);
+            $this->processUsedInventories($usedInventories, $order->id, $companyId);
         });
 
-        return response()->json([
-            'local_market_order_id' => $orderId,
-            'order' => $financialOrder,
-            'products' => $usedInventories,
-            'success' => true,
-        ]);
+        return true;
     }
 
     protected function associateUnitsWithInventories(&$usedInventories, $units)
@@ -74,17 +75,17 @@ class PurchaseProductAction
     {
         foreach ($usedInventories as $inventory) {
             $item = $this->localMarketService->findCommodityItem($inventory->commodity_item_id);
-            $inventoryId = $this->localMarketService->createOrderInventory($orderId, $inventory, $item);
+            $orderInventoryId = $this->localMarketService->createOrderInventory($orderId, $inventory, $item);
 
-            $this->localMarketService->insertOrderUnits($inventory->units, $inventoryId);
+            $this->localMarketService->insertOrderUnits($inventory->units, $orderInventoryId->id);
             $this->localMarketService->updateInventoryUnitCounts($inventory, count($inventory->units));
             //run job to update ownership of used untis
             UpdateOwnershipJob::dispatch($inventory, $companyId);
         }
     }
 
-    private function generateUnitIDs($usedUnits)
+    private function retrieveUnitIDs($usedUnits)
     {
-        return collect($usedUnits)->pluck('id')->toArray();
+        return collect($usedUnits)->flatten()->pluck('id')->toArray();
     }
 }

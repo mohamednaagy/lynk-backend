@@ -60,7 +60,7 @@ class LynkV1Driver implements TraderInterface
     {
         $response = LynkClient::of($traderOrder)->buyProduct();
 
-        if (! empty($response->json('header.errorCode'))) {
+        if (! $response) {
             throw new TraderException(
                 'Failed to create trader order',
                 [
@@ -69,7 +69,7 @@ class LynkV1Driver implements TraderInterface
                     'version' => $this->version,
                     'provider_response_body' => $response->json(),
                     'financing_order_id' => $traderOrder->order->id,
-                    'failure_reason' => $response->json('body.0.bidMsg'),
+                    'failure_reason' => $response->json('cannot fullfilled'),
                 ]
             );
         }
