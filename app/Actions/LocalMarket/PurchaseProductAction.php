@@ -2,9 +2,10 @@
 
 namespace App\Actions\LocalMarket;
 
+use App\Enums\LocalMarketInventoryUnitsStatus;
+use App\Exceptions\LocalMarket\PurchaseProductException;
 use App\Jobs\UpdateOwnershipJob;
 use App\Services\LocalMarketService;
-use Exception;
 use Illuminate\Support\Facades\DB;
 
 class PurchaseProductAction
@@ -22,30 +23,46 @@ class PurchaseProductAction
         $this->localMarketService = $localMarketService;
     }
 
-    public function handle($traderOrder, $financialOrder, $companyId, $preferredTypes, $loanAmount, $rotations, array $usedInventories = [], array $usedUnitsIDs = []): bool
+    /**
+     * Executes the purchase product action.
+     *
+     * @param  mixed  $traderOrder  The trader order details.
+     * @param  array  $inventories  The inventories to be updated.
+     * @return bool Indicates if the operation was successful.
+     *
+     * @throws PurchaseProductException If the purchase operation fails.
+     */
+    public function handle($traderOrder, array $inventories): bool
     {
+        DB::beginTransaction();
+
         try {
-            $inventory = $this->localMarketService->getInventory($preferredTypes, $loanAmount, $usedInventories);
-            if (empty($inventory)) {
-                throw new Exception('Loan_amount_can_not_be_fullfilled', 422);
-            }
-            $suitableUnits = $this->localMarketService->getSuitableUnits($companyId, $inventory, $loanAmount, $usedUnitsIDs, $rotations);
-            $this->usedUnits[] = $suitableUnits['availableUnits'];
-            $this->usedInventories[] = $inventory;
-            $this->remainingAmount = $suitableUnits['remainingLoan'];
+            // Change units status to be reserved
+            $unitIds = $this->extractUnitIds($inventories);
+            $this->localMarketService->changeUnitsStatus($unitIds, LocalMarketInventoryUnitsStatus::Reserved);
 
-            $usedUnitsIDs[] = $this->retrieveUnitIDs($suitableUnits['availableUnits']);
-            if (empty($suitableUnits['remainingLoan'])) {
-                return $this->bulkInsertUnits($traderOrder, $financialOrder, $preferredTypes, $companyId, $this->usedUnits, $this->usedInventories);
-            }
+            // Update inventory available quantity
+            $this->localMarketService->recalculateAvailableInventoryQuantities($inventories);
 
-            $usedInventories[] = $inventory->id;
+            // Insert ownership for units
+            $this->localMarketService->changeUnitsOwnerShip($unitIds, 'current_owner', 'previous_owner', 1, 2);
 
-            return $this->handle($traderOrder, $financialOrder, $companyId, $preferredTypes, $this->remainingAmount, $rotations, $usedInventories, $usedUnitsIDs);
-        } catch (\Throwable $th) {
-            throw new Exception($th->getMessage());
+            DB::commit();
+
+            return true;
+        } catch (PurchaseProductException $e) {
+            DB::rollBack();
+            throw new PurchaseProductException('Failed to purchase product: '.$e->getMessage(), 0, $e);
         }
+    }
 
+    private function extractUnitIds($inventories)
+    {
+        $unitIds = collect($inventories)->flatMap(function ($inventory) {
+            return collect($inventory['availableUnits'])->pluck('id');
+        })->toArray();
+
+        return $unitIds;
     }
 
     private function bulkInsertUnits($traderOrder, $financialOrder, $preferredTypes, $companyId, $units, $usedInventories)

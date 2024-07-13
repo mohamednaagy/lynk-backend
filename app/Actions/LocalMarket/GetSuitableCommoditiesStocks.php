@@ -44,45 +44,4 @@ class GetSuitableCommoditiesStocks
 
         return $this->getSuitableStocks($companyId, $inventorySuitableUnits['remainingLoan'], $preferredTypes, $this->loanDetails['inventories_id']);
     }
-
-    // private function bulkInsertUnits($financialOrder, $preferredTypes, $companyId, $units, $loanInventories)
-    // {
-    //     $unitIds = collect($units)->flatten()->pluck('id')->toArray();
-
-    //     $this->associateUnitsWithInventories($loanInventories, $units);
-
-    //     $unitsSql = implode(',', $unitIds);
-    //     DB::transaction(function () use ($financialOrder, $companyId, $unitsSql, $preferredTypes, $loanInventories, &$orderId) {
-    //         $this->localMarketService->updateInventoryUnitsStatus($unitsSql);
-    //         $orderId = $this->localMarketService->createOrder($financialOrder, $preferredTypes, $companyId);
-    //         $this->processloanInventories($loanInventories, $orderId, $companyId);
-    //     });
-
-    //     return response()->json([
-    //         'local_market_order_id' => $orderId,
-    //         'order' => $financialOrder,
-    //         'products' => $loanInventories,
-    //         'success' => true
-    //     ]);
-    // }
-
-    // protected function associateUnitsWithInventories(&$loanInventories, $units)
-    // {
-    //     foreach ($loanInventories as $i => $inventory) {
-    //         $inventory->units = $units[$i];
-    //     }
-    // }
-
-    // protected function processloanInventories($loanInventories, $orderId, $companyId)
-    // {
-    //     foreach ($loanInventories as $inventory) {
-    //         $item = $this->localMarketService->findCommodityItem($inventory->commodity_item_id);
-    //         $inventoryId = $this->localMarketService->createOrderInventory($orderId, $inventory, $item);
-
-    //         $this->localMarketService->insertOrderUnits($inventory->units, $inventoryId);
-    //         $this->localMarketService->updateInventoryUnitCounts($inventory, count($inventory->units));
-    //         //run job to update ownership of used untis
-    //         UpdateOwnershipJob::dispatch($inventory, $companyId);
-    //     }
-    // }
 }

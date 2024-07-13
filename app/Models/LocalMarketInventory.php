@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\LocalMarketInventoryStatus;
+use App\Enums\LocalMarketInventoryUnitsStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
@@ -109,5 +110,17 @@ class LocalMarketInventory extends Model
     public function price()
     {
         return $this->max_price;
+    }
+
+    /**
+     * Update the available quantity based on the number of free units in LocalMarketInventoryUnits.
+     *
+     * @return void
+     */
+    public function updateAvailableQuantity()
+    {
+        $freeUnitsCount = $this->units()->where('status', LocalMarketInventoryUnitsStatus::Free)->count();
+        $this->available_quantity = $freeUnitsCount;
+        $this->save();
     }
 }

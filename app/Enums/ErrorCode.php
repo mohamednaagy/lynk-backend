@@ -73,4 +73,6 @@ class ErrorCode
     public const ERROR_CHEKING_UNITS = 1036;
 
     public const ORDER_IS_CANCELLED = 1037;
+
+    public const LOCAL_MARKET_PURCHASE_PRODUCT = 1037;
 }

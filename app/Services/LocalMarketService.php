@@ -45,6 +45,14 @@ class LocalMarketService
             ->first();
     }
 
+    /**
+     * Get suitable units from inventory based on the loan amount.
+     *
+     * @param  int  $companyId  The ID of the company.
+     * @param  LocalMarketInventory  $inventory  The local market inventory.
+     * @param  float  $loan  The loan amount.
+     * @return array The array containing information about the suitable units.
+     */
     public function getSuitableUnitsFromInventory($companyId, LocalMarketInventory $inventory, $loan)
     {
         $numberOfNeededUnits = floor($loan / $inventory->price());
@@ -65,6 +73,14 @@ class LocalMarketService
         ];
     }
 
+    /**
+     * Extracts valid units for a specific company from the inventory.
+     *
+     * @param  Inventory  $inventory  The inventory object.
+     * @param  int  $companyId  The ID of the company.
+     * @param  int  $numberOfNeededUnits  The number of units needed.
+     * @return array The array of valid units for the company.
+     */
     private function extractValidUnitsForCompany($inventory, $companyId, $numberOfNeededUnits)
     {
         if ($inventory->hasCompanyBoughtFromInventory($companyId)) {
@@ -74,6 +90,14 @@ class LocalMarketService
         }
     }
 
+    /**
+     * Retrieves units from the local market inventory with an ownership check.
+     *
+     * @param  $inventory  The local market inventory object.
+     * @param  $numberOfNeededUnits  The number of units needed.
+     * @param  $companyId  The ID of the company.
+     * @return array The array of units retrieved from the inventory.
+     */
     private function getUnitsWithOwnershipCheck($inventory, $numberOfNeededUnits, $companyId)
     {
         $number_of_rotations = app(LocalMurabahaSettings::class)->default_trade_order_roatation_count ?? 0;
@@ -88,6 +112,13 @@ class LocalMarketService
             ->toArray();
     }
 
+    /**
+     * Retrieve units from the local market inventory without checking ownership.
+     *
+     * @param  \App\Models\LocalMarketInventory  $inventory  The local market inventory.
+     * @param  int  $numberOfNeededUnits  The number of units needed.
+     * @return array An array of units without ownership check.
+     */
     private function getUnitsWithoutOwnershipCheck($inventory, $numberOfNeededUnits)
     {
         return LocalMarketInventoryUnits::where('status', LocalMarketInventoryUnitsStatus::Free)
@@ -97,14 +128,48 @@ class LocalMarketService
             ->toArray();
     }
 
-    public function updateInventoryUnitsStatus($unitsSql)
+    /**
+     * Reserves the specified units in the local market .
+     *
+     * @param  array  $units  The array of unit IDs to be reserved.
+     * @return void
+     */
+    public function changeUnitsStatus(array $units, $status = LocalMarketInventoryUnitsStatus::Reserved)
     {
-        DB::update(
-            "UPDATE local_market_inventory_units
-             SET status = ?
-             WHERE `id` IN ($unitsSql)",
-            [LocalMarketInventoryUnitsStatus::Reserved]
-        );
+        LocalMarketInventoryUnits::whereIn('id', $units)->update(['status' => $status]);
+    }
+
+    /**
+     * Recalculates the available inventory quantities for the given inventory IDs.
+     *
+     * @param  array  $inventoryIds  The array of inventory IDs.
+     * @return void
+     */
+    public function recalculateAvailableInventoryQuantities($inventoryIds)
+    {
+        LocalMarketInventory::whereIn('id', $inventoryIds)->each(function ($inventory) {
+            $inventory->updateAvailableQuantity();
+        });
+    }
+
+    public function changeUnitsOwnerShip($units, $currentOwner, $currentOwnerType, $previousOwnerType, $previousOwner)
+    {
+        $ownershipData = [];
+        foreach ($units as $unit) {
+            $ownershipData[] = [
+                'unit_id' => $unit,
+                'current_owner' => $currentOwner,
+                'owner_type' => $currentOwnerType,
+                'current_owner_type' => $currentOwnerType,
+                'previous_owner' => $previousOwner,
+                'previous_owner_type' => $previousOwnerType,
+            ];
+        }
+
+        $chunks = array_chunk($ownershipData, 3000);
+        foreach ($chunks as $chunk) {
+            DB::table('local_market_unit_ownership')->insert($chunk);
+        }
     }
 
     public function createOrder($traderOrder, $financialOrder, $preferredTypes, $companyId)
