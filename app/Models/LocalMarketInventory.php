@@ -4,10 +4,8 @@ namespace App\Models;
 
 use App\Enums\LocalMarketInventoryStatus;
 use App\Enums\LocalMarketInventoryUnitsStatus;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 class LocalMarketInventory extends Model
 {
@@ -117,10 +115,11 @@ class LocalMarketInventory extends Model
      *
      * @return void
      */
-    public function updateAvailableQuantity()
+    public function refreshStockQuantities()
     {
-        $freeUnitsCount = $this->units()->where('status', LocalMarketInventoryUnitsStatus::Free)->count();
-        $this->available_quantity = $freeUnitsCount;
+        $this->available_quantity = $this->units()->where('status', LocalMarketInventoryUnitsStatus::Free)->count();
+        $this->reserved_items = $this->units()->where('status', LocalMarketInventoryUnitsStatus::Reserved)->count();
+
         $this->save();
     }
 }

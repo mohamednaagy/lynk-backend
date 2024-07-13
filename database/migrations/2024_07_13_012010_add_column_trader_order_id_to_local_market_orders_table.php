@@ -13,10 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('local_market_orders', function (Blueprint $table) {
-            $table->unsignedBigInteger('trader_order_id')->after('id');
-            $table->foreign('trader_order_id')->references('id')->on('trader_orders');
-        });
+        // Schema::table('local_market_orders', function (Blueprint $table) {
+        //     $table->unsignedBigInteger('trader_order_id')->after('id');
+        //     $table->foreign('trader_order_id')->references('id')->on('trader_orders');
+        // });
     }
 
     /**

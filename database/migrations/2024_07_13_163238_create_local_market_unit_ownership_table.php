@@ -17,16 +17,12 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('unit_id');
             $table->string('current_owner')->nullable();
-            $table->string('current_owner_type')->comment("Supplier => 1, Company => 2, Customer => ");
-            $table->string('status');
+            $table->smallInteger('current_owner_type')->comment('Supplier => 1, Company => 2, Customer => 3');
             $table->string('previous_owner')->nullable();
-            $table->unsignedBigInteger('previous_owner_type')->nullable()->comment("Supplier => 1, Company => 2, Customer => ");
+            $table->smallInteger('previous_owner_type')->nullable()->comment('Supplier => 1, Company => 2, Customer => 3');
             $table->timestamps();
 
-            $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
-            // Assuming there's a 'users' table for owner_id and previous_owner references
-            $table->foreign('owner_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('previous_owner')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('unit_id')->references('id')->on('local_market_inventory_units')->onDelete('cascade');
         });
     }
 
@@ -39,4 +35,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('local_market_unit_ownership');
     }
-}
+};

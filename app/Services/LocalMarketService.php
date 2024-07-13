@@ -10,6 +10,7 @@ use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
 use App\Models\LocalMarketOrderHasInventory;
+use App\Models\LocalMarketUnitOwnership;
 use App\Settings\Classes\LocalMurabahaSettings;
 use Illuminate\Support\Facades\DB;
 
@@ -145,21 +146,20 @@ class LocalMarketService
      * @param  array  $inventoryIds  The array of inventory IDs.
      * @return void
      */
-    public function recalculateAvailableInventoryQuantities($inventoryIds)
+    public function refreshInventoryStockQuantities($inventoryIds)
     {
         LocalMarketInventory::whereIn('id', $inventoryIds)->each(function ($inventory) {
-            $inventory->updateAvailableQuantity();
+            $inventory->refreshStockQuantities();
         });
     }
 
-    public function changeUnitsOwnerShip($units, $currentOwner, $currentOwnerType, $previousOwnerType, $previousOwner)
+    public function changeUnitsOwnerShip($units, $currentOwner, $currentOwnerType, $previousOwner, $previousOwnerType)
     {
         $ownershipData = [];
         foreach ($units as $unit) {
             $ownershipData[] = [
                 'unit_id' => $unit,
                 'current_owner' => $currentOwner,
-                'owner_type' => $currentOwnerType,
                 'current_owner_type' => $currentOwnerType,
                 'previous_owner' => $previousOwner,
                 'previous_owner_type' => $previousOwnerType,
@@ -168,7 +168,7 @@ class LocalMarketService
 
         $chunks = array_chunk($ownershipData, 3000);
         foreach ($chunks as $chunk) {
-            DB::table('local_market_unit_ownership')->insert($chunk);
+            LocalMarketUnitOwnership::insert($chunk);
         }
     }
 
