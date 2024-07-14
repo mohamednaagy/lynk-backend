@@ -14,6 +14,7 @@ use App\Http\Requests\V1\Supplier\Inventories\StoreLocalMarketInventoryRequest;
 use App\Http\Requests\V1\Supplier\Inventories\UpdateLocalMarketInventoryRequest;
 use App\Models\CommodityItem;
 use App\Models\LocalMarketInventory;
+use App\Services\InventoryItemUnitsService;
 use App\Transformers\LocalMarketInventoryTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -116,7 +117,7 @@ class LocalMarketInventoryController extends Controller
     public function update(CommodityItem $item, LocalMarketInventory $inventory, UpdateLocalMarketInventoryRequest $updateInventoryRequest, UpdateCommodityInventory $updateCommodityInventory)
     {
         //double check if the inventory is editable
-        if (! $inventory->is_editable) {
+        if (! $inventory->checkIfCanUpdateUnits($updateInventoryRequest->total_units)) {
             return $this->errorResponse(
                 __('error.inventory_cannot_be_updated'),
                 Response::HTTP_BAD_REQUEST,

@@ -40,5 +40,6 @@ return [
     'no_match_for_order_cost_and_value' => 'Not able to match order cost with order value',
     'order_cost_with_vat_and_without_vat_incorrect' => 'Entered value of order cost with VAT is incorrect',
     'user_doesnt_have_the_right_permissions' => 'User Doesnt Have The Right Permission',
-    'inventory_cannot_be_updated' => 'Inventory can be updated only if the reserved units is 0',
+    'inventory_cannot_be_updated' => 'Reserved Units is greater than new Total Units',
+    'inventory_units_not_changed' => 'No changes can be saved',
 ];

@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Exceptions\ErrorCreatingUnitsForThisINventory;
 use App\Jobs\CreateLocalMarketUnitInventoriesJob;
 use App\Models\LocalMarketInventory;
+use App\Services\InventoryItemUnitsService;
 use Exception;
 
 class LocalMarketInventoryObserver
@@ -18,7 +19,7 @@ class LocalMarketInventoryObserver
      */
     public function created(LocalMarketInventory $inventory)
     {
-        $this->createItemUnits($inventory);
+        app(InventoryItemUnitsService::class)->createItemUnits($inventory);
     }
 
     /**
@@ -33,26 +34,19 @@ class LocalMarketInventoryObserver
         //$this->createItemUnits($inventory);
     }
 
-    public function createItemUnits(LocalMarketInventory $inventory)
+    public function updating(LocalMarketInventory $inventory)
     {
-        try {
-            $numberOfUnits = $inventory->available_quantity;
-            $chunkSize = ($numberOfUnits <= 20000) ? $numberOfUnits : 20000;
-            $numberOfChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
+        $originalTotalItems = $inventory->getOriginal('total_items');
+        $newTotalItems = $inventory->total_items;
 
-            //loop through the chunks
-            for ($i = 0; $i < $numberOfChunks; $i++) {
-                $isLastChunk = ($i == $numberOfChunks - 1);
-                if ($isLastChunk) { // Get if this is the last chunk
-                    $chunkSize = $numberOfUnits - ($i * $chunkSize);
-                }
-
-                //dispatch job
-                CreateLocalMarketUnitInventoriesJob::dispatch($inventory, $chunkSize, $isLastChunk)->onQueue('unit-inventory');
+        if ($newTotalItems > $originalTotalItems) {
+            $newUnits = $newTotalItems - $originalTotalItems;
+            app(InventoryItemUnitsService::class)->createItemUnits($inventory, $newUnits);
+        } elseif ($newTotalItems < $originalTotalItems) {
+            $unitsToRemove = $originalTotalItems - $newTotalItems;
+            if ($unitsToRemove > 0) {
+                app(InventoryItemUnitsService::class)->decreaseItemUnits($inventory, $unitsToRemove);
             }
-        } catch (\Exception $e) {
-            // TODO create a custom exception for inventory unit creation
-            throw new ErrorCreatingUnitsForThisINventory();
         }
     }
 }
