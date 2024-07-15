@@ -3,6 +3,7 @@
 namespace App\Jobs\LocalMarket;
 
 use App\Enums\LocalMarketInventoryUnitsStatus;
+use App\Exceptions\FailedDecreaseUnitsForInventory;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use Illuminate\Bus\Queueable;
@@ -10,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 
 class DecreaseInventoryUnitsJob implements ShouldQueue
 {
@@ -36,14 +38,22 @@ class DecreaseInventoryUnitsJob implements ShouldQueue
      */
     public function handle()
     {
-        // Fetch IDs of units to be deleted
-        $ids = LocalMarketInventoryUnits::select('id')
-            ->where('local_market_inventory_id', $this->inventory->id)
-            ->where('status', (int) LocalMarketInventoryUnitsStatus::Free)
-            ->limit($this->numberOfUnits)
-            ->pluck('id');
+        try {
+            DB::beginTransaction();
+            // Fetch IDs of units to be deleted
+            $ids = LocalMarketInventoryUnits::select('id')
+                ->where('local_market_inventory_id', $this->inventory->id)
+                ->where('status', (int) LocalMarketInventoryUnitsStatus::Free)
+                ->limit($this->numberOfUnits)
+                ->pluck('id');
 
-        // Delete the fetched rows by IDs
-        LocalMarketInventoryUnits::whereIn('id', $ids)->delete();
+            // Delete the fetched rows by IDs
+            LocalMarketInventoryUnits::whereIn('id', $ids)->delete();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new FailedDecreaseUnitsForInventory();
+
+        }
     }
 }

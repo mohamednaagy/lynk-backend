@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Exceptions\ErrorCreatingUnitsForThisINventory;
+use App\Exceptions\FailedDecreaseUnitsForInventory;
 use App\Jobs\LocalMarket\CreateLocalMarketUnitInventoriesJob;
 use App\Jobs\LocalMarket\DecreaseInventoryUnitsJob;
 use App\Models\LocalMarketInventory;
+use Illuminate\Support\Facades\DB;
 
 class InventoryItemUnitsService
 {
@@ -14,7 +16,7 @@ class InventoryItemUnitsService
         try {
             // TODO no need to recalculate numberOfUnits
             $numberOfUnits = $total_units ?? $inventory->available_quantity;
-            $chunkSize = ($numberOfUnits <= 20000) ? $numberOfUnits : 20000;
+            $chunkSize = ($numberOfUnits <= 10000) ? $numberOfUnits : 10000;
             $numberOfChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
 
             //loop through the chunks
@@ -36,12 +38,13 @@ class InventoryItemUnitsService
     public function decreaseItemUnits(LocalMarketInventory $inventory, $decreased_amount)
     {
         try {
-            
+            DB::beginTransaction();
             DecreaseInventoryUnitsJob::dispatch($inventory, $decreased_amount)->onQueue('unit-inventory');
-         
+            DB::commit();
         } catch (\Exception $e) {
+            DB::rollBack();
             // TODO create a custom exception for inventory unit creation
-            throw new ErrorCreatingUnitsForThisINventory();
+            throw new FailedDecreaseUnitsForInventory();
         }
     }
 }

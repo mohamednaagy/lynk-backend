@@ -19,17 +19,17 @@ class UpdateInventoryStock implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $inventory;
-    protected $total;
+    protected $originalTotalItems;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(LocalMarketInventory $inventory, $total)
+    public function __construct(LocalMarketInventory $inventory, $originalTotalItems)
     {
         $this->inventory = $inventory;
-        $this->total = $total;
+        $this->originalTotalItems = $originalTotalItems;
     }
 
     /**
@@ -47,20 +47,20 @@ class UpdateInventoryStock implements ShouldQueue
             $this->inventory->update(['status' => LocalMarketInventoryStatus::Pending]);
             Log::info("Set inventory ID: {$this->inventory->id} to status pending");
 
-            $newTotalItems = $this->total;
-            $originalTotalItems = $this->inventory->getOriginal('total_items');
-            Log::info("Original total items: {$originalTotalItems}, New total items: {$newTotalItems}");
+            $newTotalItems = $this->inventory->total_items;
+            Log::info("Original total items: {$this->originalTotalItems}, New total items: {$this->inventory}");
 
-            if ($newTotalItems > $originalTotalItems) {
-                $newUnits = $newTotalItems - $originalTotalItems;
+            if ($newTotalItems > $this->originalTotalItems) {
+                $newUnits = $newTotalItems - $this->originalTotalItems;
                 Log::info("Increasing units by: {$newUnits}");
                 app(InventoryItemUnitsService::class)->createItemUnits($this->inventory, $newUnits);
-            } elseif ($newTotalItems < $originalTotalItems) {
-                $unitsToRemove = $originalTotalItems - $newTotalItems;
+            } elseif ($newTotalItems < $this->originalTotalItems) {
+                $unitsToRemove = $this->originalTotalItems - $newTotalItems;
                 if ($unitsToRemove > 0) {
                     Log::info("Decreasing units by: {$unitsToRemove}");
                     app(InventoryItemUnitsService::class)->decreaseItemUnits($this->inventory, $unitsToRemove);
                 }
+
             }
 
             // Enable inventory (set status to active)
@@ -70,6 +70,15 @@ class UpdateInventoryStock implements ShouldQueue
             // Commit the transaction
             DB::commit();
             Log::info("Transaction committed for updating inventory ID: {$this->inventory->id}");
+
+            if($this->inventory->total_items !== $this->inventory->units()->count()) {
+                DB::rollBack();
+                $this->inventory->update([
+                    'status' => LocalMarketInventoryStatus::Problem,
+                ]);
+                Log::error("Transaction rolled back for updating inventory ID: {$this->inventory->id}");
+                throw new NeedManuallyCheckUnitsAndStatus();
+            }
 
         } catch (\Exception $e) {
             // Rollback the transaction
