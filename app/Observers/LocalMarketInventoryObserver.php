@@ -2,11 +2,8 @@
 
 namespace App\Observers;
 
-use App\Exceptions\ErrorCreatingUnitsForThisINventory;
-use App\Jobs\CreateLocalMarketUnitInventoriesJob;
 use App\Models\LocalMarketInventory;
 use App\Services\InventoryItemUnitsService;
-use Exception;
 
 class LocalMarketInventoryObserver
 {

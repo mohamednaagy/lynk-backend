@@ -51,6 +51,8 @@ class CreateLocalMarketUnitInventoriesJob implements ShouldQueue
                 'local_market_inventory_id' => $this->inventory->id,
                 'commodity_item_id' => $this->inventory->item->id,
                 'qr_code' => $baseName.'-'.$uuid,
+                'created_at'=> now(),
+                'updated_at' => now(),
             ];
         }
 

@@ -2,13 +2,10 @@
 
 namespace App\Services;
 
-use App\Enums\LocalMarketInventoryStatus;
-use App\Enums\LocalMarketInventoryUnitsStatus;
 use App\Exceptions\ErrorCreatingUnitsForThisINventory;
 use App\Jobs\CreateLocalMarketUnitInventoriesJob;
 use App\Jobs\DecreaseInventoryUnitsJob;
 use App\Models\LocalMarketInventory;
-use Illuminate\Support\Facades\DB;
 
 class InventoryItemUnitsService
 {
