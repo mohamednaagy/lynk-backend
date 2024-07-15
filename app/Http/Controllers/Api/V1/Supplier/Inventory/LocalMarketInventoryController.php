@@ -117,7 +117,7 @@ class LocalMarketInventoryController extends Controller
     public function update(CommodityItem $item, LocalMarketInventory $inventory, UpdateLocalMarketInventoryRequest $updateInventoryRequest, UpdateCommodityInventory $updateCommodityInventory)
     {
         //double check if the inventory is editable
-        if (! $inventory->checkIfCanUpdateUnits($updateInventoryRequest->total_units)) {
+        if (! $inventory->canUpdateUnits($updateInventoryRequest->total_units)) {
             return $this->errorResponse(
                 __('error.inventory_cannot_be_updated'),
                 Response::HTTP_BAD_REQUEST,

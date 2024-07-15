@@ -87,7 +87,7 @@ class LocalMarketInventory extends Model
         }
     }
 
-    public function checkIfCanUpdateUnits($total_new_units) 
+    public function canUpdateUnits($total_new_units) 
     {
         if($total_new_units >= $this->reserved_items) {
             return true;
