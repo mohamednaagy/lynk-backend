@@ -2,13 +2,14 @@
 
 namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
 
+use App\Enums\CompanyMarketType;
 use App\Enums\CompanyStatus;
 use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Role;
-use App\Enums\Trader;
+use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
@@ -29,19 +30,29 @@ use Tests\Traits\InteractsWithUser;
 
 class MakeOrderProceedTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     const BaseUrl = 'api/v1/lender/orders/';
 
     private static Company $company;
 
+    private static Company $localCompany;
+
     private static User $userLender;
+
+    private static User $localUserLender;
 
     private static CommittedOrder $financingOrder;
 
+    private static CommittedOrder $localFinancingOrder;
+
     private static Model|TraderOrder $traderOrder;
 
+    private static Model|TraderOrder $localTraderOrder;
+
     private static string $orderProceedUrl;
+
+    private static string $localOrderProceedUrl;
 
     public function setUp(): void
     {
@@ -49,6 +60,7 @@ class MakeOrderProceedTest extends TestCase
 
         Artisan::call('module:seed');
 
+        // company with internation preferred market type
         [self::$company] = $this->createCompany('2000', ['company_cr' => '1234567891']);
         self::$userLender = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
 
@@ -57,9 +69,22 @@ class MakeOrderProceedTest extends TestCase
             ->creator(self::$userLender)
             ->commit();
 
-        self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder(Trader::Bursam);
+        self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder();
+        //
+        //        // company with local preferred market type
+        [self::$localCompany] = $this->createCompany('2000', ['company_cr' => '123456789', 'preferred_market_type' => CompanyMarketType::Local]);
+        self::$localUserLender = $this->createLenderUser(self::$localCompany->id, Role::LenderAdmin);
+
+        self::$localFinancingOrder = OrderScenario::inProgress()
+            ->lender(self::$localCompany)
+            ->creator(self::$localUserLender)
+            ->commit();
+
+        self::$localTraderOrder = InProgressOrder::of(self::$localFinancingOrder)->createTraderOrder();
 
         self::$orderProceedUrl = self::BaseUrl.self::$financingOrder->id.'/proceed';
+        self::$localOrderProceedUrl = self::BaseUrl.self::$localFinancingOrder->id.'/proceed';
+
     }
 
     public function test_that_unauth_user_cant_make_order_proceed(): void
@@ -385,5 +410,84 @@ class MakeOrderProceedTest extends TestCase
                 'message' => __('error.order_status_doesnt_follow_sequence'),
                 'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
             ]);
+    }
+
+    public function test_make_failed_order_proceed_with_invalid_case_contract_signed_at_local_market(): void
+    {
+        $response = $this->actingAs(self::$localUserLender)
+            ->withHeader('X-Company', self::$localCompany->getOriginal('id'))
+            ->postJson(self::$localOrderProceedUrl, [
+                'case' => FinancingOrderProceedCase::ContractSigned,
+            ]);
+
+        $response->assertStatus(422)
+            ->assertExactJson(
+                [
+                    'message' => __('validation.attributes.invalid_case_proceed'),
+                    'errors' => [
+                        'case' => [
+                            __('validation.attributes.invalid_case_proceed'),
+                        ],
+                    ],
+                ]
+            );
+    }
+
+    public function test_make_failed_order_proceed_with_invalid_case_client_wakala_at_local_market(): void
+    {
+        $response = $this->actingAs(self::$localUserLender)
+            ->withHeader('X-Company', self::$localCompany->getOriginal('id'))
+            ->postJson(self::$localOrderProceedUrl, [
+                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+            ]);
+
+        $response->assertStatus(422)
+            ->assertExactJson(
+                [
+                    'message' => __('validation.attributes.invalid_case_proceed'),
+                    'errors' => [
+                        'case' => [
+                            __('validation.attributes.invalid_case_proceed'),
+                        ],
+                    ],
+                ]
+            );
+    }
+
+    public function test_make_order_proceed_on_order_status_doesnt_follow_sequence_at_local_market(): void
+    {
+        $response = $this->actingAs(self::$localUserLender)
+            ->withHeader('X-Company', self::$localCompany->getOriginal('id'))
+            ->postJson(self::$localOrderProceedUrl, [
+                'case' => FinancingOrderProceedCase::ContractAndClientWakalaCompleted,
+            ]);
+
+        $response->assertStatus(400)
+            ->assertExactJson(
+                [
+                    'message' => __('error.order_status_doesnt_follow_sequence'),
+                    'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
+                ]
+            );
+    }
+
+    public function test_make_success_order_proceed_with_valid_case_client_wakala_at_local_market(): void
+    {
+        TraderOrderScenario::of(self::$localTraderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::PurchasingCommodity);
+
+        $response = $this->actingAs(self::$localUserLender)
+            ->withHeader('X-Company', self::$localCompany->getOriginal('id'))
+            ->postJson(self::$localOrderProceedUrl, [
+                'case' => FinancingOrderProceedCase::ContractAndClientWakalaCompleted,
+            ]);
+
+        $this->assertEquals(TraderOrderStatus::Completed, self::$localTraderOrder->refresh()->status->value);
+
+        $response->assertStatus(200)
+            ->assertJson(
+                fn (AssertableJson $json) => $json->has('data')->where('data', [])
+            );
     }
 }

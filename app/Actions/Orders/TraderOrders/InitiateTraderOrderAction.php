@@ -24,6 +24,7 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
             if ($financingOrder->hasCompletedTraderOrder()) {
                 throw new OrderHasCompletedTraderOrderException($orderId);
             }
+
             throw new OrderAlreadyHasActiveTraderOrderException;
         }
 
@@ -31,7 +32,7 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
             throw new CommodityMarketIsUnavailableException;
         }
 
-        $driver = config('trader.default');
+        $driver = $financingOrder->company->getPreferredTrader();
         $trader = Trader::driver($driver, get_latest_version_of_trader($driver));
         $traderOrder = $trader->createTraderOrder($financingOrder);
 

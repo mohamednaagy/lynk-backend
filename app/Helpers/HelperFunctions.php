@@ -126,6 +126,13 @@ if (! function_exists('get_murabha_steps')) {
     }
 }
 
+if (! function_exists('get_steps_index_to_check_can_proceed_order')) {
+    function get_steps_index_to_check_can_proceed_order($provider): array
+    {
+        return config('murabha-steps.proceed_order_steps')[$provider];
+    }
+}
+
 if (! function_exists('trader_step_histories')) {
     function trader_step_histories(string $provider, string $version): array
     {

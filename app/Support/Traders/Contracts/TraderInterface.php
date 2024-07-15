@@ -24,4 +24,6 @@ interface TraderInterface
     ): mixed;
 
     public function getDefaultInitialTradeOrderStatus();
+
+    public function processProceedContractAndClientWakala(TraderOrder $traderOrder);
 }
