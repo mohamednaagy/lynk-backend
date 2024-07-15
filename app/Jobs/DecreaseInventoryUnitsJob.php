@@ -8,7 +8,6 @@ use App\Exceptions\NeedManuallyCheckUnitsAndStatus;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -17,6 +16,7 @@ use Illuminate\Queue\SerializesModels;
 class DecreaseInventoryUnitsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
     protected $inventory;
 
     protected $chunkSize;
@@ -28,11 +28,11 @@ class DecreaseInventoryUnitsJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(LocalMarketInventory $inventory, $chunkSize, $isLastChunk = false)
+    public function __construct(LocalMarketInventory $inventory, $numberOfUnits)
     {
         $this->inventory = $inventory;
-        $this->chunkSize = $chunkSize;
-        $this->isLastChunk = $isLastChunk;
+        $this->numberOfUnits = $numberOfUnits;
+
     }
 
     /**
@@ -42,11 +42,14 @@ class DecreaseInventoryUnitsJob implements ShouldQueue
      */
     public function handle()
     {
+
+        // $numberOfChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
+
         //Decrease number of units for this inventory
         $ids = LocalMarketInventoryUnits::select('id')->where('local_market_inventory_id', $this->inventory->id)
-        ->where('status', (int) LocalMarketInventoryUnitsStatus::Free)
-        ->limit($this->chunkSize)
-        ->pluck('id');
+            ->where('status', (int) LocalMarketInventoryUnitsStatus::Free)
+            ->limit($this->chunkSize)
+            ->pluck('id');
         // Delete the fetched rows by IDs
         LocalMarketInventoryUnits::whereIn('id', $ids)->delete();
 

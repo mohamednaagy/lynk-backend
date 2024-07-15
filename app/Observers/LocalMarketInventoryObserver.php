@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Jobs\UpdateInventoryStock;
 use App\Models\LocalMarketInventory;
 use App\Services\InventoryItemUnitsService;
 
@@ -26,24 +27,27 @@ class LocalMarketInventoryObserver
      */
     public function updated(LocalMarketInventory $inventory)
     {
-        //TODO: Handle the LocalMarketInventory "updated" event
-        //DROP OLD CREATED UNITS FROM LocalMarketInventoryUnits
-        //$this->createItemUnits($inventory);
     }
 
     public function updating(LocalMarketInventory $inventory)
     {
-        $originalTotalItems = $inventory->getOriginal('total_items');
-        $newTotalItems = $inventory->total_items;
+        // TODO make sure total_items is dirty
 
-        if ($newTotalItems > $originalTotalItems) {
-            $newUnits = $newTotalItems - $originalTotalItems;
-            app(InventoryItemUnitsService::class)->createItemUnits($inventory, $newUnits);
-        } elseif ($newTotalItems < $originalTotalItems) {
-            $unitsToRemove = $originalTotalItems - $newTotalItems;
-            if ($unitsToRemove > 0) {
-                app(InventoryItemUnitsService::class)->decreaseItemUnits($inventory, $unitsToRemove);
-            }
+        if ($this->isDirty('total_items')) {
+            UpdateInventoryStock::dispatch($inventory, $inventory->total_items)->onQueue('unit-inventory');
         }
+
+        // $originalTotalItems = $inventory->getOriginal('total_items');
+        // $newTotalItems = $inventory->total_items;
+
+        // if ($newTotalItems > $originalTotalItems) {
+        //     $newUnits = $newTotalItems - $originalTotalItems;
+        //     app(InventoryItemUnitsService::class)->createItemUnits($inventory, $newUnits);
+        // } elseif ($newTotalItems < $originalTotalItems) {
+        //     $unitsToRemove = $originalTotalItems - $newTotalItems;
+        //     if ($unitsToRemove > 0) {
+        //         app(InventoryItemUnitsService::class)->decreaseItemUnits($inventory, $unitsToRemove);
+        //     }
+        // }
     }
 }

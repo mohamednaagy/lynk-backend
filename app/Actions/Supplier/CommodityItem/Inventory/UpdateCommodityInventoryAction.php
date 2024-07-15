@@ -10,10 +10,11 @@ class UpdateCommodityInventoryAction implements UpdateCommodityInventory
 {
     public function handle(LocalMarketInventory $inventory, array $data): LocalMarketInventory
     {
-        $inventory->update([
-            'available_quantity' => $data['total_units'] - $inventory->reserved_items,
-            'status' => LocalMarketInventoryStatus::Pending,
-        ]
+        $inventory->update(
+            [
+                'available_quantity' => $data['total_units'] - $inventory->reserved_items,
+                'status' => LocalMarketInventoryStatus::Pending,
+            ]
         );
 
         return $inventory;
