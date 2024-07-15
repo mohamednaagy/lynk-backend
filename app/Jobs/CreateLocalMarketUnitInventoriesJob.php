@@ -6,7 +6,6 @@ use App\Enums\LocalMarketInventoryStatus;
 use App\Exceptions\NeedManuallyCheckUnitsAndStatus;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
-use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -51,8 +50,6 @@ class CreateLocalMarketUnitInventoriesJob implements ShouldQueue
                 'local_market_inventory_id' => $this->inventory->id,
                 'commodity_item_id' => $this->inventory->item->id,
                 'qr_code' => $baseName.'-'.$uuid,
-                'created_at'=> now(),
-                'updated_at' => now(),
             ];
         }
 
