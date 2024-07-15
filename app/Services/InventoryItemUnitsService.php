@@ -16,7 +16,7 @@ class InventoryItemUnitsService
         try {
             // TODO no need to recalculate numberOfUnits
             $numberOfUnits = $total_units ?? $inventory->available_quantity;
-            $chunkSize = ($numberOfUnits <= 10000) ? $numberOfUnits : 10000;
+            $chunkSize = ($numberOfUnits <= 20000) ? $numberOfUnits : 20000;
             $numberOfChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
 
             //loop through the chunks
