@@ -21,12 +21,13 @@ class TraderException extends Exception
 
     public function formatMessage($message, $context)
     {
+        $providerResponse = isset($context['provider_response_body']) ? 'Response Body : '.json_encode($context['provider_response_body']) : null;
         $messageParts = array_filter([
             'TRADER_ERROR',
             $context['provider'] ?? null,
             'Trader Order ID '.Arr::get($context, 'trader_order_id', '---'),
             $context['version'] ?? null,
-            'Provider Response Body '.json_encode($context['provider_response_body']),
+            $providerResponse,
             'Failure Reason '.$context['failure_reason'],
             $message,
         ]);
@@ -36,7 +37,7 @@ class TraderException extends Exception
             $context['provider'] ?? null,
             'Trader Order ID '.Arr::get($context, 'trader_order_id', '---'),
             $context['version'] ?? null,
-            'Provider Response Body '.json_encode($context['provider_response_body']),
+            $providerResponse,
             'Failure Reason '.$context['failure_reason'],
             $message,
         ]);
