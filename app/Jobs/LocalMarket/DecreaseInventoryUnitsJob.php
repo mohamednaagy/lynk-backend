@@ -39,7 +39,6 @@ class DecreaseInventoryUnitsJob implements ShouldQueue
     public function handle()
     {
         try {
-            DB::beginTransaction();
             // Fetch IDs of units to be deleted
             $ids = LocalMarketInventoryUnits::select('id')
                 ->where('local_market_inventory_id', $this->inventory->id)
@@ -49,11 +48,8 @@ class DecreaseInventoryUnitsJob implements ShouldQueue
 
             // Delete the fetched rows by IDs
             LocalMarketInventoryUnits::whereIn('id', $ids)->delete();
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
             throw new FailedDecreaseUnitsForInventory();
-
         }
     }
 }

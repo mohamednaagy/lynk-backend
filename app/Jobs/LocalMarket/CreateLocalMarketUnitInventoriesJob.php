@@ -2,6 +2,7 @@
 
 namespace App\Jobs\LocalMarket;
 
+use App\Enums\LocalMarketInventoryStatus;
 use App\Exceptions\NeedManuallyCheckUnitsAndStatus;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
@@ -45,7 +46,6 @@ class CreateLocalMarketUnitInventoriesJob implements ShouldQueue
      */
     public function handle()
     {
-        DB::beginTransaction();
         try {
             Log::info("Starting CreateLocalMarketUnitInventoriesJob for inventory ID: {$this->inventory->id}");
 
@@ -78,19 +78,17 @@ class CreateLocalMarketUnitInventoriesJob implements ShouldQueue
                     $missingUnits = $availableQuantity - $totalUnitsCreated;
                     Log::info("Dispatching additional job for {$missingUnits} missing units for inventory ID: {$this->inventory->id}");
                     self::dispatch($this->inventory, $missingUnits, true)->onQueue('unit-inventory');
-                } else {
-                    Log::error("Inventory ID: {$this->inventory->id} set to Problem status. More units created than available");
-                    throw new NeedManuallyCheckUnitsAndStatus();
                 }
             }
 
             unset($inventoryUnits);
-            DB::commit();
-            Log::info("Transaction committed and finished CreateLocalMarketUnitInventoriesJob for inventory ID: {$this->inventory->id}");
         } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("Transaction rolled back for inventory ID: {$this->inventory->id}. Error: {$e->getMessage()}");
-            Log::error($e->getTraceAsString());
+            $this->inventory->update([
+                'status' => LocalMarketInventoryStatus::Problem,
+            ]);
+
+            // $this->inventory->available_quantity = $this->inventory->getOriginal('available_quantity');
+            // $this->inventory->saveQuietly(); 
             throw new NeedManuallyCheckUnitsAndStatus();
         }
     }

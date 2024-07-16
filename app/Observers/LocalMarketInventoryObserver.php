@@ -18,7 +18,8 @@ class LocalMarketInventoryObserver
      */
     public function created(LocalMarketInventory $inventory)
     {
-        app(InventoryItemUnitsService::class)->createItemUnits($inventory);
+        //app(InventoryItemUnitsService::class)->createItemUnits($inventory);
+        UpdateInventoryStock::dispatch($inventory, 0)->onQueue('unit-inventory');
     }
 
     /**
