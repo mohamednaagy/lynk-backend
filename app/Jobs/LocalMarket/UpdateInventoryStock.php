@@ -102,7 +102,7 @@ class UpdateInventoryStock implements ShouldQueue
                 }
 
                 Log::info("Inserting {$chunkSize} inventory units for inventory ID: {$inventory->id}");
-                LocalMarketInventoryUnits::insert($inventoryUnits);
+                $inventory->units()->createMany($inventoryUnits);
                 if ($isLastChunk) {
                     $totalUnitsCreated = $inventory->CountOfUnits();
                     $availableQuantity = $inventory->available_quantity;

@@ -28,6 +28,8 @@ class LocalMarketInventory extends Model
         'status' => LocalMarketInventoryStatus::class,
     ];
 
+    public $timestamps = true;
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
