@@ -97,7 +97,7 @@ class UpdateInventoryStock implements ShouldQueue
                     $inventoryUnits[] = [
                         'local_market_inventory_id' => $inventory->id,
                         'commodity_item_id' => $inventory->item->id,
-                        'qr_code' => $baseName.'-'.$uuid,
+                        'qr_code' => $baseName . '-' . $uuid,
                     ];
                 }
 
@@ -137,7 +137,6 @@ class UpdateInventoryStock implements ShouldQueue
                 ->where('status', (int) LocalMarketInventoryUnitsStatus::Free)
                 ->limit($decreased_amount)
                 ->delete('id');
-
         } catch (\Exception $e) {
             DB::rollBack();
             throw new FailedDecreaseUnitsForInventory();

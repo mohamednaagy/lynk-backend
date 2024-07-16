@@ -28,8 +28,6 @@ class LocalMarketInventory extends Model
         'status' => LocalMarketInventoryStatus::class,
     ];
 
-    public $timestamps = true;
-
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -67,7 +65,7 @@ class LocalMarketInventory extends Model
         $type = substr($this->type->unique_name, 0, 2);
         $itemId = substr($this->item->unique_name, 0, 2);
 
-        return $type.'-'.$itemId;
+        return $type . '-' . $itemId;
     }
 
     public function units()
