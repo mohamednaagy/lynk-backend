@@ -30,9 +30,7 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
         if (! is_bursam_service_available()) {
             throw new CommodityMarketIsUnavailableException;
         }
-
-        $driver = config('trader.default');
-        $trader = Trader::driver($driver, get_latest_version_of_trader($driver));
+        $trader = Trader::getSuitableDriverForCompany($financingOrder->company);
         $traderOrder = $trader->createTraderOrder($financingOrder);
 
         // keep below action after createTraderOrder()
