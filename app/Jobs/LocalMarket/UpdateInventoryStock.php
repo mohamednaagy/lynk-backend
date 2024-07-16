@@ -71,14 +71,14 @@ class UpdateInventoryStock implements ShouldQueue
             DB::commit();
             Log::info("Transaction committed for updating inventory ID: {$this->inventory->id}");
 
-            if($this->inventory->total_items !== $this->inventory->units()->count()) {
-                DB::rollBack();
-                $this->inventory->update([
-                    'status' => LocalMarketInventoryStatus::Problem,
-                ]);
-                Log::error("Transaction rolled back for updating inventory ID: {$this->inventory->id}");
-                throw new NeedManuallyCheckUnitsAndStatus();
-            }
+            // if($this->inventory->total_items !== $this->inventory->units()->count()) {
+            //     DB::rollBack();
+            //     $this->inventory->update([
+            //         'status' => LocalMarketInventoryStatus::Problem,
+            //     ]);
+            //     Log::error("Transaction rolled back for updating inventory ID: {$this->inventory->id}");
+            //     throw new NeedManuallyCheckUnitsAndStatus();
+            // }
 
         } catch (\Exception $e) {
             // Rollback the transaction
@@ -86,6 +86,8 @@ class UpdateInventoryStock implements ShouldQueue
             $this->inventory->update([
                 'status' => LocalMarketInventoryStatus::Problem,
             ]);
+            $this->inventory->available_quantity = $this->inventory->getOriginal('available_quantity');
+            $this->inventory->saveQuietly(); 
             Log::error("Transaction rolled back for updating inventory ID: {$this->inventory->id}. Error: {$e->getMessage()}");
             throw new NeedManuallyCheckUnitsAndStatus();
         }
