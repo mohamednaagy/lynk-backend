@@ -246,9 +246,4 @@ class TraderOrder extends Model implements HasMedia
     {
         return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
     }
-
-    public function isProvider(string $provider_name)
-    {
-        return $this->provider == $provider_name;
-    }
 }
