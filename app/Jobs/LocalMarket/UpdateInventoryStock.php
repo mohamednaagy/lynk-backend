@@ -55,7 +55,10 @@ class UpdateInventoryStock implements ShouldQueue
             }
 
             // Enable inventory (set status to active)
-            $this->inventory->update(['status' => LocalMarketInventoryStatus::Active]);
+            $this->inventory->update([
+                'status' => LocalMarketInventoryStatus::Active,
+                'available_quantity' => $this->total - $this->inventory->reserved_items,
+            ]);
             Log::info("Set inventory ID: {$this->inventory->id} to status active");
 
             // Commit the transaction
