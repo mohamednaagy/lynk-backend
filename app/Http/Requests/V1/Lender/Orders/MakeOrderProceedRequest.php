@@ -2,10 +2,8 @@
 
 namespace App\Http\Requests\V1\Lender\Orders;
 
-use App\Enums\FinancingOrderProceedCase;
-use App\Enums\Trader;
 use App\Http\Requests\Traits\RequestHasClientWakala;
-use BenSampo\Enum\Rules\EnumValue;
+use App\Rules\CheckAllowedFinancingOrderProceedCaseRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class MakeOrderProceedRequest extends FormRequest
@@ -29,29 +27,8 @@ class MakeOrderProceedRequest extends FormRequest
     {
 
         return [
-            // TODO LYNKMRBHA-1062-BE-proceed-order rewrite validation rules
-            'case' => ['required', 'string', $this->checkFinancingOrderProceedCases()],
+            'case' => ['required', 'string', new CheckAllowedFinancingOrderProceedCaseRule($this->order)],
             'client_wakala' => ['nullable', 'file', 'mimes:pdf,png,jpeg,jpg'],
-        ];
-    }
-
-    /**
-     * @return string|\BenSampo\Enum\Rules\EnumValue
-     */
-    public function checkFinancingOrderProceedCases()
-    {
-        $traderOrder = $this->order->activeTraderOrder()->firstOrFail();
-        if ($traderOrder->isProvider(Trader::Lynk)) {
-            return 'in:'.FinancingOrderProceedCase::ContractAndClientWakalaCompleted;
-        }
-
-        return new EnumValue(FinancingOrderProceedCase::class);
-    }
-
-    public function messages(): array
-    {
-        return [
-            'case.in' => __('validation.attributes.invalid_case_proceed'),
         ];
     }
 }

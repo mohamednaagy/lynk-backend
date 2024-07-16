@@ -251,10 +251,10 @@ class MakeOrderProceedTest extends TestCase
         $response->assertStatus(422)
             ->assertExactJson(
                 [
-                    'message' => 'The value you have entered is invalid.',
+                    'message' => __('validation.attributes.invalid_case_proceed'),
                     'errors' => [
                         'case' => [
-                            'The value you have entered is invalid.',
+                            __('validation.attributes.invalid_case_proceed'),
                         ],
                     ],
                 ]

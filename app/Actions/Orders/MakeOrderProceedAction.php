@@ -9,6 +9,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader as EnumTrader;
 use App\Exceptions\OrderRequiresClientVerification;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
@@ -24,6 +25,13 @@ use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 class MakeOrderProceedAction implements MakeOrderProceed
 {
     use TraderHelperTrait;
+
+    private $get_first_step_that_must_be_check_to_proceed_order = [
+        EnumTrader::Lynk => MurabhaStep::ContractSigned,
+        EnumTrader::Bursam => MurabhaStep::ContractSigned,
+        EnumTrader::FakeDmcc => MurabhaStep::ClientWakala,
+        EnumTrader::Dmcc => MurabhaStep::ClientWakala,
+    ];
 
     protected ?UploadedFile $signedClientWakala = null;
 
@@ -121,14 +129,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
     protected function isPreviousStepOfContractAndClientWakalaNotCompleted(TraderOrder $traderOrder): bool
     {
         $murabhaSteps = array_keys(get_murabha_steps($traderOrder->provider, $traderOrder->version));
-        $allowed_proccessd_steps = get_steps_index_to_check_can_proceed_order($traderOrder->provider);
-
-        $allowed_proccessd_steps = [MurabhaStep::ClientWakala, MurabhaStep::ContractSigned];
-
-        // $firstStepIndex = min(collect($allowed_proccessd_steps)
-        //     ->map(fn ($step) => array_search($step, $murabhaSteps))->toArray());
-
-        $firstStepIndex = procces_order_stps.php[$traderOrder->provider];
+        $firstStepIndex = array_search($this->$get_first_step_that_must_be_check_to_proceed_order[$traderOrder->provider], $murabhaSteps);
 
         return ! $traderOrder->checkOrderStepComplete(
             (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))

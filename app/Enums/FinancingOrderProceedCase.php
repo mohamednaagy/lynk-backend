@@ -7,17 +7,24 @@ use BenSampo\Enum\Enum;
 
 final class FinancingOrderProceedCase extends Enum implements LocalizedEnum
 {
-    // TODO_LYNKMRBHA-1062-BE-proceed-order
     const ALLOWED_TO_PROCEED_STATUS = [
-        'BURSAM' => [
-            'wakala',
-            'contract_signed',
+        Trader::Bursam => [
+            self::ClientWakalaAccepted,
+            self::ContractSigned,
+            self::ContractAndClientWakalaCompleted,
         ],
-        'lynk' => [
-            'complete',
+        Trader::Lynk => [
+            self::ContractAndClientWakalaCompleted,
         ],
-        'naser' => [
-            'complete',
+        Trader::Dmcc => [
+            self::ClientWakalaAccepted,
+            self::ContractSigned,
+            self::ContractAndClientWakalaCompleted,
+        ],
+        Trader::FakeDmcc => [
+            self::ClientWakalaAccepted,
+            self::ContractSigned,
+            self::ContractAndClientWakalaCompleted,
         ],
     ];
 
