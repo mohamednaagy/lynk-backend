@@ -4,7 +4,6 @@ namespace App\Observers;
 
 use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\LocalMarketInventory;
-use App\Services\InventoryItemUnitsService;
 use Illuminate\Support\Facades\Log;
 
 class LocalMarketInventoryObserver
@@ -18,8 +17,7 @@ class LocalMarketInventoryObserver
      */
     public function created(LocalMarketInventory $inventory)
     {
-        //app(InventoryItemUnitsService::class)->createItemUnits($inventory);
-        UpdateInventoryStock::dispatch($inventory, 0)->onQueue('unit-inventory');
+        UpdateInventoryStock::dispatch($inventory, $inventory->available_quantity, $inventory->wasRecentlyCreated);
     }
 
     /**

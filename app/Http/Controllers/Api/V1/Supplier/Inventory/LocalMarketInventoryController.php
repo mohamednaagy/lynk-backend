@@ -14,7 +14,6 @@ use App\Http\Requests\V1\Supplier\Inventories\StoreLocalMarketInventoryRequest;
 use App\Http\Requests\V1\Supplier\Inventories\UpdateLocalMarketInventoryRequest;
 use App\Models\CommodityItem;
 use App\Models\LocalMarketInventory;
-use App\Services\InventoryItemUnitsService;
 use App\Transformers\LocalMarketInventoryTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;

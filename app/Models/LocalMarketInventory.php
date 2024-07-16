@@ -65,7 +65,7 @@ class LocalMarketInventory extends Model
         $type = substr($this->type->unique_name, 0, 2);
         $itemId = substr($this->item->unique_name, 0, 2);
 
-        return $type . '-' . $itemId;
+        return $type.'-'.$itemId;
     }
 
     public function units()
@@ -92,6 +92,11 @@ class LocalMarketInventory extends Model
         if ($total_new_units > $this->reserved_items) {
             return true;
         }
+
+        if ($total_new_units == $this->total_items) {
+            return false;
+        }
+
         return false;
     }
 }
