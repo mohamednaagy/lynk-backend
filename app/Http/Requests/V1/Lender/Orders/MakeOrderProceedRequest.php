@@ -29,6 +29,7 @@ class MakeOrderProceedRequest extends FormRequest
     {
 
         return [
+            // TODO LYNKMRBHA-1062-BE-proceed-order rewrite validation rules
             'case' => ['required', 'string', $this->checkFinancingOrderProceedCases()],
             'client_wakala' => ['nullable', 'file', 'mimes:pdf,png,jpeg,jpg'],
         ];

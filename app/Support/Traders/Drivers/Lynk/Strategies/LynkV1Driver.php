@@ -253,7 +253,7 @@ class LynkV1Driver implements TraderInterface
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
         $request = request();
-        //        $request['automatically_generate_file'] = true;
+        $request['automatically_generate_file'] = true;
         (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
             ->updateCommodityCertificateForClient($traderOrder, $request);
 

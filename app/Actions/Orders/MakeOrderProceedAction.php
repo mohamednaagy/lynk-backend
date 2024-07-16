@@ -121,9 +121,14 @@ class MakeOrderProceedAction implements MakeOrderProceed
     protected function isPreviousStepOfContractAndClientWakalaNotCompleted(TraderOrder $traderOrder): bool
     {
         $murabhaSteps = array_keys(get_murabha_steps($traderOrder->provider, $traderOrder->version));
-        $get_steps = get_steps_index_to_check_can_proceed_order($traderOrder->provider);
-        $firstStepIndex = min(collect($get_steps)
-            ->map(fn ($step) => array_search($step, $murabhaSteps))->toArray());
+        $allowed_proccessd_steps = get_steps_index_to_check_can_proceed_order($traderOrder->provider);
+
+        $allowed_proccessd_steps = [MurabhaStep::ClientWakala, MurabhaStep::ContractSigned];
+
+        // $firstStepIndex = min(collect($allowed_proccessd_steps)
+        //     ->map(fn ($step) => array_search($step, $murabhaSteps))->toArray());
+
+        $firstStepIndex = procces_order_stps.php[$traderOrder->provider];
 
         return ! $traderOrder->checkOrderStepComplete(
             (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
@@ -161,9 +166,9 @@ class MakeOrderProceedAction implements MakeOrderProceed
             throw new OrderRequiresClientVerification;
         }
 
-        $lastHistory = $traderOrder->traderHistories()->latest('id')->first();
+        $currenttraderOrderStatus = $traderOrder->traderHistories()->latest('id')->first();
 
-        if ($this->isPreviousStepOfContractAndClientWakalaNotCompleted($traderOrder) || is_null($lastHistory)) {
+        if ($this->isPreviousStepOfContractAndClientWakalaNotCompleted($traderOrder) || is_null($currenttraderOrderStatus)) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
