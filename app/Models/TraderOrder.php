@@ -19,7 +19,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -251,7 +250,6 @@ class TraderOrder extends Model implements HasMedia
 
     public function handleDeductBalanceForNewOrder()
     {
-        Log::info("traderOrder:". $this->status);
         if (
             $this->provider !== EnumsTrader::Lynk ||
             $this->status->is(TraderOrderStatus::Completed)
