@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -120,7 +122,7 @@ class TraderOrder extends Model implements HasMedia
     {
         $stepToHistoriesDictionary = trader_step_histories($this->provider, $this->version);
 
-        if (! array_key_exists($step, $stepToHistoriesDictionary)) {
+        if (!array_key_exists($step, $stepToHistoriesDictionary)) {
             throw new UnexpectedValueException("No mapping for this step {$step}");
         }
 
@@ -131,12 +133,12 @@ class TraderOrder extends Model implements HasMedia
 
     public function doesLastActionMatchWith($actions): bool
     {
-        if (! is_array($actions)) {
+        if (!is_array($actions)) {
             $actions = [$actions];
         }
 
         foreach ($actions as $action) {
-            if (! in_array($action, FinancingOrderHistory::getValues())) {
+            if (!in_array($action, FinancingOrderHistory::getValues())) {
                 throw new UnexpectedValueException('invalid Action');
             }
         }
@@ -148,12 +150,12 @@ class TraderOrder extends Model implements HasMedia
 
     public function checkOrderHistoryAction($actions): bool
     {
-        if (! is_array($actions)) {
+        if (!is_array($actions)) {
             $actions = [$actions];
         }
 
         foreach ($actions as $action) {
-            if (! in_array($action, FinancingOrderHistory::getValues())) {
+            if (!in_array($action, FinancingOrderHistory::getValues())) {
                 throw new UnexpectedValueException(sprintf('Invalid action %s', $action));
             }
         }
@@ -189,7 +191,7 @@ class TraderOrder extends Model implements HasMedia
      */
     public function ensureCanAccessStep(string $step)
     {
-        if (! $this->checkOrderStepComplete($step)) {
+        if (!$this->checkOrderStepComplete($step)) {
             throw new OrderStatusDoesNotFollowSequenceException();
         }
     }
@@ -200,7 +202,7 @@ class TraderOrder extends Model implements HasMedia
             return false;
         }
 
-        return ! $this->checkOrderStepComplete($step);
+        return !$this->checkOrderStepComplete($step);
     }
 
     public function scopeCompletedOrInProgress($query)
@@ -224,7 +226,7 @@ class TraderOrder extends Model implements HasMedia
             return false;
         }
 
-        return ! $this->hasMedia(TraderOrderMediaCollection::ClientWakala);
+        return !$this->hasMedia(TraderOrderMediaCollection::ClientWakala);
     }
 
     public function isCancelled(): bool
@@ -245,5 +247,18 @@ class TraderOrder extends Model implements HasMedia
     public function cancelDetail()
     {
         return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
+    }
+
+    public function handleDeductBalanceForNewOrder()
+    {
+        Log::info("traderOrder:". $this->status);
+        if (
+            $this->provider !== EnumsTrader::Lynk ||
+            $this->status->is(TraderOrderStatus::Completed)
+        ) {
+            return app(DeductBalanceForNewOrder::class)->handle($this);
+        }
+
+        return  false;
     }
 }

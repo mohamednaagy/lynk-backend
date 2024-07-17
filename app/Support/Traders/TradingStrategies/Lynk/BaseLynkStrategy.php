@@ -114,8 +114,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             ]);
 
             //create fees for LYNK order at completed step
-            app(DeductBalanceForNewOrder::class)->handle($traderOrder);
-
+            $traderOrder->handleDeductBalanceForNewOrder();
         }
     }
 
