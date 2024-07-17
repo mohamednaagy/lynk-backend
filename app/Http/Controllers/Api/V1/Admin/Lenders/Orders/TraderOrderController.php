@@ -7,10 +7,12 @@ use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
+use App\Enums\Trader;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\StoreTradingRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class TraderOrderController extends Controller
 {
@@ -40,9 +42,10 @@ class TraderOrderController extends Controller
             }
 
             $traderOrder = $createTraderOrder->handle($order, $data);
-
-            app(DeductBalanceForNewOrder::class)->handle($traderOrder);
-
+            if ($traderOrder->provider !== Trader::Lynk) {
+                app(DeductBalanceForNewOrder::class)->handle($traderOrder);
+            }
+            
             return $this->successResponse();
         });
     }

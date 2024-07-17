@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\TradingStrategies\Bursam;
 
+use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Actions\Contracts\Orders\UpdateTraderOrder;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -111,6 +112,10 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             $traderOrder->update([
                 'status' => TraderOrderStatus::Completed,
             ]);
+            //create fees for LYNK order at completed step
+            if ($traderOrder->provider === \App\Enums\Trader::Lynk) {
+                app(DeductBalanceForNewOrder::class)->handle($traderOrder);
+            }
         }
     }
 
