@@ -112,10 +112,10 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             $traderOrder->update([
                 'status' => TraderOrderStatus::Completed,
             ]);
+            
             //create fees for LYNK order at completed step
-            if ($traderOrder->provider === \App\Enums\Trader::Lynk) {
-                app(DeductBalanceForNewOrder::class)->handle($traderOrder);
-            }
+            app(DeductBalanceForNewOrder::class)->handle($traderOrder);
+
         }
     }
 
