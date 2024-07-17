@@ -3,16 +3,13 @@
 namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders;
 
 use App\Actions\Contracts\Orders\CreateTraderOrder;
-use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
-use App\Enums\Trader;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\StoreTradingRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class TraderOrderController extends Controller
 {

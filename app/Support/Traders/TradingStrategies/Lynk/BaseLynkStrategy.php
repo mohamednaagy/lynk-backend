@@ -2,7 +2,6 @@
 
 namespace App\Support\Traders\TradingStrategies\Bursam;
 
-use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Actions\Contracts\Orders\UpdateTraderOrder;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
