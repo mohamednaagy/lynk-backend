@@ -42,6 +42,7 @@ class TraderOrderController extends Controller
             }
 
             $traderOrder = $createTraderOrder->handle($order, $data);
+            //enhance this code
             //Skip "LYNK" requests from create transaction at initiated step
             if ($traderOrder->provider !== Trader::Lynk) {
                 app(DeductBalanceForNewOrder::class)->handle($traderOrder);

@@ -5,6 +5,7 @@ namespace App\Actions\Orders\TraderOrders;
 use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Actions\Contracts\Orders\TraderOrders\InitiateTraderOrder;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\Trader as EnumsTrader;
 use App\Exceptions\CommodityMarketIsUnavailableException;
 use App\Exceptions\OrderAlreadyHasActiveTraderOrderException;
 use App\Exceptions\OrderHasCompletedTraderOrderException;
@@ -38,8 +39,9 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
 
         // keep below action after createTraderOrder()
         // to be sure we have a trader order and store his data in transaction meta
-        app(DeductBalanceForNewOrder::class)->handle($traderOrder);
-
+        if ($traderOrder->provider !== EnumsTrader::Lynk) {
+            app(DeductBalanceForNewOrder::class)->handle($traderOrder);
+        }
         $financingOrder->update([
             'status' => FinancingOrderStatus::InProgress,
         ]);
