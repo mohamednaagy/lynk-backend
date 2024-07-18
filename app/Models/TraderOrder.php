@@ -247,16 +247,4 @@ class TraderOrder extends Model implements HasMedia
     {
         return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
     }
-
-    public function handleDeductBalanceForNewOrder()
-    {
-        if (
-            $this->provider !== EnumsTrader::Lynk ||
-            $this->status->is(TraderOrderStatus::Completed)
-        ) {
-            return app(DeductBalanceForNewOrder::class)->handle($this);
-        }
-
-        return  false;
-    }
 }
