@@ -129,11 +129,11 @@ class MakeOrderProceedAction implements MakeOrderProceed
     protected function isPreviousStepOfContractAndClientWakalaNotCompleted(TraderOrder $traderOrder): bool
     {
         $murabhaSteps = array_keys(get_murabha_steps($traderOrder->provider, $traderOrder->version));
-        $firstStepIndex = array_search($this->requiredStepForProccessedTraderOrder[$traderOrder->provider], $murabhaSteps);
+        $stepIndex = array_search($this->requiredStepForProccessedTraderOrder[$traderOrder->provider], $murabhaSteps);
 
         return ! $traderOrder->checkOrderStepComplete(
             (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
-                ->getPreviousStepOf($murabhaSteps[$firstStepIndex])->step
+                ->getPreviousStepOf($murabhaSteps[$stepIndex])->step
         );
 
     }
