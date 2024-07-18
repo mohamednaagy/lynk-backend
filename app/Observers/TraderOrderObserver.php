@@ -8,10 +8,20 @@ use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Services\TraderOrderStatusService;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
+use Illuminate\Support\Facades\Log;
 
 class TraderOrderObserver
 {
+
+    protected $traderOrderStatusService;
+
+    public function __construct(TraderOrderStatusService $traderOrderStatusService)
+    {
+        $this->traderOrderStatusService = $traderOrderStatusService;
+    }
+
     /**
      * Handle the TraderOrder "creating" event.
      *
@@ -42,6 +52,7 @@ class TraderOrderObserver
         ) {
             ProcessBursamInitiatedTraderOrder::dispatch($traderOrder->id);
         }
+        $this->handleStatusChange($traderOrder);
     }
 
     /**
@@ -70,6 +81,7 @@ class TraderOrderObserver
     {
         if ($traderOrder->wasChanged(['status'])) {
             $this->takeActionsIfStatusWasChanged($traderOrder);
+            $this->handleStatusChange($traderOrder);
         }
     }
 
@@ -109,5 +121,23 @@ class TraderOrderObserver
     public function forceDeleted(TraderOrder $traderOrder)
     {
         //
+    }
+
+     /**
+     * Handle the status change of the TraderOrder.
+     *
+     * @param TraderOrder $traderOrder
+     * @return void
+     */
+    protected function handleStatusChange(TraderOrder $traderOrder): void
+    {
+        if ($traderOrder->isDirty('status') || $traderOrder->wasRecentlyCreated) {
+            $provider = $traderOrder->provider;
+            $status = $traderOrder->status;
+            $action = $this->traderOrderStatusService->getAction($provider, $status);
+            if ($action) {
+                $action->handle($traderOrder); // Execute the action for the status change
+            }
+        }
     }
 }

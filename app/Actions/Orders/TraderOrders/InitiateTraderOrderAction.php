@@ -37,7 +37,6 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
 
         // keep below action after createTraderOrder()
         // to be sure we have a trader order and store his data in transaction meta
-        $traderOrder->handleDeductBalanceForNewOrder();
 
         $financingOrder->update([
             'status' => FinancingOrderStatus::InProgress,
