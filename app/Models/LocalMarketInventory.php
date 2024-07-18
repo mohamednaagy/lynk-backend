@@ -80,11 +80,8 @@ class LocalMarketInventory extends Model
 
     public function getIsEditableAttribute()
     {
-        if ($this->reserved_items > 0) {
-            return false;
-        } else {
-            return true;
-        }
+        //save for later if business changes and want to update inventory with a specified criteriea
+        return true;
     }
 
     public function canUpdateUnits($total_new_units)
