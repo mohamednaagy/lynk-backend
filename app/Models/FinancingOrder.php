@@ -285,7 +285,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         ) {
             return false;
         }
-
         $currentUserHasPermissionToCreate = $user?->hasRole([Role::Admin, Role::Manager])
             || $this->isTradingMode(TraderOrderMode::Automatic);
 

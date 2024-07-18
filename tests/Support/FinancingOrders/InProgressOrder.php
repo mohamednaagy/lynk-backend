@@ -33,7 +33,7 @@ class InProgressOrder
     }
 
     public function createTraderOrder(
-        string $driver = null,
+        ?string $driver = null,
         string $reference = '123456',
         int $status = TraderOrderStatus::InProgress,
         array $data = []
@@ -46,7 +46,7 @@ class InProgressOrder
             return $this->financingOrder
                 ->traderOrders()
                 ->create(array_merge([
-                    'provider' => $driver ?? config('trader.default'),
+                    'provider' => $driver ?? $this->financingOrder->Company->getPreferredTrader(),
                     'reference' => $reference,
                     'status' => $status,
                 ], $data));

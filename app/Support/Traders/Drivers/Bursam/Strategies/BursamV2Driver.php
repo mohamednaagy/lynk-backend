@@ -12,6 +12,7 @@ use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Jobs\General\ProcessAskClientForWakala;
+use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamBidCertificate;
@@ -179,5 +180,11 @@ class BursamV2Driver extends BursamV1Driver
     public function generatePdfFileName($traderOrder, $collectionName): string
     {
         return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
+    }
+
+    // use it in public api to proceed order after purchasing commodity step by one step
+    public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
+    {
+        ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
     }
 }

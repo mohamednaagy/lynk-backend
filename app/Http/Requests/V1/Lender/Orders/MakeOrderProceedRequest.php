@@ -2,9 +2,8 @@
 
 namespace App\Http\Requests\V1\Lender\Orders;
 
-use App\Enums\FinancingOrderProceedCase;
 use App\Http\Requests\Traits\RequestHasClientWakala;
-use BenSampo\Enum\Rules\EnumValue;
+use App\Rules\CheckAllowedFinancingOrderProceedCaseRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class MakeOrderProceedRequest extends FormRequest
@@ -13,8 +12,6 @@ class MakeOrderProceedRequest extends FormRequest
 
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -28,8 +25,9 @@ class MakeOrderProceedRequest extends FormRequest
      */
     public function rules(): array
     {
+
         return [
-            'case' => ['required', 'string', new EnumValue(FinancingOrderProceedCase::class)],
+            'case' => ['required', 'string', new CheckAllowedFinancingOrderProceedCaseRule($this->order)],
             'client_wakala' => ['nullable', 'file', 'mimes:pdf,png,jpeg,jpg'],
         ];
     }

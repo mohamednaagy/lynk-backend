@@ -63,7 +63,7 @@ class AppServiceProvider extends ServiceProvider
         Response::macro('errorResponse', function (
             string $message = 'something went wrong',
             int $statusCode = \Symfony\Component\HttpFoundation\Response::HTTP_BAD_REQUEST,
-            int $code = null
+            ?int $code = null
         ) {
             $response = [
                 'message' => $message,

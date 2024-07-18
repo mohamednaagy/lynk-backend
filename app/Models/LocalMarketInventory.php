@@ -10,7 +10,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class LocalMarketInventory extends Model
 {
-    use HasFactory , LogsActivity;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
         'commodity_item_id',
@@ -65,7 +65,7 @@ class LocalMarketInventory extends Model
         $type = substr($this->type->unique_name, 0, 2);
         $itemId = substr($this->item->unique_name, 0, 2);
 
-        return $type.'-'.$itemId;
+        return $type . '-' . $itemId;
     }
 
     public function units()
@@ -80,10 +80,20 @@ class LocalMarketInventory extends Model
 
     public function getIsEditableAttribute()
     {
-        if ($this->reserved_items > 0) {
-            return false;
-        } else {
+        //save for later if business changes and want to update inventory with a specified criteriea
+        return true;
+    }
+
+    public function canUpdateUnits($total_new_units)
+    {
+        if ($total_new_units > $this->reserved_items) {
             return true;
         }
+
+        if ($total_new_units == $this->total_items) {
+            return false;
+        }
+
+        return false;
     }
 }

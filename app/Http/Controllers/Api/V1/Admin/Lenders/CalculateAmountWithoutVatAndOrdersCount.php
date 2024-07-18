@@ -27,7 +27,7 @@ class CalculateAmountWithoutVatAndOrdersCount extends Controller
      */
     public function __invoke(
         Company $lender,
-        int $amountWithVat,
+        float $amountWithVat,
         CalcAmountWithoutVatAndOrdersCount $calcHandler
     ): JsonResponse {
         $wallet = $lender->getWallet(WalletType::CompanyWallet);

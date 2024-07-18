@@ -39,6 +39,6 @@ return [
     'no_match_for_order_cost_and_value' => 'لا يمكن حساب تكلفة طلب المرابحة',
     'order_cost_with_vat_and_without_vat_incorrect' => 'القيمة المدخلة للطلب مع الضريبة غير صحيحة',
     'user_doesnt_have_the_right_permissions' => 'هذا المستخدم لا يملك الصلاحيه',
-    'inventory_cannot_be_updated' => 'لا يمكن تعديل المستودع إلا إذا كانت لا توجد عمليات او وحدات محجوزة ',
-
+    'inventory_cannot_be_updated' => 'عدد الوحدات المحجوزة أكبر من العدد الإجمالي الجديد للوحدات',
+    'inventory_units_not_changed' => 'لم يتم تغيير عدد الوحدات',
 ];
