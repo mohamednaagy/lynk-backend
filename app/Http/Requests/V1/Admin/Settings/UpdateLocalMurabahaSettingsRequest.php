@@ -11,8 +11,6 @@ class UpdateLocalMurabahaSettingsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -21,14 +19,15 @@ class UpdateLocalMurabahaSettingsRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
     public function rules(): array
     {
         return [
+            'default_trade_order_roatation_count' => ['required', 'in:0,1,2,3']];
+
+        return [
             'default_trade_order_roatation_count' => ['required', 'in:0,1,2,3'],
-            'default_contract_sign_time_limit' => ['required','integer', 'gt:0'],
+            'default_contract_sign_time_limit' => ['required', 'integer', 'gt:0'],
         ];
     }
 }
