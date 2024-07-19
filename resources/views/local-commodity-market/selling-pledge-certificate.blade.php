@@ -719,7 +719,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 <p class="text-black">الوقت: {{ $current_time ?? '' }}</p>
                 <p class="text-xl text-center text-black">  شهادة تعهد بالبيع </p>
                 <p class="text-center text-black">
-                    نتعهد نحن لينك من تاريخ وتوقيت هذه الشهادة ببيع السلع المشار لها بناء على طلب{{ $customer_name }}
+                    نتعهد نحن لينك من تاريخ وتوقيت هذه الشهادة ببيع السلع المشار لها بناء على طلب {{ $customer_name }}
                     مقابل مبلغ وقدره{{ $amount }} ريال سعودي
                 <p class="text-lg font-semibold text-center text-black">بيانات السلع/ـة</p>
                 <table class="min-w-full mt-4">
