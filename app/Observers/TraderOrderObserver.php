@@ -10,7 +10,6 @@ use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Services\TraderOrderStatusService;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
-use Illuminate\Support\Facades\Log;
 
 class TraderOrderObserver
 {

@@ -5,7 +5,6 @@ use App\Actions\Contracts\Orders\DeductBalanceForCompletedOrder;
 use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Enums\Trader;
 use App\Enums\TraderOrderStatus;
-use Illuminate\Support\Facades\Log;
 
 class TraderOrderStatusService
 {
@@ -43,12 +42,10 @@ class TraderOrderStatusService
     public function getAction(string $provider, string $status)
     {
         if (!isset($this->actions[$provider])) {
-            Log::warning("Provider '{$provider}' not found in actions mapping.");
             return null;
         }
 
         if (!isset($this->actions[$provider][$status])) {
-            Log::warning("Status '{$status}' not found for provider '{$provider}' in actions mapping.");
             return null;
         }
 
