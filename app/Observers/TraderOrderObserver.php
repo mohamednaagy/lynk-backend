@@ -15,11 +15,8 @@ use Illuminate\Support\Facades\Log;
 class TraderOrderObserver
 {
 
-    protected $traderOrderStatusService;
-
-    public function __construct(TraderOrderStatusService $traderOrderStatusService)
+    public function __construct(protected TraderOrderStatusService $traderOrderStatusService)
     {
-        $this->traderOrderStatusService = $traderOrderStatusService;
     }
 
     /**
