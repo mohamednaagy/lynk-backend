@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Actions\Contracts\Orders\DeductBalanceForCompletedOrder;
@@ -6,7 +7,7 @@ use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Enums\Trader;
 use App\Enums\TraderOrderStatus;
 
-class TraderOrderStatusService
+class TraderOrderFeesService
 {
     /**
      * Mapping of actions based on provider and status.
@@ -41,21 +42,6 @@ class TraderOrderStatusService
      */
     public function getAction(string $provider, string $status)
     {
-        if (!isset($this->actions[$provider])) {
-            return null;
-        }
-
-        if (!isset($this->actions[$provider][$status])) {
-            return null;
-        }
-
-        $action = $this->actions[$provider][$status];
-
-        if ($action) {
-            return app($action); 
-        }
-
-        return null;
+        return isset($this->actions[$provider][$status]) ? app($this->actions[$provider][$status]) : null;
     }
-
 }
