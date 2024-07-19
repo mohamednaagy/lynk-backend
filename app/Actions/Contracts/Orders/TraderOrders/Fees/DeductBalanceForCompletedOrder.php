@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Contracts\Orders;
+namespace App\Actions\Contracts\Orders\TraderOrders\Fees;
 
 use App\Models\TraderOrder;
 

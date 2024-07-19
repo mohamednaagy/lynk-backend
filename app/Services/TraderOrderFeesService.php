@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Actions\Contracts\Orders\DeductBalanceForCompletedOrder;
-use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
+use App\Actions\Contracts\Orders\TraderOrders\Fees\DeductBalanceForCompletedOrder;
+use App\Actions\Contracts\Orders\TraderOrders\Fees\DeductBalanceForNewOrder;
 use App\Enums\Trader;
 use App\Enums\TraderOrderStatus;
 

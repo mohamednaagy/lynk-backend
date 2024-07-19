@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Actions\Orders;
+namespace App\Actions\Orders\TraderOrders\Fees;
 
-use App\Actions\Contracts\Orders\DeductBalanceForCompletedOrder;
+use App\Actions\Contracts\Orders\TraderOrders\Fees\DeductBalanceForCompletedOrder;
 use App\Actions\Contracts\Wallets\DeductOrderCompletedFee;
 use App\Models\TraderOrder;
 
