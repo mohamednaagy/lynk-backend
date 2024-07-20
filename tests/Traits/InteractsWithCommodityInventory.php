@@ -4,7 +4,7 @@ namespace Tests\Traits;
 
 use App\Enums\InventoryStatus;
 use App\Models\CommodityItem;
-use App\Models\Inventory;
+use App\Models\LocalMarketInventory;
 use App\Models\Supplier;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -23,7 +23,7 @@ trait InteractsWithCommodityInventory
             $this->createInventory($supplier, rand(100, 200));
         }
 
-        $inventories = Inventory::query()->where('company_id', $supplier->id)->where('commodity_item_id', $commodityItem->id);
+        $inventories = LocalMarketInventory::query()->where('company_id', $supplier->id)->where('commodity_item_id', $commodityItem->id);
         if ($is_paginate) {
             return $inventories->paginate();
         }
