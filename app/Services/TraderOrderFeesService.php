@@ -17,18 +17,14 @@ class TraderOrderFeesService
     protected $actions = [
         Trader::Bursam => [
             TraderOrderStatus::InProgress => DeductBalanceForNewOrder::class,
-            TraderOrderStatus::Completed => null,
         ],
         Trader::Dmcc => [
             TraderOrderStatus::InProgress => DeductBalanceForNewOrder::class,
-            TraderOrderStatus::Completed => null,
         ],
         Trader::FakeDmcc => [
             TraderOrderStatus::InProgress => DeductBalanceForNewOrder::class,
-            TraderOrderStatus::Completed => null,
         ],
         Trader::Lynk => [
-            TraderOrderStatus::InProgress => null,
             TraderOrderStatus::Completed => DeductBalanceForCompletedOrder::class,
         ],
     ];
