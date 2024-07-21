@@ -719,7 +719,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 <p class="text-black">الوقت: {{ $time ?? '' }}</p>
                 <p class="text-xl text-center text-black">شهادة ملكية و ضمان</p>
                 <p class="text-center text-black">
-                    استناداً إلى أحكام المادة (3/سادساً) من الاتفاقية الاطارية فيما بين المورد ولينك المؤرخة في
+                    استناداً إلى أحكام المادة (3/سادساً) من الاتفاقية الاطارية فيما بين المورد ولينك بعقد رقم
                     {{ $financing_order->contract_number }}
                     نفيدكم بأن السلعة التي جرى نقل ملكيتها من المورد إلى
                     {{ $financing_order->company->name }}
