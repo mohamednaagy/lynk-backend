@@ -6,13 +6,15 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
+use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\LocalMarketInventory;
+use App\Models\LocalMarketInventoryUnits;
 use App\Models\User;
+use App\Observers\LocalMarketInventoryObserver;
 use App\Transformers\LocalMarketInventoryTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Queue;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
@@ -205,5 +207,23 @@ class InventoryControllerStoreTest extends TestCase
 
         // Ensure the units were created
         $this->assertCount($numberOfUnits, $inventory->units);
+    }
+
+    public function test_it_creates_the_specified_number_of_units_when_inventory_is_created()
+    {
+        queue::fake();
+        LocalMarketInventory::observe(LocalMarketInventoryObserver::class);
+
+        $numberOfUnits = 5;
+
+        $inventory = $this->createInventory(self::$supplier, $numberOfUnits);
+
+        Queue::assertPushed(UpdateInventoryStock::class, function ($job) use ($inventory) {
+            return $job->inventory === $inventory &&
+                   $job->availableQuantity === $inventory->available_quantity &&
+                   $job->wasRecentlyCreated === $inventory->wasRecentlyCreated;
+        });
+
+        $this->assertCount($numberOfUnits, LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)->get());
     }
 }
