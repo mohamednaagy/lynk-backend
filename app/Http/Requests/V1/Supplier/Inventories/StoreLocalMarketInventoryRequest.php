@@ -32,7 +32,7 @@ class StoreLocalMarketInventoryRequest extends FormRequest
                 Rule::exists(SupplierLocation::class, 'id')->where('company_id', Auth()->user()->company_id),
                 Rule::unique(LocalMarketInventory::class, 'supplier_location_id')->where('commodity_item_id', $this->item->id),
             ],
-            'total_units' => ['required', 'integer', 'min:1', 'max:10000'],
+            'total_units' => ['required', 'integer', 'min:1', 'max:1000000'],
         ];
     }
 
