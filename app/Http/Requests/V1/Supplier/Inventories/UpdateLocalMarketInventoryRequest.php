@@ -23,7 +23,7 @@ class UpdateLocalMarketInventoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'total_units' => ['required', 'integer', 'min:1'],
+            'total_units' => ['required', 'integer', 'min:1', 'max:10000'],
         ];
     }
 
