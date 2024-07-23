@@ -9,6 +9,7 @@ use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCommoditySoldTo
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsMurabhaOfferIssued;
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsMurabhaSaleCompleted;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader;
 use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
@@ -60,7 +61,7 @@ trait ObserverHelper
         }
 
         return match ($provider) {
-            'fake', 'dmcc' => match ($stepNode->step) {
+            Trader::FakeDmcc, Trader::Dmcc => match ($stepNode->step) {
                 MurabhaStep::CommoditySoldToCustomer => [
                     SendSmsWhenStatusIsCommoditySoldToCustomer::class,
                     FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
@@ -69,7 +70,7 @@ trait ObserverHelper
                 MurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
                 default => []
             },
-            'bursam' => match ($stepNode->step) {
+            Trader::Bursam => match ($stepNode->step) {
                 MurabhaStep::CommoditySoldToCustomer => [
                     SendSmsWhenStatusIsCommoditySoldToCustomer::class,
                     FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
@@ -79,6 +80,13 @@ trait ObserverHelper
                     FireWebhookWhenStatusIsMurabhaSaleCompleted::class,
                 ],
                 MurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
+                default => []
+            },
+            Trader::Lynk => match ($stepNode->step) {
+                MurabhaStep::MurabahaSaleCompleted => [FireWebhookWhenStatusIsMurabhaSaleCompleted::class],
+                MurabhaStep::CommoditySoldToCustomer => [FireWebhookWhenStatusIsCommoditySoldToCustomer::class],
+                MurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
+
                 default => []
             },
             default => []

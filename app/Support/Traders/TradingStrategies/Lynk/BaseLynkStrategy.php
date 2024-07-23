@@ -31,12 +31,13 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
                 'status' => TraderOrderStatus::InProgress,
             ]);
         }
+        $this->transferOwnershipToLender($traderOrder, $request);
+
         $this->createStepHistories(
             $request,
             $traderOrder,
             MurabhaStep::PurchasingCommodity
         );
-        $this->transferOwnershipToLender($traderOrder, $request);
     }
 
     protected function transferOwnershipToLender(TraderOrder $traderOrder, $request)
@@ -54,7 +55,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
                 'base64'
             );
 
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+            //            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
         }
     }
 

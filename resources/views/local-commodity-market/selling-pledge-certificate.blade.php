@@ -744,7 +744,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                                 <td class="w-1/2 border border-black">{{ $product->getProduct() }}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getType() }}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getQuantity() }}
-                                    {{ $product->getUnitOfMeasurement() }}</td>
+                                    {{ $product->getUom() }}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getAmount() }}
                                     {{ $product->getCurrency() }}</td>
                                 <td class="w-1/2 border border-black">{{ $customer_name }}</td>
@@ -760,7 +760,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     ، بالنيابة عن {{ $customer_name }}
                     إلى أن يتم إشعارنا بالتصرف.
                 </p>
-                
+
                 <div class="flex justify-end">
                     <img class="h-20" src="{{ asset('radised-logo.png') }}" alt="">
                 </div>
