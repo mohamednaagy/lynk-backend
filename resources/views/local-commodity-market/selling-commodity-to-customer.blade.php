@@ -705,6 +705,12 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         .mt-4 {
             margin-top: 1rem;
         }
+
+        th, td {
+            border: 1px solid black;
+            text-align: center;
+            padding: 8px;
+        }
     </style>
 </head>
 
@@ -721,28 +727,28 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 <p class="text-center text-black">
                     نؤكد نحن لينك أن السلع المذكورة أدناه هي ملك ل{{ $customer_name }}
 
-                    و هو\هي المالك\ة الوحيد\ة من تاريخ وتوقيت هذه الشهادة، وقد تم شراؤها من{{ $company_name }}
+                    و هو\هي المالك\ة الوحيد\ة من تاريخ وتوقيت هذه الشهادة، وقد تم شراؤها من {{ $company_name }}
 
-                    بناء على العقد المبرم بين الطرفين بتاريخ{{ $contract_signed_date }}
+                    بناء على العقد المبرم بين الطرفين بتاريخ {{ $contract_signed_date }}
 
-                    مقابل مبلغ وقدره{{ $amount }} ريال سعودي
+                    مقابل مبلغ وقدره {{ $amount }} ريال سعودي 
                 <p class="text-lg font-semibold text-center text-black">بيانات السلع/ـة</p>
                 <table class="min-w-full mt-4">
                     <tbody>
                         @if (isset($trader_order_reference))
                             <tr>
-                                <td class="w-1/2 px-4 text-right border border-black">رقم الشهادة</td>
-                                <td class="w-1/2 border border-black">{{ $trader_order_reference }}</td>
+                                <td class="w-1/2 px-4 text-center border border-black">رقم الشهادة</td>
+                                <td colspan="6" class="w-1/2 border border-black">{{ $trader_order_reference }}</td>
                             </tr>
                         @endif
                         <tr>
-                            <td class="w-1/2 px-4 text-right border border-black"> السلعة</td>
-                            <td class="w-1/2 px-4 text-right border border-black"> نوع السلعة</td>
-                            <td class="w-1/2 px-4 text-right border border-black"> الكمية</td>
-                            <td class="w-1/2 px-4 text-right border border-black"> قيمة السلعة</td>
-                            <td class="w-1/2 px-4 text-right border border-black"> المالك السابق</td>
-                            <td class="w-1/2 px-4 text-right border border-black"> المورد الأصلي</td>
-                            <td class="w-1/2 px-4 text-right border border-black"> مكان السلعة</td>
+                            <td class="w-1/2 px-4 text-center border border-black"> السلعة</td>
+                            <td class="w-1/2 px-4 text-center border border-black"> نوع السلعة</td>
+                            <td class="w-1/2 px-4 text-center border border-black"> الكمية</td>
+                            <td class="w-1/2 px-4 text-center border border-black"> قيمة السلعة</td>
+                            <td class="w-1/2 px-4 text-center border border-black"> المالك السابق</td>
+                            <td class="w-1/2 px-4 text-center border border-black"> المورد الأصلي</td>
+                            <td class="w-1/2 px-4 text-center border border-black"> مكان السلعة</td>
                         </tr>
                         @foreach ($products ?? [] as $product)
                             <tr>
