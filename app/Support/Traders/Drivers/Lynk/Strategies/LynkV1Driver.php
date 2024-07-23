@@ -17,6 +17,7 @@ use App\Models\TraderOrder;
 use App\Settings\Classes\LocalMurabahaSettings;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Contracts\TraderInterface;
+use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Exception;
@@ -43,7 +44,7 @@ class LynkV1Driver implements TraderInterface
             return $financingOrder->initiatedTraderOrders()->first();
         }
 
-        return $financingOrder->traderOrders()->create([
+        $trader_order = $financingOrder->traderOrders()->create([
             'uuid_one' => Str::uuid(),
             'provider' => $this->provider,
             'reference' => '',
@@ -52,6 +53,12 @@ class LynkV1Driver implements TraderInterface
             'mode' => TraderOrderMode::Automatic,
             'default_contract_sign_time_limit' => app(LocalMurabahaSettings::class)->default_contract_sign_time_limit,
         ]);
+        $this->createTraderOrderHistory(
+            $trader_order,
+            FinancingOrderHistory::GetTtiId
+        );
+
+        return $trader_order;
     }
 
     public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
@@ -88,13 +95,13 @@ class LynkV1Driver implements TraderInterface
                     TraderOrderMediaCollection::TransferOwnershipToLender
                 );
 
-                $this->createTraderOrderHistory(
-                    $traderOrder,
-                    FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-                    [
-                        'created_at' => $currentTimeInUtcTz,
-                    ]
-                );
+                //                $this->createTraderOrderHistory(
+                //                    $traderOrder,
+                //                    FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
+                //                    [
+                //                        'created_at' => $currentTimeInUtcTz,
+                //                    ]
+                //                );
             });
         } catch (\Throwable $exception) {
             throw new TraderException(
@@ -240,5 +247,15 @@ class LynkV1Driver implements TraderInterface
         }
 
         return 'LYNK_'.$fileType.'_'.$traderOrder->order->company->unique_name.'_'.$traderOrder->financing_order_id.'_'.$traderOrder->reference.'_'.date('Ymd').'.pdf';
+    }
+
+    // use it in public api to proceed order after purchasing commodity step by one step
+    public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
+    {
+        $request = request();
+        $request['automatically_generate_file'] = true;
+        (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
+            ->updateCommodityCertificateForClient($traderOrder, $request);
+
     }
 }

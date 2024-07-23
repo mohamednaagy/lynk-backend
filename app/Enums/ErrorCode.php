@@ -73,4 +73,8 @@ class ErrorCode
     public const ERROR_CHEKING_UNITS = 1036;
 
     public const ORDER_IS_CANCELLED = 1037;
+  
+    public const CAN_NOT_DEAL_WITH_BURSAM_SYSTEM = 1038;
+
+
 }

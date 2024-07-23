@@ -2,7 +2,6 @@
 
 namespace App\Actions\Orders\TraderOrders;
 
-use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Actions\Contracts\Orders\TraderOrders\InitiateTraderOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Exceptions\CommodityMarketIsUnavailableException;
@@ -24,6 +23,7 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
             if ($financingOrder->hasCompletedTraderOrder()) {
                 throw new OrderHasCompletedTraderOrderException($orderId);
             }
+
             throw new OrderAlreadyHasActiveTraderOrderException;
         }
 
@@ -31,13 +31,12 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
             throw new CommodityMarketIsUnavailableException;
         }
 
-        $driver = config('trader.default');
+        $driver = $financingOrder->company->getPreferredTrader();
         $trader = Trader::driver($driver, get_latest_version_of_trader($driver));
         $traderOrder = $trader->createTraderOrder($financingOrder);
 
         // keep below action after createTraderOrder()
         // to be sure we have a trader order and store his data in transaction meta
-        app(DeductBalanceForNewOrder::class)->handle($traderOrder);
 
         $financingOrder->update([
             'status' => FinancingOrderStatus::InProgress,

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1\Admin\Lenders\Orders;
 
 use App\Actions\Contracts\Orders\CreateTraderOrder;
-use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
@@ -40,9 +39,7 @@ class TraderOrderController extends Controller
             }
 
             $traderOrder = $createTraderOrder->handle($order, $data);
-
-            app(DeductBalanceForNewOrder::class)->handle($traderOrder);
-
+            
             return $this->successResponse();
         });
     }

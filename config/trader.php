@@ -1,6 +1,8 @@
 <?php
 
+use App\Enums\FinancingOrderProceedCase;
 use App\Enums\TraderOrderMode;
+use BenSampo\Enum\Rules\EnumValue;
 
 return [
     'default' => env('DEFAULT_TRADER', 'fake'),
@@ -63,6 +65,7 @@ return [
                     TraderOrderMode::Manual,
                 ],
             ],
+            'allowed_financing_status_to_change_from_public_api' => new EnumValue(FinancingOrderProceedCase::class),
         ],
         'lynk' => [
             'latest' => 'v1',
