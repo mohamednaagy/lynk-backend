@@ -85,12 +85,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             MurabhaStep::MurabahaSaleCompleted
         );
 
-        $this->createStepHistories(
-            $request,
-            $traderOrder,
-            MurabhaStep::MurabahaSaleCompleted
-        );
-
         $trader = Trader::driver($traderOrder->provider);
         $currentTimeInUtcTz = CarbonImmutable::now();
         $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
@@ -106,6 +100,12 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             ],
             $traderOrder,
             TraderOrderMediaCollection::LynkSalePledgeCertificate,
+        );
+
+        $this->createStepHistories(
+            $request,
+            $traderOrder,
+            MurabhaStep::MurabahaSaleCompleted
         );
 
         if ($canUpdateOrderStatus) {

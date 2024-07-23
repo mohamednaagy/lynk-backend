@@ -83,9 +83,9 @@ trait ObserverHelper
                 default => []
             },
             Trader::Lynk => match ($stepNode->step) {
-                MurabhaStep::MurabahaSaleCompleted => [FireWebhookWhenStatusIsMurabhaSaleCompleted::class],
                 MurabhaStep::CommoditySoldToCustomer => [FireWebhookWhenStatusIsCommoditySoldToCustomer::class],
                 MurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
+                MurabhaStep::MurabahaSaleCompleted => [FireWebhookWhenStatusIsMurabhaSaleCompleted::class],
 
                 default => []
             },
