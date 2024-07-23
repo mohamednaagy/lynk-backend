@@ -54,8 +54,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
                 TraderOrderMediaCollection::TransferOwnershipToLender,
                 'base64'
             );
-
-            //            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
         }
     }
 
