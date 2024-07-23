@@ -737,7 +737,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     ابتداءً من تاريخ {{ $date }} الساعة
                     {{ $time }}
                     مقابل مبلغ وقدره
-                    {{ $financing_order->amount }}
+                    {{ $amount }}
                     ريال سعودي وتفاصيلها أدناه
 
                 </p>
