@@ -51,6 +51,8 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
 
     const GetSellingToMarketCertificate = 23;
 
+    const InitialCustomerDeliveryConfirmation = 24;
+
     public static array $notCancellableActions = [
         self::GetMurabahaPurchaseOfferDocument,
         self::AttachMpoDocument,

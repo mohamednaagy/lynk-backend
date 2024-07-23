@@ -195,11 +195,12 @@ class CommodityItemControllerStoreTest extends TestCase
 
     public function test_store_commodity_item_with_unique_name(): void
     {
-        $this->createCommodityType(null, 123);
+        $this->createCommodityItem(self::$supplier, unique_name: 'test');
+        self::$commodityItem['unique_name'] = 'test';
         $this
             ->withHeader('X-Company', self::$supplier->id)
             ->actingAs(self::$supplierAdmin)
-            ->postJson($this->endpoint, array_merge(self::$commodityItem, ['unique_name' => '123']))
+            ->postJson($this->endpoint, self::$commodityItem)
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonValidationErrorFor('unique_name');
     }

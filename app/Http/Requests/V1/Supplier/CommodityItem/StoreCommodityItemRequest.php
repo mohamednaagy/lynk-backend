@@ -35,14 +35,21 @@ class StoreCommodityItemRequest extends FormRequest
                 new CommodityItemUniqueNameRole(),
                 Rule::unique(CommodityItem::class, 'unique_name')->where('company_id', tenant()->id),
             ],
-            'name' => ['required', 'string',  'max:32'],
-            'description' => ['nullable', 'string', 'max:256'],
+            'name' => ['required', 'string',  'max:256'],
+            'description' => ['nullable', 'string', 'max:512'],
             'commodity_type_id' => ['required', 'exists:commodity_types,id'],
             'max_price' => ['required', 'numeric', 'gt:0', 'gte:min_price'],
             'min_price' => ['required', 'numeric', 'gt:0', 'lte:max_price'],
             'currency_id' => ['required', 'exists:currencies,id'],
             'volume_sellable_unit' => ['required', 'numeric', 'regex:/^\d+(\.\d{1,5})?$/'],
             'measurement_id' => ['required', 'exists:measurements,id'],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'unique_name.unique' => __('validation.unique_input'),
         ];
     }
 }

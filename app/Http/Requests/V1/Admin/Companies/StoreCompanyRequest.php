@@ -2,11 +2,13 @@
 
 namespace App\Http\Requests\V1\Admin\Companies;
 
+use App\Enums\CompanyMarketType;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyType;
 use App\Enums\OrderFeeType;
 use App\Enums\TraderOrderMode;
 use App\Models\Company;
+use App\Rules\CheckActiveCommodityTypeRule;
 use App\Rules\CompanyUniqueNameRule;
 use App\Rules\OrderCostTiersRangeRule;
 use BenSampo\Enum\Rules\EnumValue;
@@ -149,6 +151,21 @@ class StoreCompanyRequest extends FormRequest
                 Rule::unique(Company::class, 'contract_number'),
                 'min:4',
                 'max:16',
+            ],
+
+            'preferred_market_type' => [
+                'nullable',
+                'required_if:trading_mode,'.TraderOrderMode::Automatic,
+                'integer',
+                new EnumValue(CompanyMarketType::class, false),
+            ],
+
+            'preferred_commodity_types ' => [
+                'nullable', 'array',
+            ],
+
+            'preferred_commodity_types.*' => [
+                'required', new CheckActiveCommodityTypeRule(),
             ],
         ];
     }
