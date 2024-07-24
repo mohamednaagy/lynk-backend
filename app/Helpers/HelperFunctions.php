@@ -194,12 +194,21 @@ function convertDateTimeToHumanDate(Carbon $dataTime, ?Carbon $endDateTime = nul
 {
     $endDateTime = $endDateTime ?? Carbon::now();
     $diffTime = $dataTime->diffForHumans(
-        $endDateTime, [
+        $endDateTime,
+        [
             'parts' => 3,
             'join' => true,
-        ]);
+        ]
+    );
 
     $ignoredWords = ['ago', 'before', 'after', 'منذ', 'قبل'];
 
     return \Illuminate\Support\Str::remove($ignoredWords, $diffTime);
+}
+
+if (! function_exists('saudi_now')) {
+    function saudi_now()
+    {
+        return Carbon::now('Asia/Riyadh');
+    }
 }

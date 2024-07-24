@@ -78,7 +78,7 @@ class UpdateInventoryStock implements ShouldQueue
         Log::info("Increasing units by: {$numberOfUnits} for inventory ID: {$inventory->id}");
 
         try {
-            $chunkSize = ($numberOfUnits <= 20000) ? $numberOfUnits : 20000;
+            $chunkSize = ($numberOfUnits <= config('localMarket.generate_units_max_patch_size_limit')) ? $numberOfUnits : config('localMarket.generate_units_max_patch_size_limit');
             $numberOfChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
 
             //loop through the chunks
