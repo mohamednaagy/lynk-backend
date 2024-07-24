@@ -52,7 +52,7 @@ class LocalMarketInventoryUnits extends Model
     }
 
     public static function insertBulk($data) {
-        $now = now();
+        $now = saudi_now();
         // Implement bulk insertion logic here
         $data = array_map(function($item) use ($now) {
             return array_merge($item, [
