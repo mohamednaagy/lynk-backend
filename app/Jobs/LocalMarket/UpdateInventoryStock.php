@@ -39,7 +39,6 @@ class UpdateInventoryStock implements ShouldQueue
     {
         DB::beginTransaction();
         try {
-
             Log::info("Starting transaction for updating inventory ID: {$this->inventory->id}");
 
             $this->inventory->update(['status' => LocalMarketInventoryStatus::Pending]);
@@ -78,7 +77,8 @@ class UpdateInventoryStock implements ShouldQueue
         Log::info("Increasing units by: {$numberOfUnits} for inventory ID: {$inventory->id}");
 
         try {
-            $chunkSize = ($numberOfUnits <= 20000) ? $numberOfUnits : 20000;
+            ini_set("memory_limit", "-1");
+            $chunkSize = ($numberOfUnits <= 10000) ? $numberOfUnits : 10000;
             $numberOfChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
 
             //loop through the chunks
@@ -102,7 +102,7 @@ class UpdateInventoryStock implements ShouldQueue
                 }
 
                 Log::info("Inserting {$chunkSize} inventory units for inventory ID: {$inventory->id}");
-                $inventory->units()->createMany($inventoryUnits);
+                LocalMarketInventoryUnits::insertBulk($inventoryUnits);
                 if ($isLastChunk) {
                     $totalUnitsCreated = $inventory->CountOfUnits();
                     $availableQuantity = $inventory->available_quantity;
