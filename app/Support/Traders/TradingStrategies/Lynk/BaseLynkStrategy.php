@@ -93,6 +93,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             'local-commodity-market.selling-pledge-certificate',
             [
                 'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products),
+                'trader_order_reference' => $traderOrder->reference,
                 'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
                 'customer_name' => $financeOrder->customer_name,
                 'current_date' => $currentTimeInRiyadhTz->toDateString(),
