@@ -6,6 +6,7 @@ use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsMurabhaSaleComp
 use App\Actions\Orders\Webhooks\Traits\OrderWebhooksHelper;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader;
 use App\Enums\WebhookType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -18,15 +19,15 @@ class FireWebhookWhenStatusIsMurabhaSaleCompletedAction implements FireWebhookWh
     public function handle(FinancingOrder $financingOrder, TraderOrder $traderOrder): void
     {
         $warrantyMediaCollection = match ($traderOrder->provider) {
-            'dmcc', 'fake' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-            'bursam' => TraderOrderMediaCollection::BursamTtiHoldingCertificate,
+            Trader::Dmcc, Trader::FakeDmcc => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
+            Trader::Bursam => TraderOrderMediaCollection::BursamTtiHoldingCertificate,
+            Trader::Lynk => TraderOrderMediaCollection::LynkSalePledgeCertificate
         };
 
         $documentMediaFile = get_media_of_model($traderOrder, $warrantyMediaCollection);
         $wakalaDocumentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::ClientWakala);
         $lastHistory = $this->getTraderOrderLastHistory($traderOrder);
         $lastCompletedStep = $this->getCompletedStep($traderOrder);
-
         WebhookEvent::fire($financingOrder->company, WebhookType::OrderUpdates, [
             'order_id' => $financingOrder->id,
             'order_status' => [

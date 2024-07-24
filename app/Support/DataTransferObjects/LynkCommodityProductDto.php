@@ -29,51 +29,14 @@ class LynkCommodityProductDto extends CommodityProductDto
         return $this->type;
     }
 
-    public function getQuantity(): string
-    {
-        return $this->quantity;
-    }
-
-    public function getUnitOfMeasurement(): string
-    {
-        return $this->uom;
-    }
-
-    public function getAmount(): string
-    {
-        return $this->amount;
-    }
-
     public function getLocation(): string
     {
         return $this->location;
     }
 
-    public function getCurrency(): string
-    {
-        return $this->currency;
-    }
-
     public function getOriginalSupplier(): string
     {
         return $this->original_supplier;
-    }
-
-    public function getPreviousOwner(): string|array
-    {
-        return $this->previous_owner;
-    }
-
-    public function getPreviousOwnerAsArray(): array
-    {
-        return is_array($this->previous_owner)
-            ? $this->previous_owner
-            : [$this->previous_owner];
-    }
-
-    public function getImplodedPreviousOwner($separator = ','): string
-    {
-        return implode($separator, $this->getPreviousOwnerAsArray());
     }
 
     public static function fromArray(array $data): LynkCommodityProductDto
