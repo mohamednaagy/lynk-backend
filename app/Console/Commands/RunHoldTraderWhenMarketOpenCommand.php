@@ -33,16 +33,16 @@ class RunHoldTraderWhenMarketOpenCommand extends Command
     public function handle()
     {
 
-        $trader = TraderOrder::where('status', TraderOrderStatus::Hold)->where('mode', TraderOrderMode::Automatic)->latest()->first();
-        //        foreach ($traders as $trader){
-        $checkCanChangeStatusOfTrader = Trader::driver($trader->provider, $trader->version)->checkCanCreateTraderOrder();
-        if ($checkCanChangeStatusOfTrader) {
-            $trader->update(['status' => TraderOrderStatus::Initiated]);
-            $trader->traderHistories()->create(['action' => FinancingOrderHistory::GetTtiId]);
-            Trader::driver($trader->provider, $trader->version)->processInitiatedTraderOrder($trader);
+        $traders = TraderOrder::where('status', TraderOrderStatus::Hold)->where('mode', TraderOrderMode::Automatic)->get();
+        foreach ($traders as $trader) {
+            $checkCanChangeStatusOfTrader = Trader::driver($trader->provider, $trader->version)->checkCanInitiateTraderOrder();
+            if ($checkCanChangeStatusOfTrader) {
+                $trader->update(['status' => TraderOrderStatus::Initiated]);
+                $trader->traderHistories()->create(['action' => FinancingOrderHistory::GetTtiId]);
+                Trader::driver($trader->provider, $trader->version)->processInitiatedTraderOrder($trader);
+            }
         }
 
-        //        }
         return Command::SUCCESS;
     }
 }

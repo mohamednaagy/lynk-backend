@@ -5,7 +5,6 @@ namespace App\Actions\Orders\TraderOrders;
 use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Actions\Contracts\Orders\TraderOrders\InitiateTraderOrder;
 use App\Enums\FinancingOrderStatus;
-use App\Exceptions\CommodityMarketIsUnavailableException;
 use App\Exceptions\OrderAlreadyHasActiveTraderOrderException;
 use App\Exceptions\OrderHasCompletedTraderOrderException;
 use App\Models\FinancingOrder;
@@ -26,10 +25,6 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
             }
             throw new OrderAlreadyHasActiveTraderOrderException;
         }
-
-        //        if (! is_bursam_service_available()) {
-        //            throw new CommodityMarketIsUnavailableException;
-        //        }
 
         $driver = config('trader.default');
         $trader = Trader::driver($driver, get_latest_version_of_trader($driver));

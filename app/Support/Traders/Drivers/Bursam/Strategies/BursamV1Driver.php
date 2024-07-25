@@ -80,14 +80,14 @@ class BursamV1Driver implements TraderInterface
      */
     public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
     {
-        if ($this->checkCanCreateTraderOrder()) {
+        if ($this->checkCanInitiateTraderOrder()) {
             return $this->getOrInitiateTraderOrder($financingOrder);
         } else {
             return $this->createHoldTraderOrder($financingOrder);
         }
     }
 
-    public function checkCanCreateTraderOrder()
+    public function checkCanInitiateTraderOrder()
     {
         if (is_bursam_service_available()) {
             return true;

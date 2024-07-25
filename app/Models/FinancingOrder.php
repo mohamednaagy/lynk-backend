@@ -359,7 +359,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function isDefaultTraderAvailable()
     {
-
         return true;
     }
 

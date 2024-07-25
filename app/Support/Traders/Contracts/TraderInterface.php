@@ -25,5 +25,5 @@ interface TraderInterface
 
     public function getDefaultInitialTradeOrderStatus();
 
-    public function checkCanCreateTraderOrder();
+    public function checkCanInitiateTraderOrder();
 }

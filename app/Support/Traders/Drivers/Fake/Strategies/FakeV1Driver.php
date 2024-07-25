@@ -461,7 +461,7 @@ class FakeV1Driver implements TraderInterface
         return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
     }
 
-    public function checkCanCreateTraderOrder()
+    public function checkCanInitiateTraderOrder()
     {
         return true;
     }

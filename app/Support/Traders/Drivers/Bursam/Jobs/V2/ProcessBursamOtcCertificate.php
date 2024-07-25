@@ -41,11 +41,13 @@ class ProcessBursamOtcCertificate implements ShouldBeUnique, ShouldQueue
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::InProgress)
                 ->lockForUpdate()
-                ->latest()->first();
+                ->find($this->traderOrderId);
 
             if (
                 is_null($traderOrder)
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CommoditySoldToMarket)
+                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CommoditySoldToMarket
+                || $traderOrder->traderHistories()->latest()->first()->action == FinancingOrderHistory::OnHold
+                )
             ) {
                 return;
             }
