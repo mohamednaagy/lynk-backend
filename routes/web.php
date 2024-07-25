@@ -46,3 +46,7 @@
         \Illuminate\Support\Facades\DB::table('random_data')->insert($arr);
     }
 });
+
+Route::get('/horizon', function () {
+    return view('horizon');
+});

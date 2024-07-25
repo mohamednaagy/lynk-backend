@@ -9,12 +9,13 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader as EnumTrader;
 use App\Exceptions\OrderRequiresClientVerification;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
-use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\UploadedFile;
@@ -24,6 +25,13 @@ use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 class MakeOrderProceedAction implements MakeOrderProceed
 {
     use TraderHelperTrait;
+
+    private $requiredStepForProccessedTraderOrder = [
+        EnumTrader::Lynk => MurabhaStep::ContractSigned,
+        EnumTrader::Bursam => MurabhaStep::ContractSigned,
+        EnumTrader::FakeDmcc => MurabhaStep::ClientWakala,
+        EnumTrader::Dmcc => MurabhaStep::ClientWakala,
+    ];
 
     protected ?UploadedFile $signedClientWakala = null;
 
@@ -121,14 +129,13 @@ class MakeOrderProceedAction implements MakeOrderProceed
     protected function isPreviousStepOfContractAndClientWakalaNotCompleted(TraderOrder $traderOrder): bool
     {
         $murabhaSteps = array_keys(get_murabha_steps($traderOrder->provider, $traderOrder->version));
-
-        $firstStepIndex = min(collect([MurabhaStep::ClientWakala, MurabhaStep::ContractSigned])
-            ->map(fn ($step) => array_search($step, $murabhaSteps))->toArray());
+        $stepIndex = array_search($this->requiredStepForProccessedTraderOrder[$traderOrder->provider], $murabhaSteps);
 
         return ! $traderOrder->checkOrderStepComplete(
             (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
-                ->getPreviousStepOf($murabhaSteps[$firstStepIndex])->step
+                ->getPreviousStepOf($murabhaSteps[$stepIndex])->step
         );
+
     }
 
     protected function isContractSignedStepCompleted(TraderOrder $traderOrder): bool
@@ -160,13 +167,13 @@ class MakeOrderProceedAction implements MakeOrderProceed
             throw new OrderRequiresClientVerification;
         }
 
-        $lastHistory = $traderOrder->traderHistories()->latest('id')->first();
+        $currenttraderOrderStatus = $traderOrder->traderHistories()->latest('id')->first();
 
-        if ($this->isPreviousStepOfContractAndClientWakalaNotCompleted($traderOrder) || is_null($lastHistory)) {
+        if ($this->isPreviousStepOfContractAndClientWakalaNotCompleted($traderOrder) || is_null($currenttraderOrderStatus)) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
-        ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
+        Trader::driver($traderOrder->provider, $traderOrder->version)->processProceedContractAndClientWakala($traderOrder);
 
         return [];
     }

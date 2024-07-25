@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Enums\LocalMarketInventoryUnitsStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class LocalMarketInventoryUnits extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'inventory_id',
@@ -47,5 +49,18 @@ class LocalMarketInventoryUnits extends Model
     public function unitRotations()
     {
         return $this->hasMany(LocalMarketUnitRotation::class, 'inventory_unit_id');
+    }
+
+    public static function insertBulk($data) {
+        $now = saudi_now();
+        // Implement bulk insertion logic here
+        $data = array_map(function($item) use ($now) {
+            return array_merge($item, [
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }, $data);
+
+        DB::table((new static)->getTable())->insert($data);
     }
 }

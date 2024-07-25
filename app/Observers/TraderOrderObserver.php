@@ -8,10 +8,16 @@ use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Services\TraderOrderFeesService;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
 
 class TraderOrderObserver
 {
+
+    public function __construct(protected TraderOrderFeesService $traderOrderFeesService)
+    {
+    }
+
     /**
      * Handle the TraderOrder "creating" event.
      *
@@ -42,6 +48,7 @@ class TraderOrderObserver
         ) {
             ProcessBursamInitiatedTraderOrder::dispatch($traderOrder->id);
         }
+        $this->applyOrderFees($traderOrder);
     }
 
     /**
@@ -70,6 +77,7 @@ class TraderOrderObserver
     {
         if ($traderOrder->wasChanged(['status'])) {
             $this->takeActionsIfStatusWasChanged($traderOrder);
+            $this->applyOrderFees($traderOrder);
         }
     }
 
@@ -109,5 +117,22 @@ class TraderOrderObserver
     public function forceDeleted(TraderOrder $traderOrder)
     {
         //
+    }
+
+     /**
+     * Handle the status change of the TraderOrder.
+     *
+     * @param TraderOrder $traderOrder
+     * @return void
+     */
+    protected function applyOrderFees(TraderOrder $traderOrder): void
+    {
+        $provider = $traderOrder->provider;
+        $status = $traderOrder->status;
+        $action = $this->traderOrderFeesService->getAction($provider, $status);
+        if ($action) {
+            $action->handle($traderOrder);
+        }
+        
     }
 }

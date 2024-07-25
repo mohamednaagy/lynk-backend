@@ -26,4 +26,5 @@ interface TraderInterface
     public function getDefaultInitialTradeOrderStatus();
 
     public function checkCanInitiateTraderOrder();
+    public function processProceedContractAndClientWakala(TraderOrder $traderOrder);
 }
