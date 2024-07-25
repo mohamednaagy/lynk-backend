@@ -246,4 +246,10 @@ class TraderOrder extends Model implements HasMedia
     {
         return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
     }
+
+    public function hoverMessage(): ?string
+    {
+        return Trader::driver($this->provider, $this->version)->HoverMessageOfTraderStatus($this);
+
+    }
 }

@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use App\Enums\BursamProductCode;
-use App\Enums\CompanyMarketType;
 use App\Enums\CommodityTypeStatus;
 use App\Enums\CommoitySupplierMarketType;
 use App\Enums\CommoitySupplierStatus;
+use App\Enums\CompanyMarketType;
 use App\Enums\CompanyStatus;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
@@ -14,6 +14,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderNoRefundReason;
 use App\Enums\TraderOrderRefundReason;
+use App\Enums\TraderOrderStatus;
 use App\Enums\WalletNotificationType;
 
 return [
@@ -109,5 +110,9 @@ return [
     CommodityTypeStatus::class => [
         CommodityTypeStatus::Active => 'مفعل',
         CommodityTypeStatus::Inactive => 'غير مفعل',
+    ],
+
+    TraderOrderStatus::class => [
+        TraderOrderStatus::Hold => 'معلق',
     ],
 ];

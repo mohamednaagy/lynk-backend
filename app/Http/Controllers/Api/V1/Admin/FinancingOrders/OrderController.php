@@ -138,6 +138,7 @@ class OrderController extends Controller
                 'trader_orders.status',
                 'trader_orders.created_at',
                 'trader_orders.cancel_details',
+                'trader_orders.hover_message',
                 'creator',
                 'created_at',
                 'payment_proof_url',
