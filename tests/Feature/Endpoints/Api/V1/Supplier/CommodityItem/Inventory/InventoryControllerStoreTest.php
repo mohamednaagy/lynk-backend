@@ -8,13 +8,13 @@ use App\Enums\Role;
 use App\Enums\Subject;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\LocalMarketInventory;
-use App\Models\LocalMarketInventoryUnits;
 use App\Models\User;
 use App\Observers\LocalMarketInventoryObserver;
 use App\Transformers\LocalMarketInventoryTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Queue;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
@@ -42,8 +42,6 @@ class InventoryControllerStoreTest extends TestCase
     private static $supplier2;
 
     private static string $endpoint;
-
-    private static array $commodityItem;
 
     private static $inventory;
 
@@ -112,7 +110,7 @@ class InventoryControllerStoreTest extends TestCase
         ];
     }
 
-    public function test_that_un_auth_user_cant_commodity_item_Invemtory(): void
+    public function test_that_un_auth_user_cant_commodity_item_Inventory(): void
     {
         $this
             ->withHeader('X-Company', self::$supplier->id)
@@ -207,23 +205,5 @@ class InventoryControllerStoreTest extends TestCase
 
         // Ensure the units were created
         $this->assertCount($numberOfUnits, $inventory->units);
-    }
-
-    public function test_it_creates_the_specified_number_of_units_when_inventory_is_created()
-    {
-        queue::fake();
-        LocalMarketInventory::observe(LocalMarketInventoryObserver::class);
-
-        $numberOfUnits = 5;
-
-        $inventory = $this->createInventory(self::$supplier, $numberOfUnits);
-
-        Queue::assertPushed(UpdateInventoryStock::class, function ($job) use ($inventory) {
-            return $job->inventory === $inventory &&
-                   $job->availableQuantity === $inventory->available_quantity &&
-                   $job->wasRecentlyCreated === $inventory->wasRecentlyCreated;
-        });
-
-        $this->assertCount($numberOfUnits, LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)->get());
     }
 }
