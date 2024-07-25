@@ -7,10 +7,13 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\User;
+use App\Observers\LocalMarketInventoryObserver;
 use App\Transformers\InventoryTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Queue;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
@@ -70,6 +73,12 @@ class InventoryControllerUpdateTest extends TestCase
             self::$supplier,
             300
         );
+
+        $observer = new LocalMarketInventoryObserver();
+        $observer->created(self::$inventory);
+
+        $job = new UpdateInventoryStock(self::$inventory, 300, true);
+        Bus::dispatchNow($job);
 
         self::$location = $this->createSupplierLocation(
             self::$supplier,
@@ -208,4 +217,55 @@ class InventoryControllerUpdateTest extends TestCase
                     ->getData(true)
             );
     }
+<<<<<<< HEAD
+=======
+
+    public function test_update_inventory_stock_job_is_fired() {
+        $this
+        ->withHeader('X-Company', self::$supplier->id)
+        ->actingAs(self::$supplierAdmin)
+        ->putJson(self::$endpoint, self::$inventory2)
+        ->assertOk();
+
+        Queue::assertPushed(UpdateInventoryStock::class);
+    }
+
+    public function test_quantity_after_update_equals_generated_units() {
+        $this
+        ->withHeader('X-Company', self::$supplier->id)
+        ->actingAs(self::$supplierAdmin)
+        ->putJson(self::$endpoint, self::$inventory2)
+        ->assertOk();
+
+        // Verify the job was pushed
+        Queue::assertPushed(UpdateInventoryStock::class);
+
+        // Manually dispatch the job immediately
+        $job = new UpdateInventoryStock(self::$inventory, self::$inventory2['total_units']);
+        Bus::dispatchNow($job);
+
+        // Ensure the units were created
+
+        $this->assertEquals(self::$inventory2['total_units'], self::$inventory->units()->count());
+
+    }
+
+    public function test_can_update_quantity_equals_reserved_units() {
+        $inventory = self::$inventory;
+        $inventory->reserved_items = 50;
+        $inventory->save();
+        
+        $inventory2 = self::$inventory2;
+        $inventory2['total_units'] = '50';
+
+        $this
+        ->withHeader('X-Company', self::$supplier->id)
+        ->actingAs(self::$supplierAdmin)
+        ->putJson(self::$endpoint, $inventory2)
+        ->assertOk();
+        
+        Queue::assertPushed(UpdateInventoryStock::class);
+
+    }
+>>>>>>> 365df32e (add unit tests for create and update)
 }
