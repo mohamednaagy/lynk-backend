@@ -58,12 +58,42 @@ class BursamV1Driver implements TraderInterface
         ]);
     }
 
+    public function createHoldTraderOrder(FinancingOrder $financingOrder): ?Model
+    {
+
+        $traderOrder = $financingOrder->traderOrders()->create([
+            'uuid_one' => Str::uuid(),
+            'provider' => $this->provider,
+            'reference' => '',
+            'status' => TraderOrderStatus::Hold,
+            'version' => $this->version,
+            'mode' => TraderOrderMode::Automatic,
+        ]);
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::OnHold);
+
+        return $traderOrder;
+    }
+
     /**
      * @throws TraderException
      */
     public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
     {
-        return $this->getOrInitiateTraderOrder($financingOrder);
+        if ($this->checkCanCreateTraderOrder()) {
+            return $this->getOrInitiateTraderOrder($financingOrder);
+        } else {
+            return $this->createHoldTraderOrder($financingOrder);
+        }
+    }
+
+    public function checkCanCreateTraderOrder()
+    {
+        if (is_bursam_service_available()) {
+            return true;
+        }
+
+        return false;
     }
 
     public function getDefaultInitialTradeOrderStatus()

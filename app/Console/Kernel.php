@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\RunHoldTraderWhenMarketOpenCommand;
 use App\Jobs\General\ProcessFinancingOrders;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessDailySellingPendingCommodityToMarket;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccNotifications;
@@ -16,6 +17,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+
+        $schedule->command(RunHoldTraderWhenMarketOpenCommand::class)->at(get_start_time_bursa()->toTimeString());
+
         $schedule->job(new ProcessFinancingOrders())
             ->when(is_bursam_service_available())
             ->everyMinute()

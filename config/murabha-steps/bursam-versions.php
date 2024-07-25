@@ -45,6 +45,7 @@ return [
         ],
     ],
     'v2' => [
+
         MurabhaStep::TraderOrderCreated => [
             FinancingOrderHistory::GetTtiId => null,
         ],
@@ -76,5 +77,6 @@ return [
             ],
             FinancingOrderHistory::MurabahaSaleCompleted => null,
         ],
+
     ],
 ];

@@ -234,12 +234,12 @@ class TraderOrder extends Model implements HasMedia
 
     public function canBeCancelled(): bool
     {
-        return $this->status->is(TraderOrderStatus::InProgress) || $this->status->is(TraderOrderStatus::Initiated);
+        return $this->status->is(TraderOrderStatus::InProgress) || $this->status->is(TraderOrderStatus::Initiated) || $this->status->is(TraderOrderStatus::Hold);
     }
 
     public function getCancelStep(): ?string
     {
-        return (new StepHistoriesDictionary($this->provider, $this->version))->getCancelStep($this)->step;
+        return (new StepHistoriesDictionary($this->provider, $this->version))->getCancelStep($this)?->step ?? MurabhaStep::PurchasingCommodity;
     }
 
     public function cancelDetail()

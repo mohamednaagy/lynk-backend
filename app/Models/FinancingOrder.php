@@ -259,6 +259,13 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->latest();
     }
 
+    public function holdTraderOrders(): HasMany
+    {
+        return $this->traderOrders()
+            ->where('status', TraderOrderStatus::Hold)
+            ->latest();
+    }
+
     public function canBeCompleted()
     {
         return $this->traderOrders()->completed()->exists()
@@ -281,6 +288,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             || $this->isDefaultTraderAvailable() === false
             || $this->isInPendingTradingRequestState() === false
             || $this->hasCompletedTraderOrder()
+            || $this->hasHoldTraderOrder()
 
         ) {
             return false;
@@ -295,6 +303,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function hasCompletedTraderOrder(): bool
     {
         return $this->traderOrders()->where('status', TraderOrderStatus::Completed)->exists();
+    }
+
+    public function hasHoldTraderOrder(): bool
+    {
+        return $this->traderOrders()->where('status', TraderOrderStatus::Hold)->exists();
     }
 
     private function isComplete(): bool
@@ -346,9 +359,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function isDefaultTraderAvailable()
     {
-        if (config('trader.default') === 'bursam') {
-            return is_bursam_service_available();
-        }
 
         return true;
     }

@@ -27,9 +27,9 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
             throw new OrderAlreadyHasActiveTraderOrderException;
         }
 
-        if (! is_bursam_service_available()) {
-            throw new CommodityMarketIsUnavailableException;
-        }
+        //        if (! is_bursam_service_available()) {
+        //            throw new CommodityMarketIsUnavailableException;
+        //        }
 
         $driver = config('trader.default');
         $trader = Trader::driver($driver, get_latest_version_of_trader($driver));

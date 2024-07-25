@@ -241,4 +241,9 @@ class LynkV1Driver implements TraderInterface
 
         return 'LYNK_'.$fileType.'_'.$traderOrder->order->company->unique_name.'_'.$traderOrder->financing_order_id.'_'.$traderOrder->reference.'_'.date('Ymd').'.pdf';
     }
+
+    public function checkCanCreateTraderOrder()
+    {
+        return true;
+    }
 }
