@@ -587,4 +587,14 @@ class DmccV1Driver implements TraderInterface
     {
         ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
     }
+
+    public function checkCanInitiateTraderOrder()
+    {
+        return true;
+    }
+
+    public function moveHoldTraderOrder(TraderOrder $trader)
+    {
+        return true;
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\RunHoldTraderWhenMarketOpenCommand;
 use App\Jobs\General\ProcessFinancingOrders;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessDailySellingPendingCommodityToMarket;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccNotifications;
@@ -16,6 +17,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+
+        $timezone = Config::get('services.bursam.timezone');
+
+        $schedule->command(RunHoldTraderWhenMarketOpenCommand::class)
+            ->timezone($timezone)
+            ->when(is_bursam_service_available())
+            ->at(get_start_time_bursa()->format('H:i'));
+
         $schedule->job(new ProcessFinancingOrders())
             ->when(is_bursam_service_available())
             ->everyMinute()
@@ -28,7 +37,6 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->onOneServer();
 
-        $timezone = Config::get('services.bursam.timezone');
         $marketOpeningStartTime = Config::get('services.bursam.market_opening_start_time');
         $sellingCommodityStartTime = Config::get('services.bursam.selling_commodity_start_time');
         $sellingCommodityEndTime = Config::get('services.bursam.selling_commodity_end_time');
@@ -38,6 +46,13 @@ class Kernel extends ConsoleKernel
             ->everyTwoMinutes()
             ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
             ->onOneServer();
+
+        $schedule->job(new RunHoldTraderWhenMarketOpenCommand())
+            ->timezone($timezone)
+            ->everyTwoMinutes()
+            ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
+            ->onOneServer();
+
     }
 
     /**

@@ -174,6 +174,17 @@ class TraderHistoryTransformer extends TransformerAbstract
         ]);
     }
 
+    public function includeHold($historiesActions): Primitive
+    {
+        [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep($historiesActions, MurabhaStep::Hold);
+
+        return $this->primitive([
+            'step' => MurabhaStep::Hold,
+            'is_complete' => (bool) $history,
+            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+        ]);
+    }
+
     public function getDurationForHistoryStep($history)
     {
         $CurrentStep = $this->traderStepHistories->getStepByHistory($history)

@@ -23,6 +23,7 @@ use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Clients\BursamClient\BursamClient;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
+use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Exception;
@@ -59,12 +60,42 @@ class BursamV1Driver implements TraderInterface
         ]);
     }
 
+    public function createHoldTraderOrder(FinancingOrder $financingOrder): ?Model
+    {
+
+        $traderOrder = $financingOrder->traderOrders()->create([
+            'uuid_one' => Str::uuid(),
+            'provider' => $this->provider,
+            'reference' => '',
+            'status' => TraderOrderStatus::Hold,
+            'version' => $this->version,
+            'mode' => TraderOrderMode::Automatic,
+        ]);
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::OnHold);
+
+        return $traderOrder;
+    }
+
     /**
      * @throws TraderException
      */
     public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
     {
-        return $this->getOrInitiateTraderOrder($financingOrder);
+        if ($this->checkCanInitiateTraderOrder()) {
+            return $this->getOrInitiateTraderOrder($financingOrder);
+        } else {
+            return $this->createHoldTraderOrder($financingOrder);
+        }
+    }
+
+    public function checkCanInitiateTraderOrder()
+    {
+        if (is_bursam_service_available()) {
+            return true;
+        }
+
+        return false;
     }
 
     public function getDefaultInitialTradeOrderStatus()
@@ -102,6 +133,16 @@ class BursamV1Driver implements TraderInterface
         ]);
 
         return $traderOrder;
+    }
+
+    public function moveHoldTraderOrder(TraderOrder $trader)
+    {
+        $checkCanChangeStatusOfTrader = $this->checkCanInitiateTraderOrder();
+        if ($checkCanChangeStatusOfTrader) {
+            $trader->update(['status' => TraderOrderStatus::Initiated]);
+            $trader->traderHistories()->create(['action' => FinancingOrderHistory::GetTtiId]);
+            $this->processInitiatedTraderOrder($trader);
+        }
     }
 
     public function fetchOrderResultYNN(TraderOrder $traderOrder)

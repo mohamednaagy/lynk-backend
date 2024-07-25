@@ -249,6 +249,15 @@ class LynkV1Driver implements TraderInterface
         $request['automatically_generate_file'] = true;
         (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
             ->updateCommodityCertificateForClient($traderOrder, $request);
+    }
 
+    public function checkCanInitiateTraderOrder()
+    {
+        return true;
+    }
+
+    public function moveHoldTraderOrder(TraderOrder $trader)
+    {
+        return true;
     }
 }

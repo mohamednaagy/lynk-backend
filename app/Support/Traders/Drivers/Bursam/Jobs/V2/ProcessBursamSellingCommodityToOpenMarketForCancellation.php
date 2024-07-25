@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -45,9 +46,11 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
             if (is_null($traderOrder)) {
                 return;
             }
+            if ($traderOrder->traderHistories()->latest()->first()->action != FinancingOrderHistory::OnHold) {
+                Trader::driver('bursam', $traderOrder->version)
+                    ->sellCommodityToBursam($traderOrder);
+            }
 
-            Trader::driver('bursam', $traderOrder->version)
-                ->sellCommodityToBursam($traderOrder);
         });
     }
 
