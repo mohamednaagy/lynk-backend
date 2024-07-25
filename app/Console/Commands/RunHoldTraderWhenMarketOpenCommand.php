@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
@@ -35,12 +34,7 @@ class RunHoldTraderWhenMarketOpenCommand extends Command
 
         $traders = TraderOrder::where('status', TraderOrderStatus::Hold)->where('mode', TraderOrderMode::Automatic)->get();
         foreach ($traders as $trader) {
-            $checkCanChangeStatusOfTrader = Trader::driver($trader->provider, $trader->version)->checkCanInitiateTraderOrder();
-            if ($checkCanChangeStatusOfTrader) {
-                $trader->update(['status' => TraderOrderStatus::Initiated]);
-                $trader->traderHistories()->create(['action' => FinancingOrderHistory::GetTtiId]);
-                Trader::driver($trader->provider, $trader->version)->processInitiatedTraderOrder($trader);
-            }
+            Trader::driver($trader->provider, $trader->version)->moveHoldTraderOrder($trader);
         }
 
         return Command::SUCCESS;

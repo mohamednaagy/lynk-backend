@@ -465,4 +465,9 @@ class FakeV1Driver implements TraderInterface
     {
         return true;
     }
+
+    public function moveHoldTraderOrder(TraderOrder $trader)
+    {
+        return true;
+    }
 }

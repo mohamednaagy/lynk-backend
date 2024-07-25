@@ -22,6 +22,7 @@ use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Clients\BursamClient\BursamClient;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
+use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Exception;
@@ -131,6 +132,16 @@ class BursamV1Driver implements TraderInterface
         ]);
 
         return $traderOrder;
+    }
+
+    public function moveHoldTraderOrder(TraderOrder $trader)
+    {
+        $checkCanChangeStatusOfTrader = $this->checkCanInitiateTraderOrder();
+        if ($checkCanChangeStatusOfTrader) {
+            $trader->update(['status' => TraderOrderStatus::Initiated]);
+            $trader->traderHistories()->create(['action' => FinancingOrderHistory::GetTtiId]);
+            $this->processInitiatedTraderOrder($trader);
+        }
     }
 
     public function fetchOrderResultYNN(TraderOrder $traderOrder)

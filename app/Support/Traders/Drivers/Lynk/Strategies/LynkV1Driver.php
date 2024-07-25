@@ -246,4 +246,9 @@ class LynkV1Driver implements TraderInterface
     {
         return true;
     }
+
+    public function moveHoldTraderOrder(TraderOrder $trader)
+    {
+        return true;
+    }
 }

@@ -26,4 +26,6 @@ interface TraderInterface
     public function getDefaultInitialTradeOrderStatus();
 
     public function checkCanInitiateTraderOrder();
+
+    public function moveHoldTraderOrder(TraderOrder $traderOrder);
 }
