@@ -38,7 +38,7 @@ trait InteractsWithCommodityInventory
     ): LocalMarketInventory {
         $item = $this->createCommodityItem($supplier);
         $location = $this->createSupplierLocation($supplier);
-        $commodity_inventory = LocalMarketInventory::query()->create([
+        $commodity_inventory = LocalMarketInventory::create([
             'company_id' => $supplier->id,
             'commodity_item_id' => $item->id,
             'commodity_type_id' => $item->commodity_type_id,

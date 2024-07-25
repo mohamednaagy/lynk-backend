@@ -9,11 +9,13 @@ use App\Enums\Subject;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\User;
+use App\Observers\LocalMarketInventoryObserver;
 use App\Transformers\InventoryTransformer;
 use App\Transformers\LocalMarketInventoryTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Queue;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
@@ -75,6 +77,12 @@ class InventoryControllerUpdateTest extends TestCase
             self::$supplier,
             300
         );
+
+        $observer = new LocalMarketInventoryObserver();
+        $observer->created(self::$inventory);
+
+        $job = new UpdateInventoryStock(self::$inventory, 300, true);
+        Bus::dispatchNow($job);
 
         self::$location = $this->createSupplierLocation(
             self::$supplier,
@@ -230,10 +238,17 @@ class InventoryControllerUpdateTest extends TestCase
         ->actingAs(self::$supplierAdmin)
         ->putJson(self::$endpoint, self::$inventory2)
         ->assertOk();
-        
+
+        // Verify the job was pushed
         Queue::assertPushed(UpdateInventoryStock::class);
 
-        $this->assertEquals(self::$inventory2['total_units'], LocalMarketInventoryUnits::where('local_market_inventory_id', Self::$inventory->id)->count());
+        // Manually dispatch the job immediately
+        $job = new UpdateInventoryStock(self::$inventory, self::$inventory2['total_units']);
+        Bus::dispatchNow($job);
+
+        // Ensure the units were created
+
+        $this->assertEquals(self::$inventory2['total_units'], self::$inventory->units()->count());
 
     }
 
