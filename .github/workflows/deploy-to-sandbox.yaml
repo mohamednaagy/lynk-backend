@@ -21,7 +21,7 @@ jobs:
         id: pull-and-build
         run: | 
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@144.24.208.157 \
-           "cd /var/www/lynk-backend/ && sudo git pull origin sandbox && sudo php artisan migrate && sudo supervisorctl stop all && sudo systemctl restart supervisor && sudo supervisorctl start all"
+           "cd /var/www/lynk-backend/ && sudo git pull origin sandbox && sudo php artisan migrate && sudo supervisorctl stop all && sudo supervisorctl start all"
         
       - name: set pr url
         if: always()
