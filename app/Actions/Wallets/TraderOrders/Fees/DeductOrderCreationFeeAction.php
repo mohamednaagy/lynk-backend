@@ -5,7 +5,7 @@ namespace App\Actions\Wallets;
 use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\CreateTransactions;
-use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
+use App\Actions\Contracts\Wallets\OrderFees\DeductOrderCreationFee;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Exceptions\NoMatchOrderCostAndValueException;
