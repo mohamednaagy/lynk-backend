@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Actions\Wallets;
+namespace App\Actions\Wallets\TraderOrders\Fees;
 
 use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\CreateTransactions;
-use App\Actions\Contracts\Wallets\DeductOrderCompletedFee;
+use App\Actions\Contracts\Wallets\OrderFees\DeductOrderCompletedFee;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Exceptions\NoMatchOrderCostAndValueException;

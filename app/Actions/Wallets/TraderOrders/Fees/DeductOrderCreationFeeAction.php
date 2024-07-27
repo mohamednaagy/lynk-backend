@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Wallets;
+namespace App\Actions\Wallets\TraderOrders\Fees;
 
 use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;

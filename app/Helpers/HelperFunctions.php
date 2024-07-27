@@ -206,20 +206,22 @@ if (! function_exists('number_unformat')) {
     }
 }
 
-function convertDateTimeToHumanDate(Carbon $dataTime, ?Carbon $endDateTime = null)
-{
-    $endDateTime = $endDateTime ?? Carbon::now();
-    $diffTime = $dataTime->diffForHumans(
-        $endDateTime,
-        [
-            'parts' => 3,
-            'join' => true,
-        ]
-    );
+if (! function_exists('convertDateTimeToHumanDate')) {
+    function convertDateTimeToHumanDate(Carbon $dataTime, ?Carbon $endDateTime = null)
+    {
+        $endDateTime = $endDateTime ?? Carbon::now();
+        $diffTime = $dataTime->diffForHumans(
+            $endDateTime,
+            [
+                'parts' => 3,
+                'join' => true,
+            ]
+        );
 
-    $ignoredWords = ['ago', 'before', 'after', 'منذ', 'قبل'];
+        $ignoredWords = ['ago', 'before', 'after', 'منذ', 'قبل'];
 
-    return \Illuminate\Support\Str::remove($ignoredWords, $diffTime);
+        return \Illuminate\Support\Str::remove($ignoredWords, $diffTime);
+    }
 }
 
 if (! function_exists('saudi_now')) {
