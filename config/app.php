@@ -18,6 +18,9 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'horizon_username' => env('HORIZON_USERNAME', 'admin'),
+    'horizon_password' => env('HORIZON_PASSWORD', 'LynkHoriz@2024'),
+
     'currency' => env('APP_CURRENCY', 'SAR4'),
 
     /*

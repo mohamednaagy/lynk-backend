@@ -47,6 +47,6 @@
     }
 });
 
-Route::get('/horizon', function () {
-    return view('horizon');
+Route::match(['get', 'post'], '/background-jobs', function () {
+    return view('horizon::index');
 });
