@@ -621,4 +621,12 @@ class BursamV1Driver implements TraderInterface
     {
         ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
     }
+
+    public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
+    {
+        return match ($traderOrder->status->value) {
+            TraderOrderStatus::Hold => __('order.trader.bursa.hold_status'),
+            default => null,
+        };
+    }
 }

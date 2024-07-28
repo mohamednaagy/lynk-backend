@@ -133,6 +133,7 @@ class OrderController extends Controller
                 'trader_orders.status',
                 'trader_orders.cancel_details',
                 'trader_orders.created_at',
+                'trader_orders.hover_message',
                 'history',
             ])->respond();
     }

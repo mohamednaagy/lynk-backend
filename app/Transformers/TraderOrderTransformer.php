@@ -45,7 +45,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'history',
         'created_at',
         'cancel_details',
-
+        'hover_message',
     ];
 
     public function transform(TraderOrder $traderOrder)
@@ -108,6 +108,11 @@ class TraderOrderTransformer extends TransformerAbstract
         }
 
         return $this->primitive($this->formatRefundStatus($refundReason, $baseTraderOrder));
+    }
+
+    public function includeHoverMessage(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->hoverMessage());
     }
 
     public function includeIsCancellable(TraderOrder $traderOrder): Primitive

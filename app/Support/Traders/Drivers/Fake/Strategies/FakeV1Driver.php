@@ -477,4 +477,9 @@ class FakeV1Driver implements TraderInterface
     {
         return true;
     }
+
+    public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
+    {
+        return null;
+    }
 }
