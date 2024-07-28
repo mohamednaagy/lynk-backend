@@ -76,6 +76,5 @@ class Kernel extends HttpKernel
         'setAppLocale' => \App\Http\Middleware\SetLocalization::class,
         'checkCompanyStatus' => \App\Http\Middleware\CheckCompanyStatus::class,
         'checkDataOfSupplier' => \App\Http\Middleware\EnsureDataOfUserSupplier::class,
-        'horizon.auth' => \App\Http\Middleware\HorizonAuthMiddleware::class,
     ];
 }

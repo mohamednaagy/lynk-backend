@@ -183,6 +183,7 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         Mews\Purifier\PurifierServiceProvider::class,
+        Olssonm\VeryBasicAuth\VeryBasicAuthServiceProvider::class,
 
         /*
          * Package Service Providers...
