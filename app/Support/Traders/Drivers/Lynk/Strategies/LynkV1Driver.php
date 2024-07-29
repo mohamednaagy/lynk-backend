@@ -263,6 +263,9 @@ class LynkV1Driver implements TraderInterface
 
     public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
     {
-        return null;
+        return match ($traderOrder->status->value) {
+            TraderOrderStatus::Cancelled => __('order.trader.lynk.cancelled_status'),
+            default => null,
+        };
     }
 }
