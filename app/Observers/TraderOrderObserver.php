@@ -42,7 +42,7 @@ class TraderOrderObserver
             $traderOrder->provider === 'bursam'
             && $traderOrder->version === 'v2'
             && $traderOrder->mode === TraderOrderMode::Automatic
-            && is_bursam_service_available()
+            && $traderOrder->status->is(TraderOrderStatus::Initiated)
         ) {
             ProcessBursamInitiatedTraderOrder::dispatch($traderOrder->id);
         }
