@@ -15,6 +15,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQueue
 {
@@ -62,5 +63,10 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, Should
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->traderOrderId;
+    }
+
+    public function failed($exception)
+    {
+        Log::error('ProcessBursamTransferOwnershipToCustomer', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
     }
 }

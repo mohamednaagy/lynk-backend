@@ -16,6 +16,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, ShouldQueue
 {
@@ -74,5 +75,10 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->traderOrderId;
+    }
+
+    public function failed($exception)
+    {
+        Log::error('ProcessBursamSellingCommodityToOpenMarket', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
     }
 }

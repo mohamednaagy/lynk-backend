@@ -13,6 +13,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessBursamInitiateTraderOrder implements ShouldBeUnique, ShouldQueue
 {
@@ -49,5 +50,10 @@ class ProcessBursamInitiateTraderOrder implements ShouldBeUnique, ShouldQueue
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->financingOrder->id;
+    }
+
+    public function failed($exception)
+    {
+        Log::error('ProcessBursamInitiateTraderOrder', ['financingOrderId' => $this->financingOrder->id,  'message' => $exception->getMessage()]);
     }
 }
