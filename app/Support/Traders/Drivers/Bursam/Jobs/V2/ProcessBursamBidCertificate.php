@@ -71,12 +71,6 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
-
-        Log::error(
-            method_exists('getMessage', $exception)
-                ? $exception->getMesage().' bid trader id '.$this->traderOrderId
-                : 'Bid proceed to buy product trader id '.$this->traderOrderId,
-            [$exception]
-        );
+        Log::error($exception->getMesage().' bid trader id '.$this->traderOrderId);
     }
 }
