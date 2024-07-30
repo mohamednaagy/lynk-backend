@@ -13,7 +13,6 @@ use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder
 
 class TraderOrderObserver
 {
-
     public function __construct(protected TraderOrderFeesService $traderOrderFeesService)
     {
     }
@@ -45,6 +44,7 @@ class TraderOrderObserver
             $traderOrder->provider === 'bursam'
             && $traderOrder->version === 'v2'
             && $traderOrder->mode === TraderOrderMode::Automatic
+            && is_bursam_service_available()
         ) {
             ProcessBursamInitiatedTraderOrder::dispatch($traderOrder->id);
         }
@@ -119,11 +119,8 @@ class TraderOrderObserver
         //
     }
 
-     /**
+    /**
      * Handle the status change of the TraderOrder.
-     *
-     * @param TraderOrder $traderOrder
-     * @return void
      */
     protected function applyOrderFees(TraderOrder $traderOrder): void
     {
@@ -133,6 +130,6 @@ class TraderOrderObserver
         if ($action) {
             $action->handle($traderOrder);
         }
-        
+
     }
 }

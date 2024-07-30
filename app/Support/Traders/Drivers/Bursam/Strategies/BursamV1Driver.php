@@ -15,6 +15,7 @@ use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
+use App\Jobs\General\ProcessFinancingOrders;
 use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -25,13 +26,11 @@ use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
-use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
 
@@ -85,12 +84,8 @@ class BursamV1Driver implements TraderInterface
     public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
     {
         if ($this->checkCanInitiateTraderOrder()) {
-            Log::info('initaite trader order'.Carbon::now());
-
             return $this->getOrInitiateTraderOrder($financingOrder);
         } else {
-            Log::info('holding trader order'.Carbon::now());
-
             return $this->createHoldTraderOrder($financingOrder);
         }
     }
@@ -147,7 +142,7 @@ class BursamV1Driver implements TraderInterface
         if ($checkCanChangeStatusOfTrader) {
             $trader->update(['status' => TraderOrderStatus::Initiated]);
             $trader->traderHistories()->create(['action' => FinancingOrderHistory::GetTtiId]);
-            $this->processInitiatedTraderOrder($trader);
+            ProcessFinancingOrders::dispatch();
         }
     }
 

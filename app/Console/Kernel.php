@@ -47,12 +47,6 @@ class Kernel extends ConsoleKernel
             ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
             ->onOneServer();
 
-        $schedule->job(new RunHoldTraderWhenMarketOpenCommand())
-            ->timezone($timezone)
-            ->everyTwoMinutes()
-            ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
-            ->onOneServer();
-
     }
 
     /**
