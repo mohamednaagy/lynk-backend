@@ -74,12 +74,7 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
             'status' => TraderOrderStatus::FailureToCancel,
         ]);
 
-        Log::error(
-            method_exists('getMessage', $exception)
-                ? $exception->getMesage()
-                : 'Cannot proceed to get STB',
-            [$exception]
-        );
+        Log::error('ProcessBursamStbCertificate', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
     }
 
     public function middleware(): array
