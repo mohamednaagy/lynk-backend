@@ -26,6 +26,7 @@ class LocalMarketService
      */
     public function getInventory($loanAmount, $preferredItemTypes = [], $usedInventories = [])
     {
+        // TODO : add condition for active commodity type only
         return LocalMarketInventory::where('max_price', '<=', $loanAmount)
             ->where(function ($query) use ($preferredItemTypes) {
                 if (! empty($preferredItemTypes)) {
