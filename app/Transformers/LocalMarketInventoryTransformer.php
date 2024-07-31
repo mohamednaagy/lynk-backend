@@ -24,6 +24,7 @@ class LocalMarketInventoryTransformer extends TransformerAbstract
         'reserved_items',
         'status',
         'is_editable',
+        'is_deletable',
 
     ];
 
@@ -135,5 +136,10 @@ class LocalMarketInventoryTransformer extends TransformerAbstract
     public function includeIsEditable(LocalMarketInventory $inventory): Primitive
     {
         return $this->primitive($inventory->is_editable);
+    }
+
+    public function includeIsDeletable(LocalMarketInventory $inventory): Primitive
+    {
+        return $this->primitive($inventory->is_deletable);
     }
 }

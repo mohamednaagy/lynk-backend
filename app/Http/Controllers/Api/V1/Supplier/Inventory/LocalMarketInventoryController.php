@@ -79,6 +79,7 @@ class LocalMarketInventoryController extends Controller
                 'reserved_items',
                 'status',
                 'is_editable',
+                'is_deletable',
             ])
             ->respond();
     }
@@ -175,6 +176,7 @@ class LocalMarketInventoryController extends Controller
                 'reserved_items',
                 'status',
                 'is_editable',
+                'is_deletable',
             ])
             ->respond();
     }
