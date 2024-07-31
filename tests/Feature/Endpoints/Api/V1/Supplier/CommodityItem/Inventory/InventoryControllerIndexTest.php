@@ -108,6 +108,7 @@ class InventoryControllerIndexTest extends TestCase
                         'reserved_items',
                         'status',
                         'is_editable',
+                        'is_deletable',
                     ])
                     ->respond()
                     ->getData(true)
