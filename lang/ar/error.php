@@ -42,4 +42,6 @@ return [
     'inventory_cannot_be_updated' => 'عدد الوحدات المحجوزة أكبر من العدد الإجمالي الجديد للوحدات',
     'inventory_units_not_changed' => 'لم يتم تغيير عدد الوحدات',
     'failed_to_delete_inventory' => 'حدث خطأ أثناء محاولة حذف المخزن. يرجى المحاولة مرة أخرى لاحقاً.',
+    'inventory_cannot_be_deleted' => 'الوحدات المحجوزة أكبر من 0. لا يمكن حذف المخزن.',
+
 ];
