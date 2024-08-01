@@ -49,7 +49,7 @@ class LocalMarketInventoryController extends Controller
         $this->middleware(
             'permission:'.
                 perm(Area::CommoditySupplier, [Subject::CommoditySupplierInventories, Action::Manage, Action::Delete])
-        )->only('delete');
+        )->only('destroy');
     }
 
     /**
