@@ -24,13 +24,16 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
             if ($financingOrder->hasCompletedTraderOrder()) {
                 throw new OrderHasCompletedTraderOrderException($orderId);
             }
+
             throw new OrderAlreadyHasActiveTraderOrderException;
         }
 
         if (! is_bursam_service_available()) {
             throw new CommodityMarketIsUnavailableException;
         }
-        $trader = Trader::getSuitableDriverForCompany($financingOrder->company);
+
+        $driver = $financingOrder->company->getPreferredTrader();
+        $trader = Trader::driver($driver, get_latest_version_of_trader($driver));
         $traderOrder = $trader->createTraderOrder($financingOrder);
 
         // keep below action after createTraderOrder()

@@ -258,6 +258,7 @@ return [
         'internal_status_comment' => 'التعليق الداخلى',
         'client_wakala' => 'الوكالة',
         'payment_proof' => 'مستند إثبات التحويل للعميل',
+        'invalid_case_proceed' => 'قيمة الحالة المدخلة غير صالحة لطلب التجارة هذا',
     ],
 
 ];
