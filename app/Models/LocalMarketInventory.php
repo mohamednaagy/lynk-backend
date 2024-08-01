@@ -10,7 +10,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class LocalMarketInventory extends Model
 {
-    use HasFactory , LogsActivity;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
         'commodity_item_id',
@@ -85,5 +85,18 @@ class LocalMarketInventory extends Model
         } else {
             return true;
         }
+    }
+
+    public function canUpdateUnits($total_new_units)
+    {
+        if ($total_new_units > $this->reserved_items) {
+            return true;
+        }
+
+        if ($total_new_units == $this->total_items) {
+            return false;
+        }
+
+        return false;
     }
 }
