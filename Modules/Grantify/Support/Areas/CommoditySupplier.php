@@ -52,6 +52,7 @@ class CommoditySupplier
             Action::Show,
             Action::Edit,
             Action::Create,
+            Action::Delete,
         ],
 
     ];
