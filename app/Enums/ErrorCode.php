@@ -73,4 +73,14 @@ class ErrorCode
     public const ERROR_CHEKING_UNITS = 1036;
 
     public const ORDER_IS_CANCELLED = 1037;
+  
+    public const CAN_NOT_DEAL_WITH_BURSAM_SYSTEM = 1038;
+
+    public const ERROR_DELETING_UNITS = 1039;
+
+    public const INVENTORY_NOT_DELETABLE = 1040;
+
+    public const FAILED_TO_DELETE_INVENTORY = 1041;
+
+
 }
