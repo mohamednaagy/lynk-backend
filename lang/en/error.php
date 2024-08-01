@@ -41,6 +41,7 @@ return [
     'order_cost_with_vat_and_without_vat_incorrect' => 'Entered value of order cost with VAT is incorrect',
     'user_doesnt_have_the_right_permissions' => 'User Doesnt Have The Right Permission',
     'inventory_cannot_be_updated' => 'Reserved Units is greater than new Total Units',
+    'inventory_cannot_be_deleted' => 'Reserved Units is greater than 0. Commodity Inventory cannot be deleted.',
     'inventory_units_not_changed' => 'No changes can be saved',
     'failed_to_delete_inventory' => 'An error occurred while attempting to delete the inventory. Please try again later.',
 
