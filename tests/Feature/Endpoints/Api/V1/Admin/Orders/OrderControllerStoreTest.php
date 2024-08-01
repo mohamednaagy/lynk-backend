@@ -4,10 +4,15 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Orders;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CompanyMarketType;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
+use App\Enums\Trader;
+use App\Enums\TraderOrderMode;
+use App\Enums\TraderOrderStatus;
 use App\Models\Company;
+use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -205,5 +210,78 @@ class OrderControllerStoreTest extends TestCase
                     'status_reason',
                 ],
             ]);
+    }
+
+    public function test_success_create_order_based_with_local_preferred_type_of_company(): void
+    {
+        self::$company->update([
+            'preferred_market_type' => CompanyMarketType::Local(), 'trading_mode' => TraderOrderMode::Automatic, 'does_order_require_approval' => false, 'require_initiate_trade_request' => false,
+        ]);
+        $response = $this->actingAs(self::$admin)
+            ->postJson('api/v1/admin/orders', self::$orderDetails)
+            ->assertStatus(Response::HTTP_OK)
+            ->assertJsonStructure([
+                'data' => [
+                    'phone_country_code',
+                    'phone_number',
+                    'phone_number_formatted',
+                    'id',
+                    'status' => [
+                        'description',
+                        'value',
+                    ],
+                    'reference_number',
+                    'national_id',
+                    'amount',
+                    'amount_formatted',
+                    'selling_price',
+                    'selling_price_formatted',
+                    'is_approved',
+                    'status_reason',
+                ],
+            ]);
+
+        $order = FinancingOrder::find(json_decode($response->getContent())->data->id);
+        $traderOrder = $order->traderOrders()->first();
+        $this->assertEquals(Trader::Lynk, $traderOrder->provider);
+        $this->assertEquals(TraderOrderMode::Automatic, $traderOrder->mode);
+        $this->assertEquals(TraderOrderStatus::Initiated, $traderOrder->staus);
+
+    }
+
+    public function test_success_create_order_based_with_any_preferred_type_of_company(): void
+    {
+        self::$company->update([
+            'preferred_market_type' => CompanyMarketType::Any(), 'trading_mode' => TraderOrderMode::Automatic, 'does_order_require_approval' => false, 'require_initiate_trade_request' => false,
+        ]);
+        $response = $this->actingAs(self::$admin)
+            ->postJson('api/v1/admin/orders', self::$orderDetails)
+            ->assertStatus(Response::HTTP_OK)
+            ->assertJsonStructure([
+                'data' => [
+                    'phone_country_code',
+                    'phone_number',
+                    'phone_number_formatted',
+                    'id',
+                    'status' => [
+                        'description',
+                        'value',
+                    ],
+                    'reference_number',
+                    'national_id',
+                    'amount',
+                    'amount_formatted',
+                    'selling_price',
+                    'selling_price_formatted',
+                    'is_approved',
+                    'status_reason',
+                ],
+            ]);
+
+        $order = FinancingOrder::find(json_decode($response->getContent())->data->id);
+        $traderOrder = $order->traderOrders()->first();
+        $this->assertEquals(Trader::Lynk, $traderOrder->provider);
+        $this->assertEquals(TraderOrderMode::Automatic, $traderOrder->mode);
+        $this->assertEquals(TraderOrderStatus::Initiated, $traderOrder->staus);
     }
 }
