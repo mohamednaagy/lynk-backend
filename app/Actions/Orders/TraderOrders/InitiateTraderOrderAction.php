@@ -2,7 +2,6 @@
 
 namespace App\Actions\Orders\TraderOrders;
 
-use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
 use App\Actions\Contracts\Orders\TraderOrders\InitiateTraderOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Exceptions\CommodityMarketIsUnavailableException;
@@ -38,7 +37,6 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
 
         // keep below action after createTraderOrder()
         // to be sure we have a trader order and store his data in transaction meta
-        app(DeductBalanceForNewOrder::class)->handle($traderOrder);
 
         $financingOrder->update([
             'status' => FinancingOrderStatus::InProgress,

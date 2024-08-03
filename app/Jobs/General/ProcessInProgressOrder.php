@@ -3,7 +3,7 @@
 namespace App\Jobs\General;
 
 use App\Actions\Contracts\Orders\CanCreateOrder;
-use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
+use App\Actions\Contracts\Orders\TraderOrders\Fees\DeductBalanceForNewOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\BalanceIsNotEnoughException;
