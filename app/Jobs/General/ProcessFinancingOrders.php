@@ -9,6 +9,7 @@ use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
+use App\Support\Traders\Facades\Trader as TraderManager;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -81,12 +82,8 @@ class ProcessFinancingOrders implements ShouldQueue
                 TraderOrderStatus::InProgress,
             ])->chunk(10, function ($traderOrderCollection) {
                 $traderOrderCollection->each(function (TraderOrder $traderOrder) {
-                    try {
-                        Trader::driver($traderOrder->provider, $traderOrder->version)
-                            ->dispatchJobForTransitioningFlow($traderOrder);
-                    } catch (\Exception $e) {
-                        Log::error('There is an issue with this trader order and provider', $traderOrder);
-                    }
+                    TraderManager::driver($traderOrder->provider, $traderOrder->version)
+                        ->dispatchJobForTransitioningFlow($traderOrder);
                 });
             });
     }
