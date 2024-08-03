@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Actions\Contracts\Orders\DeductBalanceForNewOrder;
+use App\Actions\Contracts\Orders\TraderOrders\Fees\DeductBalanceForNewOrder;
 use App\Models\TraderOrder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;

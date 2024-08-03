@@ -95,13 +95,6 @@ class LynkV1Driver implements TraderInterface
                     TraderOrderMediaCollection::TransferOwnershipToLender
                 );
 
-                $this->createTraderOrderHistory(
-                    $traderOrder,
-                    FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-                    [
-                        'created_at' => $currentTimeInUtcTz,
-                    ]
-                );
             });
         } catch (\Throwable $exception) {
             throw new TraderException(

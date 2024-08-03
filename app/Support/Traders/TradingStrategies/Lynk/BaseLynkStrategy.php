@@ -31,12 +31,13 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
                 'status' => TraderOrderStatus::InProgress,
             ]);
         }
+        $this->transferOwnershipToLender($traderOrder, $request);
+
         $this->createStepHistories(
             $request,
             $traderOrder,
             MurabhaStep::PurchasingCommodity
         );
-        $this->transferOwnershipToLender($traderOrder, $request);
     }
 
     protected function transferOwnershipToLender(TraderOrder $traderOrder, $request)
@@ -53,8 +54,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
                 TraderOrderMediaCollection::TransferOwnershipToLender,
                 'base64'
             );
-
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
         }
     }
 
@@ -84,12 +83,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             MurabhaStep::MurabahaSaleCompleted
         );
 
-        $this->createStepHistories(
-            $request,
-            $traderOrder,
-            MurabhaStep::MurabahaSaleCompleted
-        );
-
         $trader = Trader::driver($traderOrder->provider);
         $currentTimeInUtcTz = CarbonImmutable::now();
         $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
@@ -105,6 +98,12 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             ],
             $traderOrder,
             TraderOrderMediaCollection::LynkSalePledgeCertificate,
+        );
+
+        $this->createStepHistories(
+            $request,
+            $traderOrder,
+            MurabhaStep::MurabahaSaleCompleted
         );
 
         if ($canUpdateOrderStatus) {
