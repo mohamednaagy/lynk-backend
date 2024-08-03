@@ -23,9 +23,6 @@ class UpdateLocalMurabahaSettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'default_trade_order_roatation_count' => ['required', 'in:0,1,2,3']];
-
-        return [
             'default_trade_order_roatation_count' => ['required', 'in:0,1,2,3'],
             'default_contract_sign_time_limit' => ['required', 'integer', 'gt:0'],
         ];
