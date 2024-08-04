@@ -5,6 +5,7 @@ namespace App\Jobs\LocalMarket;
 use App\Enums\LocalMarketInventoryStatus;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -31,18 +32,25 @@ class DeleteInventoryStock implements ShouldQueue
      */
     public function handle()
     {
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
+
             Log::info("Starting transaction for Deleting inventory ID: {$this->inventory->id}");
 
-            $this->inventory->update(['status' => LocalMarketInventoryStatus::Deleting]);
+            // Store the old status
+            $oldStatus = $this->inventory->status;
 
+            $this->inventory->update(['status' => LocalMarketInventoryStatus::Pending]);
             LocalMarketInventoryUnits::where('local_market_inventory_id', $this->inventory->id)
                 ->delete();
             Log::info("Successfully soft deleted units for inventory ID: {$this->inventory->id}");
 
             // Soft delete the inventory
             $this->inventory->delete();
+
+            // Restore the old status
+            $this->inventory->update(['status' => $oldStatus]);
+            Log::info("Restored inventory ID: {$this->inventory->id} status to {$oldStatus}");
 
             // Commit the transaction
             DB::commit();
@@ -53,6 +61,7 @@ class DeleteInventoryStock implements ShouldQueue
             $this->inventory->update([
                 'status' => LocalMarketInventoryStatus::Problem,
             ]);
+            Log::error("Updated inventory ID: {$this->inventory->id} status to Problem due to error: {$e->getMessage()}");
         }
     }
 }
