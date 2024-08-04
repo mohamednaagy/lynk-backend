@@ -41,7 +41,9 @@ class DeleteInventoryStock implements ShouldQueue
 
             $this->inventory->update(['status' => LocalMarketInventoryStatus::Deleting]);
 
-            $this->softDeleteUnits($this->inventory);
+            LocalMarketInventoryUnits::where('local_market_inventory_id', $this->inventory->id)
+                ->delete();
+            Log::info("Successfully soft deleted units for inventory ID: {$this->inventory->id}");
 
             // Soft delete the inventory
             $this->inventory->delete();
@@ -58,17 +60,4 @@ class DeleteInventoryStock implements ShouldQueue
         }
     }
 
-
-    public function softDeleteUnits(LocalMarketInventory $inventory)
-    {
-        try {
-            LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
-                ->where('status', (int) LocalMarketInventoryUnitsStatus::Free)
-                ->delete();
-            Log::info("Successfully soft deleted units for inventory ID: {$inventory->id}");
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw new FailedDeleteUnitsForInventory();
-        }
-    }
 }
