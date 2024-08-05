@@ -3,11 +3,8 @@
 namespace App\Jobs\LocalMarket;
 
 use App\Enums\LocalMarketInventoryStatus;
-use App\Enums\LocalMarketInventoryUnitsStatus;
-use App\Exceptions\FailedDeleteUnitsForInventory;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
-use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

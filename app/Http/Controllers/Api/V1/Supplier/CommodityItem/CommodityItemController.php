@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api\V1\Supplier\CommodityItem;
 
 use App\Actions\Contracts\Supplier\CommodityItem\BuildPaginatedCommodityItemQuery;
 use App\Actions\Contracts\Supplier\CommodityItem\CreateCommodityItem;
+use App\Actions\Contracts\Supplier\CommodityItem\DeleteCommodityItem;
 use App\Actions\Contracts\Supplier\CommodityItem\UpdateCommodityItem;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\ErrorCode;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Supplier\CommodityItem\StoreCommodityItemRequest;
@@ -15,6 +17,8 @@ use App\Models\CommodityItem;
 use App\Transformers\Supplier\CommodityItem\CommodityItemsTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class CommodityItemController extends Controller
 {
@@ -39,8 +43,12 @@ class CommodityItemController extends Controller
         $this->middleware(
             'permission:'.
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Manage, Action::Edit])
-        )
-            ->only('store');
+        )->only('update');
+        
+        $this->middleware(
+            'permission:' .
+                perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Manage, Action::Delete])
+        )->only('destroy');
     }
 
     /**
@@ -131,5 +139,35 @@ class CommodityItemController extends Controller
                 'created_at',
             ])
             ->respond();
+    }
+
+    /**
+     * Delete the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(CommodityItem $commodityItem, DeleteCommodityItem $deleteCommodityItem)
+    {
+        //check if the commodity item is deleteable
+        if (!$commodityItem->is_deletable) {
+            return $this->errorResponse(
+                __('error.commodity_item_cannot_be_deleted'),
+                Response::HTTP_BAD_REQUEST,
+                ErrorCode::COMMODITY_ITEM_NOT_DELETABLE
+            );
+        }
+
+        try {
+            $deleteCommodityItem->handle($commodityItem);
+            return $this->successResponse();
+        } catch (\Exception $e) {
+            Log::error("Failed to delete commodity item ID: {$commodityItem->id}. Error: {$e->getMessage()}");
+            return $this->errorResponse(
+                __('error.failed_to_delete_commodity_item'),
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                ErrorCode::FAILED_TO_DELETE_COMMODITY_ITEM
+            );
+        }
     }
 }

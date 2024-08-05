@@ -43,5 +43,6 @@ return [
     'inventory_units_not_changed' => 'لم يتم تغيير عدد الوحدات',
     'failed_to_delete_inventory' => 'حدث خطأ أثناء محاولة حذف المخزن. يرجى المحاولة مرة أخرى لاحقاً.',
     'inventory_cannot_be_deleted' => 'الوحدات المحجوزة أكبر من 0. لا يمكن حذف المخزن.',
-
+    'commodity_item_cannot_be_deleted' => 'لا يمكن حذف العنصر السلعي لأن الوحدات المحجوزة أكبر من 0.',
+    'failed_to_delete_commodity_item' => 'حدث خطأ أثناء محاولة حذف العنصر السلعي. الرجاء المحاولة مرة أخرى لاحقًا.',
 ];
