@@ -74,4 +74,16 @@ class CommodityItem extends Model
     {
         return $this->inventories()->sum('reserved_items');
     }
+
+    /**
+     * Determine if the inventory is deletable.
+     *
+     * An inventory is deletable if the sum of reserved units is zero.
+     *
+     * @return bool
+     */
+    public function getIsDeletableAttribute(): bool
+    {
+        return $this->reserved_units == 0;
+    }
 }
