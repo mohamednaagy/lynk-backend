@@ -36,6 +36,7 @@ class CommoditySupplier
             Action::Index,
             Action::Edit,
             Action::Create,
+            Action::Delete,
         ],
 
         Subject::CommoditySupplierItems => [
