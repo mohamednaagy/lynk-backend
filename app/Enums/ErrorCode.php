@@ -86,5 +86,9 @@ class ErrorCode
 
     public const FAILED_TO_DELETE_COMMODITY_ITEM = 1043;
 
+    public const LOCATION_NOT_DELETABLE = 1044;
+
+    public const FAILED_TO_DELETE_LOCATION = 1045;
+
 
 }

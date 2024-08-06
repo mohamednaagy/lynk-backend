@@ -46,5 +46,7 @@ return [
     'failed_to_delete_inventory' => 'An error occurred while attempting to delete the inventory. Please try again later.',
     'commodity_item_cannot_be_deleted' => 'Reserved Units is greater than 0. Commodity Item cannot be deleted.',
     'failed_to_delete_commodity_item' => 'An error occurred while attempting to delete the commodity item. Please try again later.',
+    'location_cannot_be_deleted' => 'Reserved Units is greater than 0. Commodity Location cannot be deleted.',
+    'failed_to_delete_location' => 'An error occurred while attempting to delete the Commodity Location. Please try again later.',
 
 ];
