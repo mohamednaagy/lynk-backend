@@ -45,6 +45,11 @@ class SupplierLocation extends Controller
             'permission:'.
                 perm(Area::CommoditySupplier, [Subject::CommoditySupplierLocations, Action::Manage, Action::Show])
         )->only('show');
+
+        $this->middleware(
+            'permission:'.
+                perm(Area::CommoditySupplier, [Subject::CommoditySupplierLocations, Action::Manage, Action::Delete])
+        )->only('destroy');
     }
 
     /**
