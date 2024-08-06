@@ -21,4 +21,36 @@ class SupplierLocation extends Model
     {
         return $this->belongsTo(Company::class, 'company_id');
     }
+
+    public function inventories() {
+        return $this->hasMany(LocalMarketInventory::class, 'supplier_location_id');
+    }
+
+    /**
+     * @return int
+     */
+    public function getAvailableUnitsAttribute() :int
+    {
+        return $this->inventories()->sum('available_quantity');
+    }
+
+    /**
+     * @return int
+     */
+    public function getReservedUnitsAttribute() :int
+    {
+        return $this->inventories()->sum('reserved_items');
+    }
+
+    /**
+     * Determine if the inventory is deletable.
+     *
+     * An inventory is deletable if the sum of reserved units is zero.
+     *
+     * @return bool
+     */
+    public function getIsDeletableAttribute(): bool
+    {
+        return $this->reserved_units == 0;
+    }
 }
