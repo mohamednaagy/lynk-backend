@@ -60,6 +60,7 @@ class SupplierLocation extends Controller
                 'unique_identifier',
                 'description',
                 'created_at',
+                'is_deletable',
             ])
             ->respond();
     }
@@ -115,6 +116,7 @@ class SupplierLocation extends Controller
                 'name',
                 'description',
                 'created_at',
+                'is_deletable',
             ])
             ->respond();
     }
