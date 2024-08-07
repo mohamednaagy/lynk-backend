@@ -6,8 +6,9 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
-use App\Jobs\LocalMarket\DeleteInventory;
+use App\Jobs\LocalMarket\DeleteCommodityItem;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
+use App\Models\CommodityItem;
 use App\Models\User;
 use App\Observers\LocalMarketInventoryObserver;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -21,7 +22,7 @@ use Tests\Traits\InteractsWithCommodityInventory;
 use Tests\Traits\InteractsWithCommodityItem;
 use Tests\Traits\InteractsWithSupplier;
 
-class InventoryControllerDeleteTest extends TestCase
+class CommodityItemControllerDeleteTest extends TestCase
 {
     use AssertsAccessByRoleAndArea, InteractsWithCommodityInventory, InteractsWithCommodityItem, InteractsWithSupplier, RefreshDatabase;
 
@@ -57,18 +58,18 @@ class InventoryControllerDeleteTest extends TestCase
         self::$supplier = $this->createSupplier();
         self::$supplier2 = $this->createSupplier();
 
-        self::$commodityItems = $this->createCommodityItem(
-            self::$supplier,
-            'name'.rand(11, 999),
-            'unique name'.rand(11, 999),
-            'Test Description',
-            10,
-            20,
-            10,
-            $this->createCurrency()->id,
-            $this->createMeasurement()->id,
-            $this->createCommodityType('type', 'test_item')->id,
-        );
+        // self::$commodityItems = $this->createCommodityItem(
+        //     self::$supplier,
+        //     'name'.rand(11, 999),
+        //     'unique name'.rand(11, 999),
+        //     'Test Description',
+        //     10,
+        //     20,
+        //     10,
+        //     $this->createCurrency()->id,
+        //     $this->createMeasurement()->id,
+        //     $this->createCommodityType('type', 'test_item')->id,
+        // );
 
         self::$inventory = $this->createInventory(
             self::$supplier,
@@ -83,8 +84,8 @@ class InventoryControllerDeleteTest extends TestCase
 
         self::$location = $this->createSupplierLocation(
             self::$supplier,
-            'name'.rand(11, 999),
-            'unique name'.rand(11, 999),
+            'name' . rand(11, 999),
+            'unique name' . rand(11, 999),
             'Test Description',
         );
 
@@ -105,19 +106,18 @@ class InventoryControllerDeleteTest extends TestCase
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(
             self::$userManager,
-            perm(Area::CommoditySupplier, [Subject::CommoditySupplierInventories, Action::Delete])
+            perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Delete])
         );
 
-        self::$endpoint = 'api/v1/supplier/commodity-items/'.self::$commodityItems->id.'/inventory/'.self::$inventory->id;
+        self::$endpoint = 'api/v1/supplier/commodity-items/' . self::$inventory->commodity_item_id;
 
         self::$inventory2 = [
             'location_id' => self::$location->id,
             'total_units' => 20,
         ];
-
     }
 
-    public function test_un_auth_user_cant_delete_commodity_inventory(): void
+    public function test_un_auth_user_cant_delete_commodity_item(): void
     {
         $this
             ->withHeader('X-Company', self::$supplier->id)
@@ -128,25 +128,28 @@ class InventoryControllerDeleteTest extends TestCase
             ]);
     }
 
-    public function test_supplier_user_cant_delete_commodity_inventory_with_active_reserved_units(): void
+    public function test_supplier_user_cant_delete_commodity_item_with_active_reserved_units(): void
     {
+        // Set up inventory with reserved items
         $inventory = self::$inventory;
         $inventory->reserved_items = 50;
         $inventory->save();
 
+        // Attempt to delete the commodity item
         $this
             ->withHeader('X-Company', self::$supplier->id)
             ->actingAs(self::$supplierAdmin)
             ->deleteJson(self::$endpoint)
             ->assertStatus(Response::HTTP_BAD_REQUEST)
             ->assertExactJson([
-                'message' => 'Reserved Units is greater than 0. Commodity Inventory cannot be deleted.',
-                'code' => 1040,
+                'message' => 'Reserved Units is greater than 0. Commodity Item cannot be deleted.',
+                'code' => 1042,
             ]);
     }
 
-    public function test_supplier_user_can_delete_commodity_inventory_successfully(): void
+    public function test_supplier_user_can_delete_commodity_item_successfully(): void
     {
+        // Attempt to delete the commodity item
         $this
             ->withHeader('X-Company', self::$supplier->id)
             ->actingAs(self::$supplierAdmin)
@@ -154,36 +157,48 @@ class InventoryControllerDeleteTest extends TestCase
             ->assertStatus(Response::HTTP_OK);
 
         // Manually dispatch the job immediately
-        $job = new DeleteInventory(self::$inventory);
+        $job = new DeleteCommodityItem(CommodityItem::find(self::$inventory->commodity_item_id));
         Bus::dispatchNow($job);
 
+        // Assert the inventory is soft deleted
         $this->assertDatabaseMissing('local_market_inventories', [
             'id' => self::$inventory->id,
             'deleted_at' => null,
         ]);
     }
 
-    public function test_delete_inventory_stock_job_is_fired() {
-        $this
-        ->withHeader('X-Company', self::$supplier->id)
-        ->actingAs(self::$supplierAdmin)
-        ->deleteJson(self::$endpoint)
-        ->assertStatus(Response::HTTP_OK);
+    public function test_delete_commodity_item_job_is_fired(): void
+    {
+        // Mock the queue
+        Queue::fake();
 
-        Queue::assertPushed(DeleteInventory::class);
+        // Attempt to delete the commodity item
+        $this
+            ->withHeader('X-Company', self::$supplier->id)
+            ->actingAs(self::$supplierAdmin)
+            ->deleteJson(self::$endpoint)
+            ->assertStatus(Response::HTTP_OK);
+
+        // Assert the job was pushed to the queue
+        Queue::assertPushed(DeleteCommodityItem::class);
     }
 
-    public function test_inventory_units_are_soft_deleted() {
+    public function test_inventory_units_are_soft_deleted(): void
+    {
+        // Attempt to delete the commodity item
         $this
-        ->withHeader('X-Company', self::$supplier->id)
-        ->actingAs(self::$supplierAdmin)
-        ->deleteJson(self::$endpoint)
-        ->assertStatus(Response::HTTP_OK);
+            ->withHeader('X-Company', self::$supplier->id)
+            ->actingAs(self::$supplierAdmin)
+            ->deleteJson(self::$endpoint)
+            ->assertStatus(Response::HTTP_OK);
 
         // Manually dispatch the job immediately
-        $job = new DeleteInventory(self::$inventory);
+        $job = new DeleteCommodityItem(CommodityItem::find(self::$inventory->commodity_item_id));
         Bus::dispatchNow($job);
 
-        $this->assertSoftDeleted('local_market_inventory_units', ['local_market_inventory_id' => self::$inventory->id]);
+        // Assert the inventory units are soft deleted
+        $this->assertSoftDeleted('local_market_inventory_units', [
+            'local_market_inventory_id' => self::$inventory->id,
+        ]);
     }
 }
