@@ -29,8 +29,8 @@ class StoreLocalMarketInventoryRequest extends FormRequest
         return [
             'location_id' => [
                 'required',
-                Rule::exists(SupplierLocation::class, 'id')->where('company_id', Auth()->user()->company_id)->whereNull('deleted_at'),
-                Rule::unique(LocalMarketInventory::class, 'supplier_location_id')->where('commodity_item_id', $this->item->id)->whereNull('deleted_at'),
+                Rule::exists(SupplierLocation::class, 'id')->where('company_id', Auth()->user()->company_id)->withoutTrashed(),
+                Rule::unique(LocalMarketInventory::class, 'supplier_location_id')->where('commodity_item_id', $this->item->id)->withoutTrashed(),
             ],
             'total_units' => ['required', 'integer', 'min:1', 'max:1000000'],
         ];
