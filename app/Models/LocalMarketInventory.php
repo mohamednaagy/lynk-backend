@@ -5,12 +5,13 @@ namespace App\Models;
 use App\Enums\LocalMarketInventoryStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class LocalMarketInventory extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'commodity_item_id',
@@ -65,7 +66,7 @@ class LocalMarketInventory extends Model
         $type = substr($this->type->unique_name, 0, 2);
         $itemId = substr($this->item->unique_name, 0, 2);
 
-        return $type . '-' . $itemId;
+        return $type.'-'.$itemId;
     }
 
     public function units()
@@ -100,7 +101,6 @@ class LocalMarketInventory extends Model
     /**
      * Determine if the item is deletable.
      * An item is considered deletable if there are no reserved items.
-     * @return bool
      */
     public function getIsDeletableAttribute(): bool
     {
