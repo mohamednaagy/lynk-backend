@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Wallets\TraderOrders\Fees;
+namespace App\Actions\Wallets\OrderFees;
 
 use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
@@ -18,8 +18,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
         protected CreateTransactions $createTransactions,
         protected CalculateVatAmount $calculateVatAmount,
         protected GetProjectSettings $getProjectSettings,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws NoMatchOrderCostAndValueException
