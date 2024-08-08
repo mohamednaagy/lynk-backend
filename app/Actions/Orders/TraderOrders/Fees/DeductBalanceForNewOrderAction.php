@@ -3,7 +3,7 @@
 namespace App\Actions\Orders\TraderOrders\Fees;
 
 use App\Actions\Contracts\Orders\TraderOrders\Fees\DeductBalanceForNewOrder;
-use App\Actions\Wallets\TraderOrders\Fees\DeductOrderCreationFeeAction;
+use App\Actions\Wallets\OrderFees\DeductOrderCreationFeeAction;
 use App\Models\TraderOrder;
 
 class DeductBalanceForNewOrderAction implements DeductBalanceForNewOrder
