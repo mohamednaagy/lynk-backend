@@ -23,8 +23,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | This is the URI path where Horizon will be accessible from. Feel free
-    | to change this path to anything you like. Note that the URI will not
-    | affect the paths of its internal API that aren't exposed to users.
+    | to change this path to anything you like.
     |
     */
 
@@ -35,9 +34,7 @@ return [
     | Horizon Redis Connection
     |--------------------------------------------------------------------------
     |
-    | This is the name of the Redis connection where Horizon will store the
-    | meta information required for it to function. It includes the list
-    | of supervisors, failed jobs, job metrics, and other information.
+    | The name of the Redis connection where Horizon will store its metadata.
     |
     */
 
@@ -48,9 +45,7 @@ return [
     | Horizon Redis Prefix
     |--------------------------------------------------------------------------
     |
-    | This prefix will be used when storing all Horizon data in Redis. You
-    | may modify the prefix when you are running multiple installations
-    | of Horizon on the same server so that they don't have problems.
+    | This prefix will be used when storing all Horizon data in Redis.
     |
     */
 
@@ -64,9 +59,7 @@ return [
     | Horizon Route Middleware
     |--------------------------------------------------------------------------
     |
-    | These middleware will get attached onto each Horizon route, giving you
-    | the chance to add your own middleware to this list or change any of
-    | the existing middleware. Or, you can simply stick with this list.
+    | Middleware attached to each Horizon route.
     |
     */
 
@@ -77,9 +70,7 @@ return [
     | Queue Wait Time Thresholds
     |--------------------------------------------------------------------------
     |
-    | This option allows you to configure when the LongWaitDetected event
-    | will be fired. Every connection / queue combination may have its
-    | own, unique threshold (in seconds) before this event is fired.
+    | Configure the LongWaitDetected event for each connection/queue combination.
     |
     */
 
@@ -92,9 +83,7 @@ return [
     | Job Trimming Times
     |--------------------------------------------------------------------------
     |
-    | Here you can configure for how long (in minutes) you desire Horizon to
-    | persist the recent and failed jobs. Typically, recent jobs are kept
-    | for one hour while all failed jobs are stored for an entire week.
+    | Configure how long to persist recent and failed jobs.
     |
     */
 
@@ -112,9 +101,7 @@ return [
     | Silenced Jobs
     |--------------------------------------------------------------------------
     |
-    | Silencing a job will instruct Horizon to not place the job in the list
-    | of completed jobs within the Horizon dashboard. This setting may be
-    | used to fully remove any noisy jobs from the completed jobs list.
+    | Jobs that will not appear in the completed jobs list.
     |
     */
 
@@ -122,14 +109,17 @@ return [
         // App\Jobs\ExampleJob::class,
     ],
 
+    'failed' => [
+        'database' => 'mysql',
+        'table' => 'failed_jobs',
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Metrics
     |--------------------------------------------------------------------------
     |
-    | Here you can configure how many snapshots should be kept to display in
-    | the metrics graph. This will get used in combination with Horizon's
-    | `horizon:snapshot` schedule to define how long to retain metrics.
+    | Configure how many snapshots to keep for metrics.
     |
     */
 
@@ -145,11 +135,7 @@ return [
     | Fast Termination
     |--------------------------------------------------------------------------
     |
-    | When this option is enabled, Horizon's "terminate" command will not
-    | wait on all of the workers to terminate unless the --wait option
-    | is provided. Fast termination can shorten deployment delay by
-    | allowing a new instance of Horizon to start while the last
-    | instance will continue to terminate each of its workers.
+    | Options for rapid termination of Horizon workers.
     |
     */
 
@@ -160,9 +146,7 @@ return [
     | Memory Limit (MB)
     |--------------------------------------------------------------------------
     |
-    | This value describes the maximum amount of memory the Horizon master
-    | supervisor may consume before it is terminated and restarted. For
-    | configuring these limits on your workers, see the next section.
+    | Maximum memory for the Horizon master supervisor.
     |
     */
 
@@ -173,9 +157,7 @@ return [
     | Queue Worker Configuration
     |--------------------------------------------------------------------------
     |
-    | Here you may define the queue worker settings used by your application
-    | in all environments. These supervisors and settings handle all your
-    | queued jobs and will be provisioned by Horizon during deployment.
+    | Define the settings for queue workers.
     |
     */
 
@@ -210,4 +192,28 @@ return [
             ],
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Monitor Jobs
+    |--------------------------------------------------------------------------
+    |
+    | You can add the following configurations to track jobs better and
+    | get insights on pending, completed, and failed jobs.
+    |
+    */
+
+    'monitor' => [
+        'enabled' => true, // Enable job monitoring
+        'pending' => [
+            'max_count' => 100, // Maximum pending job count to display
+        ],
+        'failed' => [
+            'max_count' => 100, // Maximum failed job count to display
+        ],
+        'completed' => [
+            'max_count' => 100, // Maximum completed job count to display
+        ],
+    ],
+
 ];
