@@ -81,4 +81,8 @@ class ErrorCode
     public const INVENTORY_NOT_DELETABLE = 1040;
 
     public const FAILED_TO_DELETE_INVENTORY = 1041;
+
+    public const COMMODITY_ITEM_NOT_DELETABLE = 1042;
+
+    public const FAILED_TO_DELETE_COMMODITY_ITEM = 1043;
 }

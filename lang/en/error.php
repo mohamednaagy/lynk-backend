@@ -44,5 +44,7 @@ return [
     'inventory_cannot_be_deleted' => 'Reserved Units is greater than 0. Commodity Inventory cannot be deleted.',
     'inventory_units_not_changed' => 'No changes can be saved',
     'failed_to_delete_inventory' => 'An error occurred while attempting to delete the inventory. Please try again later.',
+    'commodity_item_cannot_be_deleted' => 'Reserved Units is greater than 0. Commodity Item cannot be deleted.',
+    'failed_to_delete_commodity_item' => 'An error occurred while attempting to delete the commodity item. Please try again later.',
 
 ];
