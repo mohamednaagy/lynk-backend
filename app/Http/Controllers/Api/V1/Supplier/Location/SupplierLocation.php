@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api\V1\Supplier\Location;
 
 use App\Actions\Contracts\Commodities\CommodityLocation\CreateSupplierLocation;
+use App\Actions\Contracts\Commodities\CommodityLocation\DeleteSupplierLocation;
 use App\Actions\Contracts\Commodities\CommodityLocation\GetPaginatedSupplierLocations;
 use App\Actions\Contracts\Commodities\CommodityLocation\UpdateSupplierLocation;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\ErrorCode;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Supplier\Locations\StoreLocationRequest;
@@ -15,6 +17,8 @@ use App\Models\SupplierLocation as ModelsSupplierLocation;
 use App\Transformers\SupplierLocationsTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class SupplierLocation extends Controller
 {
@@ -53,7 +57,7 @@ class SupplierLocation extends Controller
         $supplier = tenant()->supplier;
         $enquiries = $getPaginatedSupplierLocations->handle($supplier);
 
-        return fractal($enquiries, new SupplierLocationsTransformer())
+        return fractal($enquiries, new SupplierLocationsTransformer)
             ->parseIncludes([
                 'id',
                 'name',
@@ -74,7 +78,7 @@ class SupplierLocation extends Controller
         $data['company_id'] = tenant()->id;
         $location = $createSupplierLocation->handle($data);
 
-        return fractal($location, new SupplierLocationsTransformer())
+        return fractal($location, new SupplierLocationsTransformer)
             ->parseIncludes([
                 'id',
                 'unique_identifier',
@@ -94,7 +98,7 @@ class SupplierLocation extends Controller
     {
         $location = $updateSupplierLocation->handle($location, $updateSupplierLocationRequest->validated());
 
-        return fractal($location, new SupplierLocationsTransformer())
+        return fractal($location, new SupplierLocationsTransformer)
             ->parseIncludes([
                 'id',
                 'unique_identifier',
@@ -109,7 +113,7 @@ class SupplierLocation extends Controller
      */
     public function show(ModelsSupplierLocation $location): JsonResponse
     {
-        return fractal($location, new SupplierLocationsTransformer())
+        return fractal($location, new SupplierLocationsTransformer)
             ->parseIncludes([
                 'id',
                 'unique_identifier',
@@ -127,8 +131,29 @@ class SupplierLocation extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(ModelsSupplierLocation $location, DeleteSupplierLocation $deleteSupplierLocation)
     {
-        //
+        //check if the commodity item is deleteable
+        if (! $location->is_deletable) {
+            return $this->errorResponse(
+                __('error.location_cannot_be_deleted'),
+                Response::HTTP_BAD_REQUEST,
+                ErrorCode::LOCATION_NOT_DELETABLE
+            );
+        }
+
+        try {
+            $deleteSupplierLocation->handle($location);
+
+            return $this->successResponse();
+        } catch (\Exception $e) {
+            Log::error("Failed to delete commodity item ID: {$location->id}. Error: {$e->getMessage()}");
+
+            return $this->errorResponse(
+                __('error.failed_to_delete_location'),
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                ErrorCode::FAILED_TO_DELETE_LOCATION
+            );
+        }
     }
 }
