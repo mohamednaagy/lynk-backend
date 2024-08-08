@@ -13,7 +13,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class DeleteInventoryStock implements ShouldQueue
+class DeleteInventory implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -44,18 +44,15 @@ class DeleteInventoryStock implements ShouldQueue
                 ->delete();
             Log::info("Successfully soft deleted units for inventory ID: {$this->inventory->id}");
 
-            // Soft delete the inventory
             $this->inventory->delete();
 
             // Restore the old status
             $this->inventory->update(['status' => $oldStatus]);
             Log::info("Restored inventory ID: {$this->inventory->id} status to {$oldStatus}");
 
-            // Commit the transaction
             DB::commit();
             Log::info("Transaction committed for deleting inventory ID: {$this->inventory->id}");
         } catch (\Exception $e) {
-            // Rollback the transaction
             DB::rollBack();
             $this->inventory->update([
                 'status' => LocalMarketInventoryStatus::Problem,
