@@ -3,8 +3,6 @@
 namespace App\Jobs\LocalMarket;
 
 use App\Enums\LocalMarketInventoryStatus;
-use App\Enums\LocalMarketInventoryUnitsStatus;
-use App\Exceptions\FailedDeleteUnitsForInventory;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use Illuminate\Bus\Queueable;
@@ -39,7 +37,9 @@ class DeleteInventoryStock implements ShouldQueue
 
             $this->inventory->update(['status' => LocalMarketInventoryStatus::Deleting]);
 
-            $this->softDeleteUnits($this->inventory);
+            LocalMarketInventoryUnits::where('local_market_inventory_id', $this->inventory->id)
+                ->delete();
+            Log::info("Successfully soft deleted units for inventory ID: {$this->inventory->id}");
 
             // Soft delete the inventory
             $this->inventory->delete();
@@ -53,19 +53,6 @@ class DeleteInventoryStock implements ShouldQueue
             $this->inventory->update([
                 'status' => LocalMarketInventoryStatus::Problem,
             ]);
-        }
-    }
-
-    public function softDeleteUnits(LocalMarketInventory $inventory)
-    {
-        try {
-            LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
-                ->where('status', (int) LocalMarketInventoryUnitsStatus::Free)
-                ->delete();
-            Log::info("Successfully soft deleted units for inventory ID: {$inventory->id}");
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw new FailedDeleteUnitsForInventory;
         }
     }
 }
