@@ -21,7 +21,7 @@ use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
-use App\Support\Traders\Clients\BursamClient\BursamClient;
+use App\Support\Traders\Clients\BursamClient;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Facades\Trader;
