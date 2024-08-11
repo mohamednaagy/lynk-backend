@@ -35,11 +35,10 @@ class UpdateInventoryStock implements ShouldQueue
      */
     public function handle()
     {
-        DB::beginTransaction();
+        
         try {
-
-            return true;
-
+            DB::statement('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
+            DB::beginTransaction();
             Log::info("Starting transaction for updating inventory ID: {$this->inventory->id}");
 
             $this->inventory->update(['status' => LocalMarketInventoryStatus::Pending]);
@@ -61,15 +60,19 @@ class UpdateInventoryStock implements ShouldQueue
             ]);
             Log::info("Set inventory ID: {$this->inventory->id} to status active");
 
-            // Commit the transaction
             DB::commit();
             Log::info("Transaction committed for updating inventory ID: {$this->inventory->id}");
         } catch (\Exception $e) {
-            // Rollback the transaction
-            DB::rollBack();
-            $this->inventory->update([
-                'status' => LocalMarketInventoryStatus::Problem,
-            ]);
+            if ($e->getCode() == '1205') { // Lock wait timeout error code
+                Log::warning("Lock wait timeout exceeded for inventory ID: {$this->inventory->id}. Retrying...");
+                $this->release(30); // Release the job back to the queue and retry after 10 seconds
+            } else {
+                DB::rollBack();
+                $this->inventory->update([
+                    'status' => LocalMarketInventoryStatus::Problem,
+                ]);
+                Log::error("Error in transaction: " . $e->getMessage());
+            }
         }
     }
 
@@ -121,7 +124,6 @@ class UpdateInventoryStock implements ShouldQueue
                 unset($inventoryUnits);
             }
         } catch (\Exception $e) {
-            DB::rollBack();
             throw new ErrorCreatingUnitsForThisINventory;
         }
     }
@@ -138,7 +140,6 @@ class UpdateInventoryStock implements ShouldQueue
                 ->limit($decreased_amount)
                 ->delete('id');
         } catch (\Exception $e) {
-            DB::rollBack();
             throw new FailedDecreaseUnitsForInventory;
         }
     }
