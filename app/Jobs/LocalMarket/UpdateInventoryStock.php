@@ -26,9 +26,7 @@ class UpdateInventoryStock implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected LocalMarketInventory $inventory, protected $total, protected $inventoryWasRecentlyCreated = false)
-    {
-    }
+    public function __construct(protected LocalMarketInventory $inventory, protected $total, protected $inventoryWasRecentlyCreated = false) {}
 
     /**
      * Execute the job.
@@ -39,6 +37,9 @@ class UpdateInventoryStock implements ShouldQueue
     {
         DB::beginTransaction();
         try {
+
+            return true;
+
             Log::info("Starting transaction for updating inventory ID: {$this->inventory->id}");
 
             $this->inventory->update(['status' => LocalMarketInventoryStatus::Pending]);
@@ -121,7 +122,7 @@ class UpdateInventoryStock implements ShouldQueue
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new ErrorCreatingUnitsForThisINventory();
+            throw new ErrorCreatingUnitsForThisINventory;
         }
     }
 
@@ -138,7 +139,7 @@ class UpdateInventoryStock implements ShouldQueue
                 ->delete('id');
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new FailedDecreaseUnitsForInventory();
+            throw new FailedDecreaseUnitsForInventory;
         }
     }
 }
