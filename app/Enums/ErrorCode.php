@@ -89,4 +89,6 @@ class ErrorCode
     public const LOCATION_NOT_DELETABLE = 1044;
 
     public const FAILED_TO_DELETE_LOCATION = 1045;
+
+    public const USER_DOESNT_BELONG_TO_COMPANY = 1046;
 }
