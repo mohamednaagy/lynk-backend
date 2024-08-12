@@ -65,6 +65,16 @@ trait InteractsWithUser
         return $admin;
     }
 
+    public function createSupervisorUser(
+        Role|string $role = Role::LenderSupervisor,
+        array $data = []
+    ): User {
+        $admin = $this->createUser($data);
+        $this->assignRoleToUser($admin, $role);
+
+        return $admin;
+    }
+
     public function createLenderUser(
         int $companyId,
         string $role = Role::LenderAdmin,

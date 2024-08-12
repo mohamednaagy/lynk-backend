@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierUserController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypeController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
+use App\Http\Controllers\Api\V1\Admin\Commodities\ResendInvitationToUserController as ResendSupplierInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
@@ -185,6 +186,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::prefix('commodity-suppliers')->group(function () {
             Route::post('{supplier}/users', [CommoditySupplierUserController::class, 'store']);
             Route::get('{supplier}/users', [CommoditySupplierUserController::class, 'index']);
+            Route::post('{supplier}/users/{user}/resend-invitation', ResendSupplierInvitationToUser::class);
         });
     });
 
