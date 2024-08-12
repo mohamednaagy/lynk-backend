@@ -7,10 +7,8 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
-use App\Models\LocalMarketInventoryUnits;
 use App\Models\User;
 use App\Observers\LocalMarketInventoryObserver;
-use App\Transformers\InventoryTransformer;
 use App\Transformers\LocalMarketInventoryTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -44,8 +42,6 @@ class InventoryControllerUpdateTest extends TestCase
 
     private static string $endpoint;
 
-    private static array $commodityItem;
-
     private static $inventory;
 
     private static $inventory2;
@@ -78,7 +74,7 @@ class InventoryControllerUpdateTest extends TestCase
             300
         );
 
-        $observer = new LocalMarketInventoryObserver();
+        $observer = new LocalMarketInventoryObserver;
         $observer->created(self::$inventory);
 
         $job = new UpdateInventoryStock(self::$inventory, 300, true);
@@ -200,7 +196,7 @@ class InventoryControllerUpdateTest extends TestCase
             ->putJson(self::$endpoint, self::$inventory2)
             ->assertOk()
             ->assertExactJson(
-                fractal(self::$inventory->refresh(), new LocalMarketInventoryTransformer())
+                fractal(self::$inventory->refresh(), new LocalMarketInventoryTransformer)
                     ->parseIncludes([
                         'id',
                         'company_id',
@@ -222,22 +218,24 @@ class InventoryControllerUpdateTest extends TestCase
             );
     }
 
-    public function test_update_inventory_stock_job_is_fired() {
+    public function test_update_inventory_stock_job_is_fired()
+    {
         $this
-        ->withHeader('X-Company', self::$supplier->id)
-        ->actingAs(self::$supplierAdmin)
-        ->putJson(self::$endpoint, self::$inventory2)
-        ->assertOk();
+            ->withHeader('X-Company', self::$supplier->id)
+            ->actingAs(self::$supplierAdmin)
+            ->putJson(self::$endpoint, self::$inventory2)
+            ->assertOk();
 
         Queue::assertPushed(UpdateInventoryStock::class);
     }
 
-    public function test_quantity_after_update_equals_generated_units() {
+    public function test_quantity_after_update_equals_generated_units()
+    {
         $this
-        ->withHeader('X-Company', self::$supplier->id)
-        ->actingAs(self::$supplierAdmin)
-        ->putJson(self::$endpoint, self::$inventory2)
-        ->assertOk();
+            ->withHeader('X-Company', self::$supplier->id)
+            ->actingAs(self::$supplierAdmin)
+            ->putJson(self::$endpoint, self::$inventory2)
+            ->assertOk();
 
         // Verify the job was pushed
         Queue::assertPushed(UpdateInventoryStock::class);
@@ -252,20 +250,21 @@ class InventoryControllerUpdateTest extends TestCase
 
     }
 
-    public function test_can_update_quantity_equals_reserved_units() {
+    public function test_can_update_quantity_equals_reserved_units()
+    {
         $inventory = self::$inventory;
         $inventory->reserved_items = 50;
         $inventory->save();
-        
+
         $inventory2 = self::$inventory2;
         $inventory2['total_units'] = '50';
 
         $this
-        ->withHeader('X-Company', self::$supplier->id)
-        ->actingAs(self::$supplierAdmin)
-        ->putJson(self::$endpoint, $inventory2)
-        ->assertOk();
-        
+            ->withHeader('X-Company', self::$supplier->id)
+            ->actingAs(self::$supplierAdmin)
+            ->putJson(self::$endpoint, $inventory2)
+            ->assertOk();
+
         Queue::assertPushed(UpdateInventoryStock::class);
 
     }

@@ -230,3 +230,10 @@ if (! function_exists('saudi_now')) {
         return Carbon::now('Asia/Riyadh');
     }
 }
+
+if (! function_exists('saudi_now')) {
+    function saudi_now()
+    {
+        return Carbon::now('Asia/Riyadh');
+    }
+}

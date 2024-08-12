@@ -26,9 +26,7 @@ class UpdateInventoryStock implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected LocalMarketInventory $inventory, protected $total, protected $inventoryWasRecentlyCreated = false)
-    {
-    }
+    public function __construct(protected LocalMarketInventory $inventory, protected $total, protected $inventoryWasRecentlyCreated = false) {}
 
     /**
      * Execute the job.
@@ -96,7 +94,7 @@ class UpdateInventoryStock implements ShouldQueue
                     $inventoryUnits[] = [
                         'local_market_inventory_id' => $inventory->id,
                         'commodity_item_id' => $inventory->item->id,
-                        'qr_code' => $baseName . '-' . $uuid,
+                        'qr_code' => $baseName.'-'.$uuid,
                     ];
                 }
 
@@ -121,7 +119,7 @@ class UpdateInventoryStock implements ShouldQueue
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new ErrorCreatingUnitsForThisINventory();
+            throw new ErrorCreatingUnitsForThisINventory;
         }
     }
 
@@ -138,7 +136,7 @@ class UpdateInventoryStock implements ShouldQueue
                 ->delete('id');
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new FailedDecreaseUnitsForInventory();
+            throw new FailedDecreaseUnitsForInventory;
         }
     }
 }

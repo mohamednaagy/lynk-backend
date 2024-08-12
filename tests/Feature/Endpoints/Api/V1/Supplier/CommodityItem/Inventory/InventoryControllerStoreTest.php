@@ -8,7 +8,6 @@ use App\Enums\Role;
 use App\Enums\Subject;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\LocalMarketInventory;
-use App\Models\LocalMarketInventoryUnits;
 use App\Models\User;
 use App\Observers\LocalMarketInventoryObserver;
 use App\Transformers\LocalMarketInventoryTransformer;
@@ -16,8 +15,6 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
@@ -46,8 +43,6 @@ class InventoryControllerStoreTest extends TestCase
 
     private static string $endpoint;
 
-    private static array $commodityItem;
-
     private static $inventory;
 
     private static $inventory2;
@@ -64,8 +59,8 @@ class InventoryControllerStoreTest extends TestCase
 
         self::$commodityItems = $this->createCommodityItem(
             self::$supplier,
-            'name' . rand(11, 999),
-            'unique name' . rand(11, 999),
+            'name'.rand(11, 999),
+            'unique name'.rand(11, 999),
             'Test Description',
             10,
             20,
@@ -77,8 +72,8 @@ class InventoryControllerStoreTest extends TestCase
 
         self::$location = $this->createSupplierLocation(
             self::$supplier,
-            'name' . rand(11, 999),
-            'unique name' . rand(11, 999),
+            'name'.rand(11, 999),
+            'unique name'.rand(11, 999),
             'Test Description',
         );
 
@@ -102,7 +97,7 @@ class InventoryControllerStoreTest extends TestCase
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierInventories, Action::Index])
         );
 
-        self::$endpoint = 'api/v1/supplier/commodity-items/' . self::$commodityItems->id . '/inventory';
+        self::$endpoint = 'api/v1/supplier/commodity-items/'.self::$commodityItems->id.'/inventory';
 
         self::$inventory = [
             'location_id' => self::$location->id,
@@ -115,7 +110,7 @@ class InventoryControllerStoreTest extends TestCase
         ];
     }
 
-    public function test_that_un_auth_user_cant_commodity_item_Invemtory(): void
+    public function test_that_un_auth_user_cant_commodity_item_Inventory(): void
     {
         $this
             ->withHeader('X-Company', self::$supplier->id)
@@ -156,7 +151,7 @@ class InventoryControllerStoreTest extends TestCase
             ->postJson(self::$endpoint, self::$inventory)
             ->assertOk()
             ->assertExactJson(
-                fractal(LocalMarketInventory::orderBy('id', 'desc')->first(), new LocalMarketInventoryTransformer())
+                fractal(LocalMarketInventory::orderBy('id', 'desc')->first(), new LocalMarketInventoryTransformer)
                     ->parseIncludes([
                         'id',
                         'company_id',
@@ -198,7 +193,7 @@ class InventoryControllerStoreTest extends TestCase
         $inventory = $this->createInventory(self::$supplier, $numberOfUnits);
 
         // Trigger the observer manually
-        $observer = new LocalMarketInventoryObserver();
+        $observer = new LocalMarketInventoryObserver;
         $observer->created($inventory);
 
         // Verify the job was pushed
