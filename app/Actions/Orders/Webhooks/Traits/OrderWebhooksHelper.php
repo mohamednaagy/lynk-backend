@@ -2,9 +2,9 @@
 
 namespace App\Actions\Orders\Webhooks\Traits;
 
+use App\Actions\Orders\Webhooks\Product\ProductFactory;
 use App\Enums\MurabhaStep;
 use App\Models\TraderOrder;
-use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use Illuminate\Database\Eloquent\Model;
 
@@ -32,24 +32,16 @@ trait OrderWebhooksHelper
 
     public function resolveProducts(TraderOrder $traderOrder): array
     {
-        return collect($traderOrder->products)->map(function ($product) {
-            $productDto = CommodityProductDto::fromArray($product);
+        $products = ProductFactory::create($traderOrder->provider);
 
-            return [
-                'product_description' => $productDto->getProduct(),
-                'product_volume_unit' => $productDto->getUom(),
-                'product_volume' => $productDto->getQuantity(),
-                'product_value' => $productDto->getAmount(),
-                'currency' => $productDto->getCurrency(),
-            ];
-        })
-            ->toArray();
+        return $products->map($traderOrder);
     }
 
     public function getUiStepName(?string $step): ?string
     {
         return match ($step) {
-            MurabhaStep::CommoditySoldToCustomer => 'borrower_ownership_certificate',
+            MurabhaStep::CommoditySoldToCustomer => MurabhaStep::BorrowerOwnershipCertificate,
+            MurabhaStep::CustomerDeliveryConfirmation => MurabhaStep::MurabahaSaleCompleted,
             default => $step
         };
     }

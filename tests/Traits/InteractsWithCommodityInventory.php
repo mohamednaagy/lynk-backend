@@ -2,7 +2,7 @@
 
 namespace Tests\Traits;
 
-use App\Enums\InventoryStatus;
+use App\Enums\LocalMarketInventoryStatus;
 use App\Models\CommodityItem;
 use App\Models\LocalMarketInventory;
 use App\Models\Supplier;
@@ -35,10 +35,11 @@ trait InteractsWithCommodityInventory
     public function createInventory(
         Supplier $supplier,
         int $total_units
-    ): Inventory {
+    ): LocalMarketInventory {
         $item = $this->createCommodityItem($supplier);
         $location = $this->createSupplierLocation($supplier);
-        $commodity_inventory = Inventory::query()->create([
+
+        return LocalMarketInventory::create([
             'company_id' => $supplier->id,
             'commodity_item_id' => $item->id,
             'commodity_type_id' => $item->commodity_type_id,
@@ -47,9 +48,7 @@ trait InteractsWithCommodityInventory
             'max_price' => $item->max_price,
             'reserved_items' => 0,
             'available_quantity' => $total_units,
-            'status' => InventoryStatus::Pending,
+            'status' => LocalMarketInventoryStatus::Pending,
         ]);
-
-        return $commodity_inventory;
     }
 }

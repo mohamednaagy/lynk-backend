@@ -18,12 +18,12 @@ class LocalMurabahaSettingsController extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::LocalMurabahaAreaSettings, Action::Index, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::LocalMurabahaAreaSettings, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::LocalMurabahaAreaSettings, Action::Edit, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::LocalMurabahaAreaSettings, Action::Edit, Action::Manage])
         )->only('update');
     }
 
@@ -45,9 +45,6 @@ class LocalMurabahaSettingsController extends Controller
         $data = $updateLocalMurabahaSettingsRequest->validated();
         $data['area'] = 'LocalMurabaha';
         $updateSettings->handle($data);
-
-        return $this->successResponse([
-            'default_trade_order_roatation_count' => $data['default_trade_order_roatation_count']]);
 
         return $this->successResponse([
             'default_trade_order_roatation_count' => $data['default_trade_order_roatation_count'],

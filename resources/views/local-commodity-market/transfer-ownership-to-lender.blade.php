@@ -705,6 +705,11 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         .mt-4 {
             margin-top: 1rem;
         }
+        th, td {
+            border: 1px solid black;
+            text-align: center;
+            padding: 8px;
+        }
     </style>
 </head>
 
@@ -719,7 +724,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 <p class="text-black">الوقت: {{ $time ?? '' }}</p>
                 <p class="text-xl text-center text-black">شهادة ملكية و ضمان</p>
                 <p class="text-center text-black">
-                    استناداً إلى أحكام المادة (3/سادساً) من الاتفاقية الاطارية فيما بين المورد ولينك المؤرخة في
+                    استناداً إلى أحكام المادة (3/سادساً) من الاتفاقية الاطارية فيما بين المورد ولينك بعقد رقم
                     {{ $financing_order->contract_number }}
                     نفيدكم بأن السلعة التي جرى نقل ملكيتها من المورد إلى
                     {{ $financing_order->company->name }}
@@ -732,7 +737,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     ابتداءً من تاريخ {{ $date }} الساعة
                     {{ $time }}
                     مقابل مبلغ وقدره
-                    {{ $financing_order->amount }}
+                    {{ $amount }}
                     ريال سعودي وتفاصيلها أدناه
 
                 </p>
@@ -741,24 +746,24 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     <tbody>
                         @if (isset($trader_order_reference))
                             <tr>
-                                <td class="w-1/2 px-4 text-right border border-black">رقم الشهادة</td>
-                                <td class="w-1/2 border border-black">{{ $trader_order_reference }}</td>
+                                <td class="w-1/2 px-4 text-center border border-black">رقم الشهادة</td>
+                                <td colspan="6" class="w-1/2 border border-black">{{ $trader_order_reference }}</td>
                             </tr>
                         @endif
                         <tr>
-                            <td class="w-1/2 px-4 text-right border border-black"> السلعة</td>
-                            <td class="w-1/2 px-4 text-right border border-black"> نوع السلعة</td>
-                            <td class="w-1/2 px-4 text-right border border-black"> الكمية</td>
-                            <td class="w-1/2 px-4 text-right border border-black"> قيمة السلعة</td>
-                            <td class="w-1/2 px-4 text-right border border-black"> المالك السابق</td>
-                            <td class="w-1/2 px-4 text-right border border-black"> المورد الأصلي</td>
-                            <td class="w-1/2 px-4 text-right border border-black"> مكان السلعة</td>
+                            <td class="w-1/2 px-4 text-center border border-black"> السلعة</td>
+                            <td class="w-1/2 px-4 text-center border border-black"> نوع السلعة</td>
+                            <td class="w-1/2 px-4 text-center border border-black"> الكمية</td>
+                            <td class="w-1/2 px-4 text-center border border-black"> قيمة السلعة</td>
+                            <td class="w-1/2 px-4 text-center border border-black"> المالك السابق</td>
+                            <td class="w-1/2 px-4 text-center border border-black"> المورد الأصلي</td>
+                            <td class="w-1/2 px-4 text-center border border-black"> مكان السلعة</td>
                         </tr>
                         @foreach ($products ?? [] as $product)
                             <tr>
                                 <td class="w-1/2 border border-black">{{ $product->getProduct() }}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getType() }}</td>
-                                <td class="w-1/2 border border-black">{{ $product->getQuantity() }} {{$product->getUnitOfMeasurement()}}</td>
+                                <td class="w-1/2 border border-black">{{ $product->getQuantity() }} {{$product->getUom()}}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getAmount() }} {{$product->getCurrency()}}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getPreviousOwner() }}</td>
                                 <td class="w-1/2 border border-black">{{ $product->getOriginalSupplier() }}</td>
@@ -767,19 +772,19 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                         @endforeach
                     </tbody>
                 </table>
-                <p class="text-lg text-center text-black">سيتم حفظ السلعة
+                <p class="text-lg text-right text-black">سيتم حفظ السلعة
 
                     ، بالنيابة عن {{ $company_name }}
                     إلى أن يتم إشعارنا بالتصرف.
                 </p>
-                <p class="text-lg text-center text-black">
+                <p class="text-lg text-right text-black">
                     {{ $company_name }} سيكون مسؤولا عن رسوم التخزين والحفظ إذا تم الإحتفاظ بالسلع المذكورة أعلاه لأكثر
                     من
                     <Settings> 72
                         ساعة.
 
                 </p>
-                <p class="text-lg text-center text-black">
+                <p class="text-lg text-right text-black">
                     استناداً إلى أحكام المادة (2/سادساً) من الاتفاقية الإطارية فيما بين المورد ولينك؛ تضمن لينك بأن
                     السلعة التي جرى نقل ملكيتها من المورد إلى
                     {{ $financing_order->company->name }}

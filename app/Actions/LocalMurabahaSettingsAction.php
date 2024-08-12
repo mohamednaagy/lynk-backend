@@ -21,7 +21,7 @@ class LocalMurabahaSettingsAction implements SettingsInterface
 
         $settingInstance->default_trade_order_roatation_count = $data['default_trade_order_roatation_count'];
 
-        // $settingInstance->default_contract_sign_time_limit = $data['default_contract_sign_time_limit'];
+        $settingInstance->default_contract_sign_time_limit = $data['default_contract_sign_time_limit'];
 
         $settingInstance->save();
     }
