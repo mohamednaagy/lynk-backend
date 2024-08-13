@@ -83,7 +83,7 @@ class SendEmailVerificationTest extends TestCase
         $this->assertTrue(self::$lenderUser->fresh()->email == self::$superAdmin->email);
     }
 
-    public function test_send_email_verification_for_user_who_doesnt_belong_to_comapny_will_ignore_companys_users()
+    public function test_send_email_verification_for_user_who_doesnt_belong_to_company_will_ignore_companys_users()
     {
         $this->actingAs(self::$superAdmin)
             ->postJson(self::Endpoint, ['email' => self::$anotherSuperAdmin->email])
