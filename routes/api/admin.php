@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\ResendAdminInvitation;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
+use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityItemController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierUserController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypeController;
@@ -186,6 +187,12 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::post('{supplier}/users', [CommoditySupplierUserController::class, 'store']);
             Route::get('{supplier}/users', [CommoditySupplierUserController::class, 'index']);
         });
+
+        Route::prefix('commodity-items')->group(function () {
+            Route::get('/', [CommodityItemController::class, 'index']);
+        });
+
+        
     });
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.sign-up');
