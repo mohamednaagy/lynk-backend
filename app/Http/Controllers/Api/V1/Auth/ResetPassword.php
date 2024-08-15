@@ -25,7 +25,8 @@ class ResetPassword extends Controller
         $company = null;
 
         if (($companyUniqueName = $request->validated('company_unique_name')) != null) {
-            $company = Company::where('unique_name', $companyUniqueName)->first();
+            $companyType = $request->validated('company_type');
+            $company = Company::type($companyType)->where('unique_name', $companyUniqueName)->first();
             tenancy()->initialize($company);
         }
 
