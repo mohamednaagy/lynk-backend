@@ -27,7 +27,6 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
         }
 
         $driver = $financingOrder->company->getPreferredTrader();
-
         $trader = Trader::driver($driver, get_latest_version_of_trader($driver));
         $traderOrder = $trader->createTraderOrder($financingOrder);
 

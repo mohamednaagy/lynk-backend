@@ -5,6 +5,7 @@ namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
+use App\Exceptions\RateLimitExceededException;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -57,14 +58,23 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
     {
         $traderOrder = null;
 
+        if ($exception instanceof RateLimitExceededException) {
+            Log::warning('Rate limit exceeded for ProcessBursamInitiatedTraderOrder we will retry again soon', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            return;
+        }
+
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
+        Log::channel('bursam')->error('ProcessBursamInitiatedTraderOrder exception detail', ['code' => $exception->getCode(),  'message' => $exception->getMessage()]);
 
         if (! $traderOrder) {
             return;
         }
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
 
-        Log::error('ProcessBursamInitiatedTraderOrder', ['financingOrderId' => $this->financingOrder->id,  'message' => $exception->getMessage()]);
+        Log::error('ProcessBursamInitiatedTraderOrder', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage()]);
 
     }
 
