@@ -19,7 +19,11 @@ class SendEmailVerificationTest extends TestCase
 
     private static User $lenderUser;
 
+    private static User $supplierUser;
+
     private static User $secondLenderUser;
+
+    private static User $secondSupplierUser;
 
     private static User $superAdmin;
 
@@ -36,6 +40,10 @@ class SendEmailVerificationTest extends TestCase
         [$company] = $this->createLenderCompany();
         self::$lenderUser = $this->createLenderUser($company->id, data: ['email' => 'user1@gmail.com']);
         self::$secondLenderUser = $this->createLenderUser($company->id, data: ['email' => 'user2@gmail.com']);
+
+        [$supplierCompany] = $this->createSupplierCompany();
+        self::$supplierUser = $this->createSupplierUser($supplierCompany->id, data: ['email' => 'supplier_user1@gmail.com']);
+        self::$secondSupplierUser = $this->createSupplierUser($supplierCompany->id, data: ['email' => 'supplier_user2@gmail.com']);
 
         self::$superAdmin = $this->createSuperAdminUser(data: ['email' => 'user3@gmail.com']);
         self::$anotherSuperAdmin = $this->createSuperAdminUser(data: ['email' => 'user4@gmail.com']);
@@ -132,6 +140,95 @@ class SendEmailVerificationTest extends TestCase
 
         Mail::assertQueued(VerifyEmail::class, function ($mail) {
             return $mail->to(self::$lenderUser->email);
+        });
+    }
+
+    public function test_send_email_supplier_verification_redirect_url_input_is_required()
+    {
+        $this->actingAs(self::$supplierUser)
+            ->postJson(self::Endpoint)
+            ->assertJsonValidationErrorFor('redirect_url');
+    }
+
+    public function test_send_email_supplier_verification_redirect_url_input_should_be_valid_url()
+    {
+        $this->actingAs(self::$supplierUser)
+            ->postJson(self::Endpoint, ['redirect_url' => 'wrong://localhost'])
+            ->assertJsonValidationErrorFor('redirect_url');
+    }
+
+    public function test_send_email_supplier_verification_redirect_url_should_be_in_app_white_list()
+    {
+        $this->actingAs(self::$supplierUser)
+            ->postJson(self::Endpoint, ['redirect_url' => 'http://wrong-website'])
+            ->assertJsonValidationErrorFor('redirect_url');
+    }
+
+    public function test_send_email_supplier_verification_for_company_user_that_email_input_should_be_scoped_to_his_company_users()
+    {
+        $this->actingAs(self::$supplierUser)
+            ->postJson(self::Endpoint, ['email' => self::$secondSupplierUser->email])
+            ->assertJsonValidationErrorFor('email');
+
+        $this->actingAs(self::$supplierUser)
+            ->postJson(self::Endpoint, [
+                'email' => self::$superAdmin->email,
+                'redirect_url' => self::$whitelistedUrl,
+            ])
+            ->assertStatus(Response::HTTP_OK);
+
+        $this->assertTrue(self::$supplierUser->fresh()->email == self::$superAdmin->email);
+    }
+
+    public function test_send_email_supplier_verification_for_user_who_doesnt_belong_to_comapny_will_ignore_companys_users()
+    {
+        $this->actingAs(self::$superAdmin)
+            ->postJson(self::Endpoint, ['email' => self::$anotherSuperAdmin->email])
+            ->assertJsonValidationErrorFor('email');
+
+        $this->actingAs(self::$superAdmin)
+            ->postJson(self::Endpoint, [
+                'email' => self::$supplierUser->email,
+                'redirect_url' => self::$whitelistedUrl,
+            ])
+            ->assertStatus(Response::HTTP_OK);
+
+        $this->assertTrue(self::$superAdmin->fresh()->email == self::$supplierUser->email);
+    }
+
+    public function test_send_email_email_verification_update_email_if_the_user_provide_new_email()
+    {
+        $newEmail = 'newEmail@email.com';
+        $this->actingAs(self::$supplierUser)
+            ->postJson(
+                self::Endpoint,
+                [
+                    'redirect_url' => self::$whitelistedUrl,
+                    'email' => $newEmail,
+                ]
+            )
+            ->assertStatus(Response::HTTP_OK);
+
+        self::$supplierUser->refresh();
+
+        $this->assertTrue(self::$supplierUser->email == $newEmail);
+    }
+
+    public function test_send_email_supplier_verification_mail_sent_successfully()
+    {
+        Mail::fake();
+
+        $this->actingAs(self::$supplierUser)
+            ->postJson(
+                self::Endpoint,
+                [
+                    'redirect_url' => self::$whitelistedUrl,
+                ]
+            )
+            ->assertStatus(200);
+
+        Mail::assertQueued(VerifyEmail::class, function ($mail) {
+            return $mail->to(self::$supplierUser->email);
         });
     }
 }
