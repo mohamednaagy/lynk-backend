@@ -74,7 +74,7 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
         }
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
 
-        Log::error('ProcessBursamInitiatedTraderOrder', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage()]);
+        Log::error('ProcessBursamInitiatedTraderOrder', ['financingOrderId' => $traderOrder->order->id,  'message' => $exception->getMessage()]);
 
     }
 
