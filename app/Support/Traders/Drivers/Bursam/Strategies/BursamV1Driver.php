@@ -15,6 +15,7 @@ use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
+use App\Jobs\General\ProcessFinancingOrders;
 use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -22,7 +23,6 @@ use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Clients\BursamClient;
 use App\Support\Traders\Contracts\TraderInterface;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -138,11 +138,9 @@ class BursamV1Driver implements TraderInterface
 
     public function moveHoldTraderOrder(TraderOrder $trader)
     {
-        $checkCanChangeStatusOfTrader = $this->checkCanInitiateTraderOrder();
-        if ($checkCanChangeStatusOfTrader) {
-            $trader->update(['status' => TraderOrderStatus::Initiated]);
-            ProcessBursamInitiatedTraderOrder::dispatch($trader->id);
-        }
+        $trader->update(['status' => TraderOrderStatus::Initiated]);
+        $trader->traderHistories()->create(['action' => FinancingOrderHistory::GetTtiId]);
+        ProcessFinancingOrders::dispatch();
     }
 
     public function fetchOrderResultYNN(TraderOrder $traderOrder)
