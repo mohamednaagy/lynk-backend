@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Enums\CompanyType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
@@ -28,6 +29,7 @@ class ResetPasswordRequest extends FormRequest
             'token' => ['required', 'string'],
             'email' => ['required', 'email:filter'],
             'company_unique_name' => ['nullable', 'string'],
+            'company_type'  => ['required_with:company_unique_name', 'integer', 'in:'.implode(',', CompanyType::getValues())],
             'password' => ['required', 'confirmed', Password::defaults()],
         ];
     }
