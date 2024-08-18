@@ -11,7 +11,7 @@ class LocalMarketInventoryTransformer extends TransformerAbstract
     protected array $availableIncludes = [
         'id',
         'company_id',
-        'comapny_name',
+        'company_name',
         'commodity_item_id',
         'commodity_item',
         'commodity_type',
@@ -53,7 +53,7 @@ class LocalMarketInventoryTransformer extends TransformerAbstract
         return $this->primitive($inventory->company_id);
     }
 
-    public function includeComapnyName(LocalMarketInventory $inventory): Primitive
+    public function includeCompanyName(LocalMarketInventory $inventory): Primitive
     {
         return $this->primitive($inventory->supplier->name);
     }

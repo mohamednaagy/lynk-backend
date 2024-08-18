@@ -66,7 +66,7 @@ class LocalMarketInventoryController extends Controller
             ->parseIncludes([
                 'id',
                 'company_id',
-                'comapny_name',
+                'company_name',
                 'commodity_item_id',
                 'commodity_item',
                 'commodity_type',
@@ -99,7 +99,7 @@ class LocalMarketInventoryController extends Controller
             ->parseIncludes([
                 'id',
                 'company_id',
-                'comapny_name',
+                'company_name',
                 'commodity_item_id',
                 'commodity_item',
                 'commodity_type',
@@ -138,7 +138,7 @@ class LocalMarketInventoryController extends Controller
             ->parseIncludes([
                 'id',
                 'company_id',
-                'comapny_name',
+                'company_name',
                 'commodity_item_id',
                 'commodity_item',
                 'commodity_type',
@@ -163,7 +163,7 @@ class LocalMarketInventoryController extends Controller
             ->parseIncludes([
                 'id',
                 'company_id',
-                'comapny_name',
+                'company_name',
                 'commodity_item_id',
                 'commodity_item',
                 'commodity_type',
