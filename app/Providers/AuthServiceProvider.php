@@ -43,7 +43,7 @@ class AuthServiceProvider extends ServiceProvider
             $query = http_build_query([
                 'email' => $user->email,
                 'company_unique_name' => tenant('unique_name'),
-                'company_type' => tenant('type'),
+                'company_type' => tenant()->type->value,
             ]);
 
             return rtrim($this->app['request']->input('redirect_url'), '/').'/'.$token.'?'.$query;
