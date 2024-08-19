@@ -9,6 +9,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Enums\TraderOrderStatus;
+use App\Jobs\General\ProcessFinancingOrders;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
@@ -247,7 +248,6 @@ class OrderControllerStoreTest extends TestCase
     public function test_handle_hold_trader_when_bursa_closing_time_is_outside_cutting_period()
     {
         config()->set('services.bursam.market_opening_end_time', now(Config::get('services.bursam.timezone'))->subMinute()->toTimeString());
-        config()->set('services.bursam.market_opening_start_time', now(Config::get('services.bursam.timezone'))->addMinute()->toTimeString());
         $response = $this->actingAs(self::$admin)
             ->postJson('api/v1/admin/orders', self::$orderDetails2)
             ->assertStatus(Response::HTTP_OK);
@@ -258,7 +258,7 @@ class OrderControllerStoreTest extends TestCase
         config()->set('services.bursam.market_opening_start_time', now(Config::get('services.bursam.timezone'))->toTimeString());
         Queue::fake();
         Artisan::call('run:hold-bursa-traders');
-        $traderOrder = $traderOrder->refresh();
+        Queue::assertPushed(ProcessFinancingOrders::class);
         $this->assertEquals(TraderOrderStatus::Initiated, $traderOrder->refresh()->status->value);
 
     }
