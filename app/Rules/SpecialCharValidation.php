@@ -26,8 +26,7 @@ class SpecialCharValidation implements Rule
     public function passes($attribute, $value)
     {
         // Define the regular expression pattern to allow the specified special characters
-        $pattern = '/[\/\\\\?<>|“\'.:;~,\sA-Za-z0-9]+/';
-
+        $pattern = '/^[a-zA-Z0-9\s\/\\\\\?<>|!@#\$%\^\&*\(\)\-+=._"“\'\:\;~\,]*$/';  
 
         // Check if the value matches the pattern
         return preg_match($pattern, $value);
