@@ -14,7 +14,7 @@ class LocalMarketOrderHasCancelReason extends Model
         'cancelled_by',
         'cancel_reason',
         'cancel_step',
-        'trader_order_id',
+        'order_id',
         'cancel_type',
     ];
 
@@ -22,8 +22,8 @@ class LocalMarketOrderHasCancelReason extends Model
         'cancel_reason' => LocalMarketOrderCancelReason::class,
     ];
 
-    public function traderOrder()
+    public function order()
     {
-        return $this->belongsTo(TraderOrder::class);
+        return $this->belongsTo(LocalMarketOrder::class, 'order_id');
     }
 }
