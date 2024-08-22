@@ -28,9 +28,9 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
      *
      * @return void
      */
-    public User $user;
+    public ?User $user;
 
-    public function __construct(protected int $traderOrderId, protected int $cancelReason, User $user)
+    public function __construct(protected int $traderOrderId, protected int $cancelReason, ?User $user)
     {
         $this->user = $user;
         $this->onQueue('bursam');

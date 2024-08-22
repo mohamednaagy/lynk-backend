@@ -65,8 +65,9 @@ class BursamV2Driver extends BursamV1Driver
         TraderOrder $traderOrder,
         int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
     ): int {
+        $user = auth()->check() ? auth()->user() : null;
         if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket) || $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::OnHold)) {
-            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, user: auth()->user());
+            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, user: $user);
 
             return TraderOrderCancellationStatus::Cancelled;
         }
@@ -83,7 +84,7 @@ class BursamV2Driver extends BursamV1Driver
 
         Bus::chain([
             new ProcessBursamSellingCommodityToOpenMarketForCancellation($traderOrder->id),
-            new ProcessBursamStbCertificateAfterCancellation($traderOrder->id, $cancelReason, user: auth()->user()),
+            new ProcessBursamStbCertificateAfterCancellation($traderOrder->id, $cancelReason, user: $user),
             function () use ($traderOrder) {
                 $activeTraderOrdersCount = TraderOrder::where('status', TraderOrderStatus::InProgress)
                     ->where('financing_order_id', $traderOrder->id)
