@@ -27,4 +27,12 @@ class UpdateSellConfirmationDocumentRequest extends FormRequest
             'document' => ['required', 'file', 'mimes:pdf'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'document.required' => 'This field is required.',
+            'document.mimes' => 'The Sell Confirmation Certificate must be a PDF file.',
+        ];
+    }
 }
