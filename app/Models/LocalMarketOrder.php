@@ -25,4 +25,14 @@ class LocalMarketOrder extends Model
     {
         return $this->hasMany(LocalMarketOrderHasInventory::class, 'local_market_order_id');
     }
+
+    public function histories()
+    {
+        return $this->hasMany(LocalMarketOrderHistory::class, 'local_market_order_id');
+    }
+
+    public function cancelOrder()
+    {
+        return $this->hasOne(LocalMarketOrderHasCancelReason::class, 'order_id');
+    }
 }
