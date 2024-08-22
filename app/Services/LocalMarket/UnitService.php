@@ -1,0 +1,78 @@
+<?php
+
+namespace App\Services;
+
+use App\Enums\LocalMarket\InventoryUnitsStatus;
+use App\Models\LocalMarketInventory;
+use App\Models\LocalMarketInventoryUnits;
+use App\Settings\Classes\LocalMurabahaSettings;
+
+class UnitService
+{
+    /**
+     * Retrieves eligible units from the inventory based on the loan amount and company history.
+     */
+    public function getEligibleUnits(int $companyId, LocalMarketInventory $inventory, float $loan): array
+    {
+        $numberOfNeededUnits = $this->calculateNeededUnits($loan, $inventory->price());
+
+        if ($this->hasCompanyPreviouslyPurchased($inventory, $companyId)) {
+            return $this->getUnitsWithOwnershipCheck($inventory, $numberOfNeededUnits, $companyId);
+        }
+
+        return $this->getUnitsWithoutOwnershipCheck($inventory, $numberOfNeededUnits);
+    }
+
+    /**
+     * Calculate the number of needed units based on the loan amount and unit price.
+     */
+    private function calculateNeededUnits(float $loan, float $unitPrice): int
+    {
+        return (int) floor($loan / $unitPrice);
+    }
+
+    /**
+     * Check if a company has previously purchased from the inventory.
+     */
+    private function hasCompanyPreviouslyPurchased(LocalMarketInventory $inventory, int $companyId): bool
+    {
+        return $inventory->hasCompanyBoughtFromInventory($companyId);
+    }
+
+    /**
+     * Retrieves units from the local market inventory with an ownership check.
+     */
+    private function getUnitsWithOwnershipCheck(LocalMarketInventory $inventory, int $numberOfNeededUnits, int $companyId): array
+    {
+        $rotationThreshold = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count ?? 0;
+
+        return LocalMarketInventoryUnits::join('local_market_unit_rotations', 'local_market_unit_rotations.inventory_unit_id', '=', 'local_market_inventory_units.id')
+            ->where('local_market_inventory_units.status', InventoryUnitsStatus::Free)
+            ->where('local_market_inventory_units.local_market_inventory_id', $inventory->id)
+            ->where('local_market_unit_rotations.company_id', $companyId)
+            ->where('local_market_unit_rotations.number_of_rotations', '>=', $rotationThreshold)
+            ->limit($numberOfNeededUnits)
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * Retrieve units from the local market inventory without checking ownership.
+     */
+    private function getUnitsWithoutOwnershipCheck(LocalMarketInventory $inventory, int $numberOfNeededUnits): array
+    {
+        return LocalMarketInventoryUnits::where('status', InventoryUnitsStatus::Free)
+            ->where('local_market_inventory_id', $inventory->id)
+            ->limit($numberOfNeededUnits)
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * Change the status of specified units.
+     */
+    public function changeUnitStatus(array $units, string $status = InventoryUnitsStatus::Reserved): void
+    {
+        LocalMarketInventoryUnits::whereIn('id', $units)->update(['status' => $status]);
+    }
+}

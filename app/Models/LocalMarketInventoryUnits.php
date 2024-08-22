@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\LocalMarketInventoryUnitsStatus;
+use App\Enums\LocalMarket\InventoryUnitsStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
@@ -20,7 +20,7 @@ class LocalMarketInventoryUnits extends Model
     ];
 
     protected $casts = [
-        'status' => LocalMarketInventoryUnitsStatus::class,
+        'status' => InventoryUnitsStatus::class,
     ];
 
     public function getActivitylogOptions(): LogOptions

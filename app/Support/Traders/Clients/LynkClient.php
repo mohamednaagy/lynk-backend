@@ -17,9 +17,7 @@ class LynkClient
 
     protected $traderOrderIdHeaderKey = 'X-TRADER-ORDER-ID';
 
-    private function __construct(protected $traderOrder)
-    {
-    }
+    private function __construct(protected $traderOrder) {}
 
     private function isTraderOrderInitiatedByFake()
     {
@@ -37,7 +35,7 @@ class LynkClient
         // buy the units to the company
 
         $financingOrder = $this->traderOrder->order;
-        $number_of_rotations = app(LocalMurabahaSettings::class)->default_trade_order_roatation_count ?? 0;
+        $number_of_rotations = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count ?? 0;
 
         return app(PurchaseProductAction::class)->handle($financingOrder, $financingOrder->company_id, $financingOrder->company->preferred_market_type, $financingOrder->amount->convertAndFormatByDecimal(), $number_of_rotations);
     }

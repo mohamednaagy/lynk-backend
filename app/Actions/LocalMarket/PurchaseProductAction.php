@@ -2,7 +2,7 @@
 
 namespace App\Actions\LocalMarket;
 
-use App\Enums\LocalMarketInventoryUnitsStatus;
+use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Exceptions\LocalMarket\PurchaseProductException;
 use App\Services\LocalMarketService;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +32,7 @@ class PurchaseProductAction
         try {
             $inventoryDetails = $this->extractDataFromInventories($inventories);
 
-            $this->localMarketService->changeUnitsStatus($inventoryDetails['unitIds'], LocalMarketInventoryUnitsStatus::Reserved);
+            $this->localMarketService->changeUnitsStatus($inventoryDetails['unitIds'], InventoryUnitsStatus::Reserved);
             $this->localMarketService->refreshInventoryStockQuantities($inventoryDetails['inventoriesIds']);
             // TODO add inventories to local trader order (local_market_order_has_inventories)
             // TODO add units to local trader order (local_market_order_has_units)
