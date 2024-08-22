@@ -101,6 +101,4 @@ abstract class BaseDmccStrategy implements TraderStrategyInterface
             ]);
         }
     }
-
-    public function updateSellConfirmationDocument(TraderOrder $traderOrder, $request) {}
 }
