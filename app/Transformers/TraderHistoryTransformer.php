@@ -162,7 +162,8 @@ class TraderHistoryTransformer extends TransformerAbstract
         };
 
         ///*****///
-        return $this->primitive([
+
+        $data = [
             'step' => MurabhaStep::MurabahaSaleCompleted,
             'is_complete' => (bool) $history,
             'completed_at' => optional($history)->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
@@ -171,7 +172,16 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'date' => $warrantyDocumentMediaFile?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             ],
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
-        ]);
+        ];
+    
+        if ($this->traderOrder->provider === 'lynk') {
+            $sellConfirmationDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::SellConfirmationDocument);
+            $data['sell_confirmation_document'] = [
+                'url' => $sellConfirmationDocumentMediaFile?->file_url,
+                'date' => $sellConfirmationDocumentMediaFile?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
+            ];
+        }
+        return $this->primitive($data);
     }
 
     public function getDurationForHistoryStep($history)

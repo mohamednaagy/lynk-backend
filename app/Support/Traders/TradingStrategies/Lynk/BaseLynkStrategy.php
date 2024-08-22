@@ -124,4 +124,19 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
         // automatic complete the order
         $this->updateMurabhaCompleteDocument($traderOrder, $request);
     }
+
+    public function updateSellConfirmationDocument(TraderOrder $traderOrder, $request)
+    {
+        $traderOrder->ensureCanAccessStep(MurabhaStep::MurabahaSaleCompleted);
+
+        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
+
+        $this->attachDocumentToOrder(
+            $traderOrder,
+            base64_encode(file_get_contents($request->file('document'))),
+            TraderOrderMediaCollection::SellConfirmationDocument,
+            'base64'
+        );
+        
+    }
 }

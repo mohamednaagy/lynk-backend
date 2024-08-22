@@ -46,4 +46,9 @@ class TraderStrategyContext
     {
         $this->strategy->updateMurabhaCompleteDocument($traderOrder, $request);
     }
+
+    public function updateSellConfirmationDocument(TraderOrder $traderOrder, Request $request): void
+    {
+        $this->strategy->updateSellConfirmationDocument($traderOrder, $request);
+    }
 }

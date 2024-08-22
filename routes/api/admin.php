@@ -41,11 +41,13 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetCommodityCe
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabhaCompleteDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetPurchasingCommodity;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetSellConfirmationDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetTradersWithAvailableModes;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabhaCompleteDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodity;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateSellConfirmationDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateOrderPaymentProof;
 use App\Http\Controllers\Api\V1\Admin\Lenders\ResendInvitationToUser as ResendLenderInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
@@ -151,6 +153,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                 Route::post('/selling-commodity-to-client', UpdateCommodityCertificateForClient::class);
                 Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
                 Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
+                Route::get('/sell-confirmation-document', GetSellConfirmationDocument::class);
+                Route::post('/sell-confirmation-document', UpdateSellConfirmationDocument::class);
                 Route::put('/cancel', CancelTraderOrder::class);
             });
         });

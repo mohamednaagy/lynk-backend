@@ -106,4 +106,6 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
         }
     }
+
+    public function updateSellConfirmationDocument(TraderOrder $traderOrder, $request) {}
 }
