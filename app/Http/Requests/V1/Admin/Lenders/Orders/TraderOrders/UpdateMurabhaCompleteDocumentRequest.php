@@ -27,17 +27,11 @@ class UpdateMurabhaCompleteDocumentRequest extends FormRequest
     {
         $traderOrder = TraderOrder::find($this->route('trader_order'));
 
-        $provider = $traderOrder->provider;
+        $documentKey = $traderOrder->provider == Trader::Lynk ? 'sell_confirmation_document' : 'document';
 
-        $rules = [];
-
-        if ($provider == Trader::Lynk) {
-            $rules['sell_confirmation_document'] = ['required', 'file', 'mimes:pdf'];
-        } else {
-            $rules['document'] = ['required', 'file', 'mimes:pdf'];
-        }
-
-        return $rules;
+       return  [
+        $documentKey => ['required', 'file', 'mimes:pdf'],
+       ];
     }
 
     public function messages(): array
