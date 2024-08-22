@@ -27,7 +27,7 @@ class UpdateMurabhaCompleteDocumentRequest extends FormRequest
     {
         $traderOrder = TraderOrder::find($this->route('trader_order'));
 
-        $provider = $traderOrder ? $traderOrder->provider : null;
+        $provider = $traderOrder->provider;
 
         $rules = [];
 
