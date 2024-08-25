@@ -30,39 +30,36 @@ class LoanService
             'remainingLoan' => $loanAmount,
         ];
 
-        $inventoryService = new InventoryService;
-        $unitsService = new UnitService;
+        $inventoryService = app(InventoryService::class);
+        $unitsService = app(UnitService::class);
 
         try {
-            $inventory = $inventoryService->findEligibleInventoryForLoan($loanAmount, $preferredTypes, $loanInventories);
+            while (! $loanDetails['isLoanCovered'] && $loanDetails['remainingLoan'] > 0) {
+                $inventory = $inventoryService->findEligibleInventoryForLoan(
+                    $loanDetails['remainingLoan'],
+                    $preferredTypes,
+                    array_merge($loanInventories, $loanDetails['inventories_id'])
+                );
 
-            if (! $inventory) {
-                return $loanDetails;
+                if (! $inventory) {
+                    break;
+                }
+
+                $eligibleUnits = $unitsService->getEligibleUnits($companyId, $inventory, $loanDetails['remainingLoan']);
+
+                $loanDetails['inventories_id'][] = $inventory->id;
+                $loanDetails['inventories'][] = $eligibleUnits;
+                $loanDetails['isLoanCovered'] = $eligibleUnits['isLoanCovered'];
+                $loanDetails['remainingLoan'] = $eligibleUnits['remainingLoan'];
             }
 
-            $eligibleUnits = $unitsService->getEligibleUnits($companyId, $inventory, $loanAmount);
-
-            $loanDetails['inventories_id'][] = $inventory->id;
-            $loanDetails['inventories'][] = $eligibleUnits;
-            $loanDetails['isLoanCovered'] = $eligibleUnits['isLoanCovered'];
-            $loanDetails['remainingLoan'] = $eligibleUnits['remainingLoan'];
-
-            if ($loanDetails['isLoanCovered']) {
-                return $loanDetails;
-            }
-
-            // Recursive call to handle remaining loan amount
-            $this->getCommoditiesForLoan(
-                $companyId,
-                $loanDetails['remainingLoan'],
-                $preferredTypes,
-                $loanDetails['inventories_id']
-            );
+            return $loanDetails;
         } catch (\Exception $e) {
             Log::error('Error in getCommoditiesForLoan', [
                 'company_id' => $companyId,
                 'loan_amount' => $loanAmount,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return $loanDetails;
@@ -86,7 +83,6 @@ class LoanService
             $inventoryService->refreshInventoryStocks($eligibleCommodities->getInventoriesIds());
             $orderService->insertOrderUnits($localMarketOrder, $units);
             $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::CommoditiesPurchased);
-
             DB::commit();
 
             Log::info('Commodities bought successfully');
