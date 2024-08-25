@@ -2,9 +2,8 @@
 
 namespace App\Jobs\LocalMarket\states;
 
-use App\Enums\LocalMarketOrderStatus;
+use App\Actions\Contracts\LocalMarket\FindEligibleCommodities;
 use App\Models\LocalMarketOrder;
-use App\Services\LocalMarket\LoanService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -23,22 +22,13 @@ class PendingEligibleCommoditiesStatus implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(FindEligibleCommodities $GetSuitableCommoditiesStocks): void
     {
-        $loanService = new LoanService;
-
-        $eligibleCommodities = $loanService->getCommoditiesForLoan($this->localMarketOrder->company_id, $this->localMarketOrder->amount, $this->localMarketOrder->preferred_commodity_type);
-
-        if ($eligibleCommodities['isLoanCovered']) {
-            $this->localMarketOrder->update([
-                'status' => LocalMarketOrderStatus::EligibleCommoditiesFound,
-                'data' => $eligibleCommodities,
-            ]);
-        } else {
-            $this->localMarketOrder->update([
-                'status' => LocalMarketOrderStatus::NoEligibleCommoditiesFound,
-                'data' => $eligibleCommodities,
-            ]);
-        }
+        $GetSuitableCommoditiesStocks->handle(
+            $this->localMarketOrder,
+            $this->localMarketOrder->company_id,
+            $this->localMarketOrder->amount,
+            $this->localMarketOrder->preferred_commodity_type
+        );
     }
 }
