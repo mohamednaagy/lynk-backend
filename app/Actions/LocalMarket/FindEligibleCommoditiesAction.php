@@ -9,16 +9,17 @@ use App\Services\LocalMarket\LoanService;
 
 class FindEligibleCommoditiesAction implements FindEligibleCommodities
 {
-    private LoanService $LoanService;
+    public function __construct(
+        private LoanService $LoanService
+    ) {}
 
-    public function __construct()
+    public function handle(LocalMarketOrder $localMarketOrder): void
     {
-        $this->LoanService = new LoanService;
-    }
-
-    public function handle(LocalMarketOrder $localMarketOrder, $companyId, $loanAmount, $preferredTypes): void
-    {
-        $eligibleCommodities = $this->LoanService->getCommoditiesForLoan($companyId, $loanAmount, $preferredTypes);
+        $eligibleCommodities = $this->LoanService->getCommoditiesForLoan(
+            $localMarketOrder->company_id,
+            $localMarketOrder->amount,
+            $localMarketOrder->preferred_commodity_type
+        );
 
         if ($eligibleCommodities['isLoanCovered']) {
             $localMarketOrder->update([

@@ -10,12 +10,9 @@ use Illuminate\Support\Facades\Log;
 
 class BuyCommoditiesAction implements BuyCommodities
 {
-    private $loanService;
-
-    public function __construct(LoanService $loanService)
-    {
-        $this->loanService = $loanService;
-    }
+    public function __construct(
+        private LoanService $LoanService
+    ) {}
 
     /**
      * Executes the purchase product action.

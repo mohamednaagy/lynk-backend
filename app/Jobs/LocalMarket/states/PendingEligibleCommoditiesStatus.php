@@ -24,11 +24,6 @@ class PendingEligibleCommoditiesStatus implements ShouldQueue
      */
     public function handle(FindEligibleCommodities $GetSuitableCommoditiesStocks): void
     {
-        $GetSuitableCommoditiesStocks->handle(
-            $this->localMarketOrder,
-            $this->localMarketOrder->company_id,
-            $this->localMarketOrder->amount,
-            $this->localMarketOrder->preferred_commodity_type
-        );
+        $GetSuitableCommoditiesStocks->handle($this->localMarketOrder);
     }
 }

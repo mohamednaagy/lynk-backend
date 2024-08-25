@@ -36,7 +36,7 @@ class InventoryService
             ->orderByRaw('(`available_quantity` * `max_price`) DESC')
             ->first();
 
-        Log::info("found eligible inventory for loan {$loanAmount} with inventory", ['inventory' => $inventory]);
+        Log::info('findEligibleInventoryForLoan details is :', ['inventory' => $inventory, 'preferredItemTypes' => $preferredItemTypes, 'usedInventories' => $usedInventories]);
 
         return $inventory;
     }

@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class CommoditiesPurchaseCompletedStatus implements ShouldQueue
 {
@@ -26,6 +27,8 @@ class CommoditiesPurchaseCompletedStatus implements ShouldQueue
     {
         // we will notify the owner we are done buying
         // nagy will handle it
+
+        Log::info("Congratulations Commodities purchased for order {$this->localMarketOrder->id}");
 
     }
 }

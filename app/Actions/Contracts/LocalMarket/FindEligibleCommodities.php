@@ -6,5 +6,5 @@ use App\Models\LocalMarketOrder;
 
 interface FindEligibleCommodities
 {
-    public function handle(LocalMarketOrder $localMarketOrder, $companyId, $loanAmount, $preferredTypes): void;
+    public function handle(LocalMarketOrder $localMarketOrder): void;
 }
