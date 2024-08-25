@@ -42,19 +42,25 @@ class OrderService
         ]);
     }
 
-    public function insertOrderUnits(array $units, int $inventoryId)
+    public function insertOrderUnits(LocalMarketOrder $localMarketOrder, array $units)
     {
         $chunks = array_chunk($units, 3000);
         foreach ($chunks as $chunk) {
-            $insertData = array_map(function ($unit) use ($inventoryId) {
+            $insertData = array_map(function ($unit) {
                 return [
-                    'inventory_unit_id' => $unit->id,
-                    'order_has_inventory_id' => $inventoryId,
+                    'inventory_unit_id' => $unit['id'],
+                    'order_has_inventory_id' => $unit['local_market_inventory_id'],
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
             }, $chunk);
             DB::table('local_market_order_has_units')->insert($insertData);
         }
+    }
+
+    public function changeOrderStatus($order, $status)
+    {
+        $order->status = $status;
+        $order->save();
     }
 }

@@ -1,42 +1,90 @@
-<?php 
+<?php
+
 namespace App\Services\LocalMarket;
 
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Enums\LocalMarket\InventoryUnitsStatus;
+use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarketOrderStatus;
 use App\Enums\Trader;
-use App\Exceptions\LocalMarket\NoEligibleInventoryFoundException;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
 use App\Models\LocalMarketOrderHasInventory;
 use App\Models\LocalMarketUnitOwnership;
 use App\Services\InventoryService;
-use App\Settings\Classes\LocalMurabahaSettings;
+use App\Services\OrderService;
+use App\Services\OwnershipService;
+use App\Services\UnitService;
+use App\Support\DataTransferObjects\LocalMarket\OrderCommoditiesDto;
+use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class LoanService
 {
+    public function getCommoditiesForLoan($companyId, $loanAmount, $preferredTypes = [], $loanInventories = [])
+    {
+        $loanDetails = [
+            'inventories_id' => [],
+            'inventories' => [],
+            'isLoanCovered' => false,
+        ];
 
-    public static function getCommoditiesForLoan($companyId, $loanAmount, $preferredTypes){
-        $inventory = InventoryService::findEligibleInventoryForLoan($loanAmount, $preferredTypes, $loanInventories);
+        $inventoryService = new InventoryService;
+        $unitsService = new UnitService;
+
+        $inventory = $inventoryService->findEligibleInventoryForLoan($loanAmount, $preferredTypes = [], $loanInventories);
 
         if (empty($inventory)) {
-            throw NoEligibleInventoryFoundException();
-            return;
+            Log::alert('No eligible inventory found for loan', ['company_id' => $companyId, 'loan_amount' => $loanAmount, 'preferred_types' => $preferredTypes]);
+
+            return $loanDetails;
         }
 
-        $inventorySuitableUnits = $this->localMarketService->getSuitableUnitsFromInventory($companyId, $inventory, $loanAmount);
-        $this->updateLoanDetails($inventorySuitableUnits);
+        $loanDetails['inventories_id'][] = $inventory->id;
+        $eligibleUnits = $unitsService->getEligibleUnits($companyId, $inventory, $loanAmount);
 
-        if ($this->loanDetails['isLoanCovered']) {
-            return;
+        $loanDetails['inventories'][] = $eligibleUnits;
+        $loanDetails['isLoanCovered'] = $eligibleUnits['isLoanCovered'];
+        $loanDetails['remainingLoan'] = $eligibleUnits['remainingLoan'];
+
+        if ($loanDetails['isLoanCovered']) {
+            return $loanDetails;
         }
 
         // Recursive call to handle remaining loan amount
-        $this->determineSuitableStocks($companyId, $inventorySuitableUnits['remainingLoan'], $preferredTypes, $this->loanDetails['inventories_id']);
-
+        $this->getCommoditiesForLoan($companyId, $loanDetails['remainingLoan'], $preferredTypes, $loanDetails['inventories_id']);
     }
+
+    public function buyCommodities(LocalMarketOrder $localMarketOrder, $companyId, $data)
+    {
+        DB::beginTransaction();
+        $unitService = new UnitService;
+        $ownershipService = new OwnershipService;
+        $inventoryService = new InventoryService;
+        $orderService = new OrderService;
+
+        $eligibleCommodities = OrderCommoditiesDto::fromArray($data);
+        $units = $eligibleCommodities->getAllUnits();
+
+        try {
+            $unitService->changeUnitStatus($units, InventoryUnitsStatus::Reserved);
+            $ownershipService->changeUnitOwnership($units, OwnershipTypes::Company, $companyId);
+            $inventoryService->refreshInventoryStocks($eligibleCommodities->getInventoriesIds());
+            $orderService->insertOrderUnits($localMarketOrder, $units);
+            $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::BuyCommoditiesDone);
+
+            // recalculate free and reserved items
+            DB::commit();
+
+            Log::info('Commodities bought successfully');
+        } catch (Exception $e) {
+            Log::error('Error in buy commoadites', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            DB::rollBack();
+        }
+    }
+
     /**
      * Retrieves an inventory item from the local market based on the loan amount, preferred item types, and used inventories.
      */
@@ -44,10 +92,10 @@ class LoanService
     {
         return LocalMarketInventory::where('max_price', '<=', $loanAmount)
             ->where('status', InventoryStatus::Active)
-            ->when(!empty($preferredItemTypes), function ($query) use ($preferredItemTypes) {
+            ->when(! empty($preferredItemTypes), function ($query) use ($preferredItemTypes) {
                 $query->whereIn('commodity_type_id', $preferredItemTypes);
             })
-            ->when(!empty($usedInventories), function ($query) use ($usedInventories) {
+            ->when(! empty($usedInventories), function ($query) use ($usedInventories) {
                 $query->whereNotIn('id', $usedInventories);
             })
             ->orderByRaw('(`available_quantity` * `max_price`) DESC')
@@ -85,6 +133,7 @@ class LoanService
         if ($this->hasCompanyPurchasedFromInventory($inventory, $companyId)) {
             return $this->getUnitsWithOwnershipCheck($inventory, $numberOfNeededUnits, $companyId);
         }
+
         return $this->getUnitsWithoutOwnershipCheck($inventory, $numberOfNeededUnits);
     }
 
@@ -109,7 +158,8 @@ class LoanService
      */
     private function getUnitsWithOwnershipCheck(LocalMarketInventory $inventory, int $numberOfNeededUnits, int $companyId): array
     {
-        $rotationThreshold = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count ?? 0;
+        // $rotationThreshold = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count ?? 0;
+        $rotationThreshold = 0;
 
         return LocalMarketInventoryUnits::join('local_market_unit_rotations', 'local_market_unit_rotations.inventory_unit_id', '=', 'local_market_inventory_units.id')
             ->where('local_market_inventory_units.status', InventoryUnitsStatus::Free)
@@ -132,7 +182,6 @@ class LoanService
             ->get()
             ->toArray();
     }
-
 
     /**
      * Recalculates the available inventory quantities for the given inventory IDs.
@@ -214,4 +263,6 @@ class LoanService
             'location_id' => $inventory->supplier_location_id,
             'supplier_id' => $inventory->company_id,
             'previous_owner' => '',
-           
+        ]);
+    }
+}

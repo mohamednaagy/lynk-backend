@@ -6,29 +6,25 @@ use Illuminate\Support\Facades\DB;
 
 class OwnershipService
 {
-    public function updateOwnership($inventory, int $companyId)
+    public function changeUnitOwnership($units, $ownerType, $ownerIdentifier)
     {
-        $ownershipData = [];
-        $company = DB::table('companies')->where('id', $companyId)->first();
-        foreach ($inventory->units as $unit) {
-            $previousOwner = DB::table('local_market_unit_ownership')
-                ->where('inventory_unit_id', $unit->id)
-                ->latest()
-                ->first();
+        $timestamp = now()->format('Y-m-d H:i:s');
 
-            $ownershipData[] = [
-                'inventory_unit_id' => $unit->id,
-                'owner_type' => $company->type,
-                'owner_id' => $companyId,
-                'owner_name' => $company->unique_name,
-                'previous_owner' => $previousOwner ? $previousOwner->owner_id : $inventory->company_id,
-                'created_at' => now(),
-                'updated_at' => now(),
+        // Use array_map for better performance over foreach
+        $ownershipData = array_map(function ($unit) use ($ownerType, $ownerIdentifier, $timestamp) {
+            return [
+                'unit_id' => $unit['id'],
+                'current_owner' => $ownerIdentifier,
+                'current_owner_type' => $ownerType,
+                'previous_owner' => null,
+                'previous_owner_type' => null,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
             ];
-        }
+        }, $units);
 
-        $chunks = array_chunk($ownershipData, 3000);
-        foreach ($chunks as $chunk) {
+        // Chunk and insert in bulk
+        foreach (array_chunk($ownershipData, 3000) as $chunk) {
             DB::table('local_market_unit_ownership')->insert($chunk);
         }
     }

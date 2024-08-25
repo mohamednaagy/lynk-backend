@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Models\LocalMarketInventory;
+use Illuminate\Support\Facades\Log;
 
 class InventoryService
 {
@@ -22,9 +23,9 @@ class InventoryService
      * @param  array  $usedInventories  An optional array of inventory IDs that have already been used. These inventories are excluded from the results.
      * @return LocalMarketInventory|null The best matching inventory item, or null if no eligible inventory is found.
      */
-    public static function findEligibleInventoryForLoan(int $loanAmount, array $preferredItemTypes = [], array $usedInventories = [])
+    public function findEligibleInventoryForLoan(float $loanAmount, array $preferredItemTypes = [], array $usedInventories = [])
     {
-        return LocalMarketInventory::where('max_price', '<=', $loanAmount)
+        $inventory = LocalMarketInventory::where('max_price', '<=', $loanAmount)
             ->where('status', InventoryStatus::Active)
             ->when(! empty($preferredItemTypes), function ($query) use ($preferredItemTypes) {
                 $query->whereIn('commodity_type_id', $preferredItemTypes);
@@ -34,5 +35,16 @@ class InventoryService
             })
             ->orderByRaw('(`available_quantity` * `max_price`) DESC')
             ->first();
+
+        Log::info("found eligible inventory for loan {$loanAmount} with inventory", ['inventory' => $inventory]);
+
+        return $inventory;
+    }
+
+    public static function refreshInventoryStocks($inventories)
+    {
+        LocalMarketInventory::query()->whereIn('id', $inventories)->each(function ($inventory) {
+            $inventory->refreshStockQuantities();
+        });
     }
 }

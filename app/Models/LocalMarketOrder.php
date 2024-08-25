@@ -16,9 +16,15 @@ class LocalMarketOrder extends Model
         'price',
         'customer_name',
         'status',
+        'data',
         'comment',
         'company_id',
         'trader_order_id',
+    ];
+
+    protected $casts = [
+        'preferred_commodity_type' => 'array',
+        'data' => 'array',
     ];
 
     public function orderInventories()

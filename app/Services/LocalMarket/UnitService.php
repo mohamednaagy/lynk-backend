@@ -6,6 +6,7 @@ use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Settings\Classes\LocalMurabahaSettings;
+use Illuminate\Support\Facades\Log;
 
 class UnitService
 {
@@ -17,10 +18,31 @@ class UnitService
         $numberOfNeededUnits = $this->calculateNeededUnits($loan, $inventory->price());
 
         if ($this->hasCompanyPreviouslyPurchased($inventory, $companyId)) {
-            return $this->getUnitsWithOwnershipCheck($inventory, $numberOfNeededUnits, $companyId);
+            $eligibleUnits = $this->getUnitsWithOwnershipCheck($inventory, $numberOfNeededUnits, $companyId);
         }
+        $eligibleUnits = $this->getUnitsWithoutOwnershipCheck($inventory, $numberOfNeededUnits);
+        $totalAvailableUnitsCost = count($eligibleUnits) * $inventory->price();
+        $remainingLoan = $loan - $totalAvailableUnitsCost;
 
-        return $this->getUnitsWithoutOwnershipCheck($inventory, $numberOfNeededUnits);
+        Log::info("getEligibleUnits for company {$companyId} and inventory {$inventory->id} with loan {$loan} ", [
+            'inventoryId' => $inventory->id,
+            'numberOfNeededUnits' => $numberOfNeededUnits,
+            'numberOfSuitableUnits' => count($eligibleUnits),
+            'availableUnits' => $eligibleUnits,
+            'totalCost' => $totalAvailableUnitsCost,
+            'remainingLoan' => $remainingLoan,
+            'isLoanCovered' => ($remainingLoan == 0),
+        ]);
+
+        return [
+            'inventoryId' => $inventory->id,
+            'numberOfNeededUnits' => $numberOfNeededUnits,
+            'numberOfSuitableUnits' => count($eligibleUnits),
+            'availableUnits' => $eligibleUnits,
+            'totalCost' => $totalAvailableUnitsCost,
+            'remainingLoan' => $remainingLoan,
+            'isLoanCovered' => ($remainingLoan == 0),
+        ];
     }
 
     /**
@@ -44,7 +66,8 @@ class UnitService
      */
     private function getUnitsWithOwnershipCheck(LocalMarketInventory $inventory, int $numberOfNeededUnits, int $companyId): array
     {
-        $rotationThreshold = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count ?? 0;
+        // $rotationThreshold = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count ?? 0;
+        $rotationThreshold = 0;
 
         return LocalMarketInventoryUnits::join('local_market_unit_rotations', 'local_market_unit_rotations.inventory_unit_id', '=', 'local_market_inventory_units.id')
             ->where('local_market_inventory_units.status', InventoryUnitsStatus::Free)
@@ -73,6 +96,12 @@ class UnitService
      */
     public function changeUnitStatus(array $units, string $status = InventoryUnitsStatus::Reserved): void
     {
-        LocalMarketInventoryUnits::whereIn('id', $units)->update(['status' => $status]);
+        $ids = array_column($units, 'id');
+        LocalMarketInventoryUnits::whereIn('id', $ids)->update(['status' => $status]);
+    }
+
+    public function extractUnits($data)
+    {
+        return $data['inventories']['availableUnits'];
     }
 }
