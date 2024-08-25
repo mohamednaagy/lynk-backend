@@ -26,12 +26,15 @@ return [
         MurabhaStep::CustomerDeliveryConfirmation => [
         ],
         MurabhaStep::MurabahaSaleCompleted => [
+            // @TODO_localmarket need to double check if we really need this step or not
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
             FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
+                // need to change collection to sell pledge document
                 'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
                 'file' => 'document',
             ],
             FinancingOrderHistory::MurabahaSaleCompleted => null,
+            // need to add attach sell confirmation document
         ],
     ],
 ];
