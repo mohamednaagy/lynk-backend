@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Jobs\LocalMarket\states;
+
+use App\Actions\Contracts\LocalMarket\BuyCommodities;
+use App\Models\LocalMarketOrder;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+
+class CommoditiesPurchaseCompletedStatus implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public function __construct(private LocalMarketOrder $localMarketOrder)
+    {
+        $this->onQueue('local_market');
+    }
+
+    /**
+     * Execute the job.
+     */
+    public function handle(BuyCommodities $BuyCommodities): void
+    {
+        // we will notify the owner we are done buying
+        // nagy will handle it
+
+    }
+}

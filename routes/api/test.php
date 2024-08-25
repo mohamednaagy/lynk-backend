@@ -15,7 +15,7 @@ Route::prefix('test')->group(function () {
     Route::get('process-initiate-orders', function () {
 
         $localMarketOrder = LocalMarketOrder::query()
-            ->where('status', LocalMarketOrderStatus::EligibleCommoditiesFound)->first();
+            ->where('status', LocalMarketOrderStatus::EligibleCommoditiesAvailable)->first();
 
         // double check if we can handle this order or not
         $eligibleCommodities = $localMarketOrder->data;

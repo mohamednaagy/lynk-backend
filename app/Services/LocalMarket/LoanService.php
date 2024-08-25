@@ -96,7 +96,7 @@ class LoanService
             $ownershipService->changeUnitOwnership($units, OwnershipTypes::Company, $companyId);
             $inventoryService->refreshInventoryStocks($eligibleCommodities->getInventoriesIds());
             $orderService->insertOrderUnits($localMarketOrder, $units);
-            $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::BuyCommoditiesDone);
+            $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::CommoditiesPurchased);
 
             DB::commit();
 

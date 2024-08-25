@@ -22,12 +22,12 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
 
         if ($eligibleCommodities['isLoanCovered']) {
             $localMarketOrder->update([
-                'status' => LocalMarketOrderStatus::EligibleCommoditiesFound,
+                'status' => LocalMarketOrderStatus::EligibleCommoditiesAvailable,
                 'data' => $eligibleCommodities,
             ]);
         } else {
             $localMarketOrder->update([
-                'status' => LocalMarketOrderStatus::NoEligibleCommoditiesFound,
+                'status' => LocalMarketOrderStatus::NoEligibleCommoditiesAvailable,
                 'data' => $eligibleCommodities,
             ]);
         }

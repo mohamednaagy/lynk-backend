@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Enums\LocalMarketOrderStatus;
+use App\Jobs\LocalMarket\states\CommoditiesPurchaseCompletedStatus;
 use App\Jobs\LocalMarket\states\EligibleCommoditiesFoundStatus;
 use App\Jobs\LocalMarket\states\PendingEligibleCommoditiesStatus;
 use App\Models\LocalMarketOrder;
@@ -28,7 +29,9 @@ class LocalMarketOrderObserver
     {
         match ($localMarketOrder->status) {
             LocalMarketOrderStatus::PendingEligibleCommodities => PendingEligibleCommoditiesStatus::dispatch($localMarketOrder),
-            LocalMarketOrderStatus::EligibleCommoditiesFound => EligibleCommoditiesFoundStatus::dispatch($localMarketOrder),
+            LocalMarketOrderStatus::EligibleCommoditiesAvailable => EligibleCommoditiesFoundStatus::dispatch($localMarketOrder),
+            LocalMarketOrderStatus::CommoditiesPurchased => CommoditiesPurchaseCompletedStatus::dispatch($localMarketOrder),
+
             default => null,
         };
     }

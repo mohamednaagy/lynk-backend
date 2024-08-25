@@ -19,9 +19,9 @@ final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
 
     const PendingEligibleCommodities = 6;
 
-    const EligibleCommoditiesFound = 7;
+    const EligibleCommoditiesAvailable = 7;
 
-    const NoEligibleCommoditiesFound = 8;
+    const NoEligibleCommoditiesAvailable = 8;
 
-    const BuyCommoditiesDone = 9;
+    const CommoditiesPurchased = 9;
 }
