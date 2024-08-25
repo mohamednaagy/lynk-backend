@@ -207,8 +207,17 @@ function convertDateTimeToHumanDate(Carbon $dataTime, ?Carbon $endDateTime = nul
 }
 
 if (! function_exists('saudi_now')) {
-    function saudi_now()
+    /**
+     * Get the current time in the 'Asia/Riyadh' timezone or convert a given date to this timezone.
+     *
+     * @param Carbon|null $date
+     * @return Carbon
+     */
+    function saudi_now($format ,?Carbon $date = null): string
     {
-        return Carbon::now('Asia/Riyadh');
+        $timezone = 'Asia/Riyadh';
+
+        $createdDate =  $date ? $date->clone()->timezone($timezone) : Carbon::now($timezone);
+        return $createdDate->format($format);
     }
 }

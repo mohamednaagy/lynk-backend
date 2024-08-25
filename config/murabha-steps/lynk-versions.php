@@ -28,13 +28,13 @@ return [
         MurabhaStep::MurabahaSaleCompleted => [
             // @TODO_localmarket need to double check if we really need this step or not
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
-            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
-                // need to change collection to sell pledge document
-                'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-                'file' => 'document',
-            ],
+            FinancingOrderHistory::CreateLynkSalePledgeCertificate => null,
             FinancingOrderHistory::MurabahaSaleCompleted => null,
-            // need to add attach sell confirmation document
+            //add attach sell confirmation document
+            FinancingOrderHistory::AttachSellConfirmationDocument => [
+                'collection' => TraderOrderMediaCollection::SellConfirmationDocument,
+                'file' => 'sell_confirmation_document',
+            ],
         ],
     ],
 ];

@@ -4,7 +4,7 @@ namespace App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateMurabhaCompleteDocumentRequest extends FormRequest
+class UpdateSellConfirmationDocumentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +24,15 @@ class UpdateMurabhaCompleteDocumentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'document' => ['required', 'file', 'mimes:pdf'],
+            'sell_confirmation_document' => ['required', 'file', 'mimes:pdf'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'sell_confirmation_document.required' => 'This field is required.',
+            'sell_confirmation_document.mimes' => 'The Sell Confirmation Certificate must be a PDF file.',
         ];
     }
 }

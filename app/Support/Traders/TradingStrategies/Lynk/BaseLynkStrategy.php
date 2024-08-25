@@ -77,20 +77,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
 
     public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
     {
-        // If the request contains a sell confirmation document, process it and return immediately
-        if ($request->hasFile('sell_confirmation_document')) {
-            $traderOrder->ensureCanAccessStep(MurabhaStep::MurabahaSaleCompleted);
-
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                base64_encode(file_get_contents($request->file('sell_confirmation_document'))),
-                TraderOrderMediaCollection::SellConfirmationDocument,
-                'base64'
-            );
-
-            return; // Exit the function after processing the document
-        }
-
         $traderOrder->ensureCanAccessStep(MurabhaStep::CommoditySoldToCustomer);
 
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
@@ -138,5 +124,19 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
 
         // automatic complete the order
         $this->updateMurabhaCompleteDocument($traderOrder, $request);
+    }
+
+    public function updateSellConfirmationDocument(TraderOrder $traderOrder, Request $request)
+    {
+        $traderOrder->ensureCanAccessStep(MurabhaStep::MurabahaSaleCompleted);
+
+        $this->attachDocumentToOrder(
+            $traderOrder,
+            base64_encode(file_get_contents($request->file('sell_confirmation_document'))),
+            TraderOrderMediaCollection::SellConfirmationDocument,
+            'base64'
+        );
+        
+
     }
 }
