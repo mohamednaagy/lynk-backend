@@ -89,7 +89,7 @@ class LoanService
             Log::info('Commodities bought successfully');
         } catch (Exception $e) {
             Log::error('Error in buy commodities', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::CommoditiesPurchased);
+            $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::FailedPurchase);
 
             DB::rollBack();
         }

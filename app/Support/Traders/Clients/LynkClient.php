@@ -18,9 +18,7 @@ class LynkClient
 
     protected $traderOrderIdHeaderKey = 'X-TRADER-ORDER-ID';
 
-    private function __construct(protected $traderOrder)
-    {
-    }
+    private function __construct(protected $traderOrder) {}
 
     private function isTraderOrderInitiatedByFake()
     {
@@ -35,6 +33,7 @@ class LynkClient
     public function createOrder()
     {
         $financingOrder = $this->traderOrder->order;
+
         $data['currency'] = $financingOrder->currency;
         $data['national_id'] = $financingOrder->national_id;
         $data['amount'] = $financingOrder->amount;
