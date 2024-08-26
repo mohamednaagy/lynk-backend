@@ -26,14 +26,13 @@ class LocalMarketOrder extends Model
         'company_id',
         'trader_order_id',
         'reference',
+        'buying_uuid',
+        'selling_uuid',
     ];
 
     protected $casts = [
         'status' => LocalMarketOrderStatus::class,
         'amount' => MoneyStringCast::class.':currency',
-    ];
-
-    protected $casts = [
         'preferred_commodity_type' => 'array',
         'data' => 'array',
     ];

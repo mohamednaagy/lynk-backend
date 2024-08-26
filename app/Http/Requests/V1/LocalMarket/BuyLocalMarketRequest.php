@@ -3,7 +3,6 @@
 namespace App\Http\Requests\V1\LocalMarket;
 
 use App\Models\CommodityType;
-use App\Models\Company;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -27,10 +26,17 @@ class BuyLocalMarketRequest extends FormRequest
     public function rules()
     {
         return [
-            'company_id' => ['required', Rule::exists(Company::class, 'id')],
-            'preferred_types.*' => ['nullable', 'array'],
-            'preferred_types.id' => ['nullable', Rule::exists(CommodityType::class, 'id')],
-            'loan_amount' => ['required', 'numeric'],
+            'source' => ['required', 'string'],
+            'amount' => ['required', 'numeric'],
+            'national_id' => ['required', 'numeric'],
+            'customer_name' => ['required', 'string'],
+            'comment' => ['nullable', 'string'],
+            'company_id' => ['required', 'numeric'],
+            'reference' => ['required', 'string'],
+            'currency' => ['required', 'string'],
+            'buying_uuid' => ['required', 'string'],
+            'preferred_commodity_type' => ['nullable', 'array'],
+            'preferred_commodity_type.*' => ['nullable', Rule::exists(CommodityType::class, 'id')],
         ];
     }
 }
