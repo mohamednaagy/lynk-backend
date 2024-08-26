@@ -2,9 +2,15 @@
 
 namespace App\Models;
 
+use App\Enums\LocalMarketOrderStatus;
+use App\Support\Money\Casts\MoneyStringCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property mixed $currency
+ * @property mixed $amount
+ */
 class LocalMarketOrder extends Model
 {
     use HasFactory;
@@ -13,12 +19,17 @@ class LocalMarketOrder extends Model
         'source',
         'amount',
         'national_id',
-        'price',
         'customer_name',
         'status',
         'comment',
         'company_id',
         'trader_order_id',
+        'reference',
+    ];
+
+    protected $casts = [
+        'status' => LocalMarketOrderStatus::class,
+        'amount' => MoneyStringCast::class.':currency',
     ];
 
     public function orderInventories()

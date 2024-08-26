@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Actions\LocalMarket;
+
+use App\Actions\Contracts\LocalMarket\CreateLocalMarketOrder;
+use App\Enums\LocalMarketOrderStatus;
+use App\Models\LocalMarketOrder;
+use App\Support\Traders\Traits\LocalMarketHelperTrait;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
+
+class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
+{
+    use LocalMarketHelperTrait;
+
+    /**
+     * @return LocalMarketOrder|Model
+     */
+    public function handle(array $data): LocalMarketOrder
+    {
+        $data['status'] = LocalMarketOrderStatus::pendingBuying;
+        $order = LocalMarketOrder::create(
+            Arr::only($data, [
+                'company_id',
+                'customer_name',
+                'reference',
+                'national_id',
+                'amount',
+                'currency',
+                'status',
+                'source',
+                'comment',
+                'preferred_commodity_type',
+            ])
+        );
+
+        $this->createLocalMarketOrderHistory($order, LocalMarketOrderStatus::pendingBuying);
+
+        return $order;
+    }
+}

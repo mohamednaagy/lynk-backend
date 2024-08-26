@@ -11,7 +11,7 @@ use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessLynkInitiatedTraderOrder;
+use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkInitiatedTraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -255,6 +255,7 @@ class TraderOrder extends Model implements HasMedia
             ProcessBursamInitiatedTraderOrder::dispatch($this->id);
         } elseif ($this->provider == EnumsTrader::Lynk) {
             ProcessLynkInitiatedTraderOrder::dispatch($this->id);
+
         }
     }
 
