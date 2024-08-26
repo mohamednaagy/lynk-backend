@@ -61,4 +61,9 @@ class Transaction extends Model implements HasMedia
     {
         return $query->whereIn('reason', $reasons);
     }
+
+    public function getFinancingOrderIdAttribute()
+    {
+        return $this->meta['financing_order_id'];
+    }
 }
