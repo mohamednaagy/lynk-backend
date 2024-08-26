@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Enums\LocalMarketOrderStatus;
 use App\Jobs\LocalMarket\states\CommoditiesPurchaseCompletedStatus;
 use App\Jobs\LocalMarket\states\EligibleCommoditiesFoundStatus;
+use App\Jobs\LocalMarket\states\FailedPurchaseStatus;
 use App\Jobs\LocalMarket\states\NoEligibleCommoditiesAvailableStatus;
 use App\Jobs\LocalMarket\states\PendingEligibleCommoditiesStatus;
 use App\Models\LocalMarketOrder;
@@ -40,6 +41,9 @@ class LocalMarketOrderObserver
                 break;
             case LocalMarketOrderStatus::CommoditiesPurchased:
                 dispatch(new CommoditiesPurchaseCompletedStatus($localMarketOrder));
+                break;
+            case LocalMarketOrderStatus::FailedPurchase:
+                dispatch(new FailedPurchaseStatus($localMarketOrder));
                 break;
         }
     }

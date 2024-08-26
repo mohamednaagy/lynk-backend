@@ -66,16 +66,22 @@ class UnitService
      */
     private function getUnitsWithOwnershipCheck(LocalMarketInventory $inventory, int $numberOfNeededUnits, int $companyId): array
     {
+        // NAGY uncomment this line
         // $rotationThreshold = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count ?? 0;
         $rotationThreshold = 0;
 
         return LocalMarketInventoryUnits::join('local_market_unit_rotations', 'local_market_unit_rotations.inventory_unit_id', '=', 'local_market_inventory_units.id')
-            ->select('id')
             ->where('local_market_inventory_units.status', InventoryUnitsStatus::Free)
             ->where('local_market_inventory_units.local_market_inventory_id', $inventory->id)
             ->where('local_market_unit_rotations.company_id', $companyId)
             ->where('local_market_unit_rotations.number_of_rotations', '>=', $rotationThreshold)
             ->limit($numberOfNeededUnits)
+            ->select(
+                'local_market_inventory_units.id',
+                'local_market_inventory_units.local_market_inventory_id',
+                'local_market_inventory_units.current_owner_type',
+                'local_market_inventory_units.current_owner'
+            )
             ->get()
             ->toArray();
     }
@@ -86,9 +92,9 @@ class UnitService
     private function getUnitsWithoutOwnershipCheck(LocalMarketInventory $inventory, int $numberOfNeededUnits): array
     {
         return LocalMarketInventoryUnits::where('status', InventoryUnitsStatus::Free)
-            ->select('id')
             ->where('local_market_inventory_id', $inventory->id)
             ->limit($numberOfNeededUnits)
+            ->select('id', 'local_market_inventory_id', 'current_owner_type', 'current_owner')
             ->get()
             ->toArray();
     }

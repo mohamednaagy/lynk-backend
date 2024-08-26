@@ -33,37 +33,26 @@ class LoanService
         $inventoryService = app(InventoryService::class);
         $unitsService = app(UnitService::class);
 
-        try {
-            while (! $loanDetails['isLoanCovered'] && $loanDetails['remainingLoan'] > 0) {
-                $inventory = $inventoryService->findEligibleInventoryForLoan(
-                    $loanDetails['remainingLoan'],
-                    $preferredTypes,
-                    array_merge($loanInventories, $loanDetails['inventories_id'])
-                );
+        while (! $loanDetails['isLoanCovered'] && $loanDetails['remainingLoan'] > 0) {
+            $inventory = $inventoryService->findEligibleInventoryForLoan(
+                $loanDetails['remainingLoan'],
+                $preferredTypes,
+                array_merge($loanInventories, $loanDetails['inventories_id'])
+            );
 
-                if (! $inventory) {
-                    break;
-                }
-
-                $eligibleUnits = $unitsService->getEligibleUnits($companyId, $inventory, $loanDetails['remainingLoan']);
-
-                $loanDetails['inventories_id'][] = $inventory->id;
-                $loanDetails['inventories'][] = $eligibleUnits;
-                $loanDetails['isLoanCovered'] = $eligibleUnits['isLoanCovered'];
-                $loanDetails['remainingLoan'] = $eligibleUnits['remainingLoan'];
+            if (! $inventory) {
+                break;
             }
 
-            return $loanDetails;
-        } catch (\Exception $e) {
-            Log::error('Error in getCommoditiesForLoan', [
-                'company_id' => $companyId,
-                'loan_amount' => $loanAmount,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+            $eligibleUnits = $unitsService->getEligibleUnits($companyId, $inventory, $loanDetails['remainingLoan']);
 
-            return $loanDetails;
+            $loanDetails['inventories_id'][] = $inventory->id;
+            $loanDetails['inventories'][] = $eligibleUnits;
+            $loanDetails['isLoanCovered'] = $eligibleUnits['isLoanCovered'];
+            $loanDetails['remainingLoan'] = $eligibleUnits['remainingLoan'];
         }
+
+        return $loanDetails;
     }
 
     public function buyCommodities(LocalMarketOrder $localMarketOrder, $companyId, $data)
