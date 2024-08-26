@@ -79,6 +79,7 @@ class LoanService
 
         try {
             $unitService->changeUnitStatus($units, InventoryUnitsStatus::Reserved);
+            // TODO try to save trader order ownership
             $ownershipService->changeUnitOwnership($units, OwnershipTypes::Company, $companyId);
             $inventoryService->refreshInventoryStocks($eligibleCommodities->getInventoriesIds());
             $orderService->insertOrderUnits($localMarketOrder, $units);
@@ -88,6 +89,8 @@ class LoanService
             Log::info('Commodities bought successfully');
         } catch (Exception $e) {
             Log::error('Error in buy commodities', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::FailedPurchase);
+
             DB::rollBack();
         }
     }
