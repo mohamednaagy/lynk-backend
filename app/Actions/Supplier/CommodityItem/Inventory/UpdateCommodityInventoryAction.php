@@ -3,7 +3,7 @@
 namespace App\Actions\Supplier\CommodityItem\Inventory;
 
 use App\Actions\Contracts\Supplier\CommodityItem\Inventory\UpdateCommodityInventory;
-use App\Enums\LocalMarketInventoryStatus;
+use App\Enums\LocalMarket\InventoryStatus;
 use App\Models\LocalMarketInventory;
 
 class UpdateCommodityInventoryAction implements UpdateCommodityInventory
@@ -12,7 +12,7 @@ class UpdateCommodityInventoryAction implements UpdateCommodityInventory
     {
         $inventory->update([
             'available_quantity' => $data['total_units'],
-            'status' => LocalMarketInventoryStatus::Pending,
+            'status' => InventoryStatus::Pending,
         ]
         );
 

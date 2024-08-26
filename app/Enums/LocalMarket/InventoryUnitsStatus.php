@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums;
+namespace App\Enums\LocalMarket;
 
 use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
@@ -9,8 +9,9 @@ use BenSampo\Enum\Enum;
  * @method static static Active()
  * @method static static Inactive()
  */
-final class LocalMarketInventoryUnitsStatus extends Enum implements LocalizedEnum
+final class InventoryUnitsStatus extends Enum implements LocalizedEnum
 {
-    const Free      = '0';
-    const Reserved  = '1';
+    const Free = '0';
+
+    const Reserved = '1';
 }

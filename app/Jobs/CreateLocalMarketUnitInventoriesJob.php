@@ -2,12 +2,11 @@
 
 namespace App\Jobs;
 
-use App\Enums\LocalMarketInventoryStatus;
-use App\Enums\LocalMarketInventoryUnitsStatus;
+use App\Enums\LocalMarket\InventoryStatus;
+use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Exceptions\NeedManuallyCheckUnitsAndStatus;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
-use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -52,7 +51,7 @@ class CreateLocalMarketUnitInventoriesJob implements ShouldQueue
                 'local_market_inventory_id' => $this->inventory->id,
                 'commodity_item_id' => $this->inventory->item->id,
                 'qr_code' => $baseName.'-'.$uuid,
-                'status'  => LocalMarketInventoryUnitsStatus::Free,
+                'status' => InventoryUnitsStatus::Free,
             ];
         }
 
@@ -65,7 +64,7 @@ class CreateLocalMarketUnitInventoriesJob implements ShouldQueue
             // Update the inventory status to active if the unit count matches
             if ($totalUnitsCreated == $availableQuantity) {
                 $this->inventory->update([
-                    'status' => LocalMarketInventoryStatus::Active,
+                    'status' => InventoryStatus::Active,
                 ]);
             } elseif ($totalUnitsCreated < $availableQuantity) {
                 $missingUnits = $availableQuantity - $totalUnitsCreated;
@@ -74,10 +73,10 @@ class CreateLocalMarketUnitInventoriesJob implements ShouldQueue
                 // throw exception
                 // change inventory status to be having a problem status
                 $this->inventory->update([
-                    'status' => LocalMarketInventoryStatus::Problem,
+                    'status' => InventoryStatus::Problem,
                 ]);
 
-                throw new NeedManuallyCheckUnitsAndStatus();
+                throw new NeedManuallyCheckUnitsAndStatus;
             }
         }
 

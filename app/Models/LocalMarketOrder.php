@@ -21,6 +21,7 @@ class LocalMarketOrder extends Model
         'national_id',
         'customer_name',
         'status',
+        'data',
         'comment',
         'company_id',
         'trader_order_id',
@@ -30,6 +31,11 @@ class LocalMarketOrder extends Model
     protected $casts = [
         'status' => LocalMarketOrderStatus::class,
         'amount' => MoneyStringCast::class.':currency',
+    ];
+
+    protected $casts = [
+        'preferred_commodity_type' => 'array',
+        'data' => 'array',
     ];
 
     public function orderInventories()

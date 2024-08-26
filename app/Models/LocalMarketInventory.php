@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Enums\LocalMarketInventoryStatus;
-use App\Enums\LocalMarketInventoryUnitsStatus;
+use App\Enums\LocalMarket\InventoryStatus;
+use App\Enums\LocalMarket\InventoryUnitsStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
@@ -26,7 +26,7 @@ class LocalMarketInventory extends Model
     ];
 
     protected $casts = [
-        'status' => LocalMarketInventoryStatus::class,
+        'status' => InventoryStatus::class,
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -119,8 +119,8 @@ class LocalMarketInventory extends Model
      */
     public function refreshStockQuantities()
     {
-        $this->available_quantity = $this->units()->where('status', LocalMarketInventoryUnitsStatus::Free)->count();
-        $this->reserved_items = $this->units()->where('status', LocalMarketInventoryUnitsStatus::Reserved)->count();
+        $this->available_quantity = $this->units()->where('status', InventoryUnitsStatus::Free)->count();
+        $this->reserved_items = $this->units()->where('status', InventoryUnitsStatus::Reserved)->count();
 
         $this->save();
     }
