@@ -25,20 +25,39 @@ class InventoryService
      */
     public function findEligibleInventoryForLoan(float $loanAmount, array $preferredItemTypes = [], array $usedInventories = [])
     {
-        $inventory = LocalMarketInventory::where('max_price', '<=', $loanAmount)
-            ->where('status', InventoryStatus::Active)
-            ->when(! empty($preferredItemTypes), function ($query) use ($preferredItemTypes) {
-                $query->whereIn('commodity_type_id', $preferredItemTypes);
-            })
-            ->when(! empty($usedInventories), function ($query) use ($usedInventories) {
-                $query->whereNotIn('id', $usedInventories);
-            })
-            ->orderByRaw('(`available_quantity` * `max_price`) DESC')
-            ->first();
+        // get preferred types first if there is no preferred get any inventory
+        $inventory = $this->findInventory($loanAmount, $usedInventories, $preferredItemTypes);
 
-        Log::info('findEligibleInventoryForLoan details is :', ['inventory' => $inventory, 'preferredItemTypes' => $preferredItemTypes, 'usedInventories' => $usedInventories]);
+        if (empty($inventory) && ! empty($preferredItemTypes)) {
+            $inventory = $this->findInventory($loanAmount, $usedInventories);
+        }
+
+        Log::info('InventoryService:findEligibleInventoryForLoan', [
+            'loanAmount' => $loanAmount,
+            'preferredItemTypes' => $preferredItemTypes,
+            'usedInventories' => $usedInventories,
+            'inventory' => $inventory,
+        ]);
 
         return $inventory;
+    }
+
+    private function findInventory(float $loanAmount, array $usedInventories = [], array $preferredItemTypes = [])
+    {
+        $inventory = LocalMarketInventory::where('max_price', '<=', $loanAmount)
+            ->where('status', InventoryStatus::Active)
+            ->when(! empty($usedInventories), function ($query) use ($usedInventories) {
+                $query->whereNotIn('id', $usedInventories);
+            });
+
+        if (empty($preferredItemTypes)) {
+            return $inventory->orderByRaw('(`available_quantity` * `max_price`) DESC')
+                ->first();
+        } else {
+            return $inventory->whereIn('commodity_type_id', $preferredItemTypes)
+                ->orderByRaw('(`available_quantity` * `max_price`) DESC')
+                ->first();
+        }
     }
 
     public static function refreshInventoryStocks($inventories)

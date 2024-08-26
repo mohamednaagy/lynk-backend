@@ -31,8 +31,14 @@ class LocalMarketOrder extends Model
     ];
 
     protected $casts = [
-        'status' => LocalMarketOrderStatus::class,
-        'amount' => MoneyStringCast::class.':currency',
+        // Nagy TODO
+        // i need to use status directly without casting it to LocalMarketOrderStatus
+        // LocalMarketOrderObserver.30
+        // FindEligibleCommoditiesAction.21
+        // the same issue with amount
+
+        // 'status' => LocalMarketOrderStatus::class,
+        // 'amount' => MoneyStringCast::class.':currency',
         'preferred_commodity_type' => 'array',
         'data' => 'array',
     ];

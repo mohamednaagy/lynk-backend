@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Enums\LocalMarketOrderStatus;
 use App\Jobs\LocalMarket\states\CommoditiesPurchaseCompletedStatus;
 use App\Jobs\LocalMarket\states\EligibleCommoditiesFoundStatus;
+use App\Jobs\LocalMarket\states\NoEligibleCommoditiesAvailableStatus;
 use App\Jobs\LocalMarket\states\PendingEligibleCommoditiesStatus;
 use App\Models\LocalMarketOrder;
 
@@ -27,17 +28,19 @@ class LocalMarketOrderObserver
      */
     public function updated(LocalMarketOrder $localMarketOrder)
     {
-        $job = match ($localMarketOrder->status) {
-            LocalMarketOrderStatus::PendingEligibleCommodities => new PendingEligibleCommoditiesStatus($localMarketOrder),
-            LocalMarketOrderStatus::EligibleCommoditiesAvailable => new EligibleCommoditiesFoundStatus($localMarketOrder),
-            // add job to cancel order and notify user
-            LocalMarketOrderStatus::CommoditiesPurchased => new CommoditiesPurchaseCompletedStatus($localMarketOrder),
-
-            default => null,
-        };
-
-        if ($job) {
-            $job->handle();
+        switch ($localMarketOrder->status) {
+            case LocalMarketOrderStatus::PendingEligibleCommodities:
+                dispatch(new PendingEligibleCommoditiesStatus($localMarketOrder));
+                break;
+            case LocalMarketOrderStatus::EligibleCommoditiesAvailable:
+                dispatch(new EligibleCommoditiesFoundStatus($localMarketOrder));
+                break;
+            case LocalMarketOrderStatus::NoEligibleCommoditiesAvailable:
+                dispatch(new NoEligibleCommoditiesAvailableStatus($localMarketOrder));
+                break;
+            case LocalMarketOrderStatus::CommoditiesPurchased:
+                dispatch(new CommoditiesPurchaseCompletedStatus($localMarketOrder));
+                break;
         }
     }
 
