@@ -70,6 +70,7 @@ class UnitService
         $rotationThreshold = 0;
 
         return LocalMarketInventoryUnits::join('local_market_unit_rotations', 'local_market_unit_rotations.inventory_unit_id', '=', 'local_market_inventory_units.id')
+            ->select('id')
             ->where('local_market_inventory_units.status', InventoryUnitsStatus::Free)
             ->where('local_market_inventory_units.local_market_inventory_id', $inventory->id)
             ->where('local_market_unit_rotations.company_id', $companyId)
@@ -85,6 +86,7 @@ class UnitService
     private function getUnitsWithoutOwnershipCheck(LocalMarketInventory $inventory, int $numberOfNeededUnits): array
     {
         return LocalMarketInventoryUnits::where('status', InventoryUnitsStatus::Free)
+            ->select('id')
             ->where('local_market_inventory_id', $inventory->id)
             ->limit($numberOfNeededUnits)
             ->get()
