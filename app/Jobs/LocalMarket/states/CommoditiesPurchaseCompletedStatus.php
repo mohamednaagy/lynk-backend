@@ -31,6 +31,7 @@ class CommoditiesPurchaseCompletedStatus implements ShouldQueue
         // {
         // "CASE" : "PURCHASED_COMMODITIES",
         // "CASE" : "SELLED_COMMODITIES",
+        // "CASE" : "CAncel",
         // "CASE" : "PURCHASING_FAILURE",
         // "CASE" : "SELLING_FAILURE",
         // "data": {
