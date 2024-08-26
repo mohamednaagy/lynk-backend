@@ -27,13 +27,18 @@ class LocalMarketOrderObserver
      */
     public function updated(LocalMarketOrder $localMarketOrder)
     {
-        match ($localMarketOrder->status) {
-            LocalMarketOrderStatus::PendingEligibleCommodities => PendingEligibleCommoditiesStatus::dispatch($localMarketOrder),
-            LocalMarketOrderStatus::EligibleCommoditiesAvailable => EligibleCommoditiesFoundStatus::dispatch($localMarketOrder),
-            LocalMarketOrderStatus::CommoditiesPurchased => CommoditiesPurchaseCompletedStatus::dispatch($localMarketOrder),
+        $job = match ($localMarketOrder->status) {
+            LocalMarketOrderStatus::PendingEligibleCommodities => new PendingEligibleCommoditiesStatus($localMarketOrder),
+            LocalMarketOrderStatus::EligibleCommoditiesAvailable => new EligibleCommoditiesFoundStatus($localMarketOrder),
+            // add job to cancel order and notify user
+            LocalMarketOrderStatus::CommoditiesPurchased => new CommoditiesPurchaseCompletedStatus($localMarketOrder),
 
             default => null,
         };
+
+        if ($job) {
+            $job->handle();
+        }
     }
 
     /**

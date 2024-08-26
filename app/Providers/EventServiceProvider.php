@@ -7,12 +7,14 @@ use App\Listeners\RefundOrderCost;
 use App\Models\CommodityItem;
 use App\Models\FinancingOrder;
 use App\Models\LocalMarketInventory;
+use App\Models\LocalMarketOrder;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\Transaction;
 use App\Observers\CommodityItemObserver;
 use App\Observers\FinancingOrderObserver;
 use App\Observers\LocalMarketInventoryObserver;
+use App\Observers\LocalMarketOrderObserver;
 use App\Observers\TraderHistoryObserver;
 use App\Observers\TraderOrderObserver;
 use App\Observers\TransactionObserver;
@@ -43,14 +45,13 @@ class EventServiceProvider extends ServiceProvider
         Transaction::class => [TransactionObserver::class],
         LocalMarketInventory::class => [LocalMarketInventoryObserver::class],
         CommodityItem::class => [CommodityItemObserver::class],
+        LocalMarketOrder::class => [LocalMarketOrderObserver::class],
     ];
 
     /**
      * Register any events for your application.
      */
-    public function boot(): void
-    {
-    }
+    public function boot(): void {}
 
     /**
      * Determine if events and listeners should be automatically discovered.

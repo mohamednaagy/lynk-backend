@@ -99,9 +99,4 @@ class UnitService
         $ids = array_column($units, 'id');
         LocalMarketInventoryUnits::whereIn('id', $ids)->update(['status' => $status]);
     }
-
-    public function extractUnits($data)
-    {
-        return $data['inventories']['availableUnits'];
-    }
 }

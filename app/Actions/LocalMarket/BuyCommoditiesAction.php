@@ -29,7 +29,7 @@ class BuyCommoditiesAction implements BuyCommodities
         $eligibleCommodities = $localMarketOrder->data;
 
         if ($eligibleCommodities['isLoanCovered']) {
-            $this->loanService->buyCommodities($localMarketOrder, $localMarketOrder->company_id, $eligibleCommodities);
+            $this->LoanService->buyCommodities($localMarketOrder, $localMarketOrder->company_id, $eligibleCommodities);
         } else {
             Log::error("Loan {$localMarketOrder->id} is not covered we can not move on ");
         }
