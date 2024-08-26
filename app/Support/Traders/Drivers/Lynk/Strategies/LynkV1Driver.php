@@ -43,14 +43,18 @@ class LynkV1Driver implements TraderInterface
             return $financingOrder->initiatedTraderOrders()->first();
         }
 
-        return $financingOrder->traderOrders()->create([
+        $traderOrder = $financingOrder->traderOrders()->create([
             'uuid_one' => Str::uuid(),
             'provider' => $this->provider,
-            'reference' => 'random_to_no_be_fake',
+            'reference' => Str::upper(Str::random(14)).$financingOrder->id,
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
         ]);
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+
+        return $traderOrder;
     }
 
     /**
@@ -58,27 +62,31 @@ class LynkV1Driver implements TraderInterface
      */
     public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
     {
-        $response = LynkClient::of($traderOrder)->buyProduct();
+        $order = LynkClient::of($traderOrder)->createOrder();
 
-        if (! $response) {
-            throw new TraderException(
-                'Failed to create trader order',
-                [
-                    'trader_order_id' => $traderOrder->id,
-                    'provider' => $this->provider,
-                    'version' => $this->version,
-                    'provider_response_body' => $response->json(),
-                    'financing_order_id' => $traderOrder->order->id,
-                    'failure_reason' => $response->json('cannot fullfilled'),
-                ]
-            );
-        }
-
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
-
-        $traderOrder->update([
-            'status' => TraderOrderStatus::InProgress,
-        ]);
+        return $traderOrder;
+        //        dd($order);
+        //        $response = LynkClient::of($traderOrder)->buyProduct();
+        //
+        //        if (! $response) {
+        //            throw new TraderException(
+        //                'Failed to create trader order',
+        //                [
+        //                    'trader_order_id' => $traderOrder->id,
+        //                    'provider' => $this->provider,
+        //                    'version' => $this->version,
+        //                    'provider_response_body' => $response->json(),
+        //                    'financing_order_id' => $traderOrder->order->id,
+        //                    'failure_reason' => $response->json('cannot fullfilled'),
+        //                ]
+        //            );
+        //        }
+        //
+        //        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+        //
+        //        $traderOrder->update([
+        //            'status' => TraderOrderStatus::InProgress,
+        //        ]);
 
         return $traderOrder;
     }

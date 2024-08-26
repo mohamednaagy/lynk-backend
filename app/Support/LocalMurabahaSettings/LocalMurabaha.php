@@ -7,7 +7,8 @@ class LocalMurabaha
     public function __construct(
         private int $default_trade_order_rotation_count,
         private int $default_contract_sign_time_limit,
-    ) {}
+    ) {
+    }
 
     public static function fromArray(array $data): LocalMurabaha
     {

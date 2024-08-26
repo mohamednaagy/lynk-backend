@@ -5,7 +5,7 @@ namespace App\Enums;
 use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
 
-final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
+final class LocalMarketOrderHistoryStatus extends Enum implements LocalizedEnum
 {
     const PendingEligibleCommodities = 1;
 

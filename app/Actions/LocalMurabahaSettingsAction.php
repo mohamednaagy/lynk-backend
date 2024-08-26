@@ -12,7 +12,8 @@ class LocalMurabahaSettingsAction implements SettingsInterface
      */
     public function __construct(
         protected GetSettingsClassInstance $getSettingsClassInstance
-    ) {}
+    ) {
+    }
 
     public function handle(array $data): void
     {

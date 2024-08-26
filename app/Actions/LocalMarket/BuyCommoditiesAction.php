@@ -12,7 +12,8 @@ class BuyCommoditiesAction implements BuyCommodities
 {
     public function __construct(
         private LoanService $LoanService
-    ) {}
+    ) {
+    }
 
     /**
      * Executes the purchase product action.

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
+namespace App\Support\Traders\Drivers\Lynk\Jobs;
 
+use App\Enums\Trader as TraderEnum;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -47,7 +48,7 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
                 return;
             }
 
-            Trader::driver('lynk', $traderOrder->version)->processInitiatedTraderOrder($traderOrder);
+            Trader::driver(TraderEnum::Lynk, $traderOrder->version)->processInitiatedTraderOrder($traderOrder);
         });
     }
 
