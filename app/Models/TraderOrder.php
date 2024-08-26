@@ -255,7 +255,6 @@ class TraderOrder extends Model implements HasMedia
             ProcessBursamInitiatedTraderOrder::dispatch($this->id);
         } elseif ($this->provider == EnumsTrader::Lynk) {
             ProcessLynkInitiatedTraderOrder::dispatch($this->id);
-
         }
     }
 

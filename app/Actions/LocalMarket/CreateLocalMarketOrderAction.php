@@ -18,7 +18,7 @@ class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
      */
     public function handle(array $data): LocalMarketOrder
     {
-        $data['status'] = LocalMarketOrderStatus::pendingBuying;
+        $data['status'] = LocalMarketOrderStatus::PendingEligibleCommodities;
         $order = LocalMarketOrder::create(
             Arr::only($data, [
                 'company_id',
@@ -31,10 +31,11 @@ class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
                 'source',
                 'comment',
                 'preferred_commodity_type',
+                'buying_uuid',
+                'selling_uuid',
             ])
         );
-
-        $this->createLocalMarketOrderHistory($order, LocalMarketOrderStatus::pendingBuying);
+        $this->createLocalMarketOrderHistory($order, LocalMarketOrderStatus::PendingEligibleCommodities);
 
         return $order;
     }

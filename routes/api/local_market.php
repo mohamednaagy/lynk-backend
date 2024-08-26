@@ -15,7 +15,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1/local_markets')->name('api.v1.')->group(function () {
-    Route::post('create-order', [LocalMarketController::class, 'createOrder']);
-
     Route::post('buy', [LocalMarketController::class, 'buy']);
 });

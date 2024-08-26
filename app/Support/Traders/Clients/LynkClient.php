@@ -41,6 +41,7 @@ class LynkClient
         $data['reference'] = $this->traderOrder->reference;
         $data['source'] = $this->traderOrder->provider;
         $data['company_id'] = $financingOrder->company_id;
+        $data['buying_uuid'] = $this->traderOrder->uuid_one;
 
         return app(CreateLocalMarketOrder::class)->handle($data);
 
