@@ -61,4 +61,14 @@ class Transaction extends Model implements HasMedia
     {
         return $query->whereIn('reason', $reasons);
     }
+
+    public function getFinancingOrderIdAttribute()
+    {
+        return $this->meta['financing_order_id'] ?? null;
+    }
+
+    public function scopeWhereFinancingOrderId($query, $financingOrderId)
+    {
+        return $query->whereJsonContains('meta->financing_order_id', $financingOrderId);
+    }
 }
