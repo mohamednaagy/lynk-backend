@@ -12,6 +12,7 @@ use App\Enums\OrderCancellationStatus;
 use App\Enums\TraderErrorCode;
 use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
@@ -554,7 +555,8 @@ class BursamV1Driver implements TraderInterface
             'status' => TraderOrderStatus::PendingCancellation,
         ]);
 
-        ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id, TraderOrderCancelReason::Manual, user: auth()->user());
+        ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id, TraderOrderCancelReason::Manual, TraderOrderCancelType::User,
+            auth()->user()->id);
 
         return OrderCancellationStatus::PendingCancellation;
     }
@@ -564,9 +566,11 @@ class BursamV1Driver implements TraderInterface
      */
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled,
+        $cancelledByType = TraderOrderCancelType::System,
+        $cancelledBy = null
     ): int {
-        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, user: auth()->user());
+        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
 
         $activeTraderOrdersCount = TraderOrder::where('status', TraderOrderStatus::InProgress)
             ->where('financing_order_id', $traderOrder->id)
@@ -593,7 +597,9 @@ class BursamV1Driver implements TraderInterface
         return TraderOrderCancellationStatus::Cancelled;
     }
 
-    public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void {}
+    public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
+    {
+    }
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {

@@ -5,6 +5,7 @@ namespace App\Support\Traders\Drivers\Dmcc\Strategies;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
@@ -237,7 +238,9 @@ class DmccV1Driver implements TraderInterface
      */
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled,
+        $cancelledByType = TraderOrderCancelType::System,
+        $cancelledBy = null
     ): object {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('cancelTTI'))

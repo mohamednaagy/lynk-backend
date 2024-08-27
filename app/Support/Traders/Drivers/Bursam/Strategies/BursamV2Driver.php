@@ -8,6 +8,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
@@ -63,11 +64,13 @@ class BursamV2Driver extends BursamV1Driver
      */
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled,
+        $cancelledByType = TraderOrderCancelType::System,
+        $cancelledBy = null
     ): int {
         $user = auth()->check() ? auth()->user() : null;
         if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket) || $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::OnHold)) {
-            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, user: $user);
+            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: auth()->user()->id);
 
             return TraderOrderCancellationStatus::Cancelled;
         }
@@ -84,7 +87,7 @@ class BursamV2Driver extends BursamV1Driver
 
         Bus::chain([
             new ProcessBursamSellingCommodityToOpenMarketForCancellation($traderOrder->id),
-            new ProcessBursamStbCertificateAfterCancellation($traderOrder->id, $cancelReason, user: $user),
+            new ProcessBursamStbCertificateAfterCancellation($traderOrder->id, $cancelReason, $cancelledByType, $cancelledBy),
             function () use ($traderOrder) {
                 $activeTraderOrdersCount = TraderOrder::where('status', TraderOrderStatus::InProgress)
                     ->where('financing_order_id', $traderOrder->id)
