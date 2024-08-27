@@ -45,7 +45,6 @@ class FireWebhookWhenStatusIsMurabhaSaleCompletedAction implements FireWebhookWh
                 'completed_murabaha_step' => $lastCompletedStep,
                 'signed_wakala_document_url' => get_file_url($wakalaDocumentMediaFile),
                 'warranty_document_url' => get_file_url($documentMediaFile),
-                'sell_confirmation_document_url' => get_file_url($sellConfirmationMediaCollection),
             ],
             'updated_at' => $this->getFormattedDateTime($lastHistory),
         ]);
