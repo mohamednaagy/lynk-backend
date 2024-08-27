@@ -25,8 +25,6 @@ class Kernel extends ConsoleKernel
             ->when(is_bursam_service_available())
             ->at(get_start_time_bursa()->format('H:i'));
 
-        $timezone = Config::get('services.bursam.timezone');
-
         $schedule->job(new ProcessFinancingOrders())
             ->when(is_bursam_service_available())
             ->everyMinute()
