@@ -27,7 +27,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('financing_orders', function (Blueprint $table) {
-            //
+            $table->dropColumn('charged_trader_orders_count');
         });
     }
 };
