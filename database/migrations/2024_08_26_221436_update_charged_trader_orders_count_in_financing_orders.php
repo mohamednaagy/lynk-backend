@@ -3,7 +3,6 @@
 use App\Models\FinancingOrder;
 use App\Models\Transaction;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -14,21 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::beginTransaction();
-
-        try {
-            // Process transactions in chunks
-            Transaction::chunkById(1000, function ($transactions) {
-                foreach ($transactions as $transaction) {
-                    $this->updateFinancingOrderCount($transaction);
-                }
-            });
-            DB::commit(); 
-        } catch (\Exception $e) {
-            // Rollback the transaction on any exception
-            DB::rollBack(); 
-            throw $e; 
-        }
+        // Process transactions in chunks
+        Transaction::chunkById(1000, function ($transactions) {
+            foreach ($transactions as $transaction) {
+                $this->updateFinancingOrderCount($transaction);
+            }
+        });
     }
 
     /**
