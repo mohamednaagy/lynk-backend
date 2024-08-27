@@ -46,7 +46,7 @@ class Kernel extends ConsoleKernel
         $schedule->job(new ProcessDailySellingPendingCommodityToMarket)
             ->timezone($timezone)
             ->everyTwoMinutes()
-            ->at(get_end_time_bursa())
+            ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
             ->onOneServer();
 
     }

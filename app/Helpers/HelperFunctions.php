@@ -227,20 +227,4 @@ if (! function_exists('saudi_now')) {
     {
         return Carbon::now('Asia/Riyadh');
     }
-
-    if (! function_exists('get_end_time_bursa')) {
-        function get_end_time_bursa()
-        {
-            $timezone = Config::get('services.bursam.timezone');
-            $now = now($timezone);
-            $marketOpeningStartTime = Config::get('services.bursam.market_opening_end_time');
-            $fridayBreakStartTime = Config::get('services.bursam.friday_break_end_time');
-
-            $marketOpeningStartDateTime = now($timezone)->setTimeFromTimeString($marketOpeningStartTime);
-            $fridayBreakStartDateTime = now($timezone)->setTimeFromTimeString($fridayBreakStartTime);
-
-            return $now->isFriday() ? $fridayBreakStartDateTime : $marketOpeningStartDateTime;
-
-        }
-    }
 }
