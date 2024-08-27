@@ -24,6 +24,10 @@ class FireWebhookWhenStatusIsMurabhaSaleCompletedAction implements FireWebhookWh
             Trader::Lynk => TraderOrderMediaCollection::LynkSalePledgeCertificate
         };
 
+        $sellConfirmationMediaCollection = match ($traderOrder->provider) {
+            Trader::Lynk => TraderOrderMediaCollection::SellConfirmationDocument
+        };
+
         $documentMediaFile = get_media_of_model($traderOrder, $warrantyMediaCollection);
         $wakalaDocumentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::ClientWakala);
         $lastHistory = $this->getTraderOrderLastHistory($traderOrder);

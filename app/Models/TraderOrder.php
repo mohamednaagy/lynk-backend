@@ -98,6 +98,14 @@ class TraderOrder extends Model implements HasMedia
 
         $this->addMediaCollection(TraderOrderMediaCollection::ZatcaInvoice)
             ->singleFile();
+
+        $this
+            ->addMediaCollection(TraderOrderMediaCollection::LynkSalePledgeCertificate)
+            ->singleFile();
+
+        $this
+            ->addMediaCollection(TraderOrderMediaCollection::SellConfirmationDocument)
+            ->singleFile();
     }
 
     public function order(): BelongsTo

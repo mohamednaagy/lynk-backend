@@ -51,8 +51,9 @@ class LocalMarketInventoryUnits extends Model
         return $this->hasMany(LocalMarketUnitRotation::class, 'inventory_unit_id');
     }
 
-    public static function insertBulk($data) {
-        $now = saudi_now();
+    public static function insertBulk($data)
+    {
+        $now = saudi_now('Y-m-d h:i:s');
         // Implement bulk insertion logic here
         $data = array_map(function($item) use ($now) {
             return array_merge($item, [

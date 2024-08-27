@@ -101,6 +101,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             TraderOrderMediaCollection::LynkSalePledgeCertificate,
         );
 
+
         $this->createStepHistories(
             $request,
             $traderOrder,
@@ -123,5 +124,22 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
 
         // automatic complete the order
         $this->updateMurabhaCompleteDocument($traderOrder, $request);
+    }
+
+    public function updateSellConfirmationDocument(TraderOrder $traderOrder, Request $request)
+    {
+        $traderOrder->ensureCanAccessStep(MurabhaStep::MurabahaSaleCompleted);
+
+        $this->attachDocumentToOrder(
+            $traderOrder,
+            base64_encode(file_get_contents($request->file('sell_confirmation_document'))),
+            TraderOrderMediaCollection::SellConfirmationDocument,
+            'base64'
+        );
+
+        $this->createTraderOrderHistory(
+            $traderOrder,
+            FinancingOrderHistory::AttachSellConfirmationDocument,
+        );
     }
 }
