@@ -3,6 +3,7 @@
 namespace App\Support\Traders\Contracts;
 
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderCancelType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 
@@ -20,7 +21,9 @@ interface TraderInterface
 
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::Manual
+        int $cancelReason = TraderOrderCancelReason::Manual,
+        $cancelledByType = TraderOrderCancelType::System,
+        $cancelledBy = null
     ): mixed;
 
     public function getDefaultInitialTradeOrderStatus();
