@@ -27,13 +27,13 @@ class Kernel extends ConsoleKernel
 
         $timezone = Config::get('services.bursam.timezone');
 
-        $schedule->job(new ProcessFinancingOrders)
+        $schedule->job(new ProcessFinancingOrders())
             ->when(is_bursam_service_available())
             ->everyMinute()
             ->withoutOverlapping()
             ->onOneServer();
 
-        $schedule->job(new ProcessDmccNotifications)
+        $schedule->job(new ProcessDmccNotifications())
             ->when(is_bursam_service_available())
             ->everyMinute()
             ->withoutOverlapping()
@@ -43,7 +43,7 @@ class Kernel extends ConsoleKernel
         $sellingCommodityStartTime = Config::get('services.bursam.selling_commodity_start_time');
         $sellingCommodityEndTime = Config::get('services.bursam.selling_commodity_end_time');
 
-        $schedule->job(new ProcessDailySellingPendingCommodityToMarket)
+        $schedule->job(new ProcessDailySellingPendingCommodityToMarket())
             ->timezone($timezone)
             ->everyTwoMinutes()
             ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
