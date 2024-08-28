@@ -20,11 +20,11 @@ Route::prefix('test')->group(function () {
             ->first();
 
         // (new FindEligibleCommoditiesAction(new LoanService))->handle($localMarketOrder);
-        (new BuyCommoditiesAction(new LoanService))->handle($localMarketOrder);
+        // (new BuyCommoditiesAction(new LoanService))->handle($localMarketOrder);
 
-        // if ($localMarketOrder) {
-        //     $localMarketOrder->status = $status;
-        //     $localMarketOrder->save();
-        // }
+        if ($localMarketOrder) {
+            $localMarketOrder->status = $status;
+            $localMarketOrder->save();
+        }
     });
 });

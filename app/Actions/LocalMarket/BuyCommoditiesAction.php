@@ -38,6 +38,10 @@ class BuyCommoditiesAction implements BuyCommodities
                 Log::error("Loan {$localMarketOrder->id} is not covered we can not move on ");
             }
 
+            $localMarketOrder->update([
+                'status' => LocalMarketOrderStatus::CommoditiesPurchased,
+            ]);
+
             Log::info('BuyCommoditiesAction Duration', [
                 'order_id' => $localMarketOrder->id,
                 'start_time' => $startTime,

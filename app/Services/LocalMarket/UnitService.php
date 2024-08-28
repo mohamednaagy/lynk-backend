@@ -14,6 +14,11 @@ class UnitService
      */
     public function getEligibleUnits(int $orderNo, int $companyId, LocalMarketInventory $inventory, float $loan, int $maxNumberOfUnits = 10000): array
     {
+
+        // TODO naser
+        // 1- mark unit as reserced or hold
+        // 2- recalculate invnetory units
+
         $numberOfNeededUnits = $this->calculateNeededUnits($loan, $inventory);
 
         // Check if the number of needed units exceeds the maximum limit

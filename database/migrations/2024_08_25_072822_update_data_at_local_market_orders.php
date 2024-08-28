@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('currency', 4);
             $table->string('national_id')->nullable()->change();
             $table->string('customer_name')->nullable()->change();
-            $table->string('reference');
+            $table->string('external_order');
         });
     }
 

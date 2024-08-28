@@ -16,6 +16,8 @@ return new class extends Migration
         Schema::table('local_market_orders', function (Blueprint $table) {
             $table->string('buying_uuid')->nullable();
             $table->string('selling_uuid')->nullable();
+
+            $table->renameColumn('trader_order_id', 'order_no');
         });
 
         Schema::table('local_market_inventory_units', function (Blueprint $table) {
@@ -35,6 +37,8 @@ return new class extends Migration
     public function down()
     {
         Schema::table('local_market_orders', function (Blueprint $table) {
+            $table->renameColumn('order_no', 'trader_order_id');
+
             $table->dropColumn(['buying_uuid', 'selling_uuid'])->nullable();
         });
 

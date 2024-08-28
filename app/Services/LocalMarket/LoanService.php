@@ -46,7 +46,9 @@ class LoanService
                     'preferredItemTypes' => $preferredTypes,
                     'usedInventories' => $usedInventories,
                 ]);
-                break;
+                $loanDetails['purchasingFailureReason'] = 'there is no valid inventory';
+
+                return $loanDetails;
             }
 
             $eligibleUnits = $unitsService->getEligibleUnits($orderNo, $companyId, $inventory, $loanDetails['remainingLoan'], $maxNumberOfUnits);

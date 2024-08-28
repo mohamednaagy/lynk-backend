@@ -47,6 +47,7 @@ class OrderService
     {
         $timestamp = Carbon::now()->format('Y-m-d H:i:s');
 
+        // TODO naser double check local_market_inventory_id relation
         DB::table('local_market_order_has_units')->insertUsing(
             [
                 'inventory_unit_id',
@@ -57,7 +58,8 @@ class OrderService
             DB::table('local_market_inventory_units')
                 ->select(
                     'id as inventory_unit_id',
-                    'local_market_inventory_id',
+                    '1',
+                    // 'local_market_inventory_id as local_market_inventory_id',
                     DB::raw("'{$timestamp}' as created_at"),
                     DB::raw("'{$timestamp}' as updated_at")
                 )
