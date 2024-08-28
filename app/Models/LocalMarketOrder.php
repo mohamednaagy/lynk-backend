@@ -2,14 +2,11 @@
 
 namespace App\Models;
 
-use App\Enums\LocalMarketOrderStatus;
-use App\Support\Money\Casts\MoneyStringCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property mixed $currency
- * @property mixed $amount
  */
 class LocalMarketOrder extends Model
 {
@@ -28,18 +25,11 @@ class LocalMarketOrder extends Model
         'reference',
         'buying_uuid',
         'selling_uuid',
+        'currency',
         'hold_for',
     ];
 
     protected $casts = [
-        // Nagy TODO
-        // i need to use status directly without casting it to LocalMarketOrderStatus
-        // LocalMarketOrderObserver.30
-        // FindEligibleCommoditiesAction.21
-        // the same issue with amount
-
-        // 'status' => LocalMarketOrderStatus::class,
-        // 'amount' => MoneyStringCast::class.':currency',
         'preferred_commodity_type' => 'array',
         'data' => 'array',
     ];

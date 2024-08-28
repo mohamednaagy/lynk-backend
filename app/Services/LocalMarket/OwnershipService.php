@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\LocalMarket;
 
 use App\Models\LocalMarketOrder;
 use Carbon\Carbon;
