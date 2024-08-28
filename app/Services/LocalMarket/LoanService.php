@@ -18,38 +18,40 @@ use Illuminate\Support\Facades\Log;
 class LoanService
 {
     public function getCommoditiesForLoan(
+        int $orderNo,
         int $companyId,
         float $loanAmount,
-        array $preferredTypes = [],
-        array $loanInventories = []
+        array $preferredTypes = []
     ): array {
         $loanDetails = [
-            'inventories_id' => [],
             'inventories' => [],
             'isLoanCovered' => false,
             'remainingLoan' => $loanAmount,
+            'numberOfSuitableUnits' => 0,
         ];
 
         $inventoryService = app(InventoryService::class);
         $unitsService = app(UnitService::class);
+        $usedInventories = [];
 
         while (! $loanDetails['isLoanCovered'] && $loanDetails['remainingLoan'] > 0) {
             $inventory = $inventoryService->findEligibleInventoryForLoan(
                 $loanDetails['remainingLoan'],
                 $preferredTypes,
-                array_merge($loanInventories, $loanDetails['inventories_id'])
+                $usedInventories
             );
 
             if (! $inventory) {
                 break;
             }
 
-            $eligibleUnits = $unitsService->getEligibleUnits($companyId, $inventory, $loanDetails['remainingLoan']);
+            $eligibleUnits = $unitsService->getEligibleUnits($orderNo, $companyId, $inventory, $loanDetails['remainingLoan']);
 
-            $loanDetails['inventories_id'][] = $inventory->id;
+            $usedInventories[] = $inventory->id;
             $loanDetails['inventories'][] = $eligibleUnits;
             $loanDetails['isLoanCovered'] = $eligibleUnits['isLoanCovered'];
             $loanDetails['remainingLoan'] = $eligibleUnits['remainingLoan'];
+            $loanDetails['numberOfSuitableUnits'] = +$eligibleUnits['numberOfSuitableUnits'];
         }
 
         return $loanDetails;
@@ -64,15 +66,17 @@ class LoanService
         $orderService = new OrderService;
 
         $eligibleCommodities = OrderCommoditiesDto::fromArray($data);
-        $units = $eligibleCommodities->getAllUnits();
 
         try {
-            $unitService->changeUnitStatus($units, InventoryUnitsStatus::Reserved);
-            // TODO try to save trader order ownership
-            $ownershipService->changeUnitOwnership($units, OwnershipTypes::Company, $companyId);
+            $unitService->changeUnitStatus($localMarketOrder, InventoryUnitsStatus::Reserved);
+            // try to save trader order ownership
+            // $ownershipService->changeUnitOwnership($localMarketOrder, $eligibleCommodities->getNumberOfSuitableUnits(), OwnershipTypes::Company, $companyId);
             $inventoryService->refreshInventoryStocks($eligibleCommodities->getInventoriesIds());
-            $orderService->insertOrderUnits($localMarketOrder, $units);
+            // $orderService->insertOrderUnits($localMarketOrder, $units);
+            $orderService->insertOrderInventories($localMarketOrder, $eligibleCommodities->getInventories());
             $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::CommoditiesPurchased);
+            dd('inventories done ');
+
             DB::commit();
 
             Log::info('Commodities bought successfully');

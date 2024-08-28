@@ -25,6 +25,6 @@ class FailedPurchaseStatus implements ShouldQueue
     {
         // Nagy Continue this function
         // use webhook to notify the user
-        Log::info('Sorry there is an error while purchasing commodities for order ');
+        Log::error('Sorry there is an error while purchasing commodities for order ');
     }
 }

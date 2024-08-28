@@ -28,6 +28,8 @@ class BuyCommoditiesAction implements BuyCommodities
     {
         try {
             // double check if we can handle this order or not
+            $startTime = microtime(true);
+
             $eligibleCommodities = $localMarketOrder->data;
 
             if ($eligibleCommodities['isLoanCovered']) {
@@ -35,11 +37,17 @@ class BuyCommoditiesAction implements BuyCommodities
             } else {
                 Log::error("Loan {$localMarketOrder->id} is not covered we can not move on ");
             }
+
+            Log::info('BuyCommoditiesAction Duration', [
+                'order_id' => $localMarketOrder->id,
+                'start_time' => $startTime,
+                'end_time' => microtime(true),
+                'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
+            ]);
         } catch (\Exception $e) {
             $localMarketOrder->update([
                 'status' => LocalMarketOrderStatus::FailedPurchase,
             ]);
-
             Log::error('Error in BuyCommoditiesAction', [
                 'order_id' => $localMarketOrder->id,
                 'error' => $e->getMessage(),

@@ -33,9 +33,9 @@ class LocalMarketOrderObserver
             case LocalMarketOrderStatus::PendingEligibleCommodities:
                 dispatch(new PendingEligibleCommoditiesStatus($localMarketOrder));
                 break;
-            case LocalMarketOrderStatus::EligibleCommoditiesAvailable:
-                dispatch(new EligibleCommoditiesFoundStatus($localMarketOrder));
-                break;
+                // case LocalMarketOrderStatus::EligibleCommoditiesAvailable:
+                //     dispatch(new EligibleCommoditiesFoundStatus($localMarketOrder));
+                //     break;
             case LocalMarketOrderStatus::NoEligibleCommoditiesAvailable:
                 dispatch(new NoEligibleCommoditiesAvailableStatus($localMarketOrder));
                 break;

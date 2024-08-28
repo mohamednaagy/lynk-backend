@@ -36,6 +36,17 @@ if (! function_exists('validate_said')) {
     }
 }
 
+if (! function_exists('convertMicrotimeToDuration')) {
+    function convertMicrotimeToDuration($seconds)
+    {
+        $hours = floor($seconds / 3600);
+        $minutes = floor(($seconds / 60) % 60);
+        $seconds = $seconds % 60;
+
+        return sprintf('%02d:%02d:%05.2f', $hours, $minutes, $seconds);
+    }
+}
+
 if (! function_exists('perm')) {
     function perm($areas, ...$permissions)
     {

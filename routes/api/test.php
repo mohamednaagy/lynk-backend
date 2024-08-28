@@ -1,8 +1,10 @@
 <?php
 
+use App\Actions\LocalMarket\BuyCommoditiesAction;
+use App\Actions\LocalMarket\FindEligibleCommoditiesAction;
 use App\Http\Controllers\Api\V1\Test\LocalMarketController;
-use App\Jobs\LocalMarket\states\PendingEligibleCommoditiesStatus;
 use App\Models\LocalMarketOrder;
+use App\Services\LocalMarket\LoanService;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('test')->group(function () {
@@ -17,12 +19,12 @@ Route::prefix('test')->group(function () {
             ->where('id', $orderId)
             ->first();
 
-        dispatch(new PendingEligibleCommoditiesStatus($localMarketOrder));
+        // (new FindEligibleCommoditiesAction(new LoanService))->handle($localMarketOrder);
+        (new BuyCommoditiesAction(new LoanService))->handle($localMarketOrder);
 
         // if ($localMarketOrder) {
         //     $localMarketOrder->status = $status;
         //     $localMarketOrder->save();
-
         // }
     });
 });

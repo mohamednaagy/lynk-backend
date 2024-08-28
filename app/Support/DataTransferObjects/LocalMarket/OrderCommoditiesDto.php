@@ -4,39 +4,40 @@ namespace App\Support\DataTransferObjects\LocalMarket;
 
 class OrderCommoditiesDto
 {
-    private array $inventoriesId;
-
     private $inventories;
 
     private bool $isLoanCovered;
 
     private float $remainingLoan;
 
-    public function __construct(array $inventoriesId, $inventories, bool $isLoanCovered, float $remainingLoan)
+    private int $numberOfSuitableUnits;
+
+    public function __construct($inventories, bool $isLoanCovered, float $remainingLoan, int $numberOfSuitableUnits)
     {
-        $this->inventoriesId = $inventoriesId;
         $this->inventories = $inventories;
         $this->isLoanCovered = $isLoanCovered;
         $this->remainingLoan = $remainingLoan;
+        $this->numberOfSuitableUnits = $numberOfSuitableUnits;
+
     }
 
     public static function fromArray(array $data): self
     {
         return new self(
-            $data['inventories_id'],
             $data['inventories'],
             $data['isLoanCovered'],
-            $data['remainingLoan']
+            $data['remainingLoan'],
+            $data['numberOfSuitableUnits']
         );
     }
 
     public function toArray(): array
     {
         return [
-            'inventories_id' => $this->inventoriesId,
             'inventories' => $this->inventories->toArray(),
             'isLoanCovered' => $this->isLoanCovered,
             'remainingLoan' => $this->remainingLoan,
+            'numberOfSuitableUnits' => $this->numberOfSuitableUnits,
         ];
     }
 
@@ -47,23 +48,12 @@ class OrderCommoditiesDto
 
     public function getInventoriesIds()
     {
-        return $this->inventoriesId;
+        return array_column($this->inventories, 'inventoryId');
     }
 
-    public function getInventoryUnits(): array
+    public function getNumberOfSuitableUnits(): int
     {
-        return $this->inventories->availableUnits;
-    }
-
-    public function getAllUnits(): array
-    {
-        $units = [];
-
-        foreach ($this->getInventories() as $inventory) {
-            $units = array_merge($units, $inventory['availableUnits']);
-        }
-
-        return $units;
+        return $this->numberOfSuitableUnits;
     }
 
     public function isLoanCovered(): bool

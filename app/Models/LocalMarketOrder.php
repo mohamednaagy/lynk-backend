@@ -28,6 +28,7 @@ class LocalMarketOrder extends Model
         'reference',
         'buying_uuid',
         'selling_uuid',
+        'hold_for',
     ];
 
     protected $casts = [
