@@ -34,5 +34,6 @@ class FailedPurchaseStatus implements ShouldQueue
         ];
         app(LocalMarketWebhook::class)->handle($traderOrder, $data);
         Log::info('Sorry there is an error while purchasing commodities for order ');
+
     }
 }

@@ -2,30 +2,41 @@
 
 namespace App\Services\LocalMarket;
 
+use App\Models\LocalMarketOrder;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class OwnershipService
 {
-    public function changeUnitOwnership($units, $ownerType, $ownerIdentifier)
+    public function changeUnitOwnership(LocalMarketOrder $localMarketOrder, $numberOfUnits, $ownerType, $ownerIdentifier)
     {
-        $timestamp = now()->format('Y-m-d H:i:s');
+        $timestamp = Carbon::now()->format('Y-m-d H:i:s');
 
-        // Use array_map for better performance over foreach
-        $ownershipData = array_map(function ($unit) use ($ownerType, $ownerIdentifier, $timestamp) {
-            return [
-                'unit_id' => $unit['id'],
-                'current_owner' => $ownerIdentifier,
-                'current_owner_type' => $ownerType,
-                'previous_owner' => null,
-                'previous_owner_type' => null,
-                'created_at' => $timestamp,
-                'updated_at' => $timestamp,
-            ];
-        }, $units);
+        // TODO enhanc ethis code and make sure offset
+        $subQuery = DB::table('local_market_inventory_units')
+            ->select(
+                'id as unit_id',
+                DB::raw("'{$ownerIdentifier}' as current_owner"),
+                DB::raw("'{$ownerType}' as current_owner_type"),
+                'current_owner as previous_owner',
+                'current_owner_type as previous_owner_type',
+                DB::raw("'{$timestamp}' as created_at"),
+                DB::raw("'{$timestamp}' as updated_at")
+            )
+            ->where('hold_for', $localMarketOrder->id);
 
-        // Chunk and insert in bulk
-        foreach (array_chunk($ownershipData, 3000) as $chunk) {
-            DB::table('local_market_unit_ownership')->insert($chunk);
-        }
+        // Build the full insertUsing query
+        $insertQuery = DB::table('local_market_unit_ownership')->insertUsing(
+            [
+                'unit_id',
+                'current_owner',
+                'current_owner_type',
+                'previous_owner',
+                'previous_owner_type',
+                'created_at',
+                'updated_at',
+            ],
+            $subQuery
+        );
     }
 }
