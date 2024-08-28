@@ -2,14 +2,14 @@
 
 namespace App\Actions\LocalMarket;
 
-use App\Actions\Contracts\LocalMarket\BuyCommodities;
+use App\Actions\Contracts\LocalMarket\SellCommodities;
 use App\Enums\LocalMarketOrderStatus;
 use App\Exceptions\LocalMarket\PurchaseProductException;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\LoanService;
 use Illuminate\Support\Facades\Log;
 
-class BuyCommoditiesAction implements BuyCommodities
+class SellCommoditiesAction implements SellCommodities
 {
     public function __construct(
         private LoanService $LoanService
@@ -27,25 +27,11 @@ class BuyCommoditiesAction implements BuyCommodities
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
         try {
-            //TODO nagy double check if we can buy this order or not
-
-            // TODO nagy move drawio to miro
             $startTime = microtime(true);
 
-            $eligibleCommodities = $localMarketOrder->data;
+            $this->LoanService->sellCommodities($localMarketOrder);
 
-            if ($eligibleCommodities['isLoanCovered']) {
-                if ($this->LoanService->buyCommodities($localMarketOrder, $localMarketOrder->company_id, $eligibleCommodities)) {
-                    $localMarketOrder->update([
-                        'status' => LocalMarketOrderStatus::CommoditiesPurchased,
-                    ]);
-                } else {
-                    $localMarketOrder->update([
-                        'status' => LocalMarketOrderStatus::FailedPurchase,
-                    ]);
-                }
-            }
-            Log::info('BuyCommoditiesAction Duration', [
+            Log::info('SellCommoditiesAction Duration', [
                 'order_id' => $localMarketOrder->id,
                 'start_time' => $startTime,
                 'end_time' => microtime(true),
@@ -53,11 +39,9 @@ class BuyCommoditiesAction implements BuyCommodities
             ]);
         } catch (\Exception $e) {
             $localMarketOrder->update([
-                'status' => LocalMarketOrderStatus::FailedPurchase,
-                'comment' => $e->getMessage(),
+                'status' => LocalMarketOrderStatus::FailedSell,
             ]);
-
-            Log::error('Error in BuyCommoditiesAction', [
+            Log::error('Error in SellCommoditiesAction', [
                 'order_id' => $localMarketOrder->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

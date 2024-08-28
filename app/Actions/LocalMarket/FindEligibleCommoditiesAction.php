@@ -46,7 +46,7 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
         } catch (\Exception $e) {
             $localMarketOrder->update([
                 'status' => LocalMarketOrderStatus::FailedPurchase,
-                '',
+                'comment' => $e->getMessage(),
             ]);
 
             Log::error('Error in FindEligibleCommoditiesAction', [

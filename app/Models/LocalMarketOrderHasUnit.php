@@ -10,17 +10,18 @@ class LocalMarketOrderHasUnit extends Model
     use HasFactory;
 
     protected $fillable = [
-        'inventory_unit_id',
-        'order_has_inventory_id',
+        'local_market_order_id',
+        'unit_id',
+        'inventory_id',
     ];
 
     public function inventoryUnit()
     {
-        return $this->belongsTo(LocalMarketInventoryUnits::class, 'inventory_unit_id');
+        return $this->belongsTo(LocalMarketInventoryUnits::class, 'unit_id');
     }
 
     public function orderHasInventory()
     {
-        return $this->belongsTo(LocalMarketOrderHasInventory::class, 'order_has_inventory_id');
+        return $this->belongsTo(LocalMarketOrderHasInventory::class, 'inventory_id');
     }
 }

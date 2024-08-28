@@ -48,17 +48,22 @@ class OrderService
         $timestamp = Carbon::now()->format('Y-m-d H:i:s');
 
         // TODO naser double check local_market_inventory_id relation
+
+        // this error occur when there is an issue here double check it
+
+        // investigate why refund order cost is called
+        // [2024-08-28 17:11:13] local.ERROR: App\Listeners\RefundOrderCost::resolveRefundReason(): Argument #1 ($baseTraderOrder) must be of type App\Models\TraderOrder, null given, called in /opt/homebrew/var/www/lynks/lynk-backend/app/Listeners/RefundOrderCost.php on line 47 {"exception":"[object] (TypeError(code: 0): App\\Listeners\\RefundOrderCost::resolveRefundReason(): Argument #1 ($baseTraderOrder) must be of type App\\Models\\TraderOrder, null given, called in /opt/homebrew/var/www/lynks/lynk-backend/app/Listeners/RefundOrderCost.php on line 47 at /opt/homebrew/var/www/lynks/lynk-backend/app/Listeners/RefundOrderCost.php:58)
         DB::table('local_market_order_has_units')->insertUsing(
             [
-                'inventory_unit_id',
-                'order_has_inventory_id',
+                'unit_id',
+                'inventory_id',
                 'created_at',
                 'updated_at',
             ],
             DB::table('local_market_inventory_units')
                 ->select(
-                    'id as inventory_unit_id',
-                    '1',
+                    'id',
+                    'local_market_inventory_id',
                     // 'local_market_inventory_id as local_market_inventory_id',
                     DB::raw("'{$timestamp}' as created_at"),
                     DB::raw("'{$timestamp}' as updated_at")

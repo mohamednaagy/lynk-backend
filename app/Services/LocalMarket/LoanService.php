@@ -86,11 +86,29 @@ class LoanService
             $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::CommoditiesPurchased);
 
             DB::commit();
+
+            return true;
         } catch (Exception $e) {
             Log::error('Error in buy commodities', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::FailedPurchase);
-
             DB::rollBack();
+
+            return false;
         }
+    }
+
+    public function sellCommodities(LocalMarketOrder $localMarketOrder)
+    {
+
+        /**
+         * TODO:
+         * 1- increase units rotations for the company
+         * 2- change units ownershop
+         * 3- remove hold for from units
+         * 4- change unit status to available
+         * 4- change order status to commodities sold
+         * 5- log the action
+         * 6- send notification to the company
+         */
+        Log::info('We wll sell your commodities ISA soon', ['order_id' => $localMarketOrder->id]);
     }
 }
