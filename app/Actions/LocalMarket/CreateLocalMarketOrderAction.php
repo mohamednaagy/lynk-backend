@@ -23,7 +23,7 @@ class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
             Arr::only($data, [
                 'company_id',
                 'customer_name',
-                'reference',
+                'external_order_no',
                 'national_id',
                 'amount',
                 'currency',

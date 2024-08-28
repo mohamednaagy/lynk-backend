@@ -4,7 +4,6 @@ namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
 use App\Models\LocalMarketOrder;
-use App\Models\TraderOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -26,13 +25,12 @@ class NoEligibleCommoditiesAvailableStatus implements ShouldQueue
     public function handle(): void
     {
         // Nagy Continue this function
-        $traderOrder = TraderOrder::lockForUpdate()->where('reference', $this->localMarketOrder->reference)->firstOrFail();
         $data = [
-            'refrence' => '12345',
+            'external_order_no' => '12345',
             'case' => 'FailedPurchase',
             'products' => [],
         ];
-        app(LocalMarketWebhook::class)->handle($traderOrder, $data);
+        app(LocalMarketWebhook::class)->handle($data);
         Log::info('Notify our customer sorry we can not find your eligibilities commodities ');
     }
 }

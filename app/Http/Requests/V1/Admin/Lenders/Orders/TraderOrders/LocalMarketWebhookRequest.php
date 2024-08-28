@@ -22,8 +22,8 @@ class LocalMarketWebhookRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'case' => ['required', 'in:CommoditiesPurchased'],
-            'reference' => ['required', 'string'],
+            'case' => ['required', 'in:CommoditiesPurchased,FailedPurchase'],
+            'external_order_no' => ['required', 'string'],
             'products' => ['required', 'array'],
             'products.*.uom' => ['required', 'string'],
             'products.*.product' => ['required', 'string'],

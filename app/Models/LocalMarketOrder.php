@@ -12,11 +12,6 @@ class LocalMarketOrder extends Model
 {
     use HasFactory;
 
-    // TODO nagy
-    // 1- use order-no
-    // 1- user external_order_no
-    //
-
     protected $fillable = [
         'source',
         'amount',
@@ -26,8 +21,7 @@ class LocalMarketOrder extends Model
         'data',
         'comment',
         'company_id',
-        'trader_order_id',
-        'reference',
+        'external_order_no',
         'buying_uuid',
         'selling_uuid',
         'currency',
