@@ -24,7 +24,7 @@ class LoginController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('throttle:20,1')->only('authenticate');
+        $this->middleware('throttle:60,1')->only('authenticate');
     }
 
     /**
