@@ -12,6 +12,11 @@ class LocalMarketOrder extends Model
 {
     use HasFactory;
 
+    // TODO nagy
+    // 1- use order-no
+    // 1- user external_order_no
+    //
+
     protected $fillable = [
         'source',
         'amount',
@@ -27,6 +32,7 @@ class LocalMarketOrder extends Model
         'selling_uuid',
         'currency',
         'hold_for',
+        'order_no',
     ];
 
     protected $casts = [

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('currency', 4);
             $table->string('national_id')->nullable()->change();
             $table->string('customer_name')->nullable()->change();
-            $table->string('external_order');
+            $table->string('external_order_no');
         });
     }
 
@@ -32,7 +32,7 @@ return new class extends Migration
             $table->dropColumn('currency', 4);
             $table->string('national_id')->change();
             $table->string('customer_name')->change();
-            $table->dropColumn('reference_number');
+            $table->dropColumn('external_order_no');
         });
     }
 };

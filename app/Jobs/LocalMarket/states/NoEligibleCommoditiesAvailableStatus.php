@@ -28,6 +28,7 @@ class NoEligibleCommoditiesAvailableStatus implements ShouldQueue
         // Nagy Continue this function
         $traderOrder = TraderOrder::lockForUpdate()->where('reference', $this->localMarketOrder->reference)->firstOrFail();
         $data = [
+            'refrence' => '12345',
             'case' => 'FailedPurchase',
             'products' => [],
         ];
