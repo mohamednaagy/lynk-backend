@@ -38,7 +38,7 @@ class LynkClient
         $data['national_id'] = $financingOrder->national_id;
         $data['amount'] = $financingOrder->amount?->convertAndFormatByDecimal();
         $data['customer_name'] = $financingOrder->customer_name;
-        $data['reference'] = $this->traderOrder->reference;
+        $data['external_order_no'] = $this->traderOrder->reference;
         $data['source'] = $this->traderOrder->provider;
         $data['company_id'] = $financingOrder->company_id;
         $data['buying_uuid'] = $this->traderOrder->uuid_one;

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('currency', 4);
             $table->string('national_id')->nullable()->change();
             $table->string('customer_name')->nullable()->change();
-            $table->string('external_order_no');
+            $table->renameColumn('reference', 'external_order_no');
         });
     }
 
@@ -29,10 +29,11 @@ return new class extends Migration
     public function down()
     {
         Schema::table('local_market_orders', function (Blueprint $table) {
-            $table->dropColumn('currency', 4);
+            $table->dropColumn('currency');
             $table->string('national_id')->change();
             $table->string('customer_name')->change();
-            $table->dropColumn('external_order_no');
+            $table->renameColumn('external_order_no', 'reference');
+
         });
     }
 };

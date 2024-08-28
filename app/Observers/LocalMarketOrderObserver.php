@@ -19,7 +19,8 @@ class LocalMarketOrderObserver
      */
     public function created(LocalMarketOrder $localMarketOrder)
     {
-        //
+        $localMarketOrder->order_no = 'LM_'.$localMarketOrder->source.'_'.$localMarketOrder->id;
+        $localMarketOrder->saveQuietly();
     }
 
     /**
