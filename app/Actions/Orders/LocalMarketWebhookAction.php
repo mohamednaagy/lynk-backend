@@ -17,6 +17,10 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
                 $traderOrder->update(['status' => TraderOrderStatus::InProgress, 'products' => $data['products']]);
                 break;
 
+            case 'FailedPurchase':
+                $traderOrder->update(['status' => TraderOrderStatus::Cancelled, 'products' => $data['products']]);
+                break;
+
             case 'Cancelled':
                 break;
 

@@ -3,7 +3,9 @@
 namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\LocalMarket\BuyCommodities;
+use App\Actions\Contracts\Orders\LocalMarketWebhook;
 use App\Models\LocalMarketOrder;
+use App\Models\TraderOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -23,8 +25,24 @@ class CommoditiesPurchaseCompletedStatus implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(BuyCommodities $BuyCommodities): void
+    public function handle(BuyCommodities $buyCommodities): void
     {
+        $traderOrder = TraderOrder::lockForUpdate()->where('reference', $this->localMarketOrder->reference)->firstOrFail();
+        $data = [
+            'case' => 'CommoditiesPurchased',
+            'products' => [
+                'uom' => 'Delectus nulla cupi',
+                'type' => 'Ea fuga Ad rem et n',
+                'amount' => '22',
+                'product' => 'Laboriosam numquam',
+                'currency' => 'Fugiat consequatur',
+                'location' => 'Accusantium sequi ar',
+                'quantity' => '787',
+                'previous_owner' => 'Dolore perspiciatis',
+                'original_supplier' => 'Accusamus sunt quos',
+            ],
+        ];
+        app(LocalMarketWebhook::class)->handle($traderOrder, $data);
         // we will notify the owner we are done buying
         // nagy will handle it
         // send post request to lynk with commadites DTO

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\LocalMarket;
 
 use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Models\LocalMarketInventory;
@@ -67,7 +67,7 @@ class UnitService
     private function getUnitsWithOwnershipCheck(LocalMarketInventory $inventory, int $numberOfNeededUnits, int $companyId): array
     {
         // NAGY uncomment this line
-        // $rotationThreshold = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count ?? 0;
+        //        $rotationThreshold = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count ?? 0;
         $rotationThreshold = 0;
 
         return LocalMarketInventoryUnits::join('local_market_unit_rotations', 'local_market_unit_rotations.inventory_unit_id', '=', 'local_market_inventory_units.id')

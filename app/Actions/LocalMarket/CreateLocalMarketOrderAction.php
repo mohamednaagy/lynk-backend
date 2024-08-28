@@ -18,7 +18,7 @@ class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
      */
     public function handle(array $data): LocalMarketOrder
     {
-        $data['status'] = LocalMarketOrderStatus::PendingEligibleCommodities;
+        $data['status'] = LocalMarketOrderStatus::initiate;
         $order = LocalMarketOrder::create(
             Arr::only($data, [
                 'company_id',

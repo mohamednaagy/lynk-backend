@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\LocalMarket;
 
 use Illuminate\Support\Facades\DB;
 
