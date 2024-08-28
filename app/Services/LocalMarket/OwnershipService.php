@@ -8,25 +8,11 @@ use Illuminate\Support\Facades\DB;
 
 class OwnershipService
 {
-    public function changeUnitOwnership(LocalMarketOrder $localMarketOrder, $numberOfUnits, $ownerType, $ownerIdentifier)
+    public function changeUnitOwnership(LocalMarketOrder $localMarketOrder, $ownerType, $ownerIdentifier)
     {
         $timestamp = Carbon::now()->format('Y-m-d H:i:s');
 
-        // TODO enhanc ethis code and make sure offset
-        $subQuery = DB::table('local_market_inventory_units')
-            ->select(
-                'id as unit_id',
-                DB::raw("'{$ownerIdentifier}' as current_owner"),
-                DB::raw("'{$ownerType}' as current_owner_type"),
-                'current_owner as previous_owner',
-                'current_owner_type as previous_owner_type',
-                DB::raw("'{$timestamp}' as created_at"),
-                DB::raw("'{$timestamp}' as updated_at")
-            )
-            ->where('hold_for', $localMarketOrder->id);
-
-        // Build the full insertUsing query
-        $insertQuery = DB::table('local_market_unit_ownership')->insertUsing(
+        DB::table('local_market_unit_ownership')->insertUsing(
             [
                 'unit_id',
                 'current_owner',
@@ -36,7 +22,17 @@ class OwnershipService
                 'created_at',
                 'updated_at',
             ],
-            $subQuery
+            DB::table('local_market_inventory_units')
+                ->select(
+                    'id as unit_id',
+                    DB::raw("'{$ownerIdentifier}' as current_owner"),
+                    DB::raw("'{$ownerType}' as current_owner_type"),
+                    'current_owner as previous_owner',
+                    'current_owner_type as previous_owner_type',
+                    DB::raw("'{$timestamp}' as created_at"),
+                    DB::raw("'{$timestamp}' as updated_at")
+                )
+                ->where('hold_for', $localMarketOrder->id)
         );
     }
 }

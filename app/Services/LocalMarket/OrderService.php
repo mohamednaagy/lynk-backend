@@ -43,46 +43,26 @@ class OrderService
         ]);
     }
 
-    public function insertOrderUnits(LocalMarketOrder $localMarketOrder, int $numberOfUnits)
+    public function insertOrderUnits(LocalMarketOrder $localMarketOrder)
     {
-        //TODO need to handle this
-        $batchSize = 3000;
-        $unitsProcessed = 0;
+        $timestamp = Carbon::now()->format('Y-m-d H:i:s');
 
-        while ($unitsProcessed < $numberOfUnits) {
-            // Fetch the units from the database using offset and limit to avoid duplicates
-            $units = DB::table('local_market_inventory_units')
-                ->where('hold_for', $localMarketOrder->id)
-                ->offset($unitsProcessed) // Use offset to skip already processed units
-                ->limit($batchSize)
-                ->get(['id', 'local_market_inventory_id']);
-
-            // If no more units are available, break out of the loop
-            if ($units->isEmpty()) {
-                break;
-            }
-
-            // Prepare insert data for the order units
-            $insertData = $units->map(function ($unit) {
-                return [
-                    'inventory_unit_id' => $unit->id,
-                    'order_has_inventory_id' => $unit->local_market_inventory_id,
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now(),
-                ];
-            })->toArray();
-
-            // Insert data in bulk into the local_market_order_has_units table
-            DB::table('local_market_order_has_units')->insert($insertData);
-
-            // Update the processed units' status to mark them as reserved or processed
+        DB::table('local_market_order_has_units')->insertUsing(
+            [
+                'inventory_unit_id',
+                'order_has_inventory_id',
+                'created_at',
+                'updated_at',
+            ],
             DB::table('local_market_inventory_units')
-                ->whereIn('id', $units->pluck('id')->toArray())
-                ->update(['status' => InventoryUnitsStatus::Reserved]);
-
-            // Increment the units processed counter
-            $unitsProcessed += $units->count();
-        }
+                ->select(
+                    'id as inventory_unit_id',
+                    'local_market_inventory_id',
+                    DB::raw("'{$timestamp}' as created_at"),
+                    DB::raw("'{$timestamp}' as updated_at")
+                )
+                ->where('hold_for', $localMarketOrder->id)
+        );
     }
 
     public function insertOrderInventories(LocalMarketOrder $localMarketOrder, $inventories)

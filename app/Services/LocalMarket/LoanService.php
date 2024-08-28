@@ -23,11 +23,14 @@ class LoanService
         float $loanAmount,
         array $preferredTypes = []
     ): array {
+        $maxNumberOfUnits = 10000;
+
         $loanDetails = [
             'inventories' => [],
             'isLoanCovered' => false,
             'remainingLoan' => $loanAmount,
             'numberOfSuitableUnits' => 0,
+            'purchasingFailureReason' => '',
         ];
 
         $inventoryService = app(InventoryService::class);
@@ -42,16 +45,24 @@ class LoanService
             );
 
             if (! $inventory) {
+                Log::info('There is no valid inventory for ', [
+                    'loanAmount' => $loanAmount,
+                    'preferredItemTypes' => $preferredTypes,
+                    'usedInventories' => $usedInventories,
+                ]);
                 break;
             }
 
-            $eligibleUnits = $unitsService->getEligibleUnits($orderNo, $companyId, $inventory, $loanDetails['remainingLoan']);
+            $eligibleUnits = $unitsService->getEligibleUnits($orderNo, $companyId, $inventory, $loanDetails['remainingLoan'], $maxNumberOfUnits);
 
             $usedInventories[] = $inventory->id;
             $loanDetails['inventories'][] = $eligibleUnits;
             $loanDetails['isLoanCovered'] = $eligibleUnits['isLoanCovered'];
             $loanDetails['remainingLoan'] = $eligibleUnits['remainingLoan'];
+            $loanDetails['purchasingFailureReason'] = $eligibleUnits['failureReason'];
             $loanDetails['numberOfSuitableUnits'] = +$eligibleUnits['numberOfSuitableUnits'];
+
+            $maxNumberOfUnits = -$eligibleUnits['numberOfSuitableUnits'];
         }
 
         return $loanDetails;
@@ -69,17 +80,14 @@ class LoanService
 
         try {
             $unitService->changeUnitStatus($localMarketOrder, InventoryUnitsStatus::Reserved);
-            // try to save trader order ownership
-            // $ownershipService->changeUnitOwnership($localMarketOrder, $eligibleCommodities->getNumberOfSuitableUnits(), OwnershipTypes::Company, $companyId);
+
+            $ownershipService->changeUnitOwnership($localMarketOrder, OwnershipTypes::Company, $companyId);
             $inventoryService->refreshInventoryStocks($eligibleCommodities->getInventoriesIds());
-            // $orderService->insertOrderUnits($localMarketOrder, $units);
+            $orderService->insertOrderUnits($localMarketOrder);
             $orderService->insertOrderInventories($localMarketOrder, $eligibleCommodities->getInventories());
             $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::CommoditiesPurchased);
-            dd('inventories done ');
 
             DB::commit();
-
-            Log::info('Commodities bought successfully');
         } catch (Exception $e) {
             Log::error('Error in buy commodities', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::FailedPurchase);

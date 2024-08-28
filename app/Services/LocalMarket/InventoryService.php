@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Models\LocalMarketInventory;
-use Illuminate\Support\Facades\Log;
 
 class InventoryService
 {
@@ -25,19 +24,11 @@ class InventoryService
      */
     public function findEligibleInventoryForLoan(float $loanAmount, array $preferredItemTypes = [], array $usedInventories = [])
     {
-        // get preferred types first if there is no preferred get any inventory
         $inventory = $this->findInventory($loanAmount, $usedInventories, $preferredItemTypes);
 
         if (empty($inventory) && ! empty($preferredItemTypes)) {
             $inventory = $this->findInventory($loanAmount, $usedInventories);
         }
-
-        Log::info('InventoryService:findEligibleInventoryForLoan', [
-            'loanAmount' => $loanAmount,
-            'preferredItemTypes' => $preferredItemTypes,
-            'usedInventories' => $usedInventories,
-            'inventory' => $inventory,
-        ]);
 
         return $inventory;
     }

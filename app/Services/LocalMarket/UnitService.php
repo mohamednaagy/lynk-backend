@@ -12,19 +12,32 @@ class UnitService
     /**
      * Retrieves eligible units from the inventory based on the loan amount and company history.
      */
-    public function getEligibleUnits(int $orderNo, int $companyId, LocalMarketInventory $inventory, float $loan): array
+    public function getEligibleUnits(int $orderNo, int $companyId, LocalMarketInventory $inventory, float $loan, int $maxNumberOfUnits = 10000): array
     {
-        $numberOfNeededUnits = $this->calculateNeededUnits($loan, $inventory->price());
+        $numberOfNeededUnits = $this->calculateNeededUnits($loan, $inventory);
 
-        if ($this->hasCompanyPreviouslyPurchased($inventory, $companyId)) {
-            $eligibleUnitsCount = $this->getUnitsWithOwnershipCheck($orderNo, $inventory, $numberOfNeededUnits, $companyId);
-        } else {
-            $eligibleUnitsCount = $this->getUnitsWithoutOwnershipCheck($orderNo, $inventory, $numberOfNeededUnits);
+        // Check if the number of needed units exceeds the maximum limit
+        if ($numberOfNeededUnits > $maxNumberOfUnits) {
+            return $this->buildResponseArray($inventory, $numberOfNeededUnits, 0, $loan, false, "Number of needed units {$numberOfNeededUnits} exceeds the maximum limit {$maxNumberOfUnits}");
         }
+
+        // Determine eligibility based on company history
+        $eligibleUnitsCount = $this->hasCompanyPreviouslyPurchased($inventory, $companyId)
+            ? $this->getUnitsWithOwnershipCheck($orderNo, $inventory, $numberOfNeededUnits, $companyId)
+            : $this->getUnitsWithoutOwnershipCheck($orderNo, $inventory, $numberOfNeededUnits);
 
         $totalAvailableUnitsCost = $eligibleUnitsCount * $inventory->price();
         $remainingLoan = $loan - $totalAvailableUnitsCost;
+        $isLoanCovered = ($remainingLoan <= 0);
 
+        return $this->buildResponseArray($inventory, $numberOfNeededUnits, $eligibleUnitsCount, $remainingLoan, $isLoanCovered);
+    }
+
+    /**
+     * Builds the response array for eligible units.
+     */
+    private function buildResponseArray(LocalMarketInventory $inventory, int $numberOfNeededUnits, int $eligibleUnitsCount, float $remainingLoan, bool $isLoanCovered, ?string $failureReason = null): array
+    {
         return [
             'inventoryId' => $inventory->id,
             'item' => [
@@ -43,18 +56,19 @@ class UnitService
             'price' => $inventory->price(),
             'numberOfNeededUnits' => $numberOfNeededUnits,
             'numberOfSuitableUnits' => $eligibleUnitsCount,
-            'totalCost' => $totalAvailableUnitsCost,
+            'totalCost' => $eligibleUnitsCount * $inventory->price(),
             'remainingLoan' => $remainingLoan,
-            'isLoanCovered' => ($remainingLoan == 0),
+            'isLoanCovered' => $isLoanCovered,
+            'failureReason' => $failureReason,
         ];
     }
 
     /**
      * Calculate the number of needed units based on the loan amount and unit price.
      */
-    private function calculateNeededUnits(float $loan, float $unitPrice): int
+    private function calculateNeededUnits(float $loan, LocalMarketInventory $inventory): int
     {
-        return (int) floor($loan / $unitPrice);
+        return (int) floor($loan / $inventory->price());
     }
 
     /**
@@ -81,22 +95,6 @@ class UnitService
             ->where('local_market_unit_rotations.number_of_rotations', '>=', $rotationThreshold)
             ->limit($numberOfNeededUnits)
             ->update(['local_market_inventory_units.hold_for' => $orderNo]);
-
-        // get units
-        // return LocalMarketInventoryUnits::join('local_market_unit_rotations', 'local_market_unit_rotations.inventory_unit_id', '=', 'local_market_inventory_units.id')
-        //     ->where('local_market_inventory_units.status', InventoryUnitsStatus::Free)
-        //     ->where('local_market_inventory_units.local_market_inventory_id', $inventory->id)
-        //     ->where('local_market_unit_rotations.company_id', $companyId)
-        //     ->where('local_market_unit_rotations.number_of_rotations', '>=', $rotationThreshold)
-        //     ->limit($numberOfNeededUnits)
-        //     ->select(
-        //         'local_market_inventory_units.id',
-        //         'local_market_inventory_units.local_market_inventory_id',
-        //         'local_market_inventory_units.current_owner_type',
-        //         'local_market_inventory_units.current_owner'
-        //     )
-        //     ->get()
-        //     ->toArray();
     }
 
     /**
@@ -110,15 +108,6 @@ class UnitService
             ->where('local_market_inventory_id', $inventory->id)
             ->limit($numberOfNeededUnits)
             ->update(['hold_for' => $orderNo]);
-
-        // Getting Units
-        //     return LocalMarketInventoryUnits::where('status', InventoryUnitsStatus::Free)
-        //         ->where('local_market_inventory_id', $inventory->id)
-        //         ->limit($numberOfNeededUnits)
-        //         ->select('id', 'local_market_inventory_id', 'current_owner_type', 'current_owner')
-        //         ->get()
-        //         ->toArray();
-        // }
     }
 
     /**
