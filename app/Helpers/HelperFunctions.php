@@ -225,13 +225,6 @@ if (! function_exists('convertDateTimeToHumanDate')) {
 }
 
 if (! function_exists('saudi_now')) {
-    function saudi_now()
-    {
-        return Carbon::now('Asia/Riyadh');
-    }
-}
-
-if (! function_exists('saudi_now')) {
     /**
      * Get the current time in the 'Asia/Riyadh' timezone or convert a given date to this timezone.
      *
