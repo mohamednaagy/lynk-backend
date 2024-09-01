@@ -6,6 +6,7 @@ use App\Actions\Contracts\Orders\TraderOrders\Fees\DeductBalanceForNewOrder;
 use App\Models\TraderOrder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class CreateOrderFeeTransactionsForTraderOrders extends Command
@@ -39,6 +40,8 @@ class CreateOrderFeeTransactionsForTraderOrders extends Command
          *We paused the deduction to determine if it serves another purpose 
          *and will reassess its impact after one month to decide whether to keep or remove it.
         */
+        Log::warning("[CreateOrderFeeTransactionsForTraderOrders command called from someone and shouldn't ");
+
         // DB::multipleTransaction(function () {
         //     foreach ($this->traderOrdersIds as $traderOrderId) {
         //         app(DeductBalanceForNewOrder::class)->handle(
