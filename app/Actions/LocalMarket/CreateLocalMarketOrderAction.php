@@ -3,6 +3,7 @@
 namespace App\Actions\LocalMarket;
 
 use App\Actions\Contracts\LocalMarket\CreateLocalMarketOrder;
+use App\Enums\LocalMarketOrderHistoryStatus;
 use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
@@ -35,7 +36,7 @@ class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
                 'selling_uuid',
             ])
         );
-        $this->createLocalMarketOrderHistory($order, LocalMarketOrderStatus::PendingEligibleCommodities);
+        $this->createLocalMarketOrderHistory($order, LocalMarketOrderHistoryStatus::initiate);
 
         return $order;
     }

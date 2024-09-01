@@ -4,7 +4,6 @@ namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
 use App\Models\LocalMarketOrder;
-use App\Models\TraderOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -27,12 +26,12 @@ class FailedPurchaseStatus implements ShouldQueue
     {
         // Nagy Continue this function
         // use webhook to notify the user
-        $traderOrder = TraderOrder::lockForUpdate()->where('reference', $this->localMarketOrder->reference)->firstOrFail();
         $data = [
+            'external_order_no' => 'O7F5ZL81CYOMY81711',
             'case' => 'FailedPurchase',
             'products' => [],
         ];
-        app(LocalMarketWebhook::class)->handle($traderOrder, $data);
+        app(LocalMarketWebhook::class)->handle($data);
         Log::info('Sorry there is an error while purchasing commodities for order ');
 
     }

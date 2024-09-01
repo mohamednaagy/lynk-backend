@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\LocalMarket\InventoryUnitsStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
@@ -17,10 +16,9 @@ class LocalMarketInventoryUnits extends Model
         'commodity_item_id',
         'qr_code',
         'status',
-    ];
-
-    protected $casts = [
-        'status' => InventoryUnitsStatus::class,
+        'hold_for',
+        'current_owner',
+        'current_owner_type',
     ];
 
     public function getActivitylogOptions(): LogOptions

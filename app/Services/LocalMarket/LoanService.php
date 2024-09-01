@@ -58,9 +58,8 @@ class LoanService
             $loanDetails['isLoanCovered'] = $eligibleUnits['isLoanCovered'];
             $loanDetails['remainingLoan'] = $eligibleUnits['remainingLoan'];
             $loanDetails['purchasingFailureReason'] = $eligibleUnits['failureReason'];
-            $loanDetails['numberOfSuitableUnits'] = +$eligibleUnits['numberOfSuitableUnits'];
-
-            $maxNumberOfUnits = -$eligibleUnits['numberOfSuitableUnits'];
+            $loanDetails['numberOfSuitableUnits'] = $loanDetails['numberOfSuitableUnits'] + $eligibleUnits['numberOfSuitableUnits'];
+            $maxNumberOfUnits = $maxNumberOfUnits - $eligibleUnits['numberOfSuitableUnits'];
         }
 
         return $loanDetails;

@@ -26,7 +26,7 @@ class NoEligibleCommoditiesAvailableStatus implements ShouldQueue
     {
         // Nagy Continue this function
         $data = [
-            'external_order_no' => '12345',
+            'external_order_no' => 'O7F5ZL81CYOMY81711',
             'case' => 'FailedPurchase',
             'products' => [],
         ];

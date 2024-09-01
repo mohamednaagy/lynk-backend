@@ -27,6 +27,7 @@ class LocalMarketOrder extends Model
         'currency',
         'hold_for',
         'order_no',
+        'preferred_commodity_type',
     ];
 
     protected $casts = [

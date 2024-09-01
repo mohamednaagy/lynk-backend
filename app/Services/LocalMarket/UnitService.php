@@ -6,6 +6,7 @@ use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
+use Illuminate\Support\Facades\Log;
 
 class UnitService
 {
@@ -20,7 +21,6 @@ class UnitService
         // 2- recalculate invnetory units
 
         $numberOfNeededUnits = $this->calculateNeededUnits($loan, $inventory);
-
         // Check if the number of needed units exceeds the maximum limit
         if ($numberOfNeededUnits > $maxNumberOfUnits) {
             return $this->buildResponseArray($inventory, $numberOfNeededUnits, 0, $loan, false, "Number of needed units {$numberOfNeededUnits} exceeds the maximum limit {$maxNumberOfUnits}");
@@ -34,6 +34,7 @@ class UnitService
         $totalAvailableUnitsCost = $eligibleUnitsCount * $inventory->price();
         $remainingLoan = $loan - $totalAvailableUnitsCost;
         $isLoanCovered = ($remainingLoan <= 0);
+        Log::info('unit message', ['max_unit' => $eligibleUnitsCount]);
 
         return $this->buildResponseArray($inventory, $numberOfNeededUnits, $eligibleUnitsCount, $remainingLoan, $isLoanCovered);
     }

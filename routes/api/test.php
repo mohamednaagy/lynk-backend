@@ -7,7 +7,7 @@ use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\LoanService;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('test')->group(function () {
+Route::prefix('v1/test')->group(function () {
 
     Route::get('suitable-stocks', [LocalMarketController::class, 'getSuitableLoanStock']);
     Route::post('buy', [LocalMarketController::class, 'buy']);
@@ -19,8 +19,8 @@ Route::prefix('test')->group(function () {
             ->where('id', $orderId)
             ->first();
 
-        // (new FindEligibleCommoditiesAction(new LoanService))->handle($localMarketOrder);
-        // (new BuyCommoditiesAction(new LoanService))->handle($localMarketOrder);
+        //         (new FindEligibleCommoditiesAction(new LoanService))->handle($localMarketOrder);
+        //         (new BuyCommoditiesAction(new LoanService))->handle($localMarketOrder);
 
         if ($localMarketOrder) {
             $localMarketOrder->status = $status;

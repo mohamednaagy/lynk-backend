@@ -18,7 +18,9 @@ class LynkClient
 
     protected $traderOrderIdHeaderKey = 'X-TRADER-ORDER-ID';
 
-    private function __construct(protected $traderOrder) {}
+    private function __construct(protected $traderOrder)
+    {
+    }
 
     private function isTraderOrderInitiatedByFake()
     {
@@ -42,6 +44,7 @@ class LynkClient
         $data['source'] = $this->traderOrder->provider;
         $data['company_id'] = $financingOrder->company_id;
         $data['buying_uuid'] = $this->traderOrder->uuid_one;
+        $data['preferred_commodity_type'] = $financingOrder->company->commodityTypes()?->pluck('commodity_type_id')->toArray() ?? [];
 
         return app(CreateLocalMarketOrder::class)->handle($data);
 

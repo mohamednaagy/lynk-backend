@@ -2,14 +2,18 @@
 
 namespace App\Observers;
 
-use App\Exceptions\ErrorCreatingUnitsForThisINventory;
-use App\Jobs\CreateLocalMarketUnitInventoriesJob;
+use App\Enums\LocalMarket\InventoryStatus;
 use App\Models\LocalMarketInventory;
-use Exception;
+use Illuminate\Support\Facades\DB;
 
 class LocalMarketInventoryObserver
 {
     public $afterCommit = true;
+
+    public function creating(LocalMarketInventory $inventory)
+    {
+        $inventory->status = InventoryStatus::Active();
+    }
 
     /**
      * Handle the LocalMarketInventory "created" event.
@@ -35,24 +39,6 @@ class LocalMarketInventoryObserver
 
     public function createItemUnits(LocalMarketInventory $inventory)
     {
-        try {
-            $numberOfUnits = $inventory->available_quantity;
-            $chunkSize = ($numberOfUnits <= 15000) ? $numberOfUnits : 15000;
-            $numberOfChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
-
-            //loop through the chunks
-            for ($i = 0; $i < $numberOfChunks; $i++) {
-                $isLastChunk = ($i == $numberOfChunks - 1);
-                if ($isLastChunk) { // Get if this is the last chunk
-                    $chunkSize = $numberOfUnits - ($i * $chunkSize);
-                }
-
-                //dispatch job
-                CreateLocalMarketUnitInventoriesJob::dispatch($inventory, $chunkSize, $isLastChunk)->onQueue('unit-inventory');
-            }
-        } catch (\Exception $e) {
-            // TODO create a custom exception for inventory unit creation
-            throw new ErrorCreatingUnitsForThisINventory();
-        }
+        DB::select('CALL GenerateRandomQRCodesOptimized(?, ?, ?)', [$inventory->id, $inventory->commodity_item_id, $inventory->available_quantity]);
     }
 }

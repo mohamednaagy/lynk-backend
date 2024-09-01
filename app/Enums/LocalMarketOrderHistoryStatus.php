@@ -7,6 +7,8 @@ use BenSampo\Enum\Enum;
 
 final class LocalMarketOrderHistoryStatus extends Enum implements LocalizedEnum
 {
+    const initiate = 0;
+
     const PendingEligibleCommodities = 1;
 
     const CommoditiesPurchased = 2;
@@ -15,9 +17,17 @@ final class LocalMarketOrderHistoryStatus extends Enum implements LocalizedEnum
 
     const NoEligibleCommoditiesAvailable = 4;
 
-    const pendingCancellation = 5;
+    const FailedPurchase = 5;
 
-    const Completed = 6;
+    const pendingCancellation = 6;
 
     const Cancelled = 7;
+
+    const Completed = 8;
+
+    const PendingSellCommodities = 9;
+
+    const CommoditiesSell = 10;
+
+    const FailedSell = 11;
 }
