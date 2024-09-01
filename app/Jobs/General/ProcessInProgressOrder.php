@@ -69,10 +69,6 @@ class ProcessInProgressOrder implements ShouldQueue
 
                 $traderOrder = $trader->createTraderOrder($financingOrder);
 
-                // keep below action after createTraderOrder()
-                // to be sure we have a trader order and store his data in transaction meta
-                app(DeductBalanceForNewOrder::class)->handle($traderOrder);
-
                 $financingOrder->update([
                     'status' => FinancingOrderStatus::InProgress,
                 ]);

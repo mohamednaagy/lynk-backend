@@ -35,13 +35,17 @@ class CreateOrderFeeTransactionsForTraderOrders extends Command
     {
         $this->loadTraderOrderIdsFromStorage();
 
-        DB::multipleTransaction(function () {
-            foreach ($this->traderOrdersIds as $traderOrderId) {
-                app(DeductBalanceForNewOrder::class)->handle(
-                    TraderOrder::find($traderOrderId)
-                );
-            }
-        });
+        /*
+         *We paused the deduction to determine if it serves another purpose 
+         *and will reassess its impact after one month to decide whether to keep or remove it.
+        */
+        // DB::multipleTransaction(function () {
+        //     foreach ($this->traderOrdersIds as $traderOrderId) {
+        //         app(DeductBalanceForNewOrder::class)->handle(
+        //             TraderOrder::find($traderOrderId)
+        //         );
+        //     }
+        // });
 
         return Command::SUCCESS;
     }
