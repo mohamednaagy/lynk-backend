@@ -2,8 +2,10 @@
 
 namespace App\Enums;
 
+use App\Enums\FinancingOrderStatus as Status;
 use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
+use UnexpectedValueException;
 
 final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
 {
@@ -30,4 +32,44 @@ final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
     const CommoditiesSell = 10;
 
     const FailedSell = 11;
+
+    private static array $state = [
+        self::initiate => [
+            self::PendingEligibleCommodities,
+        ],
+        self::PendingEligibleCommodities => [
+            self::EligibleCommoditiesAvailable,
+            self::NoEligibleCommoditiesAvailable,
+            self::FailedPurchase,
+        ],
+        self::Completed => [],
+        self::NoEligibleCommoditiesAvailable => [
+            self::FailedPurchase,
+            self::Cancelled,
+
+        ],
+        self::EligibleCommoditiesAvailable => [
+            self::CommoditiesPurchased,
+        ],
+    ];
+
+    public function canMoveTo(int $status): bool
+    {
+        return in_array($status, self::$state[$this->value]);
+    }
+
+    /**
+     * Get the key name for a given status value.
+     */
+    public static function getEnumInstanceByValue(int $value): self
+    {
+        $constants = (new \ReflectionClass(self::class))->getConstants();
+        $key = array_search($value, $constants, true);
+
+        if ($key === false) {
+            throw new UnexpectedValueException("No key found for value $value");
+        }
+
+        return new self($constants[$key]);
+    }
 }

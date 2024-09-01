@@ -39,6 +39,6 @@ class LocalMarketInventoryObserver
 
     public function createItemUnits(LocalMarketInventory $inventory)
     {
-        DB::select('CALL GenerateRandomQRCodesOptimized(?, ?, ?)', [$inventory->id, $inventory->commodity_item_id, $inventory->available_quantity]);
+        DB::select('CALL GenerateRandomInventoryUnitsQRCode(?, ?, ?,?)', [$inventory->id, $inventory->commodity_item_id, $inventory->available_quantity, $inventory->company_id]);
     }
 }

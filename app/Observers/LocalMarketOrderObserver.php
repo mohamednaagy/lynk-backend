@@ -9,9 +9,12 @@ use App\Jobs\LocalMarket\states\FailedPurchaseStatus;
 use App\Jobs\LocalMarket\states\NoEligibleCommoditiesAvailableStatus;
 use App\Jobs\LocalMarket\states\PendingEligibleCommoditiesStatus;
 use App\Models\LocalMarketOrder;
+use App\Support\Traders\Traits\LocalMarketHelperTrait;
 
 class LocalMarketOrderObserver
 {
+    use LocalMarketHelperTrait;
+
     /**
      * Handle the LocalMarketOrder "created" event.
      *
@@ -23,6 +26,12 @@ class LocalMarketOrderObserver
         $localMarketOrder->saveQuietly();
     }
 
+    public function updating(LocalMarketOrder $localMarketOrder)
+    {
+        return $this->canMoveToNextStep($localMarketOrder->getOriginal('status'), $localMarketOrder->status);
+
+    }
+
     /**
      * Handle the LocalMarketOrder "updated" event.
      *
@@ -30,6 +39,7 @@ class LocalMarketOrderObserver
      */
     public function updated(LocalMarketOrder $localMarketOrder)
     {
+
         switch ($localMarketOrder->status) {
             case LocalMarketOrderStatus::PendingEligibleCommodities:
                 dispatch(new PendingEligibleCommoditiesStatus($localMarketOrder));

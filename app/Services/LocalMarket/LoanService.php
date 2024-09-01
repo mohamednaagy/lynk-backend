@@ -77,7 +77,6 @@ class LoanService
 
         try {
             $unitService->changeUnitStatus($localMarketOrder, InventoryUnitsStatus::Reserved);
-
             $ownershipService->changeUnitOwnership($localMarketOrder, OwnershipTypes::Company, $companyId);
             $inventoryService->refreshInventoryStocks($eligibleCommodities->getInventoriesIds());
             $orderService->insertOrderUnits($localMarketOrder);

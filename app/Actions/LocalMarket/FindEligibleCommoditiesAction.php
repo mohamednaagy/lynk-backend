@@ -3,6 +3,7 @@
 namespace App\Actions\LocalMarket;
 
 use App\Actions\Contracts\LocalMarket\FindEligibleCommodities;
+use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\LoanService;
@@ -12,7 +13,8 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
 {
     public function __construct(
         private LoanService $LoanService
-    ) {}
+    ) {
+    }
 
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
@@ -35,6 +37,10 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
                 $localMarketOrder->update([
                     'status' => LocalMarketOrderStatus::NoEligibleCommoditiesAvailable,
                     'data' => $eligibleCommodities,
+                ]);
+                $localMarketOrder->inverntoryUnits()->update([
+                    'hold_for' => null,
+                    'status' => InventoryUnitsStatus::Free,
                 ]);
             }
 
