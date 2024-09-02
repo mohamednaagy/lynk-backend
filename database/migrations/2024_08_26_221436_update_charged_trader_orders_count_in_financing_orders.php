@@ -3,7 +3,8 @@
 use App\Models\FinancingOrder;
 use App\Models\Transaction;
 use Illuminate\Database\Migrations\Migration;
-
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
@@ -13,11 +14,8 @@ return new class extends Migration
      */
     public function up()
     {
-        // Process transactions in chunks
-        Transaction::chunkById(1000, function ($transactions) {
-            foreach ($transactions as $transaction) {
-                $this->updateFinancingOrderCount($transaction);
-            }
+        Schema::table('financing_orders', function (Blueprint $table) {
+            $table->tinyInteger('update_charged_count_status')->default(0)->comment("PENDING=>0|ERROR=>1|DONE=>2");
         });
     }
 
@@ -28,17 +26,8 @@ return new class extends Migration
      */
     public function down()
     {
-        FinancingOrder::query()->update(['charged_trader_orders_count' => 0]);
-    }
-
-    private function updateFinancingOrderCount(Transaction $transaction): void
-    {
-        if ($transaction->amount->isNegative()) {
-            FinancingOrder::where('id', $transaction->financing_order_id)
-                ->increment('charged_trader_orders_count');
-        } elseif ($transaction->amount->isPositive()) {
-            FinancingOrder::where('id', $transaction->financing_order_id)
-                ->decrement('charged_trader_orders_count');
-        }
+        Schema::table('financing_orders', function (Blueprint $table) {
+            $table->dropColumn('update_charged_count_status');
+        });
     }
 };
