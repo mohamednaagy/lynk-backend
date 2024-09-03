@@ -63,16 +63,11 @@ class UpdateInventoryStock implements ShouldQueue
             DB::commit();
             Log::info("Transaction committed for updating inventory ID: {$this->inventory->id}");
         } catch (\Exception $e) {
-            if ($e->getCode() == '1205') { // Lock wait timeout error code
-                Log::warning("Lock wait timeout exceeded for inventory ID: {$this->inventory->id}. Retrying...");
-                $this->release(30); // Release the job back to the queue and retry after 10 seconds
-            } else {
                 DB::rollBack();
                 $this->inventory->update([
                     'status' => LocalMarketInventoryStatus::Problem,
                 ]);
                 Log::error("Error in transaction: " . $e->getMessage());
-            }
         }
     }
 
@@ -81,48 +76,7 @@ class UpdateInventoryStock implements ShouldQueue
         Log::info("Increasing units by: {$numberOfUnits} for inventory ID: {$inventory->id}");
 
         try {
-            $chunkSize = ($numberOfUnits <= config('localMarket.generate_units_max_patch_size_limit')) ? $numberOfUnits : config('localMarket.generate_units_max_patch_size_limit');
-            $numberOfChunks = ceil($numberOfUnits / $chunkSize); // Use ceil to ensure covering all units
-
-            //loop through the chunks
-            for ($i = 0; $i < $numberOfChunks; $i++) {
-                $isLastChunk = ($i == $numberOfChunks - 1);
-                if ($isLastChunk) { // Get if this is the last chunk
-                    $chunkSize = $numberOfUnits - ($i * $chunkSize);
-                }
-
-                //dispatch job
-                $inventoryUnits = [];
-                $baseName = $inventory->generateQrCodeBaseName();
-
-                for ($j = 0; $j < $chunkSize; $j++) {
-                    $uuid = Uuid::uuid4()->toString();
-                    $inventoryUnits[] = [
-                        'local_market_inventory_id' => $inventory->id,
-                        'commodity_item_id' => $inventory->item->id,
-                        'qr_code' => $baseName.'-'.$uuid,
-                    ];
-                }
-
-                Log::info("Inserting {$chunkSize} inventory units for inventory ID: {$inventory->id}");
-                LocalMarketInventoryUnits::insertBulk($inventoryUnits);
-                if ($isLastChunk) {
-                    $totalUnitsCreated = $inventory->CountOfUnits();
-                    $availableQuantity = $inventory->available_quantity;
-
-                    Log::info("Total units created: {$totalUnitsCreated}, Available quantity: {$availableQuantity}");
-
-                    // Update the inventory status based on the unit count
-                    if ($totalUnitsCreated == $availableQuantity) {
-                        Log::info("Inventory ID: {$inventory->id} set to Active status");
-                    } elseif ($totalUnitsCreated < $availableQuantity) {
-                        $missingUnits = $availableQuantity - $totalUnitsCreated;
-                        Log::info("Dispatching additional job for {$missingUnits} missing units for inventory ID: {$inventory->id}");
-                    }
-                }
-
-                unset($inventoryUnits);
-            }
+            DB::select('CALL GenerateRandomInventoryUnitsQRCode(?, ? , ?, ?)', [$inventory->id, $inventory->commodity_item_id, $numberOfUnits, $inventory->company_id]);
         } catch (\Exception $e) {
             throw new ErrorCreatingUnitsForThisINventory;
         }
@@ -133,12 +87,8 @@ class UpdateInventoryStock implements ShouldQueue
         Log::info("Decreasing units by: {$decreased_amount}");
 
         try {
-            // Fetch IDs of units to be deleted
-            $ids = LocalMarketInventoryUnits::select('id')
-                ->where('local_market_inventory_id', $inventory->id)
-                ->where('status', (int) LocalMarketInventoryUnitsStatus::Free)
-                ->limit($decreased_amount)
-                ->delete('id');
+            DB::select('CALL SoftDeleteLocalMarketInventoryUnits(?, ? , ?)', [$inventory->id,LocalMarketInventoryUnitsStatus::Free, $decreased_amount]);
+
         } catch (\Exception $e) {
             throw new FailedDecreaseUnitsForInventory;
         }
