@@ -12,9 +12,8 @@ class CreateSoftDeleteLocalMarketInventoryUnitsProcedure extends Migration
      */
     public function up()
     {
-        DB::unprepared('DROP PROCEDURE IF EXISTS `SoftDeleteLocalMarketInventoryUnits`;');
         DB::unprepared('
-        CREATE PROCEDURE SoftDeleteLocalMarketInventoryUnits(
+        CREATE PROCEDURE DeleteLocalMarketInventoryUnits(
             IN p_inventory_id INT,
             IN p_status INT,
             IN p_limit INT
@@ -23,8 +22,10 @@ class CreateSoftDeleteLocalMarketInventoryUnitsProcedure extends Migration
                 DECLARE current_batch INT UNSIGNED DEFAULT 0;
                 DECLARE batch_size INT UNSIGNED DEFAULT 100000; -- Adjust batch size based on your system capacity
                 DECLARE total_units_remaining INT UNSIGNED;
+                DECLARE time_now DATETIME;
                 
                 SET total_units_remaining = p_limit;
+                SET time_now = CONVERT_TZ(NOW(), @@session.time_zone, \'+03:00\');
             
                 -- Continue updating in batches as long as rows are being affected
                 WHILE total_units_remaining > 0 DO                
@@ -37,7 +38,7 @@ class CreateSoftDeleteLocalMarketInventoryUnitsProcedure extends Migration
                     
                     -- Update in chunks
                     UPDATE local_market_inventory_units
-                    SET deleted_at = NOW()
+                    SET deleted_at = time_now
                     WHERE local_market_inventory_id = p_inventory_id
                     AND status = p_status
                     AND deleted_at IS NULL
@@ -46,9 +47,7 @@ class CreateSoftDeleteLocalMarketInventoryUnitsProcedure extends Migration
                     
                     SET total_units_remaining = total_units_remaining - current_batch;
                 END WHILE;
-                
-                -- Final debug information
-                SELECT CONCAT("Total units soft-deleted: ", p_limit) AS final_result;
+
             END;
         ');
     }
@@ -60,6 +59,6 @@ class CreateSoftDeleteLocalMarketInventoryUnitsProcedure extends Migration
      */
     public function down()
     {
-        DB::unprepared('DROP PROCEDURE IF EXISTS SoftDeleteLocalMarketInventoryUnitsOptimized');
+        DB::unprepared('DROP PROCEDURE IF EXISTS DeleteLocalMarketInventoryUnits');
     }
 }

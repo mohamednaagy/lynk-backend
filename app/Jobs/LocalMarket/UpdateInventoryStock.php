@@ -35,13 +35,12 @@ class UpdateInventoryStock implements ShouldQueue
      */
     public function handle()
     {
-        
-        try {
-            DB::beginTransaction();
-            Log::info("Starting transaction for updating inventory ID: {$this->inventory->id}");
 
+        try {
             $this->inventory->update(['status' => LocalMarketInventoryStatus::Pending]);
 
+            DB::beginTransaction();
+            Log::info("Starting transaction for updating inventory ID: {$this->inventory->id}");
             if ($this->inventoryWasRecentlyCreated) {
                 $this->createItemUnits($this->inventory, $this->inventory->available_quantity);
             } else {
@@ -62,12 +61,12 @@ class UpdateInventoryStock implements ShouldQueue
             DB::commit();
             Log::info("Transaction committed for updating inventory ID: {$this->inventory->id}");
         } catch (\Exception $e) {
-                DB::rollBack();
-                $this->inventory->update([
-                    'status' => LocalMarketInventoryStatus::Problem,
-                ]);
-                Log::error("Error in transaction: " . $e->getMessage());
-            }
+            DB::rollBack();
+            $this->inventory->update([
+                'status' => LocalMarketInventoryStatus::Problem,
+            ]);
+            Log::error("Error in transaction: " . $e->getMessage());
+        }
     }
 
     public function createItemUnits(LocalMarketInventory $inventory, $numberOfUnits)
@@ -75,7 +74,15 @@ class UpdateInventoryStock implements ShouldQueue
         Log::info("Increasing units by: {$numberOfUnits} for inventory ID: {$inventory->id}");
 
         try {
-            DB::select('CALL GenerateRandomInventoryUnitsQRCode(?, ? , ?, ?)', [$inventory->id, $inventory->commodity_item_id, $numberOfUnits, $inventory->company_id]);
+            DB::select('CALL GenerateRandomInventoryUnitsQRCode(?, ? , ?, ?, ?, ?, ?)', [
+                $inventory->id,
+                $inventory->commodity_item_id,
+                $numberOfUnits,
+                $inventory->company_id,
+                $inventory->supplier->type,
+                LocalMarketInventoryUnitsStatus::Free,
+                $inventory->generateQrCodeBaseName()
+            ]);
         } catch (\Exception $e) {
             throw new ErrorCreatingUnitsForThisINventory;
         }
@@ -86,8 +93,7 @@ class UpdateInventoryStock implements ShouldQueue
         Log::info("Decreasing units by: {$decreased_amount}");
 
         try {
-            DB::select('CALL SoftDeleteLocalMarketInventoryUnits(?, ? , ?)', [$inventory->id,LocalMarketInventoryUnitsStatus::Free, $decreased_amount]);
-
+            DB::select('CALL DeleteLocalMarketInventoryUnits(?, ? , ?)', [$inventory->id, LocalMarketInventoryUnitsStatus::Free, $decreased_amount]);
         } catch (\Exception $e) {
             throw new FailedDecreaseUnitsForInventory;
         }
