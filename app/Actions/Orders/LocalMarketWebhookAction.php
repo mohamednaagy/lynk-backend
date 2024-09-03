@@ -6,8 +6,11 @@ use App\Actions\Contracts\Orders\CancelTraderOrder;
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
 use App\Actions\Contracts\Orders\TraderOrders\InProgressTrader;
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Support\Traders\TradingStrategies\TraderStrategyContext;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class LocalMarketWebhookAction implements LocalMarketWebhook
@@ -20,7 +23,13 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
 
         switch ($data['case']) {
             case 'CommoditiesPurchased':
-                app(InProgressTrader::class)->handle($traderOrder, ['products' => $data['products']]);
+                //                app(InProgressTrader::class)->handle($traderOrder, ['products' => $data['products']]);
+
+                $traderOrder->update(['status' => TraderOrderStatus::InProgress, 'products' => $data['products']]);
+                $data['auto_generate_financing_institution_certificate'] = 1;
+                $request = Request::create('/', 'POST', $data);
+                (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))->updatePurchasingCommodity($traderOrder, $request);
+
                 break;
             case 'FailedPurchase':
                 Log::info('cancel trader order');

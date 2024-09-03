@@ -28,4 +28,22 @@ trait LocalMarketHelperTrait
 
         return $checkStep;
     }
+
+    public function getDataOfLocalMarketOrder(LocalMarketOrder $order): array
+    {
+        $newData['external_order_no'] = $order->external_order_no;
+        foreach ($order->data['inventories'] as $key => $data) {
+            $newData['products'][$key]['currency'] = $data['currency']['name'];
+            $newData['products'][$key]['uom'] = $data['measurement']['name'];
+            $newData['products'][$key]['type'] = $data['commodityType']['name'];
+            $newData['products'][$key]['amount'] = $data['price'];
+            $newData['products'][$key]['product'] = $data['item']['name'];
+            $newData['products'][$key]['location'] = $data['location']['name'];
+            $newData['products'][$key]['previous_owner'] = $data['currency']['name'];
+            $newData['products'][$key]['original_supplier'] = $data['currency']['name'];
+            $newData['products'][$key]['quantity'] = $data['numberOfSuitableUnits'];
+        }
+
+        return $newData;
+    }
 }

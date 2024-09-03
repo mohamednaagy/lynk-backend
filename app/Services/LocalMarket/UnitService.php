@@ -44,20 +44,27 @@ class UnitService
      */
     private function buildResponseArray(LocalMarketInventory $inventory, int $numberOfNeededUnits, int $eligibleUnitsCount, float $remainingLoan, bool $isLoanCovered, ?string $failureReason = null): array
     {
+        $item = $inventory->item;
+        $location = $inventory->location;
+
         return [
             'inventoryId' => $inventory->id,
             'item' => [
                 'id' => $inventory->commodity_item_id,
-                'name' => $inventory->item->name,
+                'name' => $item->name,
+                'type' => $item->type->name,
             ],
+            'currency' => ['id' => $item->currency_id, 'name' => $item->currency->name],
+            'measurement' => ['id' => $item->measurement_id, 'name' => $item->measurement->name],
+            'commodityType' => ['id' => $item->commodity_type_id, 'name' => $item->type->name],
             'location' => [
-                'id' => $inventory->location->id,
-                'name' => $inventory->location->name,
-                'unique_identifier' => $inventory->location->unique_identifier,
+                'id' => $location->id,
+                'name' => $location->name,
+                'unique_identifier' => $location->unique_identifier,
             ],
             'supplier' => [
-                'id' => $inventory->location->supplier->id,
-                'name' => $inventory->location->supplier->name,
+                'id' => $location->supplier->id,
+                'name' => $location->supplier->name,
             ],
             'price' => $inventory->price(),
             'numberOfNeededUnits' => $numberOfNeededUnits,

@@ -65,30 +65,7 @@ class LynkV1Driver implements TraderInterface
         $order = LynkClient::of($traderOrder)->createOrder();
 
         return $traderOrder;
-        //        dd($order);
-        //        $response = LynkClient::of($traderOrder)->buyProduct();
-        //
-        //        if (! $response) {
-        //            throw new TraderException(
-        //                'Failed to create trader order',
-        //                [
-        //                    'trader_order_id' => $traderOrder->id,
-        //                    'provider' => $this->provider,
-        //                    'version' => $this->version,
-        //                    'provider_response_body' => $response->json(),
-        //                    'financing_order_id' => $traderOrder->order->id,
-        //                    'failure_reason' => $response->json('cannot fullfilled'),
-        //                ]
-        //            );
-        //        }
-        //
-        //        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
-        //
-        //        $traderOrder->update([
-        //            'status' => TraderOrderStatus::InProgress,
-        //        ]);
 
-        return $traderOrder;
     }
 
     public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)

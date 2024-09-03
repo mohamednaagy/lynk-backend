@@ -3,7 +3,9 @@
 namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\LocalMarket\BuyCommodities;
+use App\Enums\LocalMarketOrderHistoryStatus;
 use App\Models\LocalMarketOrder;
+use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -12,7 +14,7 @@ use Illuminate\Queue\SerializesModels;
 
 class EligibleCommoditiesFoundStatus implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, LocalMarketHelperTrait, Queueable , SerializesModels;
 
     public function __construct(private LocalMarketOrder $localMarketOrder)
     {
@@ -24,8 +26,12 @@ class EligibleCommoditiesFoundStatus implements ShouldQueue
      */
     public function handle(BuyCommodities $BuyCommodities): void
     {
+
         $BuyCommodities->handle(
             $this->localMarketOrder
         );
+
+        $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::EligibleCommoditiesAvailable);
+
     }
 }

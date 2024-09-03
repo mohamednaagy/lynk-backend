@@ -24,6 +24,8 @@ class LocalMarketOrderObserver
     {
         $localMarketOrder->order_no = 'LM_'.$localMarketOrder->source.'_'.$localMarketOrder->id;
         $localMarketOrder->saveQuietly();
+        $this->fireJob($localMarketOrder);
+
     }
 
     public function updating(LocalMarketOrder $localMarketOrder)
@@ -39,24 +41,9 @@ class LocalMarketOrderObserver
      */
     public function updated(LocalMarketOrder $localMarketOrder)
     {
+        // if change status fire this job
+        $this->fireJob($localMarketOrder);
 
-        switch ($localMarketOrder->status) {
-            case LocalMarketOrderStatus::PendingEligibleCommodities:
-                dispatch(new PendingEligibleCommoditiesStatus($localMarketOrder));
-                break;
-            case LocalMarketOrderStatus::EligibleCommoditiesAvailable:
-                dispatch(new EligibleCommoditiesFoundStatus($localMarketOrder));
-                break;
-            case LocalMarketOrderStatus::NoEligibleCommoditiesAvailable:
-                dispatch(new NoEligibleCommoditiesAvailableStatus($localMarketOrder));
-                break;
-            case LocalMarketOrderStatus::CommoditiesPurchased:
-                dispatch(new CommoditiesPurchaseCompletedStatus($localMarketOrder));
-                break;
-            case LocalMarketOrderStatus::FailedPurchase:
-                dispatch(new FailedPurchaseStatus($localMarketOrder));
-                break;
-        }
     }
 
     /**
@@ -87,5 +74,26 @@ class LocalMarketOrderObserver
     public function forceDeleted(LocalMarketOrder $localMarketOrder)
     {
         //
+    }
+
+    private function fireJob(LocalMarketOrder $localMarketOrder)
+    {
+        switch ($localMarketOrder->status) {
+            case LocalMarketOrderStatus::initiate:
+                dispatch(new PendingEligibleCommoditiesStatus($localMarketOrder));
+                break;
+            case LocalMarketOrderStatus::EligibleCommoditiesAvailable:
+                dispatch(new EligibleCommoditiesFoundStatus($localMarketOrder));
+                break;
+            case LocalMarketOrderStatus::NoEligibleCommoditiesAvailable:
+                dispatch(new NoEligibleCommoditiesAvailableStatus($localMarketOrder));
+                break;
+            case LocalMarketOrderStatus::CommoditiesPurchased:
+                dispatch(new CommoditiesPurchaseCompletedStatus($localMarketOrder));
+                break;
+            case LocalMarketOrderStatus::FailedPurchase:
+                dispatch(new FailedPurchaseStatus($localMarketOrder));
+                break;
+        }
     }
 }

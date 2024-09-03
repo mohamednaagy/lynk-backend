@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\LocalMarket\OwnershipTypes;
 use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
@@ -12,6 +13,7 @@ return new class extends Migration
     public function up()
     {
         \Illuminate\Support\Facades\DB::unprepared('DROP PROCEDURE IF EXISTS `GenerateRandomQRCodesOptimized`;');
+        \Illuminate\Support\Facades\DB::unprepared('DROP PROCEDURE IF EXISTS `GenerateRandomInventoryUnitsQRCode`;');
         \Illuminate\Support\Facades\DB::unprepared('
             CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateRandomInventoryUnitsQRCode`(
                 IN `p_local_market_inventory_id` BIGINT UNSIGNED,
@@ -88,7 +90,7 @@ return new class extends Migration
                         qr_code,
                         0,
                         p_current_owner,
-                        1,
+                        '.OwnershipTypes::OriginalSupplier.',
                         time_now,
                         time_now
                     FROM temp_units;

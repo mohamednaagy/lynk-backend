@@ -51,6 +51,8 @@ final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
         self::EligibleCommoditiesAvailable => [
             self::CommoditiesPurchased,
         ],
+        self::CommoditiesPurchased => [
+        ],
     ];
 
     public function canMoveTo(int $status): bool

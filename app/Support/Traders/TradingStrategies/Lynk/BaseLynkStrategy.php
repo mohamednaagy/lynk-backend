@@ -25,8 +25,8 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::TraderOrderCreated);
 
-        app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
         if ($traderOrder->mode == TraderOrderMode::Manual) {
+            app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
             $traderOrder->update([
                 'status' => TraderOrderStatus::InProgress,
             ]);

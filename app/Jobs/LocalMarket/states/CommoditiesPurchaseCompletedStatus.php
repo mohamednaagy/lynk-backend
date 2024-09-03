@@ -2,9 +2,10 @@
 
 namespace App\Jobs\LocalMarket\states;
 
-use App\Actions\Contracts\LocalMarket\BuyCommodities;
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
+use App\Enums\LocalMarketOrderHistoryStatus;
 use App\Models\LocalMarketOrder;
+use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 
 class CommoditiesPurchaseCompletedStatus implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, LocalMarketHelperTrait, Queueable , SerializesModels;
 
     public function __construct(private LocalMarketOrder $localMarketOrder)
     {
@@ -24,23 +25,11 @@ class CommoditiesPurchaseCompletedStatus implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(BuyCommodities $buyCommodities): void
+    public function handle(): void
     {
-        $data = [
-            'external_order_no' => 'O7F5ZL81CYOMY81711',
-            'case' => 'CommoditiesPurchased',
-            'products' => [
-                'uom' => 'Delectus nulla cupi',
-                'type' => 'Ea fuga Ad rem et n',
-                'amount' => '22',
-                'product' => 'Laboriosam numquam',
-                'currency' => 'Fugiat consequatur',
-                'location' => 'Accusantium sequi ar',
-                'quantity' => '787',
-                'previous_owner' => 'Dolore perspiciatis',
-                'original_supplier' => 'Accusamus sunt quos',
-            ],
-        ];
+        $data = $this->getDataOfLocalMarketOrder($this->localMarketOrder);
+        $data['case'] = 'CommoditiesPurchased';
+        $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::CommoditiesPurchased);
         app(LocalMarketWebhook::class)->handle($data);
         // we will notify the owner we are done buying
         // nagy will handle it
