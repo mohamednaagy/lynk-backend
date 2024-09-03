@@ -11,6 +11,10 @@ use App\Models\TraderOrder;
 
 class TraderOrderObserver
 {
+    public function __construct(protected TraderOrderFeesService $traderOrderFeesService)
+    {
+    }
+
     /**
      * Handle the TraderOrder "creating" event.
      *
@@ -37,6 +41,7 @@ class TraderOrderObserver
         if ($traderOrder->needsProcessingAfterInitiation()) {
             $traderOrder->processInitiatedTraderOrder();
         }
+        $this->applyOrderFees($traderOrder);
     }
 
     /**
@@ -65,6 +70,7 @@ class TraderOrderObserver
     {
         if ($traderOrder->wasChanged(['status'])) {
             $this->takeActionsIfStatusWasChanged($traderOrder);
+            $this->applyOrderFees($traderOrder);
         }
     }
 
@@ -104,5 +110,19 @@ class TraderOrderObserver
     public function forceDeleted(TraderOrder $traderOrder)
     {
         //
+    }
+
+    /**
+     * Handle the status change of the TraderOrder.
+     */
+    protected function applyOrderFees(TraderOrder $traderOrder): void
+    {
+        $provider = $traderOrder->provider;
+        $status = $traderOrder->status;
+        $action = $this->traderOrderFeesService->getAction($provider, $status);
+        if ($action) {
+            $action->handle($traderOrder);
+        }
+
     }
 }

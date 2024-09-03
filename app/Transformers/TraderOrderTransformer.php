@@ -44,9 +44,8 @@ class TraderOrderTransformer extends TransformerAbstract
         'is_cancellable',
         'history',
         'created_at',
-        'cancel_reason_message',
-        'cancelled_at',
-
+        'cancel_details',
+        'hover_message',
     ];
 
     public function transform(TraderOrder $traderOrder)
@@ -109,6 +108,11 @@ class TraderOrderTransformer extends TransformerAbstract
         }
 
         return $this->primitive($this->formatRefundStatus($refundReason, $baseTraderOrder));
+    }
+
+    public function includeHoverMessage(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->hoverMessage());
     }
 
     public function includeIsCancellable(TraderOrder $traderOrder): Primitive
@@ -175,21 +179,19 @@ class TraderOrderTransformer extends TransformerAbstract
         return $this->primitive($traderOrder->created_at?->clone()->tz('Asia/Riyadh')->toDateTimeString());
     }
 
-    public function includeCancelledAt(TraderOrder $traderOrder): Primitive
+    public function includeCancelDetails(TraderOrder $traderOrder)
     {
+        if ($traderOrder->isCancelled()) {
+            $cancelDetail = $traderOrder->cancelDetail;
 
-        if ($traderOrder->cancelled_at) {
-            $cancelledAt = Carbon::make($traderOrder->cancelled_at)->clone()->tz('Asia/Riyadh');
-
-            return $this->primitive(convertDateTimeToHumanDate($cancelledAt));
+            return $this->primitive([
+                'cancelled_at' => Carbon::make($cancelDetail->created_at)?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
+                'cancel_step' => $cancelDetail->cancel_step,
+                'cancel_reason' => $cancelDetail->cancel_reason,
+            ]);
         }
 
         return $this->primitive(null);
-    }
-
-    public function includeCancelReasonMessage(TraderOrder $traderOrder): Primitive
-    {
-        return $this->primitive($traderOrder->cancel_reason_message);
     }
 
     public function setArea($area): static

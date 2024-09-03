@@ -240,8 +240,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function activeTraderOrder(): HasMany
     {
         return $this->traderOrders()
-            ->where('status', TraderOrderStatus::InProgress)
+            ->where(function ($query) {
+                $query->where('status', TraderOrderStatus::InProgress)->orWhere('status', TraderOrderStatus::Initiated);
+            })
             ->latest();
+
     }
 
     public function latestTraderOrder(): HasOne
@@ -253,6 +256,13 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     {
         return $this->traderOrders()
             ->where('status', TraderOrderStatus::Initiated)
+            ->latest();
+    }
+
+    public function holdTraderOrders(): HasMany
+    {
+        return $this->traderOrders()
+            ->where('status', TraderOrderStatus::Hold)
             ->latest();
     }
 
@@ -278,11 +288,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             || $this->isDefaultTraderAvailable() === false
             || $this->isInPendingTradingRequestState() === false
             || $this->hasCompletedTraderOrder()
+            || $this->hasHoldTraderOrder()
 
         ) {
             return false;
         }
-
         $currentUserHasPermissionToCreate = $user?->hasRole([Role::Admin, Role::Manager])
             || $this->isTradingMode(TraderOrderMode::Automatic);
 
@@ -292,6 +302,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function hasCompletedTraderOrder(): bool
     {
         return $this->traderOrders()->where('status', TraderOrderStatus::Completed)->exists();
+    }
+
+    public function hasHoldTraderOrder(): bool
+    {
+        return $this->traderOrders()->where('status', TraderOrderStatus::Hold)->exists();
     }
 
     private function isComplete(): bool
@@ -343,10 +358,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function isDefaultTraderAvailable()
     {
-        if (config('trader.default') === 'bursam') {
-            return is_bursam_service_available();
-        }
-
         return true;
     }
 

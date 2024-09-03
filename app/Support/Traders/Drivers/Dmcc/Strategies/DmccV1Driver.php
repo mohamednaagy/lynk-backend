@@ -5,10 +5,12 @@ namespace App\Support\Traders\Drivers\Dmcc\Strategies;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Jobs\General\ProcessAskClientForWakala;
+use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Contracts\TraderInterface;
@@ -236,7 +238,9 @@ class DmccV1Driver implements TraderInterface
      */
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::Manual
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled,
+        $cancelledByType = TraderOrderCancelType::System,
+        $cancelledBy = null
     ): object {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('cancelTTI'))
@@ -579,5 +583,26 @@ class DmccV1Driver implements TraderInterface
     public function generatePdfFileName($traderOrder, $collectionName): string
     {
         return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
+    }
+
+    // use it in public api to proceed order after purchasing commodity step by one step
+    public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
+    {
+        ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
+    }
+
+    public function checkCanInitiateTraderOrder()
+    {
+        return true;
+    }
+
+    public function moveHoldTraderOrder(TraderOrder $trader)
+    {
+        return true;
+    }
+
+    public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
+    {
+        return null;
     }
 }

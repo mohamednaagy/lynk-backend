@@ -12,6 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
 {
@@ -52,5 +53,10 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
             ->each(function (FinancingOrder $financingOrder) {
                 ProcessBursamCancelTimeOutOrder::dispatch($financingOrder);
             });
+    }
+
+    public function failed($exception)
+    {
+        Log::error('ProcessDailySellingPendingCommodityToMarket', ['message' => $exception->getMessage()]);
     }
 }

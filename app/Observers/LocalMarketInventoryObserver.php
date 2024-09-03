@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Enums\LocalMarket\InventoryStatus;
+use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\LocalMarketInventory;
 use Illuminate\Support\Facades\DB;
 
@@ -22,7 +23,7 @@ class LocalMarketInventoryObserver
      */
     public function created(LocalMarketInventory $inventory)
     {
-        $this->createItemUnits($inventory);
+        UpdateInventoryStock::dispatch($inventory, $inventory->available_quantity, $inventory->wasRecentlyCreated);
     }
 
     /**
@@ -30,11 +31,9 @@ class LocalMarketInventoryObserver
      *
      * @return void
      */
-    public function updated(LocalMarketInventory $inventory)
+    public function updating(LocalMarketInventory $inventory)
     {
-        //TODO: Handle the LocalMarketInventory "updated" event
-        //DROP OLD CREATED UNITS FROM LocalMarketInventoryUnits
-        //$this->createItemUnits($inventory);
+
     }
 
     public function createItemUnits(LocalMarketInventory $inventory)

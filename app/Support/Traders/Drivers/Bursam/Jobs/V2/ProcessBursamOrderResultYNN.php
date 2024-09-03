@@ -102,10 +102,8 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
             );
         });
 
-        Log::error(
-            method_exists($exception, 'getMessage') ? $exception->getMessage() : 'Error and failed',
-            ['exception' => $exception]
-        );
+        Log::error('ProcessBursamOrderResultYNN', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage()]);
+
     }
 
     public function middleware(): array

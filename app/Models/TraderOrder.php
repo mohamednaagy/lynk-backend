@@ -57,6 +57,7 @@ class TraderOrder extends Model implements HasMedia
             'can_continue_progress',
             'updated_at',
             'created_at',
+            'default_contract_sign_time_limit',
         ];
     }
 
@@ -261,5 +262,31 @@ class TraderOrder extends Model implements HasMedia
     public function company()
     {
         return $this->order->company;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status->is(TraderOrderStatus::Cancelled);
+    }
+
+    public function canBeCancelled(): bool
+    {
+        return $this->status->is(TraderOrderStatus::InProgress) || $this->status->is(TraderOrderStatus::Initiated) || $this->status->is(TraderOrderStatus::Hold);
+    }
+
+    public function getCancelStep(): ?string
+    {
+        return (new StepHistoriesDictionary($this->provider, $this->version))->getCancelStep($this)?->step ?? MurabhaStep::PurchasingCommodity;
+    }
+
+    public function cancelDetail()
+    {
+        return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
+    }
+
+    public function hoverMessage(): ?string
+    {
+        return Trader::driver($this->provider, $this->version)->HoverMessageOfTraderStatus($this);
+
     }
 }

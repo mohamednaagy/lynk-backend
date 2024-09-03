@@ -18,12 +18,12 @@ class LocalMurabahaSettingsController extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::LocalMurabahaAreaSettings, Action::Index, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::LocalMurabahaAreaSettings, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::LocalMurabahaAreaSettings, Action::Edit, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::LocalMurabahaAreaSettings, Action::Edit, Action::Manage])
         )->only('update');
     }
 

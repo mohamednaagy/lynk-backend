@@ -15,6 +15,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessBursamOtcCertificate implements ShouldBeUnique, ShouldQueue
 {
@@ -37,6 +38,8 @@ class ProcessBursamOtcCertificate implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
+        Log::error('success otc trader id '.$this->traderOrderId);
+
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::InProgress)
@@ -45,7 +48,9 @@ class ProcessBursamOtcCertificate implements ShouldBeUnique, ShouldQueue
 
             if (
                 is_null($traderOrder)
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CommoditySoldToMarket)
+                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CommoditySoldToMarket
+                || $traderOrder->traderHistories()->latest()->first()->action == FinancingOrderHistory::OnHold
+                )
             ) {
                 return;
             }
@@ -62,5 +67,10 @@ class ProcessBursamOtcCertificate implements ShouldBeUnique, ShouldQueue
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->traderOrderId;
+    }
+
+    public function failed($exception)
+    {
+        Log::error('ProcessBursamOtcCertificate', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
     }
 }

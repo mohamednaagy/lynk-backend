@@ -2,6 +2,8 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
+use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -60,17 +62,10 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
         if (! $traderOrder) {
             return;
         }
+        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
 
-        $traderOrder->update([
-            'status' => TraderOrderStatus::Cancelled,
-        ]);
+        Log::error('ProcessBursamInitiatedTraderOrder', ['financingOrderId' => $traderOrder->order->id,  'message' => $exception->getMessage()]);
 
-        Log::error(
-            method_exists('getMessage', $exception)
-                ? $exception->getMesage()
-                : 'Cannot proceed to buy product',
-            [$exception]
-        );
     }
 
     public function middleware(): array

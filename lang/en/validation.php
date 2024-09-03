@@ -172,6 +172,8 @@ return [
         'company_unique_name' => 'company identifier',
         'company_cr' => 'company CR',
         'national_id' => 'national ID',
+        'invalid_case_proceed' => 'The case value entered is invalid for this trade request',
+
     ],
 
 ];
