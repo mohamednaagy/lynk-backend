@@ -26,8 +26,6 @@ class CreateSoftDeleteLocalMarketInventoryUnitsProcedure extends Migration
                 
                 SET total_units_remaining = p_limit;
             
-                START TRANSACTION;
-
                 -- Continue updating in batches as long as rows are being affected
                 WHILE total_units_remaining > 0 DO                
                     -- Determine the size of the current batch
@@ -49,8 +47,6 @@ class CreateSoftDeleteLocalMarketInventoryUnitsProcedure extends Migration
                     SET total_units_remaining = total_units_remaining - current_batch;
                 END WHILE;
                 
-                COMMIT;
-
                 -- Final debug information
                 SELECT CONCAT("Total units soft-deleted: ", p_limit) AS final_result;
             END;

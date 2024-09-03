@@ -37,7 +37,6 @@ class UpdateInventoryStock implements ShouldQueue
     {
         
         try {
-            DB::statement('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
             DB::beginTransaction();
             Log::info("Starting transaction for updating inventory ID: {$this->inventory->id}");
 
@@ -68,7 +67,7 @@ class UpdateInventoryStock implements ShouldQueue
                     'status' => LocalMarketInventoryStatus::Problem,
                 ]);
                 Log::error("Error in transaction: " . $e->getMessage());
-        }
+            }
     }
 
     public function createItemUnits(LocalMarketInventory $inventory, $numberOfUnits)

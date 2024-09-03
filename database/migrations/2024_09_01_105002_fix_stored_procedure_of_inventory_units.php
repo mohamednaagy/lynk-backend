@@ -33,8 +33,6 @@ BEGIN
     SET time_now = NOW();
     SET total_units_remaining = p_number_of_units;
 
-    START TRANSACTION;
-
     -- Disable foreign key checks and unique checks for performance
     SET FOREIGN_KEY_CHECKS = 0;
     SET UNIQUE_CHECKS = 0;
@@ -95,8 +93,6 @@ BEGIN
     SET FOREIGN_KEY_CHECKS = 1;
     SET UNIQUE_CHECKS = 1;
     SET SQL_MODE = DEFAULT;
-
-    COMMIT;
 
     -- Final debug information
     SELECT CONCAT(\'Total inserted: \', p_number_of_units, \' units\') AS final_result;
