@@ -75,8 +75,7 @@ class UpdateInventoryStock implements ShouldQueue
                 $inventory->commodity_item_id,
                 $numberOfUnits,
                 $inventory->company_id,
-                // TODO aadel double check
-                $inventory->supplier->type,
+                3,  // TODO aadel double call enum when merge with dev branch
                 LocalMarketInventoryUnitsStatus::Free,
                 $inventory->generateQrCodeBaseName(),
             ]);

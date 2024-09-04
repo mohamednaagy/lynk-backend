@@ -12,6 +12,7 @@ return new class extends Migration
      */
     public function up()
     {
+        // TODO adel kindly double check
         DB::unprepared('
             CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateRandomInventoryUnitsQRCode`(
                 IN `p_local_market_inventory_id` BIGINT UNSIGNED,

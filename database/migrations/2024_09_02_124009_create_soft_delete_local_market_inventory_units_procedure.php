@@ -12,6 +12,7 @@ class CreateSoftDeleteLocalMarketInventoryUnitsProcedure extends Migration
      */
     public function up()
     {
+        // TODO adel need double check time zone
         DB::unprepared('
         CREATE PROCEDURE DeleteLocalMarketInventoryUnits(
             IN p_inventory_id INT,
@@ -42,7 +43,6 @@ class CreateSoftDeleteLocalMarketInventoryUnitsProcedure extends Migration
                     WHERE local_market_inventory_id = p_inventory_id
                     AND status = p_status
                     AND deleted_at IS NULL
-                    ORDER BY id
                     LIMIT current_batch;
                     
                     SET total_units_remaining = total_units_remaining - current_batch;
