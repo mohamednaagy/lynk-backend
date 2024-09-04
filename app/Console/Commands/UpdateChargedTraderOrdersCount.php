@@ -6,9 +6,16 @@ use App\Models\FinancingOrder;
 use App\Models\Transaction;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class UpdateChargedTraderOrdersCount extends Command
 {
+    private const STATUS_PENDING = 0;
+
+    private const STATUS_ERROR = 1;
+
+    private const STATUS_DONE = 2;
+
     /**
      * The name and signature of the console command.
      *
@@ -32,38 +39,52 @@ class UpdateChargedTraderOrdersCount extends Command
     {
         $this->info('Starting the update process...');
 
-        DB::transaction(function () {
-            // Chunk through all FinancingOrders
-            FinancingOrder::where('update_charged_count_status', 0)
-                ->chunkById(1000, function ($financingOrders) {
-                    foreach ($financingOrders as $order) {
-                        $this->updateFinancingOrderCount($order);
-                    }
-                });
-        });
+        FinancingOrder::where('update_charged_count_status', self::STATUS_PENDING)
+            ->chunkById(1000, function ($financingOrders) {
+                foreach ($financingOrders as $financingOrder) {
+                    $this->updateFinancingOrderCount($financingOrder);
+                }
+            });
 
         $this->info('Update process completed successfully.');
 
         return Command::SUCCESS;
     }
 
-    private function updateFinancingOrderCount(FinancingOrder $order): void
+    /**
+     * Update the charged_trader_orders_count for the given financing order.
+     *
+     * @param  FinancingOrder  $order
+     */
+    private function updateFinancingOrderCount(FinancingOrder $financingOrder): void
     {
         // Calculate the new charged_trader_orders_count based on related transactions
-        $count = Transaction::whereFinancingOrderId($order->id)
+        $chargedTransactionsCount = Transaction::whereFinancingOrderId($financingOrder->id)
             ->sum(DB::raw('IF(amount > 0, -1, 1)'));
 
-        // Check if there's a problem (negative count)
-        if ($count < 0) {
-            $order->update([
-                'update_charged_count_status' => 1 // ERROR
+        if ($chargedTransactionsCount < 0) {
+            Log::error('unexpected negative value for transactions count ', [
+                'order_id' => $financingOrder->id,
+                'new_count' => $chargedTransactionsCount,
             ]);
-        } else {
-            // Update the order's count
-            $order->update([
-                'charged_trader_orders_count' => $count,
-                'update_charged_count_status' => 2 // DONE
+            $financingOrder->update([
+                'update_charged_count_status' => self::STATUS_ERROR,
             ]);
+
+            return;
         }
+
+        // Calculate the old charged_trader_orders_count (old logic)
+        $chargedTransactionsCountOldWay = $financingOrder->loadCount([
+            'traderOrders as old_count' => function ($query) {
+                $query->whereNull('data->refunded_at');
+            },
+        ])->old_count;
+
+        $financingOrder->update([
+            'charged_trader_orders_count' => $chargedTransactionsCount,
+            'old_charged_trader_orders_count' => $chargedTransactionsCountOldWay,
+            'update_charged_count_status' => ($chargedTransactionsCount == $chargedTransactionsCountOldWay) ? self::STATUS_DONE : self::STATUS_ERROR,
+        ]);
     }
 }
