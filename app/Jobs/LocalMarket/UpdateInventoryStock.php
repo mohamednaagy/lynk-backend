@@ -7,7 +7,6 @@ use App\Enums\LocalMarketInventoryUnitsStatus;
 use App\Exceptions\ErrorCreatingUnitsForThisINventory;
 use App\Exceptions\FailedDecreaseUnitsForInventory;
 use App\Models\LocalMarketInventory;
-use App\Models\LocalMarketInventoryUnits;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -15,7 +14,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Ramsey\Uuid\Nonstandard\Uuid;
 
 class UpdateInventoryStock implements ShouldQueue
 {
@@ -38,9 +36,9 @@ class UpdateInventoryStock implements ShouldQueue
 
         try {
             $this->inventory->update(['status' => LocalMarketInventoryStatus::Pending]);
+            Log::info("Starting transaction for updating inventory ID: {$this->inventory->id}");
 
             DB::beginTransaction();
-            Log::info("Starting transaction for updating inventory ID: {$this->inventory->id}");
             if ($this->inventoryWasRecentlyCreated) {
                 $this->createItemUnits($this->inventory, $this->inventory->available_quantity);
             } else {
@@ -50,6 +48,7 @@ class UpdateInventoryStock implements ShouldQueue
                     $this->decreaseItemUnits($this->inventory, $this->inventory->total_items - $this->total);
                 }
             }
+            DB::commit();
 
             // Enable inventory (set status to active)
             $this->inventory->update([
@@ -57,15 +56,12 @@ class UpdateInventoryStock implements ShouldQueue
                 'available_quantity' => $this->total - $this->inventory->reserved_items,
             ]);
             Log::info("Set inventory ID: {$this->inventory->id} to status active");
-
-            DB::commit();
-            Log::info("Transaction committed for updating inventory ID: {$this->inventory->id}");
         } catch (\Exception $e) {
             DB::rollBack();
             $this->inventory->update([
                 'status' => LocalMarketInventoryStatus::Problem,
             ]);
-            Log::error("Error in transaction: " . $e->getMessage());
+            Log::error('Error in transaction: '.$e->getMessage());
         }
     }
 
@@ -79,9 +75,10 @@ class UpdateInventoryStock implements ShouldQueue
                 $inventory->commodity_item_id,
                 $numberOfUnits,
                 $inventory->company_id,
+                // TODO aadel double check
                 $inventory->supplier->type,
                 LocalMarketInventoryUnitsStatus::Free,
-                $inventory->generateQrCodeBaseName()
+                $inventory->generateQrCodeBaseName(),
             ]);
         } catch (\Exception $e) {
             throw new ErrorCreatingUnitsForThisINventory;

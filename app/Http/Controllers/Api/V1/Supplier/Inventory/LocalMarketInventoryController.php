@@ -55,7 +55,7 @@ class LocalMarketInventoryController extends Controller
         $supplier = tenant()->supplier;
         $data = $getPaginatedCommodityInventory->handle($supplier, $item);
 
-        return fractal($data, new LocalMarketInventoryTransformer())
+        return fractal($data, new LocalMarketInventoryTransformer)
             ->parseIncludes([
                 'id',
                 'company_id',
@@ -87,7 +87,7 @@ class LocalMarketInventoryController extends Controller
         $createSupplierInventory->setItem($item);
         $inventory = $createSupplierInventory->handle($data);
 
-        return fractal($inventory, new LocalMarketInventoryTransformer())
+        return fractal($inventory, new LocalMarketInventoryTransformer)
             ->parseIncludes([
                 'id',
                 'company_id',
@@ -116,6 +116,7 @@ class LocalMarketInventoryController extends Controller
     public function update(CommodityItem $item, LocalMarketInventory $inventory, UpdateLocalMarketInventoryRequest $updateInventoryRequest, UpdateCommodityInventory $updateCommodityInventory)
     {
         //double check if the inventory is editable
+        // @TODO adel we need to move this contion to the action updateCommodityInventory
         if (! $inventory->canUpdateUnits($updateInventoryRequest->total_units)) {
             return $this->errorResponse(
                 __('error.inventory_cannot_be_updated'),
@@ -126,7 +127,7 @@ class LocalMarketInventoryController extends Controller
 
         $inventory = $updateCommodityInventory->handle($inventory, $updateInventoryRequest->validated());
 
-        return fractal($inventory, new LocalMarketInventoryTransformer())
+        return fractal($inventory, new LocalMarketInventoryTransformer)
             ->parseIncludes([
                 'id',
                 'company_id',
@@ -151,7 +152,7 @@ class LocalMarketInventoryController extends Controller
      */
     public function show(CommodityItem $item, LocalMarketInventory $inventory): JsonResponse
     {
-        return fractal($inventory, new LocalMarketInventoryTransformer())
+        return fractal($inventory, new LocalMarketInventoryTransformer)
             ->parseIncludes([
                 'id',
                 'company_id',
