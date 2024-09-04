@@ -12,7 +12,6 @@ return new class extends Migration
      */
     public function up()
     {
-        // TODO adel kindly double check
         DB::unprepared('
             CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateRandomInventoryUnitsQRCode`(
                 IN `p_local_market_inventory_id` BIGINT UNSIGNED,
@@ -34,7 +33,7 @@ return new class extends Migration
                     SET p_number_of_units = 2000000;
                 END IF;
 
-                SET time_now = CONVERT_TZ(NOW(), @@session.time_zone, \'+03:00\');
+                SET time_now = NOW();
                 SET total_units_remaining = p_number_of_units;
 
                 -- Disable foreign key checks and unique checks for performance

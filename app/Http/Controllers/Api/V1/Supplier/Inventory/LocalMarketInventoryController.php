@@ -115,36 +115,30 @@ class LocalMarketInventoryController extends Controller
      */
     public function update(CommodityItem $item, LocalMarketInventory $inventory, UpdateLocalMarketInventoryRequest $updateInventoryRequest, UpdateCommodityInventory $updateCommodityInventory)
     {
-        //double check if the inventory is editable
-        // @TODO adel we need to move this contion to the action updateCommodityInventory
-        if (! $inventory->canUpdateUnits($updateInventoryRequest->total_units)) {
-            return $this->errorResponse(
-                __('error.inventory_cannot_be_updated'),
-                Response::HTTP_BAD_REQUEST,
-                ErrorCode::INVENTORY_NOT_UPDATABLE
-            );
+        try {
+            $inventory = $updateCommodityInventory->handle($inventory, $updateInventoryRequest->validated());
+            return fractal($inventory, new LocalMarketInventoryTransformer)
+                ->parseIncludes([
+                    'id',
+                    'company_id',
+                    'comapny_name',
+                    'commodity_item_id',
+                    'commodity_item',
+                    'commodity_type',
+                    'min_price',
+                    'max_price',
+                    'supplier_location_id',
+                    'supplier_location',
+                    'total_items',
+                    'available_quantity',
+                    'reserved_items',
+                    'status',
+                ])
+                ->respond();
+        } catch (\Throwable $th) {
+            throw $th;
         }
-
-        $inventory = $updateCommodityInventory->handle($inventory, $updateInventoryRequest->validated());
-
-        return fractal($inventory, new LocalMarketInventoryTransformer)
-            ->parseIncludes([
-                'id',
-                'company_id',
-                'comapny_name',
-                'commodity_item_id',
-                'commodity_item',
-                'commodity_type',
-                'min_price',
-                'max_price',
-                'supplier_location_id',
-                'supplier_location',
-                'total_items',
-                'available_quantity',
-                'reserved_items',
-                'status',
-            ])
-            ->respond();
+        
     }
 
     /**

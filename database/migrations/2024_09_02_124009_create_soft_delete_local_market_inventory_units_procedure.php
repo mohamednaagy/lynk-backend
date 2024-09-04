@@ -12,7 +12,6 @@ class CreateSoftDeleteLocalMarketInventoryUnitsProcedure extends Migration
      */
     public function up()
     {
-        // TODO adel need double check time zone
         DB::unprepared('
         CREATE PROCEDURE DeleteLocalMarketInventoryUnits(
             IN p_inventory_id INT,
@@ -26,7 +25,7 @@ class CreateSoftDeleteLocalMarketInventoryUnitsProcedure extends Migration
                 DECLARE time_now DATETIME;
                 
                 SET total_units_remaining = p_limit;
-                SET time_now = CONVERT_TZ(NOW(), @@session.time_zone, \'+03:00\');
+                SET time_now = NOW();
             
                 -- Continue updating in batches as long as rows are being affected
                 WHILE total_units_remaining > 0 DO                
