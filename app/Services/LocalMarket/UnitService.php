@@ -6,6 +6,7 @@ use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
+use App\Models\LocalMarketOrderHasUnit;
 use Illuminate\Support\Facades\Log;
 
 class UnitService
@@ -129,5 +130,12 @@ class UnitService
     public function changeUnitStatus(LocalMarketOrder $localMarketOrder, string $status = InventoryUnitsStatus::Reserved): void
     {
         LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)->update(['status' => $status]);
+    }
+
+    public function areUnitsUsedForTheFirstTime(LocalMarketOrder $order): bool
+    {
+        $unitIds = $order->orderUnits()->pluck('unit_id')->toArray();
+
+        return ! LocalMarketOrderHasUnit::where('local_market_order_id', '!=', $order->id)->whereIn('unit_id', $unitIds)->exists();
     }
 }

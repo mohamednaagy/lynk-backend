@@ -3,17 +3,15 @@
 namespace App\Observers;
 
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
-use App\Enums\Trader;
 use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Services\TraderOrderFeesService;
 
 class TraderOrderObserver
 {
-    public function __construct(protected TraderOrderFeesService $traderOrderFeesService)
-    {
-    }
+    public function __construct(protected TraderOrderFeesService $traderOrderFeesService) {}
 
     /**
      * Handle the TraderOrder "creating" event.

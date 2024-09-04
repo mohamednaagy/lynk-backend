@@ -2,8 +2,8 @@
 
 namespace App\Jobs\LocalMarket;
 
-use App\Enums\LocalMarketInventoryStatus;
-use App\Enums\LocalMarketInventoryUnitsStatus;
+use App\Enums\LocalMarket\InventoryStatus;
+use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Exceptions\ErrorCreatingUnitsForThisINventory;
 use App\Exceptions\FailedDecreaseUnitsForInventory;
 use App\Models\LocalMarketInventory;
@@ -26,9 +26,7 @@ class UpdateInventoryStock implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected LocalMarketInventory $inventory, protected $total, protected $inventoryWasRecentlyCreated = false)
-    {
-    }
+    public function __construct(protected LocalMarketInventory $inventory, protected $total, protected $inventoryWasRecentlyCreated = false) {}
 
     /**
      * Execute the job.
@@ -41,7 +39,7 @@ class UpdateInventoryStock implements ShouldQueue
         try {
             Log::info("Starting transaction for updating inventory ID: {$this->inventory->id}");
 
-            $this->inventory->update(['status' => LocalMarketInventoryStatus::Pending]);
+            $this->inventory->update(['status' => InventoryStatus::Pending]);
 
             if ($this->inventoryWasRecentlyCreated) {
                 $this->createItemUnits($this->inventory, $this->inventory->available_quantity);
@@ -55,7 +53,7 @@ class UpdateInventoryStock implements ShouldQueue
 
             // Enable inventory (set status to active)
             $this->inventory->update([
-                'status' => LocalMarketInventoryStatus::Active,
+                'status' => InventoryStatus::Active,
                 'available_quantity' => $this->total - $this->inventory->reserved_items,
             ]);
             Log::info("Set inventory ID: {$this->inventory->id} to status active");
@@ -67,7 +65,7 @@ class UpdateInventoryStock implements ShouldQueue
             // Rollback the transaction
             DB::rollBack();
             $this->inventory->update([
-                'status' => LocalMarketInventoryStatus::Problem,
+                'status' => InventoryStatus::Problem,
             ]);
         }
     }
@@ -121,7 +119,7 @@ class UpdateInventoryStock implements ShouldQueue
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new ErrorCreatingUnitsForThisINventory();
+            throw new ErrorCreatingUnitsForThisINventory;
         }
     }
 
@@ -133,12 +131,12 @@ class UpdateInventoryStock implements ShouldQueue
             // Fetch IDs of units to be deleted
             $ids = LocalMarketInventoryUnits::select('id')
                 ->where('local_market_inventory_id', $inventory->id)
-                ->where('status', (int) LocalMarketInventoryUnitsStatus::Free)
+                ->where('status', (int) InventoryUnitsStatus::Free)
                 ->limit($decreased_amount)
                 ->delete('id');
         } catch (\Exception $e) {
             DB::rollBack();
-            throw new FailedDecreaseUnitsForInventory();
+            throw new FailedDecreaseUnitsForInventory;
         }
     }
 }

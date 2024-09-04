@@ -28,13 +28,10 @@ class FailedPurchaseStatus implements ShouldQueue
     {
         // Nagy Continue this function
         // use webhook to notify the user
-        $data = [
-            'external_order_no' => 'O7F5ZL81CYOMY81711',
-            'case' => 'FailedPurchase',
-            'products' => [],
-        ];
-        $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::FailedPurchase);
 
+        $data['case'] = 'FailedPurchase';
+        $data['external_order_no'] = $this->localMarketOrder->external_order_no;
+        $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::FailedPurchase);
         app(LocalMarketWebhook::class)->handle($data);
         Log::info('Sorry there is an error while purchasing commodities for order ');
 

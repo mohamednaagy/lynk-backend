@@ -57,6 +57,7 @@ class OrderService
             [
                 'unit_id',
                 'inventory_id',
+                'local_market_order_id',
                 'created_at',
                 'updated_at',
             ],
@@ -64,6 +65,7 @@ class OrderService
                 ->select(
                     'id',
                     'local_market_inventory_id',
+                    DB::raw("{$localMarketOrder->id}"),
                     // 'local_market_inventory_id as local_market_inventory_id',
                     DB::raw("'{$timestamp}' as created_at"),
                     DB::raw("'{$timestamp}' as updated_at")

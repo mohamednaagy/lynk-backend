@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\LocalMarketOrderCancelReason;
+use App\Enums\LocalMarket\OrderCancelReason;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -19,7 +19,7 @@ class LocalMarketOrderHasCancelReason extends Model
     ];
 
     protected $casts = [
-        'cancel_reason' => LocalMarketOrderCancelReason::class,
+        'cancel_reason' => OrderCancelReason::class,
     ];
 
     public function order()

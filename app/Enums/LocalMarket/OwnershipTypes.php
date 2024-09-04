@@ -5,10 +5,6 @@ namespace App\Enums\LocalMarket;
 use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
 
-/**
- * @method static static Active()
- * @method static static Inactive()
- */
 final class OwnershipTypes extends Enum implements LocalizedEnum
 {
     const Company = 1;

@@ -16,4 +16,6 @@ final class TraderOrderCancelReason extends Enum implements LocalizedEnum
     const FinancingOrderIsCancelled = 4;
 
     const TraderOrderIsCancelled = 5;
+
+    const NoEligibleCommoditiesAvailable = 6;
 }

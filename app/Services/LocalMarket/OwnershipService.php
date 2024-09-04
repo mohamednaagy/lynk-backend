@@ -15,6 +15,7 @@ class OwnershipService
         DB::table('local_market_unit_ownership')->insertUsing(
             [
                 'unit_id',
+                'local_market_order_id',
                 'current_owner',
                 'current_owner_type',
                 'previous_owner',
@@ -25,6 +26,7 @@ class OwnershipService
             DB::table('local_market_inventory_units')
                 ->select(
                     'id as unit_id',
+                    DB::raw("{$localMarketOrder->id}"),
                     DB::raw("'{$ownerIdentifier}' as current_owner"),
                     DB::raw("'{$ownerType}' as current_owner_type"),
                     'current_owner as previous_owner',

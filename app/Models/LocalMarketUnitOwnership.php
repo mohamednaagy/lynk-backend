@@ -12,6 +12,7 @@ class LocalMarketUnitOwnership extends Model
     protected $table = 'local_market_unit_ownership';
 
     protected $fillable = [
+        'local_market_order_id',
         'unit_id',
         'owner_type',
         'current_owner_type',

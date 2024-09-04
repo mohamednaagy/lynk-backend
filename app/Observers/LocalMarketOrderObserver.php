@@ -41,9 +41,9 @@ class LocalMarketOrderObserver
      */
     public function updated(LocalMarketOrder $localMarketOrder)
     {
-        // if change status fire this job
-        $this->fireJob($localMarketOrder);
-
+        if ($localMarketOrder->wasChanged(['status'])) {
+            $this->fireJob($localMarketOrder);
+        }
     }
 
     /**

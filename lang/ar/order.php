@@ -13,6 +13,9 @@ return [
         ],
         'lynk' => [
             'cancelled_status' => 'اختار المستخدم إلغاء طلب التجارة هذا.',
+            'no_commodity_available' => 'لا يوجد سلع كافيه داخل السوق المحلي',
+            'internal_technical_error' => 'يوجد خطا ما',
+
         ],
     ],
 

@@ -24,4 +24,9 @@ class LocalMarketOrderHasUnit extends Model
     {
         return $this->belongsTo(LocalMarketOrderHasInventory::class, 'inventory_id');
     }
+
+    public function order()
+    {
+        return $this->belongsTo(LocalMarketOrder::class, 'local_market_order_id');
+    }
 }
