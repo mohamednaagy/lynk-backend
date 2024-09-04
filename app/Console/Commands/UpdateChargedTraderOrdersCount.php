@@ -33,7 +33,6 @@ class UpdateChargedTraderOrdersCount extends Command
         $this->info('Starting the update process...');
 
         DB::transaction(function () {
-            // Chunk through all FinancingOrders
             FinancingOrder::where('update_charged_count_status', 0)
                 ->chunkById(1000, function ($financingOrders) {
                     foreach ($financingOrders as $order) {
@@ -47,22 +46,45 @@ class UpdateChargedTraderOrdersCount extends Command
         return Command::SUCCESS;
     }
 
+    /**
+     * Update the charged_trader_orders_count for the given financing order.
+     *
+     * @param FinancingOrder $order
+     * @return void
+     */
     private function updateFinancingOrderCount(FinancingOrder $order): void
     {
         // Calculate the new charged_trader_orders_count based on related transactions
         $count = Transaction::whereFinancingOrderId($order->id)
             ->sum(DB::raw('IF(amount > 0, -1, 1)'));
+            
+        // Calculate the old charged_trader_orders_count (old logic)
+        $oldCount = $order->loadCount([
+            'traderOrders as old_count' => function ($query) {
+                $query->whereNull('data->refunded_at');
+            }
+        ]);
 
-        // Check if there's a problem (negative count)
-        if ($count < 0) {
+        // Check if the new count is different from the old one or new count is negative
+        if ($count != $oldCount->old_count || $count < 0) {
             $order->update([
-                'update_charged_count_status' => 1 // ERROR
+                'update_charged_count_status' => 1, // ERROR
+                'old_charged_trader_orders_count' => $oldCount->old_count,
             ]);
+
+            if ($count >= 0) {
+                $order->update([
+                    'charged_trader_orders_count' => $count,
+                    'update_charged_count_status' => 1, // ERROR
+                    'old_charged_trader_orders_count' => $oldCount->old_count,
+                ]);
+            }
         } else {
-            // Update the order's count
+            // Update the order's count if no issues were found
             $order->update([
                 'charged_trader_orders_count' => $count,
-                'update_charged_count_status' => 2 // DONE
+                'old_charged_trader_orders_count' => $oldCount->old_count,
+                'update_charged_count_status' => 2, // DONE
             ]);
         }
     }
