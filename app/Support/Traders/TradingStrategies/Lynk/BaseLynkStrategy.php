@@ -21,39 +21,42 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
 {
     use TraderHelperTrait;
 
+    // TODO nagy  replace request with array
     public function updatePurchasingCommodity(TraderOrder $traderOrder, Request $request)
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::TraderOrderCreated);
 
+        // TODO nagy  do we need to check if need manual
         if ($traderOrder->mode == TraderOrderMode::Manual) {
             app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
             $traderOrder->update([
                 'status' => TraderOrderStatus::InProgress,
             ]);
         }
-        $this->transferOwnershipToLender($traderOrder, $request);
 
-        $this->createStepHistories(
-            $request,
+        // TODO nagy
+        $this->transferOwnershipToLender($traderOrder, $auto_generate_financing_institution_certificate);
+
+        // TODO nagy
+        $this->createTraderOrderHistory(
             $traderOrder,
             MurabhaStep::PurchasingCommodity
         );
+
+        // $this->createStepHistories(
+        //     $request,
+        //     $traderOrder,
+        //     MurabhaStep::PurchasingCommodity
+        // );
     }
 
-    protected function transferOwnershipToLender(TraderOrder $traderOrder, $request)
+    protected function transferOwnershipToLender(TraderOrder $traderOrder, $auto_generate_financing_institution_certificate)
     {
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
 
         // this (if) is a special case doesn't exist in history map
-        if ($request->auto_generate_financing_institution_certificate) {
+        if ($auto_generate_financing_institution_certificate) {
             $trader->createTransferOwnershipToLenderDocument($traderOrder);
-        } elseif ($request->has('financing_institution_certificate')) {
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                base64_encode(file_get_contents($request->file('financing_institution_certificate'))),
-                TraderOrderMediaCollection::TransferOwnershipToLender,
-                'base64'
-            );
         }
     }
 
