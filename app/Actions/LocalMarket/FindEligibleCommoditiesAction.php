@@ -18,7 +18,6 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
         try {
-            abort(500);
             // TODO naser amount is not real amount ouble check it
             $startTime = microtime(true);
             $eligibleCommodities = $this->LoanService->getCommoditiesForLoan(
