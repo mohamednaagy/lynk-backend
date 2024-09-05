@@ -2,6 +2,8 @@
 
 namespace App\Services\LocalMarket;
 
+use App\Enums\CommodityTypeStatus;
+use App\Enums\CommoitySupplierStatus;
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Models\LocalMarketInventory;
 
@@ -35,20 +37,30 @@ class InventoryService
 
     private function findInventory(float $loanAmount, array $usedInventories = [], array $preferredItemTypes = [])
     {
-        $inventory = LocalMarketInventory::where('max_price', '<=', $loanAmount)
+
+        $inventoryQuery = LocalMarketInventory::where('max_price', '<=', $loanAmount)
             ->where('status', InventoryStatus::Active)
+            ->whereHas('type', function ($query) {
+                $query->where('status', CommodityTypeStatus::Active);  // Assuming CommodityStatus::Active is defined
+            })
+            ->whereHas('supplier.detail', function ($query) {
+                $query->where('status', CommoitySupplierStatus::Active);  // Assuming CommodityStatus::Active is defined
+            })
+
             ->when(! empty($usedInventories), function ($query) use ($usedInventories) {
                 $query->whereNotIn('id', $usedInventories);
             });
 
-        if (empty($preferredItemTypes)) {
-            return $inventory->orderByRaw('(`available_quantity` * `max_price`) DESC')
-                ->first();
-        } else {
-            return $inventory->whereIn('commodity_type_id', $preferredItemTypes)
-                ->orderByRaw('(`available_quantity` * `max_price`) DESC')
-                ->first();
+        $cloneInventoryQuery = clone $inventoryQuery;
+        $existInventoryMatchFullLoan = $cloneInventoryQuery->where('max_price', $loanAmount)->first();
+        if ($existInventoryMatchFullLoan) {
+            return $existInventoryMatchFullLoan;
         }
+        if (! empty($preferredItemTypes)) {
+            $inventoryQuery->whereIn('commodity_type_id', $preferredItemTypes);
+        }
+
+        return $inventoryQuery->orderByRaw('available_quantity * max_price DESC')->first();
     }
 
     public static function refreshInventoryStocks($inventories)

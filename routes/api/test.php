@@ -16,10 +16,10 @@ Route::prefix('v1/test')->group(function () {
         $status = request()->input('status');
 
         $localMarketOrder = LocalMarketOrder::query()
-            ->where('id', $orderId)
+            ->latest()
             ->first();
 
-        //         (new FindEligibleCommoditiesAction(new LoanService))->handle($localMarketOrder);
+        (new FindEligibleCommoditiesAction(new LoanService))->handle($localMarketOrder);
         //         (new BuyCommoditiesAction(new LoanService))->handle($localMarketOrder);
 
         if ($localMarketOrder) {

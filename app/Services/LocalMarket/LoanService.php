@@ -19,7 +19,7 @@ class LoanService
         float $loanAmount,
         array $preferredTypes = []
     ): array {
-        $maxNumberOfUnits = 10000;
+        $maxNumberOfUnits = config('trader.providers.lynk.max_units_per_trader');
 
         $loanDetails = [
             'inventories' => [],
