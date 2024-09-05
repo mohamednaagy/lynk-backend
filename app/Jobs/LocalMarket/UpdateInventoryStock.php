@@ -37,8 +37,7 @@ class UpdateInventoryStock implements ShouldQueue
         try {
             $this->inventory->update(['status' => LocalMarketInventoryStatus::Pending]);
             Log::info("Starting transaction for updating inventory ID: {$this->inventory->id}");
-
-            DB::beginTransaction();
+            
             if ($this->inventoryWasRecentlyCreated) {
                 $this->createItemUnits($this->inventory, $this->inventory->available_quantity);
             } else {
@@ -48,7 +47,6 @@ class UpdateInventoryStock implements ShouldQueue
                     $this->decreaseItemUnits($this->inventory, $this->inventory->total_items - $this->total);
                 }
             }
-            DB::commit();
 
             // Enable inventory (set status to active)
             $this->inventory->update([
@@ -57,7 +55,6 @@ class UpdateInventoryStock implements ShouldQueue
             ]);
             Log::info("Set inventory ID: {$this->inventory->id} to status active");
         } catch (\Exception $e) {
-            DB::rollBack();
             $this->inventory->update([
                 'status' => LocalMarketInventoryStatus::Problem,
             ]);

@@ -27,6 +27,15 @@ return new class extends Migration
                 DECLARE current_batch INT UNSIGNED DEFAULT 0;
                 DECLARE batch_size INT UNSIGNED DEFAULT 1000; -- Adjust batch size based on your system capacity
                 DECLARE total_units_remaining INT UNSIGNED;
+                DECLARE EXIT HANDLER FOR SQLEXCEPTION
+                BEGIN
+                    -- Log and rollback on error
+                    ROLLBACK;
+                    UPDATE local_market_inventories
+                    SET STATUS = 3
+                    WHERE id = inventoryId;
+                    SIGNAL SQLSTATE \'45000\' SET MESSAGE_TEXT = \'Error in transaction\';
+                END;
 
                 -- Ensure we don\'t exceed two million units
                 IF p_number_of_units > 2000000 THEN
@@ -35,7 +44,7 @@ return new class extends Migration
 
                 SET time_now = NOW();
                 SET total_units_remaining = p_number_of_units;
-
+                START TRANSACTION;
                 -- Disable foreign key checks and unique checks for performance
                 SET FOREIGN_KEY_CHECKS = 0;
                 SET UNIQUE_CHECKS = 0;
@@ -96,7 +105,7 @@ return new class extends Migration
                 SET FOREIGN_KEY_CHECKS = 1;
                 SET UNIQUE_CHECKS = 1;
                 SET SQL_MODE = DEFAULT;
-
+                COMMIT;
             END;
         ');
 

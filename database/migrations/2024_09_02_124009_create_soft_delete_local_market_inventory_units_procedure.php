@@ -23,10 +23,19 @@ class CreateSoftDeleteLocalMarketInventoryUnitsProcedure extends Migration
                 DECLARE batch_size INT UNSIGNED DEFAULT 100000; -- Adjust batch size based on your system capacity
                 DECLARE total_units_remaining INT UNSIGNED;
                 DECLARE time_now DATETIME;
+                DECLARE EXIT HANDLER FOR SQLEXCEPTION
+                BEGIN
+                    -- Log and rollback on error
+                    ROLLBACK;
+                    UPDATE local_market_inventories
+                    SET STATUS = 3
+                    WHERE id = inventoryId;
+                    SIGNAL SQLSTATE \'45000\' SET MESSAGE_TEXT = \'Error in transaction\';
+                END;
                 
                 SET total_units_remaining = p_limit;
                 SET time_now = NOW();
-            
+                START TRANSACTION;
                 -- Continue updating in batches as long as rows are being affected
                 WHILE total_units_remaining > 0 DO                
                     -- Determine the size of the current batch
@@ -46,7 +55,7 @@ class CreateSoftDeleteLocalMarketInventoryUnitsProcedure extends Migration
                     
                     SET total_units_remaining = total_units_remaining - current_batch;
                 END WHILE;
-
+                COMMIT;
             END;
         ');
     }
