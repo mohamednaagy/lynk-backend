@@ -27,10 +27,6 @@ class CreateSoftDeleteLocalMarketInventoryUnitsProcedure extends Migration
                 BEGIN
                     -- Log and rollback on error
                     ROLLBACK;
-                    UPDATE local_market_inventories
-                    SET STATUS = 3
-                    WHERE id = inventoryId;
-                    SIGNAL SQLSTATE \'45000\' SET MESSAGE_TEXT = \'Error in transaction\';
                 END;
                 
                 SET total_units_remaining = p_limit;
