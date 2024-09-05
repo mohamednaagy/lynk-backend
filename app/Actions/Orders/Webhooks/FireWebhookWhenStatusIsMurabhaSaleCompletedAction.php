@@ -25,7 +25,9 @@ class FireWebhookWhenStatusIsMurabhaSaleCompletedAction implements FireWebhookWh
         };
 
         $sellConfirmationMediaCollection = match ($traderOrder->provider) {
-            Trader::Lynk => TraderOrderMediaCollection::SellConfirmationDocument
+            Trader::Dmcc, Trader::FakeDmcc => null,
+            Trader::Bursam => null,
+            Trader::Lynk => TraderOrderMediaCollection::SellConfirmationDocument,
         };
 
         $documentMediaFile = get_media_of_model($traderOrder, $warrantyMediaCollection);
