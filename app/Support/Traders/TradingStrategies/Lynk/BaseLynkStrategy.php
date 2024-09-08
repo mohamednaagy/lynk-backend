@@ -6,7 +6,6 @@ use App\Actions\Contracts\Orders\UpdateTraderOrder;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
-use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -21,41 +20,31 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
 {
     use TraderHelperTrait;
 
-    // TODO nagy  replace request with array
-    public function updatePurchasingCommodity(TraderOrder $traderOrder, Request $request)
+    public function updatePurchasingCommodity(TraderOrder $traderOrder, array $data)
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::TraderOrderCreated);
 
-        // TODO nagy  do we need to check if need manual
-        if ($traderOrder->mode == TraderOrderMode::Manual) {
-            app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
-            $traderOrder->update([
-                'status' => TraderOrderStatus::InProgress,
-            ]);
-        }
+        app(UpdateTraderOrder::class)->handle($traderOrder, $data);
+        $traderOrder->update([
+            'status' => TraderOrderStatus::InProgress,
+        ]);
 
-        // TODO nagy
-        $this->transferOwnershipToLender($traderOrder, $auto_generate_financing_institution_certificate);
+        $this->transferOwnershipToLender($traderOrder, $data);
 
-        // TODO nagy
-        $this->createTraderOrderHistory(
+        $this->createStepHistories(
+            $data,
             $traderOrder,
             MurabhaStep::PurchasingCommodity
         );
 
-        // $this->createStepHistories(
-        //     $request,
-        //     $traderOrder,
-        //     MurabhaStep::PurchasingCommodity
-        // );
     }
 
-    protected function transferOwnershipToLender(TraderOrder $traderOrder, $auto_generate_financing_institution_certificate)
+    protected function transferOwnershipToLender(TraderOrder $traderOrder, $data)
     {
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
 
         // this (if) is a special case doesn't exist in history map
-        if ($auto_generate_financing_institution_certificate) {
+        if (isset($data['auto_generate_financing_institution_certificate'])) {
             $trader->createTransferOwnershipToLenderDocument($traderOrder);
         }
     }
@@ -65,7 +54,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
         $traderOrder->ensureCanAccessStep(MurabhaStep::CommoditySoldToCustomer);
 
         $this->createStepHistories(
-            $request,
+            $request->validated(),
             $traderOrder,
             MurabhaStep::MurabhaOfferIssued
         );
@@ -105,7 +94,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
         );
 
         $this->createStepHistories(
-            $request,
+            $request->validated(),
             $traderOrder,
             MurabhaStep::MurabahaSaleCompleted
         );

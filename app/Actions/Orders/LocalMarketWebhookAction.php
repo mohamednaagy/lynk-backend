@@ -3,10 +3,10 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
-use App\Actions\Contracts\Orders\TraderOrders\completePurchasingCommodityOfTrader;
 use App\Enums\TraderOrderCancelReason;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 
 class LocalMarketWebhookAction implements LocalMarketWebhook
 {
@@ -16,7 +16,8 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
         $traderOrder = TraderOrder::lockForUpdate()->where('reference', $data['external_order_no'])->firstOrFail();
         switch ($data['case']) {
             case 'CommoditiesPurchased':
-                app(completePurchasingCommodityOfTrader::class)->handle($traderOrder, ['products' => $data['products']]);
+                $data['auto_generate_financing_institution_certificate'] = 1;
+                (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))->updatePurchasingCommodity($traderOrder, $data);
                 break;
             case 'FailedPurchase':
                 Trader::driver($traderOrder->provider, $traderOrder->version)

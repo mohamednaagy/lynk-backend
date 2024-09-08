@@ -12,9 +12,9 @@ class BursamStrategyV2 extends BursamStrategyV1
 {
     public static string $version = 'v2';
 
-    public function updatePurchasingCommodity(TraderOrder $traderOrder, Request $request)
+    public function updatePurchasingCommodity(TraderOrder $traderOrder, array $data)
     {
-        parent::updatePurchasingCommodity($traderOrder, $request);
+        parent::updatePurchasingCommodity($traderOrder, $data);
         app(GenerateClientWakala::class)->handle($traderOrder);
     }
 
@@ -25,9 +25,7 @@ class BursamStrategyV2 extends BursamStrategyV1
         $this->sellCommodityToCustomer($traderOrder, $request);
     }
 
-    public function updateMurabahaPurchaseOffer(TraderOrder $traderOrder, $request)
-    {
-    }
+    public function updateMurabahaPurchaseOffer(TraderOrder $traderOrder, $request) {}
 
     public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
     {
@@ -38,7 +36,7 @@ class BursamStrategyV2 extends BursamStrategyV1
         );
 
         $this->createStepHistories(
-            $request,
+            $request->validated(),
             $traderOrder,
             MurabhaStep::MurabahaSaleCompleted
         );

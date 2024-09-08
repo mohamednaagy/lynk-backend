@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 interface TraderStrategyInterface
 {
-    public function updatePurchasingCommodity(TraderOrder $traderOrder, Request $request);
+    public function updatePurchasingCommodity(TraderOrder $traderOrder, array $data);
 
     public function updateMurabahaPurchaseOffer(TraderOrder $traderOrder, Request $request);
 

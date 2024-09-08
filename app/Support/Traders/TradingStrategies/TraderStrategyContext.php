@@ -27,9 +27,9 @@ class TraderStrategyContext
         };
     }
 
-    public function updatePurchasingCommodity(TraderOrder $traderOrder, Request $request): void
+    public function updatePurchasingCommodity(TraderOrder $traderOrder, array $data): void
     {
-        $this->strategy->updatePurchasingCommodity($traderOrder, $request);
+        $this->strategy->updatePurchasingCommodity($traderOrder, $data);
     }
 
     public function updateMurabahaPurchaseOffer(TraderOrder $traderOrder, Request $request): void

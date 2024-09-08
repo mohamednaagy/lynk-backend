@@ -41,21 +41,15 @@ class InventoryService
         $inventoryQuery = LocalMarketInventory::where('max_price', '<=', $loanAmount)
             ->where('status', InventoryStatus::Active)
             ->whereHas('type', function ($query) {
-                $query->where('status', CommodityTypeStatus::Active);  // Assuming CommodityStatus::Active is defined
+                $query->where('status', CommodityTypeStatus::Active);
             })
             ->whereHas('supplier.detail', function ($query) {
-                $query->where('status', CommoitySupplierStatus::Active);  // Assuming CommodityStatus::Active is defined
+                $query->where('status', CommoitySupplierStatus::Active);
             })
-
             ->when(! empty($usedInventories), function ($query) use ($usedInventories) {
                 $query->whereNotIn('id', $usedInventories);
             });
 
-        $cloneInventoryQuery = clone $inventoryQuery;
-        $existInventoryMatchFullLoan = $cloneInventoryQuery->where('max_price', $loanAmount)->first();
-        if ($existInventoryMatchFullLoan) {
-            return $existInventoryMatchFullLoan;
-        }
         if (! empty($preferredItemTypes)) {
             $inventoryQuery->whereIn('commodity_type_id', $preferredItemTypes);
         }
