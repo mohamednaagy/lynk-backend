@@ -39,7 +39,7 @@ class TraderOrderController extends Controller
             }
 
             $traderOrder = $createTraderOrder->handle($order, $data);
-            
+
             return $this->successResponse();
         });
     }

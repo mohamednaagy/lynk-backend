@@ -12,6 +12,9 @@ return [
         ],
         'lynk' => [
             'cancelled_status' => 'User has chosen to cancel this trade request.',
+            'no_commodity_available' => 'No commodities found with LOCAL Trader.',
+            'internal_technical_error' => 'Internal Technical Error',
+
         ],
     ],
 ];

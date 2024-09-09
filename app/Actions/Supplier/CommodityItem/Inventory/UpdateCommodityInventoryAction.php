@@ -12,7 +12,7 @@ class UpdateCommodityInventoryAction implements UpdateCommodityInventory
     public function handle(LocalMarketInventory $inventory, array $data): LocalMarketInventory
     {
         if (! $inventory->canUpdateUnits($data['total_units'])) {
-            throw new InventoryNotUpdatable();
+            throw new InventoryNotUpdatable;
         }
 
         if ($data['total_units']) {

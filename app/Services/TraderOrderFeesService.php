@@ -32,8 +32,6 @@ class TraderOrderFeesService
     /**
      * Get the action class for the given provider and status.
      *
-     * @param string $provider
-     * @param string $status
      * @return mixed|null
      */
     public function getAction(string $provider, string $status)

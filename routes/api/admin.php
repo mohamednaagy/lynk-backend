@@ -44,6 +44,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabahaPur
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabhaCompleteDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetPurchasingCommodity;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetTradersWithAvailableModes;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\LocalMarketWebhook;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabhaCompleteDocument;
@@ -135,6 +136,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('commodity-types', CommodityTypeController::class);
 
         Route::get('orders/export', ExportOrders::class);
+        Route::post('update-trader/local-market-webhook', LocalMarketWebhook::class);
 
         Route::prefix('orders/{order}')->group(function () {
             Route::post('trader-orders', [TraderOrderController::class, 'store']);
@@ -157,6 +159,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                 Route::post('/attach-sell-confirmation-document', UpdateSellConfirmationDocument::class);
                 Route::put('/cancel', CancelTraderOrder::class);
             });
+
         });
 
         Route::apiResource('orders', OrderController::class)
@@ -195,7 +198,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/', [CommodityItemController::class, 'index']);
         });
 
-        
     });
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.sign-up');

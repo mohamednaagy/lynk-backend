@@ -2,8 +2,9 @@
 
 namespace App\Jobs\LocalMarket;
 
-use App\Enums\LocalMarketInventoryStatus;
-use App\Enums\LocalMarketInventoryUnitsStatus;
+use App\Enums\LocalMarket\InventoryStatus;
+use App\Enums\LocalMarket\InventoryUnitsStatus;
+use App\Enums\LocalMarket\OwnershipTypes;
 use App\Exceptions\ErrorCreatingUnitsForThisINventory;
 use App\Exceptions\FailedDecreaseUnitsForInventory;
 use App\Models\LocalMarketInventory;
@@ -35,9 +36,10 @@ class UpdateInventoryStock implements ShouldQueue
     {
 
         try {
-            $this->inventory->update(['status' => LocalMarketInventoryStatus::Pending]);
+
             Log::info("Starting transaction for updating inventory ID: {$this->inventory->id}");
-            
+            $this->inventory->update(['status' => InventoryStatus::Pending]);
+
             if ($this->inventoryWasRecentlyCreated) {
                 $this->createItemUnits($this->inventory, $this->inventory->available_quantity);
             } else {
@@ -50,13 +52,13 @@ class UpdateInventoryStock implements ShouldQueue
 
             // Enable inventory (set status to active)
             $this->inventory->update([
-                'status' => LocalMarketInventoryStatus::Active,
+                'status' => InventoryStatus::Active,
                 'available_quantity' => $this->total - $this->inventory->reserved_items,
             ]);
             Log::info("Set inventory ID: {$this->inventory->id} to status active");
         } catch (\Exception $e) {
             $this->inventory->update([
-                'status' => LocalMarketInventoryStatus::Problem,
+                'status' => InventoryStatus::Problem,
             ]);
             Log::error('Error in transaction: '.$e->getMessage());
         }
@@ -65,15 +67,14 @@ class UpdateInventoryStock implements ShouldQueue
     public function createItemUnits(LocalMarketInventory $inventory, $numberOfUnits)
     {
         Log::info("Increasing units by: {$numberOfUnits} for inventory ID: {$inventory->id}");
-
         try {
             DB::select('CALL GenerateRandomInventoryUnitsQRCode(?, ? , ?, ?, ?, ?, ?)', [
                 $inventory->id,
                 $inventory->commodity_item_id,
                 $numberOfUnits,
                 $inventory->company_id,
-                3,  // TODO aadel double call enum when merge with dev branch
-                LocalMarketInventoryUnitsStatus::Free,
+                OwnershipTypes::OriginalSupplier,  // TODO aadel double call enum when merge with dev branch
+                InventoryUnitsStatus::Free,
                 $inventory->generateQrCodeBaseName(),
             ]);
         } catch (\Exception $e) {
@@ -84,9 +85,8 @@ class UpdateInventoryStock implements ShouldQueue
     public function decreaseItemUnits(LocalMarketInventory $inventory, $decreased_amount)
     {
         Log::info("Decreasing units by: {$decreased_amount}");
-
         try {
-            DB::select('CALL DeleteLocalMarketInventoryUnits(?, ? , ?)', [$inventory->id, LocalMarketInventoryUnitsStatus::Free, $decreased_amount]);
+            DB::select('CALL DeleteLocalMarketInventoryUnits(?, ? , ?)', [$inventory->id, InventoryUnitsStatus::Free, $decreased_amount]);
         } catch (\Exception $e) {
             throw new FailedDecreaseUnitsForInventory;
         }

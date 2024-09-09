@@ -36,6 +36,17 @@ if (! function_exists('validate_said')) {
     }
 }
 
+if (! function_exists('convertMicrotimeToDuration')) {
+    function convertMicrotimeToDuration($seconds)
+    {
+        $hours = floor($seconds / 3600);
+        $minutes = floor(($seconds / 60) % 60);
+        $seconds = $seconds % 60;
+
+        return sprintf('%02d:%02d:%05.2f', $hours, $minutes, $seconds);
+    }
+}
+
 if (! function_exists('perm')) {
     function perm($areas, ...$permissions)
     {
@@ -228,14 +239,14 @@ if (! function_exists('saudi_now')) {
     /**
      * Get the current time in the 'Asia/Riyadh' timezone or convert a given date to this timezone.
      *
-     * @param Carbon|null $date
      * @return Carbon
      */
-    function saudi_now($format ,?Carbon $date = null): string
+    function saudi_now($format, ?Carbon $date = null): string
     {
         $timezone = 'Asia/Riyadh';
 
-        $createdDate =  $date ? $date->clone()->timezone($timezone) : Carbon::now($timezone);
+        $createdDate = $date ? $date->clone()->timezone($timezone) : Carbon::now($timezone);
+
         return $createdDate->format($format);
     }
 }

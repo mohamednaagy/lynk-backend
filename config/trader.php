@@ -88,6 +88,7 @@ return [
                     TraderOrderMode::Manual,
                 ],
             ],
+            'max_units_per_trader' => env('LYNK_MAX_UNITS_PER_TRADER', 10000),
         ],
     ],
 ];

@@ -91,4 +91,6 @@ class ErrorCode
     public const FAILED_TO_DELETE_LOCATION = 1045;
 
     public const USER_DOESNT_BELONG_TO_COMPANY = 1046;
+
+    public const LOCAL_MARKET_PURCHASE_PRODUCT = 1047;
 }

@@ -6,7 +6,6 @@ use App\Actions\Contracts\Orders\UpdateTraderOrder;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
-use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -21,39 +20,32 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
 {
     use TraderHelperTrait;
 
-    public function updatePurchasingCommodity(TraderOrder $traderOrder, Request $request)
+    public function updatePurchasingCommodity(TraderOrder $traderOrder, array $data)
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::TraderOrderCreated);
 
-        app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
-        if ($traderOrder->mode == TraderOrderMode::Manual) {
-            $traderOrder->update([
-                'status' => TraderOrderStatus::InProgress,
-            ]);
-        }
-        $this->transferOwnershipToLender($traderOrder, $request);
+        app(UpdateTraderOrder::class)->handle($traderOrder, $data);
+        $traderOrder->update([
+            'status' => TraderOrderStatus::InProgress,
+        ]);
+
+        $this->transferOwnershipToLender($traderOrder, $data);
 
         $this->createStepHistories(
-            $request,
+            $data,
             $traderOrder,
             MurabhaStep::PurchasingCommodity
         );
+
     }
 
-    protected function transferOwnershipToLender(TraderOrder $traderOrder, $request)
+    protected function transferOwnershipToLender(TraderOrder $traderOrder, $data)
     {
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
 
         // this (if) is a special case doesn't exist in history map
-        if ($request->auto_generate_financing_institution_certificate) {
+        if (isset($data['auto_generate_financing_institution_certificate'])) {
             $trader->createTransferOwnershipToLenderDocument($traderOrder);
-        } elseif ($request->has('financing_institution_certificate')) {
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                base64_encode(file_get_contents($request->file('financing_institution_certificate'))),
-                TraderOrderMediaCollection::TransferOwnershipToLender,
-                'base64'
-            );
         }
     }
 
@@ -62,7 +54,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
         $traderOrder->ensureCanAccessStep(MurabhaStep::CommoditySoldToCustomer);
 
         $this->createStepHistories(
-            $request,
+            $request->validated(),
             $traderOrder,
             MurabhaStep::MurabhaOfferIssued
         );
@@ -101,9 +93,8 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             TraderOrderMediaCollection::LynkSalePledgeCertificate,
         );
 
-
         $this->createStepHistories(
-            $request,
+            $request->validated(),
             $traderOrder,
             MurabhaStep::MurabahaSaleCompleted
         );

@@ -31,9 +31,9 @@ class UpdatePurchasingCommodity extends Controller
         return DB::multipleTransaction(function () use ($traderOrder, $request) {
             [$financingOrder, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
 
-            (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))->updatePurchasingCommodity($traderOrder, $request);
+            (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))->updatePurchasingCommodity($traderOrder, $request->validated());
 
-            return fractal($traderOrder, (new TraderOrderTransformer())->setArea(Area::SuperAdmin))
+            return fractal($traderOrder, (new TraderOrderTransformer)->setArea(Area::SuperAdmin))
                 ->parseIncludes(
                     'purchasing_commodity_information',
                 )

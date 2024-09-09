@@ -37,7 +37,6 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->onOneServer();
 
-        $marketOpeningStartTime = Config::get('services.bursam.market_opening_start_time');
         $sellingCommodityStartTime = Config::get('services.bursam.selling_commodity_start_time');
         $sellingCommodityEndTime = Config::get('services.bursam.selling_commodity_end_time');
 
