@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\TransactionReason;
 use App\Models\FinancingOrder;
 use App\Models\Transaction;
 use Illuminate\Console\Command;
@@ -59,7 +60,8 @@ class UpdateChargedTraderOrdersCount extends Command
     private function updateFinancingOrderCount(FinancingOrder $financingOrder): void
     {
         // Calculate the new charged_trader_orders_count based on related transactions
-        $chargedTransactionsCount = Transaction::whereFinancingOrderId($financingOrder->id)
+        $chargedTransactionsCount = Transaction::reasons([TransactionReason::OrderCreationFee, TransactionReason::RefundOrderCreationFee])
+            ->whereFinancingOrderId($financingOrder->id)
             ->sum(DB::raw('IF(amount > 0, -1, 1)'));
 
         if ($chargedTransactionsCount < 0) {
@@ -69,6 +71,7 @@ class UpdateChargedTraderOrdersCount extends Command
             ]);
             $financingOrder->update([
                 'update_charged_count_status' => self::STATUS_ERROR,
+                'charged_trader_orders_count' => 0,
             ]);
 
             return;
