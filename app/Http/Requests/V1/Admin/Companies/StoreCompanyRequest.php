@@ -66,6 +66,10 @@ class StoreCompanyRequest extends FormRequest
                 'required_if:trading_mode,'.TraderOrderMode::Automatic,
                 'boolean',
             ],
+            'auto_complete_murabaha_order' => [
+                'required',
+                'boolean',
+            ],
             'order_cost_tiers' => [
                 'required',
                 'array',
@@ -165,7 +169,7 @@ class StoreCompanyRequest extends FormRequest
             ],
 
             'preferred_commodity_types.*' => [
-                'required', new CheckActiveCommodityTypeRule(),
+                'required', new CheckActiveCommodityTypeRule,
             ],
         ];
     }

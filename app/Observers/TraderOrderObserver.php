@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
@@ -76,7 +77,11 @@ class TraderOrderObserver
         if ($traderOrder->wasChanged(['status'])) {
             $this->takeActionsIfStatusWasChanged($traderOrder);
             $this->applyOrderFees($traderOrder);
+            if ($traderOrder->status->is(TraderOrderStatus::Completed) && $traderOrder->order->company->isCompanyHasMurabahaAutoCompleteOrder()) {
+                $traderOrder->order->update(['status' => FinancingOrderStatus::Completed]);
+            }
         }
+
     }
 
     protected function takeActionsIfStatusWasChanged(TraderOrder $traderOrder): void

@@ -30,12 +30,13 @@ class SettingsController extends Controller
     {
         $company = tenant();
 
-        return fractal($company, new CompanyTransformer())
+        return fractal($company, new CompanyTransformer)
             ->parseIncludes([
                 'order_cost',
                 'does_order_require_approval',
                 'webhook_secret_key',
                 'require_initiate_trade_request',
+                'auto_complete_murabaha_order',
                 'notify_borrowers_about_order_updates',
                 'force_unique_reference_number',
             ])->respond();
