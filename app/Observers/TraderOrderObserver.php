@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
@@ -13,10 +14,7 @@ use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder
 
 class TraderOrderObserver
 {
-
-    public function __construct(protected TraderOrderFeesService $traderOrderFeesService)
-    {
-    }
+    public function __construct(protected TraderOrderFeesService $traderOrderFeesService) {}
 
     /**
      * Handle the TraderOrder "creating" event.
@@ -78,7 +76,11 @@ class TraderOrderObserver
         if ($traderOrder->wasChanged(['status'])) {
             $this->takeActionsIfStatusWasChanged($traderOrder);
             $this->applyOrderFees($traderOrder);
+            if ($traderOrder->status->is(TraderOrderStatus::Completed) && $traderOrder->order->company->isCompanyHasMurabahaAutoCompleteOrder()) {
+                $traderOrder->order->update(['status' => FinancingOrderStatus::Completed]);
+            }
         }
+
     }
 
     protected function takeActionsIfStatusWasChanged(TraderOrder $traderOrder): void
@@ -119,11 +121,8 @@ class TraderOrderObserver
         //
     }
 
-     /**
+    /**
      * Handle the status change of the TraderOrder.
-     *
-     * @param TraderOrder $traderOrder
-     * @return void
      */
     protected function applyOrderFees(TraderOrder $traderOrder): void
     {
@@ -133,6 +132,6 @@ class TraderOrderObserver
         if ($action) {
             $action->handle($traderOrder);
         }
-        
+
     }
 }
