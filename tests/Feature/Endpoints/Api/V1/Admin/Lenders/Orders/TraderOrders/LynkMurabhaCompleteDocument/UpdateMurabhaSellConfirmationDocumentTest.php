@@ -79,7 +79,7 @@ class UpdateMurabhaSellConfirmationDocumentTest extends TestCase
 
     }
 
-    public function test_that_unauth_user_cant_update_murabha_complete_document(): void
+    public function test_that_unauth_user_cant_update_sell_confirmation_document(): void
     {
         $this->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
             ->assertStatus(Response::HTTP_UNAUTHORIZED)
@@ -88,7 +88,7 @@ class UpdateMurabhaSellConfirmationDocumentTest extends TestCase
             ]);
     }
 
-    public function test_that_other_area_roles_of_not_super_admin_area_cant_update_murabha_complete_document(): void
+    public function test_that_other_area_roles_of_not_super_admin_area_cant_update_sell_confirmation_document(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
         ->reset()
@@ -99,7 +99,7 @@ class UpdateMurabhaSellConfirmationDocumentTest extends TestCase
         ->assertForbidden();
     }
 
-    public function test_proceed_murabha_complete_document_is_successful_and_order_status_will_be_updated(): void
+    public function test_proceed_sell_confirmation_document_is_successful_and_order_status_will_be_updated(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
@@ -115,7 +115,7 @@ class UpdateMurabhaSellConfirmationDocumentTest extends TestCase
     /**
      * @dataProvider unsuitableTraderHistoryDataProvider
      */
-    public function test_update_murabha_complete_document_not_follow_sequence($action)
+    public function test_update_sell_confirmation_document_not_follow_sequence($action)
     {
         Queue::fake();
         self::$traderOrder->traderHistories()->create([
@@ -146,7 +146,7 @@ class UpdateMurabhaSellConfirmationDocumentTest extends TestCase
         return $histories->toArray();
     }
 
-    public function test_update_murabha_complete_document_is_successful(): void
+    public function test_update_sell_confirmation_document_is_successful(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
