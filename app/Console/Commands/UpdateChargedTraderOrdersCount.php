@@ -40,7 +40,7 @@ class UpdateChargedTraderOrdersCount extends Command
     {
         $this->info('Starting the update process...');
 
-        FinancingOrder::whereIn('update_charged_count_status', [self::STATUS_PENDING, self::STATUS_ERROR])
+        FinancingOrder::where('update_charged_count_status', self::STATUS_PENDING)
             ->chunkById(1000, function ($financingOrders) {
                 foreach ($financingOrders as $financingOrder) {
                     $this->updateFinancingOrderCount($financingOrder);
@@ -71,7 +71,6 @@ class UpdateChargedTraderOrdersCount extends Command
             ]);
             $financingOrder->update([
                 'update_charged_count_status' => self::STATUS_ERROR,
-                'charged_trader_orders_count' => 0,
             ]);
 
             return;
