@@ -31,6 +31,7 @@ return new class extends Migration
                 BEGIN
                     -- Log and rollback on error
                     ROLLBACK;
+                    SIGNAL SQLSTATE \'45000\' SET MESSAGE_TEXT = \'An error occurred. Rolling back transaction.\';
                 END;
 
                 -- Ensure we don\'t exceed two million units
