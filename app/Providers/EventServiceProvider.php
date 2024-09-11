@@ -5,12 +5,16 @@ namespace App\Providers;
 use App\Events\TraderOrderCancelled;
 use App\Listeners\RefundOrderCost;
 use App\Models\CommodityItem;
+use App\Models\CommodityType;
+use App\Models\CompanySupplierDetail;
 use App\Models\FinancingOrder;
 use App\Models\LocalMarketInventory;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\Transaction;
 use App\Observers\CommodityItemObserver;
+use App\Observers\CommoditySupplierObserver;
+use App\Observers\CommodityTypeObserver;
 use App\Observers\FinancingOrderObserver;
 use App\Observers\LocalMarketInventoryObserver;
 use App\Observers\TraderHistoryObserver;
@@ -43,6 +47,8 @@ class EventServiceProvider extends ServiceProvider
         Transaction::class => [TransactionObserver::class],
         LocalMarketInventory::class => [LocalMarketInventoryObserver::class],
         CommodityItem::class => [CommodityItemObserver::class],
+        CompanySupplierDetail::class => [CommoditySupplierObserver::class],
+        CommodityType::class => [CommodityTypeObserver::class],
     ];
 
     /**
