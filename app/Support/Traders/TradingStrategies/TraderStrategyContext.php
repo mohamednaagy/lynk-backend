@@ -5,9 +5,9 @@ namespace App\Support\Traders\TradingStrategies;
 use App\Models\TraderOrder;
 use App\Support\Traders\TradingStrategies\Bursam\BursamStrategyV1;
 use App\Support\Traders\TradingStrategies\Bursam\BursamStrategyV2;
-use App\Support\Traders\TradingStrategies\Bursam\LynkStrategyV1;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
 use App\Support\Traders\TradingStrategies\Dmcc\DmccStrategyV1;
+use App\Support\Traders\TradingStrategies\Lynk\LynkStrategyV1;
 use Illuminate\Http\Request;
 
 class TraderStrategyContext

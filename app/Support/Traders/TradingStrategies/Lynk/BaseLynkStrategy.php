@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Traders\TradingStrategies\Bursam;
+namespace App\Support\Traders\TradingStrategies\Lynk;
 
 use App\Actions\Contracts\Orders\UpdateTraderOrder;
 use App\Enums\FinancingOrderHistory;
