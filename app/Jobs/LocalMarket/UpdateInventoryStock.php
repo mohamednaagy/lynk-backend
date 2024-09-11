@@ -5,7 +5,7 @@ namespace App\Jobs\LocalMarket;
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Enums\LocalMarket\OwnershipTypes;
-use App\Exceptions\ErrorCreatingUnitsForThisINventory;
+use App\Exceptions\ErrorCreatingUnitsForThisInventory;
 use App\Exceptions\FailedDecreaseUnitsForInventory;
 use App\Models\LocalMarketInventory;
 use Illuminate\Bus\Queueable;
@@ -78,7 +78,7 @@ class UpdateInventoryStock implements ShouldQueue
                 $inventory->generateQrCodeBaseName(),
             ]);
         } catch (\Exception $e) {
-            throw new ErrorCreatingUnitsForThisINventory;
+            throw new ErrorCreatingUnitsForThisInventory;
         }
     }
 
