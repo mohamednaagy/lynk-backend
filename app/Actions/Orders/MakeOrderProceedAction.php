@@ -5,6 +5,7 @@ namespace App\Actions\Orders;
 use App\Actions\Contracts\Clients\AcceptClientWakala;
 use App\Actions\Contracts\Orders\MakeOrderProceed;
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
+use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -48,6 +49,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
         return match ($case) {
             FinancingOrderProceedCase::ClientWakalaAccepted => $this->handleClientWakalaAccepted($traderOrder, $forceToProceed),
             FinancingOrderProceedCase::ContractSigned => $this->handleContractSigned($traderOrder, $forceToProceed),
+            FinancingOrderProceedCase::ContractSignedDelivery => $this->handleContractSignedDelivery($traderOrder, $forceToProceed),
             FinancingOrderProceedCase::ContractAndClientWakalaCompleted => $this->handleProceedContractAndClientWakala($traderOrder),
             default => []
         };
@@ -111,6 +113,25 @@ class MakeOrderProceedAction implements MakeOrderProceed
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
 
+        if ($traderOrder->isNeedToGenerateWakalaDocument()) {
+            app()->make(GenerateClientWakala::class)->handle($traderOrder);
+        }
+
+        return [];
+    }
+
+    protected function handleContractSignedDelivery(TraderOrder $traderOrder, bool $forceToProceed): array
+    {
+        if (
+            $this->isPreviousStepOfContractSignedNotCompleted($traderOrder)
+            || ($forceToProceed === false && $this->isContractSignedStepCompleted($traderOrder))
+        ) {
+            throw new OrderStatusDoesNotFollowSequenceException;
+        }
+        $traderOrder->update(['contract_signed_type' => ContractSignedType::Delivery]);
+        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
+        $trader->createSellingCommodityToCustomerDocument($traderOrder);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::PendingDelivery);
         if ($traderOrder->isNeedToGenerateWakalaDocument()) {
             app()->make(GenerateClientWakala::class)->handle($traderOrder);
         }

@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Role;
+use App\Enums\Trader;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Enums\TransactionReason;
@@ -91,6 +93,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
                 $currentStepNode = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
                     ->getStepByHistory($traderOrder->last_history_action);
+
+                //TODO nagy check 1498 with naser
+                if ($traderOrder->provider == Trader::Lynk && $traderOrder->mode == TraderOrderMode::Manual && $traderOrder->contract_signed_type->value == ContractSignedType::Delivery) {
+                    return MurabhaStep::fromValue('contract_signed_delivery');
+                }
 
                 return MurabhaStep::fromValue($currentStepNode->step);
             }

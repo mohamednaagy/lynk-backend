@@ -16,6 +16,8 @@ final class MurabhaStep extends Enum implements LocalizedEnum, TraderMurabhaStep
 
     const CommoditySoldToCustomer = 'commodity_sold_to_customer';
 
+    const ContractSignedDelivery = 'contract_signed_delivery';
+
     const TransferOwnershipToLender = 'transfer_ownership_to_lender';
 
     const ClientWakala = 'client_wakala';

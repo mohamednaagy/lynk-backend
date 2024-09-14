@@ -6,6 +6,7 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\Facades\Trader;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use League\Fractal\Resource\Primitive;
@@ -100,6 +101,11 @@ class TraderHistoryTransformer extends TransformerAbstract
         return $this->primitive([
             'step' => MurabhaStep::ContractSigned,
             'is_complete' => (bool) $history,
+            'is_deliverable' => $this->traderOrder->isDeliverable(),
+            'contract_signed_details' => [
+                'message' => Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->contractSignedMessage($this->traderOrder),
+                'type' => $this->traderOrder->contract_signed_type->description,
+            ],
             'completed_at' => optional($history)->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'wakala_document' => [
                 'url' => $wakalaDocumentMediaFile?->file_url,
@@ -233,7 +239,7 @@ class TraderHistoryTransformer extends TransformerAbstract
     public function includeCustomerDeliveryConfirmation($historiesActions): Primitive
     {
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
-            $historiesActions, MurabhaStep::CommoditySoldToCustomer
+            $historiesActions, MurabhaStep::CustomerDeliveryConfirmation
         );
 
         return $this->primitive([

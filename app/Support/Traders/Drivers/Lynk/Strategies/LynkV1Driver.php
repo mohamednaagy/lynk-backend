@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers\Lynk\Strategies;
 
 use App\Actions\Contracts\Orders\CancelOrder;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
+use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\OrderCancellationStatus;
@@ -218,9 +219,7 @@ class LynkV1Driver implements TraderInterface
         }
     }
 
-    public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
-    {
-    }
+    public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void {}
 
     /**
      * @return string <Driver>_<collectionName>_<companies.unique_name>_<financing_orders.id>_<trader_orders.reference_number>_YYYYMMDD.pdf
@@ -249,6 +248,14 @@ class LynkV1Driver implements TraderInterface
         $request['automatically_generate_file'] = true;
         (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
             ->updateCommodityCertificateForClient($traderOrder, $request);
+    }
 
+    public function contractSignedMessage(TraderOrder $traderOrder)
+    {
+        return match ($traderOrder->contract_signed_type->value) {
+            ContractSignedType::Sell => __('order.trader.lynk.steps.contract_signed.sell'),
+            ContractSignedType::Delivery => __('order.trader.lynk.steps.contract_signed.deliver'),
+            default => null,
+        };
     }
 }

@@ -524,9 +524,7 @@ class DmccV1Driver implements TraderInterface
         }
     }
 
-    public function sellCommodityToOpenMarket(TraderOrder $traderOrder)
-    {
-    }
+    public function sellCommodityToOpenMarket(TraderOrder $traderOrder) {}
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder)
     {
@@ -586,5 +584,10 @@ class DmccV1Driver implements TraderInterface
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
         ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
+    }
+
+    public function contractSignedMessage(TraderOrder $traderOrder)
+    {
+        return null;
     }
 }

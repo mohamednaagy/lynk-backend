@@ -19,6 +19,8 @@ return [
         ],
         MurabhaStep::ContractSigned => [
             FinancingOrderHistory::ContractSigned => null,
+            FinancingOrderHistory::PendingDelivery => null,
+
         ],
         MurabhaStep::CommoditySoldToCustomer => [
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => null,
