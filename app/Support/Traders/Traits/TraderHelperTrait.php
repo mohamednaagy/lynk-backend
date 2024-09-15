@@ -84,19 +84,17 @@ trait TraderHelperTrait
         });
     }
 
-    public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
+    public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null, $originalFileName = null): void
     {
         $traderManager = new TraderManager(app());
-        $fileName = $traderManager->driver($traderOrder->provider)->generatePdfFileName($traderOrder, $collectionName);
-        if (! is_null($type)) {
-            $traderOrder->addMediaFromBase64(
-                $document
-            )->usingFileName($fileName)->toMediaCollection($collectionName);
-        } else {
-            $traderOrder->addMediaFromStream(
-                $document
-            )->usingFileName($fileName)->toMediaCollection($collectionName);
-        }
+        
+        $fileName = $originalFileName ?? $traderManager->driver($traderOrder->provider)->generatePdfFileName($traderOrder, $collectionName);
+        
+        $media = $type 
+            ? $traderOrder->addMediaFromBase64($document)
+            : $traderOrder->addMediaFromStream($document);
+
+        $media->usingFileName($fileName)->toMediaCollection($collectionName);
     }
 
     public function transformProductsToCommodityProductsDTO($products): Collection

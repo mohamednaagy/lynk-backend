@@ -120,12 +120,13 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
     public function updateSellConfirmationDocument(TraderOrder $traderOrder, Request $request)
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::MurabahaSaleCompleted);
-
+        $sellCOnfirmationDocumentFile = $request->file('sell_confirmation_document');
         $this->attachDocumentToOrder(
             $traderOrder,
-            base64_encode(file_get_contents($request->file('sell_confirmation_document'))),
+            base64_encode(file_get_contents($sellCOnfirmationDocumentFile)),
             TraderOrderMediaCollection::SellConfirmationDocument,
-            'base64'
+            'base64',
+            $sellCOnfirmationDocumentFile->getClientOriginalName(),
         );
 
         $this->createTraderOrderHistory(
