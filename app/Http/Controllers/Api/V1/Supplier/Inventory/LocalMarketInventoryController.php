@@ -25,24 +25,24 @@ class LocalMarketInventoryController extends Controller
     public function __construct()
     {
         $this->middleware(
-            'permission:'.
+            'permission:' .
                 perm(Area::CommoditySupplier, [Subject::CommoditySupplierInventories, Action::Manage, Action::Index])
         )
             ->only('index');
 
         $this->middleware(
-            'permission:'.
+            'permission:' .
                 perm(Area::CommoditySupplier, [Subject::CommoditySupplierInventories, Action::Manage, Action::Create])
         )
             ->only('store');
 
         $this->middleware(
-            'permission:'.
+            'permission:' .
                 perm(Area::CommoditySupplier, [Subject::CommoditySupplierInventories, Action::Manage, Action::Edit])
         )->only('update');
 
         $this->middleware(
-            'permission:'.
+            'permission:' .
                 perm(Area::CommoditySupplier, [Subject::CommoditySupplierInventories, Action::Manage, Action::Show])
         )->only('show');
 

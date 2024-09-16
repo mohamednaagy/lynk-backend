@@ -144,4 +144,14 @@ class LocalMarketInventory extends Model
 
         $this->save();
     }
+
+    /**
+     * Determine if the item is deletable.
+     * An item is considered deletable if there are no reserved items.
+     * @return bool
+     */
+    public function getIsDeletableAttribute(): bool
+    {
+        return $this->reserved_items == 0;
+    }
 }

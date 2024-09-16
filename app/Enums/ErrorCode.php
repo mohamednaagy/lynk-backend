@@ -73,7 +73,7 @@ class ErrorCode
     public const ERROR_CHEKING_UNITS = 1036;
 
     public const ORDER_IS_CANCELLED = 1037;
-
+    
     public const CAN_NOT_DEAL_WITH_BURSAM_SYSTEM = 1038;
 
     public const ERROR_DELETING_UNITS = 1039;
@@ -93,4 +93,5 @@ class ErrorCode
     public const USER_DOESNT_BELONG_TO_COMPANY = 1046;
 
     public const LOCAL_MARKET_PURCHASE_PRODUCT = 1047;
+
 }

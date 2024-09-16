@@ -71,6 +71,8 @@ class CommodityItem extends Model
      * Determine if the inventory is deletable.
      *
      * An inventory is deletable if the sum of reserved units is zero.
+     *
+     * @return bool
      */
     public function getIsDeletableAttribute(): bool
     {
