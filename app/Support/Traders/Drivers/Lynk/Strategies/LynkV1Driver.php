@@ -163,7 +163,7 @@ class LynkV1Driver implements TraderInterface
 
                 $this->createTraderOrderHistory(
                     $traderOrder,
-                    FinancingOrderHistory::InitialCustomerDeliveryConfirmation,
+                    FinancingOrderHistory::PendingDelivery,
                     [
                         'created_at' => $currentTimeInUtcTz,
                     ]
