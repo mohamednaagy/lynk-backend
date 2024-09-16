@@ -2,9 +2,8 @@
 
 namespace App\Jobs\LocalMarket;
 
-use App\Enums\LocalMarketInventoryStatus;
 use App\Models\LocalMarketInventory;
-use App\Models\LocalMarketInventoryUnits;
+use App\Services\LocalMarket\InventoryService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -34,32 +33,10 @@ class DeleteInventory implements ShouldQueue
     public function handle()
     {
         try {
-            DB::beginTransaction();
-
-            Log::info("Starting transaction for Deleting inventory ID: {$this->inventory->id}");
-
-            // Store the old status
-            $oldStatus = $this->inventory->status;
-
-            $this->inventory->update(['status' => LocalMarketInventoryStatus::Pending]);
-            LocalMarketInventoryUnits::where('local_market_inventory_id', $this->inventory->id)
-                ->delete();
-            Log::info("Successfully soft deleted units for inventory ID: {$this->inventory->id}");
-            
-            $this->inventory->delete();
-
-            // Restore the old status
-            $this->inventory->update(['status' => $oldStatus]);
-            Log::info("Restored inventory ID: {$this->inventory->id} status to {$oldStatus}");
-
-            DB::commit();
-            Log::info("Transaction committed for deleting inventory ID: {$this->inventory->id}");
+            InventoryService::deleteInventory($this->inventory);
         } catch (\Exception $e) {
-            DB::rollBack();
-            $this->inventory->update([
-                'status' => LocalMarketInventoryStatus::Problem,
-            ]);
-            Log::error("Updated inventory ID: {$this->inventory->id} status to Problem due to error: {$e->getMessage()}");
+            Log::error("Updated Inventory ID: {$this->inventory->id} status to Problem due to error: {$e->getMessage()}");
         }
+       
     }
 }
