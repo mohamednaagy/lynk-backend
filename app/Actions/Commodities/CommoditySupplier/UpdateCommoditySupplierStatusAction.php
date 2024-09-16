@@ -4,7 +4,7 @@ namespace App\Actions\Commodities\CommoditySupplier;
 
 use App\Enums\CommodityTypeStatus;
 use App\Enums\CommoitySupplierStatus;
-use App\Enums\LocalMarketInventoryStatus;
+use App\Enums\LocalMarket\InventoryStatus;
 use App\Models\LocalMarketInventory;
 
 class UpdateCommoditySupplierStatusAction
@@ -24,8 +24,8 @@ class UpdateCommoditySupplierStatusAction
             })
             ->update([
                 'status' => ($supplierStatus == CommoitySupplierStatus::Inactive) 
-                    ? LocalMarketInventoryStatus::Inactive 
-                    : LocalMarketInventoryStatus::Active
+                    ? InventoryStatus::Inactive 
+                    : InventoryStatus::Active
             ]);
     }
 }

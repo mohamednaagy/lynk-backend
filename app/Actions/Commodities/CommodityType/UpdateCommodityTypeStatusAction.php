@@ -4,7 +4,7 @@ namespace App\Actions\Commodities\CommodityType;
 
 use App\Enums\CommodityTypeStatus;
 use App\Enums\CommoitySupplierStatus;
-use App\Enums\LocalMarketInventoryStatus;
+use App\Enums\LocalMarket\InventoryStatus;
 use App\Models\LocalMarketInventory;
 use App\Models\Supplier;
 
@@ -24,7 +24,7 @@ class UpdateCommodityTypeStatusAction
         LocalMarketInventory::where('commodity_type_id', $commodityTypeId)
         ->whereIn('company_id', $activeSuppliers)
         ->update([
-            'status' => ($commodityStatus == CommodityTypeStatus::Inactive) ? LocalMarketInventoryStatus::Inactive : LocalMarketInventoryStatus::Active
+            'status' => ($commodityStatus == CommodityTypeStatus::Inactive) ? InventoryStatus::Inactive : InventoryStatus::Active
         ]);
     }
 }
