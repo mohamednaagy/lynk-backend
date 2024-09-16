@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\CommoitySupplierStatus;
 use Database\Factories\SupplierFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
