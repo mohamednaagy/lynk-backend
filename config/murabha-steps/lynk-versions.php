@@ -19,6 +19,8 @@ return [
         ],
         MurabhaStep::ContractSigned => [
             FinancingOrderHistory::ContractSigned => null,
+            FinancingOrderHistory::PendingDelivery => null,
+
         ],
         MurabhaStep::CommoditySoldToCustomer => [
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => null,
@@ -30,6 +32,6 @@ return [
             FinancingOrderHistory::CreateLynkSalePledgeCertificate => null,
             FinancingOrderHistory::MurabahaSaleCompleted => null,
         ],
-       
+
     ],
 ];

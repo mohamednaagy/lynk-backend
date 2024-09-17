@@ -192,4 +192,9 @@ class BursamV2Driver extends BursamV1Driver
     {
         ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
     }
+
+    public function contractSignedMessage(TraderOrder $traderOrder)
+    {
+        return null;
+    }
 }

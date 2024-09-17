@@ -102,6 +102,11 @@ class TraderHistoryTransformer extends TransformerAbstract
             'step' => MurabhaStep::ContractSigned,
             'is_complete' => (bool) $history,
             'completed_at' => optional($history) ? saudi_now('Y-m-d h:i:s A', optional($history)->created_at) : null,
+            'is_deliverable' => $this->traderOrder->isDeliverable(),
+            'contract_signed_details' => [
+                'message' => Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->contractSignedMessage($this->traderOrder),
+                'type' => $this->traderOrder->contract_signed_type->description,
+            ],
             'wakala_document' => [
                 'url' => $wakalaDocumentMediaFile?->file_url,
                 'date' => $wakalaDocumentMediaFile ? saudi_now('Y-m-d h:i:s A', $wakalaDocumentMediaFile->created_at) : null,
@@ -174,7 +179,7 @@ class TraderHistoryTransformer extends TransformerAbstract
             ],
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
         ];
-    
+
         if ($this->traderOrder->provider === Trader::Lynk) {
             $sellConfirmationDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::SellConfirmationDocument);
             $data['sell_confirmation_document'] = [
@@ -182,6 +187,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'date' => $sellConfirmationDocumentMediaFile ? saudi_now('Y-m-d h:i:s A', $sellConfirmationDocumentMediaFile->created_at) : null,
             ];
         }
+
         return $this->primitive($data);
     }
 
@@ -255,7 +261,7 @@ class TraderHistoryTransformer extends TransformerAbstract
     public function includeCustomerDeliveryConfirmation($historiesActions): Primitive
     {
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
-            $historiesActions, MurabhaStep::CommoditySoldToCustomer
+            $historiesActions, MurabhaStep::CustomerDeliveryConfirmation
         );
 
         return $this->primitive([

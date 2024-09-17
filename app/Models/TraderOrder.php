@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
@@ -58,11 +59,13 @@ class TraderOrder extends Model implements HasMedia
             'updated_at',
             'created_at',
             'default_contract_sign_time_limit',
+            'contract_signed_type',
         ];
     }
 
     protected $casts = [
         'status' => TraderOrderStatus::class,
+        'contract_signed_type' => ContractSignedType::class,
         'can_continue_progress' => 'boolean',
     ];
 
@@ -295,6 +298,10 @@ class TraderOrder extends Model implements HasMedia
     public function hoverMessage(): ?string
     {
         return Trader::driver($this->provider, $this->version)->HoverMessageOfTraderStatus($this);
+    }
 
+    public function isDeliverable(): bool
+    {
+        return $this->provider == EnumsTrader::Lynk && $this->mode == TraderOrderMode::Manual;
     }
 }

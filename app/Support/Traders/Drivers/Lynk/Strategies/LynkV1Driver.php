@@ -5,6 +5,7 @@ namespace App\Support\Traders\Drivers\Lynk\Strategies;
 use App\Actions\Contracts\Orders\CancelOrder;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\CompanyMarketType;
+use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -178,7 +179,7 @@ class LynkV1Driver implements TraderInterface
 
                 $this->createTraderOrderHistory(
                     $traderOrder,
-                    FinancingOrderHistory::InitialCustomerDeliveryConfirmation,
+                    FinancingOrderHistory::PendingDelivery,
                     [
                         'created_at' => $currentTimeInUtcTz,
                     ]
@@ -302,6 +303,15 @@ class LynkV1Driver implements TraderInterface
             TraderOrderCancelReason::Manual => __('order.trader.lynk.cancelled_status'),
             TraderOrderCancelReason::NoEligibleCommoditiesAvailable => __('order.trader.lynk.no_commodity_available'),
             TraderOrderCancelReason::FailureToPurchase => __('order.trader.lynk.internal_technical_error'),
+            default => null,
+        };
+    }
+
+    public function contractSignedMessage(TraderOrder $traderOrder)
+    {
+        return match ($traderOrder->contract_signed_type->value) {
+            ContractSignedType::Sell => __('order.trader.lynk.steps.contract_signed.sell'),
+            ContractSignedType::Delivery => __('order.trader.lynk.steps.contract_signed.deliver'),
             default => null,
         };
     }

@@ -527,9 +527,7 @@ class DmccV1Driver implements TraderInterface
         }
     }
 
-    public function sellCommodityToOpenMarket(TraderOrder $traderOrder)
-    {
-    }
+    public function sellCommodityToOpenMarket(TraderOrder $traderOrder) {}
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder)
     {
@@ -602,6 +600,11 @@ class DmccV1Driver implements TraderInterface
     }
 
     public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
+    {
+        return null;
+    }
+
+    public function contractSignedMessage(TraderOrder $traderOrder)
     {
         return null;
     }

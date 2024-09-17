@@ -597,9 +597,7 @@ class BursamV1Driver implements TraderInterface
         return TraderOrderCancellationStatus::Cancelled;
     }
 
-    public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
-    {
-    }
+    public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void {}
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
@@ -630,5 +628,10 @@ class BursamV1Driver implements TraderInterface
             TraderOrderStatus::Hold => __('order.trader.bursa.hold_status'),
             default => null,
         };
+    }
+
+    public function contractSignedMessage(TraderOrder $traderOrder)
+    {
+        return null;
     }
 }

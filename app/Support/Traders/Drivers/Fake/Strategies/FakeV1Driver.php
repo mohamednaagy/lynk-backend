@@ -485,4 +485,9 @@ class FakeV1Driver implements TraderInterface
     {
         return null;
     }
+
+    public function contractSignedMessage(TraderOrder $traderOrder)
+    {
+        return null;
+    }
 }

@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Config;
 return [
     'user_cancel_request' => 'لقد اختار المستخدم إلغاء طلب التجارة هذا',
     'user_cancel_order' => 'لقد اختار المستخدم إلغاء هذا الطلب',
-
     'trader' => [
         'bursa' => [
             'hold_status' => 'طلب التداول معلق بسبب الموعد النهائي لسوق المتداول الدولي (بورصة ماليزيا) حتى '.Config::get('services.bursam.market_opening_start_time').' مساءً بتوقيت المملكة العربية السعودية.',
@@ -15,8 +14,13 @@ return [
             'cancelled_status' => 'اختار المستخدم إلغاء طلب التجارة هذا.',
             'no_commodity_available' => 'لا يوجد سلع كافيه داخل السوق المحلي',
             'internal_technical_error' => 'يوجد خطا ما',
+            'steps' => [
+                'contract_signed' => [
+                    'sell' => 'تم توقيع العقد - بيع للعميل مؤكد بواسطة المستخدم.',
+                    'deliver' => 'تم توقيع العقد - تم تسليم الطلب للعميل من قبل المستخدم.',
+                ],
+            ],
 
         ],
     ],
-
 ];

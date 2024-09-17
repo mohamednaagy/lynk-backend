@@ -51,9 +51,14 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
 
     const GetSellingToMarketCertificate = 23;
 
-    const InitialCustomerDeliveryConfirmation = 24;
+    const PendingDelivery = 24;
+
+    const DeliveryConfirmed = 25;
+
+    const DeliveryCancelled = 26;
 
     const OnHold = 25;
+
     const AttachSellConfirmationDocument = 26;
 
     const CreateLynkSalePledgeCertificate = 27;
