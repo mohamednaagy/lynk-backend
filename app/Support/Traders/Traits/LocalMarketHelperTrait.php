@@ -38,12 +38,12 @@ trait LocalMarketHelperTrait
             $newData['products'][$key]['currency'] = $data['currency']['name'];
             $newData['products'][$key]['uom'] = $data['measurement']['name'];
             $newData['products'][$key]['type'] = $data['commodityType']['name'];
-            $newData['products'][$key]['amount'] = $data['price'];
+            $newData['products'][$key]['amount'] = $data['totalCost'];
             $newData['products'][$key]['product'] = $data['item']['name'];
             $newData['products'][$key]['location'] = $data['location']['name'];
-            $newData['products'][$key]['previous_owner'] = $checkThatUnitUserForFirstTime ? $data['supplier']['name'] : $data['currency']['name'];
+            $newData['products'][$key]['previous_owner'] = $data['supplier']['name'];
             $newData['products'][$key]['original_supplier'] = $data['supplier']['name'];
-            $newData['products'][$key]['quantity'] = $data['numberOfSuitableUnits'];
+            $newData['products'][$key]['quantity'] = $data['numberOfSuitableUnits'] * $data['item']['volume_sellable_unit'];
         }
 
         return $newData;

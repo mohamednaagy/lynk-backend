@@ -54,6 +54,7 @@ class UnitService
                 'id' => $inventory->commodity_item_id,
                 'name' => $item->name,
                 'type' => $item->type->name,
+                'volume_sellable_unit' => $item->volume_sellable_unit,
             ],
             'currency' => ['id' => $item->currency_id, 'name' => $item->currency->name],
             'measurement' => ['id' => $item->measurement_id, 'name' => $item->measurement->name],
