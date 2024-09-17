@@ -269,9 +269,6 @@ class LynkV1Driver implements TraderInterface
             case 'lynk_sale_pledge_certificate':
                 $fileType = 'SellCommCert';
                 break;
-            case 'sell_confirmation_document':
-                $fileType = 'SellConfirmationCert';
-                break;
         }
 
         return 'LYNK_'.$fileType.'_'.$traderOrder->order->company->unique_name.'_'.$traderOrder->financing_order_id.'_'.$traderOrder->reference.'_'.date('Ymd').'.pdf';

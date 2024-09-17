@@ -11,7 +11,6 @@ class DeleteCommodityInventoryAction implements DeleteCommodityInventory
     public function handle(LocalMarketInventory $inventory): LocalMarketInventory
     {
         DeleteInventory::dispatch($inventory);
-
         return $inventory;
     }
 }

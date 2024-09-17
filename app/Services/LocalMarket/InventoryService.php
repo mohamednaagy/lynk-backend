@@ -5,7 +5,10 @@ namespace App\Services\LocalMarket;
 use App\Enums\CommodityTypeStatus;
 use App\Enums\CommoitySupplierStatus;
 use App\Enums\LocalMarket\InventoryStatus;
+use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Models\LocalMarketInventory;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class InventoryService
 {
@@ -62,5 +65,21 @@ class InventoryService
         LocalMarketInventory::query()->whereIn('id', $inventories)->each(function ($inventory) {
             $inventory->refreshStockQuantities();
         });
+    }
+
+    public static function deleteInventory($inventory)
+    {
+        try {
+            Log::info("Start Deleting Inventory ID: {$inventory->id}");
+
+            DB::select('CALL DeleteLocalMarketInventoryUnits(?, ? , ?)', [$inventory->id, InventoryUnitsStatus::Free, $inventory->available_quantity]);
+            Log::info("Successfully soft deleted units for inventory ID: {$inventory->id}");
+            $inventory->delete();
+
+            Log::info("Success for deleting inventory ID: {$inventory->id}");
+        } catch (\Exception $e) {
+            Log::error("Updated Inventory ID: {$inventory->id} status to Problem due to error: {$e->getMessage()}");
+            throw $e;
+        }
     }
 }
