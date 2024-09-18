@@ -11,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class EligibleCommoditiesFoundStatus implements ShouldQueue
 {
@@ -19,6 +20,8 @@ class EligibleCommoditiesFoundStatus implements ShouldQueue
     public function __construct(private LocalMarketOrder $localMarketOrder)
     {
         $this->onQueue('local_market');
+        Log::channel('local_market')->info("add EligibleCommoditiesFoundStatus job to queue local_market with local market id {$this->localMarketOrder->id} ");
+
     }
 
     /**

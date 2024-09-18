@@ -19,6 +19,7 @@ class NoEligibleCommoditiesAvailableStatus implements ShouldQueue
     public function __construct(private LocalMarketOrder $localMarketOrder)
     {
         $this->onQueue('local_market');
+        Log::channel('local_market')->info("add NoEligibleCommoditiesAvailableStatus job to queue local_market with local market id {$this->localMarketOrder->id} ");
     }
 
     /**
@@ -31,6 +32,6 @@ class NoEligibleCommoditiesAvailableStatus implements ShouldQueue
         $data['case'] = 'NoEligibleCommoditiesAvailable';
         $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::NoEligibleCommoditiesAvailable);
         app(LocalMarketWebhook::class)->handle($data);
-        Log::info('Notify our customer sorry we can not find your eligibilities commodities ');
+        Log::channel('local_market')->info('Notify our customer sorry we can not find your eligibilities commodities ');
     }
 }

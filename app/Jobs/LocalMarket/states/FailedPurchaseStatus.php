@@ -19,6 +19,7 @@ class FailedPurchaseStatus implements ShouldQueue
     public function __construct(private LocalMarketOrder $localMarketOrder)
     {
         $this->onQueue('local_market');
+        Log::channel('local_market')->info("add FailedPurchaseStatus job to queue local_market with local market id {$this->localMarketOrder->id} ");
     }
 
     /**
@@ -33,7 +34,7 @@ class FailedPurchaseStatus implements ShouldQueue
         $data['external_order_no'] = $this->localMarketOrder->external_order_no;
         $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::FailedPurchase);
         app(LocalMarketWebhook::class)->handle($data);
-        Log::info('Sorry there is an error while purchasing commodities for order ');
+        Log::channel('local_market')->info('Sorry there is an error while purchasing commodities for order ');
 
     }
 }

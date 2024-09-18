@@ -9,6 +9,7 @@ use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 
 class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
 {
@@ -37,6 +38,7 @@ class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
             ])
         );
         $this->createLocalMarketOrderHistory($order, LocalMarketOrderHistoryStatus::initiate);
+        Log::channel('local_market')->info("saved new local market order id => {$order->id} and trader order reference is {$order->external_order_no}");
 
         return $order;
     }

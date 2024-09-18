@@ -28,6 +28,7 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
             );
 
             if ($eligibleCommodities['isLoanCovered']) {
+
                 $localMarketOrder->update([
                     'status' => LocalMarketOrderStatus::EligibleCommoditiesAvailable,
                     'data' => $eligibleCommodities,
@@ -42,8 +43,7 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
                     'status' => InventoryUnitsStatus::Free,
                 ]);
             }
-
-            Log::info('FindEligibleCommoditiesAction Duration', [
+            Log::channel('local_market')->info('FindEligibleCommoditiesAction Duration', [
                 'order_id' => $localMarketOrder->id,
                 'start_time' => $startTime,
                 'end_time' => microtime(true),
@@ -55,7 +55,7 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
                 'comment' => $e->getMessage(),
             ]);
 
-            Log::error('Error in FindEligibleCommoditiesAction', [
+            Log::channel('local_market')->error('Error in FindEligibleCommoditiesAction', [
                 'order_id' => $localMarketOrder->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
