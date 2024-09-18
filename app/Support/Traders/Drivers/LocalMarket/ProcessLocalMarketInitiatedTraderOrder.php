@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
+namespace App\Support\Traders\Drivers\LocalMarket;
 
 use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
