@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,7 +12,7 @@ return new class extends Migration
      */
     public function up()
     {
-        \Illuminate\Support\Facades\DB::unprepared('
+        DB::unprepared('
             CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateRandomInventoryUnitsQRCode`(
                 IN `p_local_market_inventory_id` BIGINT UNSIGNED,
                 IN `p_commodity_item_id` BIGINT UNSIGNED,
@@ -114,6 +115,6 @@ return new class extends Migration
      */
     public function down()
     {
-        \Illuminate\Support\Facades\DB::unprepared('DROP PROCEDURE IF EXISTS GenerateRandomInventoryUnitsQRCode');
+        DB::unprepared('DROP PROCEDURE IF EXISTS GenerateRandomInventoryUnitsQRCode');
     }
 };
