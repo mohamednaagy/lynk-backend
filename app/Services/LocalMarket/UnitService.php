@@ -7,6 +7,7 @@ use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
 use App\Models\LocalMarketOrderHasUnit;
+use App\Settings\Classes\LocalMurabahaSettings;
 use Illuminate\Support\Facades\Log;
 
 class UnitService
@@ -50,7 +51,7 @@ class UnitService
 
         return [
             'inventoryId' => $inventory->id,
-            'item' => [
+            '`item' => [
                 'id' => $inventory->commodity_item_id,
                 'name' => $item->name,
                 'type' => $item->type->name,
@@ -99,9 +100,7 @@ class UnitService
      */
     private function getUnitsWithOwnershipCheck(int $orderNo, LocalMarketInventory $inventory, int $numberOfNeededUnits, int $companyId)
     {
-        // NAGY uncomment this line
-        //        $rotationThreshold = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count ?? 0;
-        $rotationThreshold = 0;
+        $rotationThreshold = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count ?? 0;
 
         return LocalMarketInventoryUnits::join('local_market_unit_rotations', 'local_market_unit_rotations.inventory_unit_id', '=', 'local_market_inventory_units.id')
             ->where('local_market_inventory_units.status', InventoryUnitsStatus::Free)

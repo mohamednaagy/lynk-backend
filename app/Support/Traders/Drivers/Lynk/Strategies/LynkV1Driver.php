@@ -56,9 +56,7 @@ class LynkV1Driver implements TraderInterface
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
-            // TODO Nagy dont forgot remove this comment
-            //            'default_contract_sign_time_limit' => app(LocalMurabahaSettings::class)->default_contract_sign_time_limit,
-            'default_contract_sign_time_limit' => 72,
+            'default_contract_sign_time_limit' => app(LocalMurabahaSettings::class)->default_contract_sign_time_limit,
         ]);
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
