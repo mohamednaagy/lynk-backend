@@ -215,7 +215,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $previousAction = $this->getLatestTraderHistoryOfPreviousStep($CurrentStep);
         $latestAction = $this->getLatestTraderHistoryOfStep($CurrentStep);
         $endTime = $latestAction?->created_at;
-        if ($this->traderOrder->isCancelled()) {
+        if ($this->traderOrder->isCancelled() && $this->traderOrder->cancelDetail?->cancel_step == $CurrentStep) {
             $endTime = $this->traderOrder->cancelDetail->created_at;
         }
 
