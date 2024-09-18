@@ -51,7 +51,7 @@ class UnitService
 
         return [
             'inventoryId' => $inventory->id,
-            '`item' => [
+            'item' => [
                 'id' => $inventory->commodity_item_id,
                 'name' => $item->name,
                 'type' => $item->type->name,
