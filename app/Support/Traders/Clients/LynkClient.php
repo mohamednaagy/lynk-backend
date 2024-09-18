@@ -6,6 +6,7 @@ use App\Actions\Contracts\LocalMarket\CreateLocalMarketOrder;
 use App\Actions\LocalMarket\PurchaseProductAction;
 use App\Models\TraderOrder;
 use App\Settings\Classes\LocalMurabahaSettings;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Traits\Localizable;
 
 class LynkClient
@@ -33,7 +34,6 @@ class LynkClient
     public function createOrder()
     {
         $financingOrder = $this->traderOrder->order;
-
         $data['currency'] = $financingOrder->currency;
         $data['national_id'] = $financingOrder->national_id;
         $data['amount'] = $financingOrder->amount?->convertAndFormatByDecimal();
@@ -43,6 +43,7 @@ class LynkClient
         $data['company_id'] = $financingOrder->company_id;
         $data['buying_uuid'] = $this->traderOrder->uuid_one;
         $data['preferred_commodity_type'] = $financingOrder->company->commodityTypes()?->pluck('commodity_type_id')->toArray() ?? [];
+        Log::channel('local_market')->info("data prepare before saved for Trader Order id => {$this->traderOrder->id} ", $data);
 
         return app(CreateLocalMarketOrder::class)->handle($data);
 

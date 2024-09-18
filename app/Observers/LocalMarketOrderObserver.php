@@ -15,6 +15,11 @@ class LocalMarketOrderObserver
 {
     use LocalMarketHelperTrait;
 
+    public function creating(LocalMarketOrder $localMarketOrder)
+    {
+        $localMarketOrder->order_no = 'LM_'.time();
+    }
+
     /**
      * Handle the LocalMarketOrder "created" event.
      *
@@ -22,8 +27,6 @@ class LocalMarketOrderObserver
      */
     public function created(LocalMarketOrder $localMarketOrder)
     {
-        $localMarketOrder->order_no = 'LM_'.$localMarketOrder->source.'_'.$localMarketOrder->id;
-        $localMarketOrder->saveQuietly();
         $this->fireJob($localMarketOrder);
 
     }

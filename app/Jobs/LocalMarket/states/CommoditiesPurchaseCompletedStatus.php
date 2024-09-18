@@ -20,6 +20,7 @@ class CommoditiesPurchaseCompletedStatus implements ShouldQueue
     public function __construct(private LocalMarketOrder $localMarketOrder)
     {
         $this->onQueue('local_market');
+        Log::channel('local_market')->info("add CommoditiesPurchaseCompletedStatus job to queue local_market with local market id {$this->localMarketOrder->id} ");
     }
 
     /**
@@ -31,33 +32,6 @@ class CommoditiesPurchaseCompletedStatus implements ShouldQueue
         $data['case'] = 'CommoditiesPurchased';
         $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::CommoditiesPurchased);
         app(LocalMarketWebhook::class)->handle($data);
-        // we will notify the owner we are done buying
-        // nagy will handle it
-        // send post request to lynk with commadites DTO
-        // {
-        // "CASE" : "PURCHASED_COMMODITIES",
-        // "CASE" : "SELLED_COMMODITIES",
-        // "CASE" : "CAncel",
-        // "CASE" : "PURCHASING_FAILURE",
-        // "CASE" : "SELLING_FAILURE",
-        // "data": {
-        //                "products": [
-        //                  {
-        //                    "uom": "Delectus nulla cupi",
-        //                    "type": "Ea fuga Ad rem et n",
-        //                    "amount": "22",
-        //                    "product": "Laboriosam numquam",
-        //                    "currency": "Fugiat consequatur",
-        //                    "location": "Accusantium sequi ar",
-        //                    "quantity": "787",
-        //                    "previous_owner": "Dolore perspiciatis",
-        //                    "original_supplier": "Accusamus sunt quos"
-        //                  }
-        //                ]
-        //          }
-        // }
-
-        Log::info("Congratulations Commodities purchased for order {$this->localMarketOrder->id}");
-
+        Log::channel('local_market')->info("Congratulations Commodities purchased for order {$this->localMarketOrder->id}");
     }
 }
