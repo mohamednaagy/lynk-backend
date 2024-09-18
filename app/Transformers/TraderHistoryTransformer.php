@@ -4,9 +4,10 @@ namespace App\Transformers;
 
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
-use App\Enums\Trader;
+use App\Enums\Trader as TraderEnum;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\Facades\Trader;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use League\Fractal\Resource\Primitive;
@@ -162,9 +163,9 @@ class TraderHistoryTransformer extends TransformerAbstract
         );
 
         $warrantyDocumentMediaFile = match ($this->traderOrder->provider) {
-            Trader::Dmcc, Trader::FakeDmcc => $this->getMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo),
-            Trader::Bursam => $this->getMedia(TraderOrderMediaCollection::BursamTtiHoldingCertificate),
-            Trader::Lynk => $this->getMedia(TraderOrderMediaCollection::LynkSalePledgeCertificate),
+            TraderEnum::Dmcc, TraderEnum::FakeDmcc => $this->getMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo),
+            TraderEnum::Bursam => $this->getMedia(TraderOrderMediaCollection::BursamTtiHoldingCertificate),
+            TraderEnum::Lynk => $this->getMedia(TraderOrderMediaCollection::LynkSalePledgeCertificate),
         };
 
         ///*****///
@@ -180,7 +181,7 @@ class TraderHistoryTransformer extends TransformerAbstract
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
         ];
 
-        if ($this->traderOrder->provider === Trader::Lynk) {
+        if ($this->traderOrder->provider === TraderEnum::Lynk) {
             $sellConfirmationDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::SellConfirmationDocument);
             $data['sell_confirmation_document'] = [
                 'url' => $sellConfirmationDocumentMediaFile?->file_url,
@@ -214,8 +215,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $previousAction = $this->getLatestTraderHistoryOfPreviousStep($CurrentStep);
         $latestAction = $this->getLatestTraderHistoryOfStep($CurrentStep);
         $endTime = $latestAction?->created_at;
-        // If order is cancelled and current step is canceling step, update end time to cancel detail created_at.
-        if ($this->traderOrder->isCancelled() && $this->traderOrder->cancelDetail?->cancel_step == $CurrentStep) {
+        if ($this->traderOrder->isCancelled()) {
             $endTime = $this->traderOrder->cancelDetail->created_at;
         }
 
