@@ -7,6 +7,7 @@ use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedClientWakalaA
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedContractAndClientWakalaCompleted;
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedContractSigned;
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedContractSignedDelivery;
+use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedDeliveryConfirmation;
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedIgnoreAndSell;
 use App\Enums\FinancingOrderProceedCase;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
@@ -37,6 +38,7 @@ class MakeOrderProceedAction implements MakeOrderProceed
             FinancingOrderProceedCase::ContractSigned => app(ProceedContractSigned::class)->handle($traderOrder, $forceToProceed),
             FinancingOrderProceedCase::ContractSignedDelivery => app(ProceedContractSignedDelivery::class)->handle($traderOrder, $forceToProceed),
             FinancingOrderProceedCase::IgnoreAndSell => app(ProceedIgnoreAndSell::class)->handle($traderOrder, $forceToProceed),
+            FinancingOrderProceedCase::ConfirmDeliver => app(ProceedDeliveryConfirmation::class)->handle($traderOrder, $forceToProceed),
             FinancingOrderProceedCase::ContractAndClientWakalaCompleted => app(ProceedContractAndClientWakalaCompleted::class)->handle($traderOrder, $forceToProceed),
             default => []
         };
