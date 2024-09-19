@@ -3,15 +3,15 @@
 namespace App\Actions\Orders\TraderOrders\ProceedAction;
 
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedIgnoreAndSell;
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
-use App\Enums\ContractSignedType;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
-use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Http\Request;
 
 class ProceedIgnoreAndSellAction implements ProceedIgnoreAndSell
 {
@@ -29,8 +29,11 @@ class ProceedIgnoreAndSellAction implements ProceedIgnoreAndSell
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
-        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
-        $trader->sellCommodityToOpenMarket($traderOrder);
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::DeliveryCancelled);
+
+        (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
+            ->updateMurabhaCompleteDocument($traderOrder, new Request());
 
         return [];
     }

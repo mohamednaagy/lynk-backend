@@ -254,4 +254,25 @@ class TraderOrder extends Model implements HasMedia
     {
         return $this->provider == EnumsTrader::Lynk && $this->mode == TraderOrderMode::Manual;
     }
+
+    public function getCustomerDeliveryStatusAndMessage(): array
+    {
+        if ($this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryCancelled))
+        {
+            return [
+                'status' => 2,
+                'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.IgnoreAndSell'),
+            ];
+        } elseif ($this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryConfirmed)) {
+            return [
+                'status' => 1,
+                'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.DeliveryConfirmed'),
+            ];
+        } else {
+            return [
+                'status' => 0,
+                'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.pending'),
+            ];
+        }
+    }
 }
