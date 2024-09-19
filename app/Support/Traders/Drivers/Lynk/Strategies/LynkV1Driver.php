@@ -7,6 +7,7 @@ use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\OrderCancellationStatus;
 use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderCancelReason;
@@ -185,7 +186,52 @@ class LynkV1Driver implements TraderInterface
 
     public function sellCommodityToOpenMarket(TraderOrder $traderOrder)
     {
-        // TODO_LOCAL_MARKET need to implement
+        $traderOrder->ensureCanAccessStep(MurabhaStep::CommoditySoldToCustomer);
+
+        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
+            MurabhaStep::MurabahaSaleCompleted
+        );
+
+        $currentTimeInUtcTz = CarbonImmutable::now();
+        $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
+        $financeOrder = $traderOrder->order;
+        $this->storeOrderDocumentAsPdf(
+            'local-commodity-market.selling-pledge-certificate',
+            [
+                'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products),
+                'trader_order_reference' => $traderOrder->reference,
+                'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
+                'customer_name' => $financeOrder->customer_name,
+                'current_date' => $currentTimeInRiyadhTz->toDateString(),
+                'current_time' => $currentTimeInRiyadhTz->toTimeString(),
+            ],
+            $traderOrder,
+            TraderOrderMediaCollection::LynkSalePledgeCertificate,
+        );
+
+        $this->createTraderOrderHistory(
+            $traderOrder,
+            FinancingOrderHistory::DeliveryCancelled,
+            [
+                'created_at' => $currentTimeInUtcTz,
+            ]
+        );
+
+        $this->createTraderOrderHistory(
+            $traderOrder,
+            FinancingOrderHistory::MurabahaSaleCompleted,
+            [
+                'created_at' => $currentTimeInUtcTz,
+            ]
+        );
+
+        
+
+        if ($canUpdateOrderStatus) {
+            $traderOrder->update([
+                'status' => TraderOrderStatus::Completed,
+            ]);
+        }
     }
 
     public function cancelOrder(FinancingOrder $financingOrder): int

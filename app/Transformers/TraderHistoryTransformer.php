@@ -4,6 +4,7 @@ namespace App\Transformers;
 
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader as EnumsTrader;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
@@ -162,9 +163,9 @@ class TraderHistoryTransformer extends TransformerAbstract
         );
 
         $warrantyDocumentMediaFile = match ($this->traderOrder->provider) {
-            'dmcc', 'fake' => $this->getMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo),
-            'bursam' => $this->getMedia(TraderOrderMediaCollection::BursamTtiHoldingCertificate),
-            'lynk' => $this->getMedia(TraderOrderMediaCollection::LynkSalePledgeCertificate),
+            EnumsTrader::Dmcc, EnumsTrader::FakeDmcc => $this->getMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo),
+            EnumsTrader::Bursam => $this->getMedia(TraderOrderMediaCollection::BursamTtiHoldingCertificate),
+            EnumsTrader::Lynk => $this->getMedia(TraderOrderMediaCollection::LynkSalePledgeCertificate),
         };
 
         ///*****///
