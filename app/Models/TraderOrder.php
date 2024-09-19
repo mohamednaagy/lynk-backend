@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ContractSignedType;
+use App\Enums\CustomerDeliveryStatus;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
@@ -303,5 +304,26 @@ class TraderOrder extends Model implements HasMedia
     public function isDeliverable(): bool
     {
         return $this->provider == EnumsTrader::Lynk && $this->mode == TraderOrderMode::Manual;
+    }
+
+    public function getCustomerDeliveryStatusAndMessage(): array
+    {
+        if ($this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryCancelled))
+        {
+            return [
+                'status' => CustomerDeliveryStatus::DeliveryIgnoreAndSell,
+                'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.IgnoreAndSell'),
+            ];
+        } elseif ($this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryConfirmed)) {
+            return [
+                'status' => CustomerDeliveryStatus::DeliveryConfirmed,
+                'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.DeliveryConfirmed'),
+            ];
+        } else {
+            return [
+                'status' => CustomerDeliveryStatus::DeliveryPending,
+                'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.pending'),
+            ];
+        }
     }
 }

@@ -269,6 +269,7 @@ class TraderHistoryTransformer extends TransformerAbstract
             'step' => MurabhaStep::CustomerDeliveryConfirmation,
             'is_complete' => (bool) $history,
             'completed_at' => $history?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
+            'delivery_details' => $this->traderOrder->getCustomerDeliveryStatusAndMessage(),
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
         ]);
     }
