@@ -33,7 +33,7 @@ class ProceedIgnoreAndSellAction implements ProceedIgnoreAndSell
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::DeliveryCancelled);
 
         (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
-            ->updateMurabhaCompleteDocument($traderOrder, new Request());
+            ->updateMurabhaCompleteDocument($traderOrder, []); //TODO: update
 
         return [];
     }

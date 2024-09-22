@@ -42,8 +42,8 @@ class TraderStrategyContext
         $this->strategy->updateCommodityCertificateForClient($traderOrder, $request);
     }
 
-    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request): void
+    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, array $data): void
     {
-        $this->strategy->updateMurabhaCompleteDocument($traderOrder, $request);
+        $this->strategy->updateMurabhaCompleteDocument($traderOrder, $data);
     }
 }
