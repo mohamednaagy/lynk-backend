@@ -17,6 +17,7 @@ final class FinancingOrderProceedCase extends Enum implements LocalizedEnum
             self::ContractAndClientWakalaCompleted,
             self::ContractSignedDelivery,
             self::IgnoreAndSell,
+            self::ConfirmDeliver,
         ],
         Trader::Dmcc => [
             self::ClientWakalaAccepted,
@@ -39,4 +40,6 @@ final class FinancingOrderProceedCase extends Enum implements LocalizedEnum
     const ContractSignedDelivery = 'CONTRACT_SIGNED_DELIVERY';
     
     const IgnoreAndSell = 'IGNORE_AND_SELL';
+
+    const ConfirmDeliver = 'CONFIRM_DELIVER';
 }
