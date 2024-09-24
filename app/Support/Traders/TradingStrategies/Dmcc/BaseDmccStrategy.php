@@ -80,7 +80,7 @@ abstract class BaseDmccStrategy implements TraderStrategyInterface
         }
     }
 
-    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
+    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, array $data)
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::MurabhaOfferIssued);
 
@@ -89,7 +89,7 @@ abstract class BaseDmccStrategy implements TraderStrategyInterface
         );
 
         $this->createStepHistories(
-            $request,
+            $data,
             $traderOrder,
             MurabhaStep::MurabahaSaleCompleted
         );

@@ -27,16 +27,15 @@ class BursamStrategyV2 extends BursamStrategyV1
 
     public function updateMurabahaPurchaseOffer(TraderOrder $traderOrder, $request) {}
 
-    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
+    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, array $data)
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::ClientWakala);
 
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
             MurabhaStep::MurabahaSaleCompleted
         );
-
         $this->createStepHistories(
-            $request->validated(),
+            $data,
             $traderOrder,
             MurabhaStep::MurabahaSaleCompleted
         );

@@ -69,7 +69,7 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
         $this->sellCommodityToCustomer($traderOrder, $request);
     }
 
-    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
+    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, array $data)
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::MurabhaOfferIssued);
 
@@ -78,7 +78,7 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
         );
 
         $this->createStepHistories(
-            $request->validated(),
+            $data,
             $traderOrder,
             MurabhaStep::MurabahaSaleCompleted
         );
