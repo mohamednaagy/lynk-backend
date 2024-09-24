@@ -11,7 +11,6 @@ use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Http\Request;
 
 class ProceedIgnoreAndSellAction implements ProceedIgnoreAndSell
 {
@@ -33,7 +32,7 @@ class ProceedIgnoreAndSellAction implements ProceedIgnoreAndSell
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::DeliveryCancelled);
 
         (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
-            ->updateMurabhaCompleteDocument($traderOrder, new Request());
+            ->updateMurabhaCompleteDocument($traderOrder);
 
         return [];
     }

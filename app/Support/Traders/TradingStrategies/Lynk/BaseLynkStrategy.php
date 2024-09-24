@@ -75,7 +75,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
         $this->sellCommodityToCustomer($traderOrder, $request);
     }
 
-    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
+    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, array $data)
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::CommoditySoldToCustomer);
 
@@ -100,9 +100,8 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             $traderOrder,
             TraderOrderMediaCollection::LynkSalePledgeCertificate,
         );
-
         $this->createStepHistories(
-            $request,
+            $data,
             $traderOrder,
             MurabhaStep::MurabahaSaleCompleted
         );
