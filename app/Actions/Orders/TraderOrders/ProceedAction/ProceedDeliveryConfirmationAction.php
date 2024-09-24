@@ -7,6 +7,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
+use App\Jobs\FinancingOrders\NotifyAdminsAboutOrderDeliveryConfirmed;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -29,6 +30,8 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
             throw new OrderStatusDoesNotFollowSequenceException;
         }
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::DeliveryConfirmed);
+
+        dispatch(new NotifyAdminsAboutOrderDeliveryConfirmed($traderOrder));
 
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
             MurabhaStep::MurabahaSaleCompleted
