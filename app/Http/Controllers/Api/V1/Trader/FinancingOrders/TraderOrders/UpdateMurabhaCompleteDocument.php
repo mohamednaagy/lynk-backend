@@ -33,7 +33,7 @@ class UpdateMurabhaCompleteDocument extends Controller
         return DB::transaction(function () use ($request, $order, $traderOrder) {
             [$order, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
 
-            (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))->updateMurabhaCompleteDocument($traderOrder, $request);
+            (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))->updateMurabhaCompleteDocument($traderOrder, $request->validated());
 
             return $this->successResponse();
         });
