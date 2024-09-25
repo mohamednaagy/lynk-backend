@@ -29,18 +29,14 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
-        
+
         dispatch(new NotifyAdminsAboutOrderDeliveryConfirmed($traderOrder));
-        
+
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
             MurabhaStep::CustomerDeliveryConfirmation
         );
-        
+
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::DeliveryConfirmed);
-        // $this->createTraderOrderHistory(
-        //     $traderOrder,
-        //     MurabhaStep::CustomerDeliveryConfirmation
-        // );
 
         if ($canUpdateOrderStatus) {
             $traderOrder->update([

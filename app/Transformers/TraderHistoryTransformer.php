@@ -40,7 +40,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $stepHistoriesNode = $this->traderStepHistories->getStepOf($step);
         $lastHistoryOfStepNode = end($stepHistoriesNode->histories);
         $history = null;
-
+    
         if (in_array($lastHistoryOfStepNode, $historiesActions)) {
             $history = $this->getHistory($lastHistoryOfStepNode);
         }
@@ -242,7 +242,6 @@ class TraderHistoryTransformer extends TransformerAbstract
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
             $historiesActions, MurabhaStep::CustomerDeliveryConfirmation
         );
-
         return $this->primitive([
             'step' => MurabhaStep::CustomerDeliveryConfirmation,
             'is_complete' => (bool) $history,
