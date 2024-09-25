@@ -26,8 +26,8 @@ return [
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => null,
         ],
         MurabhaStep::CustomerDeliveryConfirmation => [
-            FinancingOrderHistory::DeliveryConfirmed => null,
             FinancingOrderHistory::DeliveryCancelled => null,
+            FinancingOrderHistory::DeliveryConfirmed => null,
         ],
         MurabhaStep::MurabahaSaleCompleted => [
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
