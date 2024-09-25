@@ -212,8 +212,7 @@ class LynkV1Driver implements TraderInterface
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
-        if ($traderOrder->status->is(TraderOrderStatus::Initiated) ||
-            ($traderOrder->status->is(TraderOrderStatus::InProgress) && ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::PendingDelivery))) {
+        if ($traderOrder->status->is(TraderOrderStatus::Initiated) || $traderOrder->status->is(TraderOrderStatus::InProgress)) {
             return true;
         }
 
