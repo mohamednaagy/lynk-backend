@@ -6,6 +6,7 @@ use App\Enums\CompanyMarketType;
 use App\Enums\CompanyStatus;
 use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderProceedCase;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Role;
@@ -473,6 +474,7 @@ class MakeOrderProceedTest extends TestCase
 
     public function test_make_success_order_proceed_with_valid_case_client_wakala_at_local_market(): void
     {
+
         TraderOrderScenario::of(self::$localTraderOrder)
             ->reset()
             ->moveToStep(MurabhaStep::PurchasingCommodity);
@@ -489,5 +491,30 @@ class MakeOrderProceedTest extends TestCase
             ->assertJson(
                 fn (AssertableJson $json) => $json->has('data')->where('data', [])
             );
+    }
+
+    public function test_complete_order_if_trader_is_completed_and_company_has_auto_complete_order(): void
+    {
+        self::$localCompany->update(['auto_complete_murabaha_order' => true]);
+
+        TraderOrderScenario::of(self::$localTraderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::PurchasingCommodity);
+
+        $response = $this->actingAs(self::$localUserLender)
+            ->withHeader('X-Company', self::$localCompany->getOriginal('id'))
+            ->postJson(self::$localOrderProceedUrl, [
+                'case' => FinancingOrderProceedCase::ContractAndClientWakalaCompleted,
+            ]);
+
+        $this->assertEquals(TraderOrderStatus::Completed, self::$localTraderOrder->refresh()->status->value);
+
+        $response->assertStatus(200)
+            ->assertJson(
+                fn (AssertableJson $json) => $json->has('data')->where('data', [])
+            );
+
+        $this->assertEquals(FinancingOrderStatus::Completed, self::$localTraderOrder->order->refresh()->status->value);
+
     }
 }
