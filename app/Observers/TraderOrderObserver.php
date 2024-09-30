@@ -8,12 +8,9 @@ use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
-use App\Services\TraderOrderFeesService;
 
 class TraderOrderObserver
 {
-    public function __construct(protected TraderOrderFeesService $traderOrderFeesService) {}
-
     /**
      * Handle the TraderOrder "creating" event.
      *
@@ -40,7 +37,6 @@ class TraderOrderObserver
         if ($traderOrder->needsProcessingAfterInitiation()) {
             $traderOrder->processInitiatedTraderOrder();
         }
-        $this->applyOrderFees($traderOrder);
     }
 
     /**
@@ -69,7 +65,6 @@ class TraderOrderObserver
     {
         if ($traderOrder->wasChanged(['status'])) {
             $this->takeActionsIfStatusWasChanged($traderOrder);
-            $this->applyOrderFees($traderOrder);
             if ($traderOrder->status->is(TraderOrderStatus::Completed) && $traderOrder->order->company->isCompanyHasMurabahaAutoCompleteOrder()) {
                 $traderOrder->order->update(['status' => FinancingOrderStatus::Completed]);
             }
@@ -113,19 +108,5 @@ class TraderOrderObserver
     public function forceDeleted(TraderOrder $traderOrder)
     {
         //
-    }
-
-    /**
-     * Handle the status change of the TraderOrder.
-     */
-    protected function applyOrderFees(TraderOrder $traderOrder): void
-    {
-        $provider = $traderOrder->provider;
-        $status = $traderOrder->status;
-        $action = $this->traderOrderFeesService->getAction($provider, $status);
-        if ($action) {
-            $action->handle($traderOrder);
-        }
-
     }
 }
