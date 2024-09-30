@@ -2,6 +2,7 @@
 
 return [
     'order_creation_fee' => 'Creation Fee - Order #:order_number/ Trade Request #:trader_order_reference_number',
+    'order_delivery_confirmed_fee' => 'Delivery Fee - Order #:order_number/ Trade Request #:trader_order_reference_number',
     'deposit_by_edaat' => 'Recharge balance by Sadad for invoice #:invoice_number',
     'vat_percentage' => 'VAT charges (:vat_percentage%) for order #:order_id',
     'manual_deposit' => 'Recharge the balance',
