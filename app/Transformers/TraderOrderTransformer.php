@@ -46,6 +46,8 @@ class TraderOrderTransformer extends TransformerAbstract
         'created_at',
         'cancel_details',
         'hover_message',
+        'contract_signed_type',
+
     ];
 
     public function transform(TraderOrder $traderOrder)
@@ -143,7 +145,7 @@ class TraderOrderTransformer extends TransformerAbstract
             fn ($product) => $traderOrder->provider == Trader::Lynk ? LynkCommodityProductDto::fromArray($product) : CommodityProductDto::fromArray($product)
         );
 
-        return $this->collection($products, new ProductTransformer());
+        return $this->collection($products, new ProductTransformer);
     }
 
     public function includeStatus(TraderOrder $traderOrder): Primitive
@@ -192,6 +194,11 @@ class TraderOrderTransformer extends TransformerAbstract
         }
 
         return $this->primitive(null);
+    }
+
+    public function includeContractSignedType(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->contract_signed_type);
     }
 
     public function setArea($area): static

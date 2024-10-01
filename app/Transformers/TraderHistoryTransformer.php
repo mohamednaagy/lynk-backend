@@ -40,7 +40,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         $stepHistoriesNode = $this->traderStepHistories->getStepOf($step);
         $lastHistoryOfStepNode = end($stepHistoriesNode->histories);
         $history = null;
-    
+
         if (in_array($lastHistoryOfStepNode, $historiesActions)) {
             $history = $this->getHistory($lastHistoryOfStepNode);
         }
@@ -104,10 +104,7 @@ class TraderHistoryTransformer extends TransformerAbstract
             'is_complete' => (bool) $history,
             'completed_at' => optional($history) ? saudi_now('Y-m-d h:i:s A', optional($history)->created_at) : null,
             'is_deliverable' => $this->traderOrder->isDeliverable(),
-            'contract_signed_details' => [
-                'message' => Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->contractSignedMessage($this->traderOrder),
-                'type' => $this->traderOrder->contract_signed_type->description,
-            ],
+            'contract_signed_message' => Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->contractSignedMessage($this->traderOrder),
             'wakala_document' => [
                 'url' => $wakalaDocumentMediaFile?->file_url,
                 'date' => $wakalaDocumentMediaFile ? saudi_now('Y-m-d h:i:s A', $wakalaDocumentMediaFile->created_at) : null,
@@ -264,6 +261,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
             $historiesActions, MurabhaStep::CustomerDeliveryConfirmation
         );
+
         return $this->primitive([
             'step' => MurabhaStep::CustomerDeliveryConfirmation,
             'is_complete' => (bool) $history,
