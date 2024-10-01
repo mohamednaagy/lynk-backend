@@ -241,7 +241,6 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     public function includeCustomerDeliveryConfirmation($historiesActions): Primitive
     {
-       
         $history = $this->traderOrder
             ->getOrderHistoryAction([FinancingOrderHistory::DeliveryCancelled, FinancingOrderHistory::DeliveryConfirmed])
             ->first();
@@ -252,7 +251,6 @@ class TraderHistoryTransformer extends TransformerAbstract
             'completed_at' => $history?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'delivery_details' => $this->traderOrder->getCustomerDeliveryStatusAndMessage(),
             'duration' => $this->getDurationForHistoryStep($history?->action),
-        ]);
-            
+        ]);           
     }
 }
