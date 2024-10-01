@@ -24,8 +24,8 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
     public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): array
     {
         if (
-            $this->isPreviousStepOfIgnoreAndSellNotCompleted($traderOrder)
-            || ($forceToProceed === false && $this->isContractSignedStepCompleted($traderOrder))
+            $this->isPreviousStepOfCustomerDeliveryConfirmationNotCompleted($traderOrder)
+            || ($forceToProceed === false && $this->isCustomerDeliveryConfirmationStepCompleted($traderOrder))
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
@@ -47,7 +47,7 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
         return [];
     }
 
-    protected function isPreviousStepOfIgnoreAndSellNotCompleted(TraderOrder $traderOrder): bool
+    protected function isPreviousStepOfCustomerDeliveryConfirmationNotCompleted(TraderOrder $traderOrder): bool
     {
         return ! $traderOrder->checkOrderStepComplete(
             (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
@@ -55,8 +55,8 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
         );
     }
 
-    protected function isContractSignedStepCompleted(TraderOrder $traderOrder): bool
+    protected function isCustomerDeliveryConfirmationStepCompleted(TraderOrder $traderOrder): bool
     {
-        return $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
+        return $traderOrder->checkOrderHistoryAction([FinancingOrderHistory::DeliveryCancelled, FinancingOrderHistory::DeliveryConfirmed]);
     }
 }
