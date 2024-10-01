@@ -102,10 +102,7 @@ class TraderHistoryTransformer extends TransformerAbstract
             'step' => MurabhaStep::ContractSigned,
             'is_complete' => (bool) $history,
             'is_deliverable' => $this->traderOrder->isDeliverable(),
-            'contract_signed_details' => [
-                'message' => Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->contractSignedMessage($this->traderOrder),
-                'type' => $this->traderOrder->contract_signed_type->description,
-            ],
+            'contract_signed_message' => Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->contractSignedMessage($this->traderOrder),
             'completed_at' => optional($history)->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'wakala_document' => [
                 'url' => $wakalaDocumentMediaFile?->file_url,

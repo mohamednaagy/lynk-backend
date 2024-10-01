@@ -70,7 +70,7 @@ class OrderController extends Controller
             }])
             ->paginate();
 
-        return fractal($orders, new FinancingOrderTransformer())
+        return fractal($orders, new FinancingOrderTransformer)
             ->parseIncludes([
                 'id',
                 'status',
@@ -100,7 +100,7 @@ class OrderController extends Controller
             'traderOrders.traderHistories',
         ]);
 
-        return fractal($order, (new FinancingOrderTransformer())
+        return fractal($order, (new FinancingOrderTransformer)
             ->setArea(Area::SuperAdmin)
             ->setCurrentUser($request->user()))
             ->parseIncludes([
@@ -138,6 +138,7 @@ class OrderController extends Controller
                 'trader_orders.status',
                 'trader_orders.created_at',
                 'trader_orders.cancel_details',
+                'trader_orders.contract_signed_type',
                 'creator',
                 'created_at',
                 'payment_proof_url',
@@ -190,7 +191,7 @@ class OrderController extends Controller
                     )
                 );
 
-                return fractal($financingOrder, new FinancingOrderTransformer())
+                return fractal($financingOrder, new FinancingOrderTransformer)
                     ->parseIncludes([
                         'id',
                         'status',
@@ -231,7 +232,7 @@ class OrderController extends Controller
         }
         $financingOrder = $updateFinancingOrder->handle($order, $request->validated());
 
-        return fractal($financingOrder, new FinancingOrderTransformer())
+        return fractal($financingOrder, new FinancingOrderTransformer)
             ->parseIncludes([
                 'id',
                 'status',
