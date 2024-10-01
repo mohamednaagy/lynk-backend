@@ -7,7 +7,6 @@ use App\Jobs\LocalMarket\states\CommoditiesPurchaseCompletedStatus;
 use App\Jobs\LocalMarket\states\EligibleCommoditiesFoundStatus;
 use App\Jobs\LocalMarket\states\FailedPurchaseStatus;
 use App\Jobs\LocalMarket\states\NoEligibleCommoditiesAvailableStatus;
-use App\Jobs\LocalMarket\states\PendingEligibleCommoditiesStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 
@@ -82,9 +81,6 @@ class LocalMarketOrderObserver
     private function fireJob(LocalMarketOrder $localMarketOrder)
     {
         switch ($localMarketOrder->status) {
-            case LocalMarketOrderStatus::initiate:
-                dispatch(new PendingEligibleCommoditiesStatus($localMarketOrder));
-                break;
             case LocalMarketOrderStatus::EligibleCommoditiesAvailable:
                 dispatch(new EligibleCommoditiesFoundStatus($localMarketOrder));
                 break;
