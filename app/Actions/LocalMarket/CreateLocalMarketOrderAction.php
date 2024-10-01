@@ -3,6 +3,7 @@
 namespace App\Actions\LocalMarket;
 
 use App\Actions\Contracts\LocalMarket\CreateLocalMarketOrder;
+use App\Actions\Contracts\LocalMarket\PendingEligibleCommodities;
 use App\Enums\LocalMarketOrderHistoryStatus;
 use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
@@ -39,6 +40,7 @@ class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
         );
         $this->createLocalMarketOrderHistory($order, LocalMarketOrderHistoryStatus::initiate);
         Log::channel('local_market')->info("saved new local market order id => {$order->id} and trader order reference is {$order->external_order_no}");
+        app(PendingEligibleCommodities::class)->handle($order);
 
         return $order;
     }
