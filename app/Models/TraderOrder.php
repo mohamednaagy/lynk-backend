@@ -162,6 +162,11 @@ class TraderOrder extends Model implements HasMedia
 
     public function checkOrderHistoryAction($actions): bool
     {
+        return (bool) $this->getOrderHistoryAction($actions)->first();
+    }
+
+    public function getOrderHistoryAction($actions) 
+    {
         if (! is_array($actions)) {
             $actions = [$actions];
         }
@@ -171,10 +176,10 @@ class TraderOrder extends Model implements HasMedia
                 throw new UnexpectedValueException(sprintf('Invalid action %s', $action));
             }
         }
-
+        
         return $this->traderHistories()
             ->whereIn('action', $actions)
-            ->exists();
+            ->get();
     }
 
     public function scopeWithLastHistoryAction($query)

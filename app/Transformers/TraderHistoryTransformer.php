@@ -2,6 +2,7 @@
 
 namespace App\Transformers;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader as TraderEnum;
@@ -37,6 +38,7 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     public function getCurrentLastHistoryAndLastHistoryOfStep($historiesActions, $step)
     {
+        
         $stepHistoriesNode = $this->traderStepHistories->getStepOf($step);
         $lastHistoryOfStepNode = end($stepHistoriesNode->histories);
         $history = null;
@@ -258,16 +260,16 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     public function includeCustomerDeliveryConfirmation($historiesActions): Primitive
     {
-        [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
-            $historiesActions, MurabhaStep::CustomerDeliveryConfirmation
-        );
-
+        $history = $this->traderOrder
+            ->getOrderHistoryAction([FinancingOrderHistory::DeliveryCancelled, FinancingOrderHistory::DeliveryConfirmed])
+            ->first();
+        
         return $this->primitive([
             'step' => MurabhaStep::CustomerDeliveryConfirmation,
             'is_complete' => (bool) $history,
             'completed_at' => $history?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'delivery_details' => $this->traderOrder->getCustomerDeliveryStatusAndMessage(),
-            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
-        ]);
+            'duration' => $this->getDurationForHistoryStep($history?->action),
+        ]);           
     }
 }
