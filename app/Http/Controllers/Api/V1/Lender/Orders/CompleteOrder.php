@@ -35,21 +35,21 @@ class CompleteOrder extends Controller
         CompleteOrderInterface $completeOrder,
         int $order,
     ) {
-        $order = FinancingOrder::lockForUpdate()->findOrFail($order);
-        $traderOrder = $order->latestTraderOrder;
-        if ($traderOrder) {
-            if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::DeliveryConfirmed)) {
-                return $this->errorResponse(
-                    __('error.unable_to_complete_order'),
-                    Response::HTTP_FORBIDDEN,
-                    ErrorCode::UNABLE_TO_COMPLETE_ORDER
-                );
-            }
-            
-        }
-
+    
         return DB::transaction(
             function () use ($request, $completeOrder, $order) {
+                $order = FinancingOrder::lockForUpdate()->findOrFail($order);
+                $traderOrder = $order->latestTraderOrder;
+                if ($traderOrder) {
+                    if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::DeliveryConfirmed)) {
+                        return $this->errorResponse(
+                            __('error.unable_to_complete_order'),
+                            Response::HTTP_FORBIDDEN,
+                            ErrorCode::UNABLE_TO_COMPLETE_ORDER
+                        );
+                    }
+                    
+                }
                 $completeOrder->handle($order, $request->validated());
 
                 return $this->successResponse();
