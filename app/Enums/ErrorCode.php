@@ -75,4 +75,8 @@ class ErrorCode
     public const ORDER_IS_CANCELLED = 1037;
 
     public const CAN_NOT_DEAL_WITH_BURSAM_SYSTEM = 1038;
+
+    public const UNABLE_TO_COMPLETE_ORDER = 1039;
+
+    
 }

@@ -356,7 +356,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     {
         $canMoveToPendingCancellation = $this->status->canMoveTo(FinancingOrderStatus::PendingCancellation);
 
-        if ($canMoveToPendingCancellation === false) {
+        if ($canMoveToPendingCancellation === false || $this->latestTraderOrder->isDeliveryConfirmedInLenderArea($area)) {
             return false;
         }
 

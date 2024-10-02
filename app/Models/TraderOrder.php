@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Area;
 use App\Enums\ContractSignedType;
 use App\Enums\CustomerDeliveryStatus;
 use App\Enums\FinancingOrderHistory;
@@ -280,5 +281,13 @@ class TraderOrder extends Model implements HasMedia
                 'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.pending'),
             ];
         }
+    }
+
+    /**
+     * Check if the delivery is confirmed for the given trader order in the Lender area.
+     */
+    public function isDeliveryConfirmedInLenderArea(?string $area): bool
+    {
+        return (bool) $this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryConfirmed) && $area === Area::Lender;
     }
 }
