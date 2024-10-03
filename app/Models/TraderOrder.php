@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\Area;
 use App\Enums\ContractSignedType;
 use App\Enums\CustomerDeliveryStatus;
 use App\Enums\FinancingOrderHistory;
