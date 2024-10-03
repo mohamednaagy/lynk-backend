@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\MurabhaStep;
@@ -352,11 +353,21 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return true;
     }
 
+    public function isDeliveryConfirmedCompletedOrder(): ?bool
+    {
+        $completedOrders = $this->traderOrders()->completed()->get();
+        return $completedOrders->every(fn ($traderOrder) => $traderOrder->isDeliveryConfirmed());
+    }
+
     public function isCancellable($area)
     {
         $canMoveToPendingCancellation = $this->status->canMoveTo(FinancingOrderStatus::PendingCancellation);
 
-        if ($canMoveToPendingCancellation === false || $this->latestTraderOrder->isDeliveryConfirmedInLenderArea($area)) {
+        if ($canMoveToPendingCancellation === false) {
+            return false;
+        }
+
+        if($this->isDeliveryConfirmedCompletedOrder() && $area === Area::Lender) {
             return false;
         }
 

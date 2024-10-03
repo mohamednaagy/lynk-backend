@@ -3,6 +3,7 @@
 namespace App\Actions\Orders\TraderOrders\ProceedAction;
 
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedIgnoreAndSell;
+use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
@@ -28,6 +29,8 @@ class ProceedIgnoreAndSellAction implements ProceedIgnoreAndSell
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
+        
+        $traderOrder->update(['contract_signed_type' => ContractSignedType::Sell]);
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::DeliveryCancelled);
 

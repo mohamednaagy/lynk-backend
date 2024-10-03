@@ -286,8 +286,8 @@ class TraderOrder extends Model implements HasMedia
     /**
      * Check if the delivery is confirmed for the given trader order in the Lender area.
      */
-    public function isDeliveryConfirmedInLenderArea(?string $area): bool
+    public function isDeliveryConfirmed(): bool
     {
-        return (bool) $this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryConfirmed) && $area === Area::Lender;
+        return (bool) $this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryConfirmed);
     }
 }
