@@ -282,11 +282,8 @@ class TraderOrder extends Model implements HasMedia
         }
     }
 
-    /**
-     * Check if the delivery is confirmed for the given trader order in the Lender area.
-     */
-    public function isDeliveryConfirmed(): bool
+    public function scopeCompletedWithDelivery($query)
     {
-        return (bool) $this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryConfirmed);
+        return $query->completed()->where('contract_signed_type', ContractSignedType::Delivery);
     }
 }

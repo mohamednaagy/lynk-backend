@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Area;
+use App\Enums\CompanyType;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\MurabhaStep;
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Modules\Otpify\Contracts\Otpifiable;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Propaganistas\LaravelPhone\PhoneNumber;
@@ -260,16 +262,25 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->latest();
     }
 
-    public function canBeCompleted()
+    public function isCompleted() : bool
     {
         return $this->traderOrders()->completed()->exists()
-            && $this->status->isNot(FinancingOrderStatus::Completed)
-            && $this->status->isNot(FinancingOrderStatus::Cancelled);
+        && $this->status->isNot(FinancingOrderStatus::Completed)
+        && $this->status->isNot(FinancingOrderStatus::Cancelled);
+    }
+
+    public function canBeCompleted(?string $area)
+    {
+       if(($area == Area::Lender && $this->traderOrders()->CompletedWithDelivery()->exists())){
+        return false;
+       }
+
+        return $this->isCompleted();
     }
 
     public function cantBeCompleted()
     {
-        return ! $this->canBeCompleted();
+        return ! $this->isCompleted();
     }
 
     public function canCreateTraderOrder(?User $user = null): bool
@@ -353,12 +364,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return true;
     }
 
-    public function isDeliveryConfirmedCompletedOrder(): ?bool
-    {
-        $completedOrders = $this->traderOrders()->completed()->get();
-        return $completedOrders->every(fn ($traderOrder) => $traderOrder->isDeliveryConfirmed());
-    }
-
     public function isCancellable($area)
     {
         $canMoveToPendingCancellation = $this->status->canMoveTo(FinancingOrderStatus::PendingCancellation);
@@ -367,7 +372,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             return false;
         }
 
-        if($this->isDeliveryConfirmedCompletedOrder() && $area === Area::Lender) {
+        if( $this->traderOrders()->CompletedWithDelivery()->exists() && $area === Area::Lender) {
             return false;
         }
 
