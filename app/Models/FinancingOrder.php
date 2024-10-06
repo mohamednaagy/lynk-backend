@@ -260,28 +260,18 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->latest();
     }
 
-    public function canBeCompleted(?string $area): bool
+    public function canBeCompleted(?string $area = Area::SuperAdmin): bool
     {
-        $completedTraderOrder = $this->traderOrders();
-        $traderOrderCompletes = ($area == Area::Lender) ? $completedTraderOrder->completedWithContractSignedType(ContractSignedType::Sell) : $completedTraderOrder->completed();
-
-        return $traderOrderCompletes->exists()
+        $allTraderOrders = $this->traderOrders();
+        $traderOrderCompleted = ($area == Area::Lender) ? $allTraderOrders->completedWithContractSignedType() : $allTraderOrders->completed();
+        return $traderOrderCompleted->exists()
             && $this->status->isNot(FinancingOrderStatus::Completed)
             && $this->status->isNot(FinancingOrderStatus::Cancelled);
     }
 
-    // public function canBeCompleted(?string $area)
-    // {
-    //    if(($area == Area::Lender && $this->traderOrders()->CompletedWithDelivery()->exists())){
-    //     return false;
-    //    }
-
-    //     return $this->isCompleted();
-    // }
-
     public function cantBeCompleted()
     {
-        return ! $this->isCompleted();
+        return ! $this->canBeCompleted();
     }
 
     public function canCreateTraderOrder(?User $user = null): bool
