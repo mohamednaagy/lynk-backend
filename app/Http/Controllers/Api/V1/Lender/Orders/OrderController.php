@@ -120,7 +120,6 @@ class OrderController extends Controller
                 'creator',
                 'approver',
                 'trader_orders.id',
-                'trader_orders.provider',
                 'trader_orders.reference',
                 'trader_orders.failure_reason',
                 'trader_orders.is_cancellable',
