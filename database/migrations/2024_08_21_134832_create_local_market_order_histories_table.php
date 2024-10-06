@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('local_market_order_histories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('local_market_order_id');
-            $table->foreign('local_market_order_id')->references('id')->on('local_market_orders');
+            $table->foreign('local_market_order_id')->references('id')->on('local_market_orders')->onDelete('cascade');
             $table->string('status');
             $table->timestamps();
         });
