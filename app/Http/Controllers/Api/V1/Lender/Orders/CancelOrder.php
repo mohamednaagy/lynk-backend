@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1\Lender\Orders;
 use App\Actions\Contracts\Orders\CancelOrder as CancelOrderInterface;
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\ContractSignedType;
 use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MurabhaStep;
@@ -55,14 +54,13 @@ class CancelOrder extends Controller
             if ($traderOrder) {
                 $lastHistoryOfContractSignedStep = $this->getContractSignedLastHistory($traderOrder);
 
-                if ($traderOrder->checkOrderHistoryAction($lastHistoryOfContractSignedStep) || $traderOrder->contract_signed_type == ContractSignedType::Delivery) {
+                if ($traderOrder->checkOrderHistoryAction($lastHistoryOfContractSignedStep)) {
                     return $this->errorResponse(
                         __('error.unable_to_cancel_order'),
                         Response::HTTP_FORBIDDEN,
                         ErrorCode::UNABLE_TO_CANCEL_ORDER
                     );
                 }
-                
             }
 
             $cancelOrder->handle(

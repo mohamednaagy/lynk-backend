@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\Area;
+use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\MurabhaStep;
@@ -247,7 +249,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
                 $query->where('status', TraderOrderStatus::InProgress)->orWhere('status', TraderOrderStatus::Initiated);
             })
             ->latest();
-
     }
 
     public function latestTraderOrder(): HasOne
@@ -269,9 +270,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->latest();
     }
 
-    public function canBeCompleted()
+    public function canBeCompleted(?string $area = Area::SuperAdmin): bool
     {
-        return $this->traderOrders()->completed()->exists()
+        $allTraderOrders = $this->traderOrders();
+        $traderOrderCompleted = ($area == Area::Lender) ? $allTraderOrders->completedWithContractSignedType() : $allTraderOrders->completed();
+        return $traderOrderCompleted->exists()
             && $this->status->isNot(FinancingOrderStatus::Completed)
             && $this->status->isNot(FinancingOrderStatus::Cancelled);
     }
@@ -369,6 +372,10 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         $canMoveToPendingCancellation = $this->status->canMoveTo(FinancingOrderStatus::PendingCancellation);
 
         if ($canMoveToPendingCancellation === false) {
+            return false;
+        }
+
+        if ($area === Area::Lender && $this->traderOrders()->completedWithContractSignedType(ContractSignedType::Delivery)->exists()) {
             return false;
         }
 

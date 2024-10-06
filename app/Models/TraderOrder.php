@@ -165,7 +165,7 @@ class TraderOrder extends Model implements HasMedia
         return (bool) $this->getOrderHistoryAction($actions)->first();
     }
 
-    public function getOrderHistoryAction($actions) 
+    public function getOrderHistoryAction($actions)
     {
         if (! is_array($actions)) {
             $actions = [$actions];
@@ -176,7 +176,7 @@ class TraderOrder extends Model implements HasMedia
                 throw new UnexpectedValueException(sprintf('Invalid action %s', $action));
             }
         }
-        
+
         return $this->traderHistories()
             ->whereIn('action', $actions)
             ->get();
@@ -313,8 +313,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function getCustomerDeliveryStatusAndMessage(): array
     {
-        if ($this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryCancelled))
-        {
+        if ($this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryCancelled)) {
             return [
                 'status' => CustomerDeliveryStatus::DeliveryIgnoreAndSell,
                 'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.IgnoreAndSell'),
@@ -330,5 +329,10 @@ class TraderOrder extends Model implements HasMedia
                 'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.pending'),
             ];
         }
+    }
+
+    public function scopeCompletedWithContractSignedType($query, $contractSignedType = ContractSignedType::Sell)
+    {
+        return $query->completed()->where('contract_signed_type', $contractSignedType);
     }
 }
