@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Area;
-use App\Enums\CompanyType;
+use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\MurabhaStep;
@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Modules\Otpify\Contracts\Otpifiable;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Propaganistas\LaravelPhone\PhoneNumber;
@@ -247,7 +246,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
                 $query->where('status', TraderOrderStatus::InProgress)->orWhere('status', TraderOrderStatus::Initiated);
             })
             ->latest();
-
     }
 
     public function latestTraderOrder(): HasOne
@@ -262,21 +260,24 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->latest();
     }
 
-    public function isCompleted() : bool
+    public function canBeCompleted(?string $area): bool
     {
-        return $this->traderOrders()->completed()->exists()
-        && $this->status->isNot(FinancingOrderStatus::Completed)
-        && $this->status->isNot(FinancingOrderStatus::Cancelled);
+        $completedTraderOrder = $this->traderOrders();
+        $traderOrderCompletes = ($area == Area::Lender) ? $completedTraderOrder->completedWithContractSignedType(ContractSignedType::Sell) : $completedTraderOrder->completed();
+
+        return $traderOrderCompletes->exists()
+            && $this->status->isNot(FinancingOrderStatus::Completed)
+            && $this->status->isNot(FinancingOrderStatus::Cancelled);
     }
 
-    public function canBeCompleted(?string $area)
-    {
-       if(($area == Area::Lender && $this->traderOrders()->CompletedWithDelivery()->exists())){
-        return false;
-       }
+    // public function canBeCompleted(?string $area)
+    // {
+    //    if(($area == Area::Lender && $this->traderOrders()->CompletedWithDelivery()->exists())){
+    //     return false;
+    //    }
 
-        return $this->isCompleted();
-    }
+    //     return $this->isCompleted();
+    // }
 
     public function cantBeCompleted()
     {
@@ -372,7 +373,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             return false;
         }
 
-        if( $this->traderOrders()->CompletedWithDelivery()->exists() && $area === Area::Lender) {
+        if ($area === Area::Lender && $this->traderOrders()->completedWithContractSignedType(ContractSignedType::Delivery)->exists()) {
             return false;
         }
 
