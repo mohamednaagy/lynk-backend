@@ -16,7 +16,7 @@ class LocalMarketOrderObserver
 
     public function creating(LocalMarketOrder $localMarketOrder)
     {
-        $localMarketOrder->order_no = 'LM_'.time();
+        $localMarketOrder->order_no = 'LM_'.rand(11, 99).time();
     }
 
     /**
