@@ -143,7 +143,7 @@ class TraderOrderTransformer extends TransformerAbstract
             fn ($product) => $traderOrder->provider == Trader::Lynk ? LynkCommodityProductDto::fromArray($product) : CommodityProductDto::fromArray($product)
         );
 
-        return $this->collection($products, new ProductTransformer());
+        return $this->collection($products, new ProductTransformer);
     }
 
     public function includeStatus(TraderOrder $traderOrder): Primitive
@@ -188,6 +188,7 @@ class TraderOrderTransformer extends TransformerAbstract
                 'cancelled_at' => Carbon::make($cancelDetail->created_at)?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
                 'cancel_step' => $cancelDetail->cancel_step,
                 'cancel_reason' => $cancelDetail->cancel_reason,
+                'message' => $traderOrder->cancelMessage(),
             ]);
         }
 

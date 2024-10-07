@@ -302,4 +302,14 @@ class LynkV1Driver implements TraderInterface
             default => null,
         };
     }
+
+    public function cancelMessage(TraderOrder $traderOrder): ?string
+    {
+        return match ($traderOrder->cancelDetail?->cancel_reason->value) {
+            TraderOrderCancelReason::FinancingOrderIsCancelled => __('order.trader.cancel_message.'.TraderOrderCancelReason::FinancingOrderIsCancelled),
+            TraderOrderCancelReason::TraderOrderIsCancelled => __('order.trader.cancel_message.'.TraderOrderCancelReason::TraderOrderIsCancelled),
+            TraderOrderCancelReason::NoEligibleCommoditiesAvailable => __('order.trader.cancel_message.'.TraderOrderCancelReason::NoEligibleCommoditiesAvailable),
+            default => null,
+        };
+    }
 }

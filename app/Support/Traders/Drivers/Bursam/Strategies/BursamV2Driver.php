@@ -192,4 +192,13 @@ class BursamV2Driver extends BursamV1Driver
     {
         ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
     }
+
+    public function cancelMessage(TraderOrder $traderOrder): ?string
+    {
+        return match ($traderOrder->cancelDetail?->cancel_reason->value) {
+            TraderOrderCancelReason::FinancingOrderIsCancelled => __('order.trader.cancel_message.'.TraderOrderCancelReason::FinancingOrderIsCancelled),
+            TraderOrderCancelReason::TraderOrderIsCancelled => __('order.trader.cancel_message.'.TraderOrderCancelReason::TraderOrderIsCancelled),
+            default => null,
+        };
+    }
 }

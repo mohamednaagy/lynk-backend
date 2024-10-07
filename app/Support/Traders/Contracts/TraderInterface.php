@@ -35,4 +35,6 @@ interface TraderInterface
     public function moveHoldTraderOrder(TraderOrder $traderOrder);
 
     public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string;
+
+    public function cancelMessage(TraderOrder $traderOrder): ?string;
 }

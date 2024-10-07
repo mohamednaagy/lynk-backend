@@ -192,7 +192,7 @@ class TraderOrder extends Model implements HasMedia
     public function ensureCanAccessStep(string $step)
     {
         if (! $this->checkOrderStepComplete($step)) {
-            throw new OrderStatusDoesNotFollowSequenceException();
+            throw new OrderStatusDoesNotFollowSequenceException;
         }
     }
 
@@ -287,6 +287,10 @@ class TraderOrder extends Model implements HasMedia
     public function hoverMessage(): ?string
     {
         return Trader::driver($this->provider, $this->version)->HoverMessageOfTraderStatus($this);
+    }
 
+    public function cancelMessage(): ?string
+    {
+        return Trader::driver($this->provider, $this->version)->cancelMessage($this);
     }
 }

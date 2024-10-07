@@ -527,9 +527,7 @@ class DmccV1Driver implements TraderInterface
         }
     }
 
-    public function sellCommodityToOpenMarket(TraderOrder $traderOrder)
-    {
-    }
+    public function sellCommodityToOpenMarket(TraderOrder $traderOrder) {}
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder)
     {
@@ -604,5 +602,14 @@ class DmccV1Driver implements TraderInterface
     public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
     {
         return null;
+    }
+
+    public function cancelMessage(TraderOrder $traderOrder): ?string
+    {
+        return match ($traderOrder->cancelDetail?->cancel_reason->value) {
+            TraderOrderCancelReason::FinancingOrderIsCancelled => __('order.trader.cancel_message.'.TraderOrderCancelReason::FinancingOrderIsCancelled),
+            TraderOrderCancelReason::TraderOrderIsCancelled => __('order.trader.cancel_message.'.TraderOrderCancelReason::TraderOrderIsCancelled),
+            default => null,
+        };
     }
 }
