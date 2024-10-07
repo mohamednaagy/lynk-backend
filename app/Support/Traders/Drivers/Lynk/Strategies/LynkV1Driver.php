@@ -86,6 +86,7 @@ class LynkV1Driver implements TraderInterface
                 $currentTimeInUtcTz = CarbonImmutable::now();
                 $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
                 $products = collect($traderOrder->products)->map(fn ($product) => LynkCommodityProductDto::fromArray($product));
+                $default_contract_sign_time_limit = app(LocalMurabahaSettings::class)->default_contract_sign_time_limit;
 
                 $this->storeOrderDocumentAsPdf(
                     'local-commodity-market.transfer-ownership-to-lender',
@@ -107,6 +108,7 @@ class LynkV1Driver implements TraderInterface
                         'time' => $currentTimeInRiyadhTz->toTimeString(),
                         'trade_order' => $traderOrder,
                         'financing_order' => $traderOrder->order,
+                        'default_contract_sign_time_limit'=> $default_contract_sign_time_limit
                     ],
                     $traderOrder,
                     TraderOrderMediaCollection::TransferOwnershipToLender
