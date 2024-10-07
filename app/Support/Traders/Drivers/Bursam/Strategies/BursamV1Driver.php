@@ -554,9 +554,7 @@ class BursamV1Driver implements TraderInterface
         return TraderOrderCancellationStatus::Cancelled;
     }
 
-    public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
-    {
-    }
+    public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void {}
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
@@ -579,5 +577,10 @@ class BursamV1Driver implements TraderInterface
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
         ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
+    }
+
+    public function contractSignedMessage(TraderOrder $traderOrder)
+    {
+        return null;
     }
 }

@@ -2,10 +2,13 @@
 
 namespace App\Transformers;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader as TraderEnum;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\Facades\Trader;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use League\Fractal\Resource\Primitive;
@@ -35,6 +38,7 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     public function getCurrentLastHistoryAndLastHistoryOfStep($historiesActions, $step)
     {
+        
         $stepHistoriesNode = $this->traderStepHistories->getStepOf($step);
         $lastHistoryOfStepNode = end($stepHistoriesNode->histories);
         $history = null;
@@ -100,6 +104,11 @@ class TraderHistoryTransformer extends TransformerAbstract
         return $this->primitive([
             'step' => MurabhaStep::ContractSigned,
             'is_complete' => (bool) $history,
+            'is_deliverable' => $this->traderOrder->isDeliverable(),
+            'contract_signed_details' => [
+                'message' => Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->contractSignedMessage($this->traderOrder),
+                'type' => $this->traderOrder->contract_signed_type->description,
+            ],
             'completed_at' => optional($history)->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'wakala_document' => [
                 'url' => $wakalaDocumentMediaFile?->file_url,
@@ -156,9 +165,9 @@ class TraderHistoryTransformer extends TransformerAbstract
         );
 
         $warrantyDocumentMediaFile = match ($this->traderOrder->provider) {
-            'dmcc', 'fake' => $this->getMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo),
-            'bursam' => $this->getMedia(TraderOrderMediaCollection::BursamTtiHoldingCertificate),
-            'lynk' => $this->getMedia(TraderOrderMediaCollection::LynkSalePledgeCertificate),
+            TraderEnum::Dmcc, TraderEnum::FakeDmcc => $this->getMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo),
+            TraderEnum::Bursam => $this->getMedia(TraderOrderMediaCollection::BursamTtiHoldingCertificate),
+            TraderEnum::Lynk => $this->getMedia(TraderOrderMediaCollection::LynkSalePledgeCertificate),
         };
 
         ///*****///
@@ -232,15 +241,16 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     public function includeCustomerDeliveryConfirmation($historiesActions): Primitive
     {
-        [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
-            $historiesActions, MurabhaStep::CommoditySoldToCustomer
-        );
-
+        $history = $this->traderOrder
+            ->getOrderHistoryAction([FinancingOrderHistory::DeliveryCancelled, FinancingOrderHistory::DeliveryConfirmed])
+            ->first();
+        
         return $this->primitive([
             'step' => MurabhaStep::CustomerDeliveryConfirmation,
             'is_complete' => (bool) $history,
             'completed_at' => $history?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
-            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
-        ]);
+            'delivery_details' => $this->traderOrder->getCustomerDeliveryStatusAndMessage(),
+            'duration' => $this->getDurationForHistoryStep($history?->action),
+        ]);           
     }
 }

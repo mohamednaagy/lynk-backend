@@ -467,4 +467,9 @@ class FakeV1Driver implements TraderInterface
     {
         ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
     }
+
+    public function contractSignedMessage(TraderOrder $traderOrder)
+    {
+        return null;
+    }
 }
