@@ -9,6 +9,7 @@ use App\Jobs\LocalMarket\states\FailedPurchaseStatus;
 use App\Jobs\LocalMarket\states\NoEligibleCommoditiesAvailableStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
+use Illuminate\Support\Str;
 
 class LocalMarketOrderObserver
 {
@@ -16,7 +17,7 @@ class LocalMarketOrderObserver
 
     public function creating(LocalMarketOrder $localMarketOrder)
     {
-        $localMarketOrder->order_no = 'LM_'.rand(11, 99).time();
+        $localMarketOrder->order_no = Str::uuid();
     }
 
     /**

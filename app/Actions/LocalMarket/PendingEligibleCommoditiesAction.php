@@ -17,9 +17,10 @@ class PendingEligibleCommoditiesAction implements PendingEligibleCommodities
 
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
+        $localMarketOrder->update(['status' => LocalMarketOrderStatus::PendingEligibleCommodities]);
+
         DB::beginTransaction();
         try {
-            $localMarketOrder->update(['status' => LocalMarketOrderStatus::PendingEligibleCommodities]);
             app(FindEligibleCommodities::class)->handle($localMarketOrder);
             $this->createLocalMarketOrderHistory($localMarketOrder, LocalMarketOrderHistoryStatus::PendingEligibleCommodities);
             DB::commit();
