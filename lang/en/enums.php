@@ -11,6 +11,7 @@ use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MurabhaStep;
+use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderNoRefundReason;
 use App\Enums\TraderOrderRefundReason;
 use App\Enums\TraderOrderStatus;
@@ -109,5 +110,14 @@ return [
 
     TraderOrderStatus::class => [
         TraderOrderStatus::Hold => 'Initiated - On Hold',
+    ],
+
+    TraderOrderCancelReason::class => [
+        TraderOrderCancelReason::Manual => '',
+        TraderOrderCancelReason::MurabhaTimeout => '',
+        TraderOrderCancelReason::FailureToPurchase => '',
+        TraderOrderCancelReason::FinancingOrderIsCancelled => 'Order cancelled by user',
+        TraderOrderCancelReason::TraderOrderIsCancelled => 'Trade request cancelled by user ',
+        TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'No commodities found with LOCAL Trader.',
     ],
 ];
