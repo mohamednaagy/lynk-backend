@@ -8,7 +8,7 @@ return [
 
     'trader' => [
         'bursa' => [
-            'hold_status' => 'Trade Request on hold due to International Trader (Bursa Malaysia) Market Cut-Off Time until '.Config::get('services.bursam.market_opening_start_time').' pm KSA time.',
+            'hold_status' => 'Trade Request on hold due to International Trader (Bursa Malaysia) Market Cut-Off Time until :TIME KSA time.',
         ],
         'lynk' => [
             'cancelled_status' => 'User has chosen to cancel this trade request.',
