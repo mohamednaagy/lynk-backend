@@ -8,7 +8,6 @@ use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\DataTransferObjects\LocalMarket\OrderCommoditiesDto;
 use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class LoanService
@@ -67,7 +66,6 @@ class LoanService
 
     public function buyCommodities(LocalMarketOrder $localMarketOrder, $companyId, $data)
     {
-        DB::beginTransaction();
         $unitService = new UnitService;
         $ownershipService = new OwnershipService;
         $inventoryService = new InventoryService;
@@ -83,12 +81,9 @@ class LoanService
             $orderService->insertOrderInventories($localMarketOrder, $eligibleCommodities->getInventories());
             $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::CommoditiesPurchased);
 
-            DB::commit();
-
             return true;
         } catch (Exception $e) {
             Log::error('Error in buy commodities', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            DB::rollBack();
 
             return false;
         }
