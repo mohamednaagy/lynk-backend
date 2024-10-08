@@ -6,8 +6,6 @@ use Illuminate\Support\Facades\Config;
 return [
     'user_cancel_request' => 'لقد اختار المستخدم إلغاء طلب التجارة هذا',
     'user_cancel_order' => 'لقد اختار المستخدم إلغاء هذا الطلب',
-    'trader_request_cancelled_by_user' => 'تم إلغاء طلب التجارة بواسطة المستخدم.',
-
     'trader' => [
         'cancel_message' => [
             TraderOrderCancelReason::FinancingOrderIsCancelled => 'لقد اختار المستخدم إلغاء طلب التجارة هذا',

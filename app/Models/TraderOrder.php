@@ -288,9 +288,4 @@ class TraderOrder extends Model implements HasMedia
     {
         return Trader::driver($this->provider, $this->version)->HoverMessageOfTraderStatus($this);
     }
-
-    public function cancelMessage(): ?string
-    {
-        return Trader::driver($this->provider, $this->version)->cancelMessage($this);
-    }
 }

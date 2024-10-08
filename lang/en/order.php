@@ -6,8 +6,6 @@ use Illuminate\Support\Facades\Config;
 return [
     'user_cancel_request' => 'User has chosen to cancel this trade request',
     'user_cancel_order' => 'User has chosen to cancel this order',
-    'trader_request_cancelled_by_user' => 'Trade Request cancelled by user.',
-
     'trader' => [
         'cancel_message' => [
             TraderOrderCancelReason::FinancingOrderIsCancelled => 'Order cancelled by user',

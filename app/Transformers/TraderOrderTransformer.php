@@ -188,7 +188,7 @@ class TraderOrderTransformer extends TransformerAbstract
                 'cancelled_at' => Carbon::make($cancelDetail->created_at)?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
                 'cancel_step' => $cancelDetail->cancel_step,
                 'cancel_reason' => $cancelDetail->cancel_reason,
-                'message' => $traderOrder->cancelMessage(),
+                'message' => $cancelDetail->cancelMessage(),
             ]);
         }
 
