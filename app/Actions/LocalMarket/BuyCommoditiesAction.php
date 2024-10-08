@@ -27,9 +27,6 @@ class BuyCommoditiesAction implements BuyCommodities
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
         try {
-            //TODO nagy double check if we can buy this order or not
-
-            // TODO nagy move drawio to miro
             $startTime = microtime(true);
 
             $eligibleCommodities = $localMarketOrder->data;
