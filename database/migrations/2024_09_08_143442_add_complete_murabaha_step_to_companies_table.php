@@ -14,7 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('companies', function (Blueprint $table) {
-            $table->boolean('auto_complete_murabaha_order')->default(false);
+            $table->boolean('auto_complete_murabaha_order')
+                ->default(false)
+                ->after('require_initiate_trade_request');
         });
     }
 
