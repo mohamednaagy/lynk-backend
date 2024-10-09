@@ -6,6 +6,7 @@ use App\Actions\Contracts\Orders\CancelOrder as CancelOrderInterface;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\ErrorCode;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MurabhaStep;
 use App\Enums\Subject;
@@ -52,9 +53,8 @@ class CancelOrder extends Controller
 
             $traderOrder = $order->activeTraderOrder()->first();
             if ($traderOrder) {
-                $lastHistoryOfContractSignedStep = $this->getContractSignedLastHistory($traderOrder);
 
-                if ($traderOrder->checkOrderHistoryAction($lastHistoryOfContractSignedStep)) {
+                if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::ContractSigned)) {
                     return $this->errorResponse(
                         __('error.unable_to_cancel_order'),
                         Response::HTTP_FORBIDDEN,
@@ -73,12 +73,4 @@ class CancelOrder extends Controller
         });
     }
 
-    private function getContractSignedLastHistory($traderOrder)
-    {
-        $contractSignedHistories = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
-            ->getStepOf(MurabhaStep::ContractSigned)
-            ?->histories;
-
-        return end($contractSignedHistories);
-    }
 }
