@@ -9,9 +9,11 @@ use App\Enums\Trader as EnumsTrader;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
+use App\Settings\Classes\LocalMurabahaSettings;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
 use Carbon\Carbon;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -246,4 +248,32 @@ class TraderOrder extends Model implements HasMedia
     {
         return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
     }
+
+    public function scopeWithExpiredContractSignLimit($query, string $provider, string $version, int $lastHistoryAction, string $mode)
+    {
+        // Retrieve current time and contract signing limit
+        $currentTime = now();
+        $contractSignTimeLimit = app(LocalMurabahaSettings::class)->default_contract_sign_time_limit;
+
+        // Calculate the expiration time based on the contract signing limit
+        $expirationTime = $currentTime->subHours($contractSignTimeLimit);
+
+        return $query->where('provider', $provider)
+            ->where('version', $version)
+            ->where('mode', $mode)
+            ->where('status', TraderOrderStatus::InProgress)
+            ->whereHas('traderHistories', function ($q) use ($lastHistoryAction, $expirationTime) {
+                $q->where('action', $lastHistoryAction)
+                    ->where('created_at', '<=', $expirationTime)
+                    ->latest()
+                    ->take(1);
+            })
+            ->whereDoesntHave('traderHistories', function ($q) {
+                $q->whereIn('action', [
+                    FinancingOrderHistory::ContractSigned, 
+                    FinancingOrderHistory::PendingDelivery
+                ]); // Exclude specific actions
+            });
+    }
+
 }
