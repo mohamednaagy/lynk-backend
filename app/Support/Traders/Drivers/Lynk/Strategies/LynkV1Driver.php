@@ -6,6 +6,7 @@ use App\Actions\Contracts\Orders\CancelOrder;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\OrderCancellationStatus;
 use App\Enums\TraderOrderCancellationStatus;
@@ -213,6 +214,12 @@ class LynkV1Driver implements TraderInterface
             $order = $traderOrder->order;
             if ($order->isInPendingCancellationState()) {
                 app(CancelOrder::class)->handle($order, auth()->user(), []);
+            }
+
+            if ($order->status->is(FinancingOrderStatus::InProgress)) {
+                $order->update([
+                    'status' => FinancingOrderStatus::PendingTraderOrder,
+                ]);
             }
 
             return TraderOrderCancellationStatus::Cancelled;
