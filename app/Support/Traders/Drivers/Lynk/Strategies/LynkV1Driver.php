@@ -2,7 +2,6 @@
 
 namespace App\Support\Traders\Drivers\Lynk\Strategies;
 
-use App\Actions\Contracts\Orders\CancelOrder;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\CompanyMarketType;
 use App\Enums\ContractSignedType;
@@ -201,12 +200,31 @@ class LynkV1Driver implements TraderInterface
 
     public function sellCommodityToOpenMarket(TraderOrder $traderOrder)
     {
-        // TODO_LOCAL_MARKET need to implement
+        $this->sellCommodityToLocalMarket($traderOrder);
+        // TODO:: the history needs discussion
+        //         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
+    }
+
+    public function sellCommodityToLocalMarket(TraderOrder $traderOrder)
+    {
+        try {
+            $response = LynkClient::of($traderOrder)->sellProduct();
+        } catch (Exception $e) {
+            throw new TraderException(
+                'Failed to sell commodity to local market',
+                [
+                    'trader_order_id' => $traderOrder->id,
+                    'provider' => $traderOrder->provider,
+                    'version' => $traderOrder->version,
+                ]
+            );
+        }
+
+        return $response;
     }
 
     public function cancelOrder(FinancingOrder $financingOrder): int
     {
-        // TODO_LOCAL_MARKET need to implement
         return OrderCancellationStatus::PendingCancellation;
     }
 
@@ -229,9 +247,6 @@ class LynkV1Driver implements TraderInterface
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
 
         $order = $traderOrder->order;
-        if ($order->isInPendingCancellationState()) {
-            app(CancelOrder::class)->handle($order, auth()->user(), []);
-        }
 
         if ($traderOrder->mode == TraderOrderMode::Automatic) {
             if ($traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Local)) {

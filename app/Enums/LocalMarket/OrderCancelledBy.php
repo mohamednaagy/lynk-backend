@@ -5,7 +5,7 @@ namespace App\Enums\LocalMarket;
 use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
 
-final class OrderCancelReason extends Enum implements LocalizedEnum
+final class OrderCancelledBy extends Enum implements LocalizedEnum
 {
-    const CancelOrder = 1;
+    const Customer = 1;
 }
