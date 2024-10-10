@@ -59,7 +59,7 @@ class CheckExpiredContractSignedTimeTraderOrdersJob implements ShouldQueue
 
             foreach ($expiredTraderOrders as $traderOrder) {
                 FacadesTrader::driver($this->provider, $this->version)
-                    ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::MurabhaTimeout);
+                    ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::ExpiredContractSignTime);
                 
                 Log::info("Cancelled Trader Order ID: {$traderOrder->id} due to timeout.");
             }
