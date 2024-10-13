@@ -232,6 +232,12 @@ class LynkV1Driver implements TraderInterface
             app(CancelOrder::class)->handle($order, auth()->user(), []);
         }
 
+        if ($order->status->is(FinancingOrderStatus::InProgress)) {
+            $order->update([
+                'status' => FinancingOrderStatus::PendingTraderOrder,
+            ]);
+        }
+
         if ($traderOrder->mode == TraderOrderMode::Automatic) {
             if ($traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Local)) {
                 $traderOrder->order->update([
@@ -242,12 +248,6 @@ class LynkV1Driver implements TraderInterface
             if ($traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Any)) {
                 Trader::driver(\App\Enums\Trader::Bursam, 'v2')
                     ->createTraderOrder($traderOrder->order);
-            }
-
-            if ($order->status->is(FinancingOrderStatus::InProgress)) {
-                $order->update([
-                    'status' => FinancingOrderStatus::PendingTraderOrder,
-                ]);
             }
         }
 
