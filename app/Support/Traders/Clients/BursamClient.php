@@ -175,7 +175,7 @@ class BursamClient
         ];
 
         $request = [
-            'serialNumber' => '1',
+            'serialNumbers' => '1',
             'forceYN' => 'Y',
             'maxWaitTime' => '10',
             'waitAllDoneYN' => 'Y',
