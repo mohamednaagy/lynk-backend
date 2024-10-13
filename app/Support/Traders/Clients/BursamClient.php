@@ -59,21 +59,23 @@ class BursamClient
         $url = 'api/process/svc/bsas/order.json';
 
         $request = [
-            'serialNumber' => '1',
-            'bidOption' => 'Y',
-            'otcOption' => 'N',
-            'stbOption' => 'N',
-            'productCode' => $productCode,
-            'purchaseType' => 'P',
-            'clientName' => '',
-            'currency' => 'SAR',
-            'bidValue' => (float) $financingOrder->amount->convertAndFormatByDecimal(),
-            'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
-            'tenor' => config('trader.providers.bursam.tenor'),
-            'otcCounterParty' => $financingOrder->customer_name,
-            'otcMurabaha' => '',
-            'otcMurabahaValue' => (float) $financingOrder->selling_price->convertAndFormatByDecimal(),
-            'eCertNo' => '',
+            [
+                'serialNumber' => '1',
+                'bidOption' => 'Y',
+                'otcOption' => 'N',
+                'stbOption' => 'N',
+                'productCode' => $productCode,
+                'purchaseType' => 'P',
+                'clientName' => '',
+                'currency' => 'SAR',
+                'bidValue' => (float) $financingOrder->amount->convertAndFormatByDecimal(),
+                'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
+                'tenor' => config('trader.providers.bursam.tenor'),
+                'otcCounterParty' => $financingOrder->customer_name,
+                'otcMurabaha' => '',
+                'otcMurabahaValue' => (float) $financingOrder->selling_price->convertAndFormatByDecimal(),
+                'eCertNo' => '',
+            ],
         ];
 
         $requestHeader = [
@@ -112,21 +114,23 @@ class BursamClient
         ];
 
         $request = [
-            'serialNumber' => '1',
-            'bidOption' => 'N',
-            'otcOption' => 'Y',
-            'stbOption' => 'Y',
-            'productCode' => $this->traderOrder->product_code,
-            'purchaseType' => 'P',
-            'clientName' => '',
-            'currency' => 'SAR',
-            'bidValue' => (float) $financingOrder->amount->convertAndFormatByDecimal(),
-            'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
-            'tenor' => '00090',
-            'otcCounterParty' => $financingOrder->customer_name,
-            'otcMurabaha' => '',
-            'otcMurabahaValue' => (float) $financingOrder->selling_price->convertAndFormatByDecimal(),
-            'eCertNo' => $this->traderOrder->reference,
+            [
+                'serialNumber' => '1',
+                'bidOption' => 'N',
+                'otcOption' => 'Y',
+                'stbOption' => 'Y',
+                'productCode' => $this->traderOrder->product_code,
+                'purchaseType' => 'P',
+                'clientName' => '',
+                'currency' => 'SAR',
+                'bidValue' => (float) $financingOrder->amount->convertAndFormatByDecimal(),
+                'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
+                'tenor' => '00090',
+                'otcCounterParty' => $financingOrder->customer_name,
+                'otcMurabaha' => '',
+                'otcMurabahaValue' => (float) $financingOrder->selling_price->convertAndFormatByDecimal(),
+                'eCertNo' => $this->traderOrder->reference,
+            ],
         ];
 
         $response = $this->rateLimitRequest(
@@ -171,7 +175,7 @@ class BursamClient
         ];
 
         $request = [
-            'serialNumber' => '1',
+            'serialNumbers' => '1',
             'forceYN' => 'Y',
             'maxWaitTime' => '10',
             'waitAllDoneYN' => 'Y',
