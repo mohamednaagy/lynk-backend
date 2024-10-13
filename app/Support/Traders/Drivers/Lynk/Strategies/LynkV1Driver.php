@@ -222,6 +222,7 @@ class LynkV1Driver implements TraderInterface
                 ]);
             }
 
+
             return TraderOrderCancellationStatus::Cancelled;
         }
     }
