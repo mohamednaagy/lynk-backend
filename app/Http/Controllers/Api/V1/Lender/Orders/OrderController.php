@@ -33,6 +33,44 @@ class OrderController extends Controller
 {
     use HandlesFractal;
 
+    private $sharedFields = [
+        'id',
+        'status',
+        'reference_number',
+        'customer_name',
+        'national_id',
+        'contract_number',
+        'amount',
+        'selling_price',
+        'amount_formatted',
+        'selling_price_formatted',
+        'phone_country_code',
+        'phone_number',
+        'phone_number_formatted',
+        'is_verification_required',
+        'is_updatable',
+        'is_approved',
+        'is_cancellable',
+        'can_be_completed',
+        'can_create_trader_order',
+        'payment_proof_url',
+        'status_reason',
+        'creator',
+        'approver',
+        'trader_orders.id',
+        'trader_orders.provider',
+        'trader_orders.mode',
+        'trader_orders.reference',
+        'trader_orders.failure_reason',
+        'trader_orders.is_cancellable',
+        'trader_orders.history',
+        'trader_orders.products',
+        'trader_orders.status',
+        'trader_orders.cancel_details',
+        'trader_orders.created_at',
+        'history',
+    ];
+
     public function __construct()
     {
         $this->middleware(
@@ -88,6 +126,7 @@ class OrderController extends Controller
                 'created_at',
             ])->respond();
     }
+    
 
     /**
      * @throws AuthorizationException
@@ -99,7 +138,7 @@ class OrderController extends Controller
         $order->load('creator', 'approver');
 
         $userRole = $request->user()->getRoleNames()->first();
-        $fields = $this->getFieldsForRole($userRole, OrderController::class, 'show');
+        $fields = array_diff($this->sharedFields, $this->getFieldsForRole($userRole, OrderController::class, 'show'));
         return $this->formatResponse($order,  (new FinancingOrderTransformer())
         ->setArea(Area::Lender)
         ->setCurrentUser($request->user())
