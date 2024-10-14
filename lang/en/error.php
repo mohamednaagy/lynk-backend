@@ -18,6 +18,7 @@ return [
     'invalid_person_id_type' => 'Invalid national ID type',
     'invalid_operator_tcn' => 'Invalid operator TCN',
     'no_enough_balance' => 'No enough balance',
+    'user_doesnt_belong_to_company' => 'User Doesnt Belong To This Company',
     'order_status_doesnt_follow_sequence' => 'Order status cannot be updated because it doesn\'t follow the right sequence',
     'order_require_client_verification' => 'You cannot proceed because order requires client verification.',
     'order_cannot_be_updated' => 'Order can be updated only if the status is '.FinancingOrderStatus::joinDescription(FinancingOrderStatus::$allowedToUpdateStatuses),
@@ -41,5 +42,12 @@ return [
     'order_cost_with_vat_and_without_vat_incorrect' => 'Entered value of order cost with VAT is incorrect',
     'user_doesnt_have_the_right_permissions' => 'User Doesnt Have The Right Permission',
     'inventory_cannot_be_updated' => 'Reserved Units is greater than new Total Units',
+    'inventory_cannot_be_deleted' => 'Reserved Units is greater than 0. Commodity Inventory cannot be deleted.',
     'inventory_units_not_changed' => 'No changes can be saved',
+    'failed_to_delete_inventory' => 'An error occurred while attempting to delete the inventory. Please try again later.',
+    'commodity_item_cannot_be_deleted' => 'Reserved Units is greater than 0. Commodity Item cannot be deleted.',
+    'failed_to_delete_commodity_item' => 'An error occurred while attempting to delete the commodity item. Please try again later.',
+    'location_cannot_be_deleted' => 'Reserved Units is greater than 0. Commodity Location cannot be deleted.',
+    'failed_to_delete_location' => 'An error occurred while attempting to delete the Commodity Location. Please try again later.',
+
 ];

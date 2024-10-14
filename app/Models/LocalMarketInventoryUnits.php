@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\LocalMarketInventoryUnitsStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -19,10 +18,9 @@ class LocalMarketInventoryUnits extends Model
         'commodity_item_id',
         'qr_code',
         'status',
-    ];
-
-    protected $casts = [
-        'status' => LocalMarketInventoryUnitsStatus::class,
+        'hold_for',
+        'current_owner',
+        'current_owner_type',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -53,7 +51,7 @@ class LocalMarketInventoryUnits extends Model
 
     public static function insertBulk($data)
     {
-        $now = saudi_now();
+        $now = saudi_now('Y-m-d h:i:s');
         // Implement bulk insertion logic here
         $data = array_map(function ($item) use ($now) {
             return array_merge($item, [

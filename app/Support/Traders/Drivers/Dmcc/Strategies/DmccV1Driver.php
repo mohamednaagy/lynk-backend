@@ -5,6 +5,7 @@ namespace App\Support\Traders\Drivers\Dmcc\Strategies;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
@@ -237,7 +238,9 @@ class DmccV1Driver implements TraderInterface
      */
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled,
+        $cancelledByType = TraderOrderCancelType::System,
+        $cancelledBy = null
     ): object {
         $response = $this->soap
             ->baseWsdl($this->prefixUrl('cancelTTI'))
@@ -524,9 +527,7 @@ class DmccV1Driver implements TraderInterface
         }
     }
 
-    public function sellCommodityToOpenMarket(TraderOrder $traderOrder)
-    {
-    }
+    public function sellCommodityToOpenMarket(TraderOrder $traderOrder) {}
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder)
     {
@@ -586,5 +587,25 @@ class DmccV1Driver implements TraderInterface
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
         ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
+    }
+
+    public function checkCanInitiateTraderOrder()
+    {
+        return true;
+    }
+
+    public function moveHoldTraderOrder(TraderOrder $trader)
+    {
+        return true;
+    }
+
+    public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
+    {
+        return null;
+    }
+
+    public function contractSignedMessage(TraderOrder $traderOrder)
+    {
+        return null;
     }
 }

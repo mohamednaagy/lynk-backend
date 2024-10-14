@@ -7,7 +7,7 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\User;
-use App\Transformers\InventoryTransformer;
+use App\Transformers\LocalMarketInventoryTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -91,11 +91,11 @@ class InventoryControllerIndexTest extends TestCase
             ->getJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson(
-                fractal(self::$commodityInventory, new InventoryTransformer())
+                fractal(self::$commodityInventory, new LocalMarketInventoryTransformer)
                     ->parseIncludes([
                         'id',
                         'company_id',
-                        'comapny_name',
+                        'company_name',
                         'commodity_item_id',
                         'commodity_item',
                         'commodity_type',
@@ -108,6 +108,7 @@ class InventoryControllerIndexTest extends TestCase
                         'reserved_items',
                         'status',
                         'is_editable',
+                        'is_deletable',
                     ])
                     ->respond()
                     ->getData(true)

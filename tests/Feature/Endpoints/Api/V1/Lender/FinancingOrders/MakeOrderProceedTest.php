@@ -5,10 +5,13 @@ namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
 use App\Enums\CompanyMarketType;
 use App\Enums\CompanyStatus;
 use App\Enums\ErrorCode;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Role;
+use App\Enums\Trader;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\TraderOrder;
@@ -70,6 +73,7 @@ class MakeOrderProceedTest extends TestCase
             ->commit();
 
         self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder();
+
         //
         //        // company with local preferred market type
         [self::$localCompany] = $this->createCompany('2000', ['company_cr' => '123456789', 'preferred_market_type' => CompanyMarketType::Local]);
@@ -79,8 +83,7 @@ class MakeOrderProceedTest extends TestCase
             ->lender(self::$localCompany)
             ->creator(self::$localUserLender)
             ->commit();
-
-        self::$localTraderOrder = InProgressOrder::of(self::$localFinancingOrder)->createTraderOrder();
+        self::$localTraderOrder = InProgressOrder::of(self::$localFinancingOrder)->createTraderOrder(Trader::Lynk);
 
         self::$orderProceedUrl = self::BaseUrl.self::$financingOrder->id.'/proceed';
         self::$localOrderProceedUrl = self::BaseUrl.self::$localFinancingOrder->id.'/proceed';
@@ -473,6 +476,7 @@ class MakeOrderProceedTest extends TestCase
 
     public function test_make_success_order_proceed_with_valid_case_client_wakala_at_local_market(): void
     {
+
         TraderOrderScenario::of(self::$localTraderOrder)
             ->reset()
             ->moveToStep(MurabhaStep::PurchasingCommodity);
@@ -489,5 +493,69 @@ class MakeOrderProceedTest extends TestCase
             ->assertJson(
                 fn (AssertableJson $json) => $json->has('data')->where('data', [])
             );
+    }
+
+    public function test_complete_order_if_trader_is_completed_and_company_has_auto_complete_order(): void
+    {
+        self::$localCompany->update(['auto_complete_murabaha_order' => true]);
+
+        TraderOrderScenario::of(self::$localTraderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::PurchasingCommodity);
+
+        $response = $this->actingAs(self::$localUserLender)
+            ->withHeader('X-Company', self::$localCompany->getOriginal('id'))
+            ->postJson(self::$localOrderProceedUrl, [
+                'case' => FinancingOrderProceedCase::ContractAndClientWakalaCompleted,
+            ]);
+
+        $this->assertEquals(TraderOrderStatus::Completed, self::$localTraderOrder->refresh()->status->value);
+
+        $response->assertStatus(200)
+            ->assertJson(
+                fn (AssertableJson $json) => $json->has('data')->where('data', [])
+            );
+
+        $this->assertEquals(FinancingOrderStatus::Completed, self::$localTraderOrder->order->refresh()->status->value);
+
+    }
+
+    public function test_make_success_order_proceed_with_valid_case_contract_signed_delivery_at_local_market(): void
+    {
+        TraderOrderScenario::of(self::$localTraderOrder)
+            ->reset()
+            ->moveToStep(MurabhaStep::PurchasingCommodity);
+
+        $response = $this->actingAs(self::$localUserLender)
+            ->withHeader('X-Company', self::$localCompany->getOriginal('id'))
+            ->postJson(self::$localOrderProceedUrl, [
+                'case' => FinancingOrderProceedCase::ContractSignedDelivery,
+            ]);
+
+        $this->assertEquals(TraderOrderStatus::InProgress, self::$localTraderOrder->refresh()->status->value);
+        $this->assertEquals(self::$localTraderOrder->traderHistories()->latest('id')->first()->action, FinancingOrderHistory::PendingDelivery);
+
+        $response->assertStatus(200)
+            ->assertJson(
+                fn (AssertableJson $json) => $json->has('data')->where('data', [])
+            );
+    }
+
+    public function test_make_order_proceed_on_order_status_doesnt_follow_sequence_with_contract_signed_delivery_case(): void
+    {
+        TraderOrderScenario::of(self::$localTraderOrder)
+            ->reset();
+
+        $response = $this->actingAs(self::$localUserLender)
+            ->withHeader('X-Company', self::$localCompany->getOriginal('id'))
+            ->postJson(self::$localOrderProceedUrl, [
+                'case' => FinancingOrderProceedCase::ContractSignedDelivery,
+            ]);
+
+        $response->assertStatus(400)
+            ->assertExactJson([
+                'message' => __('error.order_status_doesnt_follow_sequence'),
+                'code' => ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE,
+            ]);
     }
 }

@@ -5,12 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class CommodityItem extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -51,27 +52,30 @@ class CommodityItem extends Model
         return $this->belongsTo(Measurement::class);
     }
 
-    /**
-     * @return HasMany
-     */
-    public function inventories() :HasMany
+    public function inventories(): HasMany
     {
         return $this->hasMany(LocalMarketInventory::class);
     }
 
-    /**
-     * @return int
-     */
-    public function getAvailableUnitsAttribute() :int
+    public function getAvailableUnitsAttribute(): int
     {
         return $this->inventories()->sum('available_quantity');
     }
 
-    /**
-     * @return int
-     */
-    public function getReservedUnitsAttribute() :int
+    public function getReservedUnitsAttribute(): int
     {
         return $this->inventories()->sum('reserved_items');
+    }
+
+    /**
+     * Determine if the inventory is deletable.
+     *
+     * An inventory is deletable if the sum of reserved units is zero.
+     *
+     * @return bool
+     */
+    public function getIsDeletableAttribute(): bool
+    {
+        return $this->reserved_units == 0;
     }
 }

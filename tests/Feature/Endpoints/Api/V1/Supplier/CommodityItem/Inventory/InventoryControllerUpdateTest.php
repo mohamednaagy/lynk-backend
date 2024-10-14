@@ -74,7 +74,7 @@ class InventoryControllerUpdateTest extends TestCase
             300
         );
 
-        $observer = new LocalMarketInventoryObserver();
+        $observer = new LocalMarketInventoryObserver;
         $observer->created(self::$inventory);
 
         $job = new UpdateInventoryStock(self::$inventory, 300, true);
@@ -196,11 +196,11 @@ class InventoryControllerUpdateTest extends TestCase
             ->putJson(self::$endpoint, self::$inventory2)
             ->assertOk()
             ->assertExactJson(
-                fractal(self::$inventory->refresh(), new LocalMarketInventoryTransformer())
+                fractal(self::$inventory->refresh(), new LocalMarketInventoryTransformer)
                     ->parseIncludes([
                         'id',
                         'company_id',
-                        'comapny_name',
+                        'company_name',
                         'commodity_item_id',
                         'commodity_item',
                         'commodity_type',

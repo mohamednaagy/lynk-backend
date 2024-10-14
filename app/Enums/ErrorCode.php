@@ -73,6 +73,25 @@ class ErrorCode
     public const ERROR_CHEKING_UNITS = 1036;
 
     public const ORDER_IS_CANCELLED = 1037;
-
+    
     public const CAN_NOT_DEAL_WITH_BURSAM_SYSTEM = 1038;
+
+    public const ERROR_DELETING_UNITS = 1039;
+
+    public const INVENTORY_NOT_DELETABLE = 1040;
+
+    public const FAILED_TO_DELETE_INVENTORY = 1041;
+
+    public const COMMODITY_ITEM_NOT_DELETABLE = 1042;
+
+    public const FAILED_TO_DELETE_COMMODITY_ITEM = 1043;
+
+    public const LOCATION_NOT_DELETABLE = 1044;
+
+    public const FAILED_TO_DELETE_LOCATION = 1045;
+
+    public const USER_DOESNT_BELONG_TO_COMPANY = 1046;
+
+    public const LOCAL_MARKET_PURCHASE_PRODUCT = 1047;
+
 }

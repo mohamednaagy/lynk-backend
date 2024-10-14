@@ -279,7 +279,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCanBeCompleted(FinancingOrder $financingOrder): Primitive
     {
-        return $this->primitive($financingOrder->canBeCompleted());
+        return $this->primitive($financingOrder->canBeCompleted($this->area));
     }
 
     public function includePaymentProofUrl(FinancingOrder $financingOrder): Primitive

@@ -18,6 +18,7 @@ return [
     'invalid_person_id_type' => 'نوع رقم الهوية غير صحيح',
     'invalid_operator_tcn' => 'معامل TCN غير صحيح',
     'no_enough_balance' => 'لا يوجد رصيد كافي',
+    'user_doesnt_belong_to_company' => 'المستخدم لا بنتمي للشركه',
     'order_status_doesnt_follow_sequence' => 'حالة الطلب التمويلي لا يمكن تغييرها لأنها لا تتبع التسلسل الصحيح',
     'order_require_client_verification' => 'لا يمكنك المتابعة لأن الطلب يتطلب التحقق من العميل',
     'order_cannot_be_updated' => 'لا يمكن تعديل الطلب إلا إذا كانت الحالة '.FinancingOrderStatus::joinDescription(FinancingOrderStatus::$allowedToUpdateStatuses),
@@ -41,4 +42,10 @@ return [
     'user_doesnt_have_the_right_permissions' => 'هذا المستخدم لا يملك الصلاحيه',
     'inventory_cannot_be_updated' => 'عدد الوحدات المحجوزة أكبر من العدد الإجمالي الجديد للوحدات',
     'inventory_units_not_changed' => 'لم يتم تغيير عدد الوحدات',
+    'failed_to_delete_inventory' => 'حدث خطأ أثناء محاولة حذف المخزن. يرجى المحاولة مرة أخرى لاحقاً.',
+    'inventory_cannot_be_deleted' => 'الوحدات المحجوزة أكبر من 0. لا يمكن حذف المخزن.',
+    'commodity_item_cannot_be_deleted' => 'لا يمكن حذف العنصر السلعي لأن الوحدات المحجوزة أكبر من 0.',
+    'failed_to_delete_commodity_item' => 'حدث خطأ أثناء محاولة حذف العنصر السلعي. الرجاء المحاولة مرة أخرى لاحقًا.',
+    'location_cannot_be_deleted' => 'لا يمكن حذف الموقع لأن الوحدات المحجوزة تتجاوز الصفر. لا يمكن حذف موقع السلعة.',
+    'failed_to_delete_location' => 'حدث خطأ أثناء محاولة حذف موقع السلعة. يرجى المحاولة مرة أخرى لاحقاً.',
 ];

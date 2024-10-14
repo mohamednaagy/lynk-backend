@@ -11,8 +11,10 @@ use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MurabhaStep;
+use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderNoRefundReason;
 use App\Enums\TraderOrderRefundReason;
+use App\Enums\TraderOrderStatus;
 use App\Enums\WalletNotificationType;
 
 return [
@@ -30,6 +32,7 @@ return [
         FinancingOrderStatus::Completed => 'Completed',
         FinancingOrderStatus::Rejected => 'Rejected',
         FinancingOrderStatus::InProgress => 'In Progress',
+
         //        FinancingOrderStatus::CommodityPurchased => 'Commodity Purchased',
         //        FinancingOrderStatus::CommoditySoldToCustomer => 'Commodity Sold To Customer',
         //        FinancingOrderStatus::MurabhaOfferIssued => 'Murabha Offer Issued',
@@ -105,4 +108,16 @@ return [
         CommodityTypeStatus::Inactive => 'Inactive',
     ],
 
+    TraderOrderStatus::class => [
+        TraderOrderStatus::Hold => 'Initiated - On Hold',
+    ],
+
+    TraderOrderCancelReason::class => [
+        TraderOrderCancelReason::Manual => '',
+        TraderOrderCancelReason::MurabhaTimeout => '',
+        TraderOrderCancelReason::FailureToPurchase => '',
+        TraderOrderCancelReason::FinancingOrderIsCancelled => 'Order cancelled by user',
+        TraderOrderCancelReason::TraderOrderIsCancelled => 'Trade request cancelled by user ',
+        TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'No commodities found with LOCAL Trader.',
+    ],
 ];

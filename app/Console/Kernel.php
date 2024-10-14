@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Jobs\checkExpiredContractSignedTimeTraderOrdersJob;
+use App\Console\Commands\RunHoldTraderWhenMarketOpenCommand;
 use App\Jobs\General\ProcessFinancingOrders;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessDailySellingPendingCommodityToMarket;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccNotifications;
@@ -17,24 +18,30 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->job(new ProcessFinancingOrders())
-            ->when(is_bursam_service_available())
-            ->everyMinute()
-            ->withoutOverlapping()
-            ->onOneServer();
-
-        $schedule->job(new ProcessDmccNotifications())
-            ->when(is_bursam_service_available())
-            ->everyMinute()
-            ->withoutOverlapping()
-            ->onOneServer();
 
         $timezone = Config::get('services.bursam.timezone');
-        $marketOpeningStartTime = Config::get('services.bursam.market_opening_start_time');
+
+        $schedule->command(RunHoldTraderWhenMarketOpenCommand::class)
+            ->timezone($timezone)
+            ->when(is_bursam_service_available())
+            ->at(get_start_time_bursa()->format('H:i'));
+
+        $schedule->job(new ProcessFinancingOrders)
+            ->when(is_bursam_service_available())
+            ->everyMinute()
+            ->withoutOverlapping()
+            ->onOneServer();
+
+        $schedule->job(new ProcessDmccNotifications)
+            ->when(is_bursam_service_available())
+            ->everyMinute()
+            ->withoutOverlapping()
+            ->onOneServer();
+
         $sellingCommodityStartTime = Config::get('services.bursam.selling_commodity_start_time');
         $sellingCommodityEndTime = Config::get('services.bursam.selling_commodity_end_time');
 
-        $schedule->job(new ProcessDailySellingPendingCommodityToMarket())
+        $schedule->job(new ProcessDailySellingPendingCommodityToMarket)
             ->timezone($timezone)
             ->everyTwoMinutes()
             ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
@@ -44,6 +51,8 @@ class Kernel extends ConsoleKernel
             ->everyMinute()
             ->withoutOverlapping()
             ->onOneServer();
+            
+        $schedule->command('horizon:snapshot')->everyFiveMinutes();
     }
 
     /**

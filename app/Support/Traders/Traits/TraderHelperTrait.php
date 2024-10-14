@@ -12,28 +12,26 @@ use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\TraderManager;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
 trait TraderHelperTrait
 {
-    public function createStepHistories(Request $request, TraderOrder $traderOrder, $step): void
+    public function createStepHistories(array $data, TraderOrder $traderOrder, $step): void
     {
         $stepToHistoriesMap = get_murabha_steps($traderOrder->provider, $traderOrder->version, true);
 
         if (! array_key_exists($step, $stepToHistoriesMap)) {
-            throw new InvalidArgumentException();
+            throw new InvalidArgumentException;
         }
 
         foreach ($stepToHistoriesMap[$step] as $history => $media) {
-            if ($media && $request->has($media['file'])) {
+            if ($media && isset($data[$media['file']])) {
                 $this->attachDocumentToOrder(
                     $traderOrder,
-                    base64_encode(file_get_contents($request->file($media['file']))),
+                    base64_encode(file_get_contents($data[$media['file']])),
                     $media['collection'],
                     'base64'
                 );
@@ -86,22 +84,18 @@ trait TraderHelperTrait
         });
     }
 
-    public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null): void
+    public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null, $originalFileName = null): void
     {
         $traderManager = new TraderManager(app());
-        $fileName = $traderManager->driver($traderOrder->provider)->generatePdfFileName($traderOrder, $collectionName);
-        if (! is_null($type)) {
-            $traderOrder->addMediaFromBase64(
-                $document
-            )->usingFileName($fileName)->toMediaCollection($collectionName);
-        } else {
-            $traderOrder->addMediaFromStream(
-                $document
-            )->usingFileName($fileName)->toMediaCollection($collectionName);
-        }
+        
+        $fileName = $originalFileName ?? $traderManager->driver($traderOrder->provider)->generatePdfFileName($traderOrder, $collectionName);
+        
+        $media = $type 
+            ? $traderOrder->addMediaFromBase64($document)
+            : $traderOrder->addMediaFromStream($document);
+
+        $media->usingFileName($fileName)->toMediaCollection($collectionName);
     }
-
-
 
     public function transformProductsToCommodityProductsDTO($products): Collection
     {

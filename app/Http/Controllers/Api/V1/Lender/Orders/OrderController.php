@@ -64,12 +64,9 @@ class OrderController extends Controller
                 'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
             ])
             ->handle()
-            ->withCount(['traderOrders as charged_trader_orders_count' => function ($query) {
-                $query->whereNull('data->refunded_at');
-            }])
             ->paginate();
 
-        return fractal($financingOrders, new FinancingOrderTransformer())
+        return fractal($financingOrders, new FinancingOrderTransformer)
             ->parseIncludes([
                 'id',
                 'status',
@@ -95,7 +92,7 @@ class OrderController extends Controller
 
         $order->load('creator', 'approver');
 
-        return fractal($order, (new FinancingOrderTransformer())
+        return fractal($order, (new FinancingOrderTransformer)
             ->setArea(Area::Lender)
             ->setCurrentUser($request->user()))
             ->parseIncludes([
@@ -123,8 +120,6 @@ class OrderController extends Controller
                 'creator',
                 'approver',
                 'trader_orders.id',
-                'trader_orders.provider',
-                'trader_orders.mode',
                 'trader_orders.reference',
                 'trader_orders.failure_reason',
                 'trader_orders.is_cancellable',
@@ -133,6 +128,8 @@ class OrderController extends Controller
                 'trader_orders.status',
                 'trader_orders.cancel_details',
                 'trader_orders.created_at',
+                'trader_orders.hover_message',
+                'trader_orders.contract_signed_type',
                 'history',
             ])->respond();
     }
@@ -184,7 +181,7 @@ class OrderController extends Controller
 
                 dispatch(new NotifyAdminsAboutOrderCreated($financingOrder, $user));
 
-                return fractal($financingOrder, new FinancingOrderTransformer())
+                return fractal($financingOrder, new FinancingOrderTransformer)
                     ->parseIncludes([
                         'id',
                         'status',
@@ -225,7 +222,7 @@ class OrderController extends Controller
         }
         $financingOrder = $updateFinancingOrder->handle($order, $request->validated());
 
-        return fractal($financingOrder, new FinancingOrderTransformer())
+        return fractal($financingOrder, new FinancingOrderTransformer)
             ->parseIncludes([
                 'id',
                 'status',

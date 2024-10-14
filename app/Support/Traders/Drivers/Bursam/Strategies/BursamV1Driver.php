@@ -12,23 +12,28 @@ use App\Enums\OrderCancellationStatus;
 use App\Enums\TraderErrorCode;
 use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
+use App\Jobs\General\ProcessFinancingOrders;
 use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
-use App\Support\Traders\Clients\BursamClient\BursamClient;
+use App\Support\Traders\Clients\BursamClient;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
+use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
 
@@ -59,12 +64,42 @@ class BursamV1Driver implements TraderInterface
         ]);
     }
 
+    public function createHoldTraderOrder(FinancingOrder $financingOrder): ?Model
+    {
+
+        $traderOrder = $financingOrder->traderOrders()->create([
+            'uuid_one' => Str::uuid(),
+            'provider' => $this->provider,
+            'reference' => '',
+            'status' => TraderOrderStatus::Hold,
+            'version' => $this->version,
+            'mode' => TraderOrderMode::Automatic,
+        ]);
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::OnHold);
+
+        return $traderOrder;
+    }
+
     /**
      * @throws TraderException
      */
     public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
     {
-        return $this->getOrInitiateTraderOrder($financingOrder);
+        if ($this->checkCanInitiateTraderOrder()) {
+            return $this->getOrInitiateTraderOrder($financingOrder);
+        } else {
+            return $this->createHoldTraderOrder($financingOrder);
+        }
+    }
+
+    public function checkCanInitiateTraderOrder()
+    {
+        if (is_bursam_service_available()) {
+            return true;
+        }
+
+        return false;
     }
 
     public function getDefaultInitialTradeOrderStatus()
@@ -102,6 +137,13 @@ class BursamV1Driver implements TraderInterface
         ]);
 
         return $traderOrder;
+    }
+
+    public function moveHoldTraderOrder(TraderOrder $trader)
+    {
+        $trader->update(['status' => TraderOrderStatus::Initiated]);
+        $trader->traderHistories()->create(['action' => FinancingOrderHistory::GetTtiId]);
+        ProcessFinancingOrders::dispatch();
     }
 
     public function fetchOrderResultYNN(TraderOrder $traderOrder)
@@ -515,7 +557,8 @@ class BursamV1Driver implements TraderInterface
             'status' => TraderOrderStatus::PendingCancellation,
         ]);
 
-        ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id, TraderOrderCancelReason::Manual, user: auth()->user());
+        ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id, TraderOrderCancelReason::Manual, TraderOrderCancelType::User,
+            auth()->user()->id);
 
         return OrderCancellationStatus::PendingCancellation;
     }
@@ -525,9 +568,11 @@ class BursamV1Driver implements TraderInterface
      */
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled,
+        $cancelledByType = TraderOrderCancelType::System,
+        $cancelledBy = null
     ): int {
-        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, user: auth()->user());
+        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
 
         $activeTraderOrdersCount = TraderOrder::where('status', TraderOrderStatus::InProgress)
             ->where('financing_order_id', $traderOrder->id)
@@ -554,9 +599,7 @@ class BursamV1Driver implements TraderInterface
         return TraderOrderCancellationStatus::Cancelled;
     }
 
-    public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
-    {
-    }
+    public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void {}
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
@@ -579,5 +622,18 @@ class BursamV1Driver implements TraderInterface
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
         ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
+    }
+
+    public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
+    {
+        return match ($traderOrder->status->value) {
+            TraderOrderStatus::Hold => __('order.trader.bursa.hold_status', ['TIME' => Carbon::parse(Config::get('services.bursam.market_opening_start_time'))->translatedFormat('h:i A')]),
+            default => null,
+        };
+    }
+
+    public function contractSignedMessage(TraderOrder $traderOrder)
+    {
+        return null;
     }
 }

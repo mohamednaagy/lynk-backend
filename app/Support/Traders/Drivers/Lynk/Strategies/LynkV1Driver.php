@@ -4,11 +4,15 @@ namespace App\Support\Traders\Drivers\Lynk\Strategies;
 
 use App\Actions\Contracts\Orders\CancelOrder;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
+use App\Enums\CompanyMarketType;
+use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\OrderCancellationStatus;
 use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
@@ -16,12 +20,15 @@ use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Settings\Classes\LocalMurabahaSettings;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
+use App\Support\Traders\Clients\LynkClient;
 use App\Support\Traders\Contracts\TraderInterface;
+use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
 
@@ -44,21 +51,31 @@ class LynkV1Driver implements TraderInterface
             return $financingOrder->initiatedTraderOrders()->first();
         }
 
-        $trader_order = $financingOrder->traderOrders()->create([
+        $traderOrder = $financingOrder->traderOrders()->create([
             'uuid_one' => Str::uuid(),
             'provider' => $this->provider,
-            'reference' => '',
+            'reference' => Str::upper(Str::random(14)).$financingOrder->id,
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
             'default_contract_sign_time_limit' => app(LocalMurabahaSettings::class)->default_contract_sign_time_limit,
         ]);
-        $this->createTraderOrderHistory(
-            $trader_order,
-            FinancingOrderHistory::GetTtiId
-        );
 
-        return $trader_order;
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+
+        return $traderOrder;
+    }
+
+    /**
+     * @throws TraderException
+     */
+    public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
+    {
+        Log::channel('local_market')->info("Create New Order at Local Market For Trader Order id => {$traderOrder->id} and financing order => {$traderOrder->order->id}");
+        LynkClient::of($traderOrder)->createOrder();
+
+        return $traderOrder;
+
     }
 
     public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
@@ -69,6 +86,7 @@ class LynkV1Driver implements TraderInterface
                 $currentTimeInUtcTz = CarbonImmutable::now();
                 $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
                 $products = collect($traderOrder->products)->map(fn ($product) => LynkCommodityProductDto::fromArray($product));
+                $default_contract_sign_time_limit = app(LocalMurabahaSettings::class)->default_contract_sign_time_limit;
 
                 $this->storeOrderDocumentAsPdf(
                     'local-commodity-market.transfer-ownership-to-lender',
@@ -90,6 +108,7 @@ class LynkV1Driver implements TraderInterface
                         'time' => $currentTimeInRiyadhTz->toTimeString(),
                         'trade_order' => $traderOrder,
                         'financing_order' => $traderOrder->order,
+                        'default_contract_sign_time_limit'=> $default_contract_sign_time_limit
                     ],
                     $traderOrder,
                     TraderOrderMediaCollection::TransferOwnershipToLender
@@ -162,7 +181,7 @@ class LynkV1Driver implements TraderInterface
 
                 $this->createTraderOrderHistory(
                     $traderOrder,
-                    FinancingOrderHistory::InitialCustomerDeliveryConfirmation,
+                    FinancingOrderHistory::PendingDelivery,
                     [
                         'created_at' => $currentTimeInUtcTz,
                     ]
@@ -204,23 +223,38 @@ class LynkV1Driver implements TraderInterface
 
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled,
+        $cancelledByType = TraderOrderCancelType::System,
+        $cancelledBy = null
     ): int {
-        if ($traderOrder->mode == TraderOrderMode::Manual) {
-            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, user: auth()->user());
+        //        if ($traderOrder->mode == TraderOrderMode::Manual) {
+        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
 
-            $order = $traderOrder->order;
-            if ($order->isInPendingCancellationState()) {
-                app(CancelOrder::class)->handle($order, auth()->user(), []);
+        $order = $traderOrder->order;
+        if ($order->isInPendingCancellationState()) {
+            app(CancelOrder::class)->handle($order, auth()->user(), []);
+        }
+
+        if ($traderOrder->mode == TraderOrderMode::Automatic) {
+            if ($traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Local)) {
+                $traderOrder->order->update([
+                    'status' => FinancingOrderStatus::TradingFailure,
+                ]);
             }
 
-            return TraderOrderCancellationStatus::Cancelled;
+            if (
+
+                $traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Any)) {
+                Trader::driver(\App\Enums\Trader::Bursam, 'v2')
+                    ->createTraderOrder($traderOrder->order);
+            }
         }
+
+        return TraderOrderCancellationStatus::Cancelled;
+        //        }
     }
 
-    public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
-    {
-    }
+    public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void {}
 
     /**
      * @return string <Driver>_<collectionName>_<companies.unique_name>_<financing_orders.id>_<trader_orders.reference_number>_YYYYMMDD.pdf
@@ -249,6 +283,35 @@ class LynkV1Driver implements TraderInterface
         $request['automatically_generate_file'] = true;
         (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
             ->updateCommodityCertificateForClient($traderOrder, $request);
+    }
 
+    public function checkCanInitiateTraderOrder()
+    {
+        return true;
+    }
+
+    public function moveHoldTraderOrder(TraderOrder $trader)
+    {
+        return true;
+    }
+
+    public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
+    {
+
+        return match ($traderOrder->cancelDetail?->cancel_reason->value) {
+            TraderOrderCancelReason::Manual => __('order.trader.lynk.cancelled_status'),
+            TraderOrderCancelReason::NoEligibleCommoditiesAvailable => __('order.trader.lynk.no_commodity_available'),
+            TraderOrderCancelReason::FailureToPurchase => __('order.trader.lynk.internal_technical_error'),
+            default => null,
+        };
+    }
+
+    public function contractSignedMessage(TraderOrder $traderOrder)
+    {
+        return match ($traderOrder->contract_signed_type->value) {
+            ContractSignedType::Sell => __('order.trader.lynk.steps.contract_signed.sell'),
+            ContractSignedType::Delivery => __('order.trader.lynk.steps.contract_signed.deliver'),
+            default => null,
+        };
     }
 }

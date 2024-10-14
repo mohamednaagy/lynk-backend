@@ -30,6 +30,8 @@ final class MurabhaStep extends Enum implements LocalizedEnum, TraderMurabhaStep
 
     const BorrowerOwnershipCertificate = 'borrower_ownership_certificate';
 
+    const Hold = 'hold';
+
     public static function getSteps(?string $driver = null, ?string $version = null): array
     {
         $driver ??= config('trader.default');

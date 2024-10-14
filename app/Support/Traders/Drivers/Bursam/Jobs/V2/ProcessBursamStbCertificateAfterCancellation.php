@@ -4,9 +4,9 @@ namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
-use App\Models\User;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
@@ -28,11 +28,17 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
      *
      * @return void
      */
-    public User $user;
+    public $cancelledByType;
 
-    public function __construct(protected int $traderOrderId, protected int $cancelReason, User $user)
+    public $cancelledBy;
+
+    public function __construct(protected int $traderOrderId, protected int $cancelReason,
+        $cancelledByType = TraderOrderCancelType::System,
+        $cancelledBy = null)
     {
-        $this->user = $user;
+        $this->cancelledBy = $cancelledBy;
+        $this->cancelledByType = $cancelledByType;
+
         $this->onQueue('bursam');
     }
 
@@ -50,13 +56,13 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
                 ->find($this->traderOrderId);
 
             if (
-                is_null($traderOrder)
-                || ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::GetSellingToMarketCertificate)
+                (is_null($traderOrder)
+                   || ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::GetSellingToMarketCertificate)) && $traderOrder->traderHistories()->latest()->first()->action != FinancingOrderHistory::OnHold
             ) {
                 Trader::driver('bursam', $traderOrder->version)->getStbCertificateDetails($traderOrder);
             }
 
-            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $this->cancelReason, user: $this->user);
+            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $this->cancelReason, cancelledByType: $this->cancelledByType, cancelledBy: $this->cancelledBy);
         });
     }
 
@@ -74,12 +80,7 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
             'status' => TraderOrderStatus::FailureToCancel,
         ]);
 
-        Log::error(
-            method_exists('getMessage', $exception)
-                ? $exception->getMesage()
-                : 'Cannot proceed to get STB',
-            [$exception]
-        );
+        Log::error('ProcessBursamStbCertificateAfterCancellation', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
     }
 
     public function middleware(): array

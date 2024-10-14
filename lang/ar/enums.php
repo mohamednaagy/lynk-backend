@@ -3,17 +3,19 @@
 declare(strict_types=1);
 
 use App\Enums\BursamProductCode;
-use App\Enums\CompanyMarketType;
 use App\Enums\CommodityTypeStatus;
 use App\Enums\CommoitySupplierMarketType;
 use App\Enums\CommoitySupplierStatus;
+use App\Enums\CompanyMarketType;
 use App\Enums\CompanyStatus;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MurabhaStep;
+use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderNoRefundReason;
 use App\Enums\TraderOrderRefundReason;
+use App\Enums\TraderOrderStatus;
 use App\Enums\WalletNotificationType;
 
 return [
@@ -109,5 +111,18 @@ return [
     CommodityTypeStatus::class => [
         CommodityTypeStatus::Active => 'مفعل',
         CommodityTypeStatus::Inactive => 'غير مفعل',
+    ],
+
+    TraderOrderStatus::class => [
+        TraderOrderStatus::Hold => 'معلق',
+    ],
+
+    TraderOrderCancelReason::class => [
+        TraderOrderCancelReason::Manual => '',
+        TraderOrderCancelReason::MurabhaTimeout => '',
+        TraderOrderCancelReason::FailureToPurchase => '',
+        TraderOrderCancelReason::FinancingOrderIsCancelled => 'لقد اختار المستخدم إلغاء طلب التجارة هذا',
+        TraderOrderCancelReason::TraderOrderIsCancelled => 'لقد اختار المستخدم إلغاء هذا الطلب',
+        TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'لا يوجد سلع كافيه داخل السوق المحلي',
     ],
 ];

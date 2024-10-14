@@ -26,7 +26,7 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules()
     {
-        return  [
+        return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'email' => [
@@ -42,7 +42,6 @@ class UpdateUserRequest extends FormRequest
                 'required',
                 Rule::in(Area::roles(Area::CommoditySupplier)),
             ],
-            'is_active' => ['required', 'boolean'],
         ];
     }
 }

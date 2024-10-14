@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Traders\Clients\BursamClient;
+namespace App\Support\Traders\Clients;
 
 use App\Exceptions\RateLimitExceededException;
 use App\Models\TraderOrder;

@@ -5,9 +5,9 @@ namespace App\Support\Traders\TradingStrategies;
 use App\Models\TraderOrder;
 use App\Support\Traders\TradingStrategies\Bursam\BursamStrategyV1;
 use App\Support\Traders\TradingStrategies\Bursam\BursamStrategyV2;
-use App\Support\Traders\TradingStrategies\Bursam\LynkStrategyV1;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
 use App\Support\Traders\TradingStrategies\Dmcc\DmccStrategyV1;
+use App\Support\Traders\TradingStrategies\Lynk\LynkStrategyV1;
 use Illuminate\Http\Request;
 
 class TraderStrategyContext
@@ -27,9 +27,9 @@ class TraderStrategyContext
         };
     }
 
-    public function updatePurchasingCommodity(TraderOrder $traderOrder, Request $request): void
+    public function updatePurchasingCommodity(TraderOrder $traderOrder, array $data): void
     {
-        $this->strategy->updatePurchasingCommodity($traderOrder, $request);
+        $this->strategy->updatePurchasingCommodity($traderOrder, $data);
     }
 
     public function updateMurabahaPurchaseOffer(TraderOrder $traderOrder, Request $request): void
@@ -42,8 +42,13 @@ class TraderStrategyContext
         $this->strategy->updateCommodityCertificateForClient($traderOrder, $request);
     }
 
-    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request): void
+    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, array $data = []): void
     {
-        $this->strategy->updateMurabhaCompleteDocument($traderOrder, $request);
+        $this->strategy->updateMurabhaCompleteDocument($traderOrder, $data);
+    }
+
+    public function updateSellConfirmationDocument(TraderOrder $traderOrder, Request $request): void
+    {
+        $this->strategy->updateSellConfirmationDocument($traderOrder, $request);
     }
 }

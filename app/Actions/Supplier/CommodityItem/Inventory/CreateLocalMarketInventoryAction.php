@@ -3,7 +3,7 @@
 namespace App\Actions\Supplier\CommodityItem\Inventory;
 
 use App\Actions\Contracts\Supplier\CommodityItem\Inventory\CreateLocalMarketInventory;
-use App\Enums\LocalMarketInventoryStatus;
+use App\Enums\LocalMarket\InventoryStatus;
 use App\Models\CommodityItem;
 use App\Models\Company;
 use App\Models\LocalMarketInventory;
@@ -27,7 +27,7 @@ class CreateLocalMarketInventoryAction implements CreateLocalMarketInventory
                 'max_price' => $this->item->max_price,
                 'reserved_items' => 0,
                 'available_quantity' => $data['total_units'],
-                'status' => LocalMarketInventoryStatus::Pending,
+                'status' => InventoryStatus::Pending,
             ]
         );
 

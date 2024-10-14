@@ -34,7 +34,7 @@ class UpdateCompanyAction implements UpdateCompany
                     'notify_borrowers_about_order_updates',
                     'force_unique_reference_number',
                     'preferred_market_type',
-
+                    'auto_complete_murabaha_order',
                 ]
             )
         );

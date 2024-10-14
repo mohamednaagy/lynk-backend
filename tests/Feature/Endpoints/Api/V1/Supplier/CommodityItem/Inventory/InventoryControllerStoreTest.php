@@ -151,11 +151,11 @@ class InventoryControllerStoreTest extends TestCase
             ->postJson(self::$endpoint, self::$inventory)
             ->assertOk()
             ->assertExactJson(
-                fractal(LocalMarketInventory::orderBy('id', 'desc')->first(), new LocalMarketInventoryTransformer())
+                fractal(LocalMarketInventory::orderBy('id', 'desc')->first(), new LocalMarketInventoryTransformer)
                     ->parseIncludes([
                         'id',
                         'company_id',
-                        'comapny_name',
+                        'company_name',
                         'commodity_item_id',
                         'commodity_item',
                         'commodity_type',
@@ -193,7 +193,7 @@ class InventoryControllerStoreTest extends TestCase
         $inventory = $this->createInventory(self::$supplier, $numberOfUnits);
 
         // Trigger the observer manually
-        $observer = new LocalMarketInventoryObserver();
+        $observer = new LocalMarketInventoryObserver;
         $observer->created($inventory);
 
         // Verify the job was pushed

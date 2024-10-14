@@ -9,10 +9,12 @@ use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\ResendAdminInvitation;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
+use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityItemController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierUserController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypeController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
+use App\Http\Controllers\Api\V1\Admin\Commodities\ResendInvitationToUserController as ResendSupplierInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
@@ -42,10 +44,12 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabahaPur
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabhaCompleteDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetPurchasingCommodity;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetTradersWithAvailableModes;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\LocalMarketWebhook;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabhaCompleteDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdatePurchasingCommodity;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\UpdateSellConfirmationDocument;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateOrderPaymentProof;
 use App\Http\Controllers\Api\V1\Admin\Lenders\ResendInvitationToUser as ResendLenderInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
@@ -132,6 +136,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('commodity-types', CommodityTypeController::class);
 
         Route::get('orders/export', ExportOrders::class);
+        Route::post('update-trader/local-market-webhook', LocalMarketWebhook::class);
 
         Route::prefix('orders/{order}')->group(function () {
             Route::post('trader-orders', [TraderOrderController::class, 'store']);
@@ -151,8 +156,10 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                 Route::post('/selling-commodity-to-client', UpdateCommodityCertificateForClient::class);
                 Route::get('/murabha-complete', GetMurabhaCompleteDocument::class);
                 Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
+                Route::post('/attach-sell-confirmation-document', UpdateSellConfirmationDocument::class);
                 Route::put('/cancel', CancelTraderOrder::class);
             });
+
         });
 
         Route::apiResource('orders', OrderController::class)
@@ -183,9 +190,14 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::post('/upload-image', [UploadImage::class, 'store']);
 
         Route::prefix('commodity-suppliers')->group(function () {
-            Route::post('{supplier}/users', [CommoditySupplierUserController::class, 'store']);
-            Route::get('{supplier}/users', [CommoditySupplierUserController::class, 'index']);
+            Route::post('{supplier}/users/{user}/resend-invitation', ResendSupplierInvitationToUser::class);
+            Route::apiResource('{supplier}/users', CommoditySupplierUserController::class)->only(['index', 'show', 'store', 'update']);
         });
+
+        Route::prefix('commodity-items')->group(function () {
+            Route::get('/', [CommodityItemController::class, 'index']);
+        });
+
     });
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.sign-up');

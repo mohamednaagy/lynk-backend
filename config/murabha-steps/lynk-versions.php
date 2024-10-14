@@ -19,19 +19,21 @@ return [
         ],
         MurabhaStep::ContractSigned => [
             FinancingOrderHistory::ContractSigned => null,
+            FinancingOrderHistory::PendingDelivery => null,
+
         ],
         MurabhaStep::CommoditySoldToCustomer => [
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => null,
         ],
         MurabhaStep::CustomerDeliveryConfirmation => [
+            FinancingOrderHistory::DeliveryCancelled => null,
+            FinancingOrderHistory::DeliveryConfirmed => null,
         ],
         MurabhaStep::MurabahaSaleCompleted => [
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
-            FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
-                'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-                'file' => 'document',
-            ],
+            FinancingOrderHistory::CreateLynkSalePledgeCertificate => null,
             FinancingOrderHistory::MurabahaSaleCompleted => null,
         ],
+
     ],
 ];

@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\LocalMarketInventoryUnitsStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,15 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('inventory_units', function (Blueprint $table) {
+        Schema::create('local_market_inventory_units', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('inventory_id')->index();
+            $table->unsignedBigInteger('local_market_inventory_id')->index();
             $table->unsignedBigInteger('commodity_item_id');
             $table->string('qr_code');
-            $table->string('status')->default(LocalMarketInventoryUnitsStatus::Free)->comment('FREE=>0|RESERVED=>1');
-
-            $table->foreign('inventory_id')->references('id')->on('inventories')->cascadeOnDelete();
+            $table->smallInteger('status')->default(\App\Enums\LocalMarket\InventoryUnitsStatus::Free)->comment('FREE=>0|RESERVED=>1');
+            $table->foreign('local_market_inventory_id')->references('id')->on('local_market_inventories')->onDelete('cascade');
             $table->foreign('commodity_item_id')->references('id')->on('commodity_items')->cascadeOnDelete();
+            $table->unsignedBigInteger('hold_for')->nullable();
+            $table->smallInteger('current_owner_type');
+            $table->string('current_owner', 50);
+            $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -34,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('inventory_units');
+        Schema::dropIfExists('local_market_inventory_units');
     }
 };

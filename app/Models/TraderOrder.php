@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\ContractSignedType;
+use App\Enums\CustomerDeliveryStatus;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
@@ -9,11 +11,11 @@ use App\Enums\Trader as EnumsTrader;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
-use App\Settings\Classes\LocalMurabahaSettings;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
+use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkInitiatedTraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Carbon\Carbon;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,7 +23,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -60,11 +61,13 @@ class TraderOrder extends Model implements HasMedia
             'updated_at',
             'created_at',
             'default_contract_sign_time_limit',
+            'contract_signed_type',
         ];
     }
 
     protected $casts = [
         'status' => TraderOrderStatus::class,
+        'contract_signed_type' => ContractSignedType::class,
         'can_continue_progress' => 'boolean',
     ];
 
@@ -102,6 +105,14 @@ class TraderOrder extends Model implements HasMedia
 
         $this->addMediaCollection(TraderOrderMediaCollection::ZatcaInvoice)
             ->singleFile();
+
+        $this
+            ->addMediaCollection(TraderOrderMediaCollection::LynkSalePledgeCertificate)
+            ->singleFile();
+
+        $this
+            ->addMediaCollection(TraderOrderMediaCollection::SellConfirmationDocument)
+            ->singleFile();
     }
 
     public function order(): BelongsTo
@@ -124,7 +135,7 @@ class TraderOrder extends Model implements HasMedia
     {
         $stepToHistoriesDictionary = trader_step_histories($this->provider, $this->version);
 
-        if (!array_key_exists($step, $stepToHistoriesDictionary)) {
+        if (! array_key_exists($step, $stepToHistoriesDictionary)) {
             throw new UnexpectedValueException("No mapping for this step {$step}");
         }
 
@@ -135,12 +146,12 @@ class TraderOrder extends Model implements HasMedia
 
     public function doesLastActionMatchWith($actions): bool
     {
-        if (!is_array($actions)) {
+        if (! is_array($actions)) {
             $actions = [$actions];
         }
 
         foreach ($actions as $action) {
-            if (!in_array($action, FinancingOrderHistory::getValues())) {
+            if (! in_array($action, FinancingOrderHistory::getValues())) {
                 throw new UnexpectedValueException('invalid Action');
             }
         }
@@ -152,19 +163,24 @@ class TraderOrder extends Model implements HasMedia
 
     public function checkOrderHistoryAction($actions): bool
     {
-        if (!is_array($actions)) {
+        return (bool) $this->getOrderHistoryAction($actions)->first();
+    }
+
+    public function getOrderHistoryAction($actions)
+    {
+        if (! is_array($actions)) {
             $actions = [$actions];
         }
 
         foreach ($actions as $action) {
-            if (!in_array($action, FinancingOrderHistory::getValues())) {
+            if (! in_array($action, FinancingOrderHistory::getValues())) {
                 throw new UnexpectedValueException(sprintf('Invalid action %s', $action));
             }
         }
 
         return $this->traderHistories()
             ->whereIn('action', $actions)
-            ->exists();
+            ->get();
     }
 
     public function scopeWithLastHistoryAction($query)
@@ -197,8 +213,8 @@ class TraderOrder extends Model implements HasMedia
      */
     public function ensureCanAccessStep(string $step)
     {
-        if (!$this->checkOrderStepComplete($step)) {
-            throw new OrderStatusDoesNotFollowSequenceException();
+        if (! $this->checkOrderStepComplete($step)) {
+            throw new OrderStatusDoesNotFollowSequenceException;
         }
     }
 
@@ -208,7 +224,7 @@ class TraderOrder extends Model implements HasMedia
             return false;
         }
 
-        return !$this->checkOrderStepComplete($step);
+        return ! $this->checkOrderStepComplete($step);
     }
 
     public function scopeCompletedOrInProgress($query)
@@ -232,7 +248,42 @@ class TraderOrder extends Model implements HasMedia
             return false;
         }
 
-        return !$this->hasMedia(TraderOrderMediaCollection::ClientWakala);
+        return ! $this->hasMedia(TraderOrderMediaCollection::ClientWakala);
+    }
+
+    /**
+     * Check if the trader order needs to be automatically processed.
+     *
+     *
+     * @return bool Returns true if the trader order needs to be processed, false otherwise.
+     */
+    public function needsProcessingAfterInitiation()
+    {
+        if ($this->provider == EnumsTrader::Bursam && $this->version !== 'v2') {
+            return false;
+        }
+
+        return $this->mode === TraderOrderMode::Automatic;
+    }
+
+    /**
+     * Process the initiated trader order.
+     *
+     *
+     * @return void
+     */
+    public function processInitiatedTraderOrder()
+    {
+        if ($this->provider == EnumsTrader::Bursam) {
+            ProcessBursamInitiatedTraderOrder::dispatch($this->id);
+        } elseif ($this->provider == EnumsTrader::Lynk) {
+            ProcessLynkInitiatedTraderOrder::dispatch($this->id);
+        }
+    }
+
+    public function company()
+    {
+        return $this->order->company;
     }
 
     public function isCancelled(): bool
@@ -242,12 +293,12 @@ class TraderOrder extends Model implements HasMedia
 
     public function canBeCancelled(): bool
     {
-        return $this->status->is(TraderOrderStatus::InProgress) || $this->status->is(TraderOrderStatus::Initiated);
+        return $this->status->is(TraderOrderStatus::InProgress) || $this->status->is(TraderOrderStatus::Initiated) || $this->status->is(TraderOrderStatus::Hold);
     }
 
     public function getCancelStep(): ?string
     {
-        return (new StepHistoriesDictionary($this->provider, $this->version))->getCancelStep($this)->step;
+        return (new StepHistoriesDictionary($this->provider, $this->version))->getCancelStep($this)?->step ?? MurabhaStep::PurchasingCommodity;
     }
 
     public function cancelDetail()
@@ -276,4 +327,38 @@ class TraderOrder extends Model implements HasMedia
             });
     }
 
+    public function hoverMessage(): ?string
+    {
+        return Trader::driver($this->provider, $this->version)->HoverMessageOfTraderStatus($this);
+    }
+
+    public function isDeliverable(): bool
+    {
+        return $this->provider == EnumsTrader::Lynk && $this->mode == TraderOrderMode::Manual;
+    }
+
+    public function getCustomerDeliveryStatusAndMessage(): array
+    {
+        if ($this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryCancelled)) {
+            return [
+                'status' => CustomerDeliveryStatus::DeliveryIgnoreAndSell,
+                'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.IgnoreAndSell'),
+            ];
+        } elseif ($this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryConfirmed)) {
+            return [
+                'status' => CustomerDeliveryStatus::DeliveryConfirmed,
+                'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.DeliveryConfirmed'),
+            ];
+        } else {
+            return [
+                'status' => CustomerDeliveryStatus::DeliveryPending,
+                'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.pending'),
+            ];
+        }
+    }
+
+    public function scopeCompletedWithContractSignedType($query, $contractSignedType = ContractSignedType::Sell)
+    {
+        return $query->completed()->where('contract_signed_type', $contractSignedType);
+    }
 }

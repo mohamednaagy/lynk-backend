@@ -58,7 +58,7 @@ class LenderController extends Controller
             ->handle()
             ->paginate();
 
-        return fractal($companies, new CompanyTransformer())
+        return fractal($companies, new CompanyTransformer)
             ->parseIncludes([
                 'id',
                 'name',
@@ -89,7 +89,7 @@ class LenderController extends Controller
 
             $company->tieredPricing()->createMany($data['order_cost_tiers']);
 
-            return fractal($company, new CompanyTransformer())
+            return fractal($company, new CompanyTransformer)
                 ->parseIncludes([
                     'id',
                     'name',
@@ -111,7 +111,7 @@ class LenderController extends Controller
 
     public function show(Company $lender): JsonResponse
     {
-        return fractal($lender, new CompanyTransformer())
+        return fractal($lender, new CompanyTransformer)
             ->parseIncludes([
                 'id',
                 'name',
@@ -132,6 +132,7 @@ class LenderController extends Controller
                 'notify_borrowers_about_order_updates',
                 'force_unique_reference_number',
                 'require_initiate_trade_request',
+                'auto_complete_murabaha_order',
                 'trading_mode',
                 'contract_number',
                 'preferred_market_type',

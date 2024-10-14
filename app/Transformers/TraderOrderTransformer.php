@@ -45,6 +45,8 @@ class TraderOrderTransformer extends TransformerAbstract
         'history',
         'created_at',
         'cancel_details',
+        'hover_message',
+        'contract_signed_type',
 
     ];
 
@@ -110,6 +112,11 @@ class TraderOrderTransformer extends TransformerAbstract
         return $this->primitive($this->formatRefundStatus($refundReason, $baseTraderOrder));
     }
 
+    public function includeHoverMessage(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->hoverMessage());
+    }
+
     public function includeIsCancellable(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive($traderOrder->isCancellable($this->area));
@@ -138,7 +145,7 @@ class TraderOrderTransformer extends TransformerAbstract
             fn ($product) => $traderOrder->provider == Trader::Lynk ? LynkCommodityProductDto::fromArray($product) : CommodityProductDto::fromArray($product)
         );
 
-        return $this->collection($products, new ProductTransformer());
+        return $this->collection($products, new ProductTransformer);
     }
 
     public function includeStatus(TraderOrder $traderOrder): Primitive
@@ -183,10 +190,16 @@ class TraderOrderTransformer extends TransformerAbstract
                 'cancelled_at' => Carbon::make($cancelDetail->created_at)?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
                 'cancel_step' => $cancelDetail->cancel_step,
                 'cancel_reason' => $cancelDetail->cancel_reason,
+                'message' => $cancelDetail->cancel_reason->description,
             ]);
         }
 
         return $this->primitive(null);
+    }
+
+    public function includeContractSignedType(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->contract_signed_type);
     }
 
     public function setArea($area): static
