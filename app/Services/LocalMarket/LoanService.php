@@ -2,7 +2,6 @@
 
 namespace App\Services\LocalMarket;
 
-use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
@@ -17,49 +16,22 @@ class LoanService
         int $companyId,
         float $loanAmount,
         array $preferredTypes = []
-    ): array {
-        $maxNumberOfUnits = config('trader.providers.lynk.max_units_per_trader');
-
-        $loanDetails = [
-            'inventories' => [],
-            'isLoanCovered' => false,
-            'remainingLoan' => $loanAmount,
-            'numberOfSuitableUnits' => 0,
-            'purchasingFailureReason' => '',
-        ];
+    ) {
 
         $inventoryService = app(InventoryService::class);
         $unitsService = app(UnitService::class);
-        $usedInventories = [];
 
-        while (! $loanDetails['isLoanCovered'] && $loanDetails['remainingLoan'] > 0) {
-            $inventory = $inventoryService->findEligibleInventoryForLoan(
-                $loanDetails['remainingLoan'],
-                $preferredTypes,
-                $usedInventories
-            );
+        $eligibleInventories = $inventoryService->findEligibleInventoryForLoan(
+            $loanAmount,
+            $preferredTypes
+        );
 
-            if (! $inventory) {
-                Log::info('There is no valid inventory for ', [
-                    'loanAmount' => $loanAmount,
-                    'preferredItemTypes' => $preferredTypes,
-                    'usedInventories' => $usedInventories,
-                ]);
-                $loanDetails['purchasingFailureReason'] = 'there is no valid inventory';
-
-                return $loanDetails;
-            }
-
-            $eligibleUnits = $unitsService->getEligibleUnits($orderNo, $companyId, $inventory, $loanDetails['remainingLoan'], $maxNumberOfUnits);
-
-            $usedInventories[] = $inventory->id;
-            $loanDetails['inventories'][] = $eligibleUnits;
-            $loanDetails['isLoanCovered'] = $eligibleUnits['isLoanCovered'];
-            $loanDetails['remainingLoan'] = $eligibleUnits['remainingLoan'];
-            $loanDetails['purchasingFailureReason'] = $eligibleUnits['failureReason'];
-            $loanDetails['numberOfSuitableUnits'] = $loanDetails['numberOfSuitableUnits'] + $eligibleUnits['numberOfSuitableUnits'];
-            $maxNumberOfUnits = $maxNumberOfUnits - $eligibleUnits['numberOfSuitableUnits'];
+        if (empty($eligibleInventories)) {
+            return false;
         }
+
+        $loanDetails = $unitsService->getEligibleUnits($orderNo, $eligibleInventories);
+        dd($loanDetails);
 
         return $loanDetails;
     }
@@ -74,7 +46,6 @@ class LoanService
         $eligibleCommodities = OrderCommoditiesDto::fromArray($data);
 
         try {
-            $unitService->changeUnitStatus($localMarketOrder, InventoryUnitsStatus::Reserved);
             $ownershipService->changeUnitOwnership($localMarketOrder, OwnershipTypes::Company, $companyId);
             $inventoryService->refreshInventoryStocks($eligibleCommodities->getInventoriesIds());
             $orderService->insertOrderUnits($localMarketOrder);
