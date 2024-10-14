@@ -20,6 +20,7 @@ use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
 use App\Jobs\FinancingOrders\NotifyAdminsAboutOrderCreated;
 use App\Models\FinancingOrder;
+use App\Traits\HandlesFractal;
 use App\Transformers\FinancingOrderTransformer;
 use Cknow\Money\Money;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -30,6 +31,48 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
+    use HandlesFractal;
+
+    private $sharedFields = [
+        'id',
+        'status',
+        'reference_number',
+        'customer_name',
+        'national_id',
+        'contract_number',
+        'amount',
+        'selling_price',
+        'amount_formatted',
+        'selling_price_formatted',
+        'phone_country_code',
+        'phone_number',
+        'phone_number_formatted',
+        'is_verification_required',
+        'is_updatable',
+        'is_approved',
+        'is_cancellable',
+        'can_be_completed',
+        'can_create_trader_order',
+        'payment_proof_url',
+        'status_reason',
+        'creator',
+        'approver',
+        'trader_orders.id',
+        'trader_orders.provider',
+        'trader_orders.mode',
+        'trader_orders.reference',
+        'trader_orders.failure_reason',
+        'trader_orders.is_cancellable',
+        'trader_orders.history',
+        'trader_orders.products',
+        'trader_orders.status',
+        'trader_orders.cancel_details',
+        'trader_orders.created_at',
+        'trader_orders.hover_message',
+        'trader_orders.contract_signed_type',
+        'history',
+    ];
+
     public function __construct()
     {
         $this->middleware(
@@ -82,6 +125,7 @@ class OrderController extends Controller
                 'created_at',
             ])->respond();
     }
+    
 
     /**
      * @throws AuthorizationException
@@ -92,46 +136,12 @@ class OrderController extends Controller
 
         $order->load('creator', 'approver');
 
-        return fractal($order, (new FinancingOrderTransformer)
-            ->setArea(Area::Lender)
-            ->setCurrentUser($request->user()))
-            ->parseIncludes([
-                'id',
-                'status',
-                'reference_number',
-                'customer_name',
-                'national_id',
-                'contract_number',
-                'amount',
-                'selling_price',
-                'amount_formatted',
-                'selling_price_formatted',
-                'phone_country_code',
-                'phone_number',
-                'phone_number_formatted',
-                'is_verification_required',
-                'is_updatable',
-                'is_approved',
-                'is_cancellable',
-                'can_be_completed',
-                'can_create_trader_order',
-                'payment_proof_url',
-                'status_reason',
-                'creator',
-                'approver',
-                'trader_orders.id',
-                'trader_orders.reference',
-                'trader_orders.failure_reason',
-                'trader_orders.is_cancellable',
-                'trader_orders.history',
-                'trader_orders.products',
-                'trader_orders.status',
-                'trader_orders.cancel_details',
-                'trader_orders.created_at',
-                'trader_orders.hover_message',
-                'trader_orders.contract_signed_type',
-                'history',
-            ])->respond();
+        $userRole = $request->user()->getRoleNames()->first();
+        $fields = array_diff($this->sharedFields, $this->getFieldsForRole($userRole, OrderController::class, 'show'));
+        return $this->formatResponse($order,  (new FinancingOrderTransformer())
+        ->setArea(Area::Lender)
+        ->setCurrentUser($request->user())
+        , $fields);
     }
 
     /**
