@@ -56,7 +56,6 @@ class CheckExpiredContractSignedTimeTraderOrdersJob implements ShouldQueue
                 $lastHistoryOfStep,
                 $this->mode
             )->get();
-
             foreach ($expiredTraderOrders as $traderOrder) {
                 FacadesTrader::driver($this->provider, $this->version)
                     ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::ExpiredContractSignTime);
