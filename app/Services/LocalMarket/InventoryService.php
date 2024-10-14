@@ -40,7 +40,6 @@ class InventoryService
 
     private function findInventory(float $loanAmount, array $usedInventories = [], array $preferredItemTypes = [])
     {
-
         $inventoryQuery = LocalMarketInventory::where('max_price', '<=', $loanAmount)
             ->where('status', InventoryStatus::Active)
             ->whereHas('type', function ($query) {
@@ -53,11 +52,57 @@ class InventoryService
                 $query->whereNotIn('id', $usedInventories);
             });
 
-        if (! empty($preferredItemTypes)) {
-            $inventoryQuery->whereIn('commodity_type_id', $preferredItemTypes);
+        // First, try to find inventory items of the preferred type
+        $preferredInventory = $this->findInventoryItems($inventoryQuery, $loanAmount, $preferredItemTypes);
+
+        if ($preferredInventory) {
+            return $preferredInventory;
         }
 
-        return $inventoryQuery->orderByRaw('available_quantity * max_price DESC')->first();
+        // If not found, try to find inventory items of any type
+        return $this->findInventoryItems($inventoryQuery, $loanAmount);
+    }
+
+    private function findInventoryItems($query, float $loanAmount, array $itemTypes = [])
+    {
+        if (! empty($itemTypes)) {
+            $query = $query->whereIn('commodity_type_id', $itemTypes);
+        }
+
+        $inventories = $query->orderBy('max_price', 'DESC')->get();
+
+        return $this->findExactCombination($inventories, $loanAmount);
+    }
+
+    private function findExactCombination($inventories, float $targetAmount, $currentCombination = [], $startIndex = 0)
+    {
+        if ($targetAmount == 0) {
+            return $currentCombination;
+        }
+
+        if ($targetAmount < 0 || $startIndex >= count($inventories)) {
+            return null;
+        }
+
+        for ($i = $startIndex; $i < count($inventories); $i++) {
+            $inventory = $inventories[$i];
+
+            if ($inventory->max_price <= $targetAmount) {
+                $newCombination = array_merge($currentCombination, [$inventory]);
+                $result = $this->findExactCombination(
+                    $inventories,
+                    $targetAmount - $inventory->max_price,
+                    $newCombination,
+                    $i + 1
+                );
+
+                if ($result !== null) {
+                    return $result;
+                }
+            }
+        }
+
+        return null;
     }
 
     public static function refreshInventoryStocks($inventories)
