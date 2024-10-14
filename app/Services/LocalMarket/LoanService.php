@@ -31,14 +31,12 @@ class LoanService
         }
 
         $loanDetails = $unitsService->getEligibleUnits($orderNo, $eligibleInventories);
-        dd($loanDetails);
 
         return $loanDetails;
     }
 
     public function buyCommodities(LocalMarketOrder $localMarketOrder, $companyId, $data)
     {
-        $unitService = new UnitService;
         $ownershipService = new OwnershipService;
         $inventoryService = new InventoryService;
         $orderService = new OrderService;

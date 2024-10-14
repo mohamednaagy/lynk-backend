@@ -3,7 +3,6 @@
 namespace App\Actions\LocalMarket;
 
 use App\Actions\Contracts\LocalMarket\FindEligibleCommodities;
-use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\LoanService;
@@ -18,7 +17,6 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
         try {
-            // TODO naser amount is not real amount ouble check it
             $startTime = microtime(true);
             $eligibleCommodities = $this->LoanService->getCommoditiesForLoan(
                 $localMarketOrder->id,
@@ -27,8 +25,7 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
                 $localMarketOrder->preferred_commodity_type
             );
 
-            if ($eligibleCommodities['isLoanCovered']) {
-
+            if ($eligibleCommodities) {
                 $localMarketOrder->update([
                     'status' => LocalMarketOrderStatus::EligibleCommoditiesAvailable,
                     'data' => $eligibleCommodities,
@@ -36,13 +33,9 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
             } else {
                 $localMarketOrder->update([
                     'status' => LocalMarketOrderStatus::NoEligibleCommoditiesAvailable,
-                    'data' => $eligibleCommodities,
-                ]);
-                $localMarketOrder->inverntoryUnits()->update([
-                    'hold_for' => null,
-                    'status' => InventoryUnitsStatus::Free,
                 ]);
             }
+
             Log::channel('local_market')->info('FindEligibleCommoditiesAction Duration', [
                 'order_id' => $localMarketOrder->id,
                 'start_time' => $startTime,
