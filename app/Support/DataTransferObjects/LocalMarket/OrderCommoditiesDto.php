@@ -6,16 +6,13 @@ class OrderCommoditiesDto
 {
     private $inventories;
 
-    private bool $isLoanCovered;
-
     private float $remainingLoan;
 
     private int $numberOfSuitableUnits;
 
-    public function __construct($inventories, bool $isLoanCovered, float $remainingLoan, int $numberOfSuitableUnits)
+    public function __construct($inventories, float $remainingLoan, int $numberOfSuitableUnits)
     {
         $this->inventories = $inventories;
-        $this->isLoanCovered = $isLoanCovered;
         $this->remainingLoan = $remainingLoan;
         $this->numberOfSuitableUnits = $numberOfSuitableUnits;
 
@@ -25,7 +22,6 @@ class OrderCommoditiesDto
     {
         return new self(
             $data['inventories'],
-            $data['isLoanCovered'],
             $data['remainingLoan'],
             $data['numberOfSuitableUnits']
         );
@@ -35,7 +31,6 @@ class OrderCommoditiesDto
     {
         return [
             'inventories' => $this->inventories->toArray(),
-            'isLoanCovered' => $this->isLoanCovered,
             'remainingLoan' => $this->remainingLoan,
             'numberOfSuitableUnits' => $this->numberOfSuitableUnits,
         ];
@@ -54,11 +49,6 @@ class OrderCommoditiesDto
     public function getNumberOfSuitableUnits(): int
     {
         return $this->numberOfSuitableUnits;
-    }
-
-    public function isLoanCovered(): bool
-    {
-        return $this->isLoanCovered;
     }
 
     public function getRemainingLoan(): float
