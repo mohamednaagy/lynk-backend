@@ -23,7 +23,7 @@ trait LocalMarketHelperTrait
         $nextStep = LocalMarketOrderStatus::getEnumInstanceByValue($nextStep);
         $checkStep = $currentStep->canMoveTo($nextStep->value);
         if (! $currentStep->canMoveTo($nextStep->value)) {
-            throw new UnexpectedValueException('please make sure from your step');
+            throw new UnexpectedValueException("can not move $currentStep to $nextStep");
         }
 
         return $checkStep;
