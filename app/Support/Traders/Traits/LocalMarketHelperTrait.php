@@ -4,7 +4,6 @@ namespace App\Support\Traders\Traits;
 
 use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
-use App\Services\LocalMarket\UnitService;
 use UnexpectedValueException;
 
 trait LocalMarketHelperTrait
@@ -33,7 +32,6 @@ trait LocalMarketHelperTrait
     public function getDataOfLocalMarketOrder(LocalMarketOrder $order): array
     {
         $newData['external_order_no'] = $order->external_order_no;
-        $checkThatUnitUserForFirstTime = (new UnitService)->areUnitsUsedForTheFirstTime($order);
         foreach ($order->data['inventories'] as $key => $data) {
             $newData['products'][$key]['currency'] = $data['currency']['name'];
             $newData['products'][$key]['uom'] = $data['measurement']['name'];

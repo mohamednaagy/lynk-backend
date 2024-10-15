@@ -27,37 +27,88 @@ class InventoryService
      * @param  array  $usedInventories  An optional array of inventory IDs that have already been used. These inventories are excluded from the results.
      * @return LocalMarketInventory|null The best matching inventory item, or null if no eligible inventory is found.
      */
-    public function findEligibleInventoryForLoan(float $loanAmount, array $preferredItemTypes = [], array $usedInventories = [])
+    public function findEligibleInventoryForLoan($loanAmount, $preferredItemTypes)
     {
-        $inventory = $this->findInventory($loanAmount, $usedInventories, $preferredItemTypes);
-
-        if (empty($inventory) && ! empty($preferredItemTypes)) {
-            $inventory = $this->findInventory($loanAmount, $usedInventories);
-        }
-
-        return $inventory;
-    }
-
-    private function findInventory(float $loanAmount, array $usedInventories = [], array $preferredItemTypes = [])
-    {
-
-        $inventoryQuery = LocalMarketInventory::where('max_price', '<=', $loanAmount)
+        $inventories = LocalMarketInventory::where('max_price', '<=', $loanAmount)
             ->where('status', InventoryStatus::Active)
+            ->where('available_quantity', '>', 0)
             ->whereHas('type', function ($query) {
                 $query->where('status', CommodityTypeStatus::Active);
             })
             ->whereHas('supplier.detail', function ($query) {
                 $query->where('status', CommoitySupplierStatus::Active);
-            })
-            ->when(! empty($usedInventories), function ($query) use ($usedInventories) {
-                $query->whereNotIn('id', $usedInventories);
-            });
+            })->get();
 
-        if (! empty($preferredItemTypes)) {
-            $inventoryQuery->whereIn('commodity_type_id', $preferredItemTypes);
+        return $this->findOptimalCombination($inventories, $loanAmount, $preferredItemTypes);
+    }
+
+    private function findOptimalCombination($inventories, $loanAmount, array $preferredCommodities)
+    {
+        $maxUnits = config('trader.providers.lynk.max_units_per_trader', 10000);
+
+        // Convert inventory objects to arrays
+        $inventoriesArray = $inventories->all();
+        $preferredInventories = array_filter($inventoriesArray, fn ($inventory) => in_array($inventory['commodity_type_id'], $preferredCommodities));
+
+        $coveredAmount = 0;
+        $usedUnits = 0;
+        $selectedInventories = [];
+
+        // Function to cover loan amount from given inventories
+        $coverFromInventories = function ($inventories) use (&$coveredAmount, &$usedUnits, $loanAmount, $maxUnits, &$selectedInventories) {
+            foreach ($inventories as $inventory) {
+                if ($coveredAmount >= $loanAmount || $usedUnits >= $maxUnits) {
+                    break;
+                }
+
+                $availableUnits = min($inventory['available_quantity'], $maxUnits - $usedUnits);
+                $unitPrice = $inventory['max_price'];
+
+                // Calculate maximum amount possible without exceeding remaining loan
+                $remainingLoanAmount = $loanAmount - $coveredAmount;
+                $maxAffordableUnits = (int) floor($remainingLoanAmount / $unitPrice);
+
+                // Determine units to use from this inventory
+                $unitsToUse = min($availableUnits, $maxAffordableUnits);
+                $amountToCover = $unitsToUse * $unitPrice;
+
+                if ($amountToCover > 0) {
+                    $selectedInventories[] = [
+                        'id' => $inventory['id'],
+                        'commodity_type_id' => $inventory['commodity_type_id'],
+                        'numberOfUnits' => $unitsToUse,
+                        'amount' => $amountToCover,
+                    ];
+
+                    $coveredAmount += $amountToCover;
+                    $usedUnits += $unitsToUse;
+                }
+            }
+        };
+
+        // Try to cover the entire loan from preferred inventories first
+        $coverFromInventories($preferredInventories);
+
+        // If the loan amount is not fully covered, try to cover it with all inventories
+        if ($coveredAmount < $loanAmount) {
+            // Reset selected inventories and amounts for this second attempt
+            $selectedInventories = [];
+            $coveredAmount = 0;
+            $usedUnits = 0;
+
+            // Sort all inventories by max price (desc) for the second attempt
+            usort($inventoriesArray, fn ($a, $b) => $b['max_price'] - $a['max_price']);
+            $coverFromInventories($inventoriesArray);
         }
 
-        return $inventoryQuery->orderByRaw('available_quantity * max_price DESC')->first();
+        // Ensure exact loan amount is covered
+        if ($coveredAmount < $loanAmount) {
+            Log::info("Exact loan amount not covered: covered $coveredAmount of $loanAmount.");
+
+            return false;
+        }
+
+        return $selectedInventories;
     }
 
     public static function refreshInventoryStocks($inventories)
