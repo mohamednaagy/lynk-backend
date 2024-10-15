@@ -27,10 +27,10 @@ class EligibleCommoditiesFoundStatus implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(BuyCommodities $BuyCommodities): void
+    public function handle(BuyCommodities $buyCommodities): void
     {
 
-        $BuyCommodities->handle(
+        $buyCommodities->handle(
             $this->localMarketOrder
         );
 

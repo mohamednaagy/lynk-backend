@@ -46,10 +46,10 @@ final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
         self::NoEligibleCommoditiesAvailable => [
             self::FailedPurchase,
             self::Cancelled,
-
         ],
         self::EligibleCommoditiesAvailable => [
             self::CommoditiesPurchased,
+            self::FailedPurchase,
         ],
         self::CommoditiesPurchased => [
         ],

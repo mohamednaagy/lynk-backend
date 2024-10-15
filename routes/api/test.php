@@ -15,22 +15,27 @@ Route::prefix('v1/test')->group(function () {
     Route::post('buy', [LocalMarketController::class, 'buy']);
     Route::get('suitable-stocks', function () {
         $company_id = request()->input('company_id');
-        $preferred_types = explode(',', request()->input('preferred_types'));
+        $preferred_types = [1];
         $loan_amount = request()->input('loan_amount');
         $order_no = request()->input('order_no');
 
-        $loanService = new LoanService;
+        $localMarketOrder = LocalMarketOrder::find(9);
+        (new BuyCommoditiesAction(new LoanService))->handle($localMarketOrder);
+        dd('dwdw');
+
+        // $loanService = new LoanService;
+        // dd($loanService->getCommoditiesForLoan($order_no, $company_id, $loan_amount, $preferred_types));
 
         $data['currency'] = 'SAR';
         $data['national_id'] = 312343432432;
         $data['trader_order_id'] = 22;
-        $data['amount'] = 12000;
+        $data['amount'] = $loan_amount;
         $data['customer_name'] = 'Mohamed NAser';
-        $data['external_order_no'] = 'od_1232';
+        $data['external_order_no'] = $order_no;
         $data['source'] = 1;
-        $data['company_id'] = 2;
+        $data['company_id'] = $company_id;
         $data['buying_uuid'] = 'uuid_112';
-        $data['preferred_commodity_type'] = [1, 2, 3];
+        $data['preferred_commodity_type'] = $preferred_types;
         Log::channel('local_market')->info('data prepare before saved for  ', $data);
 
         return app(CreateLocalMarketOrderAction::class)->handle($data);

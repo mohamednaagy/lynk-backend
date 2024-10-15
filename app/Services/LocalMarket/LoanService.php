@@ -38,14 +38,12 @@ class LoanService
     public function buyCommodities(LocalMarketOrder $localMarketOrder, $companyId, $data)
     {
         $ownershipService = new OwnershipService;
-        $inventoryService = new InventoryService;
         $orderService = new OrderService;
 
         $eligibleCommodities = OrderCommoditiesDto::fromArray($data);
 
         try {
             $ownershipService->changeUnitOwnership($localMarketOrder, OwnershipTypes::Company, $companyId);
-            $inventoryService->refreshInventoryStocks($eligibleCommodities->getInventoriesIds());
             $orderService->insertOrderUnits($localMarketOrder);
             $orderService->insertOrderInventories($localMarketOrder, $eligibleCommodities->getInventories());
             $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::CommoditiesPurchased);
