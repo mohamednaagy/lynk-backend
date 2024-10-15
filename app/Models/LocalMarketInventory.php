@@ -113,20 +113,6 @@ class LocalMarketInventory extends Model
         return $this->reserved_items == 0;
     }
 
-    // /*
-    //  * Check if the company has bought from this inventory before.
-    //  *
-    //  * @param  int  $companyId
-    //  * @return bool
-    //  */
-    // public function hasCompanyBoughtFromInventory($companyId)
-    // {
-    //     return $this->whereHas('localMarketOrderHasInventory', function ($query) use ($companyId) {
-    //         $query->where('supplier_id', $companyId);
-    //     })
-    //         ->exists();
-    // }
-
     public function price()
     {
         return $this->max_price;

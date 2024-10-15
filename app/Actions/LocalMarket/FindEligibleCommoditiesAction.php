@@ -28,7 +28,7 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
             if ($eligibleCommodities) {
                 $localMarketOrder->update([
                     'status' => LocalMarketOrderStatus::EligibleCommoditiesAvailable,
-                    'data' => $eligibleCommodities,
+                    'data' => ['inventories' => $eligibleCommodities],
                 ]);
             } else {
                 $localMarketOrder->update([
