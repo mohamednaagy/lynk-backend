@@ -19,8 +19,12 @@ Route::prefix('v1/test')->group(function () {
         $loan_amount = request()->input('loan_amount');
         $order_no = request()->input('order_no');
 
-        $loanService = new LoanService;
-        dd($loanService->getCommoditiesForLoan($order_no, $company_id, $loan_amount, $preferred_types));
+        $localMarketOrder = LocalMarketOrder::find(9);
+        (new BuyCommoditiesAction(new LoanService))->handle($localMarketOrder);
+        dd('dwdw');
+
+        // $loanService = new LoanService;
+        // dd($loanService->getCommoditiesForLoan($order_no, $company_id, $loan_amount, $preferred_types));
 
         $data['currency'] = 'SAR';
         $data['national_id'] = 312343432432;

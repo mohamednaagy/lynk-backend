@@ -133,13 +133,6 @@ class InventoryService
         return $finalSelectedInventories;
     }
 
-    public static function refreshInventoryStocks($inventories)
-    {
-        LocalMarketInventory::query()->whereIn('id', $inventories)->each(function ($inventory) {
-            $inventory->refreshStockQuantities();
-        });
-    }
-
     public static function deleteInventory($inventory)
     {
         try {
