@@ -173,7 +173,6 @@ class BursamClient
             'memberShortName' => config('trader.providers.bursam.member_short_name'),
             'uuid' => $uuid,
         ];
-
         $request = [
             'serialNumbers' => '1',
             'forceYN' => 'Y',
