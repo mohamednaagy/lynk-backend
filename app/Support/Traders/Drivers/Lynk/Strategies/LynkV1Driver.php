@@ -75,7 +75,6 @@ class LynkV1Driver implements TraderInterface
         LynkClient::of($traderOrder)->createOrder();
 
         return $traderOrder;
-
     }
 
     public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
@@ -111,7 +110,6 @@ class LynkV1Driver implements TraderInterface
                     $traderOrder,
                     TraderOrderMediaCollection::TransferOwnershipToLender
                 );
-
             });
         } catch (\Throwable $exception) {
             throw new TraderException(
@@ -184,7 +182,6 @@ class LynkV1Driver implements TraderInterface
                         'created_at' => $currentTimeInUtcTz,
                     ]
                 );
-
             });
         } catch (Exception $exception) {
             throw new TraderException(
@@ -225,7 +222,7 @@ class LynkV1Driver implements TraderInterface
         $cancelledByType = TraderOrderCancelType::System,
         $cancelledBy = null
     ): int {
-        //        if ($traderOrder->mode == TraderOrderMode::Manual) {
+
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
 
         $order = $traderOrder->order;
@@ -241,15 +238,14 @@ class LynkV1Driver implements TraderInterface
             }
 
             if (
-
-                $traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Any)) {
+                $traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Any)
+            ) {
                 Trader::driver(\App\Enums\Trader::Bursam, 'v2')
                     ->createTraderOrder($traderOrder->order);
             }
         }
 
         return TraderOrderCancellationStatus::Cancelled;
-        //        }
     }
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void {}
