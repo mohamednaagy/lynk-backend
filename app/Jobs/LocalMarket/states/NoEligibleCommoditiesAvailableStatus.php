@@ -28,10 +28,10 @@ class NoEligibleCommoditiesAvailableStatus implements ShouldQueue
     public function handle(): void
     {
         // Nagy Continue this function
-        $data = $this->getDataOfLocalMarketOrder($this->localMarketOrder);
+        $data['external_order_no'] = $this->localMarketOrder->external_order_no;
         $data['case'] = 'NoEligibleCommoditiesAvailable';
         $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::NoEligibleCommoditiesAvailable);
-        app(LocalMarketWebhook::class)->handle($data);
+        app(LocalMarketWebhook::class)->handle(['case' => 'NoEligibleCommoditiesAvailable']);
         Log::channel('local_market')->info('Notify our customer sorry we can not find your eligibilities commodities ');
     }
 }
