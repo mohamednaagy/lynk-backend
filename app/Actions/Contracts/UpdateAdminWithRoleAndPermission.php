@@ -2,6 +2,8 @@
 
 namespace App\Actions\Contracts;
 
+use App\Actions\Contracts\Admins\AddAdminToAssignedList;
+use App\Actions\Contracts\Admins\RemoveAdminFromAssignedList;
 use App\Models\User;
 
 interface UpdateAdminWithRoleAndPermission
@@ -10,7 +12,7 @@ interface UpdateAdminWithRoleAndPermission
      * @param  SyncRoleToUser  $syncRoleToUser
      * @param  SyncPermissionToUser  $syncPermissionToUser
      */
-    public function __construct(UpdateUser $updateUser, SyncRoleToUser $syncRoleToUser, SyncPermissionToUser $syncPermissionToUser);
+    public function __construct(UpdateUser $updateUser, SyncRoleToUser $syncRoleToUser, SyncPermissionToUser $syncPermissionToUser, AddAdminToAssignedList $addAdminToAssignedList, RemoveAdminFromAssignedList $removeAdminFromAssignedList);
 
     /**
      * Create new user.

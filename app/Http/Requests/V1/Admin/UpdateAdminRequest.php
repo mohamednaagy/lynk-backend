@@ -33,6 +33,7 @@ class UpdateAdminRequest extends FormRequest
         return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
+            'can_assign_order' => ['nullable', 'integer'],
             'email' => [
                 'required',
                 'email:filter',

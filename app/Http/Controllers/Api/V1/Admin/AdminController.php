@@ -70,6 +70,7 @@ class AdminController extends Controller
                 'phone_number',
                 'phone_country_code',
                 'formatted_phone_number',
+                'can_assign_order',
             ])->respond();
     }
 
@@ -96,6 +97,7 @@ class AdminController extends Controller
                 'phone_number',
                 'phone_country_code',
                 'formatted_phone_number',
+                'can_assign_order',
             ])->respond();
     }
 
@@ -182,6 +184,7 @@ class AdminController extends Controller
                     'phone_number',
                     'phone_country_code',
                     'formatted_phone_number',
+                    'can_assign_order',
                 ])
                 ->respond();
         });
