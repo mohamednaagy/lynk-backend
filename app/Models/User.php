@@ -50,6 +50,7 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
         'locale',
         'company_id',
         'is_active',
+        'can_manage_orders',
     ];
 
     /**
@@ -71,6 +72,7 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
         'email_verified_at' => 'datetime',
         'phone_number' => E164PhoneNumberCast::class,
         'is_active' => 'boolean',
+        'can_manage_orders' => 'boolean',
     ];
 
     protected function password(): Attribute
@@ -173,11 +175,5 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
         }
 
         return $this->email;
-    }
-
-    public function canAssignOrders(): bool
-    {
-        $assignableAdmins = app(AssignOrdersToAdminService::class)->getAssignAdminToOrdersSorting();
-        return in_array($this->id, $assignableAdmins);
     }
 }

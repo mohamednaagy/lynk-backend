@@ -10,12 +10,14 @@ use App\Models\LocalMarketInventory;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Observers\CommodityItemObserver;
 use App\Observers\FinancingOrderObserver;
 use App\Observers\LocalMarketInventoryObserver;
 use App\Observers\TraderHistoryObserver;
 use App\Observers\TraderOrderObserver;
 use App\Observers\TransactionObserver;
+use App\Observers\UserObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -43,6 +45,7 @@ class EventServiceProvider extends ServiceProvider
         Transaction::class => [TransactionObserver::class],
         LocalMarketInventory::class => [LocalMarketInventoryObserver::class],
         CommodityItem::class => [CommodityItemObserver::class],
+        User::class => [UserObserver::class],
     ];
 
     /**

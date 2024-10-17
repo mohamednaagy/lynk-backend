@@ -6,6 +6,6 @@ return new class extends SettingsMigration
 {
     public function up(): void
     {
-        $this->migrator->add('general.assign_admin_to_orders_sorting');
+        $this->migrator->add('general.order_responsible_admins', []);
     }
 };

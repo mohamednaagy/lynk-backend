@@ -12,7 +12,7 @@ interface UpdateAdminWithRoleAndPermission
      * @param  SyncRoleToUser  $syncRoleToUser
      * @param  SyncPermissionToUser  $syncPermissionToUser
      */
-    public function __construct(UpdateUser $updateUser, SyncRoleToUser $syncRoleToUser, SyncPermissionToUser $syncPermissionToUser, AddAdminToAssignedList $addAdminToAssignedList, RemoveAdminFromAssignedList $removeAdminFromAssignedList);
+    public function __construct(UpdateUser $updateUser, SyncRoleToUser $syncRoleToUser, SyncPermissionToUser $syncPermissionToUser);
 
     /**
      * Create new user.

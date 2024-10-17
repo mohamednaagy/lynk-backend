@@ -4,20 +4,20 @@ namespace App\Actions\Admins;
 
 use App\Actions\Contracts\Admins\RemoveAdminFromAssignedList;
 use App\Models\User;
-use App\Services\AssignOrdersToAdminService;
+use App\Services\AdminOrderAssignmentService;
 
 class RemoveAdminFromAssignedListAction implements RemoveAdminFromAssignedList
 {
-    private $assignOrdersToAdminService;
+    private $adminOrderAssignmentService;
 
-    public function __construct(AssignOrdersToAdminService $assignOrdersToAdminService)
+    public function __construct(AdminOrderAssignmentService $adminOrderAssignmentService)
     {
-        $this->assignOrdersToAdminService = $assignOrdersToAdminService;
+        $this->adminOrderAssignmentService = $adminOrderAssignmentService;
     }
 
     public function handle(User $user): User
     {
-        $this->assignOrdersToAdminService->removeAdmin($user->id);
+        $this->adminOrderAssignmentService->removeAdmin($user);
         return $user;
     }
 }

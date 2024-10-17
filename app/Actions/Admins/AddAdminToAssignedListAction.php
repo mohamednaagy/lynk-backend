@@ -4,20 +4,20 @@ namespace App\Actions\Admins;
 
 use App\Actions\Contracts\Admins\AddAdminToAssignedList;
 use App\Models\User;
-use App\Services\AssignOrdersToAdminService;
+use App\Services\AdminOrderAssignmentService;
 
 class AddAdminToAssignedListAction implements AddAdminToAssignedList
 {
-    private $assignOrdersToAdminService;
+    private $adminOrderAssignmentService;
 
-    public function __construct(AssignOrdersToAdminService $assignOrdersToAdminService)
+    public function __construct(AdminOrderAssignmentService $adminOrderAssignmentService)
     {
-        $this->assignOrdersToAdminService = $assignOrdersToAdminService;
+        $this->adminOrderAssignmentService = $adminOrderAssignmentService;
     }
 
     public function handle(User $user): User
     {
-        $this->assignOrdersToAdminService->addAdmin($user->id);
+        $this->adminOrderAssignmentService->addAdmin($user);
         return $user;
     }
 }
