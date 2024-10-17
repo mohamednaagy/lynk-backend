@@ -2,8 +2,6 @@
 
 namespace App\Actions\Contracts;
 
-use App\Actions\Contracts\Admins\AddAdminToAssignedList;
-use App\Actions\Contracts\Admins\RemoveAdminFromAssignedList;
 use App\Models\User;
 
 interface UpdateAdminWithRoleAndPermission

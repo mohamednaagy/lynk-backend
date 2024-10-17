@@ -8,11 +8,9 @@ use App\Services\AdminOrderAssignmentService;
 
 class AddAdminToAssignedListAction implements AddAdminToAssignedList
 {
-    private $adminOrderAssignmentService;
 
-    public function __construct(AdminOrderAssignmentService $adminOrderAssignmentService)
+    public function __construct(protected AdminOrderAssignmentService $adminOrderAssignmentService)
     {
-        $this->adminOrderAssignmentService = $adminOrderAssignmentService;
     }
 
     public function handle(User $user): User

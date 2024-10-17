@@ -16,17 +16,6 @@ class UserObserver
     ) {}
 
     /**
-     * Handle the User "created" event.
-     *
-     * @param User $user
-     * @return void
-     */
-    public function created(User $user): void
-    {
-        // Logic for when a user is created can be implemented here
-    }
-
-    /**
      * Handle the User "updated" event.
      *
      * @param User $user
@@ -41,40 +30,7 @@ class UserObserver
     }
 
     /**
-     * Handle the User "deleted" event.
-     *
-     * @param User $user
-     * @return void
-     */
-    public function deleted(User $user): void
-    {
-        // Logic for when a user is deleted can be implemented here
-    }
-
-    /**
-     * Handle the User "restored" event.
-     *
-     * @param User $user
-     * @return void
-     */
-    public function restored(User $user): void
-    {
-        // Logic for when a user is restored can be implemented here
-    }
-
-    /**
-     * Handle the User "force deleted" event.
-     *
-     * @param User $user
-     * @return void
-     */
-    public function forceDeleted(User $user): void
-    {
-        // Logic for when a user is force deleted can be implemented here
-    }
-
-    /**
-     * Handle the addition or removal of the admin from the assigned list based on their permissions.
+     * Handle the addition or removal of the admin from the assigned list based on can_manage_orders value.
      *
      * @param User $user
      * @return void

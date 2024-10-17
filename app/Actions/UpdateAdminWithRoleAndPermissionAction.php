@@ -2,14 +2,11 @@
 
 namespace App\Actions;
 
-use App\Actions\Contracts\Admins\AddAdminToAssignedList;
-use App\Actions\Contracts\Admins\RemoveAdminFromAssignedList;
 use App\Actions\Contracts\SyncPermissionToUser;
 use App\Actions\Contracts\SyncRoleToUser;
 use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
 use App\Actions\Contracts\UpdateUser;
 use App\Models\User;
-use Illuminate\Support\Facades\Log;
 
 class UpdateAdminWithRoleAndPermissionAction implements UpdateAdminWithRoleAndPermission
 {

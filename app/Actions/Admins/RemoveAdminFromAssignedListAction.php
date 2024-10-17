@@ -8,12 +8,8 @@ use App\Services\AdminOrderAssignmentService;
 
 class RemoveAdminFromAssignedListAction implements RemoveAdminFromAssignedList
 {
-    private $adminOrderAssignmentService;
 
-    public function __construct(AdminOrderAssignmentService $adminOrderAssignmentService)
-    {
-        $this->adminOrderAssignmentService = $adminOrderAssignmentService;
-    }
+    public function __construct(protected AdminOrderAssignmentService $adminOrderAssignmentService) {}
 
     public function handle(User $user): User
     {
