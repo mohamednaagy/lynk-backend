@@ -38,20 +38,17 @@ class PendingCancelOrderStatus implements ShouldQueue
     public function handle(): void
     {
         DB::beginTransaction();
-
         try {
             $this->inventoryService->freeOrderInventoryUnits($this->localMarketOrder);
             $this->logCancellationDetails();
-
             DB::commit();
-
             $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::Cancelled);
-            $this->localMarketWebhook->with(['case' => LocalMarketOrderStatus::Cancelled])->handle();
-
+            $this->localMarketWebhook->with(['case' => LocalMarketOrderStatus::Cancelled, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
             $this->logQueueJob('Order cancelled successfully');
         } catch (\Throwable $e) {
             DB::rollBack();
-            $this->handleCancellationFailure($e);
+            $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::FailedToCancel);
+
         }
     }
 
@@ -69,18 +66,5 @@ class PendingCancelOrderStatus implements ShouldQueue
             "$message",
             ['order_id' => $this->localMarketOrder->id]
         );
-    }
-
-    /**
-     * Handle order cancellation failure.
-     */
-    private function handleCancellationFailure(\Throwable $e): void
-    {
-        $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::FailedToCancel);
-        Log::channel('local_market')->error('Failed to cancel order.', [
-            'order_id' => $this->localMarketOrder->id,
-            'error_message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString(),
-        ]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Enums\LocalMarketOrderStatus;
 use App\Jobs\LocalMarket\states\CommoditiesPurchaseCompletedStatus;
 use App\Jobs\LocalMarket\states\EligibleCommoditiesFoundStatus;
+use App\Jobs\LocalMarket\states\FailedCancelOrderStatus;
 use App\Jobs\LocalMarket\states\FailedPurchaseStatus;
 use App\Jobs\LocalMarket\states\NoEligibleCommoditiesAvailableStatus;
 use App\Jobs\LocalMarket\states\PendingCancelOrderStatus;
@@ -97,6 +98,9 @@ class LocalMarketOrderObserver
                 break;
             case LocalMarketOrderStatus::PendingCancellation:
                 dispatch(new PendingCancelOrderStatus($localMarketOrder));
+                break;
+            case LocalMarketOrderStatus::FailedToCancel:
+                dispatch(new FailedCancelOrderStatus($localMarketOrder));
                 break;
         }
     }

@@ -61,7 +61,13 @@ final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
         ],
         self::PendingCancellation => [
             self::Cancelled,
+            self::FailedToCancel,
         ],
+
+        self::Cancelled => [
+            self::FailedToCancel,
+        ],
+
     ];
 
     public function canMoveTo(int $status): bool
