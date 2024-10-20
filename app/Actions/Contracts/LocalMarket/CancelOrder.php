@@ -4,7 +4,7 @@ namespace App\Actions\Contracts\LocalMarket;
 
 use App\Models\LocalMarketOrder;
 
-interface LocalMarketCancelOrder
+interface CancelOrder
 {
     public function handle(LocalMarketOrder $localMarketOrder);
 }

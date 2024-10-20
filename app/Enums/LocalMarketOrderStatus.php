@@ -38,27 +38,28 @@ final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
     private static array $state = [
         self::initiate => [
             self::PendingEligibleCommodities,
-            self::Cancelled,
+            self::PendingCancellation,
 
         ],
         self::PendingEligibleCommodities => [
             self::EligibleCommoditiesAvailable,
             self::NoEligibleCommoditiesAvailable,
             self::FailedPurchase,
-            self::Cancelled,
+            self::PendingCancellation,
         ],
         self::Completed => [],
         self::NoEligibleCommoditiesAvailable => [
             self::FailedPurchase,
-            self::Cancelled,
-            self::Cancelled,
-
+            self::PendingCancellation,
         ],
         self::EligibleCommoditiesAvailable => [
             self::CommoditiesPurchased,
-            self::Cancelled,
+            self::PendingCancellation,
         ],
         self::CommoditiesPurchased => [
+            self::PendingCancellation,
+        ],
+        self::PendingCancellation => [
             self::Cancelled,
         ],
     ];

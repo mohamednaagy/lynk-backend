@@ -4,6 +4,7 @@ namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
 use App\Enums\LocalMarketOrderHistoryStatus;
+use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Bus\Queueable;
@@ -16,9 +17,13 @@ class NoEligibleCommoditiesAvailableStatus implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, LocalMarketHelperTrait , Queueable;
 
-    public function __construct(private LocalMarketOrder $localMarketOrder)
-    {
+    private LocalMarketWebhook $localMarketWebhook;
+
+    public function __construct(
+        private LocalMarketOrder $localMarketOrder
+    ) {
         $this->onQueue('local_market');
+        $this->localMarketWebhook = app(LocalMarketWebhook::class);
         Log::channel('local_market')->info("add NoEligibleCommoditiesAvailableStatus job to queue local_market with local market id {$this->localMarketOrder->id} ");
     }
 
@@ -29,9 +34,8 @@ class NoEligibleCommoditiesAvailableStatus implements ShouldQueue
     {
         // Nagy Continue this function
         $data = $this->getDataOfLocalMarketOrder($this->localMarketOrder);
-        $data['case'] = 'NoEligibleCommoditiesAvailable';
         $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::NoEligibleCommoditiesAvailable);
-        app(LocalMarketWebhook::class)->handle($data);
+        $this->localMarketWebhook->with(['case' => LocalMarketOrderStatus::NoEligibleCommoditiesAvailable, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
         Log::channel('local_market')->info('Notify our customer sorry we can not find your eligibilities commodities ');
     }
 }

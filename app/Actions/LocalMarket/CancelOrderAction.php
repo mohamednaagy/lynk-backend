@@ -2,11 +2,11 @@
 
 namespace App\Actions\LocalMarket;
 
-use App\Actions\Contracts\LocalMarket\LocalMarketCancelOrder;
+use App\Actions\Contracts\LocalMarket\CancelOrder;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\OrderService;
 
-class LocalMarketCancelOrderAction implements LocalMarketCancelOrder
+class CancelOrderAction implements CancelOrder
 {
     public function __construct() {}
 

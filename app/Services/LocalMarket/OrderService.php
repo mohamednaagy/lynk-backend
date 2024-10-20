@@ -2,8 +2,6 @@
 
 namespace App\Services\LocalMarket;
 
-use App\Enums\LocalMarket\OrderCancelledBy;
-use App\Enums\LocalMarket\OrderCancelReason;
 use App\Enums\LocalMarket\OrderStatus;
 use App\Enums\LocalMarketOrderStatus;
 use App\Enums\Trader;
@@ -12,7 +10,6 @@ use App\Models\LocalMarketOrderHasInventory;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class OrderService
 {
@@ -102,35 +99,8 @@ class OrderService
         $order->save();
     }
 
-    public function logCancellationDetails($localMarketOrder)
-    {
-        $localMarketOrder->cancelOrder()->create([
-            'cancelled_by' => OrderCancelledBy::Customer,
-            'cancel_reason' => OrderCancelReason::CancelOrder,
-        ]);
-    }
-
     public function cancelOrder(LocalMarketOrder $localMarketOrder)
     {
         $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::PendingCancellation);
-        DB::beginTransaction();
-        try {
-            (new InventoryService)->freeOrderInventoryUnits($localMarketOrder);
-            $this->logCancellationDetails($localMarketOrder);
-
-            DB::commit();
-            $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::Cancelled);
-            Log::channel('local_market')->info('Order Is Cancelled Successfully', [
-                'order_id' => $localMarketOrder->id]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::FailedToCancel);
-            Log::channel('local_market')->error('Error in Cancelled Action', [
-                'order_id' => $localMarketOrder->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-        }
-
     }
 }

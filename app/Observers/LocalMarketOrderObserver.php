@@ -7,6 +7,7 @@ use App\Jobs\LocalMarket\states\CommoditiesPurchaseCompletedStatus;
 use App\Jobs\LocalMarket\states\EligibleCommoditiesFoundStatus;
 use App\Jobs\LocalMarket\states\FailedPurchaseStatus;
 use App\Jobs\LocalMarket\states\NoEligibleCommoditiesAvailableStatus;
+use App\Jobs\LocalMarket\states\PendingCancelOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Support\Str;
@@ -93,6 +94,9 @@ class LocalMarketOrderObserver
                 break;
             case LocalMarketOrderStatus::FailedPurchase:
                 dispatch(new FailedPurchaseStatus($localMarketOrder));
+                break;
+            case LocalMarketOrderStatus::PendingCancellation:
+                dispatch(new PendingCancelOrderStatus($localMarketOrder));
                 break;
         }
     }
