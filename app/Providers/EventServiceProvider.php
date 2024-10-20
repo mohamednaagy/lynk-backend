@@ -13,6 +13,7 @@ use App\Models\LocalMarketOrder;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Observers\CommodityItemObserver;
 use App\Observers\CommoditySupplierObserver;
 use App\Observers\CommodityTypeObserver;
@@ -22,6 +23,7 @@ use App\Observers\LocalMarketOrderObserver;
 use App\Observers\TraderHistoryObserver;
 use App\Observers\TraderOrderObserver;
 use App\Observers\TransactionObserver;
+use App\Observers\UserObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -52,6 +54,7 @@ class EventServiceProvider extends ServiceProvider
         LocalMarketOrder::class => [LocalMarketOrderObserver::class],
         CompanySupplierDetail::class => [CommoditySupplierObserver::class],
         CommodityType::class => [CommodityTypeObserver::class],
+        User::class => [UserObserver::class],
     ];
 
     /**

@@ -43,6 +43,7 @@ class UpdateUserAction implements UpdateUser
                     'company_id',
                     'locale',
                     'is_active',
+                    'can_manage_orders',
                 ]
             )
         );

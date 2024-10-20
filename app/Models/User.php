@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Role;
+use App\Services\AssignOrdersToAdminService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Builder;
@@ -49,6 +50,7 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
         'locale',
         'company_id',
         'is_active',
+        'can_manage_orders',
     ];
 
     /**
@@ -70,6 +72,7 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
         'email_verified_at' => 'datetime',
         'phone_number' => E164PhoneNumberCast::class,
         'is_active' => 'boolean',
+        'can_manage_orders' => 'boolean',
     ];
 
     protected function password(): Attribute

@@ -27,6 +27,7 @@ class GeneralSettingsAction implements SettingsInterface
 
         $settingInstance->otp_driver = $data['otp_driver'];
         $settingInstance->order_cost = $data['order_cost'];
+        $settingInstance->order_responsible_admins = $data['order_responsible_admins'];
 
         $settingInstance->save();
     }

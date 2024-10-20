@@ -33,6 +33,7 @@ class UserTransformer extends TransformerAbstract
         'orders_count',
         'is_active',
         'is_invitation_accepted',
+        'can_manage_orders',
     ];
 
     public function __construct(?string $area = null)
@@ -161,5 +162,10 @@ class UserTransformer extends TransformerAbstract
     public function includeIsInvitationAccepted(User $user): Primitive
     {
         return $this->primitive((bool) ($user->password && $user->email_verified_at));
+    }
+
+    public function includeCanManageOrders(User $user): Primitive
+    {
+        return $this->primitive($user->can_manage_orders);
     }
 }

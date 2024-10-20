@@ -10,6 +10,8 @@ class GeneralSettings extends Settings
 
     public int $trader_order_timeout;
 
+    public array $order_responsible_admins;
+
     public static function group(): string
     {
         return 'general';
