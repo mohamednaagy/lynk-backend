@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Jobs\checkExpiredContractSignedTimeTraderOrdersJob;
 use App\Console\Commands\RunHoldTraderWhenMarketOpenCommand;
 use App\Jobs\General\ProcessFinancingOrders;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessDailySellingPendingCommodityToMarket;
@@ -46,6 +47,11 @@ class Kernel extends ConsoleKernel
             ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
             ->onOneServer();
 
+        $schedule->job(new checkExpiredContractSignedTimeTraderOrdersJob())
+            ->everyMinute()
+            ->withoutOverlapping()
+            ->onOneServer();
+            
         $schedule->command('horizon:snapshot')->everyFiveMinutes();
     }
 

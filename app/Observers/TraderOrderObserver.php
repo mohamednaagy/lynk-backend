@@ -65,13 +65,11 @@ class TraderOrderObserver
     {
         if ($traderOrder->wasChanged(['status'])) {
             $this->takeActionsIfStatusWasChanged($traderOrder);
-            if ($traderOrder->status->is(TraderOrderStatus::Completed) && $traderOrder->order->company->isCompanyHasMurabahaAutoCompleteOrder()) {
-                $this->applyOrderFees($traderOrder);
-                if (
-                    TraderOrder::whereId($traderOrder->id)->completedWithContractSignedType()->exists() &&
-                    $traderOrder->order->company->isCompanyHasMurabahaAutoCompleteOrder()) {
-                    $traderOrder->order->update(['status' => FinancingOrderStatus::Completed]);
-                }
+            if (
+                TraderOrder::whereId($traderOrder->id)->completedWithContractSignedType()->exists() &&
+                $traderOrder->order->company->isCompanyHasMurabahaAutoCompleteOrder()) 
+            {
+                $traderOrder->order->update(['status' => FinancingOrderStatus::Completed]);
             }
         }
     }
