@@ -68,20 +68,31 @@ class AdminOrderAssignmentService
         }
     }
 
-    /**
-     * Assign an order to a specific admin by moving them to the front of the list.
+     /**
+     * Reorder the responsible admins and move a specific admin to the front.
      *
-     * @param Admin $admin
+     * @param User $admin
      * @return void
      */
-    public function assignOrderToAdmin(User $admin): void
+    public static function reOrderResponsableAdmins(User $admin): void
     {
-        $admins = $this->getOrderResponsibleAdmins();
+        $service = new self();
+        $admins = $service->getOrderResponsibleAdmins();
+        
         if (in_array($admin->id, $admins, true)) {
-            // Move admin to the front
-            $admins = array_values(array_diff($admins, [$admin->id])); // Remove
-            array_unshift($admins, $admin->id); // Add to front
-            $this->updateOrderResponsibleAdmins($admins);
+            $admins = array_values(array_diff($admins, [$admin->id])); // Remove the admin
+            $admins[] = $admin->id;
+            $service->updateOrderResponsibleAdmins($admins);
         }
+    }
+    /**
+     * Get the next admin ID from the list of order responsible admins.
+     *
+     * @return int|null
+     */
+    public static function getNextAdminId(): ?int
+    {
+        $admins = (new self())->getOrderResponsibleAdmins();
+        return $admins[0] ?? null; // Return the first admin ID or null if the array is empty
     }
 }

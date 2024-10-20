@@ -83,6 +83,7 @@ class OrderController extends Controller
                 'status_reason',
                 'current_step',
                 'creator',
+                'assignable',
                 'company_name',
                 'charged_trader_orders_count',
                 'created_at',
