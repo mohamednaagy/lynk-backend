@@ -12,8 +12,6 @@ class CancelOrderAction implements CancelOrder
 
     public function handle(LocalMarketOrder $localMarketOrder)
     {
-        if ($localMarketOrder->canCancelledOrder()) {
-            (new OrderService)->cancelOrder($localMarketOrder);
-        }
+        (new OrderService)->cancelOrder($localMarketOrder);
     }
 }
