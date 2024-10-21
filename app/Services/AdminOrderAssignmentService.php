@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\FinancingOrder;
 use App\Settings\Classes\GeneralSettings;
 use App\Models\User; // Make sure to import the Admin model
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AdminOrderAssignmentService
 {
@@ -24,7 +26,7 @@ class AdminOrderAssignmentService
             return $setting ?: [];
         });
     }
-    
+
     /**
      * Update the list of order responsible admins in the database and cache.
      *
@@ -39,7 +41,7 @@ class AdminOrderAssignmentService
 
         Cache::put(self::CACHE_KEY, $admins, self::CACHE_DURATION);
     }
-    
+
     /**
      * Remove an admin from the order responsible list.
      *
@@ -49,10 +51,10 @@ class AdminOrderAssignmentService
     public function removeAdmin(User $admin): void
     {
         $admins = $this->getOrderResponsibleAdmins();
-        $admins = array_values(array_diff($admins, [$admin->id])); // Remove the admin
+        $admins = array_shift($admins); // Remove the admin
         $this->updateOrderResponsibleAdmins($admins);
     }
-    
+
     /**
      * Add an admin to the order responsible list.
      *
@@ -69,19 +71,32 @@ class AdminOrderAssignmentService
     }
 
     /**
-     * Assign an order to a specific admin by moving them to the front of the list.
+     * Reorder the responsible admins and move a specific admin to the front.
      *
-     * @param Admin $admin
+     * @param User $admin
      * @return void
      */
-    public function assignOrderToAdmin(User $admin): void
+    public function reOrderResponsableAdmins(): ?int
     {
-        $admins = $this->getOrderResponsibleAdmins();
-        if (in_array($admin->id, $admins, true)) {
-            // Move admin to the front
-            $admins = array_values(array_diff($admins, [$admin->id])); // Remove
-            array_unshift($admins, $admin->id); // Add to front
-            $this->updateOrderResponsibleAdmins($admins);
+        $service = new self();
+        $admins = $service->getOrderResponsibleAdmins();
+
+        if (empty($admins)) {
+            return null;
         }
+
+        $nextAdmin = array_shift($admins);
+        $admins[] = $nextAdmin;
+
+        $service->updateOrderResponsibleAdmins($admins);
+
+        return $nextAdmin;
+    }
+
+
+    public static function assignNextAdminToFinancingOrder(FinancingOrder $financingOrder): void
+    {
+        $financingOrder->assignable_id = (new self())->reOrderResponsableAdmins();
+        $financingOrder->saveQuietly();
     }
 }

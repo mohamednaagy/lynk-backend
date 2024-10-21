@@ -51,6 +51,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'status_reason',
         'creator',
         'approver',
+        'assignable_admin',
         'phone_country_code',
         'phone_number',
         'phone_number_formatted',
@@ -306,5 +307,17 @@ class FinancingOrderTransformer extends TransformerAbstract
         $this->user = $user;
 
         return $this;
+    }
+
+    public function includeAssignableAdmin(FinancingOrder $financingOrder)
+    {
+        if (is_null($financingOrder->assignable_id)) {
+            return $this->primitive(null);
+        }
+
+        return $this->primitive([
+            'id' => $financingOrder->responsableAdmin->id,
+            'name' => $financingOrder->responsableAdmin->full_name,
+        ]);
     }
 }

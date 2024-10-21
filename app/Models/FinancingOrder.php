@@ -383,4 +383,9 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
         return $this->activeTraderOrder->every(fn ($traderOrder) => $traderOrder->isCancellable($area));
     }
+
+    public function responsableAdmin() {
+        return $this->belongsTo(User::class, 'assignable_id', 'id');
+    }
+    
 }

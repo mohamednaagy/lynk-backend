@@ -4,6 +4,8 @@ namespace App\Observers;
 
 use App\Jobs\General\ProcessFinancingOrders;
 use App\Models\FinancingOrder;
+use App\Models\User;
+use App\Services\AdminOrderAssignmentService;
 
 class FinancingOrderObserver
 {
@@ -12,8 +14,10 @@ class FinancingOrderObserver
      *
      * @return void
      */
-    public function created(FinancingOrder $financingOrder)
+    public function created(FinancingOrder $financingOrder): void
     {
+        AdminOrderAssignmentService::assignNextAdminToFinancingOrder($financingOrder);
+        // Dispatch the job to process financing orders
         ProcessFinancingOrders::dispatch();
     }
 
