@@ -96,8 +96,7 @@ class AdminOrderAssignmentService
 
     public static function assignNextAdminToFinancingOrder(FinancingOrder $financingOrder): void
     {
-        $adminID = (new self())->reOrderResponsableAdmins();
-        $financingOrder->assignable_id = $adminID;
+        $financingOrder->assignable_id = (new self())->reOrderResponsableAdmins();
         $financingOrder->saveQuietly();
     }
 }
