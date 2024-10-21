@@ -3,7 +3,6 @@
 namespace App\Actions;
 
 use App\Actions\Contracts\PartiallyUpdateAdmin;
-use App\Actions\Contracts\UpdateUser;
 use App\Models\User;
 use DragonCode\Support\Facades\Helpers\Arr;
 

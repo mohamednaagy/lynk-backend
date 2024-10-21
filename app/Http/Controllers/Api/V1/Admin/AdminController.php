@@ -197,20 +197,14 @@ class AdminController extends Controller
         PartiallyUpdateAdminRequest $request,
         PartiallyUpdateAdmin $partiallyUpdateAdmin,
     ): JsonResponse {
-        return DB::transaction(function () use ($request, $admin, $partiallyUpdateAdmin) {
+        $data = $request->validated();
+        +$partiallyUpdateAdmin->handle($data, $admin);
 
-
-            $data = $request->validated();
-            DB::transaction(function () use ($partiallyUpdateAdmin, $data, $admin) {
-                $partiallyUpdateAdmin->handle($data, $admin);
-            });
-
-            return fractal($admin, new UserTransformer(Area::SuperAdmin))
-                ->parseIncludes([
-                    'can_manage_orders',
-                ])
-                ->respond();
-        });
+        return fractal($admin, new UserTransformer(Area::SuperAdmin))
+            ->parseIncludes([
+                'can_manage_orders',
+            ])
+            ->respond();
     }
 
     /**
