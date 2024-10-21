@@ -81,6 +81,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::post('admins/{admin}/resend-invitation', ResendAdminInvitation::class);
         Route::apiResource('admins', AdminController::class);
+        Route::patch('admins/{admin}', [AdminController::class, 'partiallyUpdate']);
 
         Route::get('/roles', GetAllRoles::class)->middleware(
             'permission:'.perm(Area::SuperAdmin, [Subject::Roles, Action::Index])
