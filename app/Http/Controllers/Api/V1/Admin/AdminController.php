@@ -198,7 +198,7 @@ class AdminController extends Controller
         PartiallyUpdateAdmin $partiallyUpdateAdmin,
     ): JsonResponse {
         $data = $request->validated();
-        +$partiallyUpdateAdmin->handle($data, $admin);
+        $partiallyUpdateAdmin->handle($data, $admin);
 
         return fractal($admin, new UserTransformer(Area::SuperAdmin))
             ->parseIncludes([
