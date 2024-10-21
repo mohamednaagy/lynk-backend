@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Actions\Contracts\CreateAdminWithRoleAndPermission;
 use App\Actions\Contracts\GetPaginatedUsersByRole;
+use App\Actions\Contracts\PartiallyUpdateAdmin;
 use App\Actions\Contracts\UpdateAdminWithRoleAndPermission;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Admin\PartiallyUpdateAdminRequest;
 use App\Http\Requests\V1\Admin\StoreAdminRequest;
 use App\Http\Requests\V1\Admin\UpdateAdminRequest;
 use App\Mail\Admin\CompleteAdminRegisterInvitation;
@@ -188,6 +190,21 @@ class AdminController extends Controller
                 ])
                 ->respond();
         });
+    }
+
+    public function partiallyUpdate(
+        User $admin,
+        PartiallyUpdateAdminRequest $request,
+        PartiallyUpdateAdmin $partiallyUpdateAdmin,
+    ): JsonResponse {
+        $data = $request->validated();
+        $partiallyUpdateAdmin->handle($data, $admin);
+
+        return fractal($admin, new UserTransformer(Area::SuperAdmin))
+            ->parseIncludes([
+                'can_manage_orders',
+            ])
+            ->respond();
     }
 
     /**
