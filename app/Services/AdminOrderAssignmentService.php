@@ -51,7 +51,7 @@ class AdminOrderAssignmentService
     public function removeAdmin(User $admin): void
     {
         $admins = $this->getOrderResponsibleAdmins();
-        $admins = array_shift($admins); // Remove the admin
+        $admins = array_values(array_diff($admins, [$admin->id])); // Remove the admin
         $this->updateOrderResponsibleAdmins($admins);
     }
 
