@@ -37,4 +37,6 @@ interface TraderInterface
     public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string;
 
     public function contractSignedMessage(TraderOrder $traderOrder);
+
+    public function retryOrder(TraderOrder $traderOrder);
 }

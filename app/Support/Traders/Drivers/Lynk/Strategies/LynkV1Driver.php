@@ -254,21 +254,26 @@ class LynkV1Driver implements TraderInterface
 
         if ($traderOrder->mode == TraderOrderMode::Automatic) {
             if ($traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Local)) {
-                $traderOrder->order->update([
-                    'status' => FinancingOrderStatus::TradingFailure,
-                ]);
+                if ($traderOrder->cancelDetail->cancel_reason->is(TraderOrderCancelReason::FailureToPurchase)) {
+                    $traderOrder->order->update([
+                        'status' => FinancingOrderStatus::TradingFailure,
+                    ]);
+                }
             }
 
             if (
-
                 $traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Any)) {
-                Trader::driver(\App\Enums\Trader::Bursam, 'v2')
-                    ->createTraderOrder($traderOrder->order);
+                $this->retryOrder($traderOrder);
             }
         }
 
         return TraderOrderCancellationStatus::Cancelled;
-        //        }
+    }
+
+    public function retryOrder(TraderOrder $traderOrder)
+    {
+        Trader::driver(\App\Enums\Trader::Bursam, 'v2')
+            ->createTraderOrder($traderOrder->order);
     }
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void {}
