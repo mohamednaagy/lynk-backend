@@ -51,7 +51,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'status_reason',
         'creator',
         'approver',
-        'assignable',
+        'assignable_admin',
         'phone_country_code',
         'phone_number',
         'phone_number_formatted',
@@ -309,7 +309,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this;
     }
 
-    public function includeAssignable(FinancingOrder $financingOrder)
+    public function includeAssignableAdmin(FinancingOrder $financingOrder)
     {
         if (is_null($financingOrder->assignable_id)) {
             return $this->primitive(null);

@@ -16,16 +16,7 @@ class FinancingOrderObserver
      */
     public function created(FinancingOrder $financingOrder): void
     {
-        $adminID = AdminOrderAssignmentService::getNextAdminId();
-        
-        if ($adminID) {
-            // Reorder admins and assign the order to the next admin
-            AdminOrderAssignmentService::reOrderResponsableAdmins(User::find($adminID));
-            $financingOrder->assignable_id = $adminID;
-
-            $financingOrder->saveQuietly();
-        }
-
+        AdminOrderAssignmentService::assignNextAdminToFinancingOrder($financingOrder);
         // Dispatch the job to process financing orders
         ProcessFinancingOrders::dispatch();
     }
