@@ -249,5 +249,5 @@ return [
     |
     */
     'host_whitelist' => explode(',', env('HOST_WHITELIST')),
-
+    'API_THROTTLE_ENABLED' => env('API_THROTTLE_ENABLED, true'),
 ];
