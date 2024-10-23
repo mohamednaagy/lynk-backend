@@ -18,7 +18,7 @@ class ThrottleManager extends ThrottleRequests
     public function handle($request, Closure $next, $maxAttempts = 60, $decayMinutes = 1, $prefix = '')
     {
         // Check if throttling is enabled
-        if (config('app.API_THROTTLE_ENABLED', 'true')) {
+        if (config('app.api_throttle_enabled', 'true')) {
             return parent::handleRequest($request, $next,
             [
                 (object) [
