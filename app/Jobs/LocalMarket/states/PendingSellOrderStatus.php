@@ -3,8 +3,7 @@
 namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
-use App\Enums\LocalMarket\OrderCancelledBy;
-use App\Enums\LocalMarket\OrderCancelReason;
+use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\InventoryService;
@@ -18,7 +17,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class PendingCancelOrderStatus implements ShouldQueue
+class PendingSellOrderStatus implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, LocalMarketHelperTrait, Queueable, SerializesModels;
 
@@ -28,16 +27,13 @@ class PendingCancelOrderStatus implements ShouldQueue
 
     private LocalMarketWebhook $localMarketWebhook;
 
-    private ?int $cancelReason;
-
     public function __construct(
-        private LocalMarketOrder $localMarketOrder,
-        $cancelReason = null
+        private LocalMarketOrder $localMarketOrder
     ) {
         $this->inventoryService = app(InventoryService::class);
-        $this->localMarketWebhook = app(LocalMarketWebhook::class);
         $this->ownershipService = app(OwnershipService::class);
-        $this->cancelReason = $cancelReason;
+        $this->localMarketWebhook = app(LocalMarketWebhook::class);
+
         $this->onQueue('local_market');
         $this->logQueueJob();
     }
@@ -46,27 +42,19 @@ class PendingCancelOrderStatus implements ShouldQueue
     {
         DB::beginTransaction();
         try {
-            $this->logCancellationDetails();
-            $this->ownershipService->swapCurrentOwnerToPreviousOwner($this->localMarketOrder);
+            $this->ownershipService->changeUnitOwnership($this->localMarketOrder, OwnershipTypes::TraderOrder, $this->localMarketOrder->external_order_no);
             $this->inventoryService->freeOrderInventoryUnits($this->localMarketOrder);
             DB::commit();
-            $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::Cancelled);
+            $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::CommoditiesSell);
+            $this->logQueueJob('pending successfully');
         } catch (\Throwable $e) {
             DB::rollBack();
-            $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::FailedToCancel);
+            $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::FailedSell);
 
         }
     }
 
-    private function logCancellationDetails(): void
-    {
-        $this->localMarketOrder->cancelOrder()->create([
-            'cancelled_by' => OrderCancelledBy::Customer,
-            'cancel_reason' => OrderCancelReason::CancelOrder,
-        ]);
-    }
-
-    private function logQueueJob(?string $message = 'Cancel order status job added to queue local_market'): void
+    private function logQueueJob(?string $message = 'Pending Sell order status job added to queue local_market'): void
     {
         Log::channel('local_market')->info(
             "$message",

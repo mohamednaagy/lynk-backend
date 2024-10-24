@@ -119,5 +119,6 @@ return [
         TraderOrderCancelReason::FinancingOrderIsCancelled => 'Order cancelled by user',
         TraderOrderCancelReason::TraderOrderIsCancelled => 'Trade request cancelled by user ',
         TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'No commodities found with LOCAL Trader.',
+        TraderOrderCancelReason::ExpiredContractSignTime => 'Contract Sign Time Limit has expired.',
     ],
 ];

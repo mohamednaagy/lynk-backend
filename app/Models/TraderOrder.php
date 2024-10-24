@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -189,6 +190,10 @@ class TraderOrder extends Model implements HasMedia
                 ->whereColumn('trader_order_id', 'trader_orders.id')
                 ->latest('id')
                 ->take(1),
+            'last_history_created_at' => TraderHistory::select('created_at')
+                ->whereColumn('trader_order_id', 'trader_orders.id')
+                ->latest('id')
+                ->take(1),
         ]);
     }
 
@@ -301,6 +306,28 @@ class TraderOrder extends Model implements HasMedia
         return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
     }
 
+    public function scopeWithExpiredContractSignLimit($query, string $provider, string $version, int $lastHistoryAction, string $mode)
+    {
+        // Retrieve current time and contract signing limit
+        $currentTime = now();
+        $contractSignTimeLimit = $this->default_contract_sign_time_limit;
+
+        // Calculate the expiration time based on the contract signing limit
+        $expirationTime = $currentTime->subHours($contractSignTimeLimit);
+
+        return $query->where('provider', $provider)
+            ->where('version', $version)
+            ->where('mode', $mode)
+            ->where('status', TraderOrderStatus::InProgress)
+            ->whereHas('traderHistories', function ($query) use ($expirationTime, $lastHistoryAction) {
+                $query->select('trader_order_id', DB::raw('MAX(created_at) as latest_created_at'))
+                    ->groupBy('trader_order_id')
+                    ->havingRaw('MAX(created_at) = (SELECT MAX(created_at) FROM trader_histories WHERE trader_order_id = trader_orders.id)')
+                    ->where('action', $lastHistoryAction)
+                    ->where('created_at', '<=', $expirationTime);
+            });
+    }
+
     public function hoverMessage(): ?string
     {
         return Trader::driver($this->provider, $this->version)->HoverMessageOfTraderStatus($this);
@@ -313,6 +340,12 @@ class TraderOrder extends Model implements HasMedia
 
     public function getCustomerDeliveryStatusAndMessage(): array
     {
+        if ($this->provider == EnumsTrader::Lynk && $this->mode = TraderOrderMode::Automatic) {
+            return [
+                'status' => CustomerDeliveryStatus::DeliveryNotApplicable,
+                'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.delivery_not_applicable'),
+            ];
+        }
         if ($this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryCancelled)) {
             return [
                 'status' => CustomerDeliveryStatus::DeliveryIgnoreAndSell,

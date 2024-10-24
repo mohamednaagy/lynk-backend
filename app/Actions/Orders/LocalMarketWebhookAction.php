@@ -50,13 +50,15 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::NoEligibleCommoditiesAvailable);
                 break;
-            case LocalMarketOrderStatus::Cancelled:
+            case LocalMarketOrderStatus::CommoditiesSell:
                 Trader::driver($traderOrder->provider, $traderOrder->version)
-                    ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::TraderOrderIsCancelled);
+                    ->createSellingCommodityToCustomerDocument($traderOrder);
+                break;
+            case LocalMarketOrderStatus::FailedSell:
+                Trader::driver($traderOrder->provider, $traderOrder->version)
+                    ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::FailureToSellAtLocalMarket);
                 break;
 
-            default:
-                throw new \Exception('Invalid format for webhook data.');
         }
     }
 }

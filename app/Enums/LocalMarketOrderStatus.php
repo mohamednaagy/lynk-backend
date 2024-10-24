@@ -2,7 +2,6 @@
 
 namespace App\Enums;
 
-use App\Enums\FinancingOrderStatus as Status;
 use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
 use UnexpectedValueException;
@@ -35,6 +34,8 @@ final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
 
     const FailedToCancel = 12;
 
+    const TransferOwnershipToCustomer = 13;
+
     private static array $state = [
         self::initiate => [
             self::PendingEligibleCommodities,
@@ -58,14 +59,25 @@ final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
         ],
         self::CommoditiesPurchased => [
             self::PendingCancellation,
+            self::PendingSellCommodities,
+            self::TransferOwnershipToCustomer,
+
         ],
         self::PendingCancellation => [
             self::Cancelled,
             self::FailedToCancel,
         ],
 
+        self::PendingSellCommodities => [
+            self::CommoditiesSell,
+        ],
         self::Cancelled => [
             self::FailedToCancel,
+        ],
+
+        self::CommoditiesSell => [],
+        self::TransferOwnershipToCustomer => [
+            self::PendingSellCommodities,
         ],
 
     ];

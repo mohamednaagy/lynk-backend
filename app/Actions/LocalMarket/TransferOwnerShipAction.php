@@ -2,11 +2,11 @@
 
 namespace App\Actions\LocalMarket;
 
-use App\Actions\Contracts\LocalMarket\SellCommodities;
+use App\Actions\Contracts\LocalMarket\TransferOwnerShip;
 use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 
-class SellCommoditiesAction implements SellCommodities
+class TransferOwnerShipAction implements TransferOwnerShip
 {
     public function __construct(
         LocalMarketOrder $localMarketOrder
@@ -14,6 +14,6 @@ class SellCommoditiesAction implements SellCommodities
 
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
-        $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::PendingSellCommodities);
+        $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::TransferOwnershipToCustomer);
     }
 }

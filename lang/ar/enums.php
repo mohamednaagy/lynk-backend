@@ -124,5 +124,6 @@ return [
         TraderOrderCancelReason::FinancingOrderIsCancelled => 'لقد اختار المستخدم إلغاء طلب التجارة هذا',
         TraderOrderCancelReason::TraderOrderIsCancelled => 'لقد اختار المستخدم إلغاء هذا الطلب',
         TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'لا يوجد سلع كافيه داخل السوق المحلي',
+        TraderOrderCancelReason::ExpiredContractSignTime => 'انتهى الوقت المحدد لتوقيع العقد.',
     ],
 ];

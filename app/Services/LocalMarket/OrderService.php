@@ -3,7 +3,6 @@
 namespace App\Services\LocalMarket;
 
 use App\Enums\LocalMarket\OrderStatus;
-use App\Enums\LocalMarketOrderStatus;
 use App\Enums\Trader;
 use App\Models\LocalMarketOrder;
 use App\Models\LocalMarketOrderHasInventory;
@@ -97,10 +96,5 @@ class OrderService
     {
         $order->status = $status;
         $order->save();
-    }
-
-    public function cancelOrder(LocalMarketOrder $localMarketOrder)
-    {
-        $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::PendingCancellation);
     }
 }
