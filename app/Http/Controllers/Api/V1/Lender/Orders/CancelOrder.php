@@ -6,13 +6,12 @@ use App\Actions\Contracts\Orders\CancelOrder as CancelOrderInterface;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\ErrorCode;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MurabhaStep;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\CancelOrderRequest;
 use App\Models\FinancingOrder;
-use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,7 +29,7 @@ class CancelOrder extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  CancelOrderInterface  $cancelOrder ,
+     * @param  CancelOrderInterface  $cancelOrder  ,
      *
      * @throws \Throwable
      */
@@ -52,9 +51,8 @@ class CancelOrder extends Controller
 
             $traderOrder = $order->activeTraderOrder()->first();
             if ($traderOrder) {
-                $lastHistoryOfContractSignedStep = $this->getContractSignedLastHistory($traderOrder);
 
-                if ($traderOrder->checkOrderHistoryAction($lastHistoryOfContractSignedStep)) {
+                if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::ContractSigned)) {
                     return $this->errorResponse(
                         __('error.unable_to_cancel_order'),
                         Response::HTTP_FORBIDDEN,
@@ -71,14 +69,5 @@ class CancelOrder extends Controller
 
             return $this->successResponse();
         });
-    }
-
-    private function getContractSignedLastHistory($traderOrder)
-    {
-        $contractSignedHistories = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
-            ->getStepOf(MurabhaStep::ContractSigned)
-            ?->histories;
-
-        return end($contractSignedHistories);
     }
 }

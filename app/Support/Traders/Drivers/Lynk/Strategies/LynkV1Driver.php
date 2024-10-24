@@ -290,6 +290,7 @@ class LynkV1Driver implements TraderInterface
                 $traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Any)) {
                 $this->retryOrder($traderOrder);
             }
+
         }
 
         return TraderOrderCancellationStatus::Cancelled;
