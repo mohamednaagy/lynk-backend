@@ -35,7 +35,9 @@ class CommoditiesPurchaseCompletedStatus implements ShouldQueue
     {
         $data = $this->getDataOfLocalMarketOrder($this->localMarketOrder);
         $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::CommoditiesPurchased);
-        $this->localMarketWebhook->with(['case' => LocalMarketOrderStatus::CommoditiesPurchased, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
+        $data['case'] = LocalMarketOrderStatus::CommoditiesPurchased;
+        $data['external_order_no'] = $this->localMarketOrder->external_order_no;
+        $this->localMarketWebhook->with($data)->handle();
         Log::channel('local_market')->info("Congratulations Commodities purchased for order {$this->localMarketOrder->id}");
     }
 }
