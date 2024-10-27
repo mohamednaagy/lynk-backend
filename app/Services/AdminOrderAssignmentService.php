@@ -35,6 +35,7 @@ class AdminOrderAssignmentService
      */
     public function updateOrderResponsibleAdmins(array $admins): void
     {
+        //check the length of the the saved array versus the user assigned list
         DB::table('settings')
             ->where('name', self::CACHE_KEY)
             ->update(['payload' => json_encode($admins)]);
@@ -51,8 +52,15 @@ class AdminOrderAssignmentService
     public function removeAdmin(User $admin): void
     {
         $admins = $this->getOrderResponsibleAdmins();
+        Log::info('Cache before removing admin', [
+            'cache' => $admins,
+            'removed_admin_id' => $admin->id,
+        ]);
         $admins = array_values(array_diff($admins, [$admin->id])); // Remove the admin
         $this->updateOrderResponsibleAdmins($admins);
+        Log::info('Cache after removing admin', [
+            'cache' => $this->getOrderResponsibleAdmins(),
+        ]);
     }
 
     /**
@@ -64,10 +72,18 @@ class AdminOrderAssignmentService
     public function addAdmin(User $admin): void
     {
         $admins = $this->getOrderResponsibleAdmins();
+        Log::info('Cache before adding admin', [
+            'cache' => $admins,
+            'admin_id' => $admin->id,
+        ]);
         if (!in_array($admin->id, $admins, true)) {
             $admins[] = $admin->id; // Add the admin
             $this->updateOrderResponsibleAdmins($admins);
         }
+        Log::info('Cache after adding admin', [
+            'cache' => $this->getOrderResponsibleAdmins(),
+            'added_admin_id' => $admin->id,
+        ]);
     }
 
     /**
