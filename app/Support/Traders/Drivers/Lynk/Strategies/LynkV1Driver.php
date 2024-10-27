@@ -182,16 +182,6 @@ class LynkV1Driver implements TraderInterface
                         'created_at' => $currentTimeInUtcTz,
                     ]
                 );
-
-                // TODO :: check it with naser
-                //                $this->createTraderOrderHistory(
-                //                    $traderOrder,
-                //                    FinancingOrderHistory::PendingDelivery,
-                //                    [
-                //                        'created_at' => $currentTimeInUtcTz,
-                //                    ]
-                //                );
-
             });
         } catch (Exception $exception) {
             throw new TraderException(
