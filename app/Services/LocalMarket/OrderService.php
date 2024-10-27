@@ -6,11 +6,14 @@ use App\Enums\LocalMarket\OrderStatus;
 use App\Enums\Trader;
 use App\Models\LocalMarketOrder;
 use App\Models\LocalMarketOrderHasInventory;
+use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class OrderService
 {
+    use LocalMarketHelperTrait;
+
     public function createOrder($traderOrder, $financialOrder, array $preferredTypes, int $companyId)
     {
         return LocalMarketOrder::create([

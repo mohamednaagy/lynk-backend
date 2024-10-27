@@ -197,4 +197,9 @@ class BursamV2Driver extends BursamV1Driver
     {
         return null;
     }
+
+    public function retryOrder(TraderOrder $traderOrder)
+    {
+        $traderOrder->order->update(['status' => FinancingOrderStatus::Approved]);
+    }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Console;
 
-use App\Jobs\checkExpiredContractSignedTimeTraderOrdersJob;
 use App\Console\Commands\RunHoldTraderWhenMarketOpenCommand;
+use App\Jobs\checkExpiredContractSignedTimeTraderOrdersJob;
 use App\Jobs\General\ProcessFinancingOrders;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessDailySellingPendingCommodityToMarket;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccNotifications;
@@ -47,11 +47,11 @@ class Kernel extends ConsoleKernel
             ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
             ->onOneServer();
 
-        $schedule->job(new checkExpiredContractSignedTimeTraderOrdersJob())
+        $schedule->job(new checkExpiredContractSignedTimeTraderOrdersJob)
             ->everyMinute()
             ->withoutOverlapping()
             ->onOneServer();
-            
+
         $schedule->command('horizon:snapshot')->everyFiveMinutes();
     }
 

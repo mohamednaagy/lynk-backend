@@ -3,6 +3,7 @@
 namespace App\Support\Traders\Drivers\Fake\Strategies;
 
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderCancelType;
@@ -489,5 +490,10 @@ class FakeV1Driver implements TraderInterface
     public function contractSignedMessage(TraderOrder $traderOrder)
     {
         return null;
+    }
+
+    public function retryOrder(TraderOrder $traderOrder)
+    {
+        $traderOrder->order->update(['status' => FinancingOrderStatus::Approved]);
     }
 }

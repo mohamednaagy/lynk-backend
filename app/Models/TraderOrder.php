@@ -191,9 +191,9 @@ class TraderOrder extends Model implements HasMedia
                 ->latest('id')
                 ->take(1),
             'last_history_created_at' => TraderHistory::select('created_at')
-            ->whereColumn('trader_order_id', 'trader_orders.id')
-            ->latest('id')
-            ->take(1),
+                ->whereColumn('trader_order_id', 'trader_orders.id')
+                ->latest('id')
+                ->take(1),
         ]);
     }
 
@@ -314,16 +314,17 @@ class TraderOrder extends Model implements HasMedia
 
         // Calculate the expiration time based on the contract signing limit
         $expirationTime = $currentTime->subHours($contractSignTimeLimit);
+
         return $query->where('provider', $provider)
             ->where('version', $version)
             ->where('mode', $mode)
             ->where('status', TraderOrderStatus::InProgress)
             ->whereHas('traderHistories', function ($query) use ($expirationTime, $lastHistoryAction) {
                 $query->select('trader_order_id', DB::raw('MAX(created_at) as latest_created_at'))
-                ->groupBy('trader_order_id')
-                ->havingRaw('MAX(created_at) = (SELECT MAX(created_at) FROM trader_histories WHERE trader_order_id = trader_orders.id)')
-                ->where('action',  $lastHistoryAction)
-                ->where('created_at', '<=', $expirationTime);
+                    ->groupBy('trader_order_id')
+                    ->havingRaw('MAX(created_at) = (SELECT MAX(created_at) FROM trader_histories WHERE trader_order_id = trader_orders.id)')
+                    ->where('action', $lastHistoryAction)
+                    ->where('created_at', '<=', $expirationTime);
             });
     }
 
@@ -339,6 +340,12 @@ class TraderOrder extends Model implements HasMedia
 
     public function getCustomerDeliveryStatusAndMessage(): array
     {
+        if ($this->provider == EnumsTrader::Lynk && $this->mode = TraderOrderMode::Automatic) {
+            return [
+                'status' => CustomerDeliveryStatus::DeliveryNotApplicable,
+                'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.delivery_not_applicable'),
+            ];
+        }
         if ($this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryCancelled)) {
             return [
                 'status' => CustomerDeliveryStatus::DeliveryIgnoreAndSell,

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class LocalMarketOrder extends Model
 {
-    use HasFactory;
+    use HasFactory , LocalMarketHelperTrait;
 
     protected $fillable = [
         'source',
@@ -45,6 +46,11 @@ class LocalMarketOrder extends Model
         return $this->hasMany(LocalMarketOrderHasUnit::class, 'local_market_order_id');
     }
 
+    public function unitOwnerships()
+    {
+        return $this->hasMany(LocalMarketUnitOwnership::class, 'local_market_order_id');
+    }
+
     public function histories()
     {
         return $this->hasMany(LocalMarketOrderHistory::class, 'local_market_order_id');
@@ -58,5 +64,12 @@ class LocalMarketOrder extends Model
     public function inverntoryUnits()
     {
         return $this->hasMany(LocalMarketInventoryUnits::class, 'hold_for');
+    }
+
+    public function changeStatusTo($status)
+    {
+        $this->status = $status;
+        $this->save();
+        $this->createLocalMarketOrderHistory($this, $status);
     }
 }

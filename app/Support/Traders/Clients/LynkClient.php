@@ -2,8 +2,11 @@
 
 namespace App\Support\Traders\Clients;
 
+use App\Actions\Contracts\LocalMarket\CancelOrder;
 use App\Actions\Contracts\LocalMarket\CreateLocalMarketOrder;
-use App\Actions\LocalMarket\PurchaseProductAction;
+use App\Actions\Contracts\LocalMarket\SellCommodities;
+use App\Actions\Contracts\LocalMarket\TransferOwnerShip;
+use App\Models\LocalMarketOrder;
 use App\Models\TraderOrder;
 use App\Settings\Classes\LocalMurabahaSettings;
 use Illuminate\Support\Facades\Log;
@@ -61,6 +64,25 @@ class LynkClient
 
     public function sellProduct()
     {
-        //TODO to be handled
+        $trader = $this->traderOrder;
+        $localMarketOrder = LocalMarketOrder::where('external_order_no', $trader->reference)->first();
+
+        return app(SellCommodities::class)->handle($localMarketOrder);
+    }
+
+    public function transferOwnershipToCustomer()
+    {
+        $trader = $this->traderOrder;
+        $localMarketOrder = LocalMarketOrder::where('external_order_no', $trader->reference)->first();
+
+        return app(TransferOwnerShip::class)->handle($localMarketOrder);
+    }
+
+    public function cancelOrder()
+    {
+        $trader = $this->traderOrder;
+        $localMarketOrder = LocalMarketOrder::where('external_order_no', $trader->reference)->first();
+
+        return app(CancelOrder::class)->handle($localMarketOrder);
     }
 }
