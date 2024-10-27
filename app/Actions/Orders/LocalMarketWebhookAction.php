@@ -5,6 +5,7 @@ namespace App\Actions\Orders;
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
 use App\Enums\LocalMarketOrderStatus;
 use App\Enums\TraderOrderCancelReason;
+use App\Exceptions\LocalMarketWebhookException;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
@@ -62,7 +63,8 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::FailureToSellAtLocalMarket);
                 break;
-
+            default:
+                throw new LocalMarketWebhookException;
         }
     }
 }
