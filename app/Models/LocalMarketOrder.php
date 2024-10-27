@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\LocalMarketOrderStatus;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -65,14 +64,6 @@ class LocalMarketOrder extends Model
     public function inverntoryUnits()
     {
         return $this->hasMany(LocalMarketInventoryUnits::class, 'hold_for');
-    }
-
-    public function canCancelledOrder()
-    {
-        return
-            $this->status == LocalMarketOrderStatus::EligibleCommoditiesAvailable ||
-            $this->status == LocalMarketOrderStatus::PendingEligibleCommodities ||
-            $this->status == LocalMarketOrderStatus::CommoditiesPurchased;
     }
 
     public function changeStatusTo($status)
