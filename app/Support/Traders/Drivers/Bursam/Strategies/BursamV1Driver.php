@@ -27,11 +27,13 @@ use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
 
@@ -625,7 +627,7 @@ class BursamV1Driver implements TraderInterface
     public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
     {
         return match ($traderOrder->status->value) {
-            TraderOrderStatus::Hold => __('order.trader.bursa.hold_status'),
+            TraderOrderStatus::Hold => __('order.trader.bursa.hold_status', ['TIME' => Carbon::parse(Config::get('services.bursam.market_opening_start_time'))->translatedFormat('h:i A')]),
             default => null,
         };
     }
