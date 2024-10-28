@@ -2,10 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Enums\MurabhaStep;
 use App\Enums\Trader;
 use App\Enums\TraderOrderCancelReason;
-use App\Enums\TraderOrderMode;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader as FacadesTrader;
 use Illuminate\Bus\Queueable;
@@ -19,56 +17,22 @@ class CheckExpiredContractSignedTimeTraderOrdersJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected string $mode;
-
-    protected string $provider;
-
-    protected string $version;
-
-    /**
-     * Create a new job instance.
-     */
-    public function __construct()
-    {
-        $this->provider = Trader::Lynk;
-        $this->version = $this->getLatestTraderVersion();
-        $this->mode = TraderOrderMode::Automatic;
-    }
-
-    /**
-     * Retrieve the latest trader version.
-     */
-    protected function getLatestTraderVersion(): string
-    {
-        return get_latest_version_of_trader($this->provider);
-    }
-
     /**
      * Execute the job.
      */
     public function handle()
     {
         try {
-            $stepToHistoriesDictionary = trader_step_histories($this->provider, $this->version);
-            $lastHistoryOfStep = end($stepToHistoriesDictionary[MurabhaStep::PurchasingCommodity]);
-
-            $expiredTraderOrders = TraderOrder::withExpiredContractSignLimit(
-                $this->provider,
-                $this->version,
-                $lastHistoryOfStep,
-                $this->mode
-            )->get();
-
+            $expiredTraderOrders = TraderOrder::withExpiredContractSignLimit();
             foreach ($expiredTraderOrders as $traderOrder) {
-
-                FacadesTrader::driver($this->provider, $this->version)
+                FacadesTrader::driver(Trader::Lynk, get_latest_version_of_trader(Trader::Lynk))
                     ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::ExpiredContractSignTime);
 
                 Log::info("Cancelled Trader Order ID: {$traderOrder->id} due to timeout.");
             }
 
             if ($expiredTraderOrders->isEmpty()) {
-                Log::info("No expired trader orders found for provider: {$this->provider}.");
+                Log::info("No expired trader orders found for Lynk provider.");
             }
 
         } catch (\Exception $e) {

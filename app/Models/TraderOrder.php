@@ -22,7 +22,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -306,26 +305,34 @@ class TraderOrder extends Model implements HasMedia
         return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
     }
 
-    public function scopeWithExpiredContractSignLimit($query, string $provider, string $version, int $lastHistoryAction, string $mode)
+
+    public function scopeWithExpiredContractSignLimit($query)
     {
-        // Retrieve current time and contract signing limit
-        $currentTime = now();
-        $contractSignTimeLimit = $this->default_contract_sign_time_limit;
+        $version = get_latest_version_of_trader(EnumsTrader::Lynk);
+        return $query->where('provider', EnumsTrader::Lynk)
+        ->where('version', $version)
+        ->where('mode', TraderOrderMode::Automatic)
+        ->where('status', TraderOrderStatus::InProgress)
+        ->whereNotNull('default_contract_sign_time_limit')
+        ->with(['traderHistories' => function ($query) {
+            $query->select('trader_order_id', 'created_at', 'action')
+                ->orderBy('id', 'desc');
+        }])
+        ->get()
+        ->filter(fn($traderOrder) => $this->isTraderOrderExpired($traderOrder));
+    }
 
-        // Calculate the expiration time based on the contract signing limit
-        $expirationTime = $currentTime->subHours($contractSignTimeLimit);
-
-        return $query->where('provider', $provider)
-            ->where('version', $version)
-            ->where('mode', $mode)
-            ->where('status', TraderOrderStatus::InProgress)
-            ->whereHas('traderHistories', function ($query) use ($expirationTime, $lastHistoryAction) {
-                $query->select('trader_order_id', DB::raw('MAX(created_at) as latest_created_at'))
-                    ->groupBy('trader_order_id')
-                    ->havingRaw('MAX(created_at) = (SELECT MAX(created_at) FROM trader_histories WHERE trader_order_id = trader_orders.id)')
-                    ->where('action', $lastHistoryAction)
-                    ->where('created_at', '<=', $expirationTime);
-            });
+    protected function isTraderOrderExpired($traderOrder): bool
+    {
+        $latestHistory = $traderOrder->traderHistories->first();
+        if ($latestHistory->action == FinancingOrderHistory::CreateTransferOwnershipToLenderDocument) {
+            $currentTime = now();
+            $contractSignTimeLimit = $traderOrder->default_contract_sign_time_limit;
+            $expirationTime = $latestHistory->created_at->addHours($contractSignTimeLimit);
+    
+            return $currentTime > $expirationTime;
+        }
+        return false;
     }
 
     public function hoverMessage(): ?string
