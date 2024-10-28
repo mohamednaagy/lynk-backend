@@ -11,8 +11,10 @@ use App\Http\Controllers\Api\V1\Admin\Auth\ResendAdminInvitation;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityItemController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierController;
+use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierUserController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypeController;
+use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypesLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ResendInvitationToUserController as ResendSupplierInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
@@ -130,10 +132,18 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         });
 
         Route::apiResource('lenders', LenderController::class);
+        Route::prefix('commodity-suppliers')->group(function () {
+            Route::post('{supplier}/users/{user}/resend-invitation', ResendSupplierInvitationToUser::class);
+            Route::apiResource('{supplier}/users', CommoditySupplierUserController::class)->only(['index', 'show', 'store', 'update']);
+            Route::get('/dropdown-list', CommoditySupplierLiteList::class);
+        });
         Route::apiResource('commodity-suppliers', CommoditySupplierController::class);
 
         Route::apiResource('lenders.users', LenderUserController::class)->scoped();
 
+        Route::prefix('commodity-types')->group(function () {
+            Route::get('/dropdown-list', CommodityTypesLiteList::class);
+        });
         Route::apiResource('commodity-types', CommodityTypeController::class);
 
         Route::get('orders/export', ExportOrders::class);
@@ -189,11 +199,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::get('media/{media}/download', DownloadMedia::class);
 
         Route::post('/upload-image', [UploadImage::class, 'store']);
-
-        Route::prefix('commodity-suppliers')->group(function () {
-            Route::post('{supplier}/users/{user}/resend-invitation', ResendSupplierInvitationToUser::class);
-            Route::apiResource('{supplier}/users', CommoditySupplierUserController::class)->only(['index', 'show', 'store', 'update']);
-        });
 
         Route::prefix('commodity-items')->group(function () {
             Route::get('/', [CommodityItemController::class, 'index']);

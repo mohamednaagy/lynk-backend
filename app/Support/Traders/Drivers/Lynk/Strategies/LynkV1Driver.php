@@ -251,7 +251,15 @@ class LynkV1Driver implements TraderInterface
                 Trader::driver(\App\Enums\Trader::Bursam, 'v2')
                     ->createTraderOrder($traderOrder->order);
             }
+            
         }
+
+        if ($order->status->is(FinancingOrderStatus::InProgress)) {
+            $order->update([
+                'status' => FinancingOrderStatus::PendingTraderOrder,
+            ]);
+        }
+
 
         return TraderOrderCancellationStatus::Cancelled;
     }
