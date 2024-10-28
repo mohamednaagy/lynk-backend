@@ -24,6 +24,7 @@ use App\Support\Traders\Clients\LynkClient;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelOrderAtLocalMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelTraderOrder;
+use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCompleteMurabahaAfterSellToMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkTransferOwnershipToCustomer;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
@@ -182,6 +183,7 @@ class LynkV1Driver implements TraderInterface
                         'created_at' => $currentTimeInUtcTz,
                     ]
                 );
+
             });
         } catch (Exception $exception) {
             throw new TraderException(
@@ -337,7 +339,7 @@ class LynkV1Driver implements TraderInterface
             TraderOrderCancelReason::Manual => __('order.trader.lynk.cancelled_status'),
             TraderOrderCancelReason::NoEligibleCommoditiesAvailable => __('order.trader.lynk.no_commodity_available'),
             TraderOrderCancelReason::FailureToPurchase => __('order.trader.lynk.internal_technical_error'),
-            TraderOrderCancelReason::ExpiredContractSignTime => __('order.trader.expired_contract_time', [
+            TraderOrderCancelReason::ExpiredContractSignTime => __('order.trader.lynk.expired_contract_time', [
                 'TIME' => $traderOrder->default_contract_sign_time_limit,
             ]),
             default => null,
@@ -377,6 +379,7 @@ class LynkV1Driver implements TraderInterface
     {
         match ($lastHistoryAction) {
             FinancingOrderHistory::ContractSigned => ProcessLynkTransferOwnershipToCustomer::dispatch($traderOrder->id),
+            //            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessLynkCompleteMurabahaAfterSellToMarket::dispatch($traderOrder->id),
             default => null,
         };
     }

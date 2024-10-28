@@ -58,7 +58,9 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
             case LocalMarketOrderStatus::CommoditiesSell:
                 (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))->updateMurabhaCompleteDocument($traderOrder);
                 break;
+            case LocalMarketOrderStatus::Cancelled:
 
+                break;
             case LocalMarketOrderStatus::FailedSell:
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::FailureToSellAtLocalMarket);

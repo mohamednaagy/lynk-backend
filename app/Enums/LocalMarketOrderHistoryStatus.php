@@ -30,4 +30,8 @@ final class LocalMarketOrderHistoryStatus extends Enum implements LocalizedEnum
     const CommoditiesSell = 10;
 
     const FailedSell = 11;
+
+    const FailedToCancel = 12;
+
+    const TransferOwnershipToCustomer = 13;
 }
