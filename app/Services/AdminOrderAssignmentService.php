@@ -21,10 +21,10 @@ class AdminOrderAssignmentService
      */
     public function getOrderResponsibleAdmins(): array
     {
-        return Cache::remember(self::CACHE_KEY, self::CACHE_DURATION, function () {
+        // return Cache::remember(self::CACHE_KEY, self::CACHE_DURATION, function () {
             $setting = app(GeneralSettings::class)->order_responsible_admins;
             return $setting ?: [];
-        });
+        // });
     }
 
     /**
@@ -40,7 +40,7 @@ class AdminOrderAssignmentService
             ->where('name', self::CACHE_KEY)
             ->update(['payload' => json_encode($admins)]);
 
-        Cache::put(self::CACHE_KEY, $admins, self::CACHE_DURATION);
+        // Cache::put(self::CACHE_KEY, $admins, self::CACHE_DURATION);
     }
 
     /**
