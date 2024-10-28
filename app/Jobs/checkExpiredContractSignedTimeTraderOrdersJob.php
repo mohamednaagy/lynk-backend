@@ -55,28 +55,21 @@ class CheckExpiredContractSignedTimeTraderOrdersJob implements ShouldQueue
                 $this->version,
                 $lastHistoryOfStep,
                 $this->mode
-            )->get();
+            );
             foreach ($expiredTraderOrders as $traderOrder) {
-                $currentTime = now();
-                $contractSignTimeLimit = $traderOrder->default_contract_sign_time_limit;
-                Log::info("contract sign time limit". $contractSignTimeLimit);
-                if ($contractSignTimeLimit !== null) {
-                    $expirationTime = $currentTime->copy()->subHours($contractSignTimeLimit);
-                    // Check if the latest history action's created_at is before or equal to expiration time
-                    $latestHistory = $traderOrder->traderHistories->first();
-                    if ($latestHistory->created_at <= $expirationTime) {
-                        FacadesTrader::driver($this->provider, $this->version)
-                            ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::ExpiredContractSignTime);
-                        Log::info("Cancelled Trader Order ID: {$traderOrder->id} due to timeout." . $traderOrder);
-                    }
-                }
+                FacadesTrader::driver($this->provider, $this->version)
+                    ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::ExpiredContractSignTime);
+                
+                Log::info("Cancelled Trader Order ID: {$traderOrder->id} due to timeout.");
             }
 
             if ($expiredTraderOrders->isEmpty()) {
-                Log::info("No trader orders found for provider: {$this->provider}.");
+                Log::info("No expired trader orders found for provider: {$this->provider}.");
             }
+
         } catch (\Exception $e) {
             Log::error("Failed to check and cancel expired trader orders: " . $e->getMessage());
+            // Optionally, you could throw the exception again if you want to handle it further up the chain.
         }
     }
 }

@@ -310,19 +310,33 @@ class TraderOrder extends Model implements HasMedia
     public function scopeWithExpiredContractSignLimit($query, string $provider, string $version, int $lastHistoryAction, string $mode)
     {
         return $query->where('provider', $provider)
-            ->where('version', $version)
-            ->where('mode', $mode)
-            ->where('status', TraderOrderStatus::InProgress)
-            ->whereHas('traderHistories', function ($query) use ($lastHistoryAction) {
-                $query->select('trader_order_id', DB::raw('MAX(created_at) as latest_created_at'))
-                ->groupBy('trader_order_id')
-                ->havingRaw('MAX(created_at) = (SELECT MAX(created_at) FROM trader_histories WHERE trader_order_id = trader_orders.id)')
-                ->where('action',  $lastHistoryAction);
-            })
-            ->with(['traderHistories' => function ($query) {
-                $query->select('trader_order_id', 'created_at', 'action')
-                    ->orderBy('created_at', 'desc');
-            }]);
+        ->where('version', $version)
+        ->where('mode', $mode)
+        ->where('status', TraderOrderStatus::InProgress)
+        ->whereHas('traderHistories', function ($query) use ($lastHistoryAction) {
+            $query->where('action', $lastHistoryAction)
+                ->select('trader_order_id', DB::raw('MAX(created_at) as latest_created_at'))
+                ->groupBy('trader_order_id');
+        })
+        ->with(['traderHistories' => function ($query) {
+            $query->select('trader_order_id', 'created_at', 'action')
+                ->orderBy('created_at', 'desc');
+        }])
+        ->get()->filter(function ($order) {
+            // Get the current time
+            $currentTime = now();
+
+            // Get the default contract sign time limit from each order
+            $contractSignTimeLimit = $order->default_contract_sign_time_limit;
+            $expirationTime = $currentTime->subHours($contractSignTimeLimit);
+            // Check if the latest history action's created_at is before or equal to expiration time
+            $latestHistory = $order->traderHistories->first();
+            if ($latestHistory->created_at <= $expirationTime) {
+                return true; // Keep this order
+            }
+            
+            return false; // Discard this order
+        });
     }
 
     public function hoverMessage(): ?string
