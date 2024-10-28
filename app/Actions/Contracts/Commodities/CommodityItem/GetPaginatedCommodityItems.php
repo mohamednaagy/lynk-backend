@@ -16,7 +16,7 @@ interface GetPaginatedCommodityItems
 
     public function setCommodityTypes(?array $commodityTypes): self;
 
-    public function setDirection(string $direction = 'asc'): self;
+    public function setDirection(?string $direction = 'asc'): self;
 
-    public function setSort(string $sort = 'id'): self;
+    public function setSort(?string $sort = 'id'): self;
 }

@@ -81,10 +81,10 @@ class GetPaginatedCommodityItemsAction implements GetPaginatedCommodityItems
     /**
      * Set the direction of the sort.
      *
-     * @param string $direction The direction of the sort. Options are 'asc' or 'desc'.
+     * @param string|null $direction The direction of the sort. Options are 'asc' or 'desc'.
      * @return $this
      */
-    public function setDirection(string $direction = 'asc'): self
+    public function setDirection(?string $direction = 'asc'): self
     {
         $this->direction = $direction;
         return $this;
@@ -93,10 +93,10 @@ class GetPaginatedCommodityItemsAction implements GetPaginatedCommodityItems
     /**
      * Set the sort field.
      *
-     * @param string $sort The field to sort by.
+     * @param string|null $sort The field to sort by.
      * @return $this
      */
-    public function setSort(string $sort = 'id'): self
+    public function setSort(?string $sort = 'id'): self
     {
         $this->sort = $sort;
         return $this;
