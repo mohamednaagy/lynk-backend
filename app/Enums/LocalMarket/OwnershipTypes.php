@@ -13,5 +13,5 @@ final class OwnershipTypes extends Enum implements LocalizedEnum
 
     const OriginalSupplier = 3;
 
-    const LocalMarket = 4;
+    const TraderOrder = 4;
 }

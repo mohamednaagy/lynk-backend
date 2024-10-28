@@ -5,6 +5,7 @@ namespace App\Actions\Orders\TraderOrders\ProceedAction;
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedContractSignedDelivery;
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\ContractSignedType;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
@@ -31,10 +32,12 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
         }
         $traderOrder->update(['contract_signed_type' => ContractSignedType::Delivery]);
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
         $trader->createSellingCommodityToCustomerDocument($traderOrder);
         if ($traderOrder->isNeedToGenerateWakalaDocument()) {
             app()->make(GenerateClientWakala::class)->handle($traderOrder);
         }
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::PendingDelivery);
 
         return [];
     }

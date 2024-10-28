@@ -20,7 +20,9 @@ class CheckExpiredContractSignedTimeTraderOrdersJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected string $mode;
+
     protected string $provider;
+
     protected string $version;
 
     /**
@@ -56,10 +58,12 @@ class CheckExpiredContractSignedTimeTraderOrdersJob implements ShouldQueue
                 $lastHistoryOfStep,
                 $this->mode
             )->get();
+
             foreach ($expiredTraderOrders as $traderOrder) {
+
                 FacadesTrader::driver($this->provider, $this->version)
                     ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::ExpiredContractSignTime);
-                
+
                 Log::info("Cancelled Trader Order ID: {$traderOrder->id} due to timeout.");
             }
 
@@ -68,7 +72,7 @@ class CheckExpiredContractSignedTimeTraderOrdersJob implements ShouldQueue
             }
 
         } catch (\Exception $e) {
-            Log::error("Failed to check and cancel expired trader orders: " . $e->getMessage());
+            Log::error('Failed to check and cancel expired trader orders: '.$e->getMessage());
             // Optionally, you could throw the exception again if you want to handle it further up the chain.
         }
     }

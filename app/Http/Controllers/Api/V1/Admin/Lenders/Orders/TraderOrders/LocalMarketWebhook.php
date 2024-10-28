@@ -32,7 +32,7 @@ class LocalMarketWebhook extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($request, $webhook) {
             $data = $request->validated();
-            $webhook->handle($data);
+            $webhook->with(['data' => $data])->handle();
 
             return $this->successResponse();
         });

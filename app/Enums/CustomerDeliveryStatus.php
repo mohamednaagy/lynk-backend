@@ -12,4 +12,6 @@ final class CustomerDeliveryStatus extends Enum implements LocalizedEnum
     const DeliveryConfirmed = 1;
 
     const DeliveryIgnoreAndSell = 2;
+
+    const DeliveryNotApplicable = 3;
 }

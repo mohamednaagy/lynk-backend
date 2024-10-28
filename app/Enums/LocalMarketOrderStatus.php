@@ -2,7 +2,6 @@
 
 namespace App\Enums;
 
-use App\Enums\FinancingOrderStatus as Status;
 use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
 use UnexpectedValueException;
@@ -21,7 +20,7 @@ final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
 
     const FailedPurchase = 5;
 
-    const pendingCancellation = 6;
+    const PendingCancellation = 6;
 
     const Cancelled = 7;
 
@@ -33,26 +32,54 @@ final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
 
     const FailedSell = 11;
 
+    const FailedToCancel = 12;
+
+    const TransferOwnershipToCustomer = 13;
+
     private static array $state = [
         self::initiate => [
             self::PendingEligibleCommodities,
+            self::PendingCancellation,
+
         ],
         self::PendingEligibleCommodities => [
             self::EligibleCommoditiesAvailable,
             self::NoEligibleCommoditiesAvailable,
             self::FailedPurchase,
+            self::PendingCancellation,
         ],
         self::Completed => [],
         self::NoEligibleCommoditiesAvailable => [
             self::FailedPurchase,
-            self::Cancelled,
+            self::PendingCancellation,
         ],
         self::EligibleCommoditiesAvailable => [
             self::CommoditiesPurchased,
-            self::FailedPurchase,
+            self::PendingCancellation,
         ],
         self::CommoditiesPurchased => [
+            self::PendingCancellation,
+            self::PendingSellCommodities,
+            self::TransferOwnershipToCustomer,
+
         ],
+        self::PendingCancellation => [
+            self::Cancelled,
+            self::FailedToCancel,
+        ],
+
+        self::PendingSellCommodities => [
+            self::CommoditiesSell,
+        ],
+        self::Cancelled => [
+            self::FailedToCancel,
+        ],
+
+        self::CommoditiesSell => [],
+        self::TransferOwnershipToCustomer => [
+            self::PendingSellCommodities,
+        ],
+
     ];
 
     public function canMoveTo(int $status): bool

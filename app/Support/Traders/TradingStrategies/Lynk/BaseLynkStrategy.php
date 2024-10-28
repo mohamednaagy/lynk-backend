@@ -108,12 +108,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
     protected function sellCommodityToCustomer($traderOrder, $request)
     {
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
-        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
-
-        $trader->createSellingCommodityToCustomerDocument($traderOrder);
-
-        // automatic complete the order
-        $this->updateMurabhaCompleteDocument($traderOrder, $request);
     }
 
     public function updateSellConfirmationDocument(TraderOrder $traderOrder, Request $request)

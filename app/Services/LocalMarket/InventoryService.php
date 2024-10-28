@@ -7,6 +7,7 @@ use App\Enums\CommoitySupplierStatus;
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Models\LocalMarketInventory;
+use App\Models\LocalMarketOrder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -146,6 +147,15 @@ class InventoryService
         } catch (\Exception $e) {
             Log::error("Updated Inventory ID: {$inventory->id} status to Problem due to error: {$e->getMessage()}");
             throw $e;
+        }
+    }
+
+    public function freeOrderInventoryUnits(LocalMarketOrder $localMarketOrder, string $status = InventoryUnitsStatus::Free)
+    {
+        foreach ($localMarketOrder->orderInventories as $orderInventory) {
+            $inventory = $orderInventory->inventory;
+            $localMarketOrder->inverntoryUnits()->where(['local_market_inventory_id' => $inventory->id])->update(['status' => $status, 'hold_for' => null]);
+            $inventory->refreshStockQuantities();
         }
     }
 }
