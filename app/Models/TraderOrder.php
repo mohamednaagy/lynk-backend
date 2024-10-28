@@ -318,8 +318,9 @@ class TraderOrder extends Model implements HasMedia
                 ->select('trader_order_id', DB::raw('MAX(created_at) as latest_created_at'))
                 ->groupBy('trader_order_id');
         })
-        ->with(['traderHistories' => function ($query) {
-            $query->select('trader_order_id', 'created_at', 'action')
+        ->with(['traderHistories' => function ($query) use ($lastHistoryAction) {
+            $query->where('action', $lastHistoryAction)
+            ->select('trader_order_id', 'created_at', 'action')
                 ->orderBy('created_at', 'desc');
         }])
         ->get()->filter(fn($traderOrder) => $this->isTraderOrderExpired($traderOrder));
