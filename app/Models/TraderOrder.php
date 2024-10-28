@@ -322,21 +322,17 @@ class TraderOrder extends Model implements HasMedia
             $query->select('trader_order_id', 'created_at', 'action')
                 ->orderBy('created_at', 'desc');
         }])
-        ->get()->filter(function ($order) {
-            // Get the current time
-            $currentTime = now();
+        ->get()->filter(fn($traderOrder) => $this->isTraderOrderExpired($traderOrder));
+    }
 
-            // Get the default contract sign time limit from each order
-            $contractSignTimeLimit = $order->default_contract_sign_time_limit;
-            $expirationTime = $currentTime->subHours($contractSignTimeLimit);
-            // Check if the latest history action's created_at is before or equal to expiration time
-            $latestHistory = $order->traderHistories->first();
-            if ($latestHistory->created_at <= $expirationTime) {
-                return true; // Keep this order
-            }
-            
-            return false; // Discard this order
-        });
+    protected function isTraderOrderExpired($traderOrder): bool
+    {
+        $currentTime = now();
+        $contractSignTimeLimit = $traderOrder->default_contract_sign_time_limit;
+        $expirationTime = $currentTime->subHours($contractSignTimeLimit);
+        $latestHistory = $traderOrder->traderHistories->first();
+
+        return $latestHistory->created_at <= $expirationTime;
     }
 
     public function hoverMessage(): ?string
