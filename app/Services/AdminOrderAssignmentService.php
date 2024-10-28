@@ -22,8 +22,8 @@ class AdminOrderAssignmentService
     public function getOrderResponsibleAdmins(): array
     {
         // return Cache::remember(self::CACHE_KEY, self::CACHE_DURATION, function () {
-            $setting = app(GeneralSettings::class)->order_responsible_admins;
-            return $setting ?: [];
+            $setting = app(GeneralSettings::class)->getOrderResponsibleAdminsWithoutCache();
+            return $setting;
         // });
     }
 
