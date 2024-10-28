@@ -306,25 +306,23 @@ class TraderOrder extends Model implements HasMedia
         return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
     }
 
+
     public function scopeWithExpiredContractSignLimit($query, string $provider, string $version, int $lastHistoryAction, string $mode)
     {
-        // Retrieve current time and contract signing limit
-        $currentTime = now();
-        $contractSignTimeLimit = $this->default_contract_sign_time_limit;
-
-        // Calculate the expiration time based on the contract signing limit
-        $expirationTime = $currentTime->subHours($contractSignTimeLimit);
         return $query->where('provider', $provider)
             ->where('version', $version)
             ->where('mode', $mode)
             ->where('status', TraderOrderStatus::InProgress)
-            ->whereHas('traderHistories', function ($query) use ($expirationTime, $lastHistoryAction) {
+            ->whereHas('traderHistories', function ($query) use ($lastHistoryAction) {
                 $query->select('trader_order_id', DB::raw('MAX(created_at) as latest_created_at'))
                 ->groupBy('trader_order_id')
                 ->havingRaw('MAX(created_at) = (SELECT MAX(created_at) FROM trader_histories WHERE trader_order_id = trader_orders.id)')
-                ->where('action',  $lastHistoryAction)
-                ->where('created_at', '<=', $expirationTime);
-            });
+                ->where('action',  $lastHistoryAction);
+            })
+            ->with(['traderHistories' => function ($query) {
+                $query->select('trader_order_id', 'created_at', 'action')
+                    ->orderBy('created_at', 'desc');
+            }]);
     }
 
     public function hoverMessage(): ?string
