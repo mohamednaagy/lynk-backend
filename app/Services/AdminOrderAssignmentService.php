@@ -100,8 +100,12 @@ class AdminOrderAssignmentService
         if (empty($admins)) {
             return null;
         }
-
+        
         $nextAdmin = array_shift($admins);
+        Log::info('Cache while assigning admin', [
+            'cache' => $admins,
+            'assigned_admin' => $nextAdmin,
+        ]);
         $admins[] = $nextAdmin;
 
         $service->updateOrderResponsibleAdmins($admins);
