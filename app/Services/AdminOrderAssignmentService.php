@@ -4,16 +4,16 @@ namespace App\Services;
 
 use App\Models\FinancingOrder;
 use App\Settings\Classes\GeneralSettings;
-use App\Models\User; // Make sure to import the Admin model
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use App\Models\User;
 
 class AdminOrderAssignmentService
 {
-    private const CACHE_KEY = 'order_responsible_admins';
-    private const CACHE_DURATION = 60; // Cache duration in seconds
+    protected GeneralSettings $settings;
 
+    public function __construct(GeneralSettings $settings)
+    {
+        $this->settings = $settings;
+    }
     /**
      * Retrieve the list of order responsible admins from cache or database.
      *
@@ -21,10 +21,7 @@ class AdminOrderAssignmentService
      */
     public function getOrderResponsibleAdmins(): array
     {
-        // return Cache::remember(self::CACHE_KEY, self::CACHE_DURATION, function () {
-            $setting = app(GeneralSettings::class)->getOrderResponsibleAdminsWithoutCache();
-            return $setting;
-        // });
+        return $this->settings->order_responsible_admins ?? [];
     }
 
     /**
@@ -35,12 +32,8 @@ class AdminOrderAssignmentService
      */
     public function updateOrderResponsibleAdmins(array $admins): void
     {
-        //check the length of the the saved array versus the user assigned list
-        DB::table('settings')
-            ->where('name', self::CACHE_KEY)
-            ->update(['payload' => json_encode($admins)]);
-
-        // Cache::put(self::CACHE_KEY, $admins, self::CACHE_DURATION);
+        $this->settings->order_responsible_admins = $admins;
+        $this->settings->save();
     }
 
     /**
@@ -51,16 +44,9 @@ class AdminOrderAssignmentService
      */
     public function removeAdmin(User $admin): void
     {
-        $admins = $this->getOrderResponsibleAdmins();
-        Log::info('Cache before removing admin', [
-            'cache' => $admins,
-            'removed_admin_id' => $admin->id,
-        ]);
-        $admins = array_values(array_diff($admins, [$admin->id])); // Remove the admin
+        $admins = $this->settings->order_responsible_admins;
+        $admins = array_values(array_diff($admins, [$admin->id]));
         $this->updateOrderResponsibleAdmins($admins);
-        Log::info('Cache after removing admin', [
-            'cache' => $this->getOrderResponsibleAdmins(),
-        ]);
     }
 
     /**
@@ -71,19 +57,11 @@ class AdminOrderAssignmentService
      */
     public function addAdmin(User $admin): void
     {
-        $admins = $this->getOrderResponsibleAdmins();
-        Log::info('Cache before adding admin', [
-            'cache' => $admins,
-            'admin_id' => $admin->id,
-        ]);
-        if (!in_array($admin->id, $admins, true)) {
-            $admins[] = $admin->id; // Add the admin
+        $admins = $this->settings->order_responsible_admins;
+        if (!in_array($admin->id, $admins)) {
+            $admins[] = $admin->id; 
             $this->updateOrderResponsibleAdmins($admins);
         }
-        Log::info('Cache after adding admin', [
-            'cache' => $this->getOrderResponsibleAdmins(),
-            'added_admin_id' => $admin->id,
-        ]);
     }
 
     /**
@@ -94,29 +72,24 @@ class AdminOrderAssignmentService
      */
     public function reOrderResponsableAdmins(): ?int
     {
-        $service = new self();
-        $admins = $service->getOrderResponsibleAdmins();
+        $admins = $this->getOrderResponsibleAdmins();
 
         if (empty($admins)) {
             return null;
         }
         
         $nextAdmin = array_shift($admins);
-        Log::info('Cache while assigning admin', [
-            'cache' => $admins,
-            'assigned_admin' => $nextAdmin,
-        ]);
         $admins[] = $nextAdmin;
 
-        $service->updateOrderResponsibleAdmins($admins);
+        $this->updateOrderResponsibleAdmins($admins);
 
         return $nextAdmin;
     }
 
 
-    public static function assignNextAdminToFinancingOrder(FinancingOrder $financingOrder): void
+    public function assignNextAdminToFinancingOrder(FinancingOrder $financingOrder): void
     {
-        $financingOrder->assignable_id = (new self())->reOrderResponsableAdmins();
-        $financingOrder->saveQuietly();
+        $financingOrder->assignable_id = $this->reOrderResponsableAdmins();
+        $financingOrder->save();
     }
 }
