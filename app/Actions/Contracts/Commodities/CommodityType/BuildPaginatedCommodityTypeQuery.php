@@ -9,4 +9,6 @@ interface BuildPaginatedCommodityTypeQuery
     public function handle(): LengthAwarePaginator;
 
     public function setStatus($status = null);
+
+    public function setName($name = null);
 }
