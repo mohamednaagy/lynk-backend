@@ -12,8 +12,8 @@ class GetPaginatedCommodityItemsAction implements GetPaginatedCommodityItems
     protected ?string $name = null;
     protected array $suppliers = [];
     protected array $commodityTypes = [];
-    private string $direction = 'asc';
-    private string $sort = 'id';
+    private ?string $direction = 'asc';
+    private ?string $sort = 'id';
 
     public function handle(): LengthAwarePaginator
     {
@@ -86,6 +86,8 @@ class GetPaginatedCommodityItemsAction implements GetPaginatedCommodityItems
      */
     public function setDirection(?string $direction = 'asc'): self
     {
+       if(is_null($direction))
+            return $this;
         $this->direction = $direction;
         return $this;
     }
@@ -98,6 +100,8 @@ class GetPaginatedCommodityItemsAction implements GetPaginatedCommodityItems
      */
     public function setSort(?string $sort = 'id'): self
     {
+        if(is_null($sort))
+            return $this;
         $this->sort = $sort;
         return $this;
     }
