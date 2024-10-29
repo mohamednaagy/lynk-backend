@@ -30,7 +30,7 @@ class CommoditySupplierLiteList extends Controller
         $commiditySuppliers = $buildPaginatedCommoditySuppliersQuery->setType(CompanyType::Supplier)
             ->handle()
             ->where('name', 'like', '%' . request('search') . '%')
-            ->paginate();
+            ->get(['id', 'name']);
 
         return fractal($commiditySuppliers, new CommoditySuppliersTransformer())
             ->parseIncludes(['id', 'legal_name'])

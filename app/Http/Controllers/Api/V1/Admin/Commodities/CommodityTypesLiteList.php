@@ -30,8 +30,10 @@ class CommodityTypesLiteList extends Controller
      */
     public function __invoke(BuildPaginatedCommodityTypeQuery $buildPaginatedCommodityTypeQuery): JsonResponse
     {
-        $commidityTypes = $buildPaginatedCommodityTypeQuery->setName(request('search'))->handle()
-                            ;
+        $commidityTypes = $buildPaginatedCommodityTypeQuery
+            ->setName(request('search'))
+            ->handle()
+            ->get(['id', 'name']);
 
         return fractal($commidityTypes, new CommodityTypeTransformer())
             ->parseIncludes(['id', 'name'])

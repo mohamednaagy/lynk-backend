@@ -31,7 +31,8 @@ class CommodityTypeController extends Controller
     {
         $commidityTypes = $buildPaginatedCommodityTypesQuery
             ->setStatus($request->status)
-            ->handle();
+            ->handle()
+            ->paginate();
 
         return fractal($commidityTypes, new CommodityTypeTransformer())
             ->parseIncludes([
