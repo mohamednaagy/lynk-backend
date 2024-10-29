@@ -305,21 +305,21 @@ class TraderOrder extends Model implements HasMedia
         return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
     }
 
-
     public function scopeWithExpiredContractSignLimit($query)
     {
         $version = get_latest_version_of_trader(EnumsTrader::Lynk);
+
         return $query->where('provider', EnumsTrader::Lynk)
-        ->where('version', $version)
-        ->where('mode', TraderOrderMode::Automatic)
-        ->where('status', TraderOrderStatus::InProgress)
-        ->whereNotNull('default_contract_sign_time_limit')
-        ->with(['traderHistories' => function ($query) {
-            $query->select('trader_order_id', 'created_at', 'action')
-                ->orderBy('id', 'desc');
-        }])
-        ->get()
-        ->filter(fn($traderOrder) => $this->isTraderOrderExpired($traderOrder));
+            ->where('version', $version)
+            ->where('mode', TraderOrderMode::Automatic)
+            ->where('status', TraderOrderStatus::InProgress)
+            ->whereNotNull('default_contract_sign_time_limit')
+            ->with(['traderHistories' => function ($query) {
+                $query->select('trader_order_id', 'created_at', 'action')
+                    ->orderBy('id', 'desc');
+            }])
+            ->get()
+            ->filter(fn ($traderOrder) => $this->isTraderOrderExpired($traderOrder));
     }
 
     protected function isTraderOrderExpired($traderOrder): bool
@@ -329,9 +329,10 @@ class TraderOrder extends Model implements HasMedia
             $currentTime = now();
             $contractSignTimeLimit = $traderOrder->default_contract_sign_time_limit;
             $expirationTime = $latestHistory->created_at->addHours($contractSignTimeLimit);
-    
+
             return $currentTime > $expirationTime;
         }
+
         return false;
     }
 
@@ -350,10 +351,17 @@ class TraderOrder extends Model implements HasMedia
     public function getCustomerDeliveryStatusAndMessage(): array
     {
         if ($this->provider == EnumsTrader::Lynk && $this->mode = TraderOrderMode::Automatic) {
-            return [
-                'status' => CustomerDeliveryStatus::DeliveryNotApplicable,
-                'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.delivery_not_applicable'),
-            ];
+            if ($this->checkOrderStepComplete(MurabhaStep::CommoditySoldToCustomer)) {
+                return [
+                    'status' => CustomerDeliveryStatus::DeliveryNotApplicable,
+                    'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.delivery_not_applicable'),
+                ];
+            } else {
+                return [
+                    'status' => CustomerDeliveryStatus::DeliveryPending,
+                    'message' => null,
+                ];
+            }
         }
         if ($this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryCancelled)) {
             return [
