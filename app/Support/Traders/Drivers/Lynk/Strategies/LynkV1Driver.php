@@ -66,6 +66,18 @@ class LynkV1Driver implements TraderInterface
             'default_contract_sign_time_limit' => app(LocalMurabahaSettings::class)->default_contract_sign_time_limit,
         ]);
 
+        // Generate the reference number
+        $referenceNumber = sprintf(
+            'LYNK-%s%s%s',
+            $traderOrder->financing_order_id,
+            $traderOrder->id,
+            $traderOrder->created_at->format('Ymd')
+        );
+
+        // Update the trader order with the new reference number
+        $traderOrder->reference = $referenceNumber;
+        $traderOrder->save();
+
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $traderOrder;
