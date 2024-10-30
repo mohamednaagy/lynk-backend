@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 class BuildPaginatedCommoditySuppliersQueryAction implements BuildPaginatedCommoditySuppliersQuery
 {
     private string $type;
-    private ?string $name;
+    private ?string $name = null;
     public function handle(): Builder
     {
         return Company::when($this->type, function ($query) {
