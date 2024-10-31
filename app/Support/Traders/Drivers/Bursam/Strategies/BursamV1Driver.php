@@ -20,6 +20,7 @@ use App\Jobs\General\ProcessFinancingOrders;
 use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Models\User;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Clients\BursamClient;
@@ -558,7 +559,7 @@ class BursamV1Driver implements TraderInterface
         ]);
 
         ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id, TraderOrderCancelReason::Manual, TraderOrderCancelType::User,
-            auth()->user()->id);
+            auth()->user());
 
         return OrderCancellationStatus::PendingCancellation;
     }
@@ -570,7 +571,7 @@ class BursamV1Driver implements TraderInterface
         TraderOrder $traderOrder,
         int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled,
         $cancelledByType = TraderOrderCancelType::System,
-        $cancelledBy = null
+        ?User $cancelledBy = null
     ): int {
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
 

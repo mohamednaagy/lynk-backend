@@ -49,6 +49,7 @@ class PendingCancelOrderStatus implements ShouldQueue
             $this->logCancellationDetails();
             $this->ownershipService->swapCurrentOwnerToPreviousOwner($this->localMarketOrder);
             $this->inventoryService->freeOrderInventoryUnits($this->localMarketOrder);
+
             DB::commit();
             $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::Cancelled);
         } catch (\Throwable $e) {
