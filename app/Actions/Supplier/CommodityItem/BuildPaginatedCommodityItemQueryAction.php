@@ -20,7 +20,7 @@ class BuildPaginatedCommodityItemQueryAction implements BuildPaginatedCommodityI
     {
         return $supplier->commodityItems()->getQuery()
             ->when($this->uniqueName, function ($query) {
-                $query->where('unique_name', $this->uniqueName);
+                $query->where('unique_name', 'like', "%{$this->uniqueName}%");
             })
             ->when($this->name, function ($query) {
                 $query->where('name', 'like', "%{$this->name}%");
