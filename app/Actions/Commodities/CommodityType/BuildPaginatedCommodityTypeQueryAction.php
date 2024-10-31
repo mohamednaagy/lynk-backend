@@ -4,20 +4,20 @@ namespace App\Actions\Commodities\CommodityType;
 
 use App\Actions\Contracts\Commodities\CommodityType\BuildPaginatedCommodityTypeQuery;
 use App\Models\CommodityType;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityTypeQuery
 {
     private $status;
     private $name;
 
-    public function handle(): LengthAwarePaginator
+    public function handle(): Builder
     {
-        return CommodityType::query()->when($this->status, function ($query) {
+        return CommodityType::when($this->status, function ($query) {
             $query->where('status', $this->status);
         })->when($this->name, function ($query) {
             $query->where('name', 'like', "%{$this->name}%");
-        })->paginate();
+        });
     }
 
     public function setStatus($status = null)

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Commodities;
+namespace App\Http\Controllers\Api\V1\Supplier\CommodityType;
 
 use App\Actions\Contracts\Commodities\CommodityType\BuildPaginatedCommodityTypeQuery;
 use App\Http\Controllers\Controller;
@@ -16,8 +16,8 @@ class CommodityTypesLiteList extends Controller
     public function __construct()
     {
         $this->middleware(
-            'permission:' .
-            perm(Area::SuperAdmin, [Subject::CommodityMarketCommodityTypes, Action::Index, Action::Manage])
+            'permission:'.
+                perm(Area::CommoditySupplier, [Subject::CommodityMarketCommodityTypes, Action::Index, Action::Manage])
         );
     }
 

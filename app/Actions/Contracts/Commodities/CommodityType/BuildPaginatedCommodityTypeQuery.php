@@ -2,11 +2,12 @@
 
 namespace App\Actions\Contracts\Commodities\CommodityType;
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+
 
 interface BuildPaginatedCommodityTypeQuery
 {
-    public function handle(): LengthAwarePaginator;
+    public function handle(): Builder;
 
     public function setStatus($status = null);
 

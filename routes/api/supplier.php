@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Http\Controllers\Api\V1\Supplier\Auth\CompleteRegister;
 use App\Http\Controllers\Api\V1\Supplier\CommodityItem\CommodityItemController;
 use App\Http\Controllers\Api\V1\Supplier\CommodityType\CommodityTypeController;
+use App\Http\Controllers\Api\V1\Supplier\CommodityType\CommodityTypesLiteList;
 use App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController;
 use App\Http\Controllers\Api\V1\Supplier\Location\SupplierLocation;
 use Illuminate\Support\Facades\Route;
@@ -33,7 +34,10 @@ Route::prefix('v1/supplier')->name('api.v1.supplier.')->group(function () {
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::get('constants', [ConstantController::class, 'index']);
-        Route::get('commodity-types', [CommodityTypeController::class, 'index']);
+        Route::prefix('commodity-types')->group(function () {
+            Route::get('/', [CommodityTypeController::class, 'index']);
+            Route::get('/dropdown-list', CommodityTypesLiteList::class);
+        });
         Route::apiResource('locations', SupplierLocation::class)->middleware('checkDataOfSupplier');
         Route::apiResource('commodity-items', CommodityItemController::class)->middleware('checkDataOfSupplier');
         Route::apiResource('commodity-items/{item}/inventory', LocalMarketInventoryController::class)->middleware('checkDataOfSupplier');
