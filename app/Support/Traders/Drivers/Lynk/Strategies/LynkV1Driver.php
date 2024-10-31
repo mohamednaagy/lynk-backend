@@ -49,6 +49,12 @@ class LynkV1Driver implements TraderInterface
 
     protected $version = 'v1';
 
+    protected $murabahaSettings;
+
+    function __construct () {
+        $this->murabahaSettings = app(LocalMurabahaSettings::class);
+    }
+
     public function getOrInitiateTraderOrder(FinancingOrder $financingOrder): ?Model
     {
 
@@ -56,20 +62,48 @@ class LynkV1Driver implements TraderInterface
             return $financingOrder->initiatedTraderOrders()->first();
         }
 
-        $traderOrder = $financingOrder->traderOrders()->create([
-            'uuid_one' => Str::uuid(),
-            'provider' => $this->provider,
-            'reference' => Str::upper(Str::random(14)).$financingOrder->id,
-            'status' => TraderOrderStatus::Initiated,
-            'version' => $this->version,
-            'mode' => TraderOrderMode::Automatic,
-            'default_contract_sign_time_limit' => app(LocalMurabahaSettings::class)->default_contract_sign_time_limit,
-        ]);
+        $traderOrder = $this->createInitialTraderOrder($financingOrder);
+        $this->updateReferenceNumber($traderOrder);
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $traderOrder;
     }
+
+    private function createInitialTraderOrder(FinancingOrder $financingOrder): Model
+    {
+        return $financingOrder->traderOrders()->create([
+            'uuid_one' => Str::uuid(),
+            'provider' => $this->provider,
+            'reference' => $this->generateTemporaryReference($financingOrder),
+            'status' => TraderOrderStatus::Initiated,
+            'version' => $this->version,
+            'mode' => TraderOrderMode::Automatic,
+            'default_contract_sign_time_limit' => $this->murabahaSettings->default_contract_sign_time_limit,
+        ]);
+    }
+
+    private function generateTemporaryReference(Model $financingOrder): string
+    {
+        return Str::upper(Str::random(14)) . $financingOrder->id;
+    }
+
+    private function generateFinalReferenceNumber(Model $traderOrder): string
+    {
+        return sprintf(
+            'LYNK-%s%s%s',
+            $traderOrder->financing_order_id,
+            $traderOrder->id,
+            $traderOrder->created_at->format('Ymd')
+        );
+    }
+
+    private function updateReferenceNumber(Model $traderOrder): void
+    {
+        $referenceNumber = $this->generateFinalReferenceNumber($traderOrder);
+        $traderOrder->update(['reference' => $referenceNumber]);
+    }
+
 
     /**
      * @throws TraderException
@@ -80,7 +114,6 @@ class LynkV1Driver implements TraderInterface
         LynkClient::of($traderOrder)->createOrder();
 
         return $traderOrder;
-
     }
 
     public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
@@ -90,8 +123,8 @@ class LynkV1Driver implements TraderInterface
                 $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
                 $currentTimeInUtcTz = CarbonImmutable::now();
                 $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
-                $products = collect($traderOrder->products)->map(fn ($product) => LynkCommodityProductDto::fromArray($product));
-                $default_contract_sign_time_limit = app(LocalMurabahaSettings::class)->default_contract_sign_time_limit;
+                $products = collect($traderOrder->products)->map(fn($product) => LynkCommodityProductDto::fromArray($product));
+                $default_contract_sign_time_limit = $this->murabahaSettings->default_contract_sign_time_limit;
 
                 $this->storeOrderDocumentAsPdf(
                     'local-commodity-market.transfer-ownership-to-lender',
@@ -104,11 +137,11 @@ class LynkV1Driver implements TraderInterface
                         'order_number' => $traderOrder->financing_order_id,
                         'amount' => $amount,
                         'previous_owner' => $products->map(
-                            fn ($item) => $item->getPreviousOwnerAsArray()
+                            fn($item) => $item->getPreviousOwnerAsArray()
                         )
                             ->flatten()
                             ->implode('،'),
-                        'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
+                        'product_name' => $products->implode(fn($item) => $item->getProduct(), '،'),
                         'date' => $currentTimeInRiyadhTz->toDateString(),
                         'time' => $currentTimeInRiyadhTz->toTimeString(),
                         'trade_order' => $traderOrder,
@@ -118,7 +151,6 @@ class LynkV1Driver implements TraderInterface
                     $traderOrder,
                     TraderOrderMediaCollection::TransferOwnershipToLender
                 );
-
             });
         } catch (\Throwable $exception) {
             throw new TraderException(
@@ -183,7 +215,6 @@ class LynkV1Driver implements TraderInterface
                         'created_at' => $currentTimeInUtcTz,
                     ]
                 );
-
             });
         } catch (Exception $exception) {
             throw new TraderException(
@@ -274,14 +305,13 @@ class LynkV1Driver implements TraderInterface
                         },
                     ])->dispatch();
                 }
-
             }
 
             if (
-                $traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Any)) {
+                $traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Any)
+            ) {
                 $this->retryOrder($traderOrder);
             }
-
         }
 
         return TraderOrderCancellationStatus::Cancelled;
@@ -310,7 +340,7 @@ class LynkV1Driver implements TraderInterface
                 break;
         }
 
-        return 'LYNK_'.$fileType.'_'.$traderOrder->order->company->unique_name.'_'.$traderOrder->financing_order_id.'_'.$traderOrder->reference.'_'.date('Ymd').'.pdf';
+        return 'LYNK_' . $fileType . '_' . $traderOrder->order->company->unique_name . '_' . $traderOrder->financing_order_id . '_' . $traderOrder->reference . '_' . date('Ymd') . '.pdf';
     }
 
     // use it in public api to proceed order after purchasing commodity step by one step
@@ -372,7 +402,7 @@ class LynkV1Driver implements TraderInterface
     {
         match (true) {
             $lastHistoryAction === FinancingOrderHistory::ContractSigned
-            && $traderOrder->contract_signed_type->is(ContractSignedType::Sell) => $this->handleManualSellTransition($traderOrder),
+                && $traderOrder->contract_signed_type->is(ContractSignedType::Sell) => $this->handleManualSellTransition($traderOrder),
             default => null,
         };
     }
@@ -381,7 +411,7 @@ class LynkV1Driver implements TraderInterface
     {
         match ($lastHistoryAction) {
             FinancingOrderHistory::ContractSigned => ProcessLynkTransferOwnershipToCustomer::dispatch($traderOrder->id),
-            //            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessLynkCompleteMurabahaAfterSellToMarket::dispatch($traderOrder->id),
+                //            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessLynkCompleteMurabahaAfterSellToMarket::dispatch($traderOrder->id),
             default => null,
         };
     }
