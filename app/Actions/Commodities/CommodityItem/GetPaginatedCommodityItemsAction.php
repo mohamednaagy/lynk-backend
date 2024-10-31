@@ -18,7 +18,7 @@ class GetPaginatedCommodityItemsAction implements GetPaginatedCommodityItems
     public function handle(): LengthAwarePaginator
     {
         return CommodityItem::query()->when($this->uniqueName, function ($query) {
-            $query->where('unique_name', $this->uniqueName);
+            $query->where('unique_name', 'like', "%{$this->uniqueName}%");
         })->when($this->name, function ($query) {
             $query->where('name', 'like', "%{$this->name}%");
         })->when($this->suppliers, function ($query) {
