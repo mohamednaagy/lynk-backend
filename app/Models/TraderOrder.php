@@ -343,7 +343,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function isDeliverable(): bool
     {
-        return $this->provider == EnumsTrader::Lynk && $this->mode == TraderOrderMode::Manual;
+        return $this->provider == EnumsTrader::Lynk && $this->mode == TraderOrderMode::Manual && $this->status->is(TraderOrderStatus::InProgress);
     }
 
     public function getCustomerDeliveryStatusAndMessage(): array

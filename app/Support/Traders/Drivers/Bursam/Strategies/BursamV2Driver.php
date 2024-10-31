@@ -16,6 +16,7 @@ use App\Jobs\General\ProcessAskClientForWakala;
 use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Models\User;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamBidCertificate;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultNYY;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultYNN;
@@ -66,11 +67,11 @@ class BursamV2Driver extends BursamV1Driver
         TraderOrder $traderOrder,
         int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled,
         $cancelledByType = TraderOrderCancelType::System,
-        $cancelledBy = null
+        ?User $cancelledBy = null
     ): int {
         $user = auth()->check() ? auth()->user() : null;
         if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket) || $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::OnHold)) {
-            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: auth()->user()->id);
+            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: auth()->user());
 
             return TraderOrderCancellationStatus::Cancelled;
         }

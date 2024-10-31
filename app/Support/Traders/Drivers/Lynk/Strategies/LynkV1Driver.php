@@ -18,6 +18,7 @@ use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Models\User;
 use App\Settings\Classes\LocalMurabahaSettings;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Clients\LynkClient;
@@ -80,7 +81,6 @@ class LynkV1Driver implements TraderInterface
         LynkClient::of($traderOrder)->createOrder();
 
         return $traderOrder;
-
     }
 
     public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
@@ -118,7 +118,6 @@ class LynkV1Driver implements TraderInterface
                     $traderOrder,
                     TraderOrderMediaCollection::TransferOwnershipToLender
                 );
-
             });
         } catch (\Throwable $exception) {
             throw new TraderException(
@@ -226,71 +225,88 @@ class LynkV1Driver implements TraderInterface
         TraderOrder $traderOrder,
         int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled,
         $cancelledByType = TraderOrderCancelType::System,
-        $cancelledBy = null
+        ?User $cancelledBy = null
     ): int {
-        if ($traderOrder->mode == TraderOrderMode::Manual || ($traderOrder->mode == TraderOrderMode::Automatic && $cancelReason == TraderOrderCancelReason::FailureToPurchase)) {
-            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
-        }
-        $order = $traderOrder->order;
-        if ($order->isInPendingCancellationState()) {
-            app(CancelOrder::class)->handle($order, auth()->user(), []);
-        }
 
-        if ($traderOrder->mode == TraderOrderMode::Automatic) {
-            if ($traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Local)) {
-                if ($traderOrder->cancelDetail?->cancel_reason->is(TraderOrderCancelReason::FailureToPurchase)) {
-                    $traderOrder->order->update([
-                        'status' => FinancingOrderStatus::TradingFailure,
-                    ]);
-                } else {
-                    $traderOrder->update([
-                        'status' => TraderOrderStatus::PendingCancellation,
-                    ]);
-                    Bus::chain([
-                        new ProcessLynkCancelOrderAtLocalMarket($traderOrder->id),
-                        new ProcessLynkCancelTraderOrder($traderOrder->id, $cancelReason, $cancelledByType, $cancelledBy),
-                        function () use ($traderOrder) {
-                            $activeTraderOrdersCount = TraderOrder::where('status', TraderOrderStatus::InProgress)
-                                ->where('financing_order_id', $traderOrder->id)
-                                ->count();
-
-                            if ($activeTraderOrdersCount !== 0) {
-                                return;
-                            }
-
-                            $order = $traderOrder->order()->first();
-
-                            if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
-                                $order->update([
-                                    'status' => FinancingOrderStatus::Cancelled,
-                                ]);
-                            }
-
-                            if ($order->status->is(FinancingOrderStatus::InProgress)) {
-                                $order->update([
-                                    'status' => FinancingOrderStatus::PendingTraderOrder,
-                                ]);
-                            }
-                        },
-                    ])->dispatch();
-                }
-
-            }
-
-            if (
-                $traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Any)) {
-                $this->retryOrder($traderOrder);
-            }
-
-        }
+        match ($traderOrder->mode) {
+            TraderOrderMode::Manual => $this->handleManualOrderCancellation($traderOrder, $cancelReason, $cancelledByType, $cancelledBy),
+            TraderOrderMode::Automatic => $this->handleAutomaticOrderCancellation($traderOrder, $cancelReason, $cancelledByType, $cancelledBy),
+        };
 
         return TraderOrderCancellationStatus::Cancelled;
     }
 
-    public function retryOrder(TraderOrder $traderOrder)
+    protected function handleManualOrderCancellation(
+        TraderOrder $traderOrder,
+        int $cancelReason,
+        $cancelledByType,
+        ?User $cancelledBy
+    ): void {
+        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
+        // use at cancel financing order
+        if ($traderOrder->order->isInPendingCancellationState()) {
+            app(CancelOrder::class)->handle($traderOrder->order, $cancelledBy);
+        }
+        if ($traderOrder->order->status->is(FinancingOrderStatus::InProgress) && $traderOrder->order->activeTraderOrder()->count() == 0) {
+            $traderOrder->order->update(['status' => FinancingOrderStatus::PendingTraderOrder]);
+        }
+    }
+
+    protected function handleAutomaticOrderCancellation(
+        TraderOrder $traderOrder,
+        int $cancelReason,
+        $cancelledByType,
+        ?User $cancelledBy
+    ): void {
+        $traderOrder->update(['status' => TraderOrderStatus::PendingCancellation]);
+        Bus::chain([
+            new ProcessLynkCancelOrderAtLocalMarket($traderOrder->id, $cancelReason),
+            new ProcessLynkCancelTraderOrder($traderOrder->id, $cancelReason, $cancelledByType, $cancelledBy),
+            fn () => $this->updateFinancingOrderStatusAfterCancellation($traderOrder, $cancelReason),
+            fn () => $this->checkAndRetryOrder($traderOrder, $cancelReason),
+        ])->dispatch();
+    }
+
+    protected function updateFinancingOrderStatusAfterCancellation($traderOrder, int $cancelReason): void
     {
-        Trader::driver(\App\Enums\Trader::Bursam, 'v2')
-            ->createTraderOrder($traderOrder->order);
+        $order = $traderOrder->order;
+        if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
+            $order->update(['status' => FinancingOrderStatus::Cancelled]);
+        } elseif ($order->status->is(FinancingOrderStatus::InProgress)) {
+            if ($order->company->preferred_market_type->is(CompanyMarketType::Local())
+                && ($cancelReason == TraderOrderCancelReason::FailureToPurchase || $cancelReason == TraderOrderCancelReason::FailureToSellAtLocalMarket)) {
+                $order->update(['status' => FinancingOrderStatus::TradingFailure]);
+            } else {
+                $order->update(['status' => FinancingOrderStatus::PendingTraderOrder]);
+            }
+        }
+    }
+
+    protected function canRetryOrder(TraderOrder $traderOrder, $cancelReason): bool
+    {
+        return
+            $traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Any) && (
+                $cancelReason === TraderOrderCancelReason::NoEligibleCommoditiesAvailable ||
+                $cancelReason === TraderOrderCancelReason::FailureToPurchase);
+    }
+
+    public function retryOrder(TraderOrder $traderOrder): void
+    {
+
+        if ($traderOrder->order->activeTraderOrder()->count() === 0) {
+            if ($traderOrder->order->status->is(FinancingOrderStatus::PendingTraderOrder)) {
+                $traderOrder->order->update(['status' => FinancingOrderStatus::InProgress]);
+            }
+            Trader::driver(\App\Enums\Trader::Bursam, 'v2')
+                ->createTraderOrder($traderOrder->order);
+        }
+    }
+
+    protected function checkAndRetryOrder(TraderOrder $traderOrder, int $cancelReason): void
+    {
+        if ($this->canRetryOrder($traderOrder, $cancelReason)) {
+            $this->retryOrder($traderOrder);
+        }
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Lynk\Jobs;
 
+use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Clients\LynkClient;
@@ -25,8 +26,11 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $traderOrderId)
+    protected int $cancelReason;
+
+    public function __construct(protected int $traderOrderId, $cancelReason)
     {
+        $this->cancelReason = $cancelReason;
         $this->onQueue('local_market');
     }
 
@@ -37,14 +41,26 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
      */
     public function handle()
     {
-        DB::transaction(function () {
-            $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::PendingCancellation)
-                ->lockForUpdate()
-                ->find($this->traderOrderId);
+        try {
+            DB::transaction(function () {
+                $traderOrder = TraderOrder::query()
+                    ->where('status', TraderOrderStatus::PendingCancellation)
+                    ->lockForUpdate()
+                    ->find($this->traderOrderId);
 
-            LynkClient::of($traderOrder)->cancelOrder();
-        });
+                if (
+                    (is_null($traderOrder))
+                    || $this->cancelReason == TraderOrderCancelReason::FailureToPurchase
+                    || $this->cancelReason == TraderOrderCancelReason::NoEligibleCommoditiesAvailable) {
+                    return;
+                }
+                LynkClient::of($traderOrder)->cancelOrder();
+            });
+        } catch (\Exception $e) {
+            Log::channel('local_market')->error('error at ProcessLynkCancelOrderAtLocalMarket , cant add connect to local market to cancel order ', ['trader_order_id' => $this->traderOrderId, 'error' => $e->getMessage()]);
+
+        }
+
     }
 
     public function middleware(): array
@@ -55,10 +71,5 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->traderOrderId;
-    }
-
-    public function failed($exception)
-    {
-        Log::error('ProcessLynkTransferOwnershipToCustomer', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
     }
 }
