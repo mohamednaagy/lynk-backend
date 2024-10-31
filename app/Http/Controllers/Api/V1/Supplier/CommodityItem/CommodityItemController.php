@@ -11,6 +11,7 @@ use App\Enums\Area;
 use App\Enums\ErrorCode;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Supplier\CommodityItem\ListCommodityItemsRequest;
 use App\Http\Requests\V1\Supplier\CommodityItem\StoreCommodityItemRequest;
 use App\Http\Requests\V1\Supplier\CommodityItem\UpdateCommodityItemRequest;
 use App\Models\CommodityItem;
@@ -25,29 +26,29 @@ class CommodityItemController extends Controller
     public function __construct()
     {
         $this->middleware(
-            'permission:'.
+            'permission:' .
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
-            'permission:'.
-                perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Manage, Action::Create])
+            'permission:' .
+            perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Manage, Action::Create])
         )
             ->only('store');
 
         $this->middleware(
-            'permission:'.
+            'permission:' .
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
-            'permission:'.
+            'permission:' .
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Manage, Action::Edit])
         )->only('update');
 
         $this->middleware(
-            'permission:'.
-                perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Manage, Action::Delete])
+            'permission:' .
+            perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Manage, Action::Delete])
         )->only('destroy');
     }
 
@@ -55,10 +56,21 @@ class CommodityItemController extends Controller
      * Display a listing of the resource.
      */
     public function index(
-        Request $request,
+        ListCommodityItemsRequest $request,
         BuildPaginatedCommodityItemQuery $getPaginatedItems
     ): JsonResponse {
-        $items = $getPaginatedItems->handle(tenant()->supplier);
+        $items = $getPaginatedItems
+            ->setName($request->validated('name'))
+            ->setuniqueName($request->validated('unique_name'))
+            ->setCommodityTypes(
+                $request->validated('commodity_type')
+                ? collect($request->validated('commodity_type'))->pluck('id')->toArray()
+                : []
+            )
+            ->setSort($request->validated('sort'))
+            ->setDirection($request->validated('direction'))
+            ->handle(tenant()->supplier)
+            ->paginate();
 
         return fractal($items, new CommodityItemsTransformer)
             ->parseIncludes([
@@ -150,7 +162,7 @@ class CommodityItemController extends Controller
     public function destroy(CommodityItem $commodityItem, DeleteCommodityItem $deleteCommodityItem)
     {
         //check if the commodity item is deleteable
-        if (! $commodityItem->is_deletable) {
+        if (!$commodityItem->is_deletable) {
             return $this->errorResponse(
                 __('error.commodity_item_cannot_be_deleted'),
                 Response::HTTP_BAD_REQUEST,
