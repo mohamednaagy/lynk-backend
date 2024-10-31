@@ -50,13 +50,6 @@ class LynkV1Driver implements TraderInterface
 
     protected $version = 'v1';
 
-    protected $murabahaSettings;
-
-    public function __construct()
-    {
-        $this->murabahaSettings = app(LocalMurabahaSettings::class);
-    }
-
     public function getOrInitiateTraderOrder(FinancingOrder $financingOrder): ?Model
     {
 
@@ -81,7 +74,7 @@ class LynkV1Driver implements TraderInterface
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
-            'default_contract_sign_time_limit' => $this->murabahaSettings->default_contract_sign_time_limit,
+            'default_contract_sign_time_limit' => app(LocalMurabahaSettings::class)->default_contract_sign_time_limit,
         ]);
     }
 
@@ -125,7 +118,7 @@ class LynkV1Driver implements TraderInterface
                 $currentTimeInUtcTz = CarbonImmutable::now();
                 $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
                 $products = collect($traderOrder->products)->map(fn ($product) => LynkCommodityProductDto::fromArray($product));
-                $default_contract_sign_time_limit = $this->murabahaSettings->default_contract_sign_time_limit;
+                $default_contract_sign_time_limit = app(LocalMurabahaSettings::class)->default_contract_sign_time_limit;
 
                 $this->storeOrderDocumentAsPdf(
                     'local-commodity-market.transfer-ownership-to-lender',
