@@ -168,4 +168,9 @@ class UserTransformer extends TransformerAbstract
     {
         return $this->primitive($user->can_manage_orders);
     }
+
+    public function includeFullName(User $user): Primitive
+    {
+        return $this->primitive($user->first_name . $user->last_name);
+    }
 }

@@ -4,18 +4,17 @@ namespace App\Actions;
 
 use App\Actions\Contracts\GetPaginatedUsersByRole;
 use App\Models\User;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 class GetPaginatedUsersByRoleAction implements GetPaginatedUsersByRole
 {
     /**
      * @param  string|array  $role
-     * @return LengthAwarePaginator
+     * @return Builder
      */
-    public function handle(string|array $role): LengthAwarePaginator
+    public function handle(string|array $role): Builder
     {
         return User::role($role)
-            ->with('roles', 'permissions')
-            ->paginate();
+            ->with('roles', 'permissions');
     }
 }

@@ -46,7 +46,7 @@ class AdminControllerIndexTest extends TestCase
 
     public function test_admin_controller_index_with_super_admin_success()
     {
-        $admins = app(GetPaginatedUsersByRole::class)->handle(Area::roles(Area::SuperAdmin));
+        $admins = app(GetPaginatedUsersByRole::class)->handle(Area::roles(Area::SuperAdmin))->paginate();
 
         $this->actingAs(self::$superAdminUser)
             ->getJson('api/v1/admin/admins')
@@ -70,7 +70,7 @@ class AdminControllerIndexTest extends TestCase
 
     public function test_admin_controller_index_with_manager_success()
     {
-        $admins = app(GetPaginatedUsersByRole::class)->handle(Area::roles(Area::SuperAdmin));
+        $admins = app(GetPaginatedUsersByRole::class)->handle(Area::roles(Area::SuperAdmin))->paginate();
 
         $this->actingAs(self::$managerAdminUser)
             ->getJson('api/v1/admin/admins')

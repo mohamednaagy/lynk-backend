@@ -5,6 +5,7 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Api\V1\Admin\AdminController;
+use App\Http\Controllers\Api\V1\Admin\Admins\AdminLiteList;
 use App\Http\Controllers\Api\V1\Admin\Auth\CompleteAdminRegister;
 use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\ResendAdminInvitation;
@@ -80,6 +81,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::put('auth/profile', UpdateMyProfile::class);
 
         Route::post('admins/{admin}/resend-invitation', ResendAdminInvitation::class);
+        Route::get('admins/dropdown-list', AdminLiteList::class);
+
         Route::apiResource('admins', AdminController::class);
 
         Route::get('/roles', GetAllRoles::class)->middleware(

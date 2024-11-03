@@ -58,7 +58,7 @@ class AdminController extends Controller
      */
     public function index(GetPaginatedUsersByRole $getPaginatedUsersByRole): JsonResponse
     {
-        $admins = $getPaginatedUsersByRole->handle(Area::roles(Area::SuperAdmin));
+        $admins = $getPaginatedUsersByRole->handle(Area::roles(Area::SuperAdmin))->paginate();
 
         return fractal($admins, new UserTransformer(Area::SuperAdmin))
             ->parseIncludes([
