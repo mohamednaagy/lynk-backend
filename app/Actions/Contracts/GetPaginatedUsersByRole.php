@@ -2,13 +2,15 @@
 
 namespace App\Actions\Contracts;
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 interface GetPaginatedUsersByRole
 {
     /**
      * @param  string  $role
-     * @return LengthAwarePaginator
+     * @return Builder
      */
-    public function handle(string|array $role): LengthAwarePaginator;
+    public function handle(string|array $role): Builder;
+
+    public function setCanManageOrders(bool $canManageOrders = null): self;
 }
