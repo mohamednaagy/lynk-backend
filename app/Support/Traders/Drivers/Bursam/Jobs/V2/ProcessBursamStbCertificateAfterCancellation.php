@@ -61,8 +61,7 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
             ) {
                 Trader::driver('bursam', $traderOrder->version)->getStbCertificateDetails($traderOrder);
             }
-
-            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $this->cancelReason, cancelledByType: $this->cancelledByType, cancelledBy: $this->cancelledBy);
+            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $this->cancelReason);
         });
     }
 

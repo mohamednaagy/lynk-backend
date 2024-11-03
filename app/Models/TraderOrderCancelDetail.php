@@ -26,4 +26,12 @@ class TraderOrderCancelDetail extends Model
     {
         return $this->belongsTo(TraderOrder::class);
     }
+
+    public function shouldNotifyProvider(): bool
+    {
+        return ! in_array($this->cancelReason, [
+            TraderOrderCancelReason::FailureToPurchase,
+            TraderOrderCancelReason::NoEligibleCommoditiesAvailable,
+        ]);
+    }
 }

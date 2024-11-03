@@ -3,8 +3,11 @@
 namespace App\Support\Traders\Drivers\Dmcc\Jobs\V1;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -63,6 +66,7 @@ class ProcessDmccCancelNotification implements ShouldBeUnique, ShouldQueue
             if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::Cancelled)) {
                 return;
             }
+            app(UpdateTraderOrderStatusToPendingCancel::class)->handle($this->traderOrder, TraderOrderCancelReason::Manual, cancelledByType: TraderOrderCancelType::User, cancelledBy: $this->user);
 
             $trader->updateOrderStatus($financingOrder, FinancingOrderStatus::Cancelled);
 
@@ -71,7 +75,7 @@ class ProcessDmccCancelNotification implements ShouldBeUnique, ShouldQueue
                 FinancingOrderHistory::OrderCancelled
             );
 
-            app(UpdateTraderOrderStatusToCancel::class)->handle($this->traderOrder, user: $this->user);
+            app(UpdateTraderOrderStatusToCancel::class)->handle($this->traderOrder);
         });
     }
 

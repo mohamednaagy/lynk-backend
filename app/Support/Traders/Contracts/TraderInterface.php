@@ -40,4 +40,6 @@ interface TraderInterface
     public function contractSignedMessage(TraderOrder $traderOrder);
 
     public function retryOrder(TraderOrder $traderOrder);
+
+    public function confirmCancelledFromProvider(TraderOrder $traderOrder): void;
 }

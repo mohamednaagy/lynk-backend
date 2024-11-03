@@ -2,7 +2,6 @@
 
 namespace App\Support\Traders\Drivers\Lynk\Jobs;
 
-use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Clients\LynkClient;
@@ -26,11 +25,8 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
      *
      * @return void
      */
-    protected int $cancelReason;
-
-    public function __construct(protected int $traderOrderId, $cancelReason)
+    public function __construct(protected int $traderOrderId)
     {
-        $this->cancelReason = $cancelReason;
         $this->onQueue('local_market');
     }
 
@@ -48,13 +44,14 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
                     ->lockForUpdate()
                     ->find($this->traderOrderId);
 
-                if (
-                    (is_null($traderOrder))
-                    || $this->cancelReason == TraderOrderCancelReason::FailureToPurchase
-                    || $this->cancelReason == TraderOrderCancelReason::NoEligibleCommoditiesAvailable) {
+                if (is_null($traderOrder)) {
                     return;
                 }
-                LynkClient::of($traderOrder)->cancelOrder();
+
+                //if condition to notify function to cancel detail from model (TODO:nagy)
+                if ($traderOrder->cancelDetail->shouldNotifyProvider()) {
+                    LynkClient::of($traderOrder)->cancelOrder();
+                }
             });
         } catch (\Exception $e) {
             Log::channel('local_market')->error('error at ProcessLynkCancelOrderAtLocalMarket , cant add connect to local market to cancel order ', ['trader_order_id' => $this->traderOrderId, 'error' => $e->getMessage()]);

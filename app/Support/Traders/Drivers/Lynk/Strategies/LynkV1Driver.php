@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers\Lynk\Strategies;
 
 use App\Actions\Contracts\Orders\CancelOrder;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
 use App\Enums\CompanyMarketType;
 use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
@@ -79,6 +80,9 @@ class LynkV1Driver implements TraderInterface
     {
         Log::channel('local_market')->info("Create New Order at Local Market For Trader Order id => {$traderOrder->id} and financing order => {$traderOrder->order->id}");
         LynkClient::of($traderOrder)->createOrder();
+        $traderOrder->update([
+            'status' => TraderOrderStatus::InProgress,
+        ]);
 
         return $traderOrder;
     }
@@ -227,6 +231,7 @@ class LynkV1Driver implements TraderInterface
         $cancelledByType = TraderOrderCancelType::System,
         ?User $cancelledBy = null
     ): int {
+        app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
 
         match ($traderOrder->mode) {
             TraderOrderMode::Manual => $this->handleManualOrderCancellation($traderOrder, $cancelReason, $cancelledByType, $cancelledBy),
@@ -242,7 +247,7 @@ class LynkV1Driver implements TraderInterface
         $cancelledByType,
         ?User $cancelledBy
     ): void {
-        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
+        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
         // use at cancel financing order
         if ($traderOrder->order->isInPendingCancellationState()) {
             app(CancelOrder::class)->handle($traderOrder->order, $cancelledBy);
@@ -258,12 +263,15 @@ class LynkV1Driver implements TraderInterface
         $cancelledByType,
         ?User $cancelledBy
     ): void {
-        $traderOrder->update(['status' => TraderOrderStatus::PendingCancellation]);
+        ProcessLynkCancelOrderAtLocalMarket::dispatch($traderOrder->id, $cancelReason);
+    }
+
+    public function confirmCancelledFromProvider($traderOrder): void
+    {
         Bus::chain([
-            new ProcessLynkCancelOrderAtLocalMarket($traderOrder->id, $cancelReason),
-            new ProcessLynkCancelTraderOrder($traderOrder->id, $cancelReason, $cancelledByType, $cancelledBy),
-            fn () => $this->updateFinancingOrderStatusAfterCancellation($traderOrder, $cancelReason),
-            fn () => $this->checkAndRetryOrder($traderOrder, $cancelReason),
+            new ProcessLynkCancelTraderOrder($traderOrder->id),
+            fn () => $this->updateFinancingOrderStatusAfterCancellation($traderOrder, $traderOrder->cancelDetail->cancel_reason->value),
+            fn () => $this->checkAndRetryOrder($traderOrder, $traderOrder->cancelDetail->cancel_reason->value),
         ])->dispatch();
     }
 

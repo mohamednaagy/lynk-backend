@@ -63,6 +63,12 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
 
     const CreateLynkSalePledgeCertificate = 27;
 
+    const PendingCancellation = 28;
+
+    const SuccessCancelled = 29;
+
+    const FailedCancelled = 29;
+
     public static array $notCancellableActions = [
         self::GetMurabahaPurchaseOfferDocument,
         self::AttachMpoDocument,

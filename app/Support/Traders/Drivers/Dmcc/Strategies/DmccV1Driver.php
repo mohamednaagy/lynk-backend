@@ -615,4 +615,6 @@ class DmccV1Driver implements TraderInterface
     {
         $traderOrder->order->update(['status' => FinancingOrderStatus::Approved]);
     }
+
+    public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}
 }

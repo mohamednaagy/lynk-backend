@@ -3,6 +3,7 @@
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderErrorCode;
@@ -64,6 +65,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
                         'status' => FinancingOrderStatus::TradingFailure,
                     ]);
 
+                    app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
                     app(UpdateTraderOrderStatusToCancel::class)->handle(
                         $traderOrder,
                         TraderOrderCancelReason::FailureToPurchase,
@@ -92,7 +94,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
             $traderOrder->order->update([
                 'status' => FinancingOrderStatus::TradingFailure,
             ]);
-
+            app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
             app(UpdateTraderOrderStatusToCancel::class)->handle(
                 $traderOrder,
                 TraderOrderCancelReason::FailureToPurchase,
