@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
 
@@ -61,8 +62,27 @@ class BursamV1Driver implements TraderInterface
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
+            'default_contract_sign_time_limit' => $this->calculateTimeDifference(),
+
         ]);
     }
+
+    protected function calculateTimeDifference()
+    {
+        $marketEndTime = env('BURSAM_MARKET_OPENING_END_TIME');
+        $saudiNowTime = saudi_now('H:i:s');
+        $marketEnd = Carbon::createFromFormat('H:i:s', $marketEndTime);
+        // Calculate the difference in hours
+        $now = Carbon::createFromFormat('H:i:s', $saudiNowTime);
+        $differenceInMinutes = $now->diffInMinutes($marketEnd);
+        $differenceInHours = $differenceInMinutes / 60; // Convert to hours
+        Log::info("time now " . $now);
+        Log::info("market End " . $marketEnd);
+        Log::info("difference In minutes " . $differenceInMinutes);
+        Log::info("difference In Hours " . $differenceInHours);
+        return $differenceInHours;
+    }
+    
 
     public function createHoldTraderOrder(FinancingOrder $financingOrder): ?Model
     {

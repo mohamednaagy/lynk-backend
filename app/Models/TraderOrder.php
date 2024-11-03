@@ -369,4 +369,15 @@ class TraderOrder extends Model implements HasMedia
     {
         return $query->completed()->where('contract_signed_type', $contractSignedType);
     }
+
+    /**
+     * Set the default contract sign time limit in minutes.
+     *
+     * @param  int  $value
+     * @return void
+     */
+    public function setDefaultContractSignTimeLimitAttribute($value)
+    {
+        $this->attributes['default_contract_sign_time_limit'] = $value * 60;
+    }
 }
