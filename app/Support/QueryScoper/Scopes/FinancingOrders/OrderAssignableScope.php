@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderAssignableScope extends QueryScoper
 {
-        /**
+    /**
      * Prepare builder
      *
      * @param  Builder  $builder
@@ -25,6 +25,16 @@ class OrderAssignableScope extends QueryScoper
         return $builder;
     }
 
+    /**
+     * Prepare data
+     *
+     * @return array
+     */
+    /**
+     * Get data from request query and prepare them for the scope
+     *
+     * @return array
+     */
     public function prepareData(): array
     {
         return [
@@ -32,11 +42,18 @@ class OrderAssignableScope extends QueryScoper
         ];
     }
 
+    /**
+     * Get the validator
+     *
+     * @param  array  $data
+     * @return \Illuminate\Contracts\Validation\Validator
+     */
     public function validator($data): \Illuminate\Contracts\Validation\Validator
     {
+
         return Validator::make($data, [
-            'assignable_id'         => ['nullable', 'array'],
-            'assignable_id.*.id'    => ['required', 'integer', 'exists:users,id'],
+            'assignable_id' => ['nullable', 'array'],
+            'assignable_id.*' => ['required', 'integer', 'exists:users,id'],
         ]);
     }
 }

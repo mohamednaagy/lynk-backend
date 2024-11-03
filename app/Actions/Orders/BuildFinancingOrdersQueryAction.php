@@ -38,6 +38,7 @@ class BuildFinancingOrdersQueryAction implements BuildFinancingOrdersQuery
     private function scopes(): array
     {
         return [
+            'assignable' => new OrderAssignableScope(),
             'need_action' => new OrderNeedActionScope(),
             'search' => new OrderSearchScope(),
             'status' => new OrderStatusScope(),
@@ -47,7 +48,6 @@ class BuildFinancingOrdersQueryAction implements BuildFinancingOrdersQuery
             'filter' => new OrderFilterScope(),
             'company' => new OrderCompanyScope(),
             'date' => new OrderDateScope(),
-            'assignable' => new OrderAssignableScope(),
         ];
     }
 
