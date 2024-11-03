@@ -86,7 +86,7 @@ class LynkV1Driver implements TraderInterface
     private function generateFinalReferenceNumber(Model $traderOrder): string
     {
         return sprintf(
-            'LYNK-%s%s%s',
+            'LYNK-%s-%s-%s',
             $traderOrder->financing_order_id,
             $traderOrder->id,
             $traderOrder->created_at->format('Ymd')
