@@ -11,4 +11,6 @@ interface GetPaginatedUsersByRole
      * @return Builder
      */
     public function handle(string|array $role): Builder;
+
+    public function setCanManageOrders(bool $canManageOrders = null): self;
 }

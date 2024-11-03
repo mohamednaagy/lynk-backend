@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
+use App\Http\Requests\V1\Admin\Admins\AdminLiteListRequest;
 use App\Transformers\UserTransformer;
 
 class AdminLiteList extends Controller
@@ -19,9 +20,11 @@ class AdminLiteList extends Controller
             perm(Area::SuperAdmin, [Subject::Admins, Action::Index, Action::Manage])
         );
     }
-    public function __invoke(GetPaginatedUsersByRole $getPaginatedUsersByRole)
+    public function __invoke(AdminLiteListRequest $request, GetPaginatedUsersByRole $getPaginatedUsersByRole)
     {
-        $admins = $getPaginatedUsersByRole->handle(Area::roles(Area::SuperAdmin))->get([
+        $admins = $getPaginatedUsersByRole->setCanManageOrders($request->validated('can_manage_orders'))
+        ->handle(Area::roles(Area::SuperAdmin))
+        ->get([
             'id',
             'first_name',
             'last_name',
