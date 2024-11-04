@@ -50,6 +50,8 @@ class BursamV2Driver extends BursamV1Driver
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
+            'default_contract_sign_time_limit' => $this->calculateTimeDifference(),
+
         ]);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
