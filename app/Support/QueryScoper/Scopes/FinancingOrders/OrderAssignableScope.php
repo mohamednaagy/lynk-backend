@@ -18,10 +18,10 @@ class OrderAssignableScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data): Builder
     {
-        if (!empty($data['assignable_id']) && !in_array(-1, $data['assignable_id'], true))
+        if (!empty($data['assignable_id']) && in_array(-1, $data['assignable_id'], true))
             return $builder->whereIn('assignable_id', $data['assignable_id'])->orWhereNull('assignable_id');
 
-        if (in_array(-1, $data['assignable_id'], true))
+        if (!empty($data['assignable_id']) && !in_array(-1, $data['assignable_id'], true))
             return $builder->whereIn('assignable_id', $data['assignable_id']);
 
         return $builder;
