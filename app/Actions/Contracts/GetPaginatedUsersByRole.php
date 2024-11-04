@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 interface GetPaginatedUsersByRole
 {
     /**
-     * @param  string  $role
+     * @param  string|array $role
      * @return Builder
      */
     public function handle(string|array $role): Builder;

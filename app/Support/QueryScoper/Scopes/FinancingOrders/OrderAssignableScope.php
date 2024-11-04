@@ -2,7 +2,6 @@
 
 namespace App\Support\QueryScoper\Scopes\FinancingOrders;
 
-use App\Support\Money\Money;
 use App\Support\QueryScoper\QueryScoper;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Request;
@@ -19,19 +18,17 @@ class OrderAssignableScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data): Builder
     {
-        if ($data['assignable_id']) {
-            $builder->where('assignable_id', $data['assignable_id']);
-        }
+        if (!empty($data['assignable_id']) && !in_array(-1, $data['assignable_id'], true))
+            return $builder->whereIn('assignable_id', $data['assignable_id'])->orWhereNull('assignable_id');
+
+        if (in_array(-1, $data['assignable_id'], true))
+            return $builder->whereIn('assignable_id', $data['assignable_id']);
+
         return $builder;
     }
 
     /**
      * Prepare data
-     *
-     * @return array
-     */
-    /**
-     * Get data from request query and prepare them for the scope
      *
      * @return array
      */
@@ -50,10 +47,19 @@ class OrderAssignableScope extends QueryScoper
      */
     public function validator($data): \Illuminate\Contracts\Validation\Validator
     {
-
         return Validator::make($data, [
             'assignable_id' => ['nullable', 'array'],
-            'assignable_id.*' => ['required', 'integer', 'exists:users,id'],
+            'assignable_id.*' => ['required', 'integer', 'in:-1,' . implode(',', $this->getValidUserIds())],
         ]);
+    }
+
+    /**
+     * Get valid user IDs for validation
+     *
+     * @return array
+     */
+    protected function getValidUserIds(): array
+    {
+        return \App\Models\User::pluck('id')->toArray();
     }
 }
