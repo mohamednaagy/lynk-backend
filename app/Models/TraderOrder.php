@@ -61,6 +61,7 @@ class TraderOrder extends Model implements HasMedia
             'created_at',
             'default_contract_sign_time_limit',
             'contract_signed_type',
+            'expire_at',
         ];
     }
 

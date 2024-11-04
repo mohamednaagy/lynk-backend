@@ -318,7 +318,7 @@ class BursamV1Driver implements TraderInterface
             });
              // Set expiration time for the trader order
              if ($traderOrder->default_contract_sign_time_limit > 0) {
-                $traderOrder->expire_at = env('BURSAM_MARKET_OPENING_END_TIME');
+                $traderOrder->expire_at = Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME'));
                 $traderOrder->save();
             }
         } catch (\Throwable $exception) {
