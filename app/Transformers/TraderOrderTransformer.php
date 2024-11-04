@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Enums\BursamProductCode;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader;
@@ -36,6 +37,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'mode',
         'version',
         'failure_reason',
+        'expiry_date',
         'refunded_at',
         'refund_status',
         'purchasing_commodity_information',
@@ -214,5 +216,10 @@ class TraderOrderTransformer extends TransformerAbstract
         $this->currentOrderTraderOrders = $currentOrderTraderOrders;
 
         return $this;
+    }
+
+    public function includeExpiryDate(TraderOrder $traderOrder)
+    {
+        return $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument) ? $this->primitive($traderOrder->expire_at) : null;
     }
 }
