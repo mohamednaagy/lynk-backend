@@ -311,27 +311,24 @@ class TraderOrder extends Model implements HasMedia
     public function scopeWithExpiredContractSignLimit($query)
     {
         $version = get_latest_version_of_trader(EnumsTrader::Lynk);
+        $now = Carbon::createFromFormat('Y-m-d H:i:s', saudi_now('Y-m-d H:i:s'));
         return $query->where('provider', EnumsTrader::Lynk)
         ->where('version', $version)
         ->where('mode', TraderOrderMode::Automatic)
         ->where('status', TraderOrderStatus::InProgress)
+        ->where('expire_at', '<', $now)
         ->whereNotNull('default_contract_sign_time_limit')
-        ->with(['traderHistories' => function ($query) {
-            $query->select('trader_order_id', 'created_at', 'action')
-                ->orderBy('id', 'desc');
-        }])
-        ->get()
-        ->filter(fn($traderOrder) => $this->isTraderOrderExpired($traderOrder));
-    }
-
-    protected function isTraderOrderExpired($traderOrder): bool
-    {
-        $latestHistory = $traderOrder->traderHistories->first();
-        if ($latestHistory->action == FinancingOrderHistory::CreateTransferOwnershipToLenderDocument) {
-            $now = Carbon::createFromFormat('Y-m-d H:i:s', saudi_now('Y-m-d H:i:s'));
-            return Carbon::parse($traderOrder->expire_at) < $now;
-        }
-        return false;
+        ->whereHas('traderHistories', function ($historyQuery){
+            $historyQuery->select('id')
+                ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
+                ->where('id', function ($subQuery) {
+                    $subQuery->select('id')
+                        ->from('trader_histories')
+                        ->orderBy('id', 'desc')
+                        ->limit(1);
+                }); 
+        })
+        ->get();
     }
 
     public function hoverMessage(): ?string
