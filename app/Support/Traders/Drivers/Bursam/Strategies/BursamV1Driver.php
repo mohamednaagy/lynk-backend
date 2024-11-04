@@ -34,7 +34,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
 
@@ -63,6 +62,7 @@ class BursamV1Driver implements TraderInterface
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
             'default_contract_sign_time_limit' => $this->calculateTimeDifference(),
+            'expire_at' => Carbon::createFromFormat('Y-m-d H:i:s', env('BURSAM_MARKET_OPENING_END_TIME')),
 
         ]);
     }
@@ -315,11 +315,6 @@ class BursamV1Driver implements TraderInterface
                     ]
                 );
             });
-             // Set expiration time for the trader order
-             if ($traderOrder->default_contract_sign_time_limit > 0) {
-                $traderOrder->expire_at = Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME'));
-                $traderOrder->save();
-            }
         } catch (\Throwable $exception) {
             throw new TraderException(
                 'Failed to create lender ownership certificate',

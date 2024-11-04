@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -327,8 +328,8 @@ class TraderOrder extends Model implements HasMedia
     {
         $latestHistory = $traderOrder->traderHistories->first();
         if ($latestHistory->action == FinancingOrderHistory::CreateTransferOwnershipToLenderDocument) {
-            $now = Carbon::now('Asia/Riyadh');
-            return $traderOrder->expire_at < $now;
+            $now = Carbon::createFromFormat('Y-m-d H:i:s', saudi_now('Y-m-d H:i:s'));
+            return Carbon::parse($traderOrder->expire_at) < $now;
         }
         return false;
     }
