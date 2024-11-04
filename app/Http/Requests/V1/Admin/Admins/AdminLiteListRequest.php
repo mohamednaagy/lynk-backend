@@ -24,7 +24,7 @@ class AdminLiteListRequest extends FormRequest
     public function rules()
     {
         return [
-           'can_manage_orders' => ['required',  'boolean'],
+           'can_manage_orders' => ['nullable',  'boolean'],
         ];
     }
 }
