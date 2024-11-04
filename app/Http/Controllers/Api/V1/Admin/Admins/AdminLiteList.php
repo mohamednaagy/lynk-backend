@@ -23,12 +23,14 @@ class AdminLiteList extends Controller
     public function __invoke(AdminLiteListRequest $request, GetPaginatedUsersByRole $getPaginatedUsersByRole)
     {
         $admins = $getPaginatedUsersByRole->setCanManageOrders($request->validated('can_manage_orders'))
-        ->handle(Area::roles(Area::SuperAdmin))
-        ->get([
-            'id',
-            'first_name',
-            'last_name',
-        ]);
+            ->handle(Area::roles(Area::SuperAdmin))
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get([
+                'id',
+                'first_name',
+                'last_name',
+            ]);
 
         return fractal($admins, new UserTransformer(Area::SuperAdmin))
             ->parseIncludes([
