@@ -327,11 +327,8 @@ class TraderOrder extends Model implements HasMedia
     {
         $latestHistory = $traderOrder->traderHistories->first();
         if ($latestHistory->action == FinancingOrderHistory::CreateTransferOwnershipToLenderDocument) {
-            $currentTime = now();
-            $contractSignTimeLimit = $traderOrder->default_contract_sign_time_limit;
-            $expirationTime = $latestHistory->created_at->addHours($contractSignTimeLimit);
-    
-            return $currentTime > $expirationTime;
+            $now = Carbon::now('Asia/Riyadh');
+            return $traderOrder->expire_at < $now;
         }
         return false;
     }

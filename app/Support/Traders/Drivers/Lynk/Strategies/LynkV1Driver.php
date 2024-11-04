@@ -118,7 +118,8 @@ class LynkV1Driver implements TraderInterface
             });
             // Set expiration time for the trader order
             if ($traderOrder->default_contract_sign_time_limit > 0) {
-                $traderOrder->expire_at = Carbon::createFromFormat('H:i:s', saudi_now('H:i:s'))->addMinutes($traderOrder->default_contract_sign_time_limit)->toDateTimeString();
+                $traderOrder->expire_at = Carbon::now('Asia/Riyadh')
+                    ->addMinutes($traderOrder->default_contract_sign_time_limit)->toDateTimeString();
                 $traderOrder->save();
             }
         } catch (\Throwable $exception) {
