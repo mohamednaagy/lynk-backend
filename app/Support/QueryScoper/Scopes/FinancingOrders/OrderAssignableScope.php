@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderAssignableScope extends QueryScoper
 {
+
+    private const NOT_AASSIGNED_FILTER_VALUE = '-1';
     /**
      * Prepare builder
      *
@@ -18,10 +20,10 @@ class OrderAssignableScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data): Builder
     {
-        if (!empty($data['assignable_id']) && in_array(-1, $data['assignable_id'], true))
+        if (!empty($data['assignable_id']) && in_array(self::NOT_AASSIGNED_FILTER_VALUE, $data['assignable_id'], true))
             return $builder->whereIn('assignable_id', $data['assignable_id'])->orWhereNull('assignable_id');
 
-        if (!empty($data['assignable_id']) && !in_array(-1, $data['assignable_id'], true))
+        if (!empty($data['assignable_id']) && !in_array(self::NOT_AASSIGNED_FILTER_VALUE, $data['assignable_id'], true))
             return $builder->whereIn('assignable_id', $data['assignable_id']);
 
         return $builder;
