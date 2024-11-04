@@ -24,6 +24,7 @@ return [
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => null,
         ],
         MurabhaStep::CustomerDeliveryConfirmation => [
+            FinancingOrderHistory::PendingDelivery => null,
             FinancingOrderHistory::DeliveryCancelled => null,
             FinancingOrderHistory::DeliveryConfirmed => null,
         ],
