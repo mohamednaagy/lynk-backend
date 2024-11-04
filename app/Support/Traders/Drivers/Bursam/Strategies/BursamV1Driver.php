@@ -75,11 +75,7 @@ class BursamV1Driver implements TraderInterface
         // Calculate the difference in hours
         $now = Carbon::createFromFormat('H:i:s', $saudiNowTime);
         $differenceInMinutes = $now->diffInMinutes($marketEnd);
-        $differenceInHours = $differenceInMinutes / 60; // Convert to hours
-        Log::info("time now " . $now);
-        Log::info("market End " . $marketEnd);
-        Log::info("difference In minutes " . $differenceInMinutes);
-        Log::info("difference In Hours " . $differenceInHours);
+        $differenceInHours = $differenceInMinutes / 60;
         return $differenceInHours;
     }
     
@@ -320,6 +316,11 @@ class BursamV1Driver implements TraderInterface
                     ]
                 );
             });
+             // Set expiration time for the trader order
+             if ($traderOrder->default_contract_sign_time_limit > 0) {
+                $traderOrder->expire_at = env('BURSAM_MARKET_OPENING_END_TIME');
+                $traderOrder->save();
+            }
         } catch (\Throwable $exception) {
             throw new TraderException(
                 'Failed to create lender ownership certificate',
