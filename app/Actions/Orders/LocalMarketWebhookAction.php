@@ -45,11 +45,14 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
             case LocalMarketOrderStatus::FailedPurchase:
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::FailureToPurchase);
+                Trader::driver($traderOrder->provider, $traderOrder->version)
+                    ->confirmCancelledFromProvider($traderOrder);
                 break;
-
             case LocalMarketOrderStatus::NoEligibleCommoditiesAvailable:
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::NoEligibleCommoditiesAvailable);
+                Trader::driver($traderOrder->provider, $traderOrder->version)
+                    ->confirmCancelledFromProvider($traderOrder);
                 break;
             case LocalMarketOrderStatus::TransferOwnershipToCustomer:
                 Trader::driver($traderOrder->provider, $traderOrder->version)
@@ -59,12 +62,16 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
                 (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))->updateMurabhaCompleteDocument($traderOrder);
                 break;
             case LocalMarketOrderStatus::Cancelled:
-
+                Trader::driver($traderOrder->provider, $traderOrder->version)
+                    ->confirmCancelledFromProvider($traderOrder);
                 break;
             case LocalMarketOrderStatus::FailedSell:
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::FailureToSellAtLocalMarket);
+                Trader::driver($traderOrder->provider, $traderOrder->version)
+                    ->confirmCancelledFromProvider($traderOrder);
                 break;
+
             default:
                 throw new LocalMarketWebhookException;
         }

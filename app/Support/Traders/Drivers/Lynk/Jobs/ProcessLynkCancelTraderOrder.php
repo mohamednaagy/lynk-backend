@@ -3,7 +3,6 @@
 namespace App\Support\Traders\Drivers\Lynk\Jobs;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
-use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -26,17 +25,8 @@ class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
      *
      * @return void
      */
-    public $cancelledByType;
-
-    public $cancelledBy;
-
-    public function __construct(protected int $traderOrderId, protected int $cancelReason,
-        $cancelledByType = TraderOrderCancelType::System,
-        $cancelledBy = null)
+    public function __construct(protected int $traderOrderId)
     {
-        $this->cancelledBy = $cancelledBy;
-        $this->cancelledByType = $cancelledByType;
-
         $this->onQueue('local_market');
     }
 
@@ -47,19 +37,23 @@ class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
-        DB::transaction(function () {
-            $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::PendingCancellation)
-                ->lockForUpdate()
-                ->find($this->traderOrderId);
+        try {
+            DB::transaction(function () {
+                $traderOrder = TraderOrder::query()
+                    ->where('status', TraderOrderStatus::PendingCancellation)
+                    ->lockForUpdate()
+                    ->find($this->traderOrderId);
 
-            if (
-                (is_null($traderOrder))) {
-                return;
-            }
+                if (
+                    (is_null($traderOrder))) {
+                    return;
+                }
+                app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $traderOrder->cancelDetail->cancel_reason->value);
+            });
+        } catch (\Exception $e) {
+            Log::channel('local_market')->error('error at ProcessLynkCancelTraderOrder ,cant add cancel details ', ['trader_order_id' => $this->traderOrderId, 'error' => $e->getMessage()]);
+        }
 
-            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $this->cancelReason, cancelledByType: $this->cancelledByType, cancelledBy: $this->cancelledBy);
-        });
     }
 
     public function failed($exception)

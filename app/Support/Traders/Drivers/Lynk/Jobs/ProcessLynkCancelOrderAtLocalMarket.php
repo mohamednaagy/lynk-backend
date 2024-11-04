@@ -37,14 +37,27 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
      */
     public function handle()
     {
-        DB::transaction(function () {
-            $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::PendingCancellation)
-                ->lockForUpdate()
-                ->find($this->traderOrderId);
+        try {
+            DB::transaction(function () {
+                $traderOrder = TraderOrder::query()
+                    ->where('status', TraderOrderStatus::PendingCancellation)
+                    ->lockForUpdate()
+                    ->find($this->traderOrderId);
 
-            LynkClient::of($traderOrder)->cancelOrder();
-        });
+                if (is_null($traderOrder)) {
+                    return;
+                }
+
+                //if condition to notify function to cancel detail from model (TODO:nagy)
+                if ($traderOrder->cancelDetail->shouldNotifyProvider()) {
+                    LynkClient::of($traderOrder)->cancelOrder();
+                }
+            });
+        } catch (\Exception $e) {
+            Log::channel('local_market')->error('error at ProcessLynkCancelOrderAtLocalMarket , cant add connect to local market to cancel order ', ['trader_order_id' => $this->traderOrderId, 'error' => $e->getMessage()]);
+
+        }
+
     }
 
     public function middleware(): array
@@ -55,10 +68,5 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->traderOrderId;
-    }
-
-    public function failed($exception)
-    {
-        Log::error('ProcessLynkTransferOwnershipToCustomer', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
     }
 }

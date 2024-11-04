@@ -17,6 +17,6 @@ class CancelTraderOrderAction implements CancelTraderOrder
         int $cancelReason
     ): void {
         Trader::driver($traderOrder->provider, $traderOrder->version)
-            ->cancelTraderOrder($traderOrder, $cancelReason, cancelledByType: TraderOrderCancelType::User, cancelledBy: auth()->user()->id);
+            ->cancelTraderOrder($traderOrder, $cancelReason, cancelledByType: TraderOrderCancelType::User, cancelledBy: auth()->user());
     }
 }
