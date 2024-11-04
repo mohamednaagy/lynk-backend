@@ -3,6 +3,7 @@
 namespace App\Support\Traders\Drivers\Lynk\Jobs;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
 use App\Enums\Trader as TraderEnum;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
@@ -63,7 +64,7 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
         if (! $traderOrder) {
             return;
         }
-
+        app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         Log::error(
             method_exists('getMessage', $exception)

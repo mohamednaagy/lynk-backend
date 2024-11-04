@@ -3,6 +3,7 @@
 namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
@@ -71,7 +72,8 @@ class BursamV2Driver extends BursamV1Driver
     ): int {
         $user = auth()->check() ? auth()->user() : null;
         if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket) || $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::OnHold)) {
-            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: auth()->user());
+            app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
+            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
 
             return TraderOrderCancellationStatus::Cancelled;
         }
@@ -82,9 +84,7 @@ class BursamV2Driver extends BursamV1Driver
             throw new Exception(sprintf('Trader order (#%s) cannot be cancelled now', $traderOrder->id));
         }
 
-        $traderOrder->update([
-            'status' => TraderOrderStatus::PendingCancellation,
-        ]);
+        app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
 
         Bus::chain([
             new ProcessBursamSellingCommodityToOpenMarketForCancellation($traderOrder->id),
@@ -203,4 +203,6 @@ class BursamV2Driver extends BursamV1Driver
     {
         $traderOrder->order->update(['status' => FinancingOrderStatus::Approved]);
     }
+
+    public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}
 }
