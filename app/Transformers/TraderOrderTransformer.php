@@ -220,6 +220,9 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeExpiryDate(TraderOrder $traderOrder)
     {
-        return $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument) ? $this->primitive($traderOrder->expire_at) : null;
+        $isInProgress = $traderOrder->status->is(TraderOrderStatus::InProgress);
+        $lastActionMatches = $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+
+        return ($isInProgress && $lastActionMatches) ? $this->primitive($traderOrder->expire_at) : null;
     }
 }
