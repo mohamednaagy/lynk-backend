@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -61,6 +62,7 @@ class TraderOrder extends Model implements HasMedia
             'created_at',
             'default_contract_sign_time_limit',
             'contract_signed_type',
+            'expire_at',
         ];
     }
 
@@ -308,32 +310,24 @@ class TraderOrder extends Model implements HasMedia
     public function scopeWithExpiredContractSignLimit($query)
     {
         $version = get_latest_version_of_trader(EnumsTrader::Lynk);
-
+        $now = Carbon::createFromFormat('Y-m-d H:i:s', saudi_now('Y-m-d H:i:s'));
         return $query->where('provider', EnumsTrader::Lynk)
-            ->where('version', $version)
-            ->where('mode', TraderOrderMode::Automatic)
-            ->where('status', TraderOrderStatus::InProgress)
-            ->whereNotNull('default_contract_sign_time_limit')
-            ->with(['traderHistories' => function ($query) {
-                $query->select('trader_order_id', 'created_at', 'action')
-                    ->orderBy('id', 'desc');
-            }])
-            ->get()
-            ->filter(fn ($traderOrder) => $this->isTraderOrderExpired($traderOrder));
-    }
-
-    protected function isTraderOrderExpired($traderOrder): bool
-    {
-        $latestHistory = $traderOrder->traderHistories->first();
-        if ($latestHistory->action == FinancingOrderHistory::CreateTransferOwnershipToLenderDocument) {
-            $currentTime = now();
-            $contractSignTimeLimit = $traderOrder->default_contract_sign_time_limit;
-            $expirationTime = $latestHistory->created_at->addHours($contractSignTimeLimit);
-
-            return $currentTime > $expirationTime;
-        }
-
-        return false;
+        ->where('version', $version)
+        ->where('mode', TraderOrderMode::Automatic)
+        ->where('status', TraderOrderStatus::InProgress)
+        ->where('expire_at', '<', $now)
+        ->whereNotNull('default_contract_sign_time_limit')
+        ->whereHas('traderHistories', function ($historyQuery){
+            $historyQuery->select('id')
+                ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
+                ->where('id', function ($subQuery) {
+                    $subQuery->select('id')
+                        ->from('trader_histories')
+                        ->orderBy('id', 'desc')
+                        ->limit(1);
+                }); 
+        })
+        ->get();
     }
 
     public function hoverMessage(): ?string
@@ -382,5 +376,16 @@ class TraderOrder extends Model implements HasMedia
     public function scopeCompletedWithContractSignedType($query, $contractSignedType = ContractSignedType::Sell)
     {
         return $query->completed()->where('contract_signed_type', $contractSignedType);
+    }
+
+    /**
+     * Set the default contract sign time limit in minutes.
+     *
+     * @param  int  $value
+     * @return void
+     */
+    public function setDefaultContractSignTimeLimitAttribute($value)
+    {
+        $this->attributes['default_contract_sign_time_limit'] = $value * 60;
     }
 }
