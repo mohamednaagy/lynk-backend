@@ -157,7 +157,7 @@ class LynkV1Driver implements TraderInterface
                     $traderOrder,
                     TraderOrderMediaCollection::TransferOwnershipToLender
                 );
-                    
+
             });
             // Set expiration time for the trader order
             if ($traderOrder->default_contract_sign_time_limit > 0) {
@@ -228,6 +228,7 @@ class LynkV1Driver implements TraderInterface
                         'created_at' => $currentTimeInUtcTz,
                     ]
                 );
+
             });
         } catch (Exception $exception) {
             throw new TraderException(

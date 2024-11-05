@@ -31,17 +31,16 @@ class BuyCommoditiesAction implements BuyCommodities
 
             $eligibleCommodities = $localMarketOrder->data;
 
-            if ($eligibleCommodities['isLoanCovered']) {
-                if ($this->LoanService->buyCommodities($localMarketOrder, $localMarketOrder->company_id, $eligibleCommodities)) {
-                    $localMarketOrder->update([
-                        'status' => LocalMarketOrderStatus::CommoditiesPurchased,
-                    ]);
-                } else {
-                    $localMarketOrder->update([
-                        'status' => LocalMarketOrderStatus::FailedPurchase,
-                    ]);
-                }
+            if ($this->LoanService->buyCommodities($localMarketOrder, $localMarketOrder->company_id, $eligibleCommodities)) {
+                $localMarketOrder->update([
+                    'status' => LocalMarketOrderStatus::CommoditiesPurchased,
+                ]);
+            } else {
+                $localMarketOrder->update([
+                    'status' => LocalMarketOrderStatus::FailedPurchase,
+                ]);
             }
+
             Log::info('BuyCommoditiesAction Duration', [
                 'order_id' => $localMarketOrder->id,
                 'start_time' => $startTime,

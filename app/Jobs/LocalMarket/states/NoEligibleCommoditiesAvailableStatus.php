@@ -32,8 +32,6 @@ class NoEligibleCommoditiesAvailableStatus implements ShouldQueue
      */
     public function handle(): void
     {
-        // Nagy Continue this function
-        $data = $this->getDataOfLocalMarketOrder($this->localMarketOrder);
         $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::NoEligibleCommoditiesAvailable);
         $data['case'] = LocalMarketOrderStatus::NoEligibleCommoditiesAvailable;
         $data['external_order_no'] = $this->localMarketOrder->external_order_no;

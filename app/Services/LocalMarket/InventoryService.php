@@ -28,44 +28,110 @@ class InventoryService
      * @param  array  $usedInventories  An optional array of inventory IDs that have already been used. These inventories are excluded from the results.
      * @return LocalMarketInventory|null The best matching inventory item, or null if no eligible inventory is found.
      */
-    public function findEligibleInventoryForLoan(float $loanAmount, array $preferredItemTypes = [], array $usedInventories = [])
+    public function findEligibleInventoryForLoan($loanAmount, $preferredItemTypes)
     {
-        $inventory = $this->findInventory($loanAmount, $usedInventories, $preferredItemTypes);
-
-        if (empty($inventory) && ! empty($preferredItemTypes)) {
-            $inventory = $this->findInventory($loanAmount, $usedInventories);
-        }
-
-        return $inventory;
-    }
-
-    private function findInventory(float $loanAmount, array $usedInventories = [], array $preferredItemTypes = [])
-    {
-
-        $inventoryQuery = LocalMarketInventory::where('max_price', '<=', $loanAmount)
+        $inventories = LocalMarketInventory::where('max_price', '<=', $loanAmount)
             ->where('status', InventoryStatus::Active)
+            ->where('available_quantity', '>', 0)
             ->whereHas('type', function ($query) {
                 $query->where('status', CommodityTypeStatus::Active);
             })
             ->whereHas('supplier.detail', function ($query) {
                 $query->where('status', CommoitySupplierStatus::Active);
             })
-            ->when(! empty($usedInventories), function ($query) use ($usedInventories) {
-                $query->whereNotIn('id', $usedInventories);
-            });
+            ->orderBy('max_price', 'DESC')
+            ->get();
 
         if (! empty($preferredItemTypes)) {
-            $inventoryQuery->whereIn('commodity_type_id', $preferredItemTypes);
+            $filteredInventories = $inventories->filter(function ($inventory) use ($preferredItemTypes) {
+                return in_array($inventory->commodity_type_id, $preferredItemTypes);
+            });
+
+            $combination = $this->findOptimalCombination($filteredInventories, $loanAmount, $preferredItemTypes);
+
+            if (! empty($combination)) {
+                return $combination;
+            }
         }
 
-        return $inventoryQuery->orderByRaw('available_quantity * max_price DESC')->first();
+        return $this->findOptimalCombination($inventories, $loanAmount, $preferredItemTypes);
     }
 
-    public static function refreshInventoryStocks($inventories)
+    private function findOptimalCombination($inventories, $loanAmount, array $preferredCommodities)
     {
-        LocalMarketInventory::query()->whereIn('id', $inventories)->each(function ($inventory) {
-            $inventory->refreshStockQuantities();
-        });
+        $maxUnits = config('trader.providers.lynk.max_units_per_trader', 10000);
+
+        // Convert inventory objects to arrays
+        $inventoriesArray = array_values($inventories->all());
+
+        $finalSelectedInventories = [];
+        $maxCoveredAmount = 0;
+        $loanCovered = false; // Early exit flag
+
+        Log::info("Trying to cover loan amount of $loanAmount with inventories...");
+
+        // Outer loop to iterate through all inventories
+        foreach ($inventoriesArray as $outerIndex => $outerInventory) {
+            if ($loanCovered) {
+                break;
+            } // Early exit if already covered
+            Log::info(" ====== Starting new combination attempt with inventory {$outerInventory['id']} =======");
+
+            $coveredAmount = 0;
+            $usedUnits = 0;
+            $selectedInventories = [];
+
+            // Inner loop to try combinations starting with the current outer inventory
+            for ($innerIndex = $outerIndex; $innerIndex < count($inventoriesArray); $innerIndex++) {
+                $inv = $inventoriesArray[$innerIndex];
+                if ($coveredAmount >= $loanAmount || $usedUnits >= $maxUnits) {
+                    break; // Stop if the loan is covered or max units reached
+                }
+
+                $availableUnits = min($inv['available_quantity'], $maxUnits - $usedUnits);
+                $unitPrice = $inv['max_price'];
+                $remainingLoanAmount = $loanAmount - $coveredAmount;
+                $maxAffordableUnits = (int) floor($remainingLoanAmount / $unitPrice);
+
+                $unitsToUse = min($availableUnits, $maxAffordableUnits);
+                $amountToCover = $unitsToUse * $unitPrice;
+
+                Log::info("Attempting inventory {$inv['id']} with {$unitsToUse} units at {$unitPrice} per unit, covering {$amountToCover}");
+
+                if ($amountToCover > 0) {
+                    $selectedInventories[] = [
+                        'id' => $inv['id'],
+                        'commodity_type_id' => $inv['commodity_type_id'],
+                        'numberOfUnits' => $unitsToUse,
+                        'amount' => $amountToCover,
+                    ];
+
+                    $coveredAmount += $amountToCover;
+                    $usedUnits += $unitsToUse;
+                    Log::info("Updated covered amount: $coveredAmount, used units: $usedUnits");
+                }
+
+                // Check if we've covered the loan amount
+                if ($coveredAmount >= $loanAmount) {
+                    // Update max covered amount if this combination is better
+                    $maxCoveredAmount = $coveredAmount;
+                    $finalSelectedInventories = $selectedInventories;
+                    $loanCovered = true; // Mark as covered for early exit
+                    Log::info("Successfully covered the loan amount with a total of $coveredAmount.");
+                    break; // Exit the inner loop since we've covered the loan
+                }
+            }
+        }
+
+        if (! $loanCovered) {
+            Log::info("Failed to cover the exact loan amount. Covered $maxCoveredAmount of $loanAmount.");
+
+            return false;
+        }
+
+        Log::info("Successfully covered the loan amount with a total of $maxCoveredAmount.");
+
+        return $finalSelectedInventories;
     }
 
     public static function deleteInventory($inventory)
