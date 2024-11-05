@@ -64,7 +64,7 @@ class BursamV1Driver implements TraderInterface
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
             'default_contract_sign_time_limit' => $this->calculateTimeDifference(),
-            'expire_at' => Carbon::createFromFormat('Y-m-d H:i:s', env('BURSAM_MARKET_OPENING_END_TIME')),
+            'expire_at' => Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME')),
 
         ]);
     }
