@@ -28,7 +28,7 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
         'charged_transactions' => 'Charged Transactions',
         'order_owner' => 'Order Owner',
         'company_name' => 'Company Name',
-        'assigned_to'=> 'Assigned To',
+        'assigned_to' => 'Assigned To',
         'status' => 'Status',
         'cost_with_vat' => 'Cost With Vat (SAR)',
         'cost_without_vat' => 'Cost Without Vat (SAR)',
@@ -75,7 +75,7 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
             'charged_transactions' => fn () => (string) $order->charged_trader_orders_count,
             'order_owner' => fn () => $order->creator?->full_name,
             'company_name' => fn () => $order->company->name,
-            'assigned_to' => fn() => $order->responsableAdmin,
+            'assigned_to' => fn () => $order->responsableAdmin ? $order->responsableAdmin->full_name : null,
             'status' => fn () => $this->withLocale('en', function () use ($order) {
                 return $order->status->isNot(FinancingOrderStatus::InProgress)
                     || is_null($order->current_step)
