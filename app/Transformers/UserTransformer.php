@@ -172,6 +172,6 @@ class UserTransformer extends TransformerAbstract
 
     public function includeFullName(User $user): Primitive
     {
-        return $this->primitive($user->first_name . $user->last_name);
+        return $this->primitive($user->first_name . ' ' . $user->last_name);
     }
 }
