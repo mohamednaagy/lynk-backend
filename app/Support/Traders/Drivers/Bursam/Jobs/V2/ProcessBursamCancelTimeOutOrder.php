@@ -34,6 +34,8 @@ class ProcessBursamCancelTimeOutOrder implements ShouldQueue
      */
     public function handle(): void
     {
+        Log::info('Starting ProcessBursamBidCertificate Job');
+
         DB::transaction(function () {
             $lockedFinancingOrder = FinancingOrder::query()
                 ->lockForUpdate()

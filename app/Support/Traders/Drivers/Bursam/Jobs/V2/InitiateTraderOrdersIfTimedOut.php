@@ -24,9 +24,7 @@ class InitiateTraderOrdersIfTimedOut implements ShouldQueue
      *
      * @return void
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Execute the job.
@@ -35,6 +33,8 @@ class InitiateTraderOrdersIfTimedOut implements ShouldQueue
      */
     public function handle()
     {
+        Log::info('Starting InitiateTraderOrdersIfTimedOut Job');
+
         $timezone = Config::get('services.bursam.timezone');
         $marketOpeningStartTimeString = Config::get('services.bursam.market_opening_start_time');
         $marketOpeningEndTimeString = Config::get('services.bursam.market_opening_end_time');
