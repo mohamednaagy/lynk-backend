@@ -33,6 +33,8 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
      */
     public function handle(): void
     {
+        Log::info('Starting ProcessDailySellingPendingCommodityToMarket Job');
+
         $timezone = Config::get('services.bursam.timezone');
         $marketOpeningStartTime = Carbon::parse(Config::get('services.bursam.market_opening_start_time'), $timezone);
         $marketOpeningEndTime = Carbon::parse(Config::get('services.bursam.market_opening_end_time'), $timezone);
@@ -51,6 +53,7 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
             ->select('id')
             ->lazyById()
             ->each(function (FinancingOrder $financingOrder) {
+                Log::info("fire auto cancel job for finance order {$financingOrder->id}");
                 ProcessBursamCancelTimeOutOrder::dispatch($financingOrder);
             });
     }

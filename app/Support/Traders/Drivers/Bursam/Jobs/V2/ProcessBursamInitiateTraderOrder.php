@@ -36,6 +36,8 @@ class ProcessBursamInitiateTraderOrder implements ShouldBeUnique, ShouldQueue
      */
     public function handle(InitiateTraderOrder $initiateTraderOrder)
     {
+        Log::info('Starting ProcessBursamInitiateTraderOrder Job');
+
         return DB::multipleTransaction(function () use ($initiateTraderOrder) {
             try {
                 $initiateTraderOrder->handle($this->financingOrder->creator, $this->financingOrder->id);
