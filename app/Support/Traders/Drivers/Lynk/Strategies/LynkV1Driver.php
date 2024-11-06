@@ -310,7 +310,7 @@ class LynkV1Driver implements TraderInterface
             TraderOrderCancelReason::NoEligibleCommoditiesAvailable => __('order.trader.lynk.no_commodity_available'),
             TraderOrderCancelReason::FailureToPurchase => __('order.trader.lynk.internal_technical_error'),
             TraderOrderCancelReason::ExpiredContractSignTime => __('order.trader.lynk.expired_contract_time', [
-                'TIME' => $traderOrder->default_contract_sign_time_limit,
+                'TIME' => $traderOrder->default_contract_sign_time_limit / 60,
             ]),
             default => null,
         };
