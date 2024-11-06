@@ -16,6 +16,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
 {
@@ -38,6 +39,8 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
      */
     public function handle()
     {
+        Log::info('Starting ProcessBursamBidCertificate Job');
+
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::InProgress)

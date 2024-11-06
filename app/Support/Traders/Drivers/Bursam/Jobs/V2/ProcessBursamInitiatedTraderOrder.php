@@ -39,6 +39,8 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
+        Log::info('Starting ProcessBursamInitiatedTraderOrder Job');
+
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::Initiated)

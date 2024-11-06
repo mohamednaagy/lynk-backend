@@ -337,8 +337,6 @@ class BursamClient
             return $this->rateLimitRequest($callback, ++$remainingRetries);
         }
 
-        Log::info('ok everything is ok');
-
         return $executed;
     }
 
