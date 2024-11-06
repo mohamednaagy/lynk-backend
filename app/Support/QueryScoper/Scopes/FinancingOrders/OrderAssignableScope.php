@@ -37,7 +37,7 @@ class OrderAssignableScope extends QueryScoper
     public function prepareData(): array
     {
         return [
-            'assignable_id' => collect(Request::query('assignable_id'))->pluck('id')->toArray()
+            'assignable_id' => collect(Request::query('assignable_id'))->pluck('value')->toArray()
         ];
     }
 
