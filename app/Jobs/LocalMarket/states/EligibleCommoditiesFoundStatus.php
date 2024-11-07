@@ -30,6 +30,7 @@ class EligibleCommoditiesFoundStatus implements ShouldQueue
     public function handle(): void
     {
         Log::channel('local_market')->info("before buy commodity step to local market id {$this->localMarketOrder->id} ");
+        // cant use ButCommodities in dependency injection as it can disrupt the order within transactions.
         app(BuyCommodities::class)->handle($this->localMarketOrder);
         Log::channel('local_market')->info("before buy commodity step to local market id {$this->localMarketOrder->id} ");
 
