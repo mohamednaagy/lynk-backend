@@ -27,14 +27,12 @@ class EligibleCommoditiesFoundStatus implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(BuyCommodities $buyCommodities): void
+    public function handle(): void
     {
-
-        $buyCommodities->handle(
-            $this->localMarketOrder
-        );
+        Log::channel('local_market')->info("before buy commodity step to local market id {$this->localMarketOrder->id} ");
+        app(BuyCommodities::class)->handle($this->localMarketOrder);
+        Log::channel('local_market')->info("before buy commodity step to local market id {$this->localMarketOrder->id} ");
 
         $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::EligibleCommoditiesAvailable);
-
     }
 }
