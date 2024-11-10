@@ -22,7 +22,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -311,26 +310,24 @@ class TraderOrder extends Model implements HasMedia
     {
         $version = get_latest_version_of_trader(EnumsTrader::Lynk);
         $now = Carbon::createFromFormat('Y-m-d H:i:s', saudi_now('Y-m-d H:i:s'));
-        return $query->where([
-            ['provider', EnumsTrader::Lynk],
-            ['version', $version],
-            ['mode', TraderOrderMode::Automatic],
-            ['status', TraderOrderStatus::InProgress],
-            ['expire_at', '<', $now],
-        ])
-        ->whereNotNull('default_contract_sign_time_limit')
-        ->whereHas('traderHistories', function ($historyQuery) {
-            $historyQuery->select('id')
-                ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
-                ->where('id', function ($subQuery) {
-                    $subQuery->select('id')
-                        ->from('trader_histories')
-                        ->whereRaw('trader_orders.id = trader_histories.trader_order_id') 
-                        ->orderByDesc('id')
-                        ->limit(1);
-                }); 
-        })
-        ->get();
+
+        return $query->where('provider', EnumsTrader::Lynk)
+            ->where('version', $version)
+            ->where('mode', TraderOrderMode::Automatic)
+            ->where('status', TraderOrderStatus::InProgress)
+            ->where('expire_at', '<', $now)
+            ->whereNotNull('default_contract_sign_time_limit')
+            ->whereHas('traderHistories', function ($historyQuery) {
+                $historyQuery->select('id')
+                    ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
+                    ->where('id', function ($subQuery) {
+                        $subQuery->select('id')
+                            ->from('trader_histories')
+                            ->orderBy('id', 'desc')
+                            ->limit(1);
+                    });
+            })
+            ->get();
     }
 
     public function hoverMessage(): ?string
@@ -347,7 +344,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function getCustomerDeliveryStatusAndMessage(): array
     {
-        if ($this->provider == EnumsTrader::Lynk && $this->mode = TraderOrderMode::Automatic) {
+        if ($this->provider == EnumsTrader::Lynk && $this->mode == TraderOrderMode::Automatic) {
             if ($this->checkOrderStepComplete(MurabhaStep::CommoditySoldToCustomer)) {
                 return [
                     'status' => CustomerDeliveryStatus::DeliveryNotApplicable,
