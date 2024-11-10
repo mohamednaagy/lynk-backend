@@ -7,11 +7,8 @@ use App\Enums\TraderOrderCancelReason;
 use App\Http\Controllers\Api\V1\Test\LocalMarketController;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\LoanService;
-<<<<<<< HEAD
 use App\Services\LocalMarket\OrderService;
 use App\Support\Traders\Facades\Trader as FacadesTrader;
-=======
->>>>>>> LYNKMRBHA-1628-enhance-finding-eligable-inventories
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
