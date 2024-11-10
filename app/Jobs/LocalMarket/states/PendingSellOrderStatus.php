@@ -49,6 +49,7 @@ class PendingSellOrderStatus implements ShouldQueue
             $this->logQueueJob('pending successfully');
         } catch (\Throwable $e) {
             DB::rollBack();
+            Log::channel('local_market')->error("failed sell local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
             $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::FailedSell);
 
         }

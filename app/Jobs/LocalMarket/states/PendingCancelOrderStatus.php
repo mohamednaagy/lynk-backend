@@ -54,6 +54,7 @@ class PendingCancelOrderStatus implements ShouldQueue
             $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::Cancelled);
         } catch (\Throwable $e) {
             DB::rollBack();
+            Log::channel('local_market')->error("failed cancel local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
             $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::FailedToCancel);
 
         }
