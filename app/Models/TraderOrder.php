@@ -342,7 +342,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function getCustomerDeliveryStatusAndMessage(): array
     {
-        if ($this->provider == EnumsTrader::Lynk && $this->mode = TraderOrderMode::Automatic && $this->status->is(TraderOrderStatus::InProgress)) {
+        if ($this->provider == EnumsTrader::Lynk && $this->mode == TraderOrderMode::Automatic) {
             if ($this->checkOrderStepComplete(MurabhaStep::CommoditySoldToCustomer)) {
                 return [
                     'status' => CustomerDeliveryStatus::DeliveryNotApplicable,
