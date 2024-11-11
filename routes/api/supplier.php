@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Supplier\CommodityItem\CommodityItemController;
 use App\Http\Controllers\Api\V1\Supplier\CommodityType\CommodityTypeController;
 use App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController;
 use App\Http\Controllers\Api\V1\Supplier\Location\SupplierLocation;
+use App\Http\Controllers\Api\V1\Supplier\Users\UsersController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 use App\Http\Controllers\Api\V1\Supplier\Auth\GetAuthUser;
@@ -37,6 +38,10 @@ Route::prefix('v1/supplier')->name('api.v1.supplier.')->group(function () {
         Route::apiResource('locations', SupplierLocation::class)->middleware('checkDataOfSupplier');
         Route::apiResource('commodity-items', CommodityItemController::class)->middleware('checkDataOfSupplier');
         Route::apiResource('commodity-items/{item}/inventory', LocalMarketInventoryController::class)->middleware('checkDataOfSupplier');
+        Route::prefix('users')->group(function () {
+            Route::get('/', [UsersController::class, 'index']);
+            Route::post('/', [UsersController::class, 'store']);
+        })->middleware('checkDataOfSupplier');
 
     });
     Route::post('{user}/sign-up', CompleteRegister::class)->name('sign-up');
