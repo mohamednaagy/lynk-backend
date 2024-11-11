@@ -41,6 +41,8 @@ class BursamV2Driver extends BursamV1Driver
         if ($financingOrder->initiatedTraderOrders()->exists()) {
             return $financingOrder->initiatedTraderOrders()->first();
         }
+        $marketOpeningEndTime = Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME'), 'Asia/Riyadh');
+        $marketOpeningEndTimeUtc = $marketOpeningEndTime->setTimezone('UTC');
 
         $traderOrder = $financingOrder->traderOrders()->create([
             'uuid_one' => Str::uuid(),
@@ -50,7 +52,7 @@ class BursamV2Driver extends BursamV1Driver
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
             'default_contract_sign_time_limit' => $this->calculateTimeDifference(),
-            'expire_at' => Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME')),
+            'expire_at' => $marketOpeningEndTimeUtc,
 
         ]);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);

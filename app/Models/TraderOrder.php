@@ -311,13 +311,12 @@ class TraderOrder extends Model implements HasMedia
     public function scopeWithExpiredContractSignLimit($query)
     {
         $version = get_latest_version_of_trader(EnumsTrader::Lynk);
-        $now = Carbon::createFromFormat('Y-m-d H:i:s', saudi_now('Y-m-d H:i:s'));
         return $query->where([
             ['provider', EnumsTrader::Lynk],
             ['version', $version],
             ['mode', TraderOrderMode::Automatic],
             ['status', TraderOrderStatus::InProgress],
-            ['expire_at', '<', $now],
+            ['expire_at', '<', now()],
         ])
         ->whereNotNull('default_contract_sign_time_limit')
         ->whereHas('traderHistories', function ($historyQuery) {
