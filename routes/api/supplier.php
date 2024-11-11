@@ -41,6 +41,7 @@ Route::prefix('v1/supplier')->name('api.v1.supplier.')->group(function () {
         Route::prefix('users')->group(function () {
             Route::get('/', [UsersController::class, 'index']);
             Route::post('/', [UsersController::class, 'store']);
+            Route::put('{user}', [UsersController::class, 'update']);
         })->middleware('checkDataOfSupplier');
 
     });

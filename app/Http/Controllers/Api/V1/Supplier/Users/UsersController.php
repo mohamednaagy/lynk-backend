@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Api\V1\Supplier\Users;
 
 use App\Actions\Contracts\Commodities\CommoditySupplier\CreateSupplierUserWithRoleAndPermission;
 use App\Actions\Contracts\Commodities\CommoditySupplier\GetPaginatedSupplierUsers;
+use App\Actions\Contracts\Commodities\CommoditySupplier\UpdateSupplierUserWithRoleAndPermission;
 use App\Http\Controllers\Controller;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Requests\V1\Supplier\CommoditySupplier\Users\StoreUserRequest;
+use App\Http\Requests\V1\Supplier\CommoditySupplier\Users\UpdateUserRequest;
 use App\Mail\Supplier\CompleteSupplierRegisterInvitation;
+use App\Models\User;
 use App\Transformers\UserTransformer;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -28,6 +32,11 @@ class UsersController extends Controller
             'permission:' .
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierUsers, Action::Manage, Action::Create])
         )->only('store');
+
+        $this->middleware(
+            'permission:' .
+            perm(Area::CommoditySupplier, [Subject::CommoditySupplierUsers, Action::Edit, Action::Manage])
+        )->only('update');
     }
 
     /**
@@ -88,4 +97,35 @@ class UsersController extends Controller
                 ])->respond();
         });
     }
+
+
+    /**
+     * Update the specified supplier user in storage.
+     *
+     * @param  UpdateUserRequest  $updateUserRequest
+     * @param  User  $user
+     * @param  UpdateSupplierUserWithRoleAndPermission  $updateSupplierUserWithRoleAndPermission
+     * @return JsonResponse
+     */
+    public function update(
+        UpdateUserRequest $updateUserRequest,
+        User $user,
+        UpdateSupplierUserWithRoleAndPermission $updateSupplierUserWithRoleAndPermission,
+    ): JsonResponse {
+
+        return DB::transaction((function () use ($updateUserRequest, $user, $updateSupplierUserWithRoleAndPermission) {
+            $this->checkIfUserDoesNotHaveSupplierAreaRole($user);
+            $updateSupplierUserWithRoleAndPermission->handle($updateUserRequest->validated(), $user);
+
+            return $this->successResponse();
+        }));
+    }
+
+    public function checkIfUserDoesNotHaveSupplierAreaRole(User $user)
+    {
+        if (! $user->hasRole(Area::roles(Area::CommoditySupplier))) {
+            throw new AuthorizationException();
+        }
+    }
+
 }
