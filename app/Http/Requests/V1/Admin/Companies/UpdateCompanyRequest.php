@@ -68,6 +68,10 @@ class UpdateCompanyRequest extends FormRequest
                 'required',
                 'boolean',
             ],
+            'auto_complete_murabaha_order' => [
+                'required',
+                'boolean',
+            ],
             'require_initiate_trade_request' => [
                 'required_if:trading_mode,'.TraderOrderMode::Automatic,
                 'boolean',
@@ -170,7 +174,7 @@ class UpdateCompanyRequest extends FormRequest
             ],
 
             'preferred_commodity_types.*' => [
-                'required', 'exists:commodity_types,id', new CheckActiveCommodityTypeRule(),
+                'required', 'exists:commodity_types,id', new CheckActiveCommodityTypeRule,
             ],
 
         ];

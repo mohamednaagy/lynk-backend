@@ -11,7 +11,7 @@ use Illuminate\Database\Query\Builder;
 
 trait InteractsWithCommodityItem
 {
-    use InteractsWithCommodityType , InteractsWithCurrency , InteractsWithMeasurements;
+    use InteractsWithCommodityType , InteractsWithSupplier, InteractsWithCurrency , InteractsWithMeasurements;
 
     public function getCommodityItems(Supplier $supplier, $number_of_objects = 5, $is_paginate = false): LengthAwarePaginator|Collection
     {
@@ -20,6 +20,22 @@ trait InteractsWithCommodityItem
         }
 
         $items = CommodityItem::query()->where('company_id', $supplier->id);
+        if ($is_paginate) {
+            return $items->paginate();
+        }
+
+        return $items->get();
+
+    }
+
+    public function getAdminCommodityItems($number_of_objects = 5, $is_paginate = false): LengthAwarePaginator|Collection
+    {
+        for ($i = 0; $i < $number_of_objects; $i++) {
+            $supplier = $this->createSupplier();
+            $this->createCommodityItem($supplier, 'item'.$i, 'unqiue_name_'.$i);
+        }
+
+        $items = CommodityItem::query();
         if ($is_paginate) {
             return $items->paginate();
         }

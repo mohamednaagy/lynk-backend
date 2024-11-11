@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Traders\Clients\BursamClient;
+namespace App\Support\Traders\Clients;
 
 use App\Exceptions\RateLimitExceededException;
 use App\Models\TraderOrder;
@@ -336,8 +336,6 @@ class BursamClient
 
             return $this->rateLimitRequest($callback, ++$remainingRetries);
         }
-
-        Log::info('ok everything is ok');
 
         return $executed;
     }

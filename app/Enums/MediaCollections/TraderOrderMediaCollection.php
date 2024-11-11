@@ -31,4 +31,6 @@ final class TraderOrderMediaCollection extends Enum
     const LynkSalePledgeCertificate = 'lynk_sale_pledge_certificate';
 
     const ZatcaInvoice = 'trader_order_zatca_invoice';
+
+    const SellConfirmationDocument = 'sell_confirmation_document';
 }

@@ -11,13 +11,18 @@ use App\Enums\Subject;
 use App\Enums\Trader;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
+use App\Jobs\General\ProcessFinancingOrders;
 use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Queue;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
@@ -29,7 +34,11 @@ class OrderControllerStoreTest extends TestCase
 
     private static Company $company;
 
+    private static Company $company2;
+
     private static Wallet $wallet;
+
+    private static Wallet $wallet2;
 
     private static User $userLenderAdmin;
 
@@ -41,14 +50,17 @@ class OrderControllerStoreTest extends TestCase
 
     private static array $orderDetails;
 
+    private static array $orderDetails2;
+
     /**
      * @throws BindingResolutionException
      */
     public function setUp(): void
     {
         parent::setUp();
-
         [self::$company, self::$wallet] = $this->createCompany('2000');
+        [self::$company2, self::$wallet2] = $this->createCompany('2000', ['does_order_require_approval' => false, 'require_initiate_trade_request' => false, 'preferred_market_type' => CompanyMarketType::International]);
+
         self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$admin = $this->createSuperAdminUser();
         self::$mangerHasNoPermissions = $this->createSuperAdminUser(Role::Manager);
@@ -60,6 +72,17 @@ class OrderControllerStoreTest extends TestCase
 
         self::$orderDetails = [
             'company_id' => self::$company->id,
+            'customer_name' => 'youssof',
+            'national_id' => '1001280070',
+            'amount' => '200',
+            'selling_price' => '220',
+            'phone_country_code' => 'SA',
+            'phone_number' => '500112233',
+            'is_verification_required' => true,
+        ];
+
+        self::$orderDetails2 = [
+            'company_id' => self::$company2->id,
             'customer_name' => 'youssof',
             'national_id' => '1001280070',
             'amount' => '200',
@@ -283,5 +306,39 @@ class OrderControllerStoreTest extends TestCase
         $this->assertEquals(Trader::Lynk, $traderOrder->provider);
         $this->assertEquals(TraderOrderMode::Automatic, $traderOrder->mode);
         $this->assertEquals(TraderOrderStatus::Initiated, $traderOrder->staus);
+    }
+
+    public function test_create_hold_trader_when_bursa_in_cutting_time()
+    {
+        //override the start and end time of bursa
+        config()->set('services.bursam.market_opening_end_time', now(Config::get('services.bursam.timezone'))->subMinute()->toTimeString());
+        config()->set('services.bursam.market_opening_start_time', now(Config::get('services.bursam.timezone'))->addMinute()->toTimeString());
+        $response = $this->actingAs(self::$admin)
+            ->postJson('api/v1/admin/orders', self::$orderDetails2)
+            ->assertStatus(Response::HTTP_OK);
+        $order = json_decode($response->getContent())->data;
+        $this->assertEquals(FinancingOrderStatus::Approved, $order->status->value);
+        $traderOrder = TraderOrder::where('financing_order_id', $order->id)->first();
+        $this->assertEquals(TraderOrderStatus::Hold, $traderOrder->status->value);
+    }
+
+    public function test_handle_hold_trader_when_bursa_closing_time_is_outside_cutting_period()
+    {
+        //override the start and end time of bursa
+        config()->set('services.bursam.market_opening_end_time', now(Config::get('services.bursam.timezone'))->subMinute()->toTimeString());
+        $response = $this->actingAs(self::$admin)
+            ->postJson('api/v1/admin/orders', self::$orderDetails2)
+            ->assertStatus(Response::HTTP_OK);
+        $order = json_decode($response->getContent())->data;
+        $this->assertEquals(FinancingOrderStatus::Approved, $order->status->value);
+        $traderOrder = TraderOrder::where('financing_order_id', $order->id)->first();
+        $this->assertEquals(TraderOrderStatus::Hold, $traderOrder->status->value);
+        config()->set('services.bursam.market_opening_start_time', now(Config::get('services.bursam.timezone'))->toTimeString());
+        Queue::fake();
+        //call the command RunHoldTraderWhenMarketOpenCommand to start move hold trader to initiate trader when market bursa market is opening
+        Artisan::call('run:hold-bursa-traders');
+        Queue::assertPushed(ProcessFinancingOrders::class);
+        $this->assertEquals(TraderOrderStatus::Initiated, $traderOrder->refresh()->status->value);
+
     }
 }

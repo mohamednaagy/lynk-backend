@@ -130,6 +130,12 @@ return [
             'level' => 'debug',
             'days' => 30,
         ],
+        'local_market' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/local_market/local_market.log'),
+            'level' => 'debug',
+            'days' => 30,
+        ],
         'orders' => [
             'driver' => 'daily',
             'path' => storage_path('logs/orders/order-log.log'),

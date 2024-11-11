@@ -34,7 +34,7 @@ class OrderSortScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'sort' => ['required', Rule::in('created_at', 'amount')],
+                'sort' => ['required', Rule::in('id', 'created_at', 'amount')],
                 'direction' => ['nullable', Rule::in('asc', 'desc')],
             ]
         );

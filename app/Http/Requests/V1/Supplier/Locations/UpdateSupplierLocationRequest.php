@@ -30,7 +30,7 @@ class UpdateSupplierLocationRequest extends FormRequest
                 'string',
                 'min:3',
                 'max:16',
-                Rule::unique(SupplierLocation::class, 'unique_identifier')->where('company_id', tenant()->id)->ignore($this->route('location')),
+                Rule::unique(SupplierLocation::class, 'unique_identifier')->where('company_id', tenant()->id)->ignore($this->route('location'))->withoutTrashed(),
             ],
             'name' => ['required', 'string',  'max:32'],
             'description' => ['nullable', 'string', 'max:256'],

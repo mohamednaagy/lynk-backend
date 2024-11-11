@@ -36,6 +36,17 @@ if (! function_exists('validate_said')) {
     }
 }
 
+if (! function_exists('convertMicrotimeToDuration')) {
+    function convertMicrotimeToDuration($seconds)
+    {
+        $hours = floor($seconds / 3600);
+        $minutes = floor(($seconds / 60) % 60);
+        $seconds = $seconds % 60;
+
+        return sprintf('%02d:%02d:%05.2f', $hours, $minutes, $seconds);
+    }
+}
+
 if (! function_exists('perm')) {
     function perm($areas, ...$permissions)
     {
@@ -165,6 +176,22 @@ if (! function_exists('is_bursam_service_available')) {
     }
 }
 
+if (! function_exists('get_start_time_bursa')) {
+    function get_start_time_bursa()
+    {
+        $timezone = Config::get('services.bursam.timezone');
+        $now = now($timezone);
+        $marketOpeningStartTime = Config::get('services.bursam.market_opening_start_time');
+        $fridayBreakStartTime = Config::get('services.bursam.friday_break_start_time');
+
+        $marketOpeningStartDateTime = now($timezone)->setTimeFromTimeString($marketOpeningStartTime);
+        $fridayBreakStartDateTime = now($timezone)->setTimeFromTimeString($fridayBreakStartTime);
+
+        return $now->isFriday() ? $fridayBreakStartDateTime : $marketOpeningStartDateTime;
+
+    }
+}
+
 if (! function_exists('parse_number')) {
     function parse_number($number): float
     {
@@ -190,25 +217,36 @@ if (! function_exists('number_unformat')) {
     }
 }
 
-function convertDateTimeToHumanDate(Carbon $dataTime, ?Carbon $endDateTime = null)
-{
-    $endDateTime = $endDateTime ?? Carbon::now();
-    $diffTime = $dataTime->diffForHumans(
-        $endDateTime,
-        [
-            'parts' => 3,
-            'join' => true,
-        ]
-    );
+if (! function_exists('convertDateTimeToHumanDate')) {
+    function convertDateTimeToHumanDate(Carbon $dataTime, ?Carbon $endDateTime = null)
+    {
+        $endDateTime = $endDateTime ?? Carbon::now();
+        $diffTime = $dataTime->diffForHumans(
+            $endDateTime,
+            [
+                'parts' => 3,
+                'join' => true,
+            ]
+        );
 
-    $ignoredWords = ['ago', 'before', 'after', 'منذ', 'قبل'];
+        $ignoredWords = ['ago', 'before', 'after', 'منذ', 'قبل'];
 
-    return \Illuminate\Support\Str::remove($ignoredWords, $diffTime);
+        return \Illuminate\Support\Str::remove($ignoredWords, $diffTime);
+    }
 }
 
 if (! function_exists('saudi_now')) {
-    function saudi_now()
+    /**
+     * Get the current time in the 'Asia/Riyadh' timezone or convert a given date to this timezone.
+     *
+     * @return Carbon
+     */
+    function saudi_now($format, ?Carbon $date = null): string
     {
-        return Carbon::now('Asia/Riyadh');
+        $timezone = 'Asia/Riyadh';
+
+        $createdDate = $date ? $date->clone()->timezone($timezone) : Carbon::now($timezone);
+
+        return $createdDate->format($format);
     }
 }

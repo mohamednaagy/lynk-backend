@@ -12,14 +12,13 @@ class LocalMurabahaSettingsAction implements SettingsInterface
      */
     public function __construct(
         protected GetSettingsClassInstance $getSettingsClassInstance
-    ) {
-    }
+    ) {}
 
     public function handle(array $data): void
     {
         $settingInstance = $this->getSettingsClassInstance->handle($data['area']);
 
-        $settingInstance->default_trade_order_roatation_count = $data['default_trade_order_roatation_count'];
+        $settingInstance->default_trade_order_rotation_count = $data['default_trade_order_rotation_count'];
 
         $settingInstance->default_contract_sign_time_limit = $data['default_contract_sign_time_limit'];
 

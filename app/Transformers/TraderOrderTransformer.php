@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Enums\BursamProductCode;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader;
@@ -36,6 +37,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'mode',
         'version',
         'failure_reason',
+        'expiry_date',
         'refunded_at',
         'refund_status',
         'purchasing_commodity_information',
@@ -45,6 +47,8 @@ class TraderOrderTransformer extends TransformerAbstract
         'history',
         'created_at',
         'cancel_details',
+        'hover_message',
+        'contract_signed_type',
 
     ];
 
@@ -110,6 +114,11 @@ class TraderOrderTransformer extends TransformerAbstract
         return $this->primitive($this->formatRefundStatus($refundReason, $baseTraderOrder));
     }
 
+    public function includeHoverMessage(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->hoverMessage());
+    }
+
     public function includeIsCancellable(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive($traderOrder->isCancellable($this->area));
@@ -138,7 +147,7 @@ class TraderOrderTransformer extends TransformerAbstract
             fn ($product) => $traderOrder->provider == Trader::Lynk ? LynkCommodityProductDto::fromArray($product) : CommodityProductDto::fromArray($product)
         );
 
-        return $this->collection($products, new ProductTransformer());
+        return $this->collection($products, new ProductTransformer);
     }
 
     public function includeStatus(TraderOrder $traderOrder): Primitive
@@ -183,10 +192,16 @@ class TraderOrderTransformer extends TransformerAbstract
                 'cancelled_at' => Carbon::make($cancelDetail->created_at)?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
                 'cancel_step' => $cancelDetail->cancel_step,
                 'cancel_reason' => $cancelDetail->cancel_reason,
+                'message' => $cancelDetail->cancel_reason->description,
             ]);
         }
 
         return $this->primitive(null);
+    }
+
+    public function includeContractSignedType(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->contract_signed_type);
     }
 
     public function setArea($area): static
@@ -201,5 +216,13 @@ class TraderOrderTransformer extends TransformerAbstract
         $this->currentOrderTraderOrders = $currentOrderTraderOrders;
 
         return $this;
+    }
+
+    public function includeExpiryDate(TraderOrder $traderOrder)
+    {
+        $isInProgress = $traderOrder->status->is(TraderOrderStatus::InProgress);
+        $lastActionMatches = $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+
+        return ($isInProgress && $lastActionMatches) ? $this->primitive($traderOrder->expire_at) : null;
     }
 }

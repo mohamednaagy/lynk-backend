@@ -17,32 +17,32 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
 {
     use TraderHelperTrait;
 
-    public function updatePurchasingCommodity(TraderOrder $traderOrder, Request $request)
+    public function updatePurchasingCommodity(TraderOrder $traderOrder, array $data)
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::TraderOrderCreated);
 
-        app(UpdateTraderOrder::class)->handle($traderOrder, $request->validated());
+        app(UpdateTraderOrder::class)->handle($traderOrder, $data);
 
         $this->createStepHistories(
-            $request,
+            $data,
             $traderOrder,
             MurabhaStep::PurchasingCommodity
         );
 
-        $this->transferOwnershipToLender($traderOrder, $request);
+        $this->transferOwnershipToLender($traderOrder, $data);
     }
 
-    protected function transferOwnershipToLender(TraderOrder $traderOrder, $request)
+    protected function transferOwnershipToLender(TraderOrder $traderOrder, $data)
     {
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
 
         // this (if) is a special case doesn't exist in history map
-        if ($request->auto_generate_financing_institution_certificate) {
+        if (isset($data['auto_generate_financing_institution_certificate'])) {
             $trader->createTransferOwnershipToLenderDocument($traderOrder);
-        } elseif ($request->has('financing_institution_certificate')) {
+        } elseif (isset($data['financing_institution_certificate'])) {
             $this->attachDocumentToOrder(
                 $traderOrder,
-                base64_encode(file_get_contents($request->file('financing_institution_certificate'))),
+                base64_encode(file_get_contents($data['financing_institution_certificate'])),
                 TraderOrderMediaCollection::TransferOwnershipToLender,
                 'base64'
             );
@@ -56,7 +56,7 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
         $traderOrder->ensureCanAccessStep(MurabhaStep::CommoditySoldToCustomer);
 
         $this->createStepHistories(
-            $request,
+            $request->validated(),
             $traderOrder,
             MurabhaStep::MurabhaOfferIssued
         );
@@ -69,7 +69,7 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
         $this->sellCommodityToCustomer($traderOrder, $request);
     }
 
-    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, Request $request)
+    public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, array $data)
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::MurabhaOfferIssued);
 
@@ -78,7 +78,7 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
         );
 
         $this->createStepHistories(
-            $request,
+            $data,
             $traderOrder,
             MurabhaStep::MurabahaSaleCompleted
         );
@@ -106,4 +106,6 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
         }
     }
+
+    public function updateSellConfirmationDocument(TraderOrder $traderOrder, $request) {}
 }

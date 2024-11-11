@@ -40,6 +40,7 @@ class Company extends BaseTenant
         'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::class,
         'trading_mode' => TraderOrderMode::class,
         'preferred_market_type' => CompanyMarketType::class,
+        'auto_complete_murabaha_order' => 'boolean',
     ];
 
     public static function getCustomColumns(): array
@@ -67,6 +68,7 @@ class Company extends BaseTenant
             'trading_mode',
             'deleted_at',
             'preferred_market_type',
+            'auto_complete_murabaha_order',
         ];
     }
 
@@ -167,6 +169,10 @@ class Company extends BaseTenant
         }
 
         return Trader::Lynk;
+    }
 
+    public function isCompanyHasMurabahaAutoCompleteOrder()
+    {
+        return $this->auto_complete_murabaha_order;
     }
 }

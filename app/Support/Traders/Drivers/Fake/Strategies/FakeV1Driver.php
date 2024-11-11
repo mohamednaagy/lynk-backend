@@ -3,8 +3,10 @@
 namespace App\Support\Traders\Drivers\Fake\Strategies;
 
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
@@ -12,6 +14,7 @@ use App\Jobs\General\ProcessAskClientForWakala;
 use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Models\User;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoOrder;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccRespondedToPtpOrder;
@@ -182,7 +185,9 @@ class FakeV1Driver implements TraderInterface
 
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled,
+        $cancelledByType = TraderOrderCancelType::System,
+        ?User $cancelledBy = null
     ): bool {
         return true;
     }
@@ -467,4 +472,31 @@ class FakeV1Driver implements TraderInterface
     {
         ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
     }
+
+    public function checkCanInitiateTraderOrder()
+    {
+        return true;
+    }
+
+    public function moveHoldTraderOrder(TraderOrder $trader)
+    {
+        return true;
+    }
+
+    public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
+    {
+        return null;
+    }
+
+    public function contractSignedMessage(TraderOrder $traderOrder)
+    {
+        return null;
+    }
+
+    public function retryOrder(TraderOrder $traderOrder)
+    {
+        $traderOrder->order->update(['status' => FinancingOrderStatus::Approved]);
+    }
+
+    public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}
 }

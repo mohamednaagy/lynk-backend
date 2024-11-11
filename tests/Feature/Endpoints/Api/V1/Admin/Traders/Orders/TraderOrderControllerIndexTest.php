@@ -75,9 +75,7 @@ class TraderOrderControllerIndexTest extends TestCase
             ->getJson(self::$baseURL)
             ->assertOk()
             ->assertExactJson(
-                fractal(FinancingOrder::withCount(['traderOrders as charged_trader_orders_count' => function ($query) {
-                    $query->whereNull('data->refunded_at');
-                }])->paginate(), (new FinancingOrderTransformer())->setArea(Area::SuperAdmin))
+                fractal(FinancingOrder::paginate(), (new FinancingOrderTransformer())->setArea(Area::SuperAdmin))
                     ->parseIncludes([
                         'id',
                         'company_name',

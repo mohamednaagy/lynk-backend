@@ -11,7 +11,7 @@ class LocalMarketInventoryTransformer extends TransformerAbstract
     protected array $availableIncludes = [
         'id',
         'company_id',
-        'comapny_name',
+        'company_name',
         'commodity_item_id',
         'commodity_item',
         'commodity_type',
@@ -24,6 +24,7 @@ class LocalMarketInventoryTransformer extends TransformerAbstract
         'reserved_items',
         'status',
         'is_editable',
+        'is_deletable',
 
     ];
 
@@ -52,7 +53,7 @@ class LocalMarketInventoryTransformer extends TransformerAbstract
         return $this->primitive($inventory->company_id);
     }
 
-    public function includeComapnyName(LocalMarketInventory $inventory): Primitive
+    public function includeCompanyName(LocalMarketInventory $inventory): Primitive
     {
         return $this->primitive($inventory->supplier->name);
     }
@@ -135,5 +136,10 @@ class LocalMarketInventoryTransformer extends TransformerAbstract
     public function includeIsEditable(LocalMarketInventory $inventory): Primitive
     {
         return $this->primitive($inventory->is_editable);
+    }
+
+    public function includeIsDeletable(LocalMarketInventory $inventory): Primitive
+    {
+        return $this->primitive($inventory->is_deletable);
     }
 }

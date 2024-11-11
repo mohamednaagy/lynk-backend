@@ -26,4 +26,18 @@ class Supplier extends Company
     {
         return $this->hasOne(CompanySupplierDetail::class, 'company_id');
     }
+
+    /**
+     * Scope a query to include suppliers with a specific status.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param int $status
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWithSupplierStatus($query, $status)
+    {
+        return $query->whereHas('detail', function ($query) use ($status) {
+            $query->where('status', $status);
+        });
+    }
 }

@@ -35,6 +35,7 @@ class CompanyTransformer extends TransformerAbstract
         'contract_number',
         'preferred_market_type',
         'preferred_commodity_types',
+        'auto_complete_murabaha_order',
     ];
 
     public function transform(Company $company): array
@@ -150,12 +151,17 @@ class CompanyTransformer extends TransformerAbstract
             ->orderBy('order_value_start')
             ->get();
 
-        return $this->collection($orderCostTiers, new OrderCostTierTransformer());
+        return $this->collection($orderCostTiers, new OrderCostTierTransformer);
     }
 
     public function includeRequireInitiateTradeRequest(Company $company)
     {
         return $this->primitive($company->require_initiate_trade_request);
+    }
+
+    public function includeAutoCompleteMurabahaOrder(Company $company)
+    {
+        return $this->primitive($company->auto_complete_murabaha_order);
     }
 
     public function includePreferredMarketType(Company $company): Primitive

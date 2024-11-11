@@ -11,6 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessBursamCancelTimeOutOrder implements ShouldQueue
 {
@@ -33,6 +34,8 @@ class ProcessBursamCancelTimeOutOrder implements ShouldQueue
      */
     public function handle(): void
     {
+        Log::info('Starting ProcessBursamBidCertificate Job');
+
         DB::transaction(function () {
             $lockedFinancingOrder = FinancingOrder::query()
                 ->lockForUpdate()
@@ -47,5 +50,10 @@ class ProcessBursamCancelTimeOutOrder implements ShouldQueue
                     ->cancelTraderOrder($activeTraderOrder, TraderOrderCancelReason::MurabhaTimeout);
             });
         });
+    }
+
+    public function failed($exception)
+    {
+        Log::error('ProcessBursamCancelTimeOutOrder', ['financingOrderId' => $this->financingOrder->id,  'message' => $exception->getMessage()]);
     }
 }

@@ -83,6 +83,7 @@ class CommodityItemControllerIndexTest extends TestCase
                         'available_units',
                         'reserved_units',
                         'created_at',
+                        'is_deletable',
                     ])
                     ->respond()
                     ->getData(true)

@@ -3,15 +3,14 @@
 namespace App\Actions\Orders\TraderOrders\Fees;
 
 use App\Actions\Contracts\Orders\TraderOrders\Fees\DeductBalanceForNewOrder;
-use App\Actions\Contracts\Wallets\DeductOrderCreationFee;
+use App\Actions\Wallets\OrderFees\DeductOrderCreationFeeAction;
 use App\Models\TraderOrder;
 
 class DeductBalanceForNewOrderAction implements DeductBalanceForNewOrder
 {
     public function __construct(
-        protected DeductOrderCreationFee $deductOrderCreationFee
-    ) {
-    }
+        protected DeductOrderCreationFeeAction $deductOrderCreationFee
+    ) {}
 
     public function handle(TraderOrder $traderOrder): void
     {

@@ -13,6 +13,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 {
@@ -58,5 +59,10 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->traderOrderId;
+    }
+
+    public function failed($exception)
+    {
+        Log::error('ProcessBursamTransferOwnershipToLender', ['traderOrderId' => $this->traderOrderId, 'message' => $exception->getMessage()]);
     }
 }

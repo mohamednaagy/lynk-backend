@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Actions\LocalMarket;
+
+use App\Actions\Contracts\LocalMarket\CreateLocalMarketOrder;
+use App\Actions\Contracts\LocalMarket\PendingEligibleCommodities;
+use App\Enums\LocalMarketOrderHistoryStatus;
+use App\Enums\LocalMarketOrderStatus;
+use App\Models\LocalMarketOrder;
+use App\Support\Traders\Traits\LocalMarketHelperTrait;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
+
+class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
+{
+    use LocalMarketHelperTrait;
+
+    /**
+     * @return LocalMarketOrder|Model
+     */
+    public function handle(array $data): LocalMarketOrder
+    {
+        $data['status'] = LocalMarketOrderStatus::initiate;
+        $order = LocalMarketOrder::create(
+            Arr::only($data, [
+                'company_id',
+                'customer_name',
+                'external_order_no',
+                'national_id',
+                'amount',
+                'currency',
+                'status',
+                'source',
+                'comment',
+                'preferred_commodity_type',
+                'buying_uuid',
+                'selling_uuid',
+            ])
+        );
+        $this->createLocalMarketOrderHistory($order, LocalMarketOrderHistoryStatus::initiate);
+        Log::channel('local_market')->info("saved new local market order id => {$order->id} and trader order reference is {$order->external_order_no}");
+        app(PendingEligibleCommodities::class)->handle($order);
+
+        return $order;
+    }
+}

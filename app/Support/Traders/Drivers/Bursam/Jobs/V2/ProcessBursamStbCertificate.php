@@ -16,6 +16,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessBursamStbCertificate implements ShouldBeUnique, ShouldQueue
 {
@@ -69,5 +70,10 @@ class ProcessBursamStbCertificate implements ShouldBeUnique, ShouldQueue
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->traderOrderId;
+    }
+
+    public function failed($exception)
+    {
+        Log::error('ProcessBursamStbCertificate', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
     }
 }

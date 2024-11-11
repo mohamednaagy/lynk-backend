@@ -41,9 +41,7 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
 
     public function query()
     {
-        return $this->ordersQuery->withCount(['traderOrders as charged_trader_orders_count' => function ($query) {
-            $query->whereNull('data->refunded_at');
-        }]);
+        return $this->ordersQuery;
     }
 
     public function headings(): array

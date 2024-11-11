@@ -1,0 +1,98 @@
+version: "3.5"
+
+services:
+    laravel-app:
+        build:
+            context: "./docker/laravel"
+            args:
+                uid: 1000
+        container_name: laravel-lynk-backend
+        ports:
+            - 80:80
+            - 443:443
+        environment:
+            - APACHE_RUN_USER=#1000
+            - APACHE_RUN_GROUP=#1000
+        volumes:
+            - .:/var/www/html
+            - ./docker/config/conf.d:/usr/local/etc/php/conf.d/extra
+            - ./docker/config/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+            - ./docker/config/conf.d/php.ini:/usr/local/etc/php/php.ini
+
+        networks:
+            - sail
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+
+    # supervisor:
+    #     build:
+    #         context: .
+    #         dockerfile: ./docker/supervisor.dockerfile
+    #     container_name: supervisor
+    #     volumes:
+    #         - .:/var/www/html
+    #     networks:
+    #         - sail
+
+    mysql:
+        image: "mysql/mysql-server:8.0"
+        ports:
+            - "${FORWARD_DB_PORT:-3306}:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+            MYSQL_ROOT_HOST: "%"
+            MYSQL_DATABASE: "${DB_DATABASE}"
+            MYSQL_USER: "${DB_USERNAME}"
+            MYSQL_PASSWORD: "${DB_PASSWORD}"
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
+        volumes:
+            - "sail-mysql:/var/lib/mysql"
+        networks:
+            - sail
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+            retries: 3
+            timeout: 5s
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: pma-lynk
+        links:
+            - mysql
+        environment:
+            PMA_HOST: mysql
+            PMA_PORT: 3306
+            PMA_ARBITRARY: 1
+            UPLOAD_LIMIT: 1G
+        restart: always
+        ports:
+            - 8081:80
+        networks:
+            - sail
+
+    redis:
+        image: "redis:alpine"
+        container_name: "lynk1-redis"
+        command: redis-server
+        restart: "${RESTART:-always}"
+        ports:
+            - "${APPLICATION_OUTSIDE_REDIS_PORT:-6379}:6379"
+        networks:
+            - sail
+            
+    browserless:
+        image: browserless/chrome
+        ports:
+        - "3002:3000"
+
+    mailhog:
+        image: mailhog/mailhog
+        ports:
+        - "8025:8025"
+
+networks:
+    sail:
+        driver: bridge
+volumes:
+    sail-mysql:
+        driver: local

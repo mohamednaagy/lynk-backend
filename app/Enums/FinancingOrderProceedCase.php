@@ -15,6 +15,9 @@ final class FinancingOrderProceedCase extends Enum implements LocalizedEnum
         ],
         Trader::Lynk => [
             self::ContractAndClientWakalaCompleted,
+            self::ContractSignedDelivery,
+            self::IgnoreAndSell,
+            self::ConfirmDeliver,
         ],
         Trader::Dmcc => [
             self::ClientWakalaAccepted,
@@ -33,4 +36,10 @@ final class FinancingOrderProceedCase extends Enum implements LocalizedEnum
     const ContractSigned = 'CONTRACT_SIGNED';
 
     const ContractAndClientWakalaCompleted = 'CONTRACT_AND_CLIENT_WAKALA_COMPLETED';
+
+    const ContractSignedDelivery = 'CONTRACT_SIGNED_DELIVERY';
+    
+    const IgnoreAndSell = 'IGNORE_AND_SELL';
+
+    const ConfirmDeliver = 'CONFIRM_DELIVER';
 }

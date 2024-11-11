@@ -7,7 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class ErrorCreatingUnitsForThisINventory extends Exception
+class ErrorCreatingUnitsForThisInventory extends Exception
 {
     /**
      * Render the exception into an HTTP response.

@@ -15,10 +15,12 @@ return new class extends Migration
     {
         Schema::create('local_market_order_has_units', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('inventory_unit_id');
-            $table->foreign('inventory_unit_id')->references('id')->on('local_market_inventory_units')->onDelete('cascade');
-            $table->unsignedBigInteger('order_has_inventory_id');
-            $table->foreign('order_has_inventory_id')->references('id')->on('local_market_order_has_inventories')->onDelete('cascade');
+            $table->unsignedBigInteger('inventory_id');
+            $table->foreign('inventory_id')->references('id')->on('local_market_inventories')->onDelete('cascade');
+            $table->unsignedBigInteger('local_market_order_id');
+            $table->foreign('local_market_order_id')->references('id')->on('local_market_orders')->onDelete('cascade');
+            $table->unsignedBigInteger('unit_id');
+            $table->foreign('unit_id')->references('id')->on('local_market_inventory_units')->onDelete('cascade');
             $table->timestamps();
         });
     }

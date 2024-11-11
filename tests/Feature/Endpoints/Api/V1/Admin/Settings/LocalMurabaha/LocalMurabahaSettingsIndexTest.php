@@ -19,7 +19,7 @@ use Tests\Traits\InteractsWithUser;
 
 class LocalMurabahaSettingsIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithSettings, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithSettings, InteractsWithUser, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin/settings/local-commodity';
 
@@ -35,9 +35,6 @@ class LocalMurabahaSettingsIndexTest extends TestCase
 
     private static $localMurabahaSettings;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -53,9 +50,6 @@ class LocalMurabahaSettingsIndexTest extends TestCase
         self::$localMurabahaSettings = $this->getLocalMurabahaSettingsClass('LocalMurabaha');
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_index_lender_settings_failed(): void
     {
         $this->getJson(self::BaseUrl)
@@ -65,9 +59,6 @@ class LocalMurabahaSettingsIndexTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_authorized_user_without_right_role_cant_index_local_murabaha_settings_failed(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -77,8 +68,6 @@ class LocalMurabahaSettingsIndexTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_that_auth_user_has_admin_role_can_index_local_murabaha_settings_succeed(): void
@@ -87,9 +76,9 @@ class LocalMurabahaSettingsIndexTest extends TestCase
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$localMurabahaSettings, new LocalMurabahaSettingsTransformer())
+                fractal(self::$localMurabahaSettings, new LocalMurabahaSettingsTransformer)
                     ->parseIncludes([
-                        'default_trade_order_roatation_count',
+                        'default_trade_order_rotation_count',
                         'default_contract_sign_time_limit',
                     ])
                     ->respond()
@@ -98,8 +87,6 @@ class LocalMurabahaSettingsIndexTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_that_auth_user_has_manager_role_and_right_permission_can_index_local_murabaha_settings_succeed(): void
@@ -108,9 +95,9 @@ class LocalMurabahaSettingsIndexTest extends TestCase
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$localMurabahaSettings, new LocalMurabahaSettingsTransformer())
+                fractal(self::$localMurabahaSettings, new LocalMurabahaSettingsTransformer)
                     ->parseIncludes([
-                        'default_trade_order_roatation_count',
+                        'default_trade_order_rotation_count',
                         'default_contract_sign_time_limit',
                     ])
                     ->respond()
@@ -118,9 +105,6 @@ class LocalMurabahaSettingsIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_right_permissions_cannot_index_local_murabaha_settings_failed(): void
     {
         $this->actingAs(self::$manager)

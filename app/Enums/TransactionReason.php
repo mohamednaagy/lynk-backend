@@ -20,6 +20,8 @@ final class TransactionReason extends Enum
 
     const VatPercentageOnDeposit = 7;
 
+    const DeliveryConfirmedFee = 8;
+
     public static array $reasonsAssociatedWithZatcaInvoice = [
         TransactionReason::OrderCreationFee,
         TransactionReason::VatPercentageFee,

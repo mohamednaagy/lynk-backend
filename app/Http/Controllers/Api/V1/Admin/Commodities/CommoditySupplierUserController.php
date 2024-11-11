@@ -7,12 +7,11 @@ use App\Actions\Contracts\Commodities\CommoditySupplier\GetPaginatedSupplierUser
 use App\Actions\Contracts\Commodities\CommoditySupplier\UpdateSupplierUserWithRoleAndPermission;
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\CompanyType;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\Users\StoreUserRequest;
 use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\Users\UpdateUserRequest;
-use App\Mail\CompleteRegisterInvitation;
+use App\Mail\Supplier\CompleteSupplierRegisterInvitation;
 use App\Models\Company;
 use App\Models\Supplier;
 use App\Models\User;
@@ -94,9 +93,9 @@ class CommoditySupplierUserController extends Controller
                 ]
             );
             $invitationUrl = $request->validated('redirect_url');
-            Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Supplier));
+            Mail::to($user)->send(new CompleteSupplierRegisterInvitation($user, $invitationUrl));
 
-            return fractal($user, new UserTransformer())
+            return fractal($user, new UserTransformer)
                 ->parseIncludes([
                     'id',
                     'first_name',
@@ -137,26 +136,21 @@ class CommoditySupplierUserController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  UpdateUserRequest  $updateUserRequest
-     * @param  Company  $supplier
-     * @param  UpdateSupplierUserWithRoleAndPermission  $updateSupplierUserWithRoleAndPermission
-     * @return JsonResponse
      */
-    // public function update(
-    //     UpdateUserRequest $updateUserRequest,
-    //     Company $supplier,
-    //     User $user,
-    //     UpdateSupplierUserWithRoleAndPermission $updateSupplierUserWithRoleAndPermission,
-    // ): JsonResponse {
-    //     return DB::transaction((function () use ($updateUserRequest, $user, $updateSupplierUserWithRoleAndPermission) {
-    //         $this->checkIfUserDoesNotHaveSupplierAreaRole($user);
+    public function update(
+        UpdateUserRequest $updateUserRequest,
+        Supplier $supplier,
+        User $user,
+        UpdateSupplierUserWithRoleAndPermission $updateSupplierUserWithRoleAndPermission,
+    ): JsonResponse {
 
-    //         $updateSupplierUserWithRoleAndPermission->handle($updateUserRequest->validated(), $user);
+        return DB::transaction((function () use ($updateUserRequest, $user, $updateSupplierUserWithRoleAndPermission) {
+            $this->checkIfUserDoesNotHaveSupplierAreaRole($user);
+            $updateSupplierUserWithRoleAndPermission->handle($updateUserRequest->validated(), $user);
 
-    //         return $this->successResponse();
-    //     }));
-    // }
+            return $this->successResponse();
+        }));
+    }
 
     // /**
     //  * Remove the specified resource from storage.
@@ -178,7 +172,7 @@ class CommoditySupplierUserController extends Controller
     public function checkIfUserDoesNotHaveSupplierAreaRole(User $user)
     {
         if (! $user->hasRole(Area::roles(Area::CommoditySupplier))) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
     }
 }

@@ -780,7 +780,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 <p class="text-lg text-right text-black">
                     {{ $company_name }} سيكون مسؤولا عن رسوم التخزين والحفظ إذا تم الإحتفاظ بالسلع المذكورة أعلاه لأكثر
                     من
-                    <Settings> 72
+                    <Settings> {{ $default_contract_sign_time_limit }}
                         ساعة.
 
                 </p>

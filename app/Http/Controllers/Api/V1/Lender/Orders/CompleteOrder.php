@@ -34,7 +34,6 @@ class CompleteOrder extends Controller
         return DB::transaction(
             function () use ($request, $completeOrder, $order) {
                 $completeOrder->handle($order, $request->validated());
-
                 return $this->successResponse();
             }
         );

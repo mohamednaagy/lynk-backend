@@ -47,6 +47,3 @@
     }
 });
 
-Route::get('/horizon', function () {
-    return view('horizon');
-});

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\Traders\TradingStrategies\Bursam;
+namespace App\Support\Traders\TradingStrategies\Lynk;
 
 class LynkStrategyV1 extends BaseLynkStrategy
 {

@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -14,6 +15,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessBursamSellingCommodityToOpenMarketForCancellation implements ShouldBeUnique, ShouldQueue
 {
@@ -45,9 +47,11 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
             if (is_null($traderOrder)) {
                 return;
             }
+            if ($traderOrder->traderHistories()->latest()->first()->action != FinancingOrderHistory::OnHold) {
+                Trader::driver('bursam', $traderOrder->version)
+                    ->sellCommodityToBursam($traderOrder);
+            }
 
-            Trader::driver('bursam', $traderOrder->version)
-                ->sellCommodityToBursam($traderOrder);
         });
     }
 
@@ -64,5 +68,10 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->traderOrderId;
+    }
+
+    public function failed($exception)
+    {
+        Log::error('ProcessBursamSellingCommodityToOpenMarketForCancellation', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
     }
 }

@@ -39,7 +39,7 @@ class CreateTraderOrderAction implements CreateTraderOrder
         $doesInProgressTraderOrderExists = $financingOrder
             ->traderOrders()
             ->where(function ($q) {
-                $q->where('status', TraderOrderStatus::InProgress)->orWhere('status', TraderOrderStatus::Initiated);
+                $q->where('status', TraderOrderStatus::InProgress)->orWhere('status', TraderOrderStatus::Initiated)->orWhere('status', TraderOrderStatus::Hold);
             })
             ->exists();
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Enums\CompanyType;
 use App\Http\Middleware\EnsureFrontendRequestsAreStatefulWithoutCookie;
 use App\Models\User;
 use App\Rules\HostWhitelistRule;
@@ -36,10 +37,10 @@ class SendLinkRequest extends FormRequest
         if ($isRequestFromFromFrontend) {
             $recaptchaRoles['g-recaptcha-response'] = ['required', 'recaptcha'];
         }
-
         $validationRules = [
             'email' => ['required', 'email:filter', Rule::exists(User::class, 'email')],
             'company_unique_name' => ['nullable', 'string'],
+            'company_type'  => ['required_with:company_unique_name', 'integer', 'in:'.implode(',', CompanyType::getValues())],
             'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
         ];
 

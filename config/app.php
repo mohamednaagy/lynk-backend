@@ -18,6 +18,9 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'horizon_username' => env('HORIZON_USERNAME', 'admin'),
+    'horizon_password' => env('HORIZON_PASSWORD', 'LynkHoriz@2024'),
+
     'currency' => env('APP_CURRENCY', 'SAR4'),
 
     /*
@@ -180,6 +183,7 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         Mews\Purifier\PurifierServiceProvider::class,
+        Olssonm\VeryBasicAuth\VeryBasicAuthServiceProvider::class,
 
         /*
          * Package Service Providers...
@@ -192,6 +196,7 @@ return [
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
+        App\Providers\HorizonServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\TelescopeServiceProvider::class,
         App\Providers\ActionsServiceProvider::class,

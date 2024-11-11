@@ -124,6 +124,7 @@ class SuperAdmin
 
         Subject::CommodityMarketCommodityItems => [
             Action::Index,
+            Action::Manage,
         ],
 
         Subject::CommoditySupplierUsers => [

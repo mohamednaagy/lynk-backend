@@ -15,6 +15,7 @@ class SupplierLocationsTransformer extends TransformerAbstract
         'description',
         'supplier_id',
         'created_at',
+        'is_deletable',
 
     ];
 
@@ -46,5 +47,10 @@ class SupplierLocationsTransformer extends TransformerAbstract
     public function includeCreatedAt(SupplierLocation $supplierLocation): Primitive
     {
         return $this->primitive(optional($supplierLocation->created_at)->format('Y-m-d'));
+    }
+
+    public function includeIsDeletable(SupplierLocation $supplierLocation): Primitive
+    {
+        return $this->primitive($supplierLocation->is_deletable);
     }
 }

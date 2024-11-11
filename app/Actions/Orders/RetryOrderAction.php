@@ -6,13 +6,11 @@ use App\Actions\Contracts\Orders\RetryOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
+use App\Support\Traders\Facades\Trader;
 
 class RetryOrderAction implements RetryOrder
 {
     /**
-     * @param $orderId
-     * @return void
-     *
      * @throws OrderStatusDoesNotFollowSequenceException
      */
     public function handle($orderId): void
@@ -25,6 +23,8 @@ class RetryOrderAction implements RetryOrder
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
-        $financingOrder->update(['status' => FinancingOrderStatus::Approved]);
+        $activeTraderOrder = $financingOrder->traderOrders()->latest()->first();
+        Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)
+            ->retryOrder($activeTraderOrder);
     }
 }

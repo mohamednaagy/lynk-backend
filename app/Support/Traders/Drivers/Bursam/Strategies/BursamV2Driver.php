@@ -3,11 +3,13 @@
 namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
@@ -15,6 +17,7 @@ use App\Jobs\General\ProcessAskClientForWakala;
 use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Models\User;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamBidCertificate;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultNYY;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultYNN;
@@ -25,6 +28,7 @@ use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificate;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamTransferOwnershipToCustomer;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamTransferOwnershipToLender;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Bus;
@@ -47,6 +51,9 @@ class BursamV2Driver extends BursamV1Driver
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
+            'default_contract_sign_time_limit' => $this->calculateTimeDifference(),
+            'expire_at' => Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME')),
+
         ]);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
@@ -63,10 +70,14 @@ class BursamV2Driver extends BursamV1Driver
      */
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled
+        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled,
+        $cancelledByType = TraderOrderCancelType::System,
+        ?User $cancelledBy = null
     ): int {
-        if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket)) {
-            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason, user: auth()->user());
+        $user = auth()->check() ? auth()->user() : null;
+        if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket) || $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::OnHold)) {
+            app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
+            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
 
             return TraderOrderCancellationStatus::Cancelled;
         }
@@ -77,13 +88,11 @@ class BursamV2Driver extends BursamV1Driver
             throw new Exception(sprintf('Trader order (#%s) cannot be cancelled now', $traderOrder->id));
         }
 
-        $traderOrder->update([
-            'status' => TraderOrderStatus::PendingCancellation,
-        ]);
+        app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
 
         Bus::chain([
             new ProcessBursamSellingCommodityToOpenMarketForCancellation($traderOrder->id),
-            new ProcessBursamStbCertificateAfterCancellation($traderOrder->id, $cancelReason, user: auth()->user()),
+            new ProcessBursamStbCertificateAfterCancellation($traderOrder->id, $cancelReason, $cancelledByType, $cancelledBy),
             function () use ($traderOrder) {
                 $activeTraderOrdersCount = TraderOrder::where('status', TraderOrderStatus::InProgress)
                     ->where('financing_order_id', $traderOrder->id)
@@ -154,7 +163,8 @@ class BursamV2Driver extends BursamV1Driver
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
-        if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+
+        if ($traderOrder->status->isNot(TraderOrderStatus::InProgress) && $traderOrder->status->isNot(TraderOrderStatus::Hold)) {
             return false;
         }
 
@@ -187,4 +197,16 @@ class BursamV2Driver extends BursamV1Driver
     {
         ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
     }
+
+    public function contractSignedMessage(TraderOrder $traderOrder)
+    {
+        return null;
+    }
+
+    public function retryOrder(TraderOrder $traderOrder)
+    {
+        $traderOrder->order->update(['status' => FinancingOrderStatus::Approved]);
+    }
+
+    public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}
 }

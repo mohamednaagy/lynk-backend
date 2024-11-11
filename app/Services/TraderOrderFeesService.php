@@ -3,10 +3,10 @@
 namespace App\Services;
 
 use App\Actions\Contracts\Orders\TraderOrders\Fees\DeductBalanceForCompletedOrder;
+use App\Actions\Contracts\Orders\TraderOrders\Fees\DeductBalanceForDeliveryConfirmed;
 use App\Actions\Contracts\Orders\TraderOrders\Fees\DeductBalanceForNewOrder;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\Trader;
-use App\Enums\TraderOrderStatus;
-
 class TraderOrderFeesService
 {
     /**
@@ -16,24 +16,23 @@ class TraderOrderFeesService
      */
     protected $actions = [
         Trader::Bursam => [
-            TraderOrderStatus::InProgress => DeductBalanceForNewOrder::class,
+            FinancingOrderHistory::GetTtiId => DeductBalanceForNewOrder::class,
         ],
         Trader::Dmcc => [
-            TraderOrderStatus::InProgress => DeductBalanceForNewOrder::class,
+            FinancingOrderHistory::GetTtiId => DeductBalanceForNewOrder::class,
         ],
         Trader::FakeDmcc => [
-            TraderOrderStatus::InProgress => DeductBalanceForNewOrder::class,
+            FinancingOrderHistory::GetTtiId => DeductBalanceForNewOrder::class,
         ],
         Trader::Lynk => [
-            TraderOrderStatus::Completed => DeductBalanceForCompletedOrder::class,
+            FinancingOrderHistory::MurabahaSaleCompleted => DeductBalanceForCompletedOrder::class,
+            FinancingOrderHistory::DeliveryConfirmed => DeductBalanceForDeliveryConfirmed::class,
         ],
     ];
 
     /**
      * Get the action class for the given provider and status.
      *
-     * @param string $provider
-     * @param string $status
      * @return mixed|null
      */
     public function getAction(string $provider, string $status)

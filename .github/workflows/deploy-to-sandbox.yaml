@@ -28,7 +28,7 @@ jobs:
         id: pr-url
         uses: kceb/pull-request-url-action@v1
         with:
-          github-oauth-token: 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
+          github-oauth-token:  ${{secrets.GB_OAUTH_TOKEN}}
         
         
       - name: print info
