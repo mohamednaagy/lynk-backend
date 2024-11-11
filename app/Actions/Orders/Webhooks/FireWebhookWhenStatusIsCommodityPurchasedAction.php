@@ -10,6 +10,7 @@ use App\Enums\WebhookType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Webhooks\Facades\WebhookEvent;
+use Carbon\Carbon;
 
 class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhenStatusIsCommodityPurchased
 {
@@ -42,7 +43,7 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
                 'products' => $this->resolveProducts($traderOrder),
                 'cert_document_url' => get_file_url($certDocumentMediaFile),
                 'ownership_document_url' => get_file_url($ownershipDocumentMediaFile),
-                'expiry_date' => $traderOrder->expire_at,
+                'expiry_date' => saudi_now("Y-m-d H:i:s", Carbon::parse($traderOrder->expire_at)),
             ],
             'updated_at' => $this->getFormattedDateTime($lastHistory),
         ]);
