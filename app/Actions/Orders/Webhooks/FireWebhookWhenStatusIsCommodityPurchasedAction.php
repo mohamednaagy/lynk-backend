@@ -43,7 +43,7 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
                 'products' => $this->resolveProducts($traderOrder),
                 'cert_document_url' => get_file_url($certDocumentMediaFile),
                 'ownership_document_url' => get_file_url($ownershipDocumentMediaFile),
-                'expiry_date' => saudi_now("Y-m-d H:i:s", Carbon::parse($traderOrder->expire_at)),
+                'expiry_date' => $traderOrder->expire_at ? saudi_now("Y-m-d H:i:s", Carbon::parse($traderOrder->expire_at)) : null,
             ],
             'updated_at' => $this->getFormattedDateTime($lastHistory),
         ]);

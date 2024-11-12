@@ -223,6 +223,6 @@ class TraderOrderTransformer extends TransformerAbstract
         $isInProgress = $traderOrder->status->is(TraderOrderStatus::InProgress);
         $lastActionMatches = $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
 
-        return ($isInProgress && $lastActionMatches) ? $this->primitive(saudi_now("Y-m-d H:i:s", Carbon::parse($traderOrder->expire_at))) : null;
+        return ($isInProgress && $lastActionMatches && $traderOrder->expire_at) ? $this->primitive(saudi_now("Y-m-d H:i:s", Carbon::parse($traderOrder->expire_at))) : null;
     }
 }
