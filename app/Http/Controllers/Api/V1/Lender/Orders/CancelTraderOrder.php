@@ -50,7 +50,7 @@ class CancelTraderOrder extends Controller
                 );
             }
 
-            if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::ContractSigned)) {
+            if ($traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
                 return $this->errorResponse(
                     __('error.unable_to_cancel_order'),
                     Response::HTTP_FORBIDDEN,
