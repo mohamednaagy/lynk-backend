@@ -123,9 +123,37 @@ class UsersController extends Controller
 
     public function checkIfUserDoesNotHaveSupplierAreaRole(User $user)
     {
-        if (! $user->hasRole(Area::roles(Area::CommoditySupplier))) {
+        if (!$user->hasRole(Area::roles(Area::CommoditySupplier))) {
             throw new AuthorizationException();
         }
+    }
+
+
+    /**
+     * Display the specified supplier user resource.
+     *
+     * @param  User  $user
+     * @return JsonResponse
+     */
+    public function show(User $user): JsonResponse
+    {
+        $this->checkIfUserDoesNotHaveSupplierAreaRole($user);
+
+        $user->load('roles', 'permissions');
+
+        return fractal($user, new UserTransformer(Area::CommoditySupplier))
+            ->parseIncludes([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'phone_number',
+                'phone_country_code',
+                'formatted_phone_number',
+                'role',
+                'is_active',
+                'is_invitation_accepted',
+            ])->respond();
     }
 
 }
