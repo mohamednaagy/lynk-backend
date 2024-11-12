@@ -52,6 +52,7 @@ return [
             'driver' => 'stack',
             'channels' => ['daily'],
             'ignore_exceptions' => false,
+            'tap' => [App\Logging\CustomizeLogTimezone::class],
         ],
 
         'single' => [
