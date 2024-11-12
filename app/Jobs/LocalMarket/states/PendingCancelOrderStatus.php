@@ -47,15 +47,15 @@ class PendingCancelOrderStatus implements ShouldQueue
         DB::beginTransaction();
         try {
             $this->logCancellationDetails();
+            Log::channel('local_market')->info("add cancel log data to db successfully {$this->localMarketOrder->id}");
             $this->ownershipService->swapCurrentOwnerToPreviousOwner($this->localMarketOrder);
-            $this->inventoryService->freeOrderInventoryUnits($this->localMarketOrder);
+            Log::channel('local_market')->info("swap ownership successfully {$this->localMarketOrder->id}");
             DB::commit();
             $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::Cancelled);
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::channel('local_market')->error("failed cancel local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
+            Log::channel('local_market')->error("failed to exec transaction at pending cancel local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
             $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::FailedToCancel);
-
         }
     }
 

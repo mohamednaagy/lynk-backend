@@ -87,12 +87,18 @@ class OwnershipService
             // Step 3: Update inventory units with the new owner.
             DB::table('local_market_inventory_units')
                 ->where('hold_for', $localMarketOrder->id)
-                ->update([
-                    'current_owner' => $newOwner->current_owner,
-                    'current_owner_type' => $newOwner->current_owner_type,
-                    'updated_at' => $timestamp,
-                ]);
-        });
+                ->chunkById(100, function ($units) use ($newOwner) {
+                    foreach ($units as $unit) {
+                        DB::table('local_market_inventory_units')
+                            ->where('id', $unit->id)
+                            ->update([
+                                'current_owner' => $newOwner->current_owner,
+                                'current_owner_type' => $newOwner->current_owner_type,
+                                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                            ]);
+                    }
+                });
 
+        });
     }
 }
