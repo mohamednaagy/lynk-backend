@@ -369,7 +369,11 @@ class TraderOrder extends Model implements HasMedia
 
     public function setExpireDate()
     {
-        $this->expire_at = Carbon::now()->addMinutes($this->default_contract_sign_time_limit);
+        // get end market datetime from .env and convert to UTC
+        $marketOpeningEndTime = Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME'), 'Asia/Riyadh');
+        $marketOpeningEndTimeUtc = $marketOpeningEndTime->setTimezone('UTC');
+        // save the expire_at value based on provider
+        $this->expire_at = ($this->provider == EnumsTrader::Bursam) ? $marketOpeningEndTimeUtc : Carbon::now()->addMinutes($this->default_contract_sign_time_limit);
         $this->save();
     }
 }
