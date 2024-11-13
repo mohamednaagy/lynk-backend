@@ -55,8 +55,6 @@ class BursamV1Driver implements TraderInterface
         if ($financingOrder->initiatedTraderOrders()->exists()) {
             return $financingOrder->initiatedTraderOrders()->first();
         }
-        $marketOpeningEndTime = Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME'), 'Asia/Riyadh');
-        $marketOpeningEndTimeUtc = $marketOpeningEndTime->setTimezone('UTC');
 
         return $financingOrder->traderOrders()->create([
             'uuid_one' => Str::uuid(),
@@ -65,22 +63,7 @@ class BursamV1Driver implements TraderInterface
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
-            'default_contract_sign_time_limit' => $this->calculateTimeDifference(),
-            'expire_at' => $marketOpeningEndTimeUtc,
-
         ]);
-    }
-
-    protected function calculateTimeDifference()
-    {
-        $marketEndTime = env('BURSAM_MARKET_OPENING_END_TIME');
-        $marketEnd = Carbon::createFromFormat('H:i:s', $marketEndTime);
-        // Calculate the difference in hours
-        $now = Carbon::now();
-        $differenceInMinutes = $now->diffInMinutes($marketEnd);
-        $differenceInHours = $differenceInMinutes / 60;
-
-        return $differenceInHours;
     }
 
     public function createHoldTraderOrder(FinancingOrder $financingOrder): ?Model
@@ -318,6 +301,9 @@ class BursamV1Driver implements TraderInterface
                         'created_at' => $currentTimeInUtcTz,
                     ]
                 );
+
+                // Set expiration time for the trader order
+                $traderOrder->setExpireDate();
             });
         } catch (\Throwable $exception) {
             throw new TraderException(

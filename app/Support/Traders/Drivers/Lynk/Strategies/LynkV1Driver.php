@@ -31,7 +31,6 @@ use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkTransferOwnershipToCustomer
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 use App\Support\Traders\Traits\TraderHelperTrait;
-use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
@@ -76,7 +75,7 @@ class LynkV1Driver implements TraderInterface
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
-            'default_contract_sign_time_limit' => app(LocalMurabahaSettings::class)->default_contract_sign_time_limit,
+            'default_contract_sign_time_limit' => config('trader.providers.lynk.default_contract_sign_time_limit'),
         ]);
     }
 
@@ -153,11 +152,8 @@ class LynkV1Driver implements TraderInterface
 
             });
             // Set expiration time for the trader order
-            if ($traderOrder->default_contract_sign_time_limit > 0) {
-                $traderOrder->expire_at = Carbon::now()
-                    ->addMinutes($traderOrder->default_contract_sign_time_limit)->toDateTimeString();
-                $traderOrder->save();
-            }
+            $traderOrder->setExpireDate();
+
         } catch (\Throwable $exception) {
             throw new TraderException(
                 'Failed to create lender ownership certificate',

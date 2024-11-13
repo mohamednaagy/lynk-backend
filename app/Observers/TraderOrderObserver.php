@@ -8,6 +8,7 @@ use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use Illuminate\Support\Facades\Log;
 
 class TraderOrderObserver
 {
@@ -19,12 +20,16 @@ class TraderOrderObserver
     public function creating(TraderOrder $traderOrder)
     {
         $order = $traderOrder->order;
-
+        // dd(config("trader.providers.{$traderOrder->provider}.default_contract_sign_time_limit")());
         if ($this->shouldSetAsBaseTraderOrder($order)) {
             $traderOrder->fill([
                 'is_base' => true,
             ]);
         }
+
+        $traderOrder->fill([
+            'default_contract_sign_time_limit' => config("trader.providers.{$traderOrder->provider}.default_contract_sign_time_limit")(),
+        ]);
     }
 
     /**

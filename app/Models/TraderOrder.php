@@ -309,6 +309,7 @@ class TraderOrder extends Model implements HasMedia
     public function scopeWithExpiredContractSignLimit($query)
     {
         $version = get_latest_version_of_trader(EnumsTrader::Lynk);
+
         return $query->where([
             ['provider', EnumsTrader::Lynk],
             ['version', $version],
@@ -316,19 +317,19 @@ class TraderOrder extends Model implements HasMedia
             ['status', TraderOrderStatus::InProgress],
             ['expire_at', '<', now()],
         ])
-        ->whereNotNull('default_contract_sign_time_limit')
-        ->whereHas('traderHistories', function ($historyQuery) {
-            $historyQuery->select('id')
-                ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
-                ->where('id', function ($subQuery) {
-                    $subQuery->select('id')
-                        ->from('trader_histories')
-                        ->whereRaw('trader_orders.id = trader_histories.trader_order_id') 
-                        ->orderByDesc('id')
-                        ->limit(1);
-                }); 
-        })
-        ->get();
+            ->whereNotNull('default_contract_sign_time_limit')
+            ->whereHas('traderHistories', function ($historyQuery) {
+                $historyQuery->select('id')
+                    ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
+                    ->where('id', function ($subQuery) {
+                        $subQuery->select('id')
+                            ->from('trader_histories')
+                            ->whereRaw('trader_orders.id = trader_histories.trader_order_id')
+                            ->orderByDesc('id')
+                            ->limit(1);
+                    });
+            })
+            ->get();
     }
 
     public function hoverMessage(): ?string
@@ -381,14 +382,13 @@ class TraderOrder extends Model implements HasMedia
         return $query->completed()->where('contract_signed_type', $contractSignedType);
     }
 
-    /**
-     * Set the default contract sign time limit in minutes.
-     *
-     * @param  int  $value
-     * @return void
-     */
-    public function setDefaultContractSignTimeLimitAttribute($value)
+    public function setExpireDate()
     {
-        $this->attributes['default_contract_sign_time_limit'] = $value * 60;
+        // get end market datetime from .env and convert to UTC
+        $marketOpeningEndTime = Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME'), 'Asia/Riyadh');
+        $marketOpeningEndTimeUtc = $marketOpeningEndTime->setTimezone('UTC');
+        // save the expire_at value based on provider
+        $this->expire_at = ($this->provider == EnumsTrader::Bursam) ? $marketOpeningEndTimeUtc : Carbon::now()->addMinutes($this->default_contract_sign_time_limit);
+        $this->save();
     }
 }
