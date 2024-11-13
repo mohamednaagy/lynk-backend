@@ -22,7 +22,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -192,9 +191,9 @@ class TraderOrder extends Model implements HasMedia
                 ->latest('id')
                 ->take(1),
             'last_history_created_at' => TraderHistory::select('created_at')
-            ->whereColumn('trader_order_id', 'trader_orders.id')
-            ->latest('id')
-            ->take(1),
+                ->whereColumn('trader_order_id', 'trader_orders.id')
+                ->latest('id')
+                ->take(1),
         ]);
     }
 
@@ -307,10 +306,10 @@ class TraderOrder extends Model implements HasMedia
         return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
     }
 
-
     public function scopeWithExpiredContractSignLimit($query)
     {
         $version = get_latest_version_of_trader(EnumsTrader::Lynk);
+
         return $query->where([
             ['provider', EnumsTrader::Lynk],
             ['version', $version],
@@ -318,19 +317,19 @@ class TraderOrder extends Model implements HasMedia
             ['status', TraderOrderStatus::InProgress],
             ['expire_at', '<', now()],
         ])
-        ->whereNotNull('default_contract_sign_time_limit')
-        ->whereHas('traderHistories', function ($historyQuery) {
-            $historyQuery->select('id')
-                ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
-                ->where('id', function ($subQuery) {
-                    $subQuery->select('id')
-                        ->from('trader_histories')
-                        ->whereRaw('trader_orders.id = trader_histories.trader_order_id') 
-                        ->orderByDesc('id')
-                        ->limit(1);
-                }); 
-        })
-        ->get();
+            ->whereNotNull('default_contract_sign_time_limit')
+            ->whereHas('traderHistories', function ($historyQuery) {
+                $historyQuery->select('id')
+                    ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
+                    ->where('id', function ($subQuery) {
+                        $subQuery->select('id')
+                            ->from('trader_histories')
+                            ->whereRaw('trader_orders.id = trader_histories.trader_order_id')
+                            ->orderByDesc('id')
+                            ->limit(1);
+                    });
+            })
+            ->get();
     }
 
     public function hoverMessage(): ?string
@@ -376,6 +375,12 @@ class TraderOrder extends Model implements HasMedia
      */
     public function setDefaultContractSignTimeLimitAttribute($value)
     {
-        $this->attributes['default_contract_sign_time_limit'] = $value * 60;
+        $this->attributes['default_contract_sign_time_limit'] = config("trader.providers.{$this->provider}.default_contract_sign_time_limit");
+    }
+
+    public function setExpireDate()
+    {
+        $this->expire_at = Carbon::now()->addMinutes($this->default_contract_sign_time_limit);
+        $this->save();
     }
 }
