@@ -8,6 +8,7 @@ use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\InventoryService;
 use App\Services\LocalMarket\OwnershipService;
+use App\Services\LocalMarket\UnitService;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -23,6 +24,8 @@ class PendingSellOrderStatus implements ShouldQueue
 
     private InventoryService $inventoryService;
 
+    private UnitService $unitService;
+
     private OwnershipService $ownershipService;
 
     private LocalMarketWebhook $localMarketWebhook;
@@ -31,6 +34,8 @@ class PendingSellOrderStatus implements ShouldQueue
         private LocalMarketOrder $localMarketOrder
     ) {
         $this->inventoryService = app(InventoryService::class);
+        $this->unitService = app(UnitService::class);
+
         $this->ownershipService = app(OwnershipService::class);
         $this->localMarketWebhook = app(LocalMarketWebhook::class);
 
@@ -42,8 +47,8 @@ class PendingSellOrderStatus implements ShouldQueue
     {
         DB::beginTransaction();
         try {
-            $this->ownershipService->changeUnitOwnership($this->localMarketOrder, OwnershipTypes::TraderOrder, $this->localMarketOrder->external_order_no);
-            $this->inventoryService->freeOrderInventoryUnits($this->localMarketOrder);
+            $this->unitService->changeOrderUnitsOwnershipTo($this->localMarketOrder, OwnershipTypes::TraderOrder, $this->localMarketOrder->external_order_no);
+            $this->inventoryService->freeOrderInventoryUnits($this->localMarketOrder, is_completed_order: true);
             DB::commit();
             $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::CommoditiesSell);
             $this->logQueueJob('pending successfully');

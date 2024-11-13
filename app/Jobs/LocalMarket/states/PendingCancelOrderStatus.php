@@ -9,6 +9,7 @@ use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\InventoryService;
 use App\Services\LocalMarket\OwnershipService;
+use App\Services\LocalMarket\UnitService;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -26,6 +27,8 @@ class PendingCancelOrderStatus implements ShouldQueue
 
     private OwnershipService $ownershipService;
 
+    private UnitService $unitService;
+
     private LocalMarketWebhook $localMarketWebhook;
 
     private ?int $cancelReason;
@@ -37,6 +40,8 @@ class PendingCancelOrderStatus implements ShouldQueue
         $this->inventoryService = app(InventoryService::class);
         $this->localMarketWebhook = app(LocalMarketWebhook::class);
         $this->ownershipService = app(OwnershipService::class);
+        $this->unitService = app(UnitService::class);
+
         $this->cancelReason = $cancelReason;
         $this->onQueue('local_market');
         $this->logQueueJob();
@@ -48,8 +53,11 @@ class PendingCancelOrderStatus implements ShouldQueue
         try {
             $this->logCancellationDetails();
             Log::channel('local_market')->info("add cancel log data to db successfully {$this->localMarketOrder->id}");
-            $this->ownershipService->swapCurrentOwnerToPreviousOwner($this->localMarketOrder);
+            $this->unitService->revertInventoryUnitOwnership($this->localMarketOrder);
             Log::channel('local_market')->info("swap ownership successfully {$this->localMarketOrder->id}");
+            $this->inventoryService->freeOrderInventoryUnits($this->localMarketOrder);
+            Log::channel('local_market')->info("refresh order inventories and units successfully {$this->localMarketOrder->id}");
+
             DB::commit();
             $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::Cancelled);
         } catch (\Throwable $e) {

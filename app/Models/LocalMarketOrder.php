@@ -61,7 +61,7 @@ class LocalMarketOrder extends Model
         return $this->hasOne(LocalMarketOrderHasCancelReason::class, 'order_id');
     }
 
-    public function inverntoryUnits()
+    public function inventoryUnits()
     {
         return $this->hasMany(LocalMarketInventoryUnits::class, 'hold_for');
     }

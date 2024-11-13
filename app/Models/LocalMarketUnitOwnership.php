@@ -15,6 +15,7 @@ class LocalMarketUnitOwnership extends Model
         'local_market_order_id',
         'unit_id',
         'owner_type',
+        'current_owner',
         'current_owner_type',
         'previous_owner',
         'previous_owner_type',
