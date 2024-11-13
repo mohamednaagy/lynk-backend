@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -373,10 +374,10 @@ class TraderOrder extends Model implements HasMedia
      * @param  int  $value
      * @return void
      */
-    public function setDefaultContractSignTimeLimitAttribute($value)
-    {
-        $this->attributes['default_contract_sign_time_limit'] = config("trader.providers.{$this->provider}.default_contract_sign_time_limit");
-    }
+    // public function setDefaultContractSignTimeLimitAttribute($value)
+    // {
+    //     $this->attributes['default_contract_sign_time_limit'] = config("trader.providers.{$this->provider}.default_contract_sign_time_limit")();
+    // }
 
     public function setExpireDate()
     {

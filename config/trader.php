@@ -24,7 +24,9 @@ return [
                     TraderOrderMode::Manual,
                 ],
             ],
-            'default_contract_sign_time_limit' => 240,
+            'default_contract_sign_time_limit' => function () {
+                return 240;
+            },
         ],
         'fake' => [
             'latest' => 'v1',
@@ -69,7 +71,9 @@ return [
                 ],
             ],
             'allowed_financing_status_to_change_from_public_api' => new EnumValue(FinancingOrderProceedCase::class),
-            'default_contract_sign_time_limit' => Carbon::now()->diffInMinutes(Carbon::createFromFormat('H:i', env('BURSAM_MARKET_OPENING_END_TIME'))),
+            'default_contract_sign_time_limit' => function () {
+                return Carbon::now()->diffInMinutes(Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME'), 'Asia/Riyadh')->setTimezone('UTC'));
+            },
         ],
         'lynk' => [
             'latest' => 'v1',
@@ -93,7 +97,9 @@ return [
                 ],
             ],
             'max_units_per_trader' => env('LYNK_MAX_UNITS_PER_TRADER', 10000),
-            'default_contract_sign_time_limit' => app(LocalMurabahaSettings::class)->default_contract_sign_time_limit * 60,
+            'default_contract_sign_time_limit' => function () {
+                return app(LocalMurabahaSettings::class)->default_contract_sign_time_limit * 60;
+            },
         ],
     ],
 ];
