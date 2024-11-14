@@ -20,7 +20,6 @@ class TraderOrderObserver
     public function creating(TraderOrder $traderOrder)
     {
         $order = $traderOrder->order;
-        // dd(config("trader.providers.{$traderOrder->provider}.default_contract_sign_time_limit")());
         if ($this->shouldSetAsBaseTraderOrder($order)) {
             $traderOrder->fill([
                 'is_base' => true,
