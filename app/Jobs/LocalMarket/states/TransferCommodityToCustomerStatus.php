@@ -7,6 +7,7 @@ use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\OwnershipService;
+use App\Services\LocalMarket\UnitService;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -23,12 +24,15 @@ class TransferCommodityToCustomerStatus implements ShouldQueue
 
     private OwnershipService $ownershipService;
 
+    private UnitService $unitService;
+
     public function __construct(
         private LocalMarketOrder $localMarketOrder
     ) {
 
         $this->localMarketWebhook = app(LocalMarketWebhook::class);
         $this->ownershipService = app(OwnershipService::class);
+        $this->unitService = app(UnitService::class);
 
         $this->onQueue('local_market');
         $this->logQueueJob();
@@ -37,7 +41,7 @@ class TransferCommodityToCustomerStatus implements ShouldQueue
     public function handle(): void
     {
 
-        $this->ownershipService->changeUnitOwnership($this->localMarketOrder, OwnershipTypes::Customer, $this->localMarketOrder->customer_name);
+        $this->unitService->changeOrderUnitsOwnershipTo($this->localMarketOrder, OwnershipTypes::Customer, $this->localMarketOrder->customer_name);
         $this->localMarketWebhook->with(['case' => LocalMarketOrderStatus::TransferOwnershipToCustomer, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
         $this->logQueueJob('Transfer Ownership to customer successfully');
         $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::PendingSellCommodities);

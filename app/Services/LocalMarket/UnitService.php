@@ -5,6 +5,9 @@ namespace App\Services\LocalMarket;
 use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
+use App\Models\LocalMarketOrder;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class UnitService
 {
@@ -69,5 +72,54 @@ class UnitService
             ->update(['hold_for' => $orderNo, 'status' => InventoryUnitsStatus::Reserved]);
 
         $inventory->refreshStockQuantities();
+    }
+
+    public function changeOrderUnitsOwnershipTo(LocalMarketOrder $localMarketOrder, $ownerType, $ownerIdentifier)
+    {
+        $localMarketOrder->inventoryUnits()->chunkById(100, function ($units) use ($ownerType, $ownerIdentifier) {
+            foreach ($units as $unit) {
+                // Get the current values for previous_owner and previous_owner_type
+                $previousOwner = $unit->current_owner;
+                $previousOwnerType = $unit->current_owner_type;
+
+                // Perform update with new and old values using Eloquent's update() method
+                $unit->update([
+                    'current_owner' => $ownerIdentifier,
+                    'current_owner_type' => $ownerType,
+                    'previous_owner' => $previousOwner,
+                    'previous_owner_type' => $previousOwnerType,
+                    'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                ]);
+            }
+        });
+    }
+
+    public function revertInventoryUnitOwnership(LocalMarketOrder $localMarketOrder)
+    {
+        LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)
+            ->chunkById(100, function ($units) use ($localMarketOrder) {
+                Log::channel('local_market')->info('Swapping current owner for order '.$localMarketOrder->id);
+
+                foreach ($units as $unit) {
+                    // Extract the last valid owner details
+                    $lastValidOwner = $unit->getLastValidOwner();
+                    $newCurrentOwner = $lastValidOwner['current_owner'];
+                    $newCurrentOwnerType = $lastValidOwner['current_owner_type'];
+
+                    Log::channel('local_market')->info(
+                        'Swapping unit ID '.$unit->id.
+                        ' to owner '.$newCurrentOwner.
+                        ' of type '.$newCurrentOwnerType
+                    );
+
+                    // Update the unit using Eloquent, which will trigger the observer
+                    $unit->update([
+                        'current_owner' => $newCurrentOwner,
+                        'current_owner_type' => $newCurrentOwnerType,
+                        'previous_owner' => $unit->current_owner,
+                        'previous_owner_type' => $unit->current_owner_type,
+                    ]);
+                }
+            });
     }
 }
