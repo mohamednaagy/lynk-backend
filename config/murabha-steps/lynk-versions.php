@@ -18,13 +18,13 @@ return [
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => null,
         ],
         MurabhaStep::ContractSigned => [
+            FinancingOrderHistory::PendingDelivery => null,
             FinancingOrderHistory::ContractSigned => null,
         ],
         MurabhaStep::CommoditySoldToCustomer => [
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => null,
         ],
         MurabhaStep::CustomerDeliveryConfirmation => [
-            FinancingOrderHistory::PendingDelivery => null,
             FinancingOrderHistory::DeliveryCancelled => null,
             FinancingOrderHistory::DeliveryConfirmed => null,
         ],
