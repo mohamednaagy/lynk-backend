@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\LocalMarket\OwnershipTypes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,6 +22,9 @@ class LocalMarketInventoryUnits extends Model
         'hold_for',
         'current_owner',
         'current_owner_type',
+        'last_completed_order_id',
+        'previous_owner_type',
+        'previous_owner',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -49,6 +53,11 @@ class LocalMarketInventoryUnits extends Model
         return $this->hasMany(LocalMarketUnitRotation::class, 'inventory_unit_id');
     }
 
+    public function completedOrder()
+    {
+        return $this->belongsTo(LocalMarketOrder::class, 'last_completed_order_id');
+    }
+
     public static function insertBulk($data)
     {
         $now = saudi_now('Y-m-d h:i:s');
@@ -61,5 +70,14 @@ class LocalMarketInventoryUnits extends Model
         }, $data);
 
         DB::table((new static)->getTable())->insert($data);
+    }
+
+    public function getLastValidOwner(): array
+    {
+        if (is_null($this->last_completed_order_id)) {
+            return ['current_owner' => $this->inventory->company_id, 'current_owner_type' => OwnershipTypes::OriginalSupplier];
+        } else {
+            return ['current_owner' => $this->completedOrder->external_order_no, 'current_owner_type' => OwnershipTypes::TraderOrder];
+        }
     }
 }

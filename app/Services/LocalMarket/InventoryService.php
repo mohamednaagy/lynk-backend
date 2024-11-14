@@ -7,6 +7,7 @@ use App\Enums\CommoitySupplierStatus;
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Models\LocalMarketInventory;
+use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -150,11 +151,25 @@ class InventoryService
         }
     }
 
-    public function freeOrderInventoryUnits(LocalMarketOrder $localMarketOrder, string $status = InventoryUnitsStatus::Free)
+    public function freeOrderInventoryUnits(LocalMarketOrder $localMarketOrder, string $status = InventoryUnitsStatus::Free, bool $is_completed_order = false)
     {
         foreach ($localMarketOrder->orderInventories as $orderInventory) {
             $inventory = $orderInventory->inventory;
-            $localMarketOrder->inverntoryUnits()->where(['local_market_inventory_id' => $inventory->id])->update(['status' => $status, 'hold_for' => null]);
+            $localMarketOrder->inventoryUnits()
+                ->where(['local_market_inventory_id' => $inventory->id])
+                ->chunkById(100, function ($units) use ($status, $is_completed_order, $localMarketOrder) {
+                    foreach ($units as $unit) {
+                        $lastCompletedOrderId = $is_completed_order ? $localMarketOrder->id : $unit->last_completed_order_id;
+                        LocalMarketInventoryUnits::where('id', $unit->id)
+                            ->update([
+                                'status' => $status,
+                                'hold_for' => null,
+                                'last_completed_order_id' => $lastCompletedOrderId,
+                            ]);
+                    }
+                });
+
+            // Refresh stock quantities for the current inventory after processing all units
             $inventory->refreshStockQuantities();
         }
     }
