@@ -292,6 +292,9 @@ class BursamV1Driver implements TraderInterface
                     TraderOrderMediaCollection::TransferOwnershipToLender
                 );
 
+                // Set expiration time for the trader order
+                $traderOrder->setExpireDate();
+
                 $this->createTraderOrderHistory(
                     $traderOrder,
                     FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
@@ -300,8 +303,7 @@ class BursamV1Driver implements TraderInterface
                     ]
                 );
 
-                // Set expiration time for the trader order
-                $traderOrder->setExpireDate();
+                
             });
         } catch (\Throwable $exception) {
             throw new TraderException(
