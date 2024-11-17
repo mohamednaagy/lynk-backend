@@ -19,6 +19,9 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
 
     public function updatePurchasingCommodity(TraderOrder $traderOrder, array $data)
     {
+        // Set expiration time for the trader order
+        $traderOrder->setExpireDate();
+        
         $traderOrder->ensureCanAccessStep(MurabhaStep::TraderOrderCreated);
 
         app(UpdateTraderOrder::class)->handle($traderOrder, $data);
