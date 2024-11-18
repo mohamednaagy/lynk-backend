@@ -20,35 +20,37 @@ class LynkClient
 
     protected $fake;
 
+    protected $LocalMarketOrder;
+
     protected $traderOrderIdHeaderKey = 'X-TRADER-ORDER-ID';
 
-    private function __construct(protected $traderOrder) {}
+    private function __construct(protected $traderOrder, LocalMarketOrder $localMarketOrder) {}
 
     private function isTraderOrderInitiatedByFake()
     {
         return strpos($this->traderOrder->reference, '-') === false;
     }
 
-    public static function of(TraderOrder $traderOrder)
+    public static function of(TraderOrder $traderOrder, LocalMarketOrder $localMarketOrder)
     {
-        return new static($traderOrder);
+        return new static($traderOrder, $localMarketOrder);
     }
 
     public function createOrder()
     {
-        $financingOrder = $this->traderOrder->order;
-        $data['currency'] = $financingOrder->currency;
-        $data['national_id'] = $financingOrder->national_id;
-        $data['amount'] = $financingOrder->amount?->convertAndFormatByDecimal();
-        $data['customer_name'] = $financingOrder->customer_name;
-        $data['external_order_no'] = $this->traderOrder->reference;
-        $data['source'] = $this->traderOrder->provider;
-        $data['company_id'] = $financingOrder->company_id;
-        $data['buying_uuid'] = $this->traderOrder->uuid_one;
-        $data['preferred_commodity_type'] = $financingOrder->company->commodityTypes()?->pluck('commodity_type_id')->toArray() ?? [];
-        Log::channel('local_market')->info("data prepare before saved for Trader Order id => {$this->traderOrder->id} ", $data);
+        try {
+            $financingOrder = $this->traderOrder->order;
 
-        return app(CreateLocalMarketOrder::class)->handle($data);
+            $data = $this->prepareOrderData($financingOrder);
+
+            Log::channel('local_market')->info("Data prepared for Trader Order ID: {$this->traderOrder->id}", $data);
+
+            return $this->LocalMarketOrder->create($data);
+        } catch (\Exception $e) {
+            Log::channel('local_market')->error("Error creating LocalMarketOrder for Trader Order ID: {$this->traderOrder->id}", [
+                'exception' => $e->getMessage()
+            ]);
+        }
 
     }
 
@@ -84,5 +86,37 @@ class LynkClient
         $localMarketOrder = LocalMarketOrder::where('external_order_no', $trader->reference)->first();
 
         return app(CancelOrder::class)->handle($localMarketOrder);
+    }
+
+    /**
+     * Prepare data for the local market order creation.
+     *
+     * @param \App\Models\FinancingOrder $financingOrder
+     * @return array
+     */
+    private function prepareOrderData($financingOrder): array
+    {
+        return [
+            'currency'               => $financingOrder->currency,
+            'national_id'            => $financingOrder->national_id,
+            'amount'                 => $financingOrder->amount->convertAndFormatByDecimal(),
+            'customer_name'          => $financingOrder->customer_name,
+            'external_order_no'      => $this->traderOrder->reference,
+            'source'                 => $this->traderOrder->provider,
+            'company_id'             => $financingOrder->company_id,
+            'buying_uuid'            => $this->traderOrder->uuid_one,
+            'preferred_commodity_type'=> $this->getPreferredCommodityTypes($financingOrder->company),
+        ];
+    }
+
+    /**
+     * Get preferred commodity types for a company.
+     *
+     * @param \App\Models\Company $company
+     * @return array
+     */
+    private function getPreferredCommodityTypes($company): array
+    {
+        return $company->commodityTypes()->pluck('commodity_type_id')->toArray() ?? [];
     }
 }
