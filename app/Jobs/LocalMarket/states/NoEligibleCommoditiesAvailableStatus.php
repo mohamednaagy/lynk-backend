@@ -3,7 +3,7 @@
 namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
-use App\Enums\LocalMarketOrderHistoryStatus;
+use App\Enums\LocalMarket\OrderHistoryStatus;
 use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
@@ -32,7 +32,7 @@ class NoEligibleCommoditiesAvailableStatus implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::NoEligibleCommoditiesAvailable);
+        $this->createLocalMarketOrderHistory($this->localMarketOrder, OrderHistoryStatus::NoEligibleCommoditiesAvailable);
         $data['case'] = LocalMarketOrderStatus::NoEligibleCommoditiesAvailable;
         $data['external_order_no'] = $this->localMarketOrder->external_order_no;
         $this->localMarketWebhook->with($data)->handle();

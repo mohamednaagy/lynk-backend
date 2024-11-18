@@ -4,8 +4,7 @@ namespace App\Actions\LocalMarket;
 
 use App\Actions\Contracts\LocalMarket\CreateLocalMarketOrder;
 use App\Actions\Contracts\LocalMarket\PendingEligibleCommodities;
-use App\Enums\LocalMarketOrderHistoryStatus;
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderHistoryStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Database\Eloquent\Model;
@@ -36,7 +35,7 @@ class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
                 'selling_uuid',
             ])
         );
-        $this->createLocalMarketOrderHistory($order, LocalMarketOrderHistoryStatus::initiate);
+        $this->createLocalMarketOrderHistory($order, OrderHistoryStatus::initiate);
         Log::channel('local_market')->info("saved new local market order id => {$order->id} and trader order reference is {$order->external_order_no}");
         app(PendingEligibleCommodities::class)->handle($order);
 

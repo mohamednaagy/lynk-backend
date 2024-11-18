@@ -3,7 +3,7 @@
 namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\LocalMarket\BuyCommodities;
-use App\Enums\LocalMarketOrderHistoryStatus;
+use App\Enums\LocalMarket\OrderHistoryStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Bus\Queueable;
@@ -35,7 +35,7 @@ class EligibleCommoditiesFoundStatus implements ShouldQueue
             app(BuyCommodities::class)->handle($this->localMarketOrder);
             Log::channel('local_market')->info("after buy commodity step to local market id {$this->localMarketOrder->id} ");
 
-            $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::EligibleCommoditiesAvailable);
+            $this->createLocalMarketOrderHistory($this->localMarketOrder, OrderHistoryStatus::EligibleCommoditiesAvailable);
         } catch (\Exception $e) {
             Log::channel('local_market')->error("failed eligible local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
         }

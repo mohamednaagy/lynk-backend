@@ -3,7 +3,7 @@
 namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\LocalMarket\FindEligibleCommodities;
-use App\Enums\LocalMarketOrderHistoryStatus;
+use App\Enums\LocalMarket\OrderHistoryStatus;
 use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
@@ -31,6 +31,6 @@ class PendingEligibleCommoditiesStatus implements ShouldQueue
     {
         $this->localMarketOrder->update(['status' => LocalMarketOrderStatus::PendingEligibleCommodities]);
         $GetSuitableCommoditiesStocks->handle($this->localMarketOrder);
-        $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::PendingEligibleCommodities);
+        $this->createLocalMarketOrderHistory($this->localMarketOrder, OrderHistoryStatus::PendingEligibleCommodities);
     }
 }

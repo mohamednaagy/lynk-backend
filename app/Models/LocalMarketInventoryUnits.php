@@ -58,20 +58,6 @@ class LocalMarketInventoryUnits extends Model
         return $this->belongsTo(LocalMarketOrder::class, 'last_completed_order_id');
     }
 
-    public static function insertBulk($data)
-    {
-        $now = saudi_now('Y-m-d h:i:s');
-        // Implement bulk insertion logic here
-        $data = array_map(function ($item) use ($now) {
-            return array_merge($item, [
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]);
-        }, $data);
-
-        DB::table((new static)->getTable())->insert($data);
-    }
-
     public function getLastValidOwner(): array
     {
         if (is_null($this->last_completed_order_id)) {
