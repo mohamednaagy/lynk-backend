@@ -40,7 +40,7 @@ class LocalMarketOrderObserver
 
     public function updating(LocalMarketOrder $localMarketOrder)
     {
-        return $this->canMoveToNextStep($localMarketOrder->getOriginal('status'), $localMarketOrder->status);
+        return $this->canMoveToNextStep($localMarketOrder->getOriginal('status'), $localMarketOrder->status, $localMarketOrder);
 
     }
 
