@@ -20,20 +20,18 @@ class LynkClient
 
     protected $fake;
 
-    protected $LocalMarketOrder;
-
     protected $traderOrderIdHeaderKey = 'X-TRADER-ORDER-ID';
 
-    private function __construct(protected $traderOrder, LocalMarketOrder $localMarketOrder) {}
+    private function __construct(protected $traderOrder) {}
 
     private function isTraderOrderInitiatedByFake()
     {
         return strpos($this->traderOrder->reference, '-') === false;
     }
 
-    public static function of(TraderOrder $traderOrder, LocalMarketOrder $localMarketOrder)
+    public static function of(TraderOrder $traderOrder)
     {
-        return new static($traderOrder, $localMarketOrder);
+        return new static($traderOrder);
     }
 
     public function createOrder()
@@ -45,7 +43,7 @@ class LynkClient
 
             Log::channel('local_market')->info("Data prepared for Trader Order ID: {$this->traderOrder->id}", $data);
 
-            return $this->LocalMarketOrder->create($data);
+            return app(CreateLocalMarketOrder::class)->handle($data);
         } catch (\Exception $e) {
             Log::channel('local_market')->error("Error creating LocalMarketOrder for Trader Order ID: {$this->traderOrder->id}", [
                 'exception' => $e->getMessage()
