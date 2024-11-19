@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\LocalMarketOrderStatus;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,6 +30,10 @@ class LocalMarketOrder extends Model
         'hold_for',
         'order_no',
         'preferred_commodity_type',
+    ];
+
+    protected $attributes = [
+        'status' => LocalMarketOrderStatus::initiate,
     ];
 
     protected $casts = [
