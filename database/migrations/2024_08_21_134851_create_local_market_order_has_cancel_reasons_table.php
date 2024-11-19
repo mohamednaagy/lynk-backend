@@ -18,7 +18,6 @@ return new class extends Migration
             $table->unsignedBigInteger('order_id')->comment('local_market_order_id');
             $table->foreign('order_id')->references('id')->on('local_market_orders')->onDelete('cascade');
             $table->integer('cancelled_by');
-            $table->string('cancel_step');
             $table->unsignedTinyInteger('cancel_reason');
             $table->timestamps();
         });

@@ -19,6 +19,7 @@ class LocalMarketUnitOwnership extends Model
         'current_owner_type',
         'previous_owner',
         'previous_owner_type',
+        'action',
         'created_at',
         'updated_at',
     ];
