@@ -2,8 +2,6 @@
 
 namespace App\Services\LocalMarket;
 
-use App\Enums\LocalMarket\OrderStatus;
-use App\Enums\Trader;
 use App\Models\LocalMarketOrder;
 use App\Models\LocalMarketOrderHasInventory;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
