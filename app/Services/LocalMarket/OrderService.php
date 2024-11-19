@@ -14,21 +14,6 @@ class OrderService
 {
     use LocalMarketHelperTrait;
 
-    public function createOrder($traderOrder, $financialOrder, array $preferredTypes, int $companyId)
-    {
-        return LocalMarketOrder::create([
-            'source' => Trader::Lynk,
-            'trader_order_id' => $traderOrder->id,
-            'amount' => $financialOrder->amount->convertAndFormatByDecimal(),
-            'national_id' => $financialOrder->national_id,
-            'customer_name' => $financialOrder->customer_name,
-            'preferred_commodity_type' => json_encode($preferredTypes),
-            'company_id' => $companyId,
-            'comment' => null,
-            'status' => OrderStatus::InProgress,
-        ]);
-    }
-
     public function createOrderInventory($orderId, $inventory, $item)
     {
         return LocalMarketOrderHasInventory::create([

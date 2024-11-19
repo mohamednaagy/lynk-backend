@@ -5,7 +5,7 @@ namespace App\Jobs\LocalMarket\states;
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
 use App\Enums\LocalMarket\OrderCancelledBy;
 use App\Enums\LocalMarket\OrderCancelReason;
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\InventoryService;
 use App\Services\LocalMarket\OwnershipService;
@@ -59,11 +59,11 @@ class PendingCancelOrderStatus implements ShouldQueue
             Log::channel('local_market')->info("refresh order inventories and units successfully {$this->localMarketOrder->id}");
 
             DB::commit();
-            $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::Cancelled);
+            $this->localMarketOrder->changeStatusTo(OrderStatus::Cancelled);
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::channel('local_market')->error("failed to exec transaction at pending cancel local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
-            $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::FailedToCancel);
+            $this->localMarketOrder->changeStatusTo(OrderStatus::FailedToCancel);
         }
     }
 

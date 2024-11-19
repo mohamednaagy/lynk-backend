@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +16,7 @@ return new class extends Migration
     {
         Schema::table('local_market_orders', function (Blueprint $table) {
             $table->unsignedSmallInteger('status')
-                  ->default(LocalMarketOrderStatus::initiate)
+                  ->default(OrderStatus::initiate)
                   ->change();
         });
     }

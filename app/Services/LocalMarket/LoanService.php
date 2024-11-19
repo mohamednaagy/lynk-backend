@@ -2,8 +2,8 @@
 
 namespace App\Services\LocalMarket;
 
+use App\Enums\LocalMarket\OrderStatus;
 use App\Enums\LocalMarket\OwnershipTypes;
-use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\DataTransferObjects\LocalMarket\OrderCommoditiesDto;
 use Exception;
@@ -46,7 +46,7 @@ class LoanService
             $unitService->changeOrderUnitsOwnershipTo($localMarketOrder, OwnershipTypes::Company, $companyId);
             $orderService->insertOrderUnits($localMarketOrder);
             $orderService->insertOrderInventories($localMarketOrder, $eligibleCommodities->getInventories());
-            $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::CommoditiesPurchased);
+            $orderService->changeOrderStatus($localMarketOrder, OrderStatus::CommoditiesPurchased);
 
             return true;
         } catch (Exception $e) {

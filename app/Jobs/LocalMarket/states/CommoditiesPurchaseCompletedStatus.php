@@ -4,7 +4,7 @@ namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
 use App\Enums\LocalMarket\OrderHistoryStatus;
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Bus\Queueable;
@@ -35,7 +35,7 @@ class CommoditiesPurchaseCompletedStatus implements ShouldQueue
     {
         $data = $this->getDataOfLocalMarketOrder($this->localMarketOrder);
         $this->createLocalMarketOrderHistory($this->localMarketOrder, OrderHistoryStatus::CommoditiesPurchased);
-        $data['case'] = LocalMarketOrderStatus::CommoditiesPurchased;
+        $data['case'] = OrderStatus::CommoditiesPurchased;
         $data['external_order_no'] = $this->localMarketOrder->external_order_no;
         $this->localMarketWebhook->with($data)->handle();
         Log::channel('local_market')->info("Congratulations Commodities purchased for order {$this->localMarketOrder->id}");

@@ -3,7 +3,7 @@
 namespace App\Actions\LocalMarket;
 
 use App\Actions\Contracts\LocalMarket\BuyCommodities;
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Exceptions\LocalMarket\PurchaseProductException;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\LoanService;
@@ -33,11 +33,11 @@ class BuyCommoditiesAction implements BuyCommodities
 
             if ($this->LoanService->buyCommodities($localMarketOrder, $localMarketOrder->company_id, $eligibleCommodities)) {
                 $localMarketOrder->update([
-                    'status' => LocalMarketOrderStatus::CommoditiesPurchased,
+                    'status' => OrderStatus::CommoditiesPurchased,
                 ]);
             } else {
                 $localMarketOrder->update([
-                    'status' => LocalMarketOrderStatus::FailedPurchase,
+                    'status' => OrderStatus::FailedPurchase,
                 ]);
             }
 
@@ -49,7 +49,7 @@ class BuyCommoditiesAction implements BuyCommodities
             ]);
         } catch (\Exception $e) {
             $localMarketOrder->update([
-                'status' => LocalMarketOrderStatus::FailedPurchase,
+                'status' => OrderStatus::FailedPurchase,
                 'comment' => $e->getMessage(),
             ]);
 

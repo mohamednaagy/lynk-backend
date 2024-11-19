@@ -5,7 +5,7 @@ namespace App\Actions\LocalMarket;
 use App\Actions\Contracts\LocalMarket\FindEligibleCommodities;
 use App\Actions\Contracts\LocalMarket\PendingEligibleCommodities;
 use App\Enums\LocalMarket\OrderHistoryStatus;
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +17,7 @@ class PendingEligibleCommoditiesAction implements PendingEligibleCommodities
 
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
-        $localMarketOrder->update(['status' => LocalMarketOrderStatus::PendingEligibleCommodities]);
+        $localMarketOrder->update(['status' => OrderStatus::PendingEligibleCommodities]);
 
         DB::beginTransaction();
         try {
@@ -29,7 +29,7 @@ class PendingEligibleCommoditiesAction implements PendingEligibleCommodities
             DB::rollBack();
             Log::error('Error in Transactions', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             $localMarketOrder->update([
-                'status' => LocalMarketOrderStatus::FailedPurchase,
+                'status' => OrderStatus::FailedPurchase,
             ]);
         }
 

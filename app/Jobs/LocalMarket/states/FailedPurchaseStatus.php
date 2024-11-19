@@ -4,7 +4,7 @@ namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
 use App\Enums\LocalMarket\OrderHistoryStatus;
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Bus\Queueable;
@@ -36,7 +36,7 @@ class FailedPurchaseStatus implements ShouldQueue
         // use webhook to notify the user
 
         $this->createLocalMarketOrderHistory($this->localMarketOrder, OrderHistoryStatus::FailedPurchase);
-        $this->localMarketWebhook->with(['case' => LocalMarketOrderStatus::FailedPurchase, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
+        $this->localMarketWebhook->with(['case' => OrderStatus::FailedPurchase, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
         Log::channel('local_market')->info('Sorry there is an error while purchasing commodities for order ');
 
     }

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -33,7 +33,7 @@ class LocalMarketOrder extends Model
     ];
 
     protected $attributes = [
-        'status' => LocalMarketOrderStatus::initiate,
+        'status' => OrderStatus::initiate,
     ];
 
     protected $casts = [

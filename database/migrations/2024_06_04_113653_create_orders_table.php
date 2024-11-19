@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\LocalMarket\OrderStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,7 +20,7 @@ return new class extends Migration
             $table->json('preferred_commodity_type')->nullable();
             $table->decimal('amount', 64, 0);
             $table->string('currency', 4);
-            $table->unsignedTinyInteger('status')->default(\App\Enums\LocalMarketOrderStatus::initiate);
+            $table->unsignedTinyInteger('status')->default(OrderStatus::initiate);
             $table->text('data')->nullable();
             $table->text('comment')->nullable();
             $table->string('source');

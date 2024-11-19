@@ -79,7 +79,7 @@ Route::prefix('v1/test')->group(function () {
         //        } else {
         //            $order = LocalMarketOrder::latest()->first();
         //        }
-        //        (new OrderService)->changeOrderStatus($order , \App\Enums\LocalMarketOrderStatus::PendingSellCommodities);
+        //        (new OrderService)->changeOrderStatus($order , OrderStatus::PendingSellCommodities);
     });
     Route::get('suitable-stocks', [LocalMarketController::class, 'getSuitableLoanStock']);
     Route::post('buy', [LocalMarketController::class, 'buy']);
