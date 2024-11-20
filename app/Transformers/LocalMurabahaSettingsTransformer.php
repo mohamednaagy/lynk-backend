@@ -12,6 +12,7 @@ class LocalMurabahaSettingsTransformer extends TransformerAbstract
         return [
             'default_trade_order_rotation_count' => $settings->getDefaultTradeOrderRoatationCount(),
             'default_contract_sign_time_limit' => $settings->getDefaultContractSignTimeLimit(),
+            'default_customer_delivery_confirmation_time_limit' => $settings->getDefaultCustomerDeliveryConfirmationTimeLimit(),
         ];
     }
 }

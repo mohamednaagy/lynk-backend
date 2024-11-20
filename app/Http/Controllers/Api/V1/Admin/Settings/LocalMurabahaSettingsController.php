@@ -49,6 +49,7 @@ class LocalMurabahaSettingsController extends Controller
         return $this->successResponse([
             'default_trade_order_rotation_count' => $data['default_trade_order_rotation_count'],
             'default_contract_sign_time_limit' => $data['default_contract_sign_time_limit'],
+            'default_customer_delivery_confirmation_time_limit' => $data['default_customer_delivery_confirmation_time_limit'],
         ]);
     }
 }
