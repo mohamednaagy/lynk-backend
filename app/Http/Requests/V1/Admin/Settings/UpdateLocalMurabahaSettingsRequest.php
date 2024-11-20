@@ -25,6 +25,7 @@ class UpdateLocalMurabahaSettingsRequest extends FormRequest
         return [
             'default_trade_order_rotation_count' => ['required', 'in:0,1,2,3'],
             'default_contract_sign_time_limit' => ['required', 'integer', 'gt:0'],
+            'default_customer_delivery_confirmation_time_limit' => ['required', 'integer', 'gt:0'],
         ];
     }
 }
