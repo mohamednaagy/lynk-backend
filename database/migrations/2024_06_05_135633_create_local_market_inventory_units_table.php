@@ -13,24 +13,26 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('local_market_inventory_units', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('local_market_inventory_id')->index();
-            $table->unsignedBigInteger('commodity_item_id');
-            $table->string('qr_code');
-            $table->smallInteger('status')->default(\App\Enums\LocalMarket\InventoryUnitsStatus::Free)->comment('FREE=>1|RESERVED=>2');
-            $table->foreign('local_market_inventory_id')->references('id')->on('local_market_inventories')->onDelete('cascade');
-            $table->foreign('commodity_item_id')->references('id')->on('commodity_items')->cascadeOnDelete();
-            $table->unsignedBigInteger('hold_for')->nullable();
-            $table->string('current_owner', 50);
-            $table->smallInteger('current_owner_type');
-            $table->string('previous_owner', 50)->nullable();
-            $table->smallInteger('previous_owner_type')->nullable();
-            $table->unsignedBigInteger('last_completed_order_id')->nullable();
-            $table->foreign('last_completed_order_id')->references('id')->on('local_market_orders');
-            $table->softDeletes();
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('local_market_inventory_units')) {
+            Schema::create('local_market_inventory_units', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('local_market_inventory_id')->index();
+                $table->unsignedBigInteger('commodity_item_id');
+                $table->string('qr_code');
+                $table->smallInteger('status')->default(\App\Enums\LocalMarket\InventoryUnitsStatus::Free)->comment('FREE=>1|RESERVED=>2');
+                $table->foreign('local_market_inventory_id')->references('id')->on('local_market_inventories')->onDelete('cascade');
+                $table->foreign('commodity_item_id')->references('id')->on('commodity_items')->cascadeOnDelete();
+                $table->unsignedBigInteger('hold_for')->nullable();
+                $table->string('current_owner', 50);
+                $table->smallInteger('current_owner_type');
+                $table->string('previous_owner', 50)->nullable();
+                $table->smallInteger('previous_owner_type')->nullable();
+                $table->unsignedBigInteger('last_completed_order_id')->nullable();
+                $table->foreign('last_completed_order_id')->references('id')->on('local_market_orders');
+                $table->softDeletes();
+                $table->timestamps();
+            });
+        }
     }
 
     /**

@@ -13,13 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('local_market_order_histories', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('local_market_order_id');
-            $table->foreign('local_market_order_id')->references('id')->on('local_market_orders')->onDelete('cascade');
-            $table->smallInteger('status');
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('local_market_order_histories')) {
+            Schema::create('local_market_order_histories', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('local_market_order_id');
+                $table->foreign('local_market_order_id')->references('id')->on('local_market_orders')->onDelete('cascade');
+                $table->smallInteger('status');
+                $table->timestamps();
+            });
+        }
     }
 
     /**
