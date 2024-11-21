@@ -39,8 +39,8 @@ class ExportOrders extends Controller
         $export = (new FinancingOrdersExport($request, $query))
             ->setExcludes(
                 $request->boolean('detailed')
-                    ? ['company_name', 'order_owner']
-                    : ['company_name', 'order_owner', 'cost_with_vat', 'cost_without_vat']
+                    ? ['company_name', 'order_owner', 'assigned_to']
+                    : ['company_name', 'order_owner', 'cost_with_vat', 'cost_without_vat', 'assigned_to']
             );
 
         return Excel::download($export, $this->getFileName(), null, [
