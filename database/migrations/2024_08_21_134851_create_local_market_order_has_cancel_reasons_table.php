@@ -13,15 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('local_market_order_has_cancel_reasons', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('order_id')->comment('local_market_order_id');
-            $table->foreign('order_id')->references('id')->on('local_market_orders')->onDelete('cascade');
-            $table->integer('cancelled_by');
-            $table->string('cancel_step');
-            $table->unsignedTinyInteger('cancel_reason');
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('local_market_order_has_cancel_reasons')) {
+            Schema::create('local_market_order_has_cancel_reasons', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('order_id')->comment('local_market_order_id');
+                $table->foreign('order_id')->references('id')->on('local_market_orders')->onDelete('cascade');
+                $table->integer('cancelled_by');
+                $table->unsignedTinyInteger('cancel_reason');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

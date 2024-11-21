@@ -13,8 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('local_market_order_has_cancel_reasons', function (Blueprint $table) {
-            $table->dropColumn('cancel_step');
+
+        Schema::table('local_market_unit_ownership', function (Blueprint $table) {
+            $table->smallInteger('action')->nullable();
         });
     }
 
@@ -25,8 +26,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('local_market_order_has_cancel_reasons', function (Blueprint $table) {
-            $table->string('cancel_step');
+        Schema::table('local_market_unit_ownership', function (Blueprint $table) {
+            $table->dropColumn('action');
         });
     }
 };
