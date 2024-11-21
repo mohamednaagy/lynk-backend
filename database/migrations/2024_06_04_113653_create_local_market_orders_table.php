@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('currency', 4);
             $table->unsignedTinyInteger('status')->default(\App\Enums\LocalMarketOrderStatus::initiate);
             $table->text('data')->nullable();
-            $table->text('comment')->nullable();
             $table->string('source');
             $table->string('external_order_no', 255);
             $table->string('national_id')->nullable();

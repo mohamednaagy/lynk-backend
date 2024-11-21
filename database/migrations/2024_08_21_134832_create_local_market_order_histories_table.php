@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('local_market_order_id');
             $table->foreign('local_market_order_id')->references('id')->on('local_market_orders')->onDelete('cascade');
-            $table->string('status');
+            $table->smallInteger('status');
             $table->timestamps();
         });
     }

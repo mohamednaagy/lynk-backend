@@ -152,11 +152,6 @@ class Company extends BaseTenant
         return $this->belongsToMany(CommodityType::class, 'company_commodity_types', 'company_id', 'commodity_type_id');
     }
 
-    public function unitRotations()
-    {
-        return $this->hasMany(LocalMarketUnitRotation::class, 'company_id');
-    }
-
     public function isInternationalMarketType()
     {
         return $this->preferred_market_type->is(CompanyMarketType::International());

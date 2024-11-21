@@ -23,6 +23,7 @@ return new class extends Migration
             $table->smallInteger('current_owner_type')->comment('Supplier => 1, Company => 2, Customer => 3');
             $table->string('previous_owner')->nullable();
             $table->smallInteger('previous_owner_type')->nullable()->comment('Supplier => 1, Company => 2, Customer => 3');
+            $table->smallInteger('action')->nullable();
             $table->timestamps();
         });
     }
