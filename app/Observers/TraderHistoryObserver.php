@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Models\TraderHistory;
 use App\Observers\Traits\ObserverHelper;
-use App\Services\TraderOrderFeesService;
+use App\Services\TraderOrder\TraderOrderFeesService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
 
@@ -94,6 +94,5 @@ class TraderHistoryObserver
         if ($action) {
             $action->handle($traderHistory->traderOrder);
         }
-        
     }
 }
