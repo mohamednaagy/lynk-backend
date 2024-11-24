@@ -16,6 +16,7 @@ use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderNoRefundReason;
 use App\Enums\TraderOrderRefundReason;
 use App\Enums\TraderOrderStatus;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Enums\WalletNotificationType;
 
 return [
@@ -125,5 +126,9 @@ return [
         TraderOrderCancelReason::TraderOrderIsCancelled => 'لقد اختار المستخدم إلغاء هذا الطلب',
         TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'لا يوجد سلع كافيه داخل السوق المحلي',
         TraderOrderCancelReason::ExpiredContractSignTime => 'انتهى الوقت المحدد لتوقيع العقد.',
+    ],
+    TraderOrderTimeLimitType::class => [
+        TraderOrderTimeLimitType::ContractSignTimeLimit => 'توقيع العقد',
+        TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit => 'تأكيد الوصول',
     ],
 ];

@@ -15,6 +15,7 @@ use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderNoRefundReason;
 use App\Enums\TraderOrderRefundReason;
 use App\Enums\TraderOrderStatus;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Enums\WalletNotificationType;
 
 return [
@@ -120,5 +121,9 @@ return [
         TraderOrderCancelReason::TraderOrderIsCancelled => 'Trade request cancelled by user ',
         TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'No commodities found with LOCAL Trader.',
         TraderOrderCancelReason::ExpiredContractSignTime => 'Contract Sign Time Limit has expired.',
+    ],
+    TraderOrderTimeLimitType::class => [
+        TraderOrderTimeLimitType::ContractSignTimeLimit => 'Contract Sign Time Limit',
+        TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit => 'Delivery Confirmation Time Limit',
     ],
 ];
