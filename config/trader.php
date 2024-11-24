@@ -72,7 +72,12 @@ return [
             ],
             'allowed_financing_status_to_change_from_public_api' => new EnumValue(FinancingOrderProceedCase::class),
             'default_contract_sign_time_limit' => function () {
-                return Carbon::now()->diffInMinutes(Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME'), 'Asia/Riyadh')->setTimezone('UTC'));
+                $marketOpeningEndTime = Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME'), 'Asia/Riyadh');
+                $marketOpeningEndTimeUtc = $marketOpeningEndTime->setTimezone('UTC');
+                if (now()->gt($marketOpeningEndTimeUtc)) {
+                    $marketOpeningEndTimeUtc->addDay();
+                }
+                return Carbon::now()->diffInMinutes($marketOpeningEndTimeUtc);
             },
         ],
         'lynk' => [
