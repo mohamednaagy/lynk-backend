@@ -27,6 +27,10 @@ class LocalMarketInventoryUnits extends Model
         'previous_owner',
     ];
 
+    protected $casts = [
+        'previous_owners' => 'array',
+    ];
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -65,6 +69,23 @@ class LocalMarketInventoryUnits extends Model
         }, $data);
 
         DB::table((new static)->getTable())->insert($data);
+    }
+
+    /**
+     * Add a new owner to the previous owners list, keeping only the last 10 owner IDs
+     */
+    public function addPreviousOwner(int $ownerId): void
+    {
+        $previousOwners = $this->previous_owners ?? [];
+        $previousOwners[] = $ownerId;
+
+        // Keep only the last 10 owners
+        if (count($previousOwners) > 10) {
+            $previousOwners = array_slice($previousOwners, -10);
+        }
+
+        $this->previous_owners = $previousOwners;
+        $this->save();
     }
 
     public function getLastValidOwner(): array
