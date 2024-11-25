@@ -51,7 +51,7 @@ class ProceedClientWakalaAcceptedAction implements ProceedClientWakalaAccepted
 
     protected function isPreviousStepOfClientWakalaNotCompleted(TraderOrder $traderOrder): bool
     {
-        $previousStep = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+        $previousStep = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type))
             ->getPreviousStepOf(MurabhaStep::ClientWakala)->step;
 
         return ! $traderOrder->checkOrderStepComplete($previousStep);

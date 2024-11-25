@@ -239,7 +239,7 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     private function getLatestTraderHistoryOfStep($step)
     {
-        $stepActions = (new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version))
+        $stepActions = (new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version, $this->traderOrder->contract_signed_type))
             ->getStepOf($step)
             ?->histories;
 

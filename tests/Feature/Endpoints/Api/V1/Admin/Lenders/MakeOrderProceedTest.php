@@ -160,7 +160,7 @@ class MakeOrderProceedTest extends TestCase
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
             ->moveToStep(
-                (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version))
+                (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version, self::$traderOrder->contract_signed_type))
                     ->getPreviousStepOf(MurabhaStep::ContractSigned)->step
             );
 
@@ -177,7 +177,7 @@ class MakeOrderProceedTest extends TestCase
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
             ->moveToStep(
-                (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version))
+                (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version, self::$traderOrder->contract_signed_type))
                     ->getPreviousStepOf(MurabhaStep::ContractSigned)->step
             );
 
@@ -216,7 +216,7 @@ class MakeOrderProceedTest extends TestCase
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
             ->moveToStep(
-                (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version))
+                (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version, self::$traderOrder->contract_signed_type))
                     ->getPreviousStepOf(MurabhaStep::ContractSigned)->step
             );
 
@@ -240,7 +240,7 @@ class MakeOrderProceedTest extends TestCase
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
             ->moveToStep(
-                (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version))
+                (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version, self::$traderOrder->contract_signed_type))
                     ->getPreviousStepOf(MurabhaStep::ContractSigned)->step
             );
 
@@ -263,7 +263,7 @@ class MakeOrderProceedTest extends TestCase
         TraderOrderScenario::of(self::$traderOrder)
             ->reset()
             ->moveToStep(
-                (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version))
+                (new StepHistoriesDictionary(self::$traderOrder->provider, self::$traderOrder->version, self::$traderOrder->contract_signed_type))
                     ->getPreviousStepOf(MurabhaStep::ContractSigned)->step
             );
 

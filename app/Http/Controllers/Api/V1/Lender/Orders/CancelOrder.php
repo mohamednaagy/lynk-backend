@@ -75,7 +75,7 @@ class CancelOrder extends Controller
 
     private function getContractSignedLastHistory($traderOrder)
     {
-        $contractSignedHistories = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+        $contractSignedHistories = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type))
             ->getStepOf(MurabhaStep::ContractSigned)
             ?->histories;
 
