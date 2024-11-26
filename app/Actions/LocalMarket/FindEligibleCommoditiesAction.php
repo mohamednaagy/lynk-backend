@@ -19,10 +19,7 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
         try {
             $startTime = microtime(true);
             $eligibleCommodities = $this->LoanService->getCommoditiesForLoan(
-                $localMarketOrder->id,
-                $localMarketOrder->company_id,
-                $localMarketOrder->amount,
-                $localMarketOrder->preferred_commodity_type
+                $localMarketOrder
             );
 
             if ($eligibleCommodities) {

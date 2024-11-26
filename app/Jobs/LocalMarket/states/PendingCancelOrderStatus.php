@@ -55,7 +55,7 @@ class PendingCancelOrderStatus implements ShouldQueue
             Log::channel('local_market')->info("add cancel log data to db successfully {$this->localMarketOrder->id}");
             $this->unitService->revertInventoryUnitOwnership($this->localMarketOrder);
             Log::channel('local_market')->info("swap ownership successfully {$this->localMarketOrder->id}");
-            $this->inventoryService->freeOrderInventoryUnits($this->localMarketOrder);
+            $this->inventoryService->cancelOrderUnits($this->localMarketOrder);
             Log::channel('local_market')->info("refresh order inventories and units successfully {$this->localMarketOrder->id}");
             DB::commit();
             $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::Cancelled);
