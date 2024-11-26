@@ -3,9 +3,7 @@
 namespace App\Services\LocalMarket;
 
 use App\Enums\LocalMarket\OwnershipTypes;
-use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
-use App\Support\DataTransferObjects\LocalMarket\OrderCommoditiesDto;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -13,7 +11,6 @@ class LoanService
 {
     public function getCommoditiesForLoan(
         int $orderNo,
-        int $companyId,
         float $loanAmount,
         array $preferredTypes = []
     ) {
@@ -35,18 +32,15 @@ class LoanService
         return $loanDetails;
     }
 
-    public function buyCommodities(LocalMarketOrder $localMarketOrder, $companyId, $data)
+    public function buyCommodities(LocalMarketOrder $localMarketOrder, $companyId)
     {
         $orderService = new OrderService;
         $unitService = new UnitService;
 
-        $eligibleCommodities = OrderCommoditiesDto::fromArray($data);
-
         try {
             $unitService->changeOrderUnitsOwnershipTo($localMarketOrder, OwnershipTypes::Company, $companyId);
             $orderService->insertOrderUnits($localMarketOrder);
-            $orderService->insertOrderInventories($localMarketOrder, $eligibleCommodities->getInventories());
-            $orderService->changeOrderStatus($localMarketOrder, LocalMarketOrderStatus::CommoditiesPurchased);
+            $orderService->insertOrderInventories($localMarketOrder);
 
             return true;
         } catch (Exception $e) {

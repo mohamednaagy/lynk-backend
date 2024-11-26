@@ -6,6 +6,7 @@ use App\Enums\LocalMarket\OrderStatus;
 use App\Enums\Trader;
 use App\Models\LocalMarketOrder;
 use App\Models\LocalMarketOrderHasInventory;
+use App\Support\DataTransferObjects\LocalMarket\OrderCommoditiesDto;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -77,16 +78,17 @@ class OrderService
         );
     }
 
-    public function insertOrderInventories(LocalMarketOrder $localMarketOrder, $inventories)
+    public function insertOrderInventories(LocalMarketOrder $localMarketOrder)
     {
-        foreach ($inventories as $inventory) {
+        $inventories = OrderCommoditiesDto::getInventoriesFromOrder($localMarketOrder);
+        foreach ($inventories as $inventory_id => $data) {
             LocalMarketOrderHasInventory::create(
                 [
                     'local_market_order_id' => $localMarketOrder->id,
-                    'local_market_inventory_id' => $inventory['inventoryId'],
-                    'quantity' => $inventory['numberOfSuitableUnits'],
-                    'supplier_id' => $inventory['supplier']['id'],
-                    'price' => $inventory['price'],
+                    'local_market_inventory_id' => $inventory_id,
+                    'quantity' => $data['numberOfSuitableUnits'],
+                    'supplier_id' => $data['supplier']['id'],
+                    'price' => $data['price'],
                 ]
             );
         }

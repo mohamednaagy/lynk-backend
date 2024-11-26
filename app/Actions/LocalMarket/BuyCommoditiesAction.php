@@ -7,6 +7,7 @@ use App\Enums\LocalMarketOrderStatus;
 use App\Exceptions\LocalMarket\PurchaseProductException;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\LoanService;
+use App\Services\LocalMarket\UnitService;
 use Illuminate\Support\Facades\Log;
 
 class BuyCommoditiesAction implements BuyCommodities
@@ -28,13 +29,12 @@ class BuyCommoditiesAction implements BuyCommodities
     {
         try {
             $startTime = microtime(true);
-
-            $eligibleCommodities = $localMarketOrder->data;
-
-            if ($this->LoanService->buyCommodities($localMarketOrder, $localMarketOrder->company_id, $eligibleCommodities)) {
+            if ($this->LoanService->buyCommodities($localMarketOrder, $localMarketOrder->company_id)) {
                 $localMarketOrder->update([
                     'status' => LocalMarketOrderStatus::CommoditiesPurchased,
+                    'data' => array_merge($localMarketOrder->data, ['data' => UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder)]),
                 ]);
+
             } else {
                 $localMarketOrder->update([
                     'status' => LocalMarketOrderStatus::FailedPurchase,
@@ -48,16 +48,16 @@ class BuyCommoditiesAction implements BuyCommodities
                 'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
             ]);
         } catch (\Exception $e) {
-            $localMarketOrder->update([
-                'status' => LocalMarketOrderStatus::FailedPurchase,
-                'comment' => $e->getMessage(),
-            ]);
-
             Log::error('Error in BuyCommoditiesAction', [
                 'order_id' => $localMarketOrder->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+            $localMarketOrder->update([
+                'status' => LocalMarketOrderStatus::FailedPurchase,
+                'comment' => $e->getMessage(),
+            ]);
+
         }
     }
 }

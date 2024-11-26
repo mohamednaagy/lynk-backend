@@ -32,16 +32,19 @@ trait LocalMarketHelperTrait
     public function getDataOfLocalMarketOrder(LocalMarketOrder $order): array
     {
         $newData['external_order_no'] = $order->external_order_no;
-        foreach ($order->data['inventories'] as $key => $data) {
-            $newData['products'][$key]['currency'] = $data['currency']['name'];
-            $newData['products'][$key]['uom'] = $data['measurement']['name'];
-            $newData['products'][$key]['type'] = $data['commodityType']['name'];
-            $newData['products'][$key]['amount'] = $data['totalCost'];
-            $newData['products'][$key]['product'] = $data['item']['name'];
-            $newData['products'][$key]['location'] = $data['location']['name'];
-            $newData['products'][$key]['previous_owner'] = $data['supplier']['name'];
-            $newData['products'][$key]['original_supplier'] = $data['supplier']['name'];
-            $newData['products'][$key]['quantity'] = $data['numberOfSuitableUnits'] * $data['item']['volume_sellable_unit'];
+        $groupedDataByPreviousOwner = $order->data['data'];
+        $inventories = $order->data['inventories'];
+        foreach ($groupedDataByPreviousOwner as $key => $data) {
+            $inventory = $inventories[$data['local_market_inventory_id']];
+            $newData['products'][$key]['currency'] = $inventory['currency']['name'];
+            $newData['products'][$key]['uom'] = $inventory['measurement']['name'];
+            $newData['products'][$key]['type'] = $inventory['commodityType']['name'];
+            $newData['products'][$key]['amount'] = $data['total_cost'];
+            $newData['products'][$key]['product'] = $inventory['item']['name'];
+            $newData['products'][$key]['location'] = $inventory['location']['name'];
+            $newData['products'][$key]['previous_owner'] = $data['previous_owner'];
+            $newData['products'][$key]['original_supplier'] = $inventory['supplier']['name'];
+            $newData['products'][$key]['quantity'] = $data['unit_count'];
         }
 
         return $newData;

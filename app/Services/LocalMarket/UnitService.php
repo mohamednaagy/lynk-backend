@@ -3,10 +3,12 @@
 namespace App\Services\LocalMarket;
 
 use App\Enums\LocalMarket\InventoryUnitsStatus;
+use App\Enums\LocalMarket\OwnershipTypes;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class UnitService
@@ -20,7 +22,7 @@ class UnitService
         foreach ($eligibleInventories as $eligibleInventory) {
             $inventory = LocalMarketInventory::find($eligibleInventory['id']);
             $this->getUnitsWithoutOwnershipCheck($orderNo, $inventory, $eligibleInventory['numberOfUnits']);
-            $inventories[] = $this->buildResponseArray($inventory, $eligibleInventory['numberOfUnits']);
+            $inventories[$inventory->id] = $this->buildResponseArray($inventory, $eligibleInventory['numberOfUnits']);
         }
 
         return $inventories;
@@ -31,11 +33,11 @@ class UnitService
      */
     private function buildResponseArray(LocalMarketInventory $inventory, int $numberOfUnits): array
     {
+
         $item = $inventory->item;
         $location = $inventory->location;
 
         return [
-            'inventoryId' => $inventory->id,
             'item' => [
                 'id' => $inventory->commodity_item_id,
                 'name' => $item->name,
@@ -58,6 +60,7 @@ class UnitService
             'numberOfSuitableUnits' => $numberOfUnits,
             'totalCost' => $numberOfUnits * $inventory->price(),
         ];
+
     }
 
     /**
@@ -65,13 +68,47 @@ class UnitService
      */
     private function getUnitsWithoutOwnershipCheck(int $orderNo, LocalMarketInventory $inventory, int $numberOfNeededUnits)
     {
-        // update unit status
+        // Reserve the required number of free units for the specified order
         LocalMarketInventoryUnits::where('status', InventoryUnitsStatus::Free)
             ->where('local_market_inventory_id', $inventory->id)
             ->limit($numberOfNeededUnits)
-            ->update(['hold_for' => $orderNo, 'status' => InventoryUnitsStatus::Reserved]);
+            ->update([
+                'hold_for' => $orderNo,
+                'status' => InventoryUnitsStatus::Reserved,
+            ]);
 
         $inventory->refreshStockQuantities();
+    }
+
+    public static function getUnitsByGroupedByPreviousOwner(LocalMarketOrder $localMarketOrder)
+    {
+        $ownershipTypeOriginalSupplier = OwnershipTypes::OriginalSupplier;
+
+        return LocalMarketInventoryUnits::select(
+            'local_market_inventory_units.local_market_inventory_id',
+            DB::raw("
+            CASE
+                WHEN local_market_inventory_units.previous_owner_type = $ownershipTypeOriginalSupplier
+                THEN companies.name
+                ELSE CAST(local_market_inventory_units.previous_owner AS CHAR)
+            END AS previous_owner
+        "),
+            'local_market_inventory_units.previous_owner_type',
+            DB::raw('COUNT(*) AS unit_count'),
+            DB::raw('MAX(local_market_inventories.max_price) AS max_price'),
+            DB::raw('SUM(local_market_inventories.max_price) AS total_cost')
+        )
+            ->join('local_market_inventories', 'local_market_inventories.id', '=', 'local_market_inventory_units.local_market_inventory_id')
+            ->leftJoin('companies', 'companies.id', '=', 'local_market_inventory_units.previous_owner')
+            ->where('local_market_inventory_units.hold_for', $localMarketOrder->id)
+            ->groupBy(
+                'local_market_inventory_units.local_market_inventory_id',
+                'local_market_inventory_units.previous_owner_type',
+                'companies.name',
+                'local_market_inventory_units.previous_owner'
+            )
+            ->get()
+            ->toArray();
     }
 
     public function changeOrderUnitsOwnershipTo(LocalMarketOrder $localMarketOrder, $ownerType, $ownerIdentifier)
