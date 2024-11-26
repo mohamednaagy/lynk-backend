@@ -14,12 +14,12 @@ class UnitService
     /**
      * Retrieves eligible units from the inventory based on the loan amount and company history.
      */
-    public function getEligibleUnits(int $orderNo, $eligibleInventories)
+    public function getEligibleUnits(LocalMarketOrder $localMarketOrder, $eligibleInventories)
     {
         $inventories = [];
         foreach ($eligibleInventories as $eligibleInventory) {
             $inventory = LocalMarketInventory::find($eligibleInventory['id']);
-            $this->getUnitsWithoutOwnershipCheck($orderNo, $inventory, $eligibleInventory['numberOfUnits']);
+            $this->holdEligibleUnits($localMarketOrder, $inventory, $eligibleInventory['numberOfUnits']);
             $inventories[] = $this->buildResponseArray($inventory, $eligibleInventory['numberOfUnits']);
         }
 
@@ -60,16 +60,28 @@ class UnitService
         ];
     }
 
-    /**
-     * Retrieve units from the local market inventory without checking ownership.
-     */
-    private function getUnitsWithoutOwnershipCheck(int $orderNo, LocalMarketInventory $inventory, int $numberOfNeededUnits)
+    private function holdEligibleUnits(LocalMarketOrder $localMarketOrder, LocalMarketInventory $inventory, int $numberOfNeededUnits)
     {
         // update unit status
-        LocalMarketInventoryUnits::where('status', InventoryUnitsStatus::Free)
-            ->where('local_market_inventory_id', $inventory->id)
+        LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
+            ->where('status', InventoryUnitsStatus::Free)
+            ->where(function ($query) use ($localMarketOrder) {
+                $query->whereNull('previous_company_id_owners')
+                    ->orWhereRaw('NOT JSON_OVERLAPS(
+                    JSON_ARRAY(?),
+                    JSON_ARRAY(
+                        JSON_EXTRACT(previous_company_id_owners, "$[0]"),
+                        JSON_EXTRACT(previous_company_id_owners, "$[1]"),
+                        JSON_EXTRACT(previous_company_id_owners, "$[2]"),
+                        JSON_EXTRACT(previous_company_id_owners, "$[3]")
+                    )
+                )', [$localMarketOrder->company_id]);
+            })
             ->limit($numberOfNeededUnits)
-            ->update(['hold_for' => $orderNo, 'status' => InventoryUnitsStatus::Reserved]);
+            ->update([
+                'hold_for' => $localMarketOrder->id,
+                'status' => InventoryUnitsStatus::Reserved,
+            ]);
 
         $inventory->refreshStockQuantities();
     }
@@ -108,8 +120,8 @@ class UnitService
 
                     Log::channel('local_market')->info(
                         'Swapping unit ID '.$unit->id.
-                        ' to owner '.$newCurrentOwner.
-                        ' of type '.$newCurrentOwnerType
+                            ' to owner '.$newCurrentOwner.
+                            ' of type '.$newCurrentOwnerType
                     );
 
                     // Update the unit using Eloquent, which will trigger the observer

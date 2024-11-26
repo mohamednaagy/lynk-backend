@@ -27,10 +27,10 @@ class PendingEligibleCommoditiesStatus implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(FindEligibleCommodities $GetSuitableCommoditiesStocks): void
+    public function handle(FindEligibleCommodities $getSuitableCommoditiesStocks): void
     {
         $this->localMarketOrder->update(['status' => LocalMarketOrderStatus::PendingEligibleCommodities]);
-        $GetSuitableCommoditiesStocks->handle($this->localMarketOrder);
+        $getSuitableCommoditiesStocks->handle($this->localMarketOrder);
         $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::PendingEligibleCommodities);
     }
 }
