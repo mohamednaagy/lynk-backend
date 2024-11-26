@@ -17,6 +17,7 @@ use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderNoRefundReason;
 use App\Enums\TraderOrderRefundReason;
 use App\Enums\TraderOrderStatus;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Enums\WalletNotificationType;
 
 return [
@@ -133,5 +134,9 @@ return [
         UnitOwnershipAction::BorrowerOwnershipTransfer => 'نقل الملكية إلى المقترض',
         UnitOwnershipAction::Cancel => 'إلغاء',
         UnitOwnershipAction::ConfirmedDelivery => 'تأكيد التسليم',
-    ]
+    ],
+    TraderOrderTimeLimitType::class => [
+        TraderOrderTimeLimitType::ContractSignTimeLimit => 'توقيع العقد',
+        TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit => 'تأكيد الوصول',
+    ],
 ];
