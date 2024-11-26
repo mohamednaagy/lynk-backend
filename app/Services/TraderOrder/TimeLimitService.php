@@ -5,15 +5,15 @@ namespace App\Services\TraderOrder;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Models\TraderOrder;
 
-class TraderOrderTimeLimitService
+class TimeLimitService
 {
     /**
      * Set a time limit for the given TraderOrder.
      *
      * @param TraderOrder $traderOrder
      * @param int $type
-     * @param string $effectiveAt
-     * @param int $defaultValue
+     * @param string $effectiveAt - Format: 'Y-m-d H:i:s', timezone: UTC
+     * @param int $defaultValue - minutes of hours
      * @return void
      */
     private function setTimeLimit(TraderOrder $traderOrder, int $type, string $effectiveAt, int $defaultValue): void
@@ -29,8 +29,8 @@ class TraderOrderTimeLimitService
      * Set the contract sign time limit.
      *
      * @param TraderOrder $traderOrder
-     * @param string $effectiveAt
-     * @param int $defaultValue
+     * @param string $effectiveAt - Format: 'Y-m-d H:i:s', timezone: UTC
+     * @param int $defaultValue - minutes of hours
      * @return void
      */
     public function setContractSignTimeLimit(TraderOrder $traderOrder, string $effectiveAt, int $defaultValue): void
@@ -42,8 +42,8 @@ class TraderOrderTimeLimitService
      * Set the delivery confirmation time limit.
      *
      * @param TraderOrder $traderOrder
-     * @param string $effectiveAt
-     * @param int $defaultValue
+     * @param string $effectiveAt - Format: 'Y-m-d H:i:s', timezone: UTC
+     * @param int $defaultValue - minutes of hours
      * @return void
      */
     public function setDeliveryConfirmationTimeLimit(TraderOrder $traderOrder, string $effectiveAt, int $defaultValue): void

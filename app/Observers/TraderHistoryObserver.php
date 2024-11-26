@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Models\TraderHistory;
 use App\Observers\Traits\ObserverHelper;
-use App\Services\TraderOrder\TraderOrderFeesService;
+use App\Services\TraderOrder\FeesService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
 
@@ -12,7 +12,7 @@ class TraderHistoryObserver
 {
     use ObserverHelper;
 
-    public function __construct(protected TraderOrderFeesService $traderOrderFeesService)
+    public function __construct(protected FeesService $feesService)
     {
     }
 
@@ -90,7 +90,7 @@ class TraderHistoryObserver
     {
         $provider = $traderHistory->traderOrder->provider;
         $status = $traderHistory->action;
-        $action = $this->traderOrderFeesService->getAction($provider, $status);
+        $action = $this->feesService->getAction($provider, $status);
         if ($action) {
             $action->handle($traderHistory->traderOrder);
         }
