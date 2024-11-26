@@ -9,25 +9,21 @@ use Illuminate\Support\Facades\Log;
 
 class LoanService
 {
-    public function getCommoditiesForLoan(
-        int $orderNo,
-        float $loanAmount,
-        array $preferredTypes = []
-    ) {
-
+    public function getCommoditiesForLoan(LocalMarketOrder $localMarketOrder)
+    {
         $inventoryService = app(InventoryService::class);
         $unitsService = app(UnitService::class);
 
         $eligibleInventories = $inventoryService->findEligibleInventoryForLoan(
-            $loanAmount,
-            $preferredTypes
+            $localMarketOrder->amount,
+            $localMarketOrder->preferred_commodity_type
         );
 
         if (empty($eligibleInventories)) {
             return false;
         }
 
-        $loanDetails = $unitsService->getEligibleUnits($orderNo, $eligibleInventories);
+        $loanDetails = $unitsService->getEligibleUnits($localMarketOrder, $eligibleInventories);
 
         return $loanDetails;
     }

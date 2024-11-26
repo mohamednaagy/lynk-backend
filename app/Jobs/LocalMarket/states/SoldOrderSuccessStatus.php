@@ -31,7 +31,7 @@ class SoldOrderSuccessStatus implements ShouldQueue
 
     public function handle(): void
     {
-
+        // handle rotatiosn or complete order
         $this->localMarketWebhook->with(['case' => LocalMarketOrderStatus::CommoditiesSell, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
         $this->logQueueJob('Order Sold successfully');
     }

@@ -27,6 +27,10 @@ class LocalMarketInventoryUnits extends Model
         'previous_owner',
     ];
 
+    protected $casts = [
+        'previous_company_id_owners' => 'array',
+    ];
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
