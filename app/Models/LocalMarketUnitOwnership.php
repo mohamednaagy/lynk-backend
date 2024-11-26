@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\LocalMarket\UnitOwnershipAction;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -25,4 +26,8 @@ class LocalMarketUnitOwnership extends Model
     ];
 
     public $timestamps = true;
+
+    protected $casts = [
+        'action' => UnitOwnershipAction::class,
+    ];
 }
