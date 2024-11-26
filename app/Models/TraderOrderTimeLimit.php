@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TraderOrderTimeLimit extends Model
 {
-        use HasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'type',
