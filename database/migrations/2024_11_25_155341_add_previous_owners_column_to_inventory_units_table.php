@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('local_market_inventory_units', function (Blueprint $table) {
-            $table->json('previous_owners')->nullable()->after('hold_for');
+            $table->json('previous_company_id_owners')->nullable()->after('hold_for');
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('local_market_inventory_units', function (Blueprint $table) {
-            $table->dropColumn('previous_owners');
+            $table->dropColumn('previous_company_id_owners');
         });
     }
 };

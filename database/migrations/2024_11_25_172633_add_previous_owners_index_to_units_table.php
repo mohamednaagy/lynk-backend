@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement('CREATE INDEX idx_previous_owners ON local_market_inventory_units ((CAST(previous_owners AS CHAR(512))))');
+        DB::statement('CREATE INDEX idx_previous_company_id_owners ON local_market_inventory_units ((CAST(previous_company_id_owners AS CHAR(512))))');
     }
 
     /**
@@ -22,6 +22,6 @@ return new class extends Migration
      */
     public function down()
     {
-        DB::statement('DROP INDEX idx_previous_owners ON local_market_inventory_units');
+        DB::statement('DROP INDEX idx_previous_company_id_owners ON local_market_inventory_units');
     }
 };

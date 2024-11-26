@@ -66,14 +66,14 @@ class UnitService
         LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
             ->where('status', InventoryUnitsStatus::Free)
             ->where(function ($query) use ($localMarketOrder) {
-                $query->whereNull('previous_owners')
+                $query->whereNull('previous_company_id_owners')
                     ->orWhereRaw('NOT JSON_OVERLAPS(
                     JSON_ARRAY(?),
                     JSON_ARRAY(
-                        JSON_EXTRACT(previous_owners, "$[0]"),
-                        JSON_EXTRACT(previous_owners, "$[1]"),
-                        JSON_EXTRACT(previous_owners, "$[2]"),
-                        JSON_EXTRACT(previous_owners, "$[3]")
+                        JSON_EXTRACT(previous_company_id_owners, "$[0]"),
+                        JSON_EXTRACT(previous_company_id_owners, "$[1]"),
+                        JSON_EXTRACT(previous_company_id_owners, "$[2]"),
+                        JSON_EXTRACT(previous_company_id_owners, "$[3]")
                     )
                 )', [$localMarketOrder->company_id]);
             })

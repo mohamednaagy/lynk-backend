@@ -185,7 +185,7 @@ class InventoryService
                                 'status' => InventoryUnitsStatus::Free,
                                 'hold_for' => null,
                                 'last_completed_order_id' => $localMarketOrder->id,
-                                'previous_owners' => $this->getUpdatedPreviousOwners($unit, $localMarketOrder->company_id),
+                                'previous_company_id_owners' => $this->getUpdatedPreviousOwners($unit, $localMarketOrder->company_id),
                             ]);
                     }
                 });
@@ -197,13 +197,15 @@ class InventoryService
 
     private function getUpdatedPreviousOwners(LocalMarketInventoryUnits $unit, $ownerId)
     {
-        $previousOwners = $unit->previous_owners ?? [];
-        $previousOwners[] = $ownerId;
+        $previousOwners = $unit->previous_company_id_owners ?? [];
 
-        // Keep only the last 10 owners
-        if (count($previousOwners) > 10) {
-            $previousOwners = array_slice($previousOwners, -10);
+        // Ensure the array has a maximum length of 10
+        if (count($previousOwners) >= 10) {
+            array_pop($previousOwners); // Remove the oldest owner
         }
+
+        // Add the new owner to the beginning of the array
+        array_unshift($previousOwners, $ownerId);
 
         return $previousOwners;
     }
