@@ -45,35 +45,88 @@ jobs:
       
            
   post-deployment-testing:
-    needs: deploy 
+    needs: deploy
     runs-on: ubuntu-latest
     steps:
       - name: Install Axios
         run: npm install axios
-      
-      - name: Trigger Testing Workflow in Another Repository
+  
+      - name: Trigger Testing Workflow and Wait for Completion
         uses: actions/github-script@v6
         with:
           script: |
             const axios = require('axios');
-            
-            // Define the target repository
-            const owner = 'lynksa'; // Replace with the owner of the target repository
-            const repo = 'lynk-backend-automation';  // Replace with the name of the target repository
-            const workflow = '114441343'; // Name or ID of the workflow in the target repository
-            const token = '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'; // Use the PAT instead of GITHUB_TOKEN
-      
+  
+            // Define the target repository and workflow
+            const owner = 'lynksa';
+            const repo = 'lynk-backend-automation';
+            const workflowId = '114441343'; // ID of the workflow in the target repository
+            const token = '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'; // Add your PAT here
+            const branch = 'main'; // Branch to trigger the workflow on
+  
             const headers = {
               Authorization: `Bearer ${token}`,
-              Accept: 'application/vnd.github.v3+json',
+              Accept: 'application/vnd.github+json',
             };
-      
-            // API URL to trigger the workflow
-            const triggerUrl = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/dispatches`;
-      
-            // Trigger the workflow on the target branch
-            const response = await axios.post(triggerUrl, {
-              ref: 'main', // Replace with the branch you want to test in the target repository
-            }, { headers });
-      
-            console.log('Triggered Workflow:', response.status, response.data);
+  
+            // Trigger the workflow
+            const triggerWorkflow = async () => {
+              const triggerUrl = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`;
+              console.log(`Triggering workflow ${workflowId} on branch ${branch}...`);
+              await axios.post(triggerUrl, { ref: branch }, { headers });
+              console.log('Workflow triggered successfully.');
+            };
+  
+            // Get the latest workflow run for this workflow
+            const getWorkflowRun = async () => {
+              const workflowRunsUrl = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowId}/runs?branch=${branch}&event=workflow_dispatch`;
+              const response = await axios.get(workflowRunsUrl, { headers });
+              const runs = response.data.workflow_runs;
+              if (!runs || runs.length === 0) {
+                throw new Error('No workflow runs found.');
+              }
+              return runs[0]; // Return the most recent workflow run
+            };
+  
+            // Poll the workflow run status until it completes
+            const waitForWorkflowToComplete = async (runId) => {
+              const runStatusUrl = `https://api.github.com/repos/${owner}/${repo}/actions/runs/${runId}`;
+              let status = 'in_progress';
+              console.log(`Waiting for workflow run ${runId} to complete...`);
+  
+              while (status === 'in_progress' || status === 'queued') {
+                const response = await axios.get(runStatusUrl, { headers });
+                status = response.data.status; // "queued", "in_progress", or "completed"
+                if (status === 'completed') {
+                  return response.data.conclusion; // "success", "failure", "cancelled", etc.
+                }
+                console.log(`Workflow run status: ${status}. Retrying in 10 seconds...`);
+                await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait 10 seconds
+              }
+            };
+  
+            // Main logic
+            (async () => {
+              try {
+                // Trigger the workflow
+                await triggerWorkflow();
+  
+                // Get the triggered workflow run
+                const workflowRun = await getWorkflowRun();
+                console.log(`Triggered workflow run ID: ${workflowRun.id}`);
+  
+                // Wait for the workflow to complete
+                const conclusion = await waitForWorkflowToComplete(workflowRun.id);
+                console.log(`Workflow completed with conclusion: ${conclusion}`);
+  
+                // Fail or succeed this job based on the workflow result
+                if (conclusion !== 'success') {
+                  throw new Error(`Workflow failed with conclusion: ${conclusion}`);
+                }
+  
+                console.log('Triggered workflow completed successfully.');
+              } catch (error) {
+                console.error('Error:', error.message);
+                process.exit(1); // Fail this job if any error occurs
+              }
+            })();
