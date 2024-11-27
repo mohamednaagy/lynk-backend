@@ -78,14 +78,29 @@ jobs:
             };
   
             // Get the latest workflow run for this workflow
-            const getWorkflowRun = async () => {
+            const getTriggeredWorkflowRun = async () => {
               const workflowRunsUrl = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowId}/runs?branch=${branch}&event=workflow_dispatch`;
-              const response = await axios.get(workflowRunsUrl, { headers });
-              const runs = response.data.workflow_runs;
-              if (!runs || runs.length === 0) {
-                throw new Error('No workflow runs found.');
+              console.log('Fetching workflow runs to find the triggered workflow...');
+              let triggeredRun = null;
+            
+              // Poll until the triggered workflow appears
+              while (!triggeredRun) {
+                const response = await axios.get(workflowRunsUrl, { headers });
+                const runs = response.data.workflow_runs;
+            
+                // Find the most recent workflow run matching the triggered workflow
+                triggeredRun = runs.find((run) => {
+                  return new Date(run.created_at) > new Date(triggeredAt); // Ensure it was created after the trigger time
+                });
+            
+                if (!triggeredRun) {
+                  console.log('Triggered workflow run not found yet. Retrying in 5 seconds...');
+                  await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait 5 seconds
+                }
               }
-              return runs[0]; // Return the most recent workflow run
+            
+              console.log(`Found triggered workflow run with ID: ${triggeredRun.id}`);
+              return triggeredRun;
             };
   
             // Poll the workflow run status until it completes
@@ -97,6 +112,7 @@ jobs:
               while (status === 'in_progress' || status === 'queued') {
                 const response = await axios.get(runStatusUrl, { headers });
                 status = response.data.status; // "queued", "in_progress", or "completed"
+                console.log(`status now is: ${status}`)
                 if (status === 'completed') {
                   return response.data.conclusion; // "success", "failure", "cancelled", etc.
                 }
