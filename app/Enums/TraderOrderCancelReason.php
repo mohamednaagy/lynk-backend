@@ -22,4 +22,6 @@ final class TraderOrderCancelReason extends Enum implements LocalizedEnum
     const ExpiredContractSignTime = 7;
 
     const FailureToSellAtLocalMarket = 8;
+
+    const ExpiredConfirmationTimeLimit = 9;
 }
