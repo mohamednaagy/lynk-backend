@@ -10,6 +10,7 @@ use App\Enums\CompanyStatus;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderNoRefundReason;
@@ -121,6 +122,13 @@ return [
         TraderOrderCancelReason::TraderOrderIsCancelled => 'Trade request cancelled by user ',
         TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'No commodities found with LOCAL Trader.',
         TraderOrderCancelReason::ExpiredContractSignTime => 'Contract Sign Time Limit has expired.',
+    ],
+    UnitOwnershipAction::class => [
+        UnitOwnershipAction::SellCommodity => 'Sell Commodity',
+        UnitOwnershipAction::PurchaseCommodity => 'Purchase Commodity',
+        UnitOwnershipAction::BorrowerOwnershipTransfer => 'Borrower Ownership Transfer',
+        UnitOwnershipAction::Cancel => 'Cancel',
+        UnitOwnershipAction::ConfirmedDelivery => 'Confirmed Delivery',
     ],
     TraderOrderTimeLimitType::class => [
         TraderOrderTimeLimitType::ContractSignTimeLimit => 'Contract Sign Time Limit',

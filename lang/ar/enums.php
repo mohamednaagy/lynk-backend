@@ -11,6 +11,7 @@ use App\Enums\CompanyStatus;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderNoRefundReason;
@@ -126,6 +127,13 @@ return [
         TraderOrderCancelReason::TraderOrderIsCancelled => 'لقد اختار المستخدم إلغاء هذا الطلب',
         TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'لا يوجد سلع كافيه داخل السوق المحلي',
         TraderOrderCancelReason::ExpiredContractSignTime => 'انتهى الوقت المحدد لتوقيع العقد.',
+    ],
+    UnitOwnershipAction::class => [
+        UnitOwnershipAction::SellCommodity => 'بيع السلعة',
+        UnitOwnershipAction::PurchaseCommodity => 'شراء السلعة',
+        UnitOwnershipAction::BorrowerOwnershipTransfer => 'نقل الملكية إلى المقترض',
+        UnitOwnershipAction::Cancel => 'إلغاء',
+        UnitOwnershipAction::ConfirmedDelivery => 'تأكيد التسليم',
     ],
     TraderOrderTimeLimitType::class => [
         TraderOrderTimeLimitType::ContractSignTimeLimit => 'توقيع العقد',

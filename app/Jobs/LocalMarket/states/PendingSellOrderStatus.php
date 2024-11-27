@@ -48,7 +48,7 @@ class PendingSellOrderStatus implements ShouldQueue
         DB::beginTransaction();
         try {
             $this->unitService->changeOrderUnitsOwnershipTo($this->localMarketOrder, OwnershipTypes::TraderOrder, $this->localMarketOrder->external_order_no);
-            $this->inventoryService->freeOrderInventoryUnits($this->localMarketOrder, is_completed_order: true);
+            $this->inventoryService->completeOrderUnits($this->localMarketOrder);
             DB::commit();
             $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::CommoditiesSell);
             $this->logQueueJob('pending successfully');

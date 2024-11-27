@@ -1,0 +1,27 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        DB::statement('CREATE INDEX idx_previous_company_id_owners ON local_market_inventory_units ((CAST(previous_company_id_owners AS CHAR(512))))');
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        DB::statement('DROP INDEX idx_previous_company_id_owners ON local_market_inventory_units');
+    }
+};
