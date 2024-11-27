@@ -99,12 +99,11 @@ class UnitService
             CASE
                 WHEN local_market_inventory_units.previous_owner_type = $ownershipTypeOriginalSupplier
                 THEN companies.name
-                ELSE CAST(local_market_inventory_units.previous_owner AS CHAR)
+                ELSE 'طلبات سابقة'
             END AS previous_owner
         "),
             'local_market_inventory_units.previous_owner_type',
             DB::raw('COUNT(*) AS unit_count'),
-            DB::raw('MAX(local_market_inventories.max_price) AS max_price'),
             DB::raw('SUM(local_market_inventories.max_price) AS total_cost')
         )
             ->join('local_market_inventories', 'local_market_inventories.id', '=', 'local_market_inventory_units.local_market_inventory_id')
@@ -113,8 +112,7 @@ class UnitService
             ->groupBy(
                 'local_market_inventory_units.local_market_inventory_id',
                 'local_market_inventory_units.previous_owner_type',
-                'companies.name',
-                'local_market_inventory_units.previous_owner'
+                'companies.name'
             )
             ->get()
             ->toArray();

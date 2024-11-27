@@ -35,20 +35,21 @@ class BuyCommoditiesAction implements BuyCommodities
                     'data' => array_merge($localMarketOrder->data, ['data' => UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder)]),
                 ]);
 
+                Log::channel('local_market')->info('unit service for order '.$localMarketOrder->id, ['data' => UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder)]);
             } else {
                 $localMarketOrder->update([
                     'status' => LocalMarketOrderStatus::FailedPurchase,
                 ]);
             }
 
-            Log::info('BuyCommoditiesAction Duration', [
+            Log::channel('local_market')->info('BuyCommoditiesAction Duration', [
                 'order_id' => $localMarketOrder->id,
                 'start_time' => $startTime,
                 'end_time' => microtime(true),
                 'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
             ]);
         } catch (\Exception $e) {
-            Log::error('Error in BuyCommoditiesAction', [
+            Log::channel('local_market')->error('Error in BuyCommoditiesAction', [
                 'order_id' => $localMarketOrder->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
