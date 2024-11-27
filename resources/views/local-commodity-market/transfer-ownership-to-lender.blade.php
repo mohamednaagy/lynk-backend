@@ -715,7 +715,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
 <body dir="rtl">
     <div class="flex justify-end">
-        <img class="h-20" src="{{ asset('color-logo.png') }}" alt="">
+        <img class="h-20" src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="Logo">
     </div>
     <div class="divide-y divide-gray-300/50">
         <div class="divide-y divide-gray-300/50">
@@ -794,7 +794,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </p>
 
                 <div class="flex justify-end">
-                    <img class="h-20" src="{{ asset('radised-logo.png') }}" alt="">
+                    <img class="h-20" src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('radised-logo.png'))) }}" alt="Stamp">
                 </div>
             </div>
             <div class="flex flex-row justify-between pt-8 font-semibold">
