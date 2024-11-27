@@ -41,14 +41,17 @@ jobs:
           echo "Workflow Status: ${{ job.status }}"
 
           curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Repository Name: '"$GITHUB_REPOSITORY"'\nBranch Name: '"$GITHUB_REF"'\nExecution Time: '"$(date)"'\nWorkflow Status: '"${{ job.status }}"'\n pull request URL: '"${{ steps.pr-url.outputs.url }}"'"}' https://hooks.slack.com/services/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
-
-
+      
+      
+           
+  post-deployment-testing:
+    needs: deploy 
+    runs-on: ubuntu-latest
+    steps:
       - name: Install Axios
         run: npm install axios
       
-      
       - name: Trigger Testing Workflow in Another Repository
-        if: always()
         uses: actions/github-script@v6
         with:
           script: |
@@ -73,4 +76,4 @@ jobs:
               ref: 'main', // Replace with the branch you want to test in the target repository
             }, { headers });
       
-            console.log('Triggered Workflow:', response.status, response.data);     
+            console.log('Triggered Workflow:', response.status, response.data);
