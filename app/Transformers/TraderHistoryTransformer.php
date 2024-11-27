@@ -26,7 +26,7 @@ class TraderHistoryTransformer extends TransformerAbstract
     public function __construct(protected ?TraderOrder $traderOrder, $historySteps)
     {
         $this->setDefaultIncludes(array_merge($this->getDefaultIncludes(), $historySteps));
-        $this->traderStepHistories = new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version);
+        $this->traderStepHistories = new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version, $this->traderOrder->contract_signed_type);
         $this->traderHistories = $traderOrder->traderHistories ?? collect();
     }
 
@@ -238,7 +238,7 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     private function getLatestTraderHistoryOfStep($step)
     {
-        $stepActions = (new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version))
+        $stepActions = (new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version, $this->traderOrder->contract_signed_type))
             ->getStepOf($step)
             ?->histories;
 

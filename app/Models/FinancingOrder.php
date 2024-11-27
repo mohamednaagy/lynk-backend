@@ -94,9 +94,8 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
                     return null;
                 }
 
-                $currentStepNode = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+                $currentStepNode = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type))
                     ->getStepByHistory($traderOrder->last_history_action);
-
                 return MurabhaStep::fromValue($currentStepNode->step);
             }
         );

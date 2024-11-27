@@ -45,7 +45,7 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
     protected function isPreviousStepOfContractSignedNotCompleted(TraderOrder $traderOrder): bool
     {
         return ! $traderOrder->checkOrderStepComplete(
-            (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+            (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type))
                 ->getPreviousStepOf(MurabhaStep::ContractSigned)->step
         );
     }

@@ -27,7 +27,7 @@ trait OrderWebhooksHelper
 
     public function getDictionaryOfTraderOrder(TraderOrder $traderOrder): StepHistoriesDictionary
     {
-        return new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version);
+        return new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type);
     }
 
     public function resolveProducts(TraderOrder $traderOrder): array

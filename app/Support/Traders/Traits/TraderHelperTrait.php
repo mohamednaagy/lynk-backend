@@ -21,7 +21,7 @@ trait TraderHelperTrait
 {
     public function createStepHistories(array $data, TraderOrder $traderOrder, $step): void
     {
-        $stepToHistoriesMap = get_murabha_steps($traderOrder->provider, $traderOrder->version, true);
+        $stepToHistoriesMap = get_murabha_steps($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type, true);
 
         if (! array_key_exists($step, $stepToHistoriesMap)) {
             throw new InvalidArgumentException;

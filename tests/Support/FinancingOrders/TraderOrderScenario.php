@@ -21,7 +21,7 @@ class TraderOrderScenario
 
         $this->dictionary = new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version);
 
-        $this->traderHistory = trader_step_histories($this->traderOrder->provider, $traderOrder->version);
+        $this->traderHistory = trader_step_histories($this->traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type);
 
         $this->orderedSteps = array_keys($this->traderHistory);
     }

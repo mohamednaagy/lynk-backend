@@ -133,7 +133,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function checkOrderStepComplete(string $step): bool
     {
-        $stepToHistoriesDictionary = trader_step_histories($this->provider, $this->version);
+        $stepToHistoriesDictionary = trader_step_histories($this->provider, $this->version, $this->contract_signed_type);
 
         if (! array_key_exists($step, $stepToHistoriesDictionary)) {
             throw new UnexpectedValueException("No mapping for this step {$step}");
@@ -201,7 +201,7 @@ class TraderOrder extends Model implements HasMedia
     {
         $lastAction = $this->traderHistories()->latest('id')->first();
 
-        $stepNode = (new StepHistoriesDictionary($this->provider, $this->version))->getStepByHistory($lastAction?->action);
+        $stepNode = (new StepHistoriesDictionary($this->provider, $this->version, $this->contract_signed_type))->getStepByHistory($lastAction?->action);
 
         return new Attribute(
             get: fn () => $stepNode?->step,
@@ -298,7 +298,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function getCancelStep(): ?string
     {
-        return (new StepHistoriesDictionary($this->provider, $this->version))->getCancelStep($this)?->step ?? MurabhaStep::PurchasingCommodity;
+        return (new StepHistoriesDictionary($this->provider, $this->version, $this->contract_signed_type))->getCancelStep($this)->step;
     }
 
     public function cancelDetail()

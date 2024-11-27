@@ -56,7 +56,7 @@ class ProceedContractAndClientWakalaCompletedAction implements ProceedContractAn
         $stepIndex = array_search($this->requiredStepForProccessedTraderOrder[$traderOrder->provider], $murabhaSteps);
 
         return ! $traderOrder->checkOrderStepComplete(
-            (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+            (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type))
                 ->getPreviousStepOf($murabhaSteps[$stepIndex])->step
         );
 

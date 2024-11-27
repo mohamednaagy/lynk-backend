@@ -24,7 +24,7 @@ class TraderOrderProgressStopped extends Notification implements ShouldQueue
      */
     public function __construct(private TraderOrder $traderOrder)
     {
-        $this->traderDictionary = new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version);
+        $this->traderDictionary = new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type);
     }
 
     /**

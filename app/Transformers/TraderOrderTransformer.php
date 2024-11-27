@@ -126,7 +126,7 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeHistory(TraderOrder $traderOrder)
     {
-        $traderMurabhaSteps = collect(get_murabha_steps($traderOrder->provider, $traderOrder->version))
+        $traderMurabhaSteps = collect(get_murabha_steps($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type))
             ->except([
                 MurabhaStep::TraderOrderCreated,
                 MurabhaStep::TransferOwnershipToLender,
