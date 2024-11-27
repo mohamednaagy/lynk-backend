@@ -61,7 +61,7 @@ jobs:
             const owner = 'lynksa';
             const repo = 'lynk-backend-automation';
             const workflowId = '114441343'; // ID of the workflow in the target repository
-            const token = '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'; // Add your PAT here
+            const token = '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'; // Use the token securely from the environment
             const branch = 'main'; // Branch to trigger the workflow on
   
             const headers = {
@@ -72,33 +72,40 @@ jobs:
             // Trigger the workflow
             const triggerWorkflow = async () => {
               const triggerUrl = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`;
-              console.log(`Triggering workflow ${workflowId} on branch ${branch}...`);
+              
+              // Capture the current timestamp
+              const triggeredAt = new Date(); // Timestamp of when the workflow was triggered
+              console.log(`Triggering workflow ${workflowId} on branch ${branch} at ${triggeredAt.toISOString()}...`);
+  
               await axios.post(triggerUrl, { ref: branch }, { headers });
               console.log('Workflow triggered successfully.');
+  
+              // Return the timestamp to use when fetching the correct workflow run
+              return triggeredAt;
             };
   
-            // Get the latest workflow run for this workflow
-            const getTriggeredWorkflowRun = async () => {
+            // Get the triggered workflow run
+            const getTriggeredWorkflowRun = async (triggeredAt) => {
               const workflowRunsUrl = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowId}/runs?branch=${branch}&event=workflow_dispatch`;
               console.log('Fetching workflow runs to find the triggered workflow...');
               let triggeredRun = null;
-            
+  
               // Poll until the triggered workflow appears
               while (!triggeredRun) {
                 const response = await axios.get(workflowRunsUrl, { headers });
                 const runs = response.data.workflow_runs;
-            
-                // Find the most recent workflow run matching the triggered workflow
+  
+                // Find the most recent workflow run created after the trigger time
                 triggeredRun = runs.find((run) => {
-                  return new Date(run.created_at) > new Date(triggeredAt); // Ensure it was created after the trigger time
+                  return new Date(run.created_at) > triggeredAt; // Ensure it was created after the trigger time
                 });
-            
+  
                 if (!triggeredRun) {
                   console.log('Triggered workflow run not found yet. Retrying in 5 seconds...');
-                  await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait 5 seconds
+                  await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait 5 seconds before retrying
                 }
               }
-            
+  
               console.log(`Found triggered workflow run with ID: ${triggeredRun.id}`);
               return triggeredRun;
             };
@@ -112,10 +119,14 @@ jobs:
               while (status === 'in_progress' || status === 'queued') {
                 const response = await axios.get(runStatusUrl, { headers });
                 status = response.data.status; // "queued", "in_progress", or "completed"
-                console.log(`status now is: ${status}`)
+                console.log(`Current workflow status: ${status}`);
+  
                 if (status === 'completed') {
-                  return response.data.conclusion; // "success", "failure", "cancelled", etc.
+                  const conclusion = response.data.conclusion; // "success", "failure", "cancelled", etc.
+                  console.log(`Workflow run ${runId} completed with conclusion: ${conclusion}`);
+                  return conclusion;
                 }
+  
                 console.log(`Workflow run status: ${status}. Retrying in 10 seconds...`);
                 await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait 10 seconds
               }
@@ -124,16 +135,15 @@ jobs:
             // Main logic
             (async () => {
               try {
-                // Trigger the workflow
-                await triggerWorkflow();
+                // Trigger the workflow and get the timestamp
+                const triggeredAt = await triggerWorkflow();
   
                 // Get the triggered workflow run
-                const workflowRun = await getTriggeredWorkflowRun();
+                const workflowRun = await getTriggeredWorkflowRun(triggeredAt);
                 console.log(`Triggered workflow run ID: ${workflowRun.id}`);
   
                 // Wait for the workflow to complete
                 const conclusion = await waitForWorkflowToComplete(workflowRun.id);
-                console.log(`Workflow completed with conclusion: ${conclusion}`);
   
                 // Fail or succeed this job based on the workflow result
                 if (conclusion !== 'success') {
