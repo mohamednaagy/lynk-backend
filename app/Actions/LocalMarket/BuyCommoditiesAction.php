@@ -29,7 +29,7 @@ class BuyCommoditiesAction implements BuyCommodities
     {
         try {
             $startTime = microtime(true);
-            if ($this->LoanService->buyCommodities($localMarketOrder, $localMarketOrder->company_id)) {
+            if ($this->LoanService->buyCommodities($localMarketOrder)) {
                 $localMarketOrder->update([
                     'status' => LocalMarketOrderStatus::CommoditiesPurchased,
                     'data' => array_merge($localMarketOrder->data, ['data' => UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder)]),

@@ -28,13 +28,13 @@ class LoanService
         return $loanDetails;
     }
 
-    public function buyCommodities(LocalMarketOrder $localMarketOrder, $companyId)
+    public function buyCommodities(LocalMarketOrder $localMarketOrder)
     {
         $orderService = new OrderService;
         $unitService = new UnitService;
 
         try {
-            $unitService->changeOrderUnitsOwnershipTo($localMarketOrder, OwnershipTypes::Company, $companyId);
+            $unitService->changeOrderUnitsOwnershipTo($localMarketOrder, OwnershipTypes::Company, $localMarketOrder->company_id);
             $orderService->insertOrderUnits($localMarketOrder);
             $orderService->insertOrderInventories($localMarketOrder);
 
