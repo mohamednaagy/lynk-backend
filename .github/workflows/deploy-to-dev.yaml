@@ -58,7 +58,7 @@ jobs:
             const owner = 'lynksa'; // Replace with the owner of the target repository
             const repo = 'lynk-backend-automation';  // Replace with the name of the target repository
             const workflow = '114441343'; // Name or ID of the workflow in the target repository
-            const token = process.env.GITHUB_TOKEN; // Use the PAT instead of GITHUB_TOKEN
+            const token = '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'; // Use the PAT instead of GITHUB_TOKEN
       
             const headers = {
               Authorization: `Bearer ${token}`,
