@@ -28,18 +28,9 @@ return [
             ],
             MurabhaStep::MurabahaSaleCompleted => [
                 FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
-                FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
-                    'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-                    'file' => 'document',
-                ],
+                FinancingOrderHistory::CreateLynkSalePledgeCertificate => null,
                 FinancingOrderHistory::MurabahaSaleCompleted => null,
             ],
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => null,
-        ],
-        MurabhaStep::ContractSigned => [
-            FinancingOrderHistory::ContractSigned => null,
-            FinancingOrderHistory::PendingDelivery => null,
-
         ],
         ContractSignedType::Delivery => [
             MurabhaStep::TraderOrderCreated => [
@@ -60,28 +51,15 @@ return [
             MurabhaStep::CommoditySoldToCustomer => [
                 FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => null,
             ],
-            MurabhaStep::CustomerDeliveryConfirmation => [
+             MurabhaStep::CustomerDeliveryConfirmation => [
                 FinancingOrderHistory::DeliveryCancelled => null,
                 FinancingOrderHistory::DeliveryConfirmed => null,
             ],
             MurabhaStep::MurabahaSaleCompleted => [
                 FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
-                FinancingOrderHistory::AttachWarrantAmendmentExceptWarrantNoDocument => [
-                    'collection' => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-                    'file' => 'document',
-                ],
+                FinancingOrderHistory::CreateLynkSalePledgeCertificate => null,
                 FinancingOrderHistory::MurabahaSaleCompleted => null,
             ],
         ],
-        MurabhaStep::CustomerDeliveryConfirmation => [
-            FinancingOrderHistory::DeliveryCancelled => null,
-            FinancingOrderHistory::DeliveryConfirmed => null,
-        ],
-        MurabhaStep::MurabahaSaleCompleted => [
-            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument => null,
-            FinancingOrderHistory::CreateLynkSalePledgeCertificate => null,
-            FinancingOrderHistory::MurabahaSaleCompleted => null,
-        ],
-
     ],
 ];

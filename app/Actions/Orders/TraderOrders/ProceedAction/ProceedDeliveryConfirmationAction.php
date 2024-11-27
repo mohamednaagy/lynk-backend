@@ -50,7 +50,7 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
     protected function isPreviousStepOfCustomerDeliveryConfirmationNotCompleted(TraderOrder $traderOrder): bool
     {
         return ! $traderOrder->checkOrderStepComplete(
-            (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
+            (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type))
                 ->getPreviousStepOf(MurabhaStep::CustomerDeliveryConfirmation)->step
         );
     }
