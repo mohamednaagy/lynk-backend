@@ -191,8 +191,8 @@ if (! function_exists('get_start_time_bursa')) {
 
     }
 }
-if (! function_exists('get_market_end_time_utc')) {
-    function get_market_end_time_utc(): Carbon
+if (! function_exists('get_bursam_contract_signed_deadline')) {
+    function get_bursam_contract_signed_deadline(): Carbon
     {
         $marketOpeningEndTime = Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME'), 'Asia/Riyadh');
         $marketOpeningEndTimeUtc = $marketOpeningEndTime->setTimezone('UTC');

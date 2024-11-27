@@ -72,8 +72,7 @@ return [
             ],
             'allowed_financing_status_to_change_from_public_api' => new EnumValue(FinancingOrderProceedCase::class),
             'default_contract_sign_time_limit' => function () {
-                $marketOpeningEndTimeUtc = get_market_end_time_utc();
-                return Carbon::now()->diffInMinutes($marketOpeningEndTimeUtc);
+                return Carbon::now()->diffInMinutes(get_bursam_contract_signed_deadline());
             },
         ],
         'lynk' => [
