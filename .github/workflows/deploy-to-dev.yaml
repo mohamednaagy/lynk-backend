@@ -128,7 +128,7 @@ jobs:
                 await triggerWorkflow();
   
                 // Get the triggered workflow run
-                const workflowRun = await getWorkflowRun();
+                const workflowRun = await getTriggeredWorkflowRun();
                 console.log(`Triggered workflow run ID: ${workflowRun.id}`);
   
                 // Wait for the workflow to complete
