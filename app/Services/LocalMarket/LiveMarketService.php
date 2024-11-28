@@ -26,18 +26,18 @@ class LiveMarketService
     public function buildFromScratch(?callable $progressCallback = null): array
     {
         try {
-            DB::beginTransaction();
+            // DB::beginTransaction();
 
             $this->truncateMarket();
             $companies = $this->getActiveLenderCompanies();
             $inventories = $this->getActiveInventories();
             $result = $this->processInventoriesAndCompanies($companies, $inventories, $progressCallback);
 
-            DB::commit();
+            // DB::commit();
 
             return $result;
         } catch (\Exception $e) {
-            DB::rollBack();
+            // DB::rollBack();
             $this->logError('Failed to build live market from scratch', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

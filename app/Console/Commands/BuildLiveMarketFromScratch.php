@@ -2,12 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\CompanyStatus;
-use App\Enums\CompanyType;
-use App\Enums\LocalMarket\InventoryStatus;
-use App\Models\Company;
-use App\Models\LocalMarketInventory;
 use App\Services\LocalMarket\LiveMarketService;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class BuildLiveMarketFromScratch extends Command
@@ -17,118 +13,138 @@ class BuildLiveMarketFromScratch extends Command
      *
      * @var string
      */
-    protected $signature = 'live-market:build {--no-progress : Hide the progress bar}';
+    protected $signature = 'live-market:build';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Build the live market from scratch';
+    protected $description = 'Build live market from scratch';
+
+    protected LiveMarketService $liveMarketService;
+
+    private Carbon $startTime;
+
+    /**
+     * Create a new command instance.
+     */
+    public function __construct(LiveMarketService $liveMarketService)
+    {
+        parent::__construct();
+        $this->liveMarketService = $liveMarketService;
+    }
 
     /**
      * Execute the console command.
      */
-    public function handle(LiveMarketService $liveMarketService): int
+    public function handle(): int
     {
-        $this->info('Starting to build live market...');
-        $startTime = now();
+        $this->startTime = now();
+        $this->info('Starting live market build at: '.$this->startTime->format('Y-m-d H:i:s'));
 
         try {
-            // Get initial counts for progress bar and statistics
-            $allLendersCount = Company::where('type', CompanyType::Lender)->count();
-            $activeLendersCount = Company::where('status', CompanyStatus::Approved)
-                ->where('type', CompanyType::Lender)
-                ->count();
-
-            $inventoriesCount = LocalMarketInventory::where('status', InventoryStatus::Active)
-                ->where('available_quantity', '>', 0)
-                ->count();
-
-            $totalOperations = $activeLendersCount * $inventoriesCount;
-
-            // Skip progress bar if --no-progress option is used
-            if ($this->option('no-progress')) {
-                $stats = $liveMarketService->buildFromScratch();
-            } else {
-                // Create progress bar
-                $progressBar = $this->output->createProgressBar($totalOperations);
-                $progressBar->setFormat(
-                    "%current%/%max% [%bar%] %percent:3s%%\n".
-                        'Processing: %message%'
-                );
-
-                // Build with progress tracking
-                $stats = $liveMarketService->buildFromScratch(function ($data) use ($progressBar) {
-                    $inventory = $data['inventory'];
-                    $company = $data['company'];
-
-                    $progressBar->setMessage("Inventory #{$inventory->id} for Company #{$company->id}");
-                    $progressBar->setProgress($data['current']);
-                });
-
-                $progressBar->finish();
-                $this->newLine(2);
-            }
+            $result = $this->liveMarketService->buildFromScratch(
+                function (array $progress) {
+                    $this->outputProgress($progress);
+                }
+            );
 
             $endTime = now();
-            $duration = $endTime->diffInSeconds($startTime);
 
-            $this->info('Live market built successfully!');
+            $this->outputResults($result);
+            $this->outputTimingInfo($endTime);
 
-            // Show summary if we're showing progress
-            if (! $this->option('no-progress')) {
-                $this->table(
-                    ['Statistics', 'Count'],
-                    [
-                        ['Start Time', $startTime->format('Y-m-d H:i:s')],
-                        ['End Time', $endTime->format('Y-m-d H:i:s')],
-                        ['Duration', $this->formatDuration($duration)],
-                        ['Total Lenders', $allLendersCount],
-                        ['Active Lenders', $activeLendersCount],
-                        ['Active Inventories', $stats['inventories_processed']],
-                        ['Total Operations', $stats['total_operations']],
-                        ['Records Created', $stats['records_created']],
-                    ]
-                );
-            } else {
-                $this->info('Build completed in: '.$this->formatDuration($duration));
-                $this->info('Records created: '.$stats['records_created']);
-                $this->info('Active lenders processed: '.$activeLendersCount);
-            }
+            $this->info('Live market build completed successfully.');
 
-            return Command::SUCCESS;
+            return self::SUCCESS;
+
         } catch (\Exception $e) {
             $endTime = now();
-            $duration = $endTime->diffInSeconds($startTime);
+            $this->outputTimingInfo($endTime);
 
             $this->error('Failed to build live market: '.$e->getMessage());
-            $this->error('Failed after: '.$this->formatDuration($duration));
+            $this->error('Check live-market.log for details');
 
-            return Command::FAILURE;
+            return self::FAILURE;
         }
     }
 
     /**
-     * Format duration in a human-readable format
+     * Output progress information
+     *
+     * @param  array  $progress  Progress information
+     */
+    private function outputProgress(array $progress): void
+    {
+        $this->info(sprintf(
+            'Processing: Inventory %d with Company %d (%d/%d)',
+            $progress['inventory']->id,
+            $progress['company']->id,
+            $progress['current'],
+            $progress['total']
+        ));
+    }
+
+    /**
+     * Output build results
+     *
+     * @param  array  $result  Build results
+     */
+    private function outputResults(array $result): void
+    {
+        $this->info('Build Statistics:');
+        $this->table(
+            ['Metric', 'Value'],
+            [
+                ['Companies Processed', $result['companies_processed']],
+                ['Inventories Processed', $result['inventories_processed']],
+                ['Total Operations', $result['total_operations']],
+                ['Records Created', $result['records_created']],
+            ]
+        );
+    }
+
+    /**
+     * Output timing information
+     */
+    private function outputTimingInfo(Carbon $endTime): void
+    {
+        $duration = $endTime->diffInSeconds($this->startTime);
+
+        $this->table(
+            ['Timing Metric', 'Value'],
+            [
+                ['Start Time', $this->startTime->format('Y-m-d H:i:s')],
+                ['End Time', $endTime->format('Y-m-d H:i:s')],
+                ['Duration', $this->formatDuration($duration)],
+            ]
+        );
+    }
+
+    /**
+     * Format duration in human-readable format
      */
     private function formatDuration(int $seconds): string
     {
-        if ($seconds < 60) {
-            return "{$seconds} seconds";
-        }
-
-        if ($seconds < 3600) {
-            $minutes = floor($seconds / 60);
-            $remainingSeconds = $seconds % 60;
-
-            return "{$minutes} minutes, {$remainingSeconds} seconds";
-        }
-
         $hours = floor($seconds / 3600);
         $minutes = floor(($seconds % 3600) / 60);
         $remainingSeconds = $seconds % 60;
 
-        return "{$hours} hours, {$minutes} minutes, {$remainingSeconds} seconds";
+        $parts = [];
+
+        if ($hours > 0) {
+            $parts[] = "$hours hour".($hours > 1 ? 's' : '');
+        }
+
+        if ($minutes > 0) {
+            $parts[] = "$minutes minute".($minutes > 1 ? 's' : '');
+        }
+
+        if ($remainingSeconds > 0 || empty($parts)) {
+            $parts[] = "$remainingSeconds second".($remainingSeconds !== 1 ? 's' : '');
+        }
+
+        return implode(', ', $parts);
     }
 }
