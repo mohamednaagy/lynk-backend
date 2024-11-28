@@ -9,6 +9,7 @@ use App\Actions\Contracts\Supplier\CommodityItem\Inventory\UpdateCommodityInvent
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\ErrorCode;
+use App\Enums\LocalMarket\InventoryStatus;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Supplier\Inventories\StoreLocalMarketInventoryRequest;
@@ -25,24 +26,24 @@ class LocalMarketInventoryController extends Controller
     public function __construct()
     {
         $this->middleware(
-            'permission:' .
+            'permission:'.
                 perm(Area::CommoditySupplier, [Subject::CommoditySupplierInventories, Action::Manage, Action::Index])
         )
             ->only('index');
 
         $this->middleware(
-            'permission:' .
+            'permission:'.
                 perm(Area::CommoditySupplier, [Subject::CommoditySupplierInventories, Action::Manage, Action::Create])
         )
             ->only('store');
 
         $this->middleware(
-            'permission:' .
+            'permission:'.
                 perm(Area::CommoditySupplier, [Subject::CommoditySupplierInventories, Action::Manage, Action::Edit])
         )->only('update');
 
         $this->middleware(
-            'permission:' .
+            'permission:'.
                 perm(Area::CommoditySupplier, [Subject::CommoditySupplierInventories, Action::Manage, Action::Show])
         )->only('show');
 
@@ -91,6 +92,7 @@ class LocalMarketInventoryController extends Controller
     {
         $data = $storeInventoryRequest->validated();
         $data['company_id'] = tenant()->id;
+        $data['status'] = InventoryStatus::Active;
         $createSupplierInventory->setSupplier(tenant());
         $createSupplierInventory->setItem($item);
         $inventory = $createSupplierInventory->handle($data);
@@ -125,6 +127,7 @@ class LocalMarketInventoryController extends Controller
     {
         try {
             $inventory = $updateCommodityInventory->handle($inventory, $updateInventoryRequest->validated());
+
             return fractal($inventory, new LocalMarketInventoryTransformer)
                 ->parseIncludes([
                     'id',
@@ -146,7 +149,7 @@ class LocalMarketInventoryController extends Controller
         } catch (\Throwable $th) {
             throw $th;
         }
-        
+
     }
 
     /**
