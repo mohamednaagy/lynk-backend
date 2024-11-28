@@ -27,10 +27,11 @@ class PendingEligibleCommoditiesAction implements PendingEligibleCommodities
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error in Transactions', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            Log::channel('local_market')->error('Error in Transactions', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             $localMarketOrder->update([
                 'status' => LocalMarketOrderStatus::FailedPurchase,
             ]);
+
         }
 
     }

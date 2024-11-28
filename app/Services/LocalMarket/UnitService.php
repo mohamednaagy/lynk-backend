@@ -7,6 +7,7 @@ use App\Enums\LocalMarket\OwnershipTypes;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
+use App\Settings\Classes\LocalMurabahaSettings;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -65,20 +66,30 @@ class UnitService
 
     private function holdEligibleUnits(LocalMarketOrder $localMarketOrder, LocalMarketInventory $inventory, int $numberOfNeededUnits)
     {
-        // update unit status
+        $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
         LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
             ->where('status', InventoryUnitsStatus::Free)
-            ->where(function ($query) use ($localMarketOrder) {
-                $query->whereNull('previous_company_id_owners')
-                    ->orWhereRaw('NOT JSON_OVERLAPS(
-                    JSON_ARRAY(?),
-                    JSON_ARRAY(
-                        JSON_EXTRACT(previous_company_id_owners, "$[0]"),
-                        JSON_EXTRACT(previous_company_id_owners, "$[1]"),
-                        JSON_EXTRACT(previous_company_id_owners, "$[2]"),
-                        JSON_EXTRACT(previous_company_id_owners, "$[3]")
-                    )
-                )', [$localMarketOrder->company_id]);
+            ->when($numberOfRotation > 0, function ($query) use ($localMarketOrder, $numberOfRotation) {
+                $query->where(function ($subQuery) use ($localMarketOrder, $numberOfRotation) {
+                    $companyId = $localMarketOrder->company_id;
+                    $subQuery->whereNull('previous_company_id_owners');
+                    $jsonConditions = implode(
+                        ' OR ',
+                        array_map(
+                            fn ($index) => "JSON_UNQUOTE(JSON_EXTRACT(extracted.previous_company_id_owners, '$[$index]')) = ?",
+                            range(0, $numberOfRotation - 1)
+                        )
+                    );
+                    $bindings = array_fill(0, $numberOfRotation, $companyId);
+                    // Add NOT EXISTS condition
+                    $subQuery->orWhereRaw("
+                NOT EXISTS (
+                    SELECT 1
+                    FROM local_market_inventory_units AS extracted
+                    WHERE $jsonConditions
+                )
+            ", $bindings);
+                });
             })
             ->limit($numberOfNeededUnits)
             ->update([
@@ -92,6 +103,7 @@ class UnitService
     public static function getUnitsByGroupedByPreviousOwner(LocalMarketOrder $localMarketOrder)
     {
         $ownershipTypeOriginalSupplier = OwnershipTypes::OriginalSupplier;
+        $previousOrdersText = trans('local-market.old_request', [], 'ar'); // Localized text
 
         return LocalMarketInventoryUnits::select(
             'local_market_inventory_units.local_market_inventory_id',
@@ -99,12 +111,11 @@ class UnitService
             CASE
                 WHEN local_market_inventory_units.previous_owner_type = $ownershipTypeOriginalSupplier
                 THEN companies.name
-                ELSE 'طلبات سابقة'
+                ELSE '$previousOrdersText'
             END AS previous_owner
         "),
             'local_market_inventory_units.previous_owner_type',
             DB::raw('COUNT(*) AS unit_count'),
-            DB::raw('SUM(local_market_inventories.max_price) AS total_cost')
         )
             ->join('local_market_inventories', 'local_market_inventories.id', '=', 'local_market_inventory_units.local_market_inventory_id')
             ->leftJoin('companies', 'companies.id', '=', 'local_market_inventory_units.previous_owner')

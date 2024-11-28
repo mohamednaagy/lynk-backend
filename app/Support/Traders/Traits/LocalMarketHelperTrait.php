@@ -39,7 +39,7 @@ trait LocalMarketHelperTrait
             $newData['products'][$key]['currency'] = $inventory['currency']['name'];
             $newData['products'][$key]['uom'] = $inventory['measurement']['name'];
             $newData['products'][$key]['type'] = $inventory['commodityType']['name'];
-            $newData['products'][$key]['amount'] = $data['total_cost'];
+            $newData['products'][$key]['amount'] = $data['unit_count'] * $inventory['price'];
             $newData['products'][$key]['product'] = $inventory['item']['name'];
             $newData['products'][$key]['location'] = $inventory['location']['name'];
             $newData['products'][$key]['previous_owner'] = $data['previous_owner'];
