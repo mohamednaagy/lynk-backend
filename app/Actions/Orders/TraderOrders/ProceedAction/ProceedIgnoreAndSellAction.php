@@ -30,7 +30,7 @@ class ProceedIgnoreAndSellAction implements ProceedIgnoreAndSell
             throw new OrderStatusDoesNotFollowSequenceException;
         }
         
-        $traderOrder->update(['contract_signed_type' => ContractSignedType::Sell]);
+        //$traderOrder->update(['contract_signed_type' => ContractSignedType::Sell]);
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::DeliveryCancelled);
 
