@@ -5,6 +5,7 @@ namespace App\Services\LocalMarket;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
 use App\Enums\LocalMarket\InventoryStatus;
+use App\Models\CommodityType;
 use App\Models\Company;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketLive;
@@ -95,6 +96,62 @@ class LiveMarketService
     }
 
     /**
+     * Handle supplier status changes
+     */
+    public function handleSupplierStatusChange(Company $supplier): void
+    {
+        // Get all active inventories for this supplier
+        $inventories = LocalMarketInventory::where('supplier_id', $supplier->id)
+            ->where('status', InventoryStatus::Active)
+            ->where('available_quantity', '>', 0)
+            ->get();
+
+        // If supplier is not active, remove all inventory records
+        if ($supplier->status !== CompanyStatus::Approved) {
+            foreach ($inventories as $inventory) {
+                $this->removeInventoryRecords($inventory);
+            }
+
+            return;
+        }
+
+        // If supplier is active, create new records for all eligible inventories
+        $companies = $this->getActiveLenderCompanies();
+
+        foreach ($inventories as $inventory) {
+            $this->createLiveMarketRecordsForInventory($inventory, $companies);
+        }
+    }
+
+    /**
+     * Handle commodity type status changes
+     */
+    public function handleCommodityTypeStatusChange(CommodityType $commodityType): void
+    {
+        // Get all active inventories for this commodity type
+        $inventories = LocalMarketInventory::where('commodity_type_id', $commodityType->id)
+            ->where('status', InventoryStatus::Active)
+            ->where('available_quantity', '>', 0)
+            ->get();
+
+        // If commodity type is not active, remove all related inventory records
+        if (! $commodityType->is_active) {
+            foreach ($inventories as $inventory) {
+                $this->removeInventoryRecords($inventory);
+            }
+
+            return;
+        }
+
+        // If commodity type is active, create new records for all eligible inventories
+        $companies = $this->getActiveLenderCompanies();
+
+        foreach ($inventories as $inventory) {
+            $this->createLiveMarketRecordsForInventory($inventory, $companies);
+        }
+    }
+
+    /**
      * Check if inventory is eligible for live market
      */
     private function isInventoryEligible(LocalMarketInventory $inventory): bool
@@ -110,6 +167,15 @@ class LiveMarketService
     {
         return $company->status === CompanyStatus::Approved
             && $company->type === CompanyType::Lender;
+    }
+
+    /**
+     * Check if supplier is eligible for live market
+     */
+    private function isSupplierEligible(Company $supplier): bool
+    {
+        return $supplier->status === CompanyStatus::Approved
+            && $supplier->type === CompanyType::Supplier;
     }
 
     /**

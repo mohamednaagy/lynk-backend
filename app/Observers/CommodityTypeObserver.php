@@ -4,26 +4,37 @@ namespace App\Observers;
 
 use App\Actions\Commodities\CommodityType\UpdateCommodityTypeStatusAction;
 use App\Models\CommodityType;
+use App\Services\LocalMarket\LiveMarketService;
+
 class CommodityTypeObserver
 {
     public $afterCommit = true;
 
     protected $UpdateCommodityTypeStatusAction;
 
-    public function __construct(UpdateCommodityTypeStatusAction $UpdateCommodityTypeStatusAction)
-    {
+    protected LiveMarketService $liveMarketService;
+
+    public function __construct(
+        UpdateCommodityTypeStatusAction $UpdateCommodityTypeStatusAction,
+        LiveMarketService $liveMarketService
+    ) {
         $this->UpdateCommodityTypeStatusAction = $UpdateCommodityTypeStatusAction;
+        $this->liveMarketService = $liveMarketService;
     }
 
     /**
-     * Handle the CommodityItem "updated" event.
-     *
-     * @return void
+     * Handle the CommodityType "updated" event.
      */
-    public function updated(CommodityType $type)
+    public function updated(CommodityType $type): void
     {
+        // Handle status changes for commodity type action
         if ($type->wasChanged('status')) {
             $this->UpdateCommodityTypeStatusAction->handle($type->id, $type->status->value);
+        }
+
+        // Handle status changes for live market
+        if ($type->wasChanged('is_active')) {
+            $this->liveMarketService->handleCommodityTypeStatusChange($type);
         }
     }
 }
