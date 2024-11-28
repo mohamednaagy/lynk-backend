@@ -3,6 +3,8 @@
 namespace App\Observers;
 
 use App\Enums\LocalMarket\InventoryStatus;
+use App\Enums\LocalMarket\InventoryUnitsStatus;
+use App\Enums\LocalMarket\OwnershipTypes;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\LocalMarketInventory;
 use App\Services\LocalMarket\LiveMarketService;
@@ -113,6 +115,9 @@ class LocalMarketInventoryObserver
                 $inventory->commodity_item_id,
                 $quantityToGenerate,
                 $inventory->company_id,
+                OwnershipTypes::OriginalSupplier,
+                InventoryUnitsStatus::Free,
+                $inventory->generateQrCodeBaseName(),
             ]
         );
     }
