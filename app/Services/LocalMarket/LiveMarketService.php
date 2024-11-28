@@ -230,7 +230,7 @@ class LiveMarketService
                 ->where('available_quantity', '>', 0)
                 ->get();
 
-            if ($supplier->status !== CompanyStatus::Approved) {
+            if (! $supplier->status->is(CompanyStatus::Approved)) {
                 foreach ($inventories as $inventory) {
                     $this->removeInventoryRecords($inventory);
                 }
@@ -299,7 +299,7 @@ class LiveMarketService
      */
     private function isInventoryEligible(LocalMarketInventory $inventory): bool
     {
-        return $inventory->status === InventoryStatus::Active
+        return $inventory->status->is(InventoryStatus::Active)
             && $inventory->available_quantity > 0;
     }
 
@@ -311,8 +311,8 @@ class LiveMarketService
      */
     private function isCompanyEligible(Company $company): bool
     {
-        return $company->status === CompanyStatus::Approved
-            && $company->type === CompanyType::Lender;
+        return $company->status->is(CompanyStatus::Approved)
+            && $company->type->is(CompanyType::Lender);
     }
 
     /**
