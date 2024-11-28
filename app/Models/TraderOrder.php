@@ -306,6 +306,11 @@ class TraderOrder extends Model implements HasMedia
         return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
     }
 
+    public function timeLimits()
+    {
+        return $this->hasMany(TraderOrderTimeLimit::class, 'trader_order_id', 'id');
+    }
+
     public function scopeWithExpiredContractSignLimit($query)
     {
         $version = get_latest_version_of_trader(EnumsTrader::Lynk);

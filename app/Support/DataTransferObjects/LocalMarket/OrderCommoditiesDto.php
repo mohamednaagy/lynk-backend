@@ -2,32 +2,32 @@
 
 namespace App\Support\DataTransferObjects\LocalMarket;
 
+use App\Models\LocalMarketOrder;
+
 class OrderCommoditiesDto
 {
-    private $inventories;
+    private LocalMarketOrder $order;
 
-    public function __construct($inventories)
+    public function __construct(LocalMarketOrder $order)
     {
-        $this->inventories = $inventories;
-
+        $this->order = $order;
     }
 
-    public static function fromArray(array $data): self
+    /**
+     * Static method to get inventories from the order data.
+     */
+    public static function getInventoriesFromOrder(LocalMarketOrder $order): array
     {
-        return new self(
-            $data['inventories']
-        );
+        return $order->data['inventories'] ?? [];
     }
 
+    /**
+     * Convert the DTO to an array representation.
+     */
     public function toArray(): array
     {
         return [
-            'inventories' => $this->inventories->toArray(),
+            'inventories' => $this->order->data['inventories'] ?? [],
         ];
-    }
-
-    public function getInventories()
-    {
-        return $this->inventories;
     }
 }
