@@ -109,7 +109,7 @@ class LocalMarketInventoryObserver
         $quantityToGenerate = $quantity ?? $inventory->available_quantity;
 
         DB::select(
-            'CALL GenerateRandomInventoryUnitsQRCode(?, ?, ?, ?)',
+            'CALL GenerateRandomInventoryUnitsQRCode(?, ? , ?, ?, ?, ?, ?)',
             [
                 $inventory->id,
                 $inventory->commodity_item_id,
