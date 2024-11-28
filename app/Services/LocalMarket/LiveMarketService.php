@@ -54,10 +54,7 @@ class LiveMarketService
                 if ($eligibleQuantity > 0) {
                     LocalMarketLive::create([
                         'inventory_id' => $inventory->id,
-                        'commodity_item_id' => $inventory->commodity_item_id,
                         'commodity_type_id' => $inventory->commodity_type_id,
-                        'supplier_location_id' => $inventory->supplier_location_id,
-                        'supplier_id' => $inventory->supplier->id,
                         'company_id' => $company->id,
                         'price' => $inventory->max_price,
                         'eligible_quantity' => $eligibleQuantity,
@@ -89,13 +86,8 @@ class LiveMarketService
      */
     public function handleNewInventory(LocalMarketInventory $inventory): void
     {
-        // Only process active inventories with available quantity
-        if ($inventory->status !== InventoryStatus::Active || $inventory->available_quantity <= 0) {
-            return;
-        }
-
         // Get all active companies
-        $companies = Company::where('status', 'active')->get();
+        $companies = Company::where('status', CompanyStatus::Approved)->get();
 
         // Create records for each company
         foreach ($companies as $company) {
@@ -133,5 +125,50 @@ class LiveMarketService
     private function truncateMarket(): void
     {
         DB::table('local_market_live')->truncate();
+    }
+
+    /**
+     * Handle new company addition
+     */
+    public function handleNewCompany(Company $company): void
+    {
+        // Only proceed if company is an approved lender
+        if ($company->status !== CompanyStatus::Approved || $company->type !== CompanyType::Lender) {
+            return;
+        }
+
+        // Get all active inventories
+        $inventories = LocalMarketInventory::where('status', InventoryStatus::Active)
+            ->where('available_quantity', '>', 0)
+            ->get();
+
+        // Create records for each eligible inventory
+        foreach ($inventories as $inventory) {
+            $eligibleQuantity = $this->calculateEligibleQuantity($inventory, $company);
+
+            if ($eligibleQuantity > 0) {
+                LocalMarketLive::create([
+                    'inventory_id' => $inventory->id,
+                    'commodity_type_id' => $inventory->commodity_type_id,
+                    'company_id' => $company->id,
+                    'price' => $inventory->max_price,
+                    'eligible_quantity' => $eligibleQuantity,
+                    'status' => $inventory->status,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Handle company removal
+     */
+    public function handleCompanyRemoval(Company $company): void
+    {
+        // Only proceed if company is an lender
+        if ($company->type !== CompanyType::Lender) {
+            return;
+        }
+
+        LocalMarketLive::where('company_id', $company->id)->delete();
     }
 }
