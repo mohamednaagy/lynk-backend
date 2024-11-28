@@ -87,10 +87,8 @@ trait TraderHelperTrait
     public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null, $originalFileName = null): void
     {
         $traderManager = new TraderManager(app());
-        
         $fileName = $originalFileName ?? $traderManager->driver($traderOrder->provider)->generatePdfFileName($traderOrder, $collectionName);
-        
-        $media = $type 
+        $media = $type
             ? $traderOrder->addMediaFromBase64($document)
             : $traderOrder->addMediaFromStream($document);
 
@@ -112,21 +110,44 @@ trait TraderHelperTrait
         });
     }
 
-    public function transformProductsToLocalCommodityProductsDTO($products): Collection
+    public function transformProductsToLocalCommodityProductsDTO($products, $grouped_by = null): Collection
     {
-        return collect($products)->map(function ($product) {
-            return LynkCommodityProductDto::fromArray([
-                'product' => $product['product'],
-                'type' => $product['type'],
-                'quantity' => $product['quantity'],
-                'uom' => $product['uom'],
-                'amount' => $product['amount'],
-                'location' => $product['location'],
-                'currency' => $product['currency'],
-                'original_supplier' => $product['original_supplier'],
-                'previous_owner' => $product['previous_owner'],
-            ]);
-        });
+
+        return collect($products)
+            ->when($grouped_by, function ($collection) use ($grouped_by) {
+                // Group and map if grouping is required
+                return $collection->groupBy($grouped_by)
+                    ->map(function ($group) {
+                        $firstItem = $group->first(); // Extract the first item once
+
+                        return LynkCommodityProductDto::fromArray([
+                            'product' => $firstItem['product'],
+                            'type' => $firstItem['type'],
+                            'quantity' => $group->sum('quantity'),
+                            'uom' => $firstItem['uom'],
+                            'amount' => $group->sum('amount'),
+                            'location' => $firstItem['location'],
+                            'currency' => $firstItem['currency'],
+                            'original_supplier' => $firstItem['original_supplier'],
+                            'previous_owner' => $firstItem['previous_owner'],
+                        ]);
+                    });
+            }, function ($collection) {
+                // Map directly if no grouping is required
+                return $collection->map(function ($product) {
+                    return LynkCommodityProductDto::fromArray([
+                        'product' => $product['product'],
+                        'type' => $product['type'],
+                        'quantity' => $product['quantity'],
+                        'uom' => $product['uom'],
+                        'amount' => $product['amount'],
+                        'location' => $product['location'],
+                        'currency' => $product['currency'],
+                        'original_supplier' => $product['original_supplier'],
+                        'previous_owner' => $product['previous_owner'],
+                    ]);
+                });
+            });
     }
 
     public function getUnusedProductCode($provider)

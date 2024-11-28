@@ -10,11 +10,8 @@ class TimeLimitService
     /**
      * Set a time limit for the given TraderOrder.
      *
-     * @param TraderOrder $traderOrder
-     * @param int $type
-     * @param string $effectiveAt - Format: 'Y-m-d H:i:s', timezone: UTC
-     * @param int $defaultValue - minutes of hours
-     * @return void
+     * @param  string  $effectiveAt  - Format: 'Y-m-d H:i:s', timezone: UTC
+     * @param  int  $defaultValue  - minutes of hours
      */
     private function setTimeLimit(TraderOrder $traderOrder, int $type, string $effectiveAt, int $defaultValue): void
     {
@@ -28,10 +25,8 @@ class TimeLimitService
     /**
      * Set the contract sign time limit.
      *
-     * @param TraderOrder $traderOrder
-     * @param string $effectiveAt - Format: 'Y-m-d H:i:s', timezone: UTC
-     * @param int $defaultValue - minutes of hours
-     * @return void
+     * @param  string  $effectiveAt  - Format: 'Y-m-d H:i:s', timezone: UTC
+     * @param  int  $defaultValue  - minutes of hours
      */
     public function setContractSignTimeLimit(TraderOrder $traderOrder, string $effectiveAt, int $defaultValue): void
     {
@@ -41,14 +36,11 @@ class TimeLimitService
     /**
      * Set the delivery confirmation time limit.
      *
-     * @param TraderOrder $traderOrder
-     * @param string $effectiveAt - Format: 'Y-m-d H:i:s', timezone: UTC
-     * @param int $defaultValue - minutes of hours
-     * @return void
+     * @param  string  $effectiveAt  - Format: 'Y-m-d H:i:s', timezone: UTC
+     * @param  int  $defaultValue  - minutes of hours
      */
     public function setDeliveryConfirmationTimeLimit(TraderOrder $traderOrder, string $effectiveAt, int $defaultValue): void
     {
         $this->setTimeLimit($traderOrder, TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit, $effectiveAt, $defaultValue);
     }
 }
-
