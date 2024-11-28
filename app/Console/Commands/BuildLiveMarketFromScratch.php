@@ -55,7 +55,7 @@ class BuildLiveMarketFromScratch extends Command
                 $progressBar = $this->output->createProgressBar($totalOperations);
                 $progressBar->setFormat(
                     "%current%/%max% [%bar%] %percent:3s%%\n".
-                    'Processing: %message%'
+                        'Processing: %message%'
                 );
 
                 // Build with progress tracking

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
 
 class LocalMarketLive extends Model
 {
@@ -19,6 +20,12 @@ class LocalMarketLive extends Model
         'eligible_quantity',
         'status',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll();
+    }
 
     // Relationships
     public function inventory()
