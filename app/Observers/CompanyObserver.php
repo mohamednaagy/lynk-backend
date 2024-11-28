@@ -39,18 +39,11 @@ class CompanyObserver
         }
 
         // Handle lender status changes
-        if ($company->type->is(CompanyType::Lender)) {
+        if ($company->type->is(CompanyType::Lender) && $company->wasChanged('status')) {
             // If status changed to Approved, handle as new company
-            if ($company->wasChanged('status') && $company->status->is(CompanyStatus::Approved)) {
+            if ($company->status->is(CompanyStatus::Approved)) {
                 $this->liveMarketService->handleNewCompany($company);
-            }
-
-            // If status changed from Approved to something else, remove from live market
-            if (
-                $company->wasChanged('status')
-                && CompanyStatus::from($company->getOriginal('status'))->is(CompanyStatus::Approved)
-                && ! $company->status->is(CompanyStatus::Approved)
-            ) {
+            } else {
                 $this->liveMarketService->handleCompanyRemoval($company);
             }
         }
