@@ -711,7 +711,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
 <body dir="rtl">
     <div class="flex justify-end">
-        <img class="h-20" src="{{ asset('color-logo.svg') }}" alt="">
+        <img class="h-20" src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="">
     </div>
     <div class="divide-y divide-gray-300/50">
         <div class="py-8 space-y-6 text-base leading-7">
