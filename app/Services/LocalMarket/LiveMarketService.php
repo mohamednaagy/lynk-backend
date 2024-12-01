@@ -249,17 +249,16 @@ class LiveMarketService
         try {
             $inventories = $this->getActiveInventoriesForSupplier($supplier);
 
-            dd($supplier->status, $inventories->toArray());
-            if (! $supplier->status->is(CompanyStatus::Approved)) {
-                $this->removeInventoriesRecords($inventories);
-
-                return;
+            if ($supplier->status->is(CompanyStatus::Approved)) {
+                $companies = $this->getActiveLenderCompanies();
+                $inventories->each(
+                    fn ($inventory) => $this->createLiveMarketRecords($inventory, $companies)
+                );
             }
 
-            $companies = $this->getActiveLenderCompanies();
-            $inventories->each(
-                fn ($inventory) => $this->createLiveMarketRecords($inventory, $companies)
-            );
+            $this->removeInventoriesRecords($inventories);
+
+            return;
         } catch (\Exception $e) {
             $this->logError('Failed to handle supplier status change', [
                 'supplier_id' => $supplier->id,
