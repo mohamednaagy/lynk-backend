@@ -131,19 +131,31 @@ class UnitService
 
     public function countEligibleUnits(Company $company, LocalMarketInventory $inventory)
     {
-        return LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
+        $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
+        LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
             ->where('status', InventoryUnitsStatus::Free)
-            ->where(function ($query) use ($company) {
-                $query->whereNull('previous_company_id_owners')
-                    ->orWhereRaw('NOT JSON_OVERLAPS(
-                            JSON_ARRAY(?),
-                            JSON_ARRAY(
-                                JSON_EXTRACT(previous_company_id_owners, "$[0]"),
-                                JSON_EXTRACT(previous_company_id_owners, "$[1]"),
-                                JSON_EXTRACT(previous_company_id_owners, "$[2]"),
-                                JSON_EXTRACT(previous_company_id_owners, "$[3]")
-                            )
-                        )', [$company->id]);
+            ->where(function ($query) use ($company, $numberOfRotation) {
+                if ($numberOfRotation > 0) {
+                    $query->whereNull('previous_company_id_owners')->orWhere(function ($subQuery) use ($company, $numberOfRotation) {
+                        // Generate JSON_EXTRACT statements dynamically
+                        $jsonExtractParts = [];
+                        for ($i = 0; $i < $numberOfRotation; $i++) {
+                            $jsonExtractParts[] = "JSON_EXTRACT(previous_company_id_owners, '$[$i]')";
+                        }
+                        // Combine the generated JSON_EXTRACT parts into a JSON_ARRAY
+                        $jsonArrayCondition = implode(",\n", $jsonExtractParts);
+                        // Add the NOT JSON_OVERLAPS condition
+                        $subQuery->whereRaw(
+                            "NOT JSON_OVERLAPS(
+                        JSON_ARRAY(?),
+                        JSON_ARRAY(
+                            $jsonArrayCondition
+                        )
+                    )",
+                            [$company->id] // Bind company ID dynamically
+                        );
+                    });
+                }
             })
             ->count();
     }
