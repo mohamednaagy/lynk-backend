@@ -12,6 +12,7 @@ use App\Models\FinancingOrder;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
+use App\Models\Supplier;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\Transaction;
@@ -23,6 +24,7 @@ use App\Observers\FinancingOrderObserver;
 use App\Observers\LocalMarketInventoryObserver;
 use App\Observers\LocalMarketInventoryUnitsObserver;
 use App\Observers\LocalMarketOrderObserver;
+use App\Observers\SupplierObserver;
 use App\Observers\TraderHistoryObserver;
 use App\Observers\TraderOrderObserver;
 use App\Observers\TransactionObserver;
@@ -58,6 +60,7 @@ class EventServiceProvider extends ServiceProvider
         CompanySupplierDetail::class => [CommoditySupplierObserver::class],
         CommodityType::class => [CommodityTypeObserver::class],
         Company::class => [CompanyObserver::class],
+        Supplier::class => [SupplierObserver::class],
     ];
 
     /**
