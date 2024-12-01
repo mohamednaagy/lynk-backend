@@ -30,10 +30,6 @@ class CommodityTypeObserver
         // Handle status changes for commodity type action
         if ($type->wasChanged('status')) {
             $this->UpdateCommodityTypeStatusAction->handle($type->id, $type->status->value);
-        }
-
-        // Handle status changes for live market
-        if ($type->wasChanged('is_active')) {
             $this->liveMarketService->handleCommodityTypeStatusChange($type);
         }
     }
