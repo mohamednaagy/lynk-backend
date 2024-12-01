@@ -61,14 +61,13 @@ class LocalMarketInventoryObserver
      */
     public function updated(LocalMarketInventory $inventory): void
     {
-        dd($inventory->status);
 
         // Handle status changes
         if ($inventory->wasChanged('status')) {
-            if ($inventory->status !== InventoryStatus::Active) {
-                $this->liveMarketService->handleInventoryDeletion($inventory);
-            } elseif ($inventory->status === InventoryStatus::Active && $inventory->available_quantity > 0) {
+            if ($inventory->status->is(InventoryStatus::Active)) {
                 $this->liveMarketService->handleNewInventory($inventory);
+            } else {
+                $this->liveMarketService->handleInventoryDeletion($inventory);
             }
         }
 

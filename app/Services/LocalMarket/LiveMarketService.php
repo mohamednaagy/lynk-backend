@@ -249,6 +249,7 @@ class LiveMarketService
         try {
             $inventories = $this->getActiveInventoriesForSupplier($supplier);
 
+            dd($supplier->status, $inventories->toArray());
             if (! $supplier->status->is(CompanyStatus::Approved)) {
                 $this->removeInventoriesRecords($inventories);
 
