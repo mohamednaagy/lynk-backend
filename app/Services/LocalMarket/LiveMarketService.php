@@ -376,7 +376,7 @@ class LiveMarketService
     private function getActiveInventoriesForSupplier(Company $supplier): Collection
     {
         return LocalMarketInventory::query()
-            ->where('supplier_id', $supplier->id)
+            ->where('company_id', $supplier->id)
             ->where('status', InventoryStatus::Active)
             ->where('available_quantity', '>', 0)
             ->get();
