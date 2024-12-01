@@ -254,9 +254,9 @@ class LiveMarketService
                 $inventories->each(
                     fn ($inventory) => $this->createLiveMarketRecords($inventory, $companies)
                 );
+            } else {
+                $this->removeInventoriesRecords($inventories);
             }
-
-            $this->removeInventoriesRecords($inventories);
 
             return;
         } catch (\Exception $e) {
