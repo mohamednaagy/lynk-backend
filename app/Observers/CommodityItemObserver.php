@@ -41,4 +41,9 @@ class CommodityItemObserver
             $this->liveMarketService->handleCommodityItemPriceUpdate($item, $item->max_price);
         }
     }
+
+    public function deleted(CommodityItem $item)
+    {
+        $this->liveMarketService->handleCommodityItemDeletion($item);
+    }
 }
