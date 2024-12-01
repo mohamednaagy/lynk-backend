@@ -58,21 +58,6 @@ class LocalMarketInventoryObserver
             }
         }
 
-        // Handle quantity changes
-        if ($inventory->wasChanged('available_quantity')) {
-            if ($inventory->available_quantity <= 0) {
-                $this->liveMarketService->handleInventoryDeletion($inventory);
-            } else {
-                $this->liveMarketService->handleInventoryUpdate($inventory);
-            }
-
-            // Dispatch stock update job
-            UpdateInventoryStock::dispatch(
-                $inventory,
-                $inventory->available_quantity - $inventory->getOriginal('available_quantity'),
-                false
-            );
-        }
     }
 
     /**
