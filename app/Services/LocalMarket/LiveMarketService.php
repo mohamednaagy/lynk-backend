@@ -550,4 +550,19 @@ class LiveMarketService
     {
         Log::channel('live_market')->info($message, $context);
     }
+
+    public function handleCommodityItemDeletion(CommodityItem $commodityItem): void
+    {
+        try {
+            // Delete all live market records for this commodity item
+            LocalMarketLive::where('commodity_item_id', $commodityItem->id)
+                ->delete();
+        } catch (\Exception $e) {
+            $this->logError('Failed to delete commodity item records', [
+                'commodity_item_id' => $commodityItem->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
 }
