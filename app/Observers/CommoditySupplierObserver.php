@@ -4,14 +4,19 @@ namespace App\Observers;
 
 use App\Actions\Commodities\CommoditySupplier\UpdateCommoditySupplierStatusAction;
 use App\Models\CompanySupplierDetail;
+use App\Services\LocalMarket\LiveMarketService;
 
 class CommoditySupplierObserver
 {
     public $afterCommit = true;
+
     protected $UpdateCommoditySupplierStatusAction;
 
-    public function __construct(UpdateCommoditySupplierStatusAction $UpdateCommoditySupplierStatusAction)
+    protected LiveMarketService $liveMarketService;
+
+    public function __construct(LiveMarketService $liveMarketService, UpdateCommoditySupplierStatusAction $UpdateCommoditySupplierStatusAction)
     {
+        $this->liveMarketService = $liveMarketService;
         $this->UpdateCommoditySupplierStatusAction = $UpdateCommoditySupplierStatusAction;
     }
 
@@ -22,8 +27,10 @@ class CommoditySupplierObserver
      */
     public function updated(CompanySupplierDetail $supplierDetails)
     {
-        if ($supplierDetails->wasChanged('status')) {     
-           $this->UpdateCommoditySupplierStatusAction->handle($supplierDetails->company_id, $supplierDetails->status->value);
+        if ($supplierDetails->wasChanged('status')) {
+            $this->UpdateCommoditySupplierStatusAction->handle($supplierDetails->company_id, $supplierDetails->status->value);
+            // Handle supplier status changes
+            $this->liveMarketService->handleSupplierStatusChange($supplierDetails);
         }
     }
 }
