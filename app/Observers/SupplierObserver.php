@@ -3,16 +3,10 @@
 namespace App\Observers;
 
 use App\Models\Company;
-use App\Services\LocalMarket\LiveMarketService;
 
 class SupplierObserver
 {
-    protected LiveMarketService $liveMarketService;
-
-    public function __construct(LiveMarketService $liveMarketService)
-    {
-        $this->liveMarketService = $liveMarketService;
-    }
+    public function __construct() {}
 
     /**
      * Handle the Company "created" event.
@@ -22,15 +16,7 @@ class SupplierObserver
     /**
      * Handle the Company "updated" event.
      */
-    public function updated(Company $company): void
-    {
-        // Handle supplier status changes
-        if ($company->wasChanged('status')) {
-            $this->liveMarketService->handleSupplierStatusChange($company);
-
-            return;
-        }
-    }
+    public function updated(Company $company): void {}
 
     /**
      * Handle the Company "deleted" event.
