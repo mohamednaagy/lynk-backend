@@ -2,6 +2,7 @@
 
 namespace App\Services\LocalMarket;
 
+use App\Enums\CommodityTypeStatus;
 use App\Enums\CommoitySupplierStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
@@ -305,16 +306,16 @@ class LiveMarketService
         try {
             $inventories = $this->getActiveInventoriesForCommodityType($commodityType);
 
-            if (! $commodityType->is_active) {
+            if ($commodityType->status->is(CommodityTypeStatus::Active)) {
+                $companies = $this->getActiveLenderCompanies();
+                $inventories->each(
+                    fn ($inventory) => $this->createLiveMarketRecords($inventory, $companies)
+                );
+            } else {
                 $this->removeInventoriesRecords($inventories);
 
                 return;
             }
-
-            $companies = $this->getActiveLenderCompanies();
-            $inventories->each(
-                fn ($inventory) => $this->createLiveMarketRecords($inventory, $companies)
-            );
         } catch (\Exception $e) {
             $this->logError('Failed to handle commodity type status change', [
                 'commodity_type_id' => $commodityType->id,
