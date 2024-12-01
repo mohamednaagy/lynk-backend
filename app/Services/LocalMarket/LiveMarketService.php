@@ -2,11 +2,13 @@
 
 namespace App\Services\LocalMarket;
 
+use App\Enums\CommoitySupplierStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Models\CommodityType;
 use App\Models\Company;
+use App\Models\CompanySupplierDetail;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketLive;
 use Illuminate\Database\Eloquent\Collection;
@@ -244,12 +246,13 @@ class LiveMarketService
      *
      * @throws \Exception If status change handling fails
      */
-    public function handleSupplierStatusChange(Company $supplier): void
+    public function handleSupplierStatusChange(CompanySupplierDetail $companySupplierDetail): void
     {
         try {
-            $inventories = $this->getActiveInventoriesForSupplier($supplier);
+            $supplier = $companySupplierDetail->company;
+            $inventories = $this->getActiveInventoriesForSupplier($supplier->id);
 
-            if ($supplier->status->is(CompanyStatus::Approved)) {
+            if ($companySupplierDetail->status->is(CommoitySupplierStatus::Active)) {
                 $companies = $this->getActiveLenderCompanies();
                 $inventories->each(
                     fn ($inventory) => $this->createLiveMarketRecords($inventory, $companies)

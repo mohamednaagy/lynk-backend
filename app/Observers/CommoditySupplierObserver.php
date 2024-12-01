@@ -30,7 +30,7 @@ class CommoditySupplierObserver
         if ($supplierDetails->wasChanged('status')) {
             $this->UpdateCommoditySupplierStatusAction->handle($supplierDetails->company_id, $supplierDetails->status->value);
             // Handle supplier status changes
-            $this->liveMarketService->handleSupplierStatusChange($supplierDetails->company);
+            $this->liveMarketService->handleSupplierStatusChange($supplierDetails);
         }
     }
 }
