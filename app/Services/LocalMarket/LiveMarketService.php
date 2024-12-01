@@ -250,7 +250,7 @@ class LiveMarketService
     {
         try {
             $supplier = $companySupplierDetail->company;
-            $inventories = $this->getActiveInventoriesForSupplier($supplier->id);
+            $inventories = $this->getActiveInventoriesForSupplier($supplier);
 
             if ($companySupplierDetail->status->is(CommoitySupplierStatus::Active)) {
                 $companies = $this->getActiveLenderCompanies();
