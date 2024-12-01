@@ -4,6 +4,7 @@ namespace App\Services\LocalMarket;
 
 use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Enums\LocalMarket\OwnershipTypes;
+use App\Models\Company;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
@@ -61,7 +62,6 @@ class UnitService
             'numberOfSuitableUnits' => $numberOfUnits,
             'totalCost' => $numberOfUnits * $inventory->price(),
         ];
-
     }
 
     private function holdEligibleUnits(LocalMarketOrder $localMarketOrder, LocalMarketInventory $inventory, int $numberOfNeededUnits)
@@ -127,6 +127,25 @@ class UnitService
             )
             ->get()
             ->toArray();
+    }
+
+    public function countEligibleUnits(Company $company, LocalMarketInventory $inventory)
+    {
+        return LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
+            ->where('status', InventoryUnitsStatus::Free)
+            ->where(function ($query) use ($company) {
+                $query->whereNull('previous_company_id_owners')
+                    ->orWhereRaw('NOT JSON_OVERLAPS(
+                            JSON_ARRAY(?),
+                            JSON_ARRAY(
+                                JSON_EXTRACT(previous_company_id_owners, "$[0]"),
+                                JSON_EXTRACT(previous_company_id_owners, "$[1]"),
+                                JSON_EXTRACT(previous_company_id_owners, "$[2]"),
+                                JSON_EXTRACT(previous_company_id_owners, "$[3]")
+                            )
+                        )', [$company->id]);
+            })
+            ->count();
     }
 
     public function changeOrderUnitsOwnershipTo(LocalMarketOrder $localMarketOrder, $ownerType, $ownerIdentifier)

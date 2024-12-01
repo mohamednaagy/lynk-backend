@@ -142,6 +142,12 @@ return [
             'level' => 'debug',
             'days' => 30,
         ],
+        'live_market' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/live-market/live-market.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 14,
+        ],
     ],
 
 ];

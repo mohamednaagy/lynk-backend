@@ -78,6 +78,7 @@ class LenderController extends Controller
         $data = $request->validated();
         $data['order_cost_tiers'] = $this->unsetProrationAmounExceptForLastTier($data['order_cost_tiers']);
         $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers']);
+        $data['type'] = CompanyType::Lender;
 
         return DB::transaction(function () use ($data, $getSettingsClassInstance, $createCompany) {
             $data['status'] = $getSettingsClassInstance->handle(Area::Lender)
