@@ -304,15 +304,15 @@ class LiveMarketService
     public function handleCommodityTypeStatusChange(CommodityType $commodityType): void
     {
         try {
-            $inventories = $this->getActiveInventoriesForCommodityType($commodityType);
 
             if ($commodityType->status->is(CommodityTypeStatus::Active)) {
+                $inventories = $this->getActiveInventoriesForCommodityType($commodityType);
                 $companies = $this->getActiveLenderCompanies();
                 $inventories->each(
                     fn ($inventory) => $this->createLiveMarketRecords($inventory, $companies)
                 );
             } else {
-                $this->removeInventoriesRecords($inventories);
+                $this->handleCommodityTypeDeletion($commodityType);
 
                 return;
             }
@@ -561,6 +561,21 @@ class LiveMarketService
         } catch (\Exception $e) {
             $this->logError('Failed to delete commodity item records', [
                 'commodity_item_id' => $commodityItem->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    public function handleCommodityTypeDeletion(CommodityType $commodityType): void
+    {
+        try {
+            // Delete all live market records for this commodity item
+            LocalMarketLive::where('commodity_type_id', $commodityType->id)
+                ->delete();
+        } catch (\Exception $e) {
+            $this->logError('Failed to delete commodity item records', [
+                'commodity_type_id' => $commodityType->id,
                 'error' => $e->getMessage(),
             ]);
             throw $e;
