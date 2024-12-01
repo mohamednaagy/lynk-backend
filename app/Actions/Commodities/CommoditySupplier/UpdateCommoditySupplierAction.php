@@ -20,10 +20,13 @@ class UpdateCommoditySupplierAction implements UpdateCommoditySupplier
                 ]
             )
         );
-        $supplier->update([
+        $supplier->fill([
             'name' => $data['legal_name'],
             'unique_name' => $data['unique_name'],
+            'status' => $data['status'],
         ]);
+
+        $supplier->save();
 
         return $supplier;
     }

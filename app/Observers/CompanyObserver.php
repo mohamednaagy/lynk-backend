@@ -31,12 +31,6 @@ class CompanyObserver
      */
     public function updated(Company $company): void
     {
-        // Handle supplier status changes
-        if ($company->type->is(CompanyType::Supplier) && $company->wasChanged('status')) {
-            $this->liveMarketService->handleSupplierStatusChange($company);
-
-            return;
-        }
 
         // Handle lender status changes
         if ($company->type->is(CompanyType::Lender) && $company->wasChanged('status')) {
