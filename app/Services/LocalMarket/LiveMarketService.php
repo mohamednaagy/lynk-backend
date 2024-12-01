@@ -156,7 +156,7 @@ class LiveMarketService
     {
         try {
             // Update live market records for all affected inventories
-            LocalMarketLive::where('inventory_id', $commodityItem->id)
+            LocalMarketLive::where('commodity_item_id', $commodityItem->id)
                 ->update(['price' => $newPrice]);
         } catch (\Exception $e) {
             $this->logError('Failed to update commodity item price', [
