@@ -6,11 +6,13 @@ use App\Events\TraderOrderCancelled;
 use App\Listeners\RefundOrderCost;
 use App\Models\CommodityItem;
 use App\Models\CommodityType;
+use App\Models\Company;
 use App\Models\CompanySupplierDetail;
 use App\Models\FinancingOrder;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
+use App\Models\Supplier;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\TraderOrderTimeLimit;
@@ -18,10 +20,12 @@ use App\Models\Transaction;
 use App\Observers\CommodityItemObserver;
 use App\Observers\CommoditySupplierObserver;
 use App\Observers\CommodityTypeObserver;
+use App\Observers\CompanyObserver;
 use App\Observers\FinancingOrderObserver;
 use App\Observers\LocalMarketInventoryObserver;
 use App\Observers\LocalMarketInventoryUnitsObserver;
 use App\Observers\LocalMarketOrderObserver;
+use App\Observers\SupplierObserver;
 use App\Observers\TraderHistoryObserver;
 use App\Observers\TraderOrderObserver;
 use App\Observers\TraderOrderTimeLimitObserver;
@@ -58,6 +62,8 @@ class EventServiceProvider extends ServiceProvider
         CompanySupplierDetail::class => [CommoditySupplierObserver::class],
         CommodityType::class => [CommodityTypeObserver::class],
         TraderOrderTimeLimit::class => [TraderOrderTimeLimitObserver::class],
+        Company::class => [CompanyObserver::class],
+        Supplier::class => [SupplierObserver::class],
     ];
 
     /**

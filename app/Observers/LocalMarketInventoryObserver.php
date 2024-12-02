@@ -5,36 +5,81 @@ namespace App\Observers;
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\LocalMarketInventory;
-use Illuminate\Support\Facades\DB;
+use App\Services\LocalMarket\LiveMarketService;
 
 class LocalMarketInventoryObserver
 {
     public $afterCommit = true;
 
-    public function creating(LocalMarketInventory $inventory)
+    protected LiveMarketService $liveMarketService;
+
+    public function __construct(LiveMarketService $liveMarketService)
+    {
+        $this->liveMarketService = $liveMarketService;
+    }
+
+    /**
+     * Handle before creating the inventory
+     */
+    public function creating(LocalMarketInventory $inventory): void
     {
         $inventory->status = InventoryStatus::Active();
     }
 
     /**
      * Handle the LocalMarketInventory "created" event.
-     *
-     * @return void
      */
-    public function created(LocalMarketInventory $inventory)
+    public function created(LocalMarketInventory $inventory): void
     {
+        // Update inventory stock
         UpdateInventoryStock::dispatch($inventory, $inventory->available_quantity, $inventory->wasRecentlyCreated);
+
+        // Add to live market if active and has quantity
+        $this->liveMarketService->handleNewInventory($inventory);
     }
 
     /**
-     * Handle the LocalMarketInventory "updated" event.
-     *
-     * @return void
+     * Handle the LocalMarketInventory "updating" event.
      */
-    public function updating(LocalMarketInventory $inventory) {}
+    public function updating(LocalMarketInventory $inventory): void {}
 
-    public function createItemUnits(LocalMarketInventory $inventory)
+    /**
+     * Handle the LocalMarketInventory "updated" event.
+     */
+    public function updated(LocalMarketInventory $inventory): void
     {
-        DB::select('CALL GenerateRandomInventoryUnitsQRCode(?, ?, ?,?)', [$inventory->id, $inventory->commodity_item_id, $inventory->available_quantity, $inventory->company_id]);
+
+        // Handle status changes
+        if ($inventory->wasChanged('status')) {
+            if ($inventory->status->is(InventoryStatus::Active)) {
+                $this->liveMarketService->handleNewInventory($inventory);
+            } else {
+                $this->liveMarketService->handleInventoryDeletion($inventory);
+            }
+        }
+
+        // Handle quantity changes
+        if ($inventory->wasChanged('available_quantity')) {
+            if ($inventory->available_quantity <= 0) {
+                $this->liveMarketService->handleInventoryDeletion($inventory);
+            } else {
+                $this->liveMarketService->handleInventoryUpdate($inventory);
+            }
+
+            // Dispatch stock update job
+            UpdateInventoryStock::dispatch(
+                $inventory,
+                $inventory->available_quantity - $inventory->getOriginal('available_quantity'),
+                false
+            );
+        }
+    }
+
+    /**
+     * Handle the LocalMarketInventory "deleted" event.
+     */
+    public function deleted(LocalMarketInventory $inventory): void
+    {
+        $this->liveMarketService->handleInventoryDeletion($inventory);
     }
 }

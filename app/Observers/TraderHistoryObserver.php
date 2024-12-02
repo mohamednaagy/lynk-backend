@@ -12,9 +12,7 @@ class TraderHistoryObserver
 {
     use ObserverHelper;
 
-    public function __construct(protected FeesService $feesService)
-    {
-    }
+    public function __construct(protected FeesService $feesService) {}
 
     /**
      * @throws \Exception
@@ -46,9 +44,7 @@ class TraderHistoryObserver
      *
      * @return void
      */
-    public function updated(TraderHistory $traderHistory)
-    {
-    }
+    public function updated(TraderHistory $traderHistory) {}
 
     /**
      * Handle the TraderHistory "deleted" event.
@@ -82,9 +78,6 @@ class TraderHistoryObserver
 
     /**
      * Handle the status change of the TraderHistory.
-     *
-     * @param TraderHistory $traderHistory
-     * @return void
      */
     protected function applyOrderFees(TraderHistory $traderHistory): void
     {

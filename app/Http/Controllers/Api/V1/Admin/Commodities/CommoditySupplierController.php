@@ -15,7 +15,6 @@ use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\UpdateCommoditySupp
 use App\Models\Supplier;
 use App\Transformers\CommoditySuppliersTransformer;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 
 class CommoditySupplierController extends Controller
 {
@@ -23,22 +22,22 @@ class CommoditySupplierController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::CommodityMarketSuppliers, Action::Index, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::CommodityMarketSuppliers, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::CommodityMarketSuppliers, Action::Create, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::CommodityMarketSuppliers, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::CommodityMarketSuppliers, Action::Show, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::CommodityMarketSuppliers, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::CommodityMarketSuppliers, Action::Edit, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::CommodityMarketSuppliers, Action::Edit, Action::Manage])
         )->only('update');
     }
 
@@ -50,7 +49,7 @@ class CommoditySupplierController extends Controller
             ->handle()
             ->paginate();
 
-        return fractal($commiditySuppliers, new CommoditySuppliersTransformer())
+        return fractal($commiditySuppliers, new CommoditySuppliersTransformer)
             ->parseIncludes([
                 'id',
                 'legal_name',
@@ -69,7 +68,7 @@ class CommoditySupplierController extends Controller
         $data = $storeCommoditySupplierRequest->validated();
         $createCommoditySupplier = $createCommoditySupplier->handle($data);
 
-        return fractal($createCommoditySupplier, new CommoditySuppliersTransformer())
+        return fractal($createCommoditySupplier, new CommoditySuppliersTransformer)
             ->parseIncludes([
                 'id',
                 'legal_name',
@@ -84,7 +83,7 @@ class CommoditySupplierController extends Controller
     public function show(Supplier $commoditySupplier): JsonResponse
     {
 
-        return fractal($commoditySupplier, new CommoditySuppliersTransformer())
+        return fractal($commoditySupplier, new CommoditySuppliersTransformer)
             ->parseIncludes([
                 'id',
                 'legal_name',
@@ -101,11 +100,9 @@ class CommoditySupplierController extends Controller
         UpdateCommoditySupplier $updateCommoditySupplier,
         Supplier $commoditySupplier
     ): JsonResponse {
-        return DB::transaction(function () use ($request, $updateCommoditySupplier, $commoditySupplier) {
-            $data = $request->validated();
-            $updateCommoditySupplier->handle($commoditySupplier, $data);
+        $data = $request->validated();
+        $updateCommoditySupplier->handle($commoditySupplier, $data);
 
-            return $this->successResponse();
-        });
+        return $this->successResponse();
     }
 }

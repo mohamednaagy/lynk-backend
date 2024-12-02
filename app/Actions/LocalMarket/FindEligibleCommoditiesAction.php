@@ -18,9 +18,7 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
     {
         try {
             $startTime = microtime(true);
-            $eligibleCommodities = $this->LoanService->getCommoditiesForLoan(
-                $localMarketOrder
-            );
+            $eligibleCommodities = $this->LoanService->getCommoditiesForLoan($localMarketOrder);
 
             if ($eligibleCommodities) {
                 $localMarketOrder->update([
@@ -40,16 +38,17 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
                 'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
             ]);
         } catch (\Exception $e) {
-            $localMarketOrder->update([
-                'status' => LocalMarketOrderStatus::FailedPurchase,
-                'comment' => $e->getMessage(),
-            ]);
-
             Log::channel('local_market')->error('Error in FindEligibleCommoditiesAction', [
                 'order_id' => $localMarketOrder->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
+            $localMarketOrder->update([
+                'status' => LocalMarketOrderStatus::FailedPurchase,
+            ]);
+
+            throw $e;
         }
     }
 }
