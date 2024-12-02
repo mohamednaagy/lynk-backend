@@ -133,7 +133,8 @@ class UnitService
     public function countEligibleUnits(Company $company, LocalMarketInventory $inventory)
     {
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
-        LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
+
+        return LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
             ->where('status', InventoryUnitsStatus::Free)
             ->where(function ($query) use ($company, $numberOfRotation) {
                 if ($numberOfRotation > 0) {
