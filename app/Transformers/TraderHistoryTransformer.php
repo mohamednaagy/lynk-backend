@@ -260,16 +260,24 @@ class TraderHistoryTransformer extends TransformerAbstract
 
     public function includeCustomerDeliveryConfirmation($historiesActions): Primitive
     {
+        // Get the step histories for the CustomerDeliveryConfirmation step.
+        $stepHistoriesNode = $this->traderStepHistories->getStepOf(MurabhaStep::CustomerDeliveryConfirmation);
+
+        // Retrieve the first history action associated with this step in trader history.
         $history = $this->traderOrder
-            ->getOrderHistoryAction([FinancingOrderHistory::DeliveryCancelled, FinancingOrderHistory::DeliveryConfirmed])
+            ->getOrderHistoryAction($stepHistoriesNode->histories)
             ->first();
-        
+
+        // Determine the last history action node. If no history found, use the last node in the step histories.
+        $lastHistoryOfStepNode = $history ? $history->action : end($stepHistoriesNode->histories);
+
+
         return $this->primitive([
             'step' => MurabhaStep::CustomerDeliveryConfirmation,
             'is_complete' => (bool) $history,
             'completed_at' => $history?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'delivery_details' => $this->traderOrder->getCustomerDeliveryStatusAndMessage(),
-            'duration' => $this->getDurationForHistoryStep($history? $history->action : FinancingOrderHistory::DeliveryConfirmed),
-        ]);           
+            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+        ]);
     }
 }
