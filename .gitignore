@@ -17,3 +17,4 @@ report.html
 **/.DS_Store
 storage/.DS_Store
 dump.rdb
+sail-mysql/

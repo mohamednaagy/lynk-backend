@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\TraderOrder;
 
 use App\Actions\Contracts\Orders\TraderOrders\Fees\DeductBalanceForCompletedOrder;
 use App\Actions\Contracts\Orders\TraderOrders\Fees\DeductBalanceForDeliveryConfirmed;
 use App\Actions\Contracts\Orders\TraderOrders\Fees\DeductBalanceForNewOrder;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\Trader;
-class TraderOrderFeesService
+
+class FeesService
 {
     /**
      * Mapping of actions based on provider and status.
