@@ -93,7 +93,7 @@ class LocalMarketOrderObserver
         // TODO:sell_commodity_21_10 => add new job for cancelled success
         switch ($localMarketOrder->status) {
             case LocalMarketOrderStatus::EligibleCommoditiesAvailable:
-                dispatch(new EligibleCommoditiesFoundStatus($localMarketOrder));
+                dispatch(new EligibleCommoditiesFoundStatus($localMarketOrder->id));
                 break;
             case LocalMarketOrderStatus::NoEligibleCommoditiesAvailable:
                 dispatch(new NoEligibleCommoditiesAvailableStatus($localMarketOrder));
