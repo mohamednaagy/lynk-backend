@@ -79,11 +79,13 @@ services:
             - "${APPLICATION_OUTSIDE_REDIS_PORT:-6379}:6379"
         networks:
             - sail
-            
+
     browserless:
         image: browserless/chrome
         ports:
-        - "3002:3000"
+            - "3002:3000"
+        networks:
+            - sail
 
     mailhog:
         image: mailhog/mailhog
