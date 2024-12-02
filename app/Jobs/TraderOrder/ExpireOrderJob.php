@@ -20,13 +20,6 @@ class ExpireOrderJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * The name of the queue on which the job should run.
-     *
-     * @var string
-     */
-    public $queue = 'expire_trader_order';
-
-    /**
      * The trader order id.
      *
      * @var int
@@ -41,6 +34,7 @@ class ExpireOrderJob implements ShouldQueue
     public function __construct(int $traderOrderId)
     {
         $this->traderOrderId = $traderOrderId;
+        $this->onQueue('expire_trader_order');
     }
 
     /**
