@@ -70,34 +70,34 @@ class UnitService
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
         LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
             ->where('status', InventoryUnitsStatus::Free)
-            ->when($numberOfRotation > 0, function ($query) use ($localMarketOrder, $numberOfRotation) {
-                $query->where(function ($subQuery) use ($localMarketOrder, $numberOfRotation) {
-                    $companyId = $localMarketOrder->company_id;
-                    $subQuery->whereNull('previous_company_id_owners');
-                    $jsonConditions = implode(
-                        ' OR ',
-                        array_map(
-                            fn ($index) => "JSON_UNQUOTE(JSON_EXTRACT(extracted.previous_company_id_owners, '$[$index]')) = ?",
-                            range(0, $numberOfRotation - 1)
+            ->where(function ($query) use ($localMarketOrder, $numberOfRotation) {
+                if ($numberOfRotation > 0) {
+                    $query->whereNull('previous_company_id_owners')->orWhere(function ($subQuery) use ($localMarketOrder, $numberOfRotation) {
+                        // Generate JSON_EXTRACT statements dynamically
+                        $jsonExtractParts = [];
+                        for ($i = 0; $i < $numberOfRotation; $i++) {
+                            $jsonExtractParts[] = "JSON_EXTRACT(previous_company_id_owners, '$[$i]')";
+                        }
+                        // Combine the generated JSON_EXTRACT parts into a JSON_ARRAY
+                        $jsonArrayCondition = implode(",\n", $jsonExtractParts);
+                        // Add the NOT JSON_OVERLAPS condition
+                        $subQuery->whereRaw(
+                            "NOT JSON_OVERLAPS(
+                        JSON_ARRAY(?),
+                        JSON_ARRAY(
+                            $jsonArrayCondition
                         )
-                    );
-                    $bindings = array_fill(0, $numberOfRotation, $companyId);
-                    // Add NOT EXISTS condition
-                    $subQuery->orWhereRaw("
-                NOT EXISTS (
-                    SELECT 1
-                    FROM local_market_inventory_units AS extracted
-                    WHERE $jsonConditions
-                )
-            ", $bindings);
-                });
+                    )",
+                            [$localMarketOrder->company_id] // Bind company ID dynamically
+                        );
+                    });
+                }
             })
             ->limit($numberOfNeededUnits)
             ->update([
                 'hold_for' => $localMarketOrder->id,
                 'status' => InventoryUnitsStatus::Reserved,
             ]);
-
         $inventory->refreshStockQuantities();
     }
 

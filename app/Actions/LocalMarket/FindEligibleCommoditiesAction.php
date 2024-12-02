@@ -38,16 +38,17 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
                 'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
             ]);
         } catch (\Exception $e) {
-            $localMarketOrder->update([
-                'status' => LocalMarketOrderStatus::FailedPurchase,
-                'comment' => $e->getMessage(),
-            ]);
-
             Log::channel('local_market')->error('Error in FindEligibleCommoditiesAction', [
                 'order_id' => $localMarketOrder->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
+            $localMarketOrder->update([
+                'status' => LocalMarketOrderStatus::FailedPurchase,
+            ]);
+
+            throw $e;
         }
     }
 }
