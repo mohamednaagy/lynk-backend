@@ -3,12 +3,14 @@
 namespace App\Services\LocalMarket;
 
 use App\Enums\CommodityTypeStatus;
+use App\Enums\CommoitySupplierStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Models\CommodityItem;
 use App\Models\CommodityType;
 use App\Models\Company;
+use App\Models\CompanySupplierDetail;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketLive;
 use Illuminate\Database\Eloquent\Collection;
@@ -238,6 +240,43 @@ class LiveMarketService
 
     /*
     |--------------------------------------------------------------------------
+    | Supplier Management
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Handle changes in supplier status and update live market accordingly
+     *
+     * @param  Company  $supplier  The supplier company with changed status
+     *
+     * @throws \Exception If status change handling fails
+     */
+    public function handleSupplierStatusChange(CompanySupplierDetail $companySupplierDetail): void
+    {
+        try {
+            $supplier = $companySupplierDetail->company;
+            $inventories = $this->getActiveInventoriesForSupplier($supplier);
+
+            if ($companySupplierDetail->status->is(CommoitySupplierStatus::Active)) {
+                $companies = $this->getActiveLenderCompanies();
+                $inventories->each(
+                    fn ($inventory) => $this->createLiveMarketRecords($inventory, $companies)
+                );
+            } else {
+                $this->removeInventoriesRecords($inventories);
+            }
+
+            return;
+        } catch (\Exception $e) {
+            $this->logError('Failed to handle supplier status change', [
+                'supplier_id' => $supplier->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+    /*
+    |--------------------------------------------------------------------------
     | Company Management
     |--------------------------------------------------------------------------
     */
@@ -411,6 +450,21 @@ class LiveMarketService
     {
         return LocalMarketInventory::query()
             ->where('commodity_type_id', $commodityType->id)
+            ->where('status', InventoryStatus::Active)
+            ->where('available_quantity', '>', 0)
+            ->get();
+    }
+
+    /**
+     * Get active inventories for a specific supplier
+     *
+     * @param  Company  $supplier  The supplier company
+     * @return Collection Collection of active inventories for the supplier
+     */
+    private function getActiveInventoriesForSupplier(Company $supplier): Collection
+    {
+        return LocalMarketInventory::query()
+            ->where('company_id', $supplier->id)
             ->where('status', InventoryStatus::Active)
             ->where('available_quantity', '>', 0)
             ->get();
