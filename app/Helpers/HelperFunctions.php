@@ -165,19 +165,76 @@ if (! function_exists('is_bursam_service_available')) {
     }
 }
 
-if (! function_exists('get_start_time_bursa')) {
+if (!function_exists('get_bursa_time')) {
+    /**
+     * Helper function to get either start or end time based on the day (Friday or regular day).
+     *
+     * @param string $timeType 'start' or 'end' to determine whether we want the opening or closing time.
+     * @return \Carbon\Carbon The computed time.
+     */
+    function get_bursa_time($timeType)
+    {
+        // Get the timezone and current time
+        $timezone = Config::get('services.bursam.timezone', 'Asia/Riyadh');  // Default to Asia/Riyadh if not found
+        $now = now($timezone);
+
+        // Get the configuration values for start and end times
+        $marketTimeKey = 'market_opening_' . $timeType . '_time';
+        $fridayBreakTimeKey = 'friday_break_' . $timeType . '_time';
+
+        // Retrieve market and break times from configuration
+        $marketTime = Config::get('services.bursam.' . $marketTimeKey);
+        $fridayBreakTime = Config::get('services.bursam.' . $fridayBreakTimeKey);
+
+        // Handle missing configurations
+        if (!$marketTime || !$fridayBreakTime) {
+            throw new InvalidArgumentException("Missing Bursa market or Friday break time configuration.");
+        }
+
+        // Set the appropriate time based on the type (start or end)
+        $marketDateTime = $now->copy()->setTimeFromTimeString($marketTime);
+        $fridayBreakDateTime = $now->copy()->setTimeFromTimeString($fridayBreakTime);
+
+        // Return the correct time based on whether it's Friday or not
+        return $now->isFriday() ? $fridayBreakDateTime : $marketDateTime;
+    }
+}
+
+if (!function_exists('get_start_time_bursa')) {
+    /**
+     * Get the market's start time, adjusted for Fridays.
+     *
+     * @return \Carbon\Carbon The market opening start time.
+     */
     function get_start_time_bursa()
     {
-        $timezone = Config::get('services.bursam.timezone');
-        $now = now($timezone);
-        $marketOpeningStartTime = Config::get('services.bursam.market_opening_start_time');
-        $fridayBreakStartTime = Config::get('services.bursam.friday_break_start_time');
+        return get_bursa_time('start');
+    }
+}
 
-        $marketOpeningStartDateTime = now($timezone)->setTimeFromTimeString($marketOpeningStartTime);
-        $fridayBreakStartDateTime = now($timezone)->setTimeFromTimeString($fridayBreakStartTime);
+if (!function_exists('get_end_time_bursa')) {
+    /**
+     * Get the market's end time, adjusted for Fridays.
+     *
+     * @return \Carbon\Carbon The market opening end time.
+     */
+    function get_end_time_bursa()
+    {
+        return get_bursa_time('end');
+    }
+}
 
-        return $now->isFriday() ? $fridayBreakStartDateTime : $marketOpeningStartDateTime;
 
+if (! function_exists('get_bursam_contract_signed_deadline')) {
+    function get_bursam_contract_signed_deadline(): Carbon
+    {
+        $marketOpeningEndTime = Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME'), 'Asia/Riyadh');
+        $marketOpeningEndTimeUtc = $marketOpeningEndTime->setTimezone('UTC');
+        if (now()->gt($marketOpeningEndTimeUtc)) {
+            $marketOpeningEndTimeUtc->addDay();
+        }
+        
+        return $marketOpeningEndTimeUtc;
     }
 }
 
