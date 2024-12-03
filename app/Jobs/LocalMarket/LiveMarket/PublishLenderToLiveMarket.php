@@ -17,22 +17,19 @@ class PublishLenderToLiveMarket implements ShouldQueue
 
     protected Company $lender;
 
-    protected LiveMarketService $liveMarketService;
-
     /**
      * Create a new job instance.
      */
-    public function __construct(Company $lender, LiveMarketService $liveMarketService)
+    public function __construct(Company $lender)
     {
         $this->lender = $lender;
-        $this->liveMarketService = $liveMarketService;
         $this->onQueue('local_market');
     }
 
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(LiveMarketService $liveMarketService): void
     {
         try {
             Log::channel('live_market')->info('Starting to publish lender to live market', [
@@ -40,7 +37,7 @@ class PublishLenderToLiveMarket implements ShouldQueue
                 'lender_name' => $this->lender->name,
             ]);
 
-            $this->liveMarketService->handleNewCompany($this->lender);
+            $liveMarketService->handleNewCompany($this->lender);
 
             Log::channel('live_market')->info('Successfully published lender to live market', [
                 'lender_id' => $this->lender->id,
