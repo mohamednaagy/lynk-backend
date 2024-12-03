@@ -3,6 +3,7 @@
 namespace App\Jobs\LocalMarket\LiveMarket;
 
 use App\Models\Company;
+use App\Models\Supplier;
 use App\Services\LocalMarket\LiveMarketService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -20,7 +21,7 @@ class HandleSupplierStatusChange implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(Company $supplier)
+    public function __construct(Supplier $supplier)
     {
         $this->supplier = $supplier;
         $this->onQueue('local_market');
