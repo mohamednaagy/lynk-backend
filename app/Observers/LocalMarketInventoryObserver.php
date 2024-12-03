@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Enums\LocalMarket\InventoryStatus;
+use App\Jobs\LocalMarket\LiveMarket\PublishInventoryToLiveMarket;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\LocalMarketInventory;
 use App\Services\LocalMarket\LiveMarketService;
@@ -35,7 +36,7 @@ class LocalMarketInventoryObserver
         UpdateInventoryStock::dispatch($inventory, $inventory->available_quantity, $inventory->wasRecentlyCreated);
 
         // Add to live market if active and has quantity
-        $this->liveMarketService->handleNewInventory($inventory);
+        PublishInventoryToLiveMarket::dispatch($inventory);
     }
 
     /**
@@ -51,7 +52,7 @@ class LocalMarketInventoryObserver
         // Handle status changes
         if ($inventory->wasChanged('status')) {
             if ($inventory->status->is(InventoryStatus::Active)) {
-                $this->liveMarketService->handleNewInventory($inventory);
+                PublishInventoryToLiveMarket::dispatch($inventory);
             } else {
                 $this->liveMarketService->handleInventoryDeletion($inventory);
             }

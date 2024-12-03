@@ -10,9 +10,9 @@ use App\Enums\LocalMarket\InventoryStatus;
 use App\Models\CommodityItem;
 use App\Models\CommodityType;
 use App\Models\Company;
-use App\Models\CompanySupplierDetail;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketLive;
+use App\Models\Supplier;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -251,13 +251,13 @@ class LiveMarketService
      *
      * @throws \Exception If status change handling fails
      */
-    public function handleSupplierStatusChange(CompanySupplierDetail $companySupplierDetail): void
+    public function handleSupplierStatusChange(Supplier $supplier): void
     {
         try {
-            $supplier = $companySupplierDetail->company;
+            $supplierDetails = $supplier->detail;
             $inventories = $this->getActiveInventoriesForSupplier($supplier);
 
-            if ($companySupplierDetail->status->is(CommoitySupplierStatus::Active)) {
+            if ($supplierDetails->status->is(CommoitySupplierStatus::Active)) {
                 $companies = $this->getActiveLenderCompanies();
                 $inventories->each(
                     fn ($inventory) => $this->createLiveMarketRecords($inventory, $companies)
