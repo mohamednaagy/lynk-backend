@@ -27,7 +27,7 @@ class CommoditySupplierObserver
         if ($supplierDetails->wasChanged('status')) {
             $this->UpdateCommoditySupplierStatusAction->handle($supplierDetails->company_id, $supplierDetails->status->value);
             // Handle supplier status changes
-            HandleSupplierStatusChange::dispatch($supplierDetails->company);
+            HandleSupplierStatusChange::dispatch($supplierDetails->supplier);
 
         }
     }
