@@ -27,19 +27,18 @@ class DeleteSupplierFromLiveMarket implements ShouldQueue
     public function __construct(Company $supplier)
     {
         $this->supplier = $supplier;
-        $this->liveMarketService = new LiveMarketService;
         $this->onQueue('local_market');
     }
 
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(LiveMarketService $liveMarketService): void
     {
         try {
             $this->logStartDeletion();
 
-            $this->liveMarketService->handleCompanyRemoval($this->supplier);
+            $liveMarketService->handleCompanyRemoval($this->supplier);
 
             $this->logSuccessfulDeletion();
         } catch (\Exception $e) {
