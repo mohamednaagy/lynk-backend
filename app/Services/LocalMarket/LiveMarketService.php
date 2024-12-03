@@ -497,7 +497,7 @@ class LiveMarketService
     }
 
     /**
-     * Create a single live market record
+     * Create a single live market record if it doesn't exist
      *
      * @param  LocalMarketInventory  $inventory  The inventory for the record
      * @param  Company  $company  The company for the record
@@ -505,15 +505,19 @@ class LiveMarketService
      */
     private function createLiveMarketRecord(LocalMarketInventory $inventory, Company $company, int $eligibleQuantity): void
     {
-        LocalMarketLive::create([
-            'inventory_id' => $inventory->id,
-            'commodity_item_id' => $inventory->commodity_item_id,
-            'commodity_type_id' => $inventory->commodity_type_id,
-            'company_id' => $company->id,
-            'price' => $inventory->item->max_price,
-            'eligible_quantity' => $eligibleQuantity,
-            'status' => $inventory->status,
-        ]);
+        LocalMarketLive::firstOrCreate(
+            [
+                'inventory_id' => $inventory->id,
+                'company_id' => $company->id,
+            ],
+            [
+                'commodity_item_id' => $inventory->commodity_item_id,
+                'commodity_type_id' => $inventory->commodity_type_id,
+                'price' => $inventory->item->max_price,
+                'eligible_quantity' => $eligibleQuantity,
+                'status' => $inventory->status,
+            ]
+        );
     }
 
     /**
