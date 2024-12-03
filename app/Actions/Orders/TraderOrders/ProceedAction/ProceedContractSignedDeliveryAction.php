@@ -8,24 +8,19 @@ use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
-use App\Enums\Trader;
 use App\Models\TraderOrder;
-use App\Services\TraderOrder\TimeLimitService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\Facades\Trader;
+use App\Enums\Trader as TraderEnum;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use App\Services\TraderOrder\TimeLimitService;
+
 class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelivery
 {
     use TraderHelperTrait;
 
-    private $timeLimitService;
-
     private const DELIVERY_CONFIRMATION_TIME_LIMIT_IN_HOURS = 72;
-
-    public function __construct(TimeLimitService $timeLimitService)
-    {
-        $this->timeLimitService = $timeLimitService;
-    }
 
     /**
      * @throws OrderStatusDoesNotFollowSequenceException
@@ -48,7 +43,6 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
         }
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::PendingDelivery);
         $this->setExpiry($traderOrder);
-
         return [];
     }
 
@@ -66,9 +60,10 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
     }
 
     private function setExpiry(TraderOrder $traderOrder){
-        if ($traderOrder->provider === Trader::Lynk){
+        if ($traderOrder->provider === TraderEnum::Lynk){
+            $timeLimitService = new TimeLimitService();
             $effectiveAt = now()->timezone('UTC')->addHours(self::DELIVERY_CONFIRMATION_TIME_LIMIT_IN_HOURS)->format('Y-m-d H:i:s');
-            $this->timeLimitService->setDeliveryConfirmationTimeLimit(traderOrder: $traderOrder, effectiveAt: $effectiveAt, defaultValue: self::DELIVERY_CONFIRMATION_TIME_LIMIT_IN_HOURS);
+            $timeLimitService->setDeliveryConfirmationTimeLimit(traderOrder: $traderOrder, effectiveAt: $effectiveAt, defaultValue: self::DELIVERY_CONFIRMATION_TIME_LIMIT_IN_HOURS);
         }
     }
 }
