@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Jobs\LocalMarket\LiveMarket\PublishInventoryToLiveMarket;
+use App\Jobs\LocalMarket\LiveMarket\UpdateInventoryInLiveMarket;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\LocalMarketInventory;
 use App\Services\LocalMarket\LiveMarketService;
@@ -58,6 +59,9 @@ class LocalMarketInventoryObserver
             }
         }
 
+        if ($inventory->wasChanged('available_quantity')) {
+            UpdateInventoryInLiveMarket::dispatch($inventory);
+        }
     }
 
     /**

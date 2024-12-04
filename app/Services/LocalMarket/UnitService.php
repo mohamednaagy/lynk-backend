@@ -91,6 +91,7 @@ class UnitService
     {
         return LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
             ->where('status', InventoryUnitsStatus::Free)
+            ->whereNull('hold_for')
             ->where(function ($query) use ($company) {
                 $query->whereNull('previous_company_id_owners')
                     ->orWhereRaw('NOT JSON_OVERLAPS(
