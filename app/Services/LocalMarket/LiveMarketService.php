@@ -35,16 +35,19 @@ class LiveMarketService
     public function buildFromScratch(?callable $progressCallback = null): array
     {
         try {
+            $this->logInfo('Starting live market build from scratch');
+
             $this->truncateMarket();
             $companies = $this->getActiveLenderCompanies();
             $inventories = $this->getActiveInventories();
 
-            return $this->processInventoriesAndCompanies($companies, $inventories, $progressCallback);
+            $result = $this->processInventoriesAndCompanies($companies, $inventories, $progressCallback);
+
+            $this->logInfo('Completed live market build', $result);
+
+            return $result;
         } catch (\Exception $e) {
-            $this->logError('Failed to build live market from scratch', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+            $this->logError('Failed to build live market from scratch', $e);
             throw $e;
         }
     }
@@ -106,14 +109,17 @@ class LiveMarketService
     public function handleCommodityItemPriceUpdate(CommodityItem $commodityItem, float $newPrice): void
     {
         try {
-            // Update live market records for all affected inventories
+            $this->logInfo('Updating commodity item price', [
+                'commodity_item_id' => $commodityItem->id,
+                'new_price' => $newPrice,
+            ]);
+
             LocalMarketLive::where('commodity_item_id', $commodityItem->id)
                 ->update(['price' => $newPrice]);
         } catch (\Exception $e) {
-            $this->logError('Failed to update commodity item price', [
+            $this->logError('Failed to update commodity item price', $e, [
                 'commodity_item_id' => $commodityItem->id,
                 'new_price' => $newPrice,
-                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -166,16 +172,25 @@ class LiveMarketService
     public function handleNewInventory(LocalMarketInventory $inventory): void
     {
         try {
+            $this->logInfo('Processing new inventory', [
+                'inventory_id' => $inventory->id,
+                'commodity_item_id' => $inventory->commodity_item_id,
+            ]);
+
             if (! $this->isInventoryEligible($inventory)) {
+                $this->logInfo('Inventory not eligible for live market', [
+                    'inventory_id' => $inventory->id,
+                    'status' => $inventory->status->value,
+                ]);
+
                 return;
             }
 
             $companies = $this->getActiveLenderCompanies();
             $this->createInventoryRecords($inventory, $companies);
         } catch (\Exception $e) {
-            $this->logError('Failed to handle new inventory', [
+            $this->logError('Failed to handle new inventory', $e, [
                 'inventory_id' => $inventory->id,
-                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -220,19 +235,16 @@ class LiveMarketService
                 'commodity_item_id' => $inventory->commodity_item_id,
             ]);
 
-            // Remove all live market records for this inventory
             $recordsDeleted = LocalMarketLive::where('inventory_id', $inventory->id)
                 ->delete();
 
-            $this->logInfo('Successfully deleted inventory records from live market', [
+            $this->logInfo('Successfully deleted inventory records', [
                 'inventory_id' => $inventory->id,
                 'records_deleted' => $recordsDeleted,
             ]);
         } catch (\Exception $e) {
-            $this->logError('Failed to delete inventory from live market', [
+            $this->logError('Failed to delete inventory', $e, [
                 'inventory_id' => $inventory->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
@@ -602,24 +614,31 @@ class LiveMarketService
     }
 
     /**
-     * Log error messages to the live market channel
-     *
-     * @param  string  $message  Error message
-     * @param  array  $context  Additional context for the error
+     * Log a message to the live market channel
      */
-    private function logError(string $message, array $context = []): void
+    private function log(string $level, string $message, array $context = []): void
     {
-        Log::channel('live_market')->error($message, $context);
+        Log::channel('live_market')->$level($message, $context);
     }
 
     /**
-     * Log informational messages to the live market channel
-     *
-     * @param  string  $message  Info message
-     * @param  array  $context  Additional context for the message
+     * Log an error message with exception details
+     */
+    private function logError(string $message, \Throwable $e, array $additionalContext = []): void
+    {
+        $context = array_merge([
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], $additionalContext);
+
+        $this->log('error', $message, $context);
+    }
+
+    /**
+     * Log an info message
      */
     private function logInfo(string $message, array $context = []): void
     {
-        Log::channel('live_market')->info($message, $context);
+        $this->log('info', $message, $context);
     }
 }
