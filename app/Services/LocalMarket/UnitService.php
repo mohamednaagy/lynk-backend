@@ -8,7 +8,7 @@ use App\Models\Company;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
-use App\Settings\Classes\LocalMurabahaSettings;
+use App\Settings\Classes\Areas\LocalMurabahaSettings;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
