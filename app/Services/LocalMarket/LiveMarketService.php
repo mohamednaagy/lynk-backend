@@ -478,6 +478,10 @@ class LiveMarketService
     private function createLiveMarketRecord(LocalMarketInventory $inventory, Company $company, int $eligibleQuantity): void
     {
         try {
+            if ($eligibleQuantity == 0) {
+                return;
+            }
+
             $this->logInfo('Creating live market record', [
                 'inventory_id' => $inventory->id,
                 'company_id' => $company->id,
