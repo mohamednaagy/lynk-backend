@@ -3,90 +3,45 @@
 namespace App\Jobs\LocalMarket\LiveMarket;
 
 use App\Models\Company;
-use App\Models\Supplier;
 use App\Services\LocalMarket\LiveMarketService;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 
-class HandleSupplierStatusChange implements ShouldQueue
+class HandleSupplierStatusChange extends BaseLiveMarketJob
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
     protected Company $supplier;
 
-    /**
-     * Create a new job instance.
-     */
-    public function __construct(Supplier $supplier)
+    public function __construct(Company $supplier)
     {
+        parent::__construct();
         $this->supplier = $supplier;
-        $this->onQueue('local_market');
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(LiveMarketService $liveMarketService): void
     {
-        try {
-            $this->logStartProcess();
+        $this->logJobStart('Processing supplier status change', [
+            'supplier_id' => $this->supplier->id,
+            'supplier_name' => $this->supplier->name,
+            'current_status' => $this->supplier->detail?->status->value,
+        ]);
 
+        try {
             $liveMarketService->handleSupplierStatusChange($this->supplier);
 
-            $this->logSuccessfulProcess();
-        } catch (\Exception $e) {
-            $this->handleError($e);
+            $this->logJobSuccess('Successfully processed supplier status change', [
+                'supplier_id' => $this->supplier->id,
+                'supplier_name' => $this->supplier->name,
+            ]);
+        } catch (\Throwable $e) {
+            $this->logJobError('Failed to process supplier status change', $e);
             throw $e;
         }
     }
 
-    /**
-     * Log start of process
-     */
-    private function logStartProcess(): void
+    protected function getFailedJobContext(): array
     {
-        Log::channel('live_market')->info('Starting to process supplier status change', [
+        return [
             'supplier_id' => $this->supplier->id,
             'supplier_name' => $this->supplier->name,
             'current_status' => $this->supplier->detail?->status->value,
-        ]);
-    }
-
-    /**
-     * Log successful process completion
-     */
-    private function logSuccessfulProcess(): void
-    {
-        Log::channel('live_market')->info('Successfully processed supplier status change', [
-            'supplier_id' => $this->supplier->id,
-            'supplier_name' => $this->supplier->name,
-            'current_status' => $this->supplier->detail?->status->value,
-        ]);
-    }
-
-    /**
-     * Handle a job failure.
-     */
-    public function failed(\Throwable $exception): void
-    {
-        $this->handleError($exception);
-    }
-
-    /**
-     * Handle errors during job execution.
-     */
-    private function handleError(\Throwable $exception): void
-    {
-        Log::channel('live_market')->error('Failed to process supplier status change', [
-            'supplier_id' => $this->supplier->id,
-            'supplier_name' => $this->supplier->name,
-            'current_status' => $this->supplier->detail?->status->value,
-            'error' => $exception->getMessage(),
-            'trace' => $exception->getTraceAsString(),
-        ]);
+        ];
     }
 }

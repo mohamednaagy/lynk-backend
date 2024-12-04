@@ -171,7 +171,7 @@ class LiveMarketService
             }
 
             $companies = $this->getActiveLenderCompanies();
-            $this->createLiveMarketRecords($inventory, $companies);
+            $this->createInventoryRecords($inventory, $companies);
         } catch (\Exception $e) {
             $this->logError('Failed to handle new inventory', [
                 'inventory_id' => $inventory->id,
@@ -260,7 +260,7 @@ class LiveMarketService
             if ($supplierDetails->status->is(CommoitySupplierStatus::Active)) {
                 $companies = $this->getActiveLenderCompanies();
                 $inventories->each(
-                    fn ($inventory) => $this->createLiveMarketRecords($inventory, $companies)
+                    fn ($inventory) => $this->createInventoryRecords($inventory, $companies)
                 );
             } else {
                 $this->removeInventoriesRecords($inventories);
@@ -296,7 +296,7 @@ class LiveMarketService
             }
 
             $inventories = $this->getActiveInventories();
-            $this->createLiveMarketRecords($company, $inventories);
+            $this->createCompanyRecords($company, $inventories);
         } catch (\Exception $e) {
             $this->logError('Failed to handle new company', [
                 'company_id' => $company->id,
@@ -352,7 +352,7 @@ class LiveMarketService
 
             $companies = $this->getActiveLenderCompanies();
             $inventories->each(
-                fn ($inventory) => $this->createLiveMarketRecords($inventory, $companies)
+                fn ($inventory) => $this->createInventoryRecords($inventory, $companies)
             );
         } catch (\Exception $e) {
             $this->logError('Failed to handle commodity type status change', [
@@ -477,23 +477,27 @@ class LiveMarketService
     */
 
     /**
-     * Create live market records for inventory-company combinations
+     * Create company records in live market
      *
-     * @param  LocalMarketInventory|Company  $primary  Primary entity (inventory or company)
-     * @param  Collection  $records  Collection of secondary entities to create records with
+     * @param  Collection<LocalMarketInventory>  $inventories
      */
-    private function createLiveMarketRecords(LocalMarketInventory|Company $primary, Collection $records): void
+    private function createCompanyRecords(Company $company, Collection $inventories): void
     {
-        $isPrimaryInventory = $primary instanceof LocalMarketInventory;
+        $inventories->each(
+            fn ($inventory) => $this->createLiveMarketRecord($inventory, $company, $this->calculateEligibleQuantity($inventory, $company))
+        );
+    }
 
-        $records->each(function ($record) use ($primary, $isPrimaryInventory) {
-            $inventory = $isPrimaryInventory ? $primary : $record;
-            $company = $isPrimaryInventory ? $record : $primary;
-
-            if ($eligibleQuantity = $this->calculateEligibleQuantity($inventory, $company)) {
-                $this->createLiveMarketRecord($inventory, $company, $eligibleQuantity);
-            }
-        });
+    /**
+     * Create inventory records in live market
+     *
+     * @param  Collection<Company>  $companies
+     */
+    private function createInventoryRecords(LocalMarketInventory $inventory, Collection $companies): void
+    {
+        $companies->each(
+            fn ($company) => $this->createLiveMarketRecord($inventory, $company, $this->calculateEligibleQuantity($inventory, $company))
+        );
     }
 
     /**
