@@ -139,7 +139,6 @@ class BursamV1Driver implements TraderInterface
         $checkCanChangeStatusOfTrader = $this->checkCanInitiateTraderOrder();
         if ($checkCanChangeStatusOfTrader) {
             $trader->update(['status' => TraderOrderStatus::Initiated]);
-            $trader->traderHistories()->create(['action' => FinancingOrderHistory::GetTtiId]);
             $this->processInitiatedTraderOrder($trader);
         }
     }
