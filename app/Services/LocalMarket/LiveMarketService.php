@@ -2,7 +2,6 @@
 
 namespace App\Services\LocalMarket;
 
-use App\Enums\CommodityTypeStatus;
 use App\Enums\CommoitySupplierStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
@@ -132,7 +131,7 @@ class LiveMarketService
             LocalMarketLive::where('commodity_item_id', $commodityItem->id)
                 ->update(['commodity_type_id' => $commodityTypeId]);
         } catch (\Exception $e) {
-            $this->logError('Failed to update commodity item type', [
+            $this->logError('Failed to update commodity item type', $e, [
                 'commodity_item_id' => $commodityItem->id,
                 'commodity_type_id' => $commodityTypeId,
                 'error' => $e->getMessage(),
@@ -148,9 +147,8 @@ class LiveMarketService
             LocalMarketLive::where('commodity_item_id', $commodityItem->id)
                 ->delete();
         } catch (\Exception $e) {
-            $this->logError('Failed to delete commodity item records', [
+            $this->logError('Failed to delete commodity item records', $e, [
                 'commodity_item_id' => $commodityItem->id,
-                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -212,9 +210,8 @@ class LiveMarketService
                 $this->handleNewInventory($inventory);
             }
         } catch (\Exception $e) {
-            $this->logError('Failed to update inventory', [
+            $this->logError('Failed to update inventory', $e, [
                 'inventory_id' => $inventory->id,
-                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -280,9 +277,8 @@ class LiveMarketService
 
             return;
         } catch (\Exception $e) {
-            $this->logError('Failed to handle supplier status change', [
+            $this->logError('Failed to handle supplier status change', $e, [
                 'supplier_id' => $supplier->id,
-                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -310,9 +306,8 @@ class LiveMarketService
             $inventories = $this->getActiveInventories();
             $this->createCompanyRecords($company, $inventories);
         } catch (\Exception $e) {
-            $this->logError('Failed to handle new company', [
+            $this->logError('Failed to handle new company', $e, [
                 'company_id' => $company->id,
-                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -330,9 +325,8 @@ class LiveMarketService
         try {
             LocalMarketLive::where('company_id', $company->id)->delete();
         } catch (\Exception $e) {
-            $this->logError('Failed to remove company records', [
+            $this->logError('Failed to remove company records', $e, [
                 'company_id' => $company->id,
-                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -344,37 +338,6 @@ class LiveMarketService
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Handle changes in commodity type status and update live market
-     *
-     * @param  CommodityType  $commodityType  The commodity type with changed status
-     *
-     * @throws \Exception If status change handling fails
-     */
-    public function handleCommodityTypeStatusChange(CommodityType $commodityType): void
-    {
-        try {
-            $inventories = $this->getActiveInventoriesForCommodityType($commodityType);
-
-            if (! $commodityType->status->is(CommodityTypeStatus::Active)) {
-                $this->removeInventoriesRecords($inventories);
-
-                return;
-            }
-
-            $companies = $this->getActiveLenderCompanies();
-            $inventories->each(
-                fn ($inventory) => $this->createInventoryRecords($inventory, $companies)
-            );
-        } catch (\Exception $e) {
-            $this->logError('Failed to handle commodity type status change', [
-                'commodity_type_id' => $commodityType->id,
-                'error' => $e->getMessage(),
-            ]);
-            throw $e;
-        }
-    }
-
     public function handleCommodityTypeDeletion(CommodityType $commodityType): void
     {
         try {
@@ -382,9 +345,8 @@ class LiveMarketService
             LocalMarketLive::where('commodity_type_id', $commodityType->id)
                 ->delete();
         } catch (\Exception $e) {
-            $this->logError('Failed to delete commodity item records', [
+            $this->logError('Failed to delete commodity item records', $e, [
                 'commodity_type_id' => $commodityType->id,
-                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -624,7 +586,7 @@ class LiveMarketService
     /**
      * Log an error message with exception details
      */
-    private function logError(string $message, \Throwable $e, array $additionalContext = []): void
+    private function logError(string $message, \Exception $e, array $additionalContext = []): void
     {
         $context = array_merge([
             'error' => $e->getMessage(),
