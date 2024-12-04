@@ -264,18 +264,12 @@ class LiveMarketService
     {
         try {
             $supplierDetails = $supplier->detail;
-            $inventories = $this->getActiveInventoriesForSupplier($supplier);
 
             if ($supplierDetails->status->is(CommoitySupplierStatus::Active)) {
-                $companies = $this->getActiveLenderCompanies();
-                $inventories->each(
-                    fn ($inventory) => $this->createInventoryRecords($inventory, $companies)
-                );
+                $this->createSupplierInventoriesRecords($supplier);
             } else {
-                $this->removeInventoriesRecords($inventories);
+                $this->removeSupplierInventoriesRecords($supplier);
             }
-
-            return;
         } catch (\Exception $e) {
             $this->logError('Failed to handle supplier status change', $e, [
                 'supplier_id' => $supplier->id,
@@ -484,6 +478,10 @@ class LiveMarketService
     private function createLiveMarketRecord(LocalMarketInventory $inventory, Company $company, int $eligibleQuantity): void
     {
         try {
+            $this->logInfo('Creating live market record', [
+                'inventory_id' => $inventory->id,
+                'company_id' => $company->id,
+            ]);
             LocalMarketLive::firstOrCreate(
                 [
                     'inventory_id' => $inventory->id,
@@ -492,6 +490,7 @@ class LiveMarketService
                 [
                     'commodity_item_id' => $inventory->commodity_item_id,
                     'commodity_type_id' => $inventory->commodity_type_id,
+                    'supplier_id' => $inventory->company_id,
                     'price' => $inventory->item->max_price,
                     'eligible_quantity' => $eligibleQuantity,
                     'status' => $inventory->status,
@@ -515,6 +514,10 @@ class LiveMarketService
      */
     private function removeInventoryRecords(LocalMarketInventory $inventory): void
     {
+        $this->logInfo('Removing inventories records', [
+            'inventory_id' => $inventory->id,
+        ]);
+
         LocalMarketLive::where('inventory_id', $inventory->id)->delete();
     }
 
@@ -602,5 +605,65 @@ class LiveMarketService
     private function logInfo(string $message, array $context = []): void
     {
         $this->log('info', $message, $context);
+    }
+
+    /**
+     * Create live market records for all supplier inventories
+     *
+     * @param  Company  $supplier  The supplier company
+     */
+    private function createSupplierInventoriesRecords(Company $supplier): void
+    {
+        try {
+            $this->logInfo('Creating live market records for supplier inventories', [
+                'supplier_id' => $supplier->id,
+                'supplier_name' => $supplier->name,
+            ]);
+
+            $inventories = $this->getActiveInventoriesForSupplier($supplier);
+            $companies = $this->getActiveLenderCompanies();
+
+            foreach ($inventories as $inventory) {
+                $this->createInventoryRecords($inventory, $companies);
+            }
+
+            $this->logInfo('Successfully created live market records for supplier', [
+                'supplier_id' => $supplier->id,
+                'inventories_processed' => $inventories->count(),
+                'lenders_processed' => $companies->count(),
+            ]);
+        } catch (\Throwable $e) {
+            $this->logError('Failed to create supplier inventories records', $e, [
+                'supplier_id' => $supplier->id,
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Remove all live market records for supplier inventories
+     *
+     * @param  Company  $supplier  The supplier company
+     */
+    private function removeSupplierInventoriesRecords(Company $supplier): void
+    {
+        try {
+            $this->logInfo('Removing live market records for supplier', [
+                'supplier_id' => $supplier->id,
+                'supplier_name' => $supplier->name,
+            ]);
+
+            $recordsDeleted = LocalMarketLive::where('supplier_id', $supplier->id)->delete();
+
+            $this->logInfo('Successfully removed supplier records from live market', [
+                'supplier_id' => $supplier->id,
+                'records_deleted' => $recordsDeleted,
+            ]);
+        } catch (\Throwable $e) {
+            $this->logError('Failed to remove supplier records from live market', $e, [
+                'supplier_id' => $supplier->id,
+            ]);
+            throw $e;
+        }
     }
 }

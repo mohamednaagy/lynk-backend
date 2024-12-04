@@ -25,9 +25,10 @@ class CommoditySupplierObserver
     public function updated(CompanySupplierDetail $supplierDetails)
     {
         if ($supplierDetails->wasChanged('status')) {
-            $this->UpdateCommoditySupplierStatusAction->handle($supplierDetails->company_id, $supplierDetails->status->value);
             // Handle supplier status changes
+            // should run before updating the status in the inventories table
             HandleSupplierStatusChange::dispatch($supplierDetails->supplier);
+            $this->UpdateCommoditySupplierStatusAction->handle($supplierDetails->company_id, $supplierDetails->status->value);
 
         }
     }

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('commodity_item_id')->constrained('commodity_items');
             $table->foreignId('commodity_type_id')->constrained('commodity_types');
             $table->foreignId('company_id')->constrained('companies');
+            $table->foreignId('supplier_id')->constrained('companies');
             $table->decimal('price');
             $table->integer('eligible_quantity');
             $table->string('status');
