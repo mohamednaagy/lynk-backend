@@ -44,6 +44,7 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
             $traderOrder->update([
                 'status' => TraderOrderStatus::Completed,
             ]);
+            $this->removeExpiryJob($traderOrder);
         }
 
         return [];
