@@ -18,7 +18,7 @@ class TraderOrderTimeLimitObserver
     {
         $effectiveAt = Carbon::parse($traderOrderTimeLimit->effective_at);
 
-        ExpireOrderJob::dispatch($traderOrderTimeLimit->trader_order_id)
+        ExpireOrderJob::dispatch($traderOrderTimeLimit)
             ->delay($effectiveAt->diffInSeconds(Carbon::now()));
     }
 }

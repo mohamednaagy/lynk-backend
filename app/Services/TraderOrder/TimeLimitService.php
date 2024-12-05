@@ -2,8 +2,12 @@
 
 namespace App\Services\TraderOrder;
 
+use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Models\TraderOrder;
+use App\Models\TraderOrderTimeLimit;
+use Carbon\Carbon;
+use App\Settings\LocalMurabahaSettings;
 
 class TimeLimitService
 {
@@ -33,14 +37,45 @@ class TimeLimitService
         $this->setTimeLimit($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit, $effectiveAt, $defaultValue);
     }
 
+
     /**
-     * Set the delivery confirmation time limit.
+     * Set the delivery confirmation time limit for the given TraderOrder.
      *
-     * @param  string  $effectiveAt  - Format: 'Y-m-d H:i:s', timezone: UTC
-     * @param  int  $defaultValue  - minutes of hours
+     * Retrieves the default delivery confirmation time limit from the settings,
+     * calculates the effective time by adding the default limit to the current time,
+     * and sets the time limit in the TraderOrder.
+     *
+     * @param TraderOrder $traderOrder The trader order for which to set the delivery confirmation time limit.
      */
-    public function setDeliveryConfirmationTimeLimit(TraderOrder $traderOrder, string $effectiveAt, int $defaultValue): void
+    public function setDeliveryConfirmationTimeLimit(TraderOrder $traderOrder): void
     {
-        $this->setTimeLimit($traderOrder, TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit, $effectiveAt, $defaultValue);
+        $config = $this->getConfirmDeliveryTimeConfig();
+        $this->setTimeLimit(
+            $traderOrder,
+            TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit,
+            $config['effective_at'],
+            $config['default_value']
+        );
+    }
+
+    /**
+     * Get the delivery confirmation time configuration.
+     *
+     * Fetches the default delivery confirmation time limit from the local Murabaha settings,
+     * calculates the effective delivery confirmation time by adding the default time limit to the current time in UTC,
+     * and returns these values in an associative array.
+     *
+     * @return array An associative array containing 'default_value' (the default delivery confirmation time limit in hours)
+     *               and 'effective_at' (the calculated effective delivery confirmation time as a string in 'Y-m-d H:i:s' format).
+     */
+
+    private function getConfirmDeliveryTimeConfig()
+    {
+        $defaultValue = app(LocalMurabahaSettings::class)->default_customer_delivery_confirmation_time_limit;
+        $effectiveAt = Carbon::now()
+            ->timezone('UTC')
+            ->addHours($defaultValue)
+            ->format('Y-m-d H:i:s');
+        return ['default_value' => $defaultValue, 'effective_at' => $effectiveAt];
     }
 }

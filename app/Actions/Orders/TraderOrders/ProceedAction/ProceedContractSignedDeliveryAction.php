@@ -20,8 +20,6 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
 {
     use TraderHelperTrait;
 
-    private const DELIVERY_CONFIRMATION_TIME_LIMIT_IN_HOURS = 72;
-
     /**
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws BindingResolutionException
@@ -42,7 +40,13 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
             app()->make(GenerateClientWakala::class)->handle($traderOrder);
         }
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::PendingDelivery);
-        $this->setExpiry($traderOrder);
+
+        # Set Delivery Confirmation Time Limit in case of Lynk Provider
+        if ($traderOrder->provider === TraderEnum::Lynk){
+            $timeLimitService = new TimeLimitService();
+            $timeLimitService->setDeliveryConfirmationTimeLimit($traderOrder);
+        }
+
         return [];
     }
 
@@ -57,13 +61,5 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
     protected function isContractSignedStepCompleted(TraderOrder $traderOrder): bool
     {
         return $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
-    }
-
-    private function setExpiry(TraderOrder $traderOrder){
-        if ($traderOrder->provider === TraderEnum::Lynk){
-            $timeLimitService = new TimeLimitService();
-            $effectiveAt = now()->timezone('UTC')->addHours(self::DELIVERY_CONFIRMATION_TIME_LIMIT_IN_HOURS)->format('Y-m-d H:i:s');
-            $timeLimitService->setDeliveryConfirmationTimeLimit(traderOrder: $traderOrder, effectiveAt: $effectiveAt, defaultValue: self::DELIVERY_CONFIRMATION_TIME_LIMIT_IN_HOURS);
-        }
     }
 }

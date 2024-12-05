@@ -2,38 +2,34 @@
 
 namespace App\Jobs\TraderOrder;
 
-use App\Enums\FinancingOrderHistory;
-use App\Enums\Trader;
-use App\Enums\TraderOrderMode;
-use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Enums\TraderOrderCancelReason;
+use App\Models\TraderOrderTimeLimit;
+use App\Services\TraderOrder\TimeLimitService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Support\Traders\Facades\Trader as FacadesTrader;
+use App\Support\Traders\Facades\Traders;
 
 class ExpireOrderJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * The trader order id.
-     *
-     * @var int
+     * @var TraderOrderTimeLimit
      */
-    private int $traderOrderId;
+    private TraderOrderTimeLimit $traderOrderTimeLimit;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(int $traderOrderId)
+    public function __construct(TraderOrderTimeLimit $traderOrderTimeLimit)
     {
-        $this->traderOrderId = $traderOrderId;
+        $this->traderOrderTimeLimit = $traderOrderTimeLimit;
         $this->onQueue('expire_trader_order');
     }
 
@@ -44,19 +40,15 @@ class ExpireOrderJob implements ShouldQueue
      */
     public function handle()
     {
-        $traderOrder = TraderOrder::find($this->traderOrderId);
-        if ($this->canExpireOrder($traderOrder)) {
-            FacadesTrader::driver($traderOrder->provider, $traderOrder->version)
-                ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::ExpiredConfirmationTimeLimit);
+        try {
+            $traderOrder = TraderOrder::find($this->traderOrderTimeLimit->trader_order_id);
+            if ($traderOrder->isExpirable()) {
+                Trader::driver($traderOrder->provider, $traderOrder->version)
+                    ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::ExpiredConfirmationTimeLimit);
+                $this->traderOrderTimeLimit->expire();
+            }
+        } catch(\Exception $exception) {
+            $this->traderOrderTimeLimit->fail();
         }
-    }
-
-    private function canExpireOrder(?TraderOrder $traderOrder): bool
-    {
-        return $traderOrder?->provider == Trader::Lynk
-            && $traderOrder?->mode == TraderOrderMode::Automatic
-            && $traderOrder?->status->is(TraderOrderStatus::InProgress)
-            && $traderOrder?->checkOrderHistoryAction([FinancingOrderHistory::PendingDelivery])
-            ?? false;
     }
 }

@@ -12,6 +12,8 @@ use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use App\Enums\TraderOrderTimeLimitType;
+use App\Enums\TraderOrderTimeLimitStatus;
 
 class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
 {
@@ -49,7 +51,7 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
 
     protected function isPreviousStepOfCustomerDeliveryConfirmationNotCompleted(TraderOrder $traderOrder): bool
     {
-        return ! $traderOrder->checkOrderStepComplete(
+        return !$traderOrder->checkOrderStepComplete(
             (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
                 ->getPreviousStepOf(MurabhaStep::CustomerDeliveryConfirmation)->step
         );
@@ -58,5 +60,14 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
     protected function isCustomerDeliveryConfirmationStepCompleted(TraderOrder $traderOrder): bool
     {
         return $traderOrder->checkOrderHistoryAction([FinancingOrderHistory::DeliveryCancelled, FinancingOrderHistory::DeliveryConfirmed]);
+    }
+
+    private function removeExpiryJob($traderOrder){
+            Queue::forget("expire_trader_order_{$traderOrder->id}");
+            $traderOrder->timeLimits()->where('status', TraderOrderTimeLimitStatus::Pending)
+                                        ->where('type', TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit)
+                                        ->latest()
+                                        ->first()->cancel();
+            Log::info("Cancelled scheduled expiration job for Trader Order ID: {$traderOrder->id}");
     }
 }
