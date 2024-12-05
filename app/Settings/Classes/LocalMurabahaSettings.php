@@ -10,6 +10,8 @@ class LocalMurabahaSettings extends Settings
 
     public int $default_contract_sign_time_limit;
 
+    public int $default_customer_delivery_confirmation_time_limit;
+
     public static function group(): string
     {
         return 'local_murabaha';
