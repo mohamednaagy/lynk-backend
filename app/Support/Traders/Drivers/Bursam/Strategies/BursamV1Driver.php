@@ -143,9 +143,11 @@ class BursamV1Driver implements TraderInterface
 
     public function moveHoldTraderOrder(TraderOrder $trader)
     {
-        $trader->update(['status' => TraderOrderStatus::Initiated]);
-        $trader->traderHistories()->create(['action' => FinancingOrderHistory::GetTtiId]);
-        ProcessFinancingOrders::dispatch();
+        $checkCanChangeStatusOfTrader = $this->checkCanInitiateTraderOrder();
+        if ($checkCanChangeStatusOfTrader) {
+            $trader->update(['status' => TraderOrderStatus::Initiated]);
+            $this->processInitiatedTraderOrder($trader);
+        }
     }
 
     public function fetchOrderResultYNN(TraderOrder $traderOrder)
