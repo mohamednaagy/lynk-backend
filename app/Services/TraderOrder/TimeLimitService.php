@@ -34,7 +34,7 @@ class TimeLimitService
      */
     public function setContractSignTimeLimit(TraderOrder $traderOrder): void
     {
-        $config = $this->getConfirmDeliveryTimeConfig();
+        $config = $this->getContractSignedLimitTimeConfig();
         $this->setTimeLimit(
             $traderOrder,
             TraderOrderTimeLimitType::ContractSignTimeLimit,
@@ -74,7 +74,6 @@ class TimeLimitService
      * @return array An associative array containing 'default_value' (the default delivery confirmation time limit in hours)
      *               and 'effective_at' (the calculated effective delivery confirmation time as a string in 'Y-m-d H:i:s' format).
      */
-
     private function getConfirmDeliveryTimeConfig()
     {
         $defaultValue = app(LocalMurabahaSettings::class)->default_customer_delivery_confirmation_time_limit;
@@ -95,7 +94,7 @@ class TimeLimitService
      * @return array An associative array containing 'default_value' (the default contract sign time limit in hours)
      *               and 'effective_at' (the calculated effective contract sign time as a string in 'Y-m-d H:i:s' format).
      */
-    private function getContractSigneLimitTimeConfig()
+    private function getContractSignedLimitTimeConfig()
     {
         $defaultValue = app(LocalMurabahaSettings::class)->default_contract_sign_time_limit;
         $effectiveAt = Carbon::now()
