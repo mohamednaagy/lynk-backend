@@ -14,6 +14,7 @@ use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Enums\TraderOrderTimeLimitStatus;
+use Illuminate\Support\Facades\Queue;
 
 class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
 {
@@ -64,7 +65,7 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
     }
 
     private function removeExpiryJob($traderOrder){
-            Queue::forget("expire_trader_order_{$traderOrder->id}");
+            removeJobFromQueue('expire-trader-order', $traderOrder->id);
             $traderOrder->timeLimits()->where('status', TraderOrderTimeLimitStatus::Pending)
                                         ->where('type', TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit)
                                         ->latest()

@@ -7,12 +7,13 @@ use Illuminate\Support\Facades\Config;
 use Modules\Grantify\Facades\Grantify;
 use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\MediaLibrary\HasMedia;
+use Illuminate\Support\Facades\Redis;
 
-if (! function_exists('validate_said')) {
+if (!function_exists('validate_said')) {
     function validate_said($id_number)
     {
         $id = trim($id_number);
-        if (! is_numeric($id)) {
+        if (!is_numeric($id)) {
             return -1;
         }
         if (strlen($id) !== 10) {
@@ -36,7 +37,7 @@ if (! function_exists('validate_said')) {
     }
 }
 
-if (! function_exists('convertMicrotimeToDuration')) {
+if (!function_exists('convertMicrotimeToDuration')) {
     function convertMicrotimeToDuration($seconds)
     {
         $hours = floor($seconds / 3600);
@@ -47,7 +48,7 @@ if (! function_exists('convertMicrotimeToDuration')) {
     }
 }
 
-if (! function_exists('perm')) {
+if (!function_exists('perm')) {
     function perm($areas, ...$permissions)
     {
         $permissionsArray = [];
@@ -74,14 +75,14 @@ if (! function_exists('perm')) {
     }
 }
 
-if (! function_exists('perm_arr')) {
+if (!function_exists('perm_arr')) {
     function perm_arr($areas, ...$permissions)
     {
         return explode('|', perm($areas, ...$permissions));
     }
 }
 
-if (! function_exists('get_host_from_url')) {
+if (!function_exists('get_host_from_url')) {
     function get_host_from_url($url)
     {
         $url = parse_url($url, PHP_URL_HOST) ?: explode('/', parse_url($url, PHP_URL_PATH), 2);
@@ -92,7 +93,7 @@ if (! function_exists('get_host_from_url')) {
     }
 }
 
-if (! function_exists('get_file_url')) {
+if (!function_exists('get_file_url')) {
     function get_file_url($media): ?string
     {
         if ($media) {
@@ -103,7 +104,7 @@ if (! function_exists('get_file_url')) {
     }
 }
 
-if (! function_exists('get_media_of_model')) {
+if (!function_exists('get_media_of_model')) {
     function get_media_of_model($model, $mediaCollection): ?Media
     {
         if ($model instanceof HasMedia) {
@@ -114,18 +115,18 @@ if (! function_exists('get_media_of_model')) {
     }
 }
 
-if (! function_exists('get_latest_version_of_trader')) {
+if (!function_exists('get_latest_version_of_trader')) {
     function get_latest_version_of_trader($provider): string
     {
-        return config('trader.providers.'.$provider.'.latest');
+        return config('trader.providers.' . $provider . '.latest');
     }
 }
 
-if (! function_exists('get_murabha_steps')) {
+if (!function_exists('get_murabha_steps')) {
     function get_murabha_steps($provider, ?string $version = null, bool $withFiles = false): array
     {
         $version = $version ?? get_latest_version_of_trader($provider);
-        $stepHistories = config('murabha-steps.'.$provider.'-versions.'.$version);
+        $stepHistories = config('murabha-steps.' . $provider . '-versions.' . $version);
 
         if ($withFiles) {
             return $stepHistories;
@@ -137,14 +138,14 @@ if (! function_exists('get_murabha_steps')) {
     }
 }
 
-if (! function_exists('trader_step_histories')) {
+if (!function_exists('trader_step_histories')) {
     function trader_step_histories(string $provider, string $version): array
     {
         return MurabhaStep::getSteps($provider, $version);
     }
 }
 
-if (! function_exists('is_bursam_service_available')) {
+if (!function_exists('is_bursam_service_available')) {
     function is_bursam_service_available(): bool
     {
         $timezone = Config::get('services.bursam.timezone');
@@ -166,7 +167,7 @@ if (! function_exists('is_bursam_service_available')) {
         }
 
         if (
-            ! $now->between($marketOpeningStartDateTime, $marketOpeningEndDateTime)
+            !$now->between($marketOpeningStartDateTime, $marketOpeningEndDateTime)
             || ($now->isFriday() && $now->between($fridayBreakStartDateTime, $fridayBreakEndDateTime))
         ) {
             return false;
@@ -176,7 +177,7 @@ if (! function_exists('is_bursam_service_available')) {
     }
 }
 
-if (! function_exists('get_start_time_bursa')) {
+if (!function_exists('get_start_time_bursa')) {
     function get_start_time_bursa()
     {
         $timezone = Config::get('services.bursam.timezone');
@@ -192,14 +193,14 @@ if (! function_exists('get_start_time_bursa')) {
     }
 }
 
-if (! function_exists('parse_number')) {
+if (!function_exists('parse_number')) {
     function parse_number($number): float
     {
         return (float) preg_replace('/[^\d.]/', '', $number);
     }
 }
 
-if (! function_exists('cast_phone_number_if_exist')) {
+if (!function_exists('cast_phone_number_if_exist')) {
     function cast_phone_number_if_exist(array &$data): array
     {
         if (array_key_exists('phone_number', $data) && array_key_exists('phone_country_code', $data)) {
@@ -210,14 +211,14 @@ if (! function_exists('cast_phone_number_if_exist')) {
     }
 }
 
-if (! function_exists('number_unformat')) {
+if (!function_exists('number_unformat')) {
     function number_unformat($number)
     {
         return app('numeral')->unformat($number);
     }
 }
 
-if (! function_exists('convertDateTimeToHumanDate')) {
+if (!function_exists('convertDateTimeToHumanDate')) {
     function convertDateTimeToHumanDate(Carbon $dataTime, ?Carbon $endDateTime = null)
     {
         $endDateTime = $endDateTime ?? Carbon::now();
@@ -235,7 +236,7 @@ if (! function_exists('convertDateTimeToHumanDate')) {
     }
 }
 
-if (! function_exists('saudi_now')) {
+if (!function_exists('saudi_now')) {
     /**
      * Get the current time in the 'Asia/Riyadh' timezone or convert a given date to this timezone.
      *
@@ -248,5 +249,37 @@ if (! function_exists('saudi_now')) {
         $createdDate = $date ? $date->clone()->timezone($timezone) : Carbon::now($timezone);
 
         return $createdDate->format($format);
+    }
+}
+
+
+if (!function_exists('removeJobFromQueue')) {
+    /**
+     * Remove a job from the given queue by its unique ID.
+     *
+     * @param string $queueName The name of the queue to remove the job from.
+     * @param string $uniqueId The unique ID of the job to be removed.
+     * @return bool
+\     */
+    function removeJobFromQueue(string $queueName, string $uniqueId): bool
+    {
+        // The Redis key for delayed jobs
+        $redisKey = "queues:{$queueName}:delayed";
+
+        // Access the raw Redis client
+        $redis = Redis::connection();
+
+        // Fetch all delayed jobs
+        $jobs = $redis->zrange($redisKey, 0, -1);
+
+        foreach ($jobs as $job) {
+            if (strpos($job, $uniqueId) !== false) {
+                // Remove the job from the delayed set
+                $redis->zrem($redisKey, $job);
+                return true;
+            }
+        }
+
+        return   false;
     }
 }
