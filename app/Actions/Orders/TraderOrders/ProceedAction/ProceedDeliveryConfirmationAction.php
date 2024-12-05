@@ -64,12 +64,13 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
         return $traderOrder->checkOrderHistoryAction([FinancingOrderHistory::DeliveryCancelled, FinancingOrderHistory::DeliveryConfirmed]);
     }
 
-    private function removeExpiryJob($traderOrder){
-            removeJobFromQueue('expire-trader-order', $traderOrder->id);
-            $traderOrder->timeLimits()->where('status', TraderOrderTimeLimitStatus::Pending)
-                                        ->where('type', TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit)
-                                        ->latest()
-                                        ->first()->cancel();
-            Log::info("Cancelled scheduled expiration job for Trader Order ID: {$traderOrder->id}");
+    private function removeExpiryJob($traderOrder)
+    {
+        removeJobFromQueue('expire-trader-order', $traderOrder->id);
+        $traderOrder->timeLimits()->where('status', TraderOrderTimeLimitStatus::Pending)
+            ->where('type', TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit)
+            ->latest()
+            ->first()->cancel();
+        Log::info("Cancelled scheduled expiration job for Trader Order ID: {$traderOrder->id}");
     }
 }
