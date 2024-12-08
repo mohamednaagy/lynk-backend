@@ -163,7 +163,7 @@ class InventoryService
                         LocalMarketInventoryUnits::where('id', $unit->id)
                             ->update([
                                 'status' => InventoryUnitsStatus::Free,
-                                'hold_for' => null,
+                                'hold_for' => 0,
                             ]);
                     }
                 });
@@ -184,7 +184,7 @@ class InventoryService
                         LocalMarketInventoryUnits::where('id', $unit->id)
                             ->update([
                                 'status' => InventoryUnitsStatus::Free,
-                                'hold_for' => null,
+                                'hold_for' => 0,
                                 'last_completed_order_id' => $localMarketOrder->id,
                                 'previous_company_id_owners' => $this->getUpdatedPreviousOwners($unit, $localMarketOrder->company_id),
                             ]);
