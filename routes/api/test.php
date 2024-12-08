@@ -20,19 +20,19 @@ Route::prefix('v1/test')->group(function () {
         $inventory = LocalMarketInventory::find(8);
 
         // $inventoryService->completeOrderUnits($localMarketOrder);
-        $unitService->getEligibleUnits($localMarketOrder, [['id' => 8, 'numberOfUnits' => 2]]);
-        dd('am here ');
-        $company_id = request()->input('company_id');
-        $preferred_types = [1];
-        $loan_amount = request()->input('loan_amount');
-        $order_no = request()->input('order_no');
+        // $unitService->getEligibleUnits($localMarketOrder, [['id' => 8, 'numberOfUnits' => 2]]);
+        // dd('am here ');
+        // $company_id = request()->input('company_id');
+        // $preferred_types = [1];
+        // $loan_amount = request()->input('loan_amount');
+        // $order_no = request()->input('order_no');
 
         $localMarketOrder = LocalMarketOrder::find(9);
-        (new BuyCommoditiesAction(new LoanService))->handle($localMarketOrder);
-        dd('dwdw');
+        // (new BuyCommoditiesAction(new LoanService))->handle($localMarketOrder);
+        // dd('dwdw');
 
-        // $loanService = new LoanService;
-        // dd($loanService->getCommoditiesForLoan($order_no, $company_id, $loan_amount, $preferred_types));
+        $loanService = new LoanService;
+        dd($loanService->getCommoditiesForLoan($localMarketOrder));
 
         $data['currency'] = 'SAR';
         $data['national_id'] = 312343432432;
