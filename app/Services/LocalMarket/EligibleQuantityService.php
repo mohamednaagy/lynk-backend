@@ -123,24 +123,32 @@ class EligibleQuantityService
 
         $current = 0;
 
-        foreach ($inventories as $inventory) {
-            foreach ($companies as $company) {
-                $current++;
+        // Process in smaller chunks to avoid long locks
+        $companies->chunk(50)->each(function ($companyChunk) use (
+            $inventories,
+            $progressCallback,
+            &$current,
+            &$stats
+        ) {
+            foreach ($companyChunk as $company) {
+                foreach ($inventories as $inventory) {
+                    $current++;
 
-                if ($progressCallback) {
-                    $progressCallback([
-                        'inventory' => $inventory,
-                        'company' => $company,
-                        'current' => $current,
-                        'total' => $stats['total_operations'],
-                    ]);
+                    if ($progressCallback) {
+                        $progressCallback([
+                            'inventory' => $inventory,
+                            'company' => $company,
+                            'current' => $current,
+                            'total' => $stats['total_operations'],
+                        ]);
+                    }
+
+                    $eligibleQuantity = $this->calculateEligibleQuantity($inventory, $company);
+                    $this->createEligibleQuantityRecord($inventory, $company, $eligibleQuantity);
+                    $stats['records_created']++;
                 }
-                $eligibleQuantity = $this->calculateEligibleQuantity($inventory, $company);
-
-                $this->createEligibleQuantityRecord($inventory, $company, $eligibleQuantity);
-                $stats['records_created']++;
             }
-        }
+        });
 
         return $stats;
     }
