@@ -2,7 +2,7 @@
 
 namespace App\Jobs\LocalMarket\InventoryEligibleQuantities;
 
-use App\Models\Company;
+use App\Models\LocalMarketInventory;
 use App\Services\LocalMarket\EligibleQuantityService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,33 +11,31 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class RebuildLenderEligibleQuantities implements ShouldQueue
+class DeleteInventory implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public function __construct(
-        private readonly int $companyId
-    ) {
-        $this->onQueue('local_market_eligible_quantities');
-    }
+        private readonly int $inventoryId
+    ) {}
 
     public function handle(EligibleQuantityService $service): void
     {
         try {
-            $company = Company::findOrFail($this->companyId);
+            $inventory = LocalMarketInventory::findOrFail($this->inventoryId);
 
-            Log::channel('live_market')->info('Starting rebuild eligible quantities for lender', [
-                'company_id' => $this->companyId,
+            Log::channel('live_market')->info('Starting delete eligible quantities for inventory', [
+                'inventory_id' => $this->inventoryId,
             ]);
 
-            $service->rebuildForLender($company);
+            $service->deleteForInventory($inventory);
 
-            Log::channel('live_market')->info('Completed rebuild eligible quantities for lender', [
-                'company_id' => $this->companyId,
+            Log::channel('live_market')->info('Completed delete eligible quantities for inventory', [
+                'inventory_id' => $this->inventoryId,
             ]);
         } catch (\Throwable $e) {
-            Log::channel('live_market')->error('Failed to rebuild eligible quantities for lender', [
-                'company_id' => $this->companyId,
+            Log::channel('live_market')->error('Failed to delete eligible quantities for inventory', [
+                'inventory_id' => $this->inventoryId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
