@@ -138,6 +138,34 @@ class EligibleQuantityService
     }
 
     /**
+     * Delete eligible quantities for a specific lender
+     */
+    public function deleteForLender(Company $company): void
+    {
+        try {
+            $this->logInfo('Deleting eligible quantities for lender', [
+                'company_id' => $company->id,
+            ]);
+
+            LocalMarketEligibleQuantity::where('company_id', $company->id)
+                ->chunkById(1000, function ($records) {
+                    foreach ($records as $record) {
+                        $record->delete();
+                    }
+                });
+
+            $this->logInfo('Successfully deleted eligible quantities for lender', [
+                'company_id' => $company->id,
+            ]);
+        } catch (\Throwable $e) {
+            $this->logError('Failed to delete eligible quantities for lender', $e, [
+                'company_id' => $company->id,
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
      * Process inventories and companies to build eligible quantity records
      */
     private function processInventoriesAndCompanies(
