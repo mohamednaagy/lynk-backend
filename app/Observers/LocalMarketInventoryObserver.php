@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Enums\LocalMarket\InventoryStatus;
+use App\Jobs\LocalMarket\InventoryEligibleQuantities\RebuildInventoryEligibleQuantities;
 use App\Jobs\LocalMarket\LiveMarket\PublishInventoryToLiveMarket;
 use App\Jobs\LocalMarket\LiveMarket\UpdateInventoryInLiveMarket;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
@@ -37,7 +38,8 @@ class LocalMarketInventoryObserver
         UpdateInventoryStock::dispatch($inventory, $inventory->available_quantity, $inventory->wasRecentlyCreated);
 
         // Add to live market if active and has quantity
-        PublishInventoryToLiveMarket::dispatch($inventory);
+        // PublishInventoryToLiveMarket::dispatch($inventory);
+
     }
 
     /**
@@ -53,17 +55,18 @@ class LocalMarketInventoryObserver
         dd($inventory->status);
 
         // Handle status changes
-        if ($inventory->wasChanged('status')) {
-            if ($inventory->status->is(InventoryStatus::Active)) {
-                PublishInventoryToLiveMarket::dispatch($inventory);
-            } else {
-                $this->liveMarketService->handleInventoryDeletion($inventory);
-            }
-        }
+        // if ($inventory->wasChanged('status')) {
+        //     if ($inventory->status->is(InventoryStatus::Active)) {
+        //         PublishInventoryToLiveMarket::dispatch($inventory);
+        //     } else {
+        //         $this->liveMarketService->handleInventoryDeletion($inventory);
+        //     }
+        // }
 
-        if ($inventory->wasChanged('available_quantity')) {
-            UpdateInventoryInLiveMarket::dispatch($inventory);
-        }
+        // if ($inventory->wasChanged('available_quantity')) {
+        //     // UpdateInventoryInLiveMarket::dispatch($inventory);
+        //     RebuildInventoryEligibleQuantities::dispatch($inventory->id);
+        // }
     }
 
     /**
@@ -71,6 +74,6 @@ class LocalMarketInventoryObserver
      */
     public function deleted(LocalMarketInventory $inventory): void
     {
-        $this->liveMarketService->handleInventoryDeletion($inventory);
+        // $this->liveMarketService->handleInventoryDeletion($inventory);
     }
 }

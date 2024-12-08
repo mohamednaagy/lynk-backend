@@ -70,7 +70,7 @@ class UnitService
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
         LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
             ->where('status', InventoryUnitsStatus::Free)
-            ->whereNull('hold_for')
+            ->where('hold_for', 0)
             ->where(function ($query) use ($localMarketOrder, $numberOfRotation) {
                 if ($numberOfRotation > 0) {
                     $query->whereNull('previous_company_id_owners')->orWhere(function ($subQuery) use ($localMarketOrder, $numberOfRotation) {
@@ -137,7 +137,7 @@ class UnitService
 
         return LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
             ->where('status', InventoryUnitsStatus::Free)
-            ->whereNull('hold_for')
+            ->where('hold_for', 0)
             ->where(function ($query) use ($company, $numberOfRotation) {
                 if ($numberOfRotation > 0) {
                     $query->whereNull('previous_company_id_owners')->orWhere(function ($subQuery) use ($company, $numberOfRotation) {
