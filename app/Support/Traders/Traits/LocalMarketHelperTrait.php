@@ -17,13 +17,13 @@ trait LocalMarketHelperTrait
         );
     }
 
-    public function canMoveToNextStep($currentStep, int $nextStep): bool
+    public function canMoveToNextStep($currentStep, int $nextStep, $localMarketOrder): bool
     {
         $currentStep = LocalMarketOrderStatus::getEnumInstanceByValue($currentStep);
         $nextStep = LocalMarketOrderStatus::getEnumInstanceByValue($nextStep);
         $checkStep = $currentStep->canMoveTo($nextStep->value);
         if (! $currentStep->canMoveTo($nextStep->value)) {
-            throw new UnexpectedValueException("can not move $currentStep to $nextStep");
+            throw new UnexpectedValueException("can not move $currentStep to $nextStep for local market order {$localMarketOrder->id}");
         }
 
         return $checkStep;
