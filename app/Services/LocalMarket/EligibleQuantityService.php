@@ -171,8 +171,10 @@ class EligibleQuantityService
             $this->logError('Failed to create eligible quantity record', $e, [
                 'inventory_id' => $inventory->id,
                 'company_id' => $company->id,
+                'eligible_quantity' => $eligibleQuantity,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
-            throw $e;
         }
     }
 
