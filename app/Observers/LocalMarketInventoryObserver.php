@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Enums\LocalMarket\InventoryStatus;
-use App\Jobs\LocalMarket\InventoryEligibleQuantities\RebuildInventoryEligibleQuantities;
 use App\Jobs\LocalMarket\LiveMarket\PublishInventoryToLiveMarket;
 use App\Jobs\LocalMarket\LiveMarket\UpdateInventoryInLiveMarket;
 use App\Jobs\LocalMarket\UpdateInventoryStock;

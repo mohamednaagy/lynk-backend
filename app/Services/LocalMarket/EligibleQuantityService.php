@@ -107,6 +107,37 @@ class EligibleQuantityService
     }
 
     /**
+     * Delete eligible quantities for a specific inventory
+     */
+    public function deleteForInventory(LocalMarketInventory $inventory): void
+    {
+        try {
+            $this->logInfo('Deleting eligible quantities for inventory', [
+                'inventory_id' => $inventory->id,
+            ]);
+
+            $deletedCount = LocalMarketEligibleQuantity::where('inventory_id', $inventory->id)
+                ->chunkById(100, function ($records) {
+                    foreach ($records as $record) {
+                        $record->delete();
+                    }
+                });
+
+            $this->logInfo('Successfully deleted eligible quantities for inventory', [
+                'inventory_id' => $inventory->id,
+                'records_deleted' => $deletedCount,
+            ]);
+        } catch (\Throwable $e) {
+            $this->logError('Failed to delete eligible quantities for inventory', $e, [
+                'inventory_id' => $inventory->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
      * Process inventories and companies to build eligible quantity records
      */
     private function processInventoriesAndCompanies(

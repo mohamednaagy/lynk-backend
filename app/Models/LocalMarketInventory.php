@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Enums\LocalMarket\InventoryUnitsStatus;
-use App\Jobs\LocalMarket\InventoryEligibleQuantities\RebuildInventoryEligibleQuantities;
+use App\Jobs\LocalMarket\InventoryEligibleQuantities\RebuildInventory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -131,6 +131,6 @@ class LocalMarketInventory extends Model
 
         $this->save();
 
-        RebuildInventoryEligibleQuantities::dispatch($this->id);
+        RebuildInventory::dispatch($this->id);
     }
 }

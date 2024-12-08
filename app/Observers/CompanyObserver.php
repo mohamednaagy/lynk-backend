@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
-use App\Jobs\LocalMarket\InventoryEligibleQuantities\RebuildLenderEligibleQuantities;
+use App\Jobs\LocalMarket\InventoryEligibleQuantities\RebuildLender;
 use App\Jobs\LocalMarket\LiveMarket\DeleteSupplierFromLiveMarket;
 use App\Jobs\LocalMarket\LiveMarket\PublishLenderToLiveMarket;
 use App\Models\Company;
@@ -24,7 +24,7 @@ class CompanyObserver
      */
     public function created(Company $company): void
     {
-        RebuildLenderEligibleQuantities::dispatch($company->id);
+        RebuildLender::dispatch($company->id);
 
         // if ($company->type->is(CompanyType::Lender) && $company->status->is(CompanyStatus::Approved)) {
         //     PublishLenderToLiveMarket::dispatch($company);
