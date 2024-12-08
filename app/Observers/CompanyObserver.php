@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
+use App\Jobs\LocalMarket\InventoryEligibleQuantities\DeleteCompany;
 use App\Jobs\LocalMarket\InventoryEligibleQuantities\RebuildLender;
 use App\Jobs\LocalMarket\LiveMarket\DeleteSupplierFromLiveMarket;
 use App\Jobs\LocalMarket\LiveMarket\PublishLenderToLiveMarket;
@@ -53,6 +54,7 @@ class CompanyObserver
      */
     public function deleted(Company $company): void
     {
+        DeleteCompany::dispatch($company->id);
         // if ($company->type->is(CompanyType::Lender)) {
         //     DeleteSupplierFromLiveMarket::dispatch($company);
         // }
