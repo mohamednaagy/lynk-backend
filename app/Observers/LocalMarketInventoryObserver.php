@@ -50,6 +50,8 @@ class LocalMarketInventoryObserver
      */
     public function updated(LocalMarketInventory $inventory): void
     {
+        dd($inventory->status);
+
         // Handle status changes
         if ($inventory->wasChanged('status')) {
             if ($inventory->status->is(InventoryStatus::Active)) {
