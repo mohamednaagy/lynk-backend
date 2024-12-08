@@ -4,6 +4,8 @@ namespace App\Observers;
 
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
+use App\Jobs\LocalMarket\LiveMarket\DeleteSupplierFromLiveMarket;
+use App\Jobs\LocalMarket\LiveMarket\PublishLenderToLiveMarket;
 use App\Models\Company;
 use App\Services\LocalMarket\LiveMarketService;
 
@@ -22,7 +24,7 @@ class CompanyObserver
     public function created(Company $company): void
     {
         if ($company->type->is(CompanyType::Lender) && $company->status->is(CompanyStatus::Approved)) {
-            $this->liveMarketService->handleNewCompany($company);
+            PublishLenderToLiveMarket::dispatch($company);
         }
     }
 
@@ -36,9 +38,9 @@ class CompanyObserver
         if ($company->type->is(CompanyType::Lender) && $company->wasChanged('status')) {
             // If status changed to Approved, handle as new company
             if ($company->status->is(CompanyStatus::Approved)) {
-                $this->liveMarketService->handleNewCompany($company);
+                PublishLenderToLiveMarket::dispatch($company);
             } else {
-                $this->liveMarketService->handleCompanyRemoval($company);
+                DeleteSupplierFromLiveMarket::dispatch($company);
             }
         }
     }
@@ -49,7 +51,7 @@ class CompanyObserver
     public function deleted(Company $company): void
     {
         if ($company->type->is(CompanyType::Lender)) {
-            $this->liveMarketService->handleCompanyRemoval($company);
+            DeleteSupplierFromLiveMarket::dispatch($company);
         }
     }
 }

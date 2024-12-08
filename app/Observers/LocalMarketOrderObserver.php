@@ -35,13 +35,11 @@ class LocalMarketOrderObserver
     public function created(LocalMarketOrder $localMarketOrder)
     {
         $this->fireJob($localMarketOrder);
-
     }
 
     public function updating(LocalMarketOrder $localMarketOrder)
     {
-        return $this->canMoveToNextStep($localMarketOrder->getOriginal('status'), $localMarketOrder->status);
-
+        return $this->canMoveToNextStep($localMarketOrder->getOriginal('status'), $localMarketOrder->status, $localMarketOrder);
     }
 
     /**
@@ -93,37 +91,37 @@ class LocalMarketOrderObserver
         // TODO:sell_commodity_21_10 => add new job for cancelled success
         switch ($localMarketOrder->status) {
             case LocalMarketOrderStatus::EligibleCommoditiesAvailable:
-                dispatch(new EligibleCommoditiesFoundStatus($localMarketOrder));
+                EligibleCommoditiesFoundStatus::dispatch($localMarketOrder);
                 break;
             case LocalMarketOrderStatus::NoEligibleCommoditiesAvailable:
-                dispatch(new NoEligibleCommoditiesAvailableStatus($localMarketOrder));
+                NoEligibleCommoditiesAvailableStatus::dispatch($localMarketOrder);
                 break;
             case LocalMarketOrderStatus::CommoditiesPurchased:
-                dispatch(new CommoditiesPurchaseCompletedStatus($localMarketOrder));
+                CommoditiesPurchaseCompletedStatus::dispatch($localMarketOrder);
                 break;
             case LocalMarketOrderStatus::FailedPurchase:
-                dispatch(new FailedPurchaseStatus($localMarketOrder));
+                FailedPurchaseStatus::dispatch($localMarketOrder);
                 break;
             case LocalMarketOrderStatus::PendingCancellation:
-                dispatch(new PendingCancelOrderStatus($localMarketOrder));
+                PendingCancelOrderStatus::dispatch($localMarketOrder);
                 break;
             case LocalMarketOrderStatus::Cancelled:
-                dispatch(new CancelledOrderStatus($localMarketOrder));
+                CancelledOrderStatus::dispatch($localMarketOrder);
                 break;
             case LocalMarketOrderStatus::FailedToCancel:
-                dispatch(new FailedCancelOrderStatus($localMarketOrder));
+                FailedCancelOrderStatus::dispatch($localMarketOrder);
                 break;
             case LocalMarketOrderStatus::PendingSellCommodities:
-                dispatch(new PendingSellOrderStatus($localMarketOrder));
+                PendingSellOrderStatus::dispatch($localMarketOrder);
                 break;
             case LocalMarketOrderStatus::CommoditiesSell:
-                dispatch(new SoldOrderSuccessStatus($localMarketOrder));
+                SoldOrderSuccessStatus::dispatch($localMarketOrder);
                 break;
             case LocalMarketOrderStatus::FailedSell:
-                dispatch(new FailedSoldOrderStatus($localMarketOrder));
+                FailedSoldOrderStatus::dispatch($localMarketOrder);
                 break;
             case LocalMarketOrderStatus::TransferOwnershipToCustomer:
-                dispatch(new TransferCommodityToCustomerStatus($localMarketOrder));
+                TransferCommodityToCustomerStatus::dispatch($localMarketOrder);
                 break;
         }
     }
