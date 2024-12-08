@@ -2,13 +2,17 @@
 
 namespace App\Services\LocalMarket;
 
+use App\Enums\CommodityTypeStatus;
+use App\Enums\CommoitySupplierStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
 use App\Enums\LocalMarket\InventoryStatus;
+use App\Models\CommodityItem;
 use App\Models\CommodityType;
 use App\Models\Company;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketLive;
+use App\Models\Supplier;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -34,9 +38,8 @@ class LiveMarketService
             $this->truncateMarket();
             $companies = $this->getActiveLenderCompanies();
             $inventories = $this->getActiveInventories();
-            $result = $this->processInventoriesAndCompanies($companies, $inventories, $progressCallback);
 
-            return $result;
+            return $this->processInventoriesAndCompanies($companies, $inventories, $progressCallback);
         } catch (\Exception $e) {
             $this->logError('Failed to build live market from scratch', [
                 'error' => $e->getMessage(),
@@ -84,6 +87,67 @@ class LiveMarketService
         }
 
         return $stats;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Commodity Item Management
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Handle price updates for commodity item and update all related inventories
+     *
+     * @param  int  $commodityItemId  The ID of the commodity item with updated price
+     * @param  float  $newPrice  The new price for the commodity item
+     *
+     * @throws \Exception If price update fails
+     */
+    public function handleCommodityItemPriceUpdate(CommodityItem $commodityItem, float $newPrice): void
+    {
+        try {
+            // Update live market records for all affected inventories
+            LocalMarketLive::where('commodity_item_id', $commodityItem->id)
+                ->update(['price' => $newPrice]);
+        } catch (\Exception $e) {
+            $this->logError('Failed to update commodity item price', [
+                'commodity_item_id' => $commodityItem->id,
+                'new_price' => $newPrice,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    public function handleCommodityItemTypeUpdate(CommodityItem $commodityItem, int $commodityTypeId): void
+    {
+        try {
+            // Update live market records for all affected inventories
+            LocalMarketLive::where('commodity_item_id', $commodityItem->id)
+                ->update(['commodity_type_id' => $commodityTypeId]);
+        } catch (\Exception $e) {
+            $this->logError('Failed to update commodity item type', [
+                'commodity_item_id' => $commodityItem->id,
+                'commodity_type_id' => $commodityTypeId,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    public function handleCommodityItemDeletion(CommodityItem $commodityItem): void
+    {
+        try {
+            // Delete all live market records for this commodity item
+            LocalMarketLive::where('commodity_item_id', $commodityItem->id)
+                ->delete();
+        } catch (\Exception $e) {
+            $this->logError('Failed to delete commodity item records', [
+                'commodity_item_id' => $commodityItem->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
     }
 
     /*
@@ -142,31 +206,6 @@ class LiveMarketService
     }
 
     /**
-     * Handle price updates for inventory in live market
-     *
-     * @param  LocalMarketInventory  $inventory  The inventory with updated price
-     *
-     * @throws \Exception If price update fails
-     */
-    public function handleInventoryPriceUpdate(LocalMarketInventory $inventory): void
-    {
-        try {
-            if (! $this->isInventoryEligible($inventory)) {
-                return;
-            }
-
-            LocalMarketLive::where('inventory_id', $inventory->id)
-                ->update(['price' => $inventory->max_price]);
-        } catch (\Exception $e) {
-            $this->logError('Failed to update inventory price', [
-                'inventory_id' => $inventory->id,
-                'error' => $e->getMessage(),
-            ]);
-            throw $e;
-        }
-    }
-
-    /**
      * Handle deletion of inventory from live market
      *
      * @param  LocalMarketInventory  $inventory  The inventory to delete
@@ -176,16 +215,66 @@ class LiveMarketService
     public function handleInventoryDeletion(LocalMarketInventory $inventory): void
     {
         try {
-            $this->removeInventoryRecords($inventory);
+            $this->logInfo('Starting inventory deletion process', [
+                'inventory_id' => $inventory->id,
+                'commodity_item_id' => $inventory->commodity_item_id,
+            ]);
+
+            // Remove all live market records for this inventory
+            $recordsDeleted = LocalMarketLive::where('inventory_id', $inventory->id)
+                ->delete();
+
+            $this->logInfo('Successfully deleted inventory records from live market', [
+                'inventory_id' => $inventory->id,
+                'records_deleted' => $recordsDeleted,
+            ]);
         } catch (\Exception $e) {
-            $this->logError('Failed to delete inventory records', [
+            $this->logError('Failed to delete inventory from live market', [
                 'inventory_id' => $inventory->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Supplier Management
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Handle changes in supplier status and update live market accordingly
+     *
+     * @param  Company  $supplier  The supplier company with changed status
+     *
+     * @throws \Exception If status change handling fails
+     */
+    public function handleSupplierStatusChange(Supplier $supplier): void
+    {
+        try {
+            $supplierDetails = $supplier->detail;
+            $inventories = $this->getActiveInventoriesForSupplier($supplier);
+
+            if ($supplierDetails->status->is(CommoitySupplierStatus::Active)) {
+                $companies = $this->getActiveLenderCompanies();
+                $inventories->each(
+                    fn ($inventory) => $this->createLiveMarketRecords($inventory, $companies)
+                );
+            } else {
+                $this->removeInventoriesRecords($inventories);
+            }
+
+            return;
+        } catch (\Exception $e) {
+            $this->logError('Failed to handle supplier status change', [
+                'supplier_id' => $supplier->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
     /*
     |--------------------------------------------------------------------------
     | Company Management
@@ -237,37 +326,6 @@ class LiveMarketService
         }
     }
 
-    /**
-     * Handle changes in supplier status and update live market accordingly
-     *
-     * @param  Company  $supplier  The supplier company with changed status
-     *
-     * @throws \Exception If status change handling fails
-     */
-    public function handleSupplierStatusChange(Company $supplier): void
-    {
-        try {
-            $inventories = $this->getActiveInventoriesForSupplier($supplier);
-
-            if (! $supplier->status->is(CompanyStatus::Approved)) {
-                $this->removeInventoriesRecords($inventories);
-
-                return;
-            }
-
-            $companies = $this->getActiveLenderCompanies();
-            $inventories->each(
-                fn ($inventory) => $this->createLiveMarketRecords($inventory, $companies)
-            );
-        } catch (\Exception $e) {
-            $this->logError('Failed to handle supplier status change', [
-                'supplier_id' => $supplier->id,
-                'error' => $e->getMessage(),
-            ]);
-            throw $e;
-        }
-    }
-
     /*
     |--------------------------------------------------------------------------
     | Commodity Type Management
@@ -286,7 +344,7 @@ class LiveMarketService
         try {
             $inventories = $this->getActiveInventoriesForCommodityType($commodityType);
 
-            if (! $commodityType->is_active) {
+            if (! $commodityType->status->is(CommodityTypeStatus::Active)) {
                 $this->removeInventoriesRecords($inventories);
 
                 return;
@@ -298,6 +356,21 @@ class LiveMarketService
             );
         } catch (\Exception $e) {
             $this->logError('Failed to handle commodity type status change', [
+                'commodity_type_id' => $commodityType->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    public function handleCommodityTypeDeletion(CommodityType $commodityType): void
+    {
+        try {
+            // Delete all live market records for this commodity item
+            LocalMarketLive::where('commodity_type_id', $commodityType->id)
+                ->delete();
+        } catch (\Exception $e) {
+            $this->logError('Failed to delete commodity item records', [
                 'commodity_type_id' => $commodityType->id,
                 'error' => $e->getMessage(),
             ]);
@@ -368,21 +441,6 @@ class LiveMarketService
     }
 
     /**
-     * Get active inventories for a specific supplier
-     *
-     * @param  Company  $supplier  The supplier company
-     * @return Collection Collection of active inventories for the supplier
-     */
-    private function getActiveInventoriesForSupplier(Company $supplier): Collection
-    {
-        return LocalMarketInventory::query()
-            ->where('supplier_id', $supplier->id)
-            ->where('status', InventoryStatus::Active)
-            ->where('available_quantity', '>', 0)
-            ->get();
-    }
-
-    /**
      * Get active inventories for a specific commodity type
      *
      * @param  CommodityType  $commodityType  The commodity type
@@ -392,6 +450,21 @@ class LiveMarketService
     {
         return LocalMarketInventory::query()
             ->where('commodity_type_id', $commodityType->id)
+            ->where('status', InventoryStatus::Active)
+            ->where('available_quantity', '>', 0)
+            ->get();
+    }
+
+    /**
+     * Get active inventories for a specific supplier
+     *
+     * @param  Company  $supplier  The supplier company
+     * @return Collection Collection of active inventories for the supplier
+     */
+    private function getActiveInventoriesForSupplier(Company $supplier): Collection
+    {
+        return LocalMarketInventory::query()
+            ->where('company_id', $supplier->id)
             ->where('status', InventoryStatus::Active)
             ->where('available_quantity', '>', 0)
             ->get();
@@ -424,7 +497,7 @@ class LiveMarketService
     }
 
     /**
-     * Create a single live market record
+     * Create a single live market record if it doesn't exist
      *
      * @param  LocalMarketInventory  $inventory  The inventory for the record
      * @param  Company  $company  The company for the record
@@ -432,14 +505,19 @@ class LiveMarketService
      */
     private function createLiveMarketRecord(LocalMarketInventory $inventory, Company $company, int $eligibleQuantity): void
     {
-        LocalMarketLive::create([
-            'inventory_id' => $inventory->id,
-            'commodity_type_id' => $inventory->commodity_type_id,
-            'company_id' => $company->id,
-            'price' => $inventory->max_price,
-            'eligible_quantity' => $eligibleQuantity,
-            'status' => $inventory->status,
-        ]);
+        LocalMarketLive::firstOrCreate(
+            [
+                'inventory_id' => $inventory->id,
+                'company_id' => $company->id,
+            ],
+            [
+                'commodity_item_id' => $inventory->commodity_item_id,
+                'commodity_type_id' => $inventory->commodity_type_id,
+                'price' => $inventory->item->max_price,
+                'eligible_quantity' => $eligibleQuantity,
+                'status' => $inventory->status,
+            ]
+        );
     }
 
     /**
@@ -518,5 +596,16 @@ class LiveMarketService
     private function logError(string $message, array $context = []): void
     {
         Log::channel('live_market')->error($message, $context);
+    }
+
+    /**
+     * Log informational messages to the live market channel
+     *
+     * @param  string  $message  Info message
+     * @param  array  $context  Additional context for the message
+     */
+    private function logInfo(string $message, array $context = []): void
+    {
+        Log::channel('live_market')->info($message, $context);
     }
 }

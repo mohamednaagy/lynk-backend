@@ -56,9 +56,8 @@ class BuyCommoditiesAction implements BuyCommodities
             ]);
             $localMarketOrder->update([
                 'status' => LocalMarketOrderStatus::FailedPurchase,
-                'comment' => $e->getMessage(),
             ]);
-
+            throw $e;
         }
     }
 }

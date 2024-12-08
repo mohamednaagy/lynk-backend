@@ -36,24 +36,29 @@ class UpdateInventoryStock implements ShouldQueue
     {
 
         try {
+            $numberOfUnits = 0;
 
             Log::info("Starting transaction for updating inventory ID: {$this->inventory->id}");
             $this->inventory->update(['status' => InventoryStatus::Pending]);
 
             if ($this->inventoryWasRecentlyCreated) {
-                $this->createItemUnits($this->inventory, $this->inventory->available_quantity);
+                $numberOfUnits = $this->inventory->available_quantity;
+                $this->createItemUnits($this->inventory, $numberOfUnits);
             } else {
                 if ($this->total > $this->inventory->total_items) {
-                    $this->createItemUnits($this->inventory, $this->total - $this->inventory->total_items);
+                    $numberOfUnits = $this->total - $this->inventory->total_items;
+                    $this->createItemUnits($this->inventory, $numberOfUnits);
                 } elseif ($this->total < $this->inventory->total_items) {
-                    $this->decreaseItemUnits($this->inventory, $this->inventory->total_items - $this->total);
+                    $numberOfUnits = $this->inventory->total_items - $this->total;
+                    $this->decreaseItemUnits($this->inventory, $numberOfUnits);
                 }
             }
 
             // Enable inventory (set status to active)
+            $this->inventory->refreshStockQuantities();
+
             $this->inventory->update([
                 'status' => InventoryStatus::Active,
-                'available_quantity' => $this->total - $this->inventory->reserved_items,
             ]);
             Log::info("Set inventory ID: {$this->inventory->id} to status active");
         } catch (\Exception $e) {
