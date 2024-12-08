@@ -17,7 +17,9 @@ class RebuildLenderEligibleQuantities implements ShouldQueue
 
     public function __construct(
         private readonly int $companyId
-    ) {}
+    ) {
+        $this->onQueue('local_market');
+    }
 
     public function handle(EligibleQuantityService $service): void
     {
