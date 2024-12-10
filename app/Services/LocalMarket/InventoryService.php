@@ -211,14 +211,19 @@ class InventoryService
         return $previousOwners;
     }
 
+
     /**
-     * Delivers the order units for the given local market order by updating the units
-     * status to free and nullifying the hold_for field. Also refreshes the stock
-     * quantities for the respective inventories.
+     * Confirm the delivery of order units by updating their status and
+     * refreshing stock quantities.
      *
-     * Logs an error if the operation fails.
+     * This function processes the units associated with the given local market
+     * order, setting their status to 'Free', removing their hold, and deleting
+     * them. It also refreshes the stock quantities for each inventory involved.
+     * The operation is performed within a database transaction to ensure
+     * atomicity. In case of an error, it logs the failure.
      *
-     * @param LocalMarketOrder $localMarketOrder
+     * @param LocalMarketOrder $localMarketOrder The order whose units are to be
+     *                                           confirmed for delivery.
      * @return void
      */
     public function confirmDeliverOrderUnits(LocalMarketOrder $localMarketOrder): void
@@ -231,11 +236,11 @@ class InventoryService
                     // Bulk update inventory units
                     $localMarketOrder->inventoryUnits()
                         ->where(['local_market_inventory_id' => $inventory->id])
-                        ->update([
-                            'status' => InventoryUnitsStatus::Free,
-                            'hold_for' => null,
-                            'deleted_at' => now(),
-                        ]);
+                        ->update(['status' => InventoryUnitsStatus::Free, 'hold_for' => null]);
+
+                    $localMarketOrder->inventoryUnits()
+                        ->where(['local_market_inventory_id' => $inventory->id])
+                        ->delete();
 
                     // Refresh stock quantities for the current inventory
                     $inventory->refreshStockQuantities();
