@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api\V1\Admin\Commodities;
 
 use App\Actions\Contracts\Commodities\CommodityItem\GetPaginatedCommodityItems;
@@ -15,7 +16,7 @@ class CommodityItemController extends Controller
     public function __construct()
     {
         $this->middleware(
-            'permission:' .
+            'permission:'.
             perm(Area::SuperAdmin, [Subject::CommodityMarketCommodityItems, Action::Index, Action::Manage])
         )->only('index');
 
@@ -23,10 +24,6 @@ class CommodityItemController extends Controller
 
     /**
      * Get a paginated list of commodity items.
-     *
-     * @param ListCommodityItemsRequest $request
-     * @param GetPaginatedCommodityItems $getPaginatedCommodityItems
-     * @return JsonResponse
      */
     public function index(
         ListCommodityItemsRequest $request,
@@ -47,8 +44,7 @@ class CommodityItemController extends Controller
             ->setDirection($request->validated('direction'))
             ->handle();
 
-
-        return fractal($commidityItems, new CommodityItemsTransformer())
+        return fractal($commidityItems, new CommodityItemsTransformer)
             ->parseIncludes([
                 'id',
                 'name',
@@ -56,6 +52,7 @@ class CommodityItemController extends Controller
                 'unique_name',
                 'company_id',
                 'commodity_type',
+                'max_price',
                 'available_units',
                 'reserved_units',
             ])

@@ -17,7 +17,6 @@ use App\Http\Requests\V1\Supplier\CommodityItem\UpdateCommodityItemRequest;
 use App\Models\CommodityItem;
 use App\Transformers\Supplier\CommodityItem\CommodityItemsTransformer;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
@@ -26,28 +25,28 @@ class CommodityItemController extends Controller
     public function __construct()
     {
         $this->middleware(
-            'permission:' .
+            'permission:'.
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
-            'permission:' .
+            'permission:'.
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Manage, Action::Create])
         )
             ->only('store');
 
         $this->middleware(
-            'permission:' .
+            'permission:'.
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
-            'permission:' .
+            'permission:'.
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Manage, Action::Edit])
         )->only('update');
 
         $this->middleware(
-            'permission:' .
+            'permission:'.
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Manage, Action::Delete])
         )->only('destroy');
     }
@@ -78,6 +77,7 @@ class CommodityItemController extends Controller
                 'name',
                 'unique_name',
                 'commodity_type',
+                'max_price',
                 'available_units',
                 'reserved_units',
                 'created_at',
@@ -162,7 +162,7 @@ class CommodityItemController extends Controller
     public function destroy(CommodityItem $commodityItem, DeleteCommodityItem $deleteCommodityItem)
     {
         //check if the commodity item is deleteable
-        if (!$commodityItem->is_deletable) {
+        if (! $commodityItem->is_deletable) {
             return $this->errorResponse(
                 __('error.commodity_item_cannot_be_deleted'),
                 Response::HTTP_BAD_REQUEST,
