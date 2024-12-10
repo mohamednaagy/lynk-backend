@@ -15,6 +15,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use App\Enums\LocalMarket\UnitOwnershipAction;
 
 class TransferCommodityToCustomerStatus implements ShouldQueue
 {
@@ -41,7 +42,7 @@ class TransferCommodityToCustomerStatus implements ShouldQueue
     public function handle(): void
     {
 
-        $this->unitService->changeOrderUnitsOwnershipTo($this->localMarketOrder, OwnershipTypes::Customer, $this->localMarketOrder->customer_name);
+        $this->unitService->changeOrderUnitsOwnershipTo($this->localMarketOrder, OwnershipTypes::Customer, $this->localMarketOrder->customer_name, UnitOwnershipAction::BorrowerOwnershipTransfer);
         $this->localMarketWebhook->with(['case' => LocalMarketOrderStatus::TransferOwnershipToCustomer, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
         $this->logQueueJob('Transfer Ownership to customer successfully');
         $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::PendingSellCommodities);

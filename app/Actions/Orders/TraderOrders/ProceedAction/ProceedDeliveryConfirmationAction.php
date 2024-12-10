@@ -5,21 +5,26 @@ namespace App\Actions\Orders\TraderOrders\ProceedAction;
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedDeliveryConfirmation;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Jobs\FinancingOrders\NotifyAdminsAboutOrderDeliveryConfirmed;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\TimeLimitService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\Clients\LynkClient;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use App\Enums\TraderOrderTimeLimitType;
-use App\Enums\TraderOrderTimeLimitStatus;
-use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Log;
+use App\Support\Traders\TradingStrategies\TraderStrategyContext;
+
+
 
 class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
 {
     use TraderHelperTrait;
 
+    public function __construct(protected TimeLimitService $timeLimitService) {}
     /**
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws BindingResolutionException
@@ -33,6 +38,10 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
+        (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
+            ->confirmDeliverCommodityToCustomer($traderOrder);
+
+        $this->deliverProducts($traderOrder);
         dispatch(new NotifyAdminsAboutOrderDeliveryConfirmed($traderOrder));
 
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
@@ -45,7 +54,7 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
             $traderOrder->update([
                 'status' => TraderOrderStatus::Completed,
             ]);
-            $this->removeExpiryJob($traderOrder);
+            $this->timeLimitService->cancelExpiry($traderOrder);
         }
 
         return [];
@@ -64,13 +73,13 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
         return $traderOrder->checkOrderHistoryAction([FinancingOrderHistory::DeliveryCancelled, FinancingOrderHistory::DeliveryConfirmed]);
     }
 
-    private function removeExpiryJob($traderOrder)
-    {
-        removeJobFromQueue('expire-trader-order', $traderOrder->id);
-        $traderOrder->timeLimits()->where('status', TraderOrderTimeLimitStatus::Pending)
-            ->where('type', TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit)
-            ->latest()
-            ->first()->cancel();
-        Log::info("Cancelled scheduled expiration job for Trader Order ID: {$traderOrder->id}");
+    private function deliverProducts(TraderOrder $traderOrder,){
+        try {
+            if($traderOrder->provider == Trader::Lynk){
+                LynkClient::of($traderOrder)->deliverProducts();
+            }
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+        }
     }
 }

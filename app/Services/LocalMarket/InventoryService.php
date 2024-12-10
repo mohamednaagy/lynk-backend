@@ -210,4 +210,42 @@ class InventoryService
 
         return $previousOwners;
     }
+
+    /**
+     * Delivers the order units for the given local market order by updating the units
+     * status to free and nullifying the hold_for field. Also refreshes the stock
+     * quantities for the respective inventories.
+     *
+     * Logs an error if the operation fails.
+     *
+     * @param LocalMarketOrder $localMarketOrder
+     * @return void
+     */
+    public function deliverOrderUnits(LocalMarketOrder $localMarketOrder): void
+    {
+        try {
+            DB::transaction(function () use ($localMarketOrder) {
+                foreach ($localMarketOrder->orderInventories as $orderInventory) {
+                    $inventory = $orderInventory->inventory;
+
+                    // Bulk update inventory units
+                    $localMarketOrder->inventoryUnits()
+                        ->where(['local_market_inventory_id' => $inventory->id])
+                        ->update([
+                            'status' => InventoryUnitsStatus::Free,
+                            'hold_for' => null,
+                            'deleted_at' => now(),
+                        ]);
+
+                    // Refresh stock quantities for the current inventory
+                    $inventory->refreshStockQuantities();
+                }
+            });
+        } catch (\Exception $e) {
+            Log::error('Failed to deliver order units.', [
+                'localMarketOrderId' => $localMarketOrder->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
 }

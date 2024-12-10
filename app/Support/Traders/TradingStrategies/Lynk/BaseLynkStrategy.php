@@ -127,4 +127,8 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             FinancingOrderHistory::AttachSellConfirmationDocument,
         );
     }
+
+    public function confirmDeliverCommodityToCustomer(TraderOrder $traderOrder){
+
+    }
 }

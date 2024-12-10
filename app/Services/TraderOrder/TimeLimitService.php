@@ -5,9 +5,9 @@ namespace App\Services\TraderOrder;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Models\TraderOrder;
-use App\Models\TraderOrderTimeLimit;
 use Carbon\Carbon;
-use App\Settings\LocalMurabahaSettings;
+use App\Settings\Classes\LocalMurabahaSettings;
+use Illuminate\Support\Facades\Log;
 
 class TimeLimitService
 {
@@ -65,6 +65,25 @@ class TimeLimitService
     }
 
     /**
+     * Removes the scheduled expiration job for the given TraderOrder, and cancels
+     * the most recent pending time limit.
+     *
+     * @param TraderOrder $traderOrder The TraderOrder for which to remove the expiration job.
+     *
+     * @return void
+     */
+    public function cancelExpiry(TraderOrder $traderOrder)
+    {
+        removeJobFromQueue('expire-trader-order', $traderOrder->id);
+        $timeLimit = $traderOrder->timeLimits()->where('status', TraderOrderTimeLimitStatus::Pending)->latest()->first();
+
+        if ($timeLimit) {
+            $timeLimit->cancel();
+            Log::info("Cancelled scheduled expiration job for Trader Order ID: {$traderOrder->id}");
+        }
+    }
+
+    /**
      * Get the delivery confirmation time configuration.
      *
      * Fetches the default delivery confirmation time limit from the local Murabaha settings,
@@ -76,7 +95,7 @@ class TimeLimitService
      */
     private function getConfirmDeliveryTimeConfig()
     {
-        $defaultValue = app(LocalMurabahaSettings::class)->default_customer_delivery_confirmation_time_limit;
+        $defaultValue = app(LocalMurabahaSettings::class)->default_customer_delivery_confirmation_time_limit ?? 72;
         $effectiveAt = Carbon::now()
             ->timezone('UTC')
             ->addHours($defaultValue)

@@ -5,6 +5,7 @@ namespace App\Support\Traders\Clients;
 use App\Actions\Contracts\LocalMarket\CancelOrder;
 use App\Actions\Contracts\LocalMarket\CreateLocalMarketOrder;
 use App\Actions\Contracts\LocalMarket\SellCommodities;
+use App\Actions\Contracts\LocalMarket\DeliverProducts;
 use App\Actions\Contracts\LocalMarket\TransferOwnerShip;
 use App\Models\LocalMarketOrder;
 use App\Models\TraderOrder;
@@ -64,25 +65,26 @@ class LynkClient
 
     public function sellProduct()
     {
-        $trader = $this->traderOrder;
-        $localMarketOrder = LocalMarketOrder::where('external_order_no', $trader->reference)->first();
-
-        return app(SellCommodities::class)->handle($localMarketOrder);
+        return app(SellCommodities::class)->handle($this->getLocalMarketOrder());
     }
 
     public function transferOwnershipToCustomer()
     {
-        $trader = $this->traderOrder;
-        $localMarketOrder = LocalMarketOrder::where('external_order_no', $trader->reference)->first();
-
-        return app(TransferOwnerShip::class)->handle($localMarketOrder);
+        return app(TransferOwnerShip::class)->handle($this->getLocalMarketOrder());
     }
 
     public function cancelOrder()
     {
-        $trader = $this->traderOrder;
-        $localMarketOrder = LocalMarketOrder::where('external_order_no', $trader->reference)->first();
+        return app(CancelOrder::class)->handle($this->getLocalMarketOrder());
+    }
 
-        return app(CancelOrder::class)->handle($localMarketOrder);
+    public function deliverProducts()
+    {
+        return app(DeliverProducts::class)->handle($this->getLocalMarketOrder());
+    }
+
+    private function getLocalMarketOrder(): ?LocalMarketOrder
+    {
+        return LocalMarketOrder::where('external_order_no', $this->traderOrder->reference)->first();
     }
 }
