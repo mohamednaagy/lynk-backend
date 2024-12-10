@@ -7,14 +7,15 @@ use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader as TraderEnum;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\TimeLimitService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
-use App\Enums\Trader as TraderEnum;
+use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use App\Services\TraderOrder\TimeLimitService;
 
 class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelivery
 {
@@ -41,9 +42,12 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
         }
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::PendingDelivery);
 
-        # Set Delivery Confirmation Time Limit in case of Lynk Provider
-        if ($traderOrder->provider === TraderEnum::Lynk){
-            $timeLimitService = new TimeLimitService();
+        (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
+            ->requestDeliverCommodityToCustomer($traderOrder);
+
+        // Set Delivery Confirmation Time Limit in case of Lynk Provider
+        if ($traderOrder->provider === TraderEnum::Lynk) {
+            $timeLimitService = new TimeLimitService;
             $timeLimitService->setDeliveryConfirmationTimeLimit($traderOrder);
         }
 

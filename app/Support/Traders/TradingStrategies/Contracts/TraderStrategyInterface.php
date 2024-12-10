@@ -19,4 +19,5 @@ interface TraderStrategyInterface
 
     public function confirmDeliverCommodityToCustomer(TraderOrder $traderOrder);
 
+    public function requestDeliverCommodityToCustomer(TraderOrder $traderOrder);
 }

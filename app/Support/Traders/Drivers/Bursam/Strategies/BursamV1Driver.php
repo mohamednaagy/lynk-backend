@@ -77,9 +77,9 @@ class BursamV1Driver implements TraderInterface
         $now = Carbon::now('Asia/Riyadh');
         $differenceInMinutes = $now->diffInMinutes($marketEnd);
         $differenceInHours = $differenceInMinutes / 60;
+
         return $differenceInHours;
     }
-    
 
     public function createHoldTraderOrder(FinancingOrder $financingOrder): ?Model
     {
@@ -660,4 +660,8 @@ class BursamV1Driver implements TraderInterface
     }
 
     public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}
+
+    public function handleConfirmDelivery(TraderOrder $traderOrder) {}
+
+    public function handleRequestDeliverCommodityToCustomer(TraderOrder $traderOrder) {}
 }

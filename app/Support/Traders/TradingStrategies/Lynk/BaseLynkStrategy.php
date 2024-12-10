@@ -128,10 +128,19 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
         );
     }
 
-    public function confirmDeliverCommodityToCustomer(TraderOrder $traderOrder){
+    public function confirmDeliverCommodityToCustomer(TraderOrder $traderOrder)
+    {
         $traderOrder->ensureCanAccessStep(MurabhaStep::MurabahaSaleCompleted);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::DeliveryConfirmed);
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
         $trader->handleConfirmDelivery($traderOrder);
+    }
+
+    public function deliverCommodityToCustomer(TraderOrder $traderOrder)
+    {
+        $traderOrder->ensureCanAccessStep(MurabhaStep::TransferOwnershipToLender);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::PendingDelivery);
+        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
+        $trader->handleRequestDeliverCommodityToCustomer($traderOrder);
     }
 }

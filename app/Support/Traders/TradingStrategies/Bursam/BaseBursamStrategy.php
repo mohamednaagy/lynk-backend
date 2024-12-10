@@ -109,6 +109,7 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
 
     public function updateSellConfirmationDocument(TraderOrder $traderOrder, $request) {}
 
-    public function confirmDeliverCommodityToCustomer(TraderOrder $traderOrder){ }
+    public function confirmDeliverCommodityToCustomer(TraderOrder $traderOrder) {}
 
+    public function requestDeliverCommodityToCustomer(TraderOrder $traderOrder) {}
 }

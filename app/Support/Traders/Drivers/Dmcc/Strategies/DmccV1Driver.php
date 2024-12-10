@@ -617,4 +617,8 @@ class DmccV1Driver implements TraderInterface
     }
 
     public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}
+
+    public function handleConfirmDelivery(TraderOrder $traderOrder) {}
+
+    public function handleRequestDeliverCommodityToCustomer(TraderOrder $traderOrder) {}
 }

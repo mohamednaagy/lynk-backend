@@ -5,26 +5,22 @@ namespace App\Actions\Orders\TraderOrders\ProceedAction;
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedDeliveryConfirmation;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
-use App\Enums\Trader;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Jobs\FinancingOrders\NotifyAdminsAboutOrderDeliveryConfirmed;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TimeLimitService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
-use App\Support\Traders\Clients\LynkClient;
+use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Support\Facades\Log;
-use App\Support\Traders\TradingStrategies\TraderStrategyContext;
-
-
 
 class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
 {
     use TraderHelperTrait;
 
     public function __construct(protected TimeLimitService $timeLimitService) {}
+
     /**
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws BindingResolutionException
@@ -61,7 +57,7 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
 
     protected function isPreviousStepOfCustomerDeliveryConfirmationNotCompleted(TraderOrder $traderOrder): bool
     {
-        return !$traderOrder->checkOrderStepComplete(
+        return ! $traderOrder->checkOrderStepComplete(
             (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version))
                 ->getPreviousStepOf(MurabhaStep::CustomerDeliveryConfirmation)->step
         );

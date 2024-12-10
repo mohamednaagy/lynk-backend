@@ -47,6 +47,7 @@ class BursamStrategyV2 extends BursamStrategyV1
         }
     }
 
-    public function confirmDeliverCommodityToCustomer(TraderOrder $traderOrder){ }
+    public function confirmDeliverCommodityToCustomer(TraderOrder $traderOrder) {}
 
+    public function requestDeliverCommodityToCustomer(TraderOrder $traderOrder) {}
 }
