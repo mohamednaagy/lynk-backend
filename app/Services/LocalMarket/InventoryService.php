@@ -221,7 +221,7 @@ class InventoryService
      * @param LocalMarketOrder $localMarketOrder
      * @return void
      */
-    public function deliverOrderUnits(LocalMarketOrder $localMarketOrder): void
+    public function confirmDeliverOrderUnits(LocalMarketOrder $localMarketOrder): void
     {
         try {
             DB::transaction(function () use ($localMarketOrder) {

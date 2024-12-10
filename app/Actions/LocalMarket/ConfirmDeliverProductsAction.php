@@ -9,12 +9,19 @@ use App\Services\LocalMarket\UnitService;
 use Illuminate\Support\Facades\Log;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use Illuminate\Support\Facades\DB;
+use App\Services\LocalMarket\InventoryService;
+
 
 class ConfirmDeliverProductsAction implements ConfirmDeliverProducts
 {
+
+    private InventoryService $inventoryService;
+
     public function __construct(
         private UnitService $unitService
-    ) {}
+    ) {
+        $this->inventoryService = app(InventoryService::class);
+    }
 
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
@@ -26,7 +33,7 @@ class ConfirmDeliverProductsAction implements ConfirmDeliverProducts
                 $this->localMarketOrder->customer_name,
                 UnitOwnershipAction::ConfirmedDelivery
             );
-            $this->unitService->deleteAssociatedUnits($localMarketOrder);
+            $this->inventoryService->confirmDeliverOrderUnits($localMarketOrder);
             $localMarketOrder->update(['status' => LocalMarketOrderStatus::Delivered]);
             DB::commit();
         } catch (\Exception $e) {
