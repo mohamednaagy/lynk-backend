@@ -66,6 +66,7 @@ class CommodityItemController extends Controller
                 'name',
                 'unique_name',
                 'commodity_type',
+                'max_price',
                 'available_units',
                 'reserved_units',
                 'created_at',
