@@ -51,4 +51,14 @@ class TraderStrategyContext
     {
         $this->strategy->updateSellConfirmationDocument($traderOrder, $request);
     }
+
+    public function requestDeliverCommodityToCustomer(TraderOrder $traderOrder): void
+    {
+        $this->strategy->requestDeliverCommodityToCustomer($traderOrder);
+    }
+
+    public function confirmDeliverCommodityToCustomer(TraderOrder $traderOrder): void
+    {
+        $this->strategy->confirmDeliverCommodityToCustomer($traderOrder);
+    }
 }

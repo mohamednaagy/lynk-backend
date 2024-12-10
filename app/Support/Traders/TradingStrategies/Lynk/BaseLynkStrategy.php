@@ -138,7 +138,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
 
     public function requestDeliverCommodityToCustomer(TraderOrder $traderOrder)
     {
-        $traderOrder->ensureCanAccessStep(MurabhaStep::TransferOwnershipToLender);
+        $traderOrder->ensureCanAccessStep(MurabhaStep::CommoditySoldToCustomer);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::PendingDelivery);
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
         $trader->handleRequestDeliverCommodityToCustomer($traderOrder);
