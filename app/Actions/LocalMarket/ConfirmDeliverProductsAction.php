@@ -2,6 +2,7 @@
 
 namespace App\Actions\LocalMarket;
 
+use App\Actions\Contracts\LocalMarket\ConfirmDeliverProducts;
 use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\UnitService;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use Illuminate\Support\Facades\DB;
 
-class DeliverProductsAction
+class ConfirmDeliverProductsAction implements ConfirmDeliverProducts
 {
     public function __construct(
         private UnitService $unitService
@@ -30,7 +31,7 @@ class DeliverProductsAction
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::channel('local_market')->error('Error in DeliverProductsAction', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            Log::channel('local_market')->error('Error in ConfirmDeliverProductsAction', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             $localMarketOrder->update(['status' => LocalMarketOrderStatus::FailedDelivery]);
         }
     }

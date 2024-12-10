@@ -4,7 +4,7 @@ namespace App\Actions\Contracts\LocalMarket;
 
 use App\Models\LocalMarketOrder;
 
-interface DeliverProducts
+interface ConfirmDeliverProducts
 {
     public function handle(LocalMarketOrder $localMarketOrder): void;
 }

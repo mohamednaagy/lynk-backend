@@ -5,7 +5,7 @@ namespace App\Support\Traders\Clients;
 use App\Actions\Contracts\LocalMarket\CancelOrder;
 use App\Actions\Contracts\LocalMarket\CreateLocalMarketOrder;
 use App\Actions\Contracts\LocalMarket\SellCommodities;
-use App\Actions\Contracts\LocalMarket\DeliverProducts;
+use App\Actions\Contracts\LocalMarket\ConfirmDeliverProducts;
 use App\Actions\Contracts\LocalMarket\TransferOwnerShip;
 use App\Models\LocalMarketOrder;
 use App\Models\TraderOrder;
@@ -78,9 +78,9 @@ class LynkClient
         return app(CancelOrder::class)->handle($this->getLocalMarketOrder());
     }
 
-    public function deliverProducts()
+    public function confirmDeliverProducts()
     {
-        return app(DeliverProducts::class)->handle($this->getLocalMarketOrder());
+        return app(ConfirmDeliverProducts::class)->handle($this->getLocalMarketOrder());
     }
 
     private function getLocalMarketOrder(): ?LocalMarketOrder

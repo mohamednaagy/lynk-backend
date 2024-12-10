@@ -41,7 +41,6 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
         (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
             ->confirmDeliverCommodityToCustomer($traderOrder);
 
-        $this->deliverProducts($traderOrder);
         dispatch(new NotifyAdminsAboutOrderDeliveryConfirmed($traderOrder));
 
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
@@ -71,15 +70,5 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
     protected function isCustomerDeliveryConfirmationStepCompleted(TraderOrder $traderOrder): bool
     {
         return $traderOrder->checkOrderHistoryAction([FinancingOrderHistory::DeliveryCancelled, FinancingOrderHistory::DeliveryConfirmed]);
-    }
-
-    private function deliverProducts(TraderOrder $traderOrder,){
-        try {
-            if($traderOrder->provider == Trader::Lynk){
-                LynkClient::of($traderOrder)->deliverProducts();
-            }
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-        }
     }
 }

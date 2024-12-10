@@ -451,4 +451,8 @@ class LynkV1Driver implements TraderInterface
         (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
             ->updateMurabhaCompleteDocument($traderOrder);
     }
+
+    public function handleConfirmDelivery(TraderOrder $traderOrder){
+        LynkClient::of($traderOrder)->confirmDeliverProducts();
+    }
 }
