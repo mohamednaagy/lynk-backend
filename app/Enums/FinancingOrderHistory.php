@@ -69,8 +69,6 @@ final class FinancingOrderHistory extends Enum implements LocalizedEnum
 
     const FailedCancelled = 32;
 
-    const PendingDelivery = 33;
-
     public static array $notCancellableActions = [
         self::GetMurabahaPurchaseOfferDocument,
         self::AttachMpoDocument,
