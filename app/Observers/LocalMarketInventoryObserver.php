@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Enums\LocalMarket\InventoryStatus;
+use App\Jobs\LocalMarket\InventoryEligibleQuantities\DeleteInventory as DeleteInventoryEligibleQuantities;
 use App\Jobs\LocalMarket\LiveMarket\PublishInventoryToLiveMarket;
 use App\Jobs\LocalMarket\LiveMarket\UpdateInventoryInLiveMarket;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
@@ -71,6 +72,7 @@ class LocalMarketInventoryObserver
      */
     public function deleted(LocalMarketInventory $inventory): void
     {
+        DeleteInventoryEligibleQuantities::dispatch($inventory->id);
         // $this->liveMarketService->handleInventoryDeletion($inventory);
     }
 }

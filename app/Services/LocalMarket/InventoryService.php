@@ -6,7 +6,6 @@ use App\Enums\CommodityTypeStatus;
 use App\Enums\CommoitySupplierStatus;
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Enums\LocalMarket\InventoryUnitsStatus;
-use App\Jobs\LocalMarket\InventoryEligibleQuantities\DeleteInventory as EligibleQuantitiesDeleteInventory;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
@@ -179,7 +178,6 @@ class InventoryService
             DB::select('CALL DeleteLocalMarketInventoryUnits(?, ? , ?)', [$inventory->id, InventoryUnitsStatus::Free, $inventory->available_quantity]);
             Log::info("Successfully soft deleted units for inventory ID: {$inventory->id}");
             $inventory->delete();
-            EligibleQuantitiesDeleteInventory::dispatch($inventory->id);
 
             // (new LiveMarketService)->handleInventoryDeletion($inventory);
             Log::info("Success for deleting inventory ID: {$inventory->id}");
