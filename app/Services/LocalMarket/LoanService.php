@@ -15,8 +15,7 @@ class LoanService
         $unitsService = app(UnitService::class);
 
         $eligibleInventories = $inventoryService->findEligibleInventoryForLoan(
-            $localMarketOrder->amount,
-            $localMarketOrder->preferred_commodity_type
+            $localMarketOrder
         );
 
         if (empty($eligibleInventories)) {

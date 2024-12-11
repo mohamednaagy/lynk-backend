@@ -44,7 +44,6 @@ class CommodityItemObserver
 
     public function deleted(CommodityItem $item)
     {
-        dd('dwdw');
         $this->liveMarketService->handleCommodityItemDeletion($item);
     }
 }

@@ -29,19 +29,14 @@ class InventoryService
      * @param  array  $usedInventories  An optional array of inventory IDs that have already been used. These inventories are excluded from the results.
      * @return LocalMarketInventory|null The best matching inventory item, or null if no eligible inventory is found.
      */
-    public function findEligibleInventoryForLoan($loanAmount, $preferredItemTypes)
+    public function findEligibleInventoryForLoan(LocalMarketOrder $localMarketOrder)
     {
-        $inventories = LocalMarketInventory::where('max_price', '<=', $loanAmount)
-            ->where('status', InventoryStatus::Active)
-            ->where('available_quantity', '>', 0)
-            ->whereHas('type', function ($query) {
-                $query->where('status', CommodityTypeStatus::Active);
-            })
-            ->whereHas('supplier.detail', function ($query) {
-                $query->where('status', CommoitySupplierStatus::Active);
-            })
-            ->orderBy('max_price', 'DESC')
-            ->get();
+        $loanAmount = $localMarketOrder->amount;
+        $companyId = $localMarketOrder->company_id;
+        $preferredItemTypes = $localMarketOrder->preferred_commodity_type;
+
+        $inventories = $this->findEligibleInventoriesForLoanVersionTwo($loanAmount, $companyId);
+        // $inventories = $this->findEligibleInventoriesForLoanVersionOne($loanAmount);
 
         if (! empty($preferredItemTypes)) {
             $filteredInventories = $inventories->filter(function ($inventory) use ($preferredItemTypes) {
@@ -56,6 +51,46 @@ class InventoryService
         }
 
         return $this->findOptimalCombination($inventories, $loanAmount, $preferredItemTypes);
+    }
+
+    private function findEligibleInventoriesForLoanVersionOne($loanAmount)
+    {
+        return LocalMarketInventory::where('max_price', '<=', $loanAmount)
+            ->where('status', InventoryStatus::Active)
+            ->where('available_quantity', '>', 0)
+            ->whereHas('type', function ($query) {
+                $query->where('status', CommodityTypeStatus::Active);
+            })
+            ->whereHas('supplier.detail', function ($query) {
+                $query->where('status', CommoitySupplierStatus::Active);
+            })
+            ->orderBy('max_price', 'DESC')
+            ->get();
+    }
+
+    private function findEligibleInventoriesForLoanVersionTwo($loanAmount, $companyId)
+    {
+        return LocalMarketInventory::query()
+            ->select([
+                'local_market_inventories.*',
+                'local_market_eligible_quantities.eligible_quantity as available_quantity',
+            ])
+            ->join('local_market_eligible_quantities', function ($join) use ($companyId) {
+                $join->on('local_market_inventories.id', '=', 'local_market_eligible_quantities.inventory_id')
+                    ->where('local_market_eligible_quantities.company_id', '=', $companyId);
+            })
+            ->where('local_market_inventories.status', InventoryStatus::Active)
+            ->where('local_market_inventories.available_quantity', '>', 0)
+            ->where('local_market_inventories.max_price', '<=', $loanAmount)
+            ->whereHas('type', function ($query) {
+                $query->where('status', CommodityTypeStatus::Active);
+            })
+            ->whereHas('supplier.detail', function ($query) {
+                $query->where('status', CommoitySupplierStatus::Active);
+            })
+            ->orderBy('local_market_inventories.max_price', 'DESC')
+            ->orderBy('local_market_eligible_quantities.eligible_quantity', 'desc')
+            ->get();
     }
 
     private function findOptimalCombination($inventories, $loanAmount, array $preferredCommodities)
@@ -144,7 +179,7 @@ class InventoryService
             Log::info("Successfully soft deleted units for inventory ID: {$inventory->id}");
             $inventory->delete();
 
-            (new LiveMarketService)->handleInventoryDeletion($inventory);
+            // (new LiveMarketService)->handleInventoryDeletion($inventory);
             Log::info("Success for deleting inventory ID: {$inventory->id}");
         } catch (\Exception $e) {
             Log::error("Updated Inventory ID: {$inventory->id} status to Problem due to error: {$e->getMessage()}");
@@ -163,7 +198,7 @@ class InventoryService
                         LocalMarketInventoryUnits::where('id', $unit->id)
                             ->update([
                                 'status' => InventoryUnitsStatus::Free,
-                                'hold_for' => null,
+                                'hold_for' => 0,
                             ]);
                     }
                 });
@@ -184,7 +219,7 @@ class InventoryService
                         LocalMarketInventoryUnits::where('id', $unit->id)
                             ->update([
                                 'status' => InventoryUnitsStatus::Free,
-                                'hold_for' => null,
+                                'hold_for' => 0,
                                 'last_completed_order_id' => $localMarketOrder->id,
                                 'previous_company_id_owners' => $this->getUpdatedPreviousOwners($unit, $localMarketOrder->company_id),
                             ]);

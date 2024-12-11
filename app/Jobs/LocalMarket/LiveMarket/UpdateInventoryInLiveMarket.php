@@ -5,7 +5,7 @@ namespace App\Jobs\LocalMarket\LiveMarket;
 use App\Models\LocalMarketInventory;
 use App\Services\LocalMarket\LiveMarketService;
 
-class PublishInventoryToLiveMarket extends BaseLiveMarketJob
+class UpdateInventoryInLiveMarket extends BaseLiveMarketJob
 {
     protected LocalMarketInventory $inventory;
 
@@ -17,21 +17,22 @@ class PublishInventoryToLiveMarket extends BaseLiveMarketJob
 
     public function handle(LiveMarketService $liveMarketService): void
     {
-        $this->logJobStart('Publishing inventory to live market', [
+        $this->logJobStart('Updating inventory in live market', [
             'inventory_id' => $this->inventory->id,
             'commodity_item_id' => $this->inventory->commodity_item_id,
             'supplier_id' => $this->inventory->company_id,
+            'status' => $this->inventory->status->value,
         ]);
 
         try {
-            $liveMarketService->handleNewInventory($this->inventory);
+            $liveMarketService->handleInventoryUpdate($this->inventory);
 
-            $this->logJobSuccess('Successfully published inventory to live market', [
+            $this->logJobSuccess('Successfully updated inventory in live market', [
                 'inventory_id' => $this->inventory->id,
                 'commodity_item_id' => $this->inventory->commodity_item_id,
             ]);
         } catch (\Throwable $e) {
-            $this->logJobError('Failed to publish inventory to live market', $e);
+            $this->logJobError('Failed to update inventory in live market', $e);
             throw $e;
         }
     }
@@ -44,6 +45,8 @@ class PublishInventoryToLiveMarket extends BaseLiveMarketJob
             'supplier_id' => $this->inventory->company_id,
             'status' => $this->inventory->status->value,
             'quantity' => $this->inventory->quantity,
+            'price' => $this->inventory->item?->max_price,
+            'updated_at' => $this->inventory->updated_at,
         ];
     }
 }

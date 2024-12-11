@@ -3,7 +3,9 @@
 namespace App\Observers;
 
 use App\Enums\LocalMarket\InventoryStatus;
+use App\Jobs\LocalMarket\InventoryEligibleQuantities\DeleteInventory as DeleteInventoryEligibleQuantities;
 use App\Jobs\LocalMarket\LiveMarket\PublishInventoryToLiveMarket;
+use App\Jobs\LocalMarket\LiveMarket\UpdateInventoryInLiveMarket;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\LocalMarketInventory;
 use App\Services\LocalMarket\LiveMarketService;
@@ -36,7 +38,8 @@ class LocalMarketInventoryObserver
         UpdateInventoryStock::dispatch($inventory, $inventory->available_quantity, $inventory->wasRecentlyCreated);
 
         // Add to live market if active and has quantity
-        PublishInventoryToLiveMarket::dispatch($inventory);
+        // PublishInventoryToLiveMarket::dispatch($inventory);
+
     }
 
     /**
@@ -52,14 +55,18 @@ class LocalMarketInventoryObserver
         dd($inventory->status);
 
         // Handle status changes
-        if ($inventory->wasChanged('status')) {
-            if ($inventory->status->is(InventoryStatus::Active)) {
-                PublishInventoryToLiveMarket::dispatch($inventory);
-            } else {
-                $this->liveMarketService->handleInventoryDeletion($inventory);
-            }
-        }
+        // if ($inventory->wasChanged('status')) {
+        //     if ($inventory->status->is(InventoryStatus::Active)) {
+        //         PublishInventoryToLiveMarket::dispatch($inventory);
+        //     } else {
+        //         $this->liveMarketService->handleInventoryDeletion($inventory);
+        //     }
+        // }
 
+        // if ($inventory->wasChanged('available_quantity')) {
+        //     // UpdateInventoryInLiveMarket::dispatch($inventory);
+        //     RebuildInventoryEligibleQuantities::dispatch($inventory->id);
+        // }
     }
 
     /**
@@ -67,6 +74,7 @@ class LocalMarketInventoryObserver
      */
     public function deleted(LocalMarketInventory $inventory): void
     {
-        $this->liveMarketService->handleInventoryDeletion($inventory);
+        DeleteInventoryEligibleQuantities::dispatch($inventory->id);
+        // $this->liveMarketService->handleInventoryDeletion($inventory);
     }
 }
