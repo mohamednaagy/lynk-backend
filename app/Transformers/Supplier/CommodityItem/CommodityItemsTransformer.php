@@ -68,6 +68,10 @@ class CommodityItemsTransformer extends TransformerAbstract
         return $this->primitive([
             'id' => $type->id,
             'name' => $type->name,
+            'status' => [
+                'value' => $type->status->value,
+                'description' => $type->status->description,
+            ]
         ]);
     }
 
