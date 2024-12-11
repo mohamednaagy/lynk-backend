@@ -24,7 +24,7 @@ class DeleteInventory implements ShouldQueue
     public function handle(EligibleQuantityService $service): void
     {
         try {
-            $inventory = LocalMarketInventory::findOrFail($this->inventoryId);
+            $inventory = LocalMarketInventory::withTrashed()->findOrFail($this->inventoryId);
 
             Log::channel('live_market')->info('Starting delete eligible quantities for inventory', [
                 'inventory_id' => $this->inventoryId,
