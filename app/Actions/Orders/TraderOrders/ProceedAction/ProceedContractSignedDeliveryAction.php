@@ -7,10 +7,8 @@ use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
-use App\Enums\Trader as TraderEnum;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
-use App\Services\TraderOrder\TimeLimitService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
@@ -33,23 +31,20 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
+
         $traderOrder->update(['contract_signed_type' => ContractSignedType::Delivery]);
+
+        (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
+            ->requestDeliverCommodityToCustomer($traderOrder);
+
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
         $trader->createSellingCommodityToCustomerDocument($traderOrder);
         if ($traderOrder->isNeedToGenerateWakalaDocument()) {
             app()->make(GenerateClientWakala::class)->handle($traderOrder);
         }
+        // TODO: Double check
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::PendingDelivery);
-
-        (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
-            ->requestDeliverCommodityToCustomer($traderOrder);
-
-        // Set Delivery Confirmation Time Limit in case of Lynk Provider
-        if ($traderOrder->provider === TraderEnum::Lynk) {
-            $timeLimitService = new TimeLimitService;
-            $timeLimitService->setDeliveryConfirmationTimeLimit($traderOrder);
-        }
 
         return [];
     }

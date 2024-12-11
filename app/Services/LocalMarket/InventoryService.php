@@ -211,7 +211,6 @@ class InventoryService
         return $previousOwners;
     }
 
-
     /**
      * Confirm the delivery of order units by updating their status and
      * refreshing stock quantities.
@@ -222,9 +221,8 @@ class InventoryService
      * The operation is performed within a database transaction to ensure
      * atomicity. In case of an error, it logs the failure.
      *
-     * @param LocalMarketOrder $localMarketOrder The order whose units are to be
-     *                                           confirmed for delivery.
-     * @return void
+     * @param  LocalMarketOrder  $localMarketOrder  The order whose units are to be
+     *                                              confirmed for delivery.
      */
     public function confirmDeliverOrderUnits(LocalMarketOrder $localMarketOrder): void
     {
@@ -236,11 +234,7 @@ class InventoryService
                     // Bulk update inventory units
                     $localMarketOrder->inventoryUnits()
                         ->where(['local_market_inventory_id' => $inventory->id])
-                        ->update(['status' => InventoryUnitsStatus::Free, 'hold_for' => null]);
-
-                    $localMarketOrder->inventoryUnits()
-                        ->where(['local_market_inventory_id' => $inventory->id])
-                        ->delete();
+                        ->update(['status' => InventoryUnitsStatus::Free, 'hold_for' => null, 'deleted_at' => now()]);
 
                     // Refresh stock quantities for the current inventory
                     $inventory->refreshStockQuantities();
