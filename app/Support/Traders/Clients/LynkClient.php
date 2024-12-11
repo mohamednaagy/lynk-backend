@@ -52,16 +52,6 @@ class LynkClient
 
     }
 
-    public function buyProduct()
-    {
-        // calculate and lock the units if we can handle the loan
-        // buy the units to the company
-        $financingOrder = $this->traderOrder->order;
-        $number_of_rotations = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count ?? 0;
-
-        return app(PurchaseProductAction::class)->handle($financingOrder, $financingOrder->company_id, $financingOrder->company->preferred_market_type, $financingOrder->amount->convertAndFormatByDecimal(), $number_of_rotations);
-    }
-
     public function sellProduct()
     {
         $trader = $this->traderOrder;
