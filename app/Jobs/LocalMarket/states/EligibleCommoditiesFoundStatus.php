@@ -10,17 +10,16 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 class EligibleCommoditiesFoundStatus implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, LocalMarketHelperTrait, Queueable , SerializesModels;
+    use Dispatchable, InteractsWithQueue, LocalMarketHelperTrait, Queueable;
 
-    public function __construct(private LocalMarketOrder $localMarketOrder)
+    public function __construct(private int $localMarketOrderID)
     {
         $this->onQueue('local_market');
-        Log::channel('local_market')->info("add EligibleCommoditiesFoundStatus job to queue local_market with local market id {$this->localMarketOrder->id} ");
+        Log::channel('local_market')->info("add EligibleCommoditiesFoundStatus job to queue local_market with local market id {$this->localMarketOrderID} ");
 
     }
 
@@ -30,14 +29,13 @@ class EligibleCommoditiesFoundStatus implements ShouldQueue
     public function handle(): void
     {
         try {
-            Log::channel('local_market')->info("before buy commodity step to local market id {$this->localMarketOrder->id} ");
-            // cant use ButCommodities in dependency injection as it can disrupt the order within transactions.
-            app(BuyCommodities::class)->handle($this->localMarketOrder);
-            Log::channel('local_market')->info("after buy commodity step to local market id {$this->localMarketOrder->id} ");
-
-            $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::EligibleCommoditiesAvailable);
+            $localMarketOrder = LocalMarketOrder::findOrFail($this->localMarketOrderID);
+            app(BuyCommodities::class)->handle($localMarketOrder);
+            Log::channel('local_market')->info("success buy commodity step to local market id {$this->localMarketOrderID} ");
+            $this->createLocalMarketOrderHistory($localMarketOrder, LocalMarketOrderHistoryStatus::EligibleCommoditiesAvailable);
         } catch (\Exception $e) {
-            Log::channel('local_market')->error("failed eligible local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
+            Log::channel('local_market')->error("failed eligible local market order id {$this->localMarketOrderID}", ['message' => $e->getMessage()]);
+            throw $e;
         }
 
     }
