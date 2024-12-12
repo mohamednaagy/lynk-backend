@@ -189,21 +189,15 @@ class InventoryService
 
     public function cancelOrderUnits(LocalMarketOrder $localMarketOrder)
     {
+
         foreach ($localMarketOrder->orderInventories as $orderInventory) {
             $inventory = $orderInventory->inventory;
-            $localMarketOrder->inventoryUnits()
-                ->where(['local_market_inventory_id' => $inventory->id])
-                ->chunkById(100, function ($units) {
-                    foreach ($units as $unit) {
-                        LocalMarketInventoryUnits::where('id', $unit->id)
-                            ->update([
-                                'status' => InventoryUnitsStatus::Free,
-                                'hold_for' => 0,
-                            ]);
-                    }
-                });
-
-            // Refresh stock quantities for the current inventory after processing all units
+            LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)
+                ->where('local_market_inventory_id', $inventory->id)
+                ->update([
+                    'status' => InventoryUnitsStatus::Free,
+                    'hold_for' => 0,
+                ]);
             $inventory->refreshStockQuantities();
         }
     }
@@ -212,20 +206,18 @@ class InventoryService
     {
         foreach ($localMarketOrder->orderInventories as $orderInventory) {
             $inventory = $orderInventory->inventory;
-            $localMarketOrder->inventoryUnits()
-                ->where(['local_market_inventory_id' => $inventory->id])
+            LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)
+                ->where('local_market_inventory_id', $inventory->id)
                 ->chunkById(100, function ($units) use ($localMarketOrder) {
                     foreach ($units as $unit) {
-                        LocalMarketInventoryUnits::where('id', $unit->id)
-                            ->update([
-                                'status' => InventoryUnitsStatus::Free,
-                                'hold_for' => 0,
-                                'last_completed_order_id' => $localMarketOrder->id,
-                                'previous_company_id_owners' => $this->getUpdatedPreviousOwners($unit, $localMarketOrder->company_id),
-                            ]);
+                        LocalMarketInventoryUnits::where('id', $unit->id)->update([
+                            'status' => InventoryUnitsStatus::Free,
+                            'hold_for' => 0,
+                            'last_completed_order_id' => $localMarketOrder->id,
+                            'previous_company_id_owners' => $this->getUpdatedPreviousOwners($unit, $localMarketOrder->company_id),
+                        ]);
                     }
                 });
-
             // Refresh stock quantities for the current inventory after processing all units
             $inventory->refreshStockQuantities();
         }
