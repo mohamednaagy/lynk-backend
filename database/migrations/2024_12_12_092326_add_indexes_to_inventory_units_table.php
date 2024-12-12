@@ -16,10 +16,8 @@ return new class extends Migration
 
         Schema::table('local_market_inventory_units', function (Blueprint $table) {
             $table->index('hold_for');
-            $table->index('qr_code');
             $table->index('status');
             $table->index('local_market_inventory_id');
-            $table->index('last_completed_order_id');
         });
     }
 
