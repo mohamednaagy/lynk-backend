@@ -15,7 +15,7 @@ class LocalMarketInventoryUnits extends Model
     use HasFactory, LogsActivity, SoftDeletes;
 
     protected $fillable = [
-        'inventory_id',
+        'local_market_inventory_id',
         'commodity_item_id',
         'qr_code',
         'status',
