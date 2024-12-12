@@ -30,10 +30,8 @@ class EligibleCommoditiesFoundStatus implements ShouldQueue
     {
         try {
             $localMarketOrder = LocalMarketOrder::findOrFail($this->localMarketOrderID);
-            Log::channel('local_market')->info("before buy commodity step to local market id {$this->localMarketOrderID} ");
             app(BuyCommodities::class)->handle($localMarketOrder);
-            Log::channel('local_market')->info("after buy commodity step to local market id {$this->localMarketOrderID} ");
-
+            Log::channel('local_market')->info("success buy commodity step to local market id {$this->localMarketOrderID} ");
             $this->createLocalMarketOrderHistory($localMarketOrder, LocalMarketOrderHistoryStatus::EligibleCommoditiesAvailable);
         } catch (\Exception $e) {
             Log::channel('local_market')->error("failed eligible local market order id {$this->localMarketOrderID}", ['message' => $e->getMessage()]);
