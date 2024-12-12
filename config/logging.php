@@ -129,24 +129,28 @@ return [
             'path' => storage_path('logs/bursam/bursam.log'),
             'level' => 'debug',
             'days' => 30,
+            'permission' => 0664,
         ],
         'local_market' => [
             'driver' => 'daily',
             'path' => storage_path('logs/local_market/local_market.log'),
             'level' => 'debug',
             'days' => 30,
+            'permission' => 0664,
         ],
         'orders' => [
             'driver' => 'daily',
             'path' => storage_path('logs/orders/order-log.log'),
             'level' => 'debug',
             'days' => 30,
+            'permission' => 0664,
         ],
         'live_market' => [
             'driver' => 'daily',
             'path' => storage_path('logs/live-market/live-market.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 14,
+            'permission' => 0664,
         ],
     ],
 
