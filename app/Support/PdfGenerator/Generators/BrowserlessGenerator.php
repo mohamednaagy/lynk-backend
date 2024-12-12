@@ -7,6 +7,7 @@ use App\Support\PdfGenerator\Exceptions\GeneratingPdfException;
 use App\Support\PdfGenerator\Exceptions\MissingStorageCallbackException;
 use Closure;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class BrowserlessGenerator implements GeneratorInterface
 {
@@ -60,7 +61,7 @@ class BrowserlessGenerator implements GeneratorInterface
                 ->post('pdf', $this->prepareRequestData($html, $options));
 
             if (! $response->ok()) {
-                \Illuminate\Support\Facades\Log::channel('local_market')->error('tmpFile error 1', [
+                Log::channel('local_market')->error('tmpFile error 1', [
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
@@ -73,11 +74,11 @@ class BrowserlessGenerator implements GeneratorInterface
 
             fclose($tmpFileResource);
 
-            \Illuminate\Support\Facades\Log::channel('local_market')->info('tmpFile success');
+            Log::channel('local_market')->info('tmpFile success');
 
             return $storedFile;
         } catch (\Throwable $th) {
-            \Illuminate\Support\Facades\Log::channel('local_market')->error('tmpFile error 2', [
+            Log::channel('local_market')->error('tmpFile error 2', [
                 'error_message' => $th->getMessage(),
                 'stack_trace' => $th->getTraceAsString(),
             ]);
