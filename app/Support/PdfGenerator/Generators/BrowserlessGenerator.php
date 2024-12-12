@@ -7,6 +7,7 @@ use App\Support\PdfGenerator\Exceptions\GeneratingPdfException;
 use App\Support\PdfGenerator\Exceptions\MissingStorageCallbackException;
 use Closure;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class BrowserlessGenerator implements GeneratorInterface
 {
@@ -50,15 +51,20 @@ class BrowserlessGenerator implements GeneratorInterface
                 $storageCallback = $options['storageCallback'];
                 unset($options['storageCallback']);
             } else {
-                throw new MissingStorageCallbackException();
+                throw new MissingStorageCallbackException;
             }
 
-            $response = Http::baseUrl($this->baseUrl)
+            $response = Http::retry(3, 100)->timeout(120)->baseUrl($this->baseUrl)
                 ->withOptions([
                     'sink' => $tmpFileResource,
                 ])
                 ->post('pdf', $this->prepareRequestData($html, $options));
+
             if (! $response->ok()) {
+                Log::channel('local_market')->error('tmpFile error 1', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
                 throw new GeneratingPdfException([
                     'status' => $response->status(),
                     'body' => $response->body(),
@@ -68,8 +74,14 @@ class BrowserlessGenerator implements GeneratorInterface
 
             fclose($tmpFileResource);
 
+            Log::channel('local_market')->info('tmpFile success');
+
             return $storedFile;
         } catch (\Throwable $th) {
+            Log::channel('local_market')->error('tmpFile error 2', [
+                'error_message' => $th->getMessage(),
+                'stack_trace' => $th->getTraceAsString(),
+            ]);
             fclose($tmpFileResource);
             throw $th;
         }
