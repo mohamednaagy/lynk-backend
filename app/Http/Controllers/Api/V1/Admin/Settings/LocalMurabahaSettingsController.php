@@ -40,16 +40,13 @@ class LocalMurabahaSettingsController extends Controller
      */
     public function update(
         UpdateLocalMurabahaSettingsRequest $updateLocalMurabahaSettingsRequest,
-        UpdateSettings $updateSettings
+        UpdateSettings $updateSettings,
+        GetLocalMurabahaSettings $getLocalMurabahaSettings
     ): JsonResponse {
         $data = $updateLocalMurabahaSettingsRequest->validated();
         $data['area'] = 'LocalMurabaha';
         $updateSettings->handle($data);
 
-        return $this->successResponse([
-            'default_trade_order_rotation_count' => $data['default_trade_order_rotation_count'],
-            'default_contract_sign_time_limit' => $data['default_contract_sign_time_limit'],
-            'default_customer_delivery_confirmation_time_limit' => $data['default_customer_delivery_confirmation_time_limit'],
-        ]);
+        return fractal($getLocalMurabahaSettings->handle(), new LocalMurabahaSettingsTransformer)->respond();
     }
 }
