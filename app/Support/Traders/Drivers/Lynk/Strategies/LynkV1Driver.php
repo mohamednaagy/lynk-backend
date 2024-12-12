@@ -154,7 +154,18 @@ class LynkV1Driver implements TraderInterface
             // Set expiration time for the trader order
             $traderOrder->setExpireDate();
 
+            Log::info("TraderOrder:" . $traderOrder);
+
         } catch (\Throwable $exception) {
+            
+            Log::error('Failed to create lender ownership certificate', [
+                'trader_order_id' => $traderOrder->id,
+                'provider' => $traderOrder->provider,
+                'error_message' => $exception->getMessage(),
+                'error_trace' => $exception->getTraceAsString(),
+                'error_code' => $exception->getCode(),
+            ]);
+
             throw new TraderException(
                 'Failed to create lender ownership certificate',
                 [
