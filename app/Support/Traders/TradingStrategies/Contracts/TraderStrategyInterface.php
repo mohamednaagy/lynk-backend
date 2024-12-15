@@ -16,4 +16,8 @@ interface TraderStrategyInterface
     public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, array $data);
 
     public function updateSellConfirmationDocument(TraderOrder $traderOrder, Request $request);
+
+    public function confirmDeliverCommodityToCustomer(TraderOrder $traderOrder);
+
+    public function requestDeliverCommodityToCustomer(TraderOrder $traderOrder);
 }

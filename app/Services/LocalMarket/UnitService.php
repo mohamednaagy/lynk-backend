@@ -163,9 +163,9 @@ class UnitService
             ->count();
     }
 
-    public function changeOrderUnitsOwnershipTo(LocalMarketOrder $localMarketOrder, $ownerType, $ownerIdentifier)
+    public function changeOrderUnitsOwnershipTo(LocalMarketOrder $localMarketOrder, $ownerType, $ownerIdentifier, $action)
     {
-        $localMarketOrder->inventoryUnits()->chunkById(100, function ($units) use ($ownerType, $ownerIdentifier) {
+        $localMarketOrder->inventoryUnits()->chunkById(100, function ($units) use ($ownerType, $ownerIdentifier, $action) {
             foreach ($units as $unit) {
                 // Get the current values for previous_owner and previous_owner_type
                 $previousOwner = $unit->current_owner;
@@ -178,6 +178,7 @@ class UnitService
                     'previous_owner' => $previousOwner,
                     'previous_owner_type' => $previousOwnerType,
                     'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                    'action' => $action,
                 ]);
             }
         });
@@ -197,8 +198,8 @@ class UnitService
 
                     Log::channel('local_market')->info(
                         'Swapping unit ID '.$unit->id.
-                            ' to owner '.$newCurrentOwner.
-                            ' of type '.$newCurrentOwnerType
+                        ' to owner '.$newCurrentOwner.
+                        ' of type '.$newCurrentOwnerType
                     );
 
                     // Update the unit using Eloquent, which will trigger the observer

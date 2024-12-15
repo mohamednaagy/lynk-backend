@@ -20,6 +20,8 @@ class LocalMurabahaSettingsAction implements SettingsInterface
 
         $settingInstance->default_contract_sign_time_limit = $data['default_contract_sign_time_limit'];
 
+        $settingInstance->default_customer_delivery_confirmation_time_limit = $data['default_customer_delivery_confirmation_time_limit'];
+
         $settingInstance->save();
     }
 }

@@ -17,6 +17,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Enums\LocalMarket\UnitOwnershipAction;
 
 class PendingSellOrderStatus implements ShouldQueue
 {
@@ -47,7 +48,7 @@ class PendingSellOrderStatus implements ShouldQueue
     {
         DB::beginTransaction();
         try {
-            $this->unitService->changeOrderUnitsOwnershipTo($this->localMarketOrder, OwnershipTypes::TraderOrder, $this->localMarketOrder->external_order_no);
+            $this->unitService->changeOrderUnitsOwnershipTo($this->localMarketOrder, OwnershipTypes::TraderOrder, $this->localMarketOrder->external_order_no, UnitOwnershipAction::SellCommodity);
             $this->inventoryService->completeOrderUnits($this->localMarketOrder);
             DB::commit();
             $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::CommoditiesSell);

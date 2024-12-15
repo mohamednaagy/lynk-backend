@@ -24,6 +24,7 @@ class UpdateLocalMurabahaSettingsRequest extends FormRequest
     {
         return [
             'default_contract_sign_time_limit' => ['required', 'integer', 'gt:0'],
+            'default_customer_delivery_confirmation_time_limit' => ['required', 'integer', 'gt:0'],
         ];
     }
 }

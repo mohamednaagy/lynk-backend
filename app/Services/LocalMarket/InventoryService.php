@@ -237,4 +237,35 @@ class InventoryService
 
         return $previousOwners;
     }
+
+    /**
+     * Confirm the delivery of order units by updating their status and
+     * refreshing stock quantities.
+     *
+     * This function processes the units associated with the given local market
+     * order, setting their status to 'Free', removing their hold, and deleting
+     * them. It also refreshes the stock quantities for each inventory involved.
+     * The operation is performed within a database transaction to ensure
+     * atomicity. In case of an error, it logs the failure.
+     *
+     * @param  LocalMarketOrder  $localMarketOrder  The order whose units are to be
+     *                                              confirmed for delivery.
+     */
+    public function confirmDeliverOrderUnits(LocalMarketOrder $localMarketOrder): void
+    {
+        try {
+            DB::transaction(function () use ($localMarketOrder) {
+                LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)
+                    ->update(['status' => InventoryUnitsStatus::Free, 'hold_for' => null, 'deleted_at' => now()]);
+                foreach ($localMarketOrder->orderInventories as $orderInventory) {
+                    $orderInventory->inventory->refreshStockQuantities();
+                }
+            });
+        } catch (\Exception $e) {
+            Log::error('Failed to deliver order units.', [
+                'localMarketOrderId' => $localMarketOrder->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
 }

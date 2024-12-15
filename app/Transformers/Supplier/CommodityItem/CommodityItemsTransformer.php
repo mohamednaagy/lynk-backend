@@ -71,7 +71,7 @@ class CommodityItemsTransformer extends TransformerAbstract
             'status' => [
                 'value' => $type->status->value,
                 'description' => $type->status->description,
-            ]
+            ],
         ]);
     }
 
