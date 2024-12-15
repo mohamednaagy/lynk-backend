@@ -27,7 +27,7 @@ return new class extends Migration
                 $table->smallInteger('current_owner_type');
                 $table->string('previous_owner', 50)->nullable();
                 $table->smallInteger('previous_owner_type')->nullable();
-                $table->unsignedBigInteger('last_completed_order_id')->after('previous_owner_type')->nullable();
+                $table->unsignedBigInteger('last_completed_order_id')->nullable();
                 $table->foreign('last_completed_order_id')->references('id')->on('local_market_orders');
                 $table->softDeletes();
                 $table->timestamps();
