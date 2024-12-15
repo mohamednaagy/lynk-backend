@@ -43,7 +43,6 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
         if ($traderOrder->isNeedToGenerateWakalaDocument()) {
             app()->make(GenerateClientWakala::class)->handle($traderOrder);
         }
-        // TODO: Double check
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::PendingDelivery);
 
         return [];
