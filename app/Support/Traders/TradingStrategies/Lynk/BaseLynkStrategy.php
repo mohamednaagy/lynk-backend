@@ -37,7 +37,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             $traderOrder,
             MurabhaStep::PurchasingCommodity
         );
-
     }
 
     protected function transferOwnershipToLender(TraderOrder $traderOrder, $data)
@@ -142,11 +141,8 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
     public function confirmDeliverCommodityToCustomer(TraderOrder $traderOrder)
     {
         match ($traderOrder->mode) {
-            TraderOrderMode::Automatic => function () use ($traderOrder) {
-                $traderOrder->ensureCanAccessStep(MurabhaStep::CustomerDeliveryConfirmation);
-                $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
-                $trader->handleConfirmDelivery($traderOrder);
-            },
+            TraderOrderMode::Automatic => Trader::driver($traderOrder->provider, $traderOrder->version)
+                ->handleConfirmDelivery($traderOrder),
             TraderOrderMode::Manual => null,
         };
     }
@@ -163,11 +159,8 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
     public function requestDeliverCommodityToCustomer(TraderOrder $traderOrder)
     {
         match ($traderOrder->mode) {
-            TraderOrderMode::Automatic => function () use ($traderOrder) {
-                $traderOrder->ensureCanAccessStep(MurabhaStep::ContractSigned);
-                $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
-                $trader->handleRequestDeliverCommodityToCustomer($traderOrder);
-            },
+            TraderOrderMode::Automatic => Trader::driver($traderOrder->provider, $traderOrder->version)
+                ->handleRequestDeliverCommodityToCustomer($traderOrder),
             TraderOrderMode::Manual => null,
         };
     }

@@ -35,12 +35,12 @@ class ConfirmDeliverProductsAction implements ConfirmDeliverProducts
                 UnitOwnershipAction::BorrowerOwnershipTransfer
             );
             $this->inventoryService->confirmDeliverOrderUnits($localMarketOrder);
-            $localMarketOrder->update(['status' => LocalMarketOrderStatus::Delivered]);
+            $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::Delivered);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
             Log::channel('local_market')->error('Error in ConfirmDeliverProductsAction', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            $localMarketOrder->update(['status' => LocalMarketOrderStatus::FailedDelivery]);
+            $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::FailedDelivery);
         }
     }
 }
