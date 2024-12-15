@@ -75,17 +75,14 @@ class LocalMurabahaSettingsUpdateTest extends TestCase
     /**
      * @throws Exception
      */
-    public function test_update_local_murabaha_settings_on_empty_default_trade_order_rotation_count_failed(): void
+    public function test_update_local_murabaha_settings_on_empty_default_contract_sign_time_limit_failed(): void
     {
         $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, Arr::except(self::$localMurabahaSettingsData, ['default_trade_order_rotation_count', 'default_contract_sign_time_limit']))
+            ->putJson(self::BaseUrl, Arr::except(self::$localMurabahaSettingsData, ['default_contract_sign_time_limit']))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
-                'message' => 'The default trade order roatation count field is required. (and 1 more error)',
+                'message' => 'The default contract sign time limit field is required.',
                 'errors' => [
-                    'default_trade_order_rotation_count' => [
-                        'The default trade order roatation count field is required.',
-                    ],
                     'default_contract_sign_time_limit' => [
                         'The default contract sign time limit field is required.',
                     ],
@@ -96,21 +93,17 @@ class LocalMurabahaSettingsUpdateTest extends TestCase
     /**
      * @throws Exception
      */
-    public function test_update_local_murabaha_settings_on_invalid_default_trade_order_rotation_count_failed(): void
+    public function test_update_local_murabaha_settings_on_invalid_default_contract_sign_time_limit_failed(): void
     {
         $this->actingAs(self::$admin)
             ->putJson(self::BaseUrl, array_merge(
                 self::$localMurabahaSettingsData,
-                ['default_trade_order_rotation_count' => 'invalid',
-                    'default_contract_sign_time_limit' => 0]
+                ['default_contract_sign_time_limit' => 0]
             ))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonFragment([
-                'message' => 'The selected default trade order roatation count is invalid. (and 1 more error)',
+                'message' => 'The default contract sign time limit must be greater than 0.',
                 'errors' => [
-                    'default_trade_order_rotation_count' => [
-                        'The selected default trade order roatation count is invalid.',
-                    ],
                     'default_contract_sign_time_limit' => [
                         'The default contract sign time limit must be greater than 0.',
                     ],
