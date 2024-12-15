@@ -5,17 +5,11 @@ namespace App\Actions\LocalMarket;
 use App\Actions\Contracts\LocalMarket\RequestDeliverProducts;
 use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
-use App\Services\LocalMarket\UnitService;
 use Illuminate\Support\Facades\Log;
 
 class RequestDeliverProductsAction implements RequestDeliverProducts
 {
-    private UnitService $unitService;
-
-    public function __construct()
-    {
-        $this->unitService = app(UnitService::class);
-    }
+    public function __construct() {}
 
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
