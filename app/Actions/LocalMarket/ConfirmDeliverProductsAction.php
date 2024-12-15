@@ -32,7 +32,7 @@ class ConfirmDeliverProductsAction implements ConfirmDeliverProducts
                 $localMarketOrder,
                 OwnershipTypes::Customer,
                 $localMarketOrder->customer_name,
-                UnitOwnershipAction::BorrowerOwnershipTransfer
+                UnitOwnershipAction::ConfirmedDelivery
             );
             $this->inventoryService->confirmDeliverOrderUnits($localMarketOrder);
             $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::Delivered);

@@ -6,6 +6,7 @@ use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedDeliveryConfi
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Jobs\FinancingOrders\NotifyAdminsAboutOrderDeliveryConfirmed;
 use App\Models\TraderOrder;
@@ -49,7 +50,7 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
             $traderOrder->update([
                 'status' => TraderOrderStatus::Completed,
             ]);
-            $this->timeLimitService->cancelExpiry($traderOrder);
+            $this->timeLimitService->cancelExpiry($traderOrder, TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit);
         }
 
         return [];

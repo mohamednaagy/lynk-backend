@@ -5,8 +5,8 @@ namespace App\Services\TraderOrder;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Models\TraderOrder;
-use Carbon\Carbon;
 use App\Settings\Classes\LocalMurabahaSettings;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class TimeLimitService
@@ -43,7 +43,6 @@ class TimeLimitService
         );
     }
 
-
     /**
      * Set the delivery confirmation time limit for the given TraderOrder.
      *
@@ -51,7 +50,7 @@ class TimeLimitService
      * calculates the effective time by adding the default limit to the current time,
      * and sets the time limit in the TraderOrder.
      *
-     * @param TraderOrder $traderOrder The trader order for which to set the delivery confirmation time limit.
+     * @param  TraderOrder  $traderOrder  The trader order for which to set the delivery confirmation time limit.
      */
     public function setDeliveryConfirmationTimeLimit(TraderOrder $traderOrder): void
     {
@@ -68,18 +67,26 @@ class TimeLimitService
      * Removes the scheduled expiration job for the given TraderOrder, and cancels
      * the most recent pending time limit.
      *
-     * @param TraderOrder $traderOrder The TraderOrder for which to remove the expiration job.
-     *
+     * @param  TraderOrder  $traderOrder  The TraderOrder for which to remove the expiration job.
+     * @param  int  $timeLimitType  The type of time limit to cancel.
      * @return void
      */
-    public function cancelExpiry(TraderOrder $traderOrder)
+    public function cancelExpiry(TraderOrder $traderOrder, int $timeLimitType)
     {
+        // Remove the job from the queue
         removeJobFromQueue('expire-trader-order', $traderOrder->id);
-        $timeLimit = $traderOrder->timeLimits()->where('status', TraderOrderTimeLimitStatus::Pending)->latest()->first();
+
+        // Retrieve and cancel the pending time limit
+        $timeLimit = $traderOrder->timeLimits()
+            ->where('status', TraderOrderTimeLimitStatus::Pending)
+            ->where('type', $timeLimitType)
+            ->first(); // Ensure we get a single instance
 
         if ($timeLimit) {
-            $timeLimit->cancel();
+            $timeLimit->cancel(); // Call the model's cancel method
             Log::info("Cancelled scheduled expiration job for Trader Order ID: {$traderOrder->id}");
+        } else {
+            Log::warning("No pending time limit found to cancel for Trader Order ID: {$traderOrder->id}");
         }
     }
 
@@ -100,6 +107,7 @@ class TimeLimitService
             ->timezone('UTC')
             ->addHours($defaultValue)
             ->format('Y-m-d H:i:s');
+
         return ['default_value' => $defaultValue, 'effective_at' => $effectiveAt];
     }
 
@@ -120,6 +128,7 @@ class TimeLimitService
             ->timezone('UTC')
             ->addHours($defaultValue)
             ->format('Y-m-d H:i:s');
+
         return ['default_value' => $defaultValue, 'effective_at' => $effectiveAt];
     }
 }

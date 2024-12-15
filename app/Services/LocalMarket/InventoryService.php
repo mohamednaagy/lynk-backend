@@ -255,16 +255,10 @@ class InventoryService
     {
         try {
             DB::transaction(function () use ($localMarketOrder) {
+                LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)
+                    ->update(['status' => InventoryUnitsStatus::Free, 'hold_for' => null, 'deleted_at' => now()]);
                 foreach ($localMarketOrder->orderInventories as $orderInventory) {
-                    $inventory = $orderInventory->inventory;
-
-                    // Bulk update inventory units
-                    $localMarketOrder->inventoryUnits()
-                        ->where(['local_market_inventory_id' => $inventory->id])
-                        ->update(['status' => InventoryUnitsStatus::Free, 'hold_for' => null, 'deleted_at' => now()]);
-
-                    // Refresh stock quantities for the current inventory
-                    $inventory->refreshStockQuantities();
+                    $orderInventory->inventory->refreshStockQuantities();
                 }
             });
         } catch (\Exception $e) {
