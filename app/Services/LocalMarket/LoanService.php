@@ -3,8 +3,10 @@
 namespace App\Services\LocalMarket;
 
 use App\Enums\LocalMarket\OwnershipTypes;
+use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Models\LocalMarketOrder;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class LoanService
@@ -32,13 +34,16 @@ class LoanService
         $orderService = new OrderService;
         $unitService = new UnitService;
 
+        DB::beginTransaction();
         try {
-            $unitService->changeOrderUnitsOwnershipTo($localMarketOrder, OwnershipTypes::Company, $localMarketOrder->company_id);
+            $unitService->changeOrderUnitsOwnershipTo($localMarketOrder, OwnershipTypes::Company, $localMarketOrder->company_id, UnitOwnershipAction::PurchaseCommodity);
             $orderService->insertOrderUnits($localMarketOrder);
             $orderService->insertOrderInventories($localMarketOrder);
+            DB::commit();
 
             return true;
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error('Error in buy commodities', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 
             return false;

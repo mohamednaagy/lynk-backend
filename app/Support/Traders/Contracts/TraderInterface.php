@@ -42,4 +42,8 @@ interface TraderInterface
     public function retryOrder(TraderOrder $traderOrder);
 
     public function confirmCancelledFromProvider(TraderOrder $traderOrder): void;
+
+    public function handleConfirmDelivery(TraderOrder $traderOrder);
+
+    public function handleRequestDeliverCommodityToCustomer(TraderOrder $traderOrder);
 }

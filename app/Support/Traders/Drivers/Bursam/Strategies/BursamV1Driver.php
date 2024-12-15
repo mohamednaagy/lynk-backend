@@ -17,7 +17,6 @@ use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
-use App\Jobs\General\ProcessFinancingOrders;
 use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -64,6 +63,18 @@ class BursamV1Driver implements TraderInterface
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
         ]);
+    }
+
+    protected function calculateTimeDifference()
+    {
+        $marketEndTime = env('BURSAM_MARKET_OPENING_END_TIME');
+        $marketEnd = Carbon::createFromFormat('H:i:s', $marketEndTime);
+        // Calculate the difference in hours
+        $now = Carbon::now('Asia/Riyadh');
+        $differenceInMinutes = $now->diffInMinutes($marketEnd);
+        $differenceInHours = $differenceInMinutes / 60;
+
+        return $differenceInHours;
     }
 
     public function createHoldTraderOrder(FinancingOrder $financingOrder): ?Model
@@ -307,7 +318,6 @@ class BursamV1Driver implements TraderInterface
                     ]
                 );
 
-                
             });
         } catch (\Throwable $exception) {
             throw new TraderException(
@@ -652,4 +662,8 @@ class BursamV1Driver implements TraderInterface
     }
 
     public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}
+
+    public function handleConfirmDelivery(TraderOrder $traderOrder) {}
+
+    public function handleRequestDeliverCommodityToCustomer(TraderOrder $traderOrder) {}
 }

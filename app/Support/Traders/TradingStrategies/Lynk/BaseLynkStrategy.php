@@ -6,6 +6,7 @@ use App\Actions\Contracts\Orders\UpdateTraderOrder;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -36,7 +37,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             $traderOrder,
             MurabhaStep::PurchasingCommodity
         );
-
     }
 
     protected function transferOwnershipToLender(TraderOrder $traderOrder, $data)
@@ -126,5 +126,42 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             $traderOrder,
             FinancingOrderHistory::AttachSellConfirmationDocument,
         );
+    }
+
+    /**
+     * Confirms the delivery of a commodity to the customer for the given trader order.
+     *
+     * Depending on the trader order mode, this method ensures the order can proceed
+     * to the 'CustomerDeliveryConfirmation' step, logs the delivery confirmation in
+     * the order history, and delegates the delivery confirmation handling to the
+     * appropriate trader driver.
+     *
+     * @param  TraderOrder  $traderOrder  The trader order for which the delivery is being confirmed.
+     */
+    public function confirmDeliverCommodityToCustomer(TraderOrder $traderOrder)
+    {
+        match ($traderOrder->mode) {
+            TraderOrderMode::Automatic => Trader::driver($traderOrder->provider, $traderOrder->version)
+                ->handleConfirmDelivery($traderOrder),
+            TraderOrderMode::Manual => null,
+        };
+    }
+
+    /**
+     * Initiates the delivery process of a commodity to the customer for the given trader order.
+     *
+     * Depending on the trader order mode, this method ensures the order can proceed
+     * to the 'CommoditySoldToCustomer' step, logs the pending delivery in the order history,
+     * and delegates the delivery request handling to the appropriate trader driver.
+     *
+     * @param  TraderOrder  $traderOrder  The trader order for which the delivery is being requested.
+     */
+    public function requestDeliverCommodityToCustomer(TraderOrder $traderOrder)
+    {
+        match ($traderOrder->mode) {
+            TraderOrderMode::Automatic => Trader::driver($traderOrder->provider, $traderOrder->version)
+                ->handleRequestDeliverCommodityToCustomer($traderOrder),
+            TraderOrderMode::Manual => null,
+        };
     }
 }

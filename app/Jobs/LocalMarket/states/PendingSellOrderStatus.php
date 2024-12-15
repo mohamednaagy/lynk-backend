@@ -4,6 +4,7 @@ namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
 use App\Enums\LocalMarket\OwnershipTypes;
+use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\InventoryService;
@@ -47,7 +48,7 @@ class PendingSellOrderStatus implements ShouldQueue
     {
         DB::beginTransaction();
         try {
-            $this->unitService->changeOrderUnitsOwnershipTo($this->localMarketOrder, OwnershipTypes::TraderOrder, $this->localMarketOrder->external_order_no);
+            $this->unitService->changeOrderUnitsOwnershipTo($this->localMarketOrder, OwnershipTypes::TraderOrder, $this->localMarketOrder->external_order_no, UnitOwnershipAction::SellCommodity);
             $this->inventoryService->completeOrderUnits($this->localMarketOrder);
             DB::commit();
             $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::CommoditiesSell);

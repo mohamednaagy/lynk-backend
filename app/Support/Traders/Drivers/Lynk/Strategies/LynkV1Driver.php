@@ -20,6 +20,7 @@ use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Services\TraderOrder\TimeLimitService;
 use App\Settings\Classes\LocalMurabahaSettings;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Clients\LynkClient;
@@ -446,5 +447,17 @@ class LynkV1Driver implements TraderInterface
         $this->createSellingCommodityToCustomerDocument($traderOrder);
         (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
             ->updateMurabhaCompleteDocument($traderOrder);
+    }
+
+    public function handleConfirmDelivery(TraderOrder $traderOrder)
+    {
+        LynkClient::of($traderOrder)->confirmDeliverProducts();
+    }
+
+    public function handleRequestDeliverCommodityToCustomer(TraderOrder $traderOrder)
+    {
+        $timeLimitService = new TimeLimitService;
+        $timeLimitService->setDeliveryConfirmationTimeLimit($traderOrder);
+        LynkClient::of($traderOrder)->requestDeliverProducts();
     }
 }

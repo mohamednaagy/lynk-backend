@@ -11,6 +11,7 @@ use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
 
@@ -30,7 +31,12 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
+
         $traderOrder->update(['contract_signed_type' => ContractSignedType::Delivery]);
+
+        (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
+            ->requestDeliverCommodityToCustomer($traderOrder);
+
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
         $trader->createSellingCommodityToCustomerDocument($traderOrder);

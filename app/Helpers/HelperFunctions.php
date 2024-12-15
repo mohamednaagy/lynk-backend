@@ -1,10 +1,10 @@
 <?php
 
-use App\Enums\ContractSignedType;
 use App\Enums\MurabhaStep;
 use App\Models\Media;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Redis;
 use Modules\Grantify\Facades\Grantify;
 use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\MediaLibrary\HasMedia;
@@ -123,14 +123,15 @@ if (! function_exists('get_latest_version_of_trader')) {
 }
 
 if (! function_exists('get_murabha_steps')) {
-    function get_murabha_steps($provider, ?string $version = null, $contract_type = ContractSignedType::Sell, bool $withFiles = false): array
+    function get_murabha_steps($provider, ?string $version = null, bool $withFiles = false): array
     {
         $version = $version ?? get_latest_version_of_trader($provider);
-        $stepHistories = config('murabha-steps.'.$provider.'-versions.'.$version.'.'.$contract_type);
+        $stepHistories = config('murabha-steps.'.$provider.'-versions.'.$version);
 
         if ($withFiles) {
             return $stepHistories;
         }
+
         return collect($stepHistories)->transform(function ($histories, $step) {
             return array_keys($histories);
         })->toArray();
@@ -138,7 +139,7 @@ if (! function_exists('get_murabha_steps')) {
 }
 
 if (! function_exists('trader_step_histories')) {
-    function trader_step_histories(string $provider, string $version, $contract_type): array
+    function trader_step_histories(string $provider, string $version): array
     {
         return MurabhaStep::getSteps($provider, $version, $contract_type);
     }
@@ -199,7 +200,7 @@ if (! function_exists('get_bursam_contract_signed_deadline')) {
         if (now()->gt($marketOpeningEndTimeUtc)) {
             $marketOpeningEndTimeUtc->addDay();
         }
-        
+
         return $marketOpeningEndTimeUtc;
     }
 }
@@ -260,5 +261,37 @@ if (! function_exists('saudi_now')) {
         $createdDate = $date ? $date->clone()->timezone($timezone) : Carbon::now($timezone);
 
         return $createdDate->format($format);
+    }
+}
+
+if (! function_exists('removeJobFromQueue')) {
+    /**
+     * Remove a job from the given queue by its unique ID.
+     *
+     * @param  string  $queueName  The name of the queue to remove the job from.
+     * @param  string  $uniqueId  The unique ID of the job to be removed.
+     * @return bool
+\     */
+    function removeJobFromQueue(string $queueName, string $uniqueId): bool
+    {
+        // The Redis key for delayed jobs
+        $redisKey = "queues:{$queueName}:delayed";
+
+        // Access the raw Redis client
+        $redis = Redis::connection();
+
+        // Fetch all delayed jobs
+        $jobs = $redis->zrange($redisKey, 0, -1);
+
+        foreach ($jobs as $job) {
+            if (strpos($job, $uniqueId) !== false) {
+                // Remove the job from the delayed set
+                $redis->zrem($redisKey, $job);
+
+                return true;
+            }
+        }
+
+        return false;
     }
 }

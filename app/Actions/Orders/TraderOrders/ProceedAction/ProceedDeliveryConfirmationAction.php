@@ -6,16 +6,21 @@ use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedDeliveryConfi
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Jobs\FinancingOrders\NotifyAdminsAboutOrderDeliveryConfirmed;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\TimeLimitService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
 
 class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
 {
     use TraderHelperTrait;
+
+    public function __construct(protected TimeLimitService $timeLimitService) {}
 
     /**
      * @throws OrderStatusDoesNotFollowSequenceException
@@ -30,6 +35,9 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
+        (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
+            ->confirmDeliverCommodityToCustomer($traderOrder);
+
         dispatch(new NotifyAdminsAboutOrderDeliveryConfirmed($traderOrder));
 
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
@@ -42,6 +50,7 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
             $traderOrder->update([
                 'status' => TraderOrderStatus::Completed,
             ]);
+            $this->timeLimitService->cancelExpiry($traderOrder, TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit);
         }
 
         return [];

@@ -36,6 +36,12 @@ final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
 
     const TransferOwnershipToCustomer = 13;
 
+    const Delivered = 14;
+
+    const FailedDelivery = 15;
+
+    const PendingDelivery = 16;
+
     private static array $state = [
         self::initiate => [
             self::PendingEligibleCommodities,
@@ -61,7 +67,11 @@ final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
             self::PendingCancellation,
             self::PendingSellCommodities,
             self::TransferOwnershipToCustomer,
-
+            self::PendingDelivery,
+        ],
+        self::PendingDelivery => [
+            self::Delivered,
+            self::FailedDelivery,
         ],
         self::PendingCancellation => [
             self::Cancelled,
