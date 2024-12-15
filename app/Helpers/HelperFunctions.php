@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ContractSignedType;
 use App\Enums\MurabhaStep;
 use App\Models\Media;
 use Carbon\Carbon;
@@ -123,10 +124,10 @@ if (! function_exists('get_latest_version_of_trader')) {
 }
 
 if (! function_exists('get_murabha_steps')) {
-    function get_murabha_steps($provider, ?string $version = null, bool $withFiles = false): array
+    function get_murabha_steps($provider, ?string $version = null, $contract_type = ContractSignedType::Sell, bool $withFiles = false): array
     {
         $version = $version ?? get_latest_version_of_trader($provider);
-        $stepHistories = config('murabha-steps.'.$provider.'-versions.'.$version);
+        $stepHistories = config('murabha-steps.'.$provider.'-versions.'.$version.'.'.$contract_type);
 
         if ($withFiles) {
             return $stepHistories;
@@ -139,7 +140,7 @@ if (! function_exists('get_murabha_steps')) {
 }
 
 if (! function_exists('trader_step_histories')) {
-    function trader_step_histories(string $provider, string $version): array
+    function trader_step_histories(string $provider, string $version, string $contract_type): array
     {
         return MurabhaStep::getSteps($provider, $version, $contract_type);
     }
