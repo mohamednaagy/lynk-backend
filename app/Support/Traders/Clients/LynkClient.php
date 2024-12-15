@@ -10,7 +10,6 @@ use App\Actions\Contracts\LocalMarket\SellCommodities;
 use App\Actions\Contracts\LocalMarket\TransferOwnerShip;
 use App\Models\LocalMarketOrder;
 use App\Models\TraderOrder;
-use App\Settings\Classes\LocalMurabahaSettings;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Traits\Localizable;
 
@@ -52,16 +51,6 @@ class LynkClient
 
         return app(CreateLocalMarketOrder::class)->handle($data);
 
-    }
-
-    public function buyProduct()
-    {
-        // calculate and lock the units if we can handle the loan
-        // buy the units to the company
-        $financingOrder = $this->traderOrder->order;
-        $number_of_rotations = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count ?? 0;
-
-        return app(PurchaseProductAction::class)->handle($financingOrder, $financingOrder->company_id, $financingOrder->company->preferred_market_type, $financingOrder->amount->convertAndFormatByDecimal(), $number_of_rotations);
     }
 
     public function sellProduct()

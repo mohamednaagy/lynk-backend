@@ -11,10 +11,6 @@ class UpdateCommoditySupplierStatusAction
 {
     /**
      * Update the inventory status based on supplier status.
-     *
-     * @param int $companyId
-     * @param int $supplierStatus
-     * @return void
      */
     public function handle(int $companyId, int $supplierStatus): void
     {
@@ -22,10 +18,13 @@ class UpdateCommoditySupplierStatusAction
             ->whereHas('type', function ($query) {
                 $query->where('status', CommodityTypeStatus::Active);
             })
-            ->update([
-                'status' => ($supplierStatus == CommoitySupplierStatus::Inactive) 
-                    ? InventoryStatus::Inactive 
-                    : InventoryStatus::Active
-            ]);
+            ->chunkById(100, function ($inventories) use ($supplierStatus) {
+                foreach ($inventories as $inventory) {
+                    $inventory->status = ($supplierStatus == CommoitySupplierStatus::Inactive)
+                        ? InventoryStatus::Inactive
+                        : InventoryStatus::Active;
+                    $inventory->save();
+                }
+            });
     }
 }

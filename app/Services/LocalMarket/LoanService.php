@@ -3,10 +3,10 @@
 namespace App\Services\LocalMarket;
 
 use App\Enums\LocalMarket\OwnershipTypes;
+use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Models\LocalMarketOrder;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use App\Enums\LocalMarket\UnitOwnershipAction;
 
 class LoanService
 {
@@ -16,8 +16,7 @@ class LoanService
         $unitsService = app(UnitService::class);
 
         $eligibleInventories = $inventoryService->findEligibleInventoryForLoan(
-            $localMarketOrder->amount,
-            $localMarketOrder->preferred_commodity_type
+            $localMarketOrder
         );
 
         if (empty($eligibleInventories)) {

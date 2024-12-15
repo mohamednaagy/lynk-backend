@@ -69,6 +69,7 @@ class UnitService
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
         LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
             ->where('status', InventoryUnitsStatus::Free)
+            ->where('hold_for', 0)
             ->where(function ($query) use ($localMarketOrder, $numberOfRotation) {
                 if ($numberOfRotation > 0) {
                     $query->whereNull('previous_company_id_owners')->orWhere(function ($subQuery) use ($localMarketOrder, $numberOfRotation) {
@@ -132,8 +133,10 @@ class UnitService
     public function countEligibleUnits(Company $company, LocalMarketInventory $inventory)
     {
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
+
         return LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
             ->where('status', InventoryUnitsStatus::Free)
+            ->where('hold_for', 0)
             ->where(function ($query) use ($company, $numberOfRotation) {
                 if ($numberOfRotation > 0) {
                     $query->whereNull('previous_company_id_owners')->orWhere(function ($subQuery) use ($company, $numberOfRotation) {
@@ -175,7 +178,7 @@ class UnitService
                     'previous_owner' => $previousOwner,
                     'previous_owner_type' => $previousOwnerType,
                     'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                    'action' => $action
+                    'action' => $action,
                 ]);
             }
         });
@@ -185,7 +188,7 @@ class UnitService
     {
         LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)
             ->chunkById(100, function ($units) use ($localMarketOrder) {
-                Log::channel('local_market')->info('Swapping current owner for order ' . $localMarketOrder->id);
+                Log::channel('local_market')->info('Swapping current owner for order '.$localMarketOrder->id);
 
                 foreach ($units as $unit) {
                     // Extract the last valid owner details
@@ -194,9 +197,9 @@ class UnitService
                     $newCurrentOwnerType = $lastValidOwner['current_owner_type'];
 
                     Log::channel('local_market')->info(
-                        'Swapping unit ID ' . $unit->id .
-                        ' to owner ' . $newCurrentOwner .
-                        ' of type ' . $newCurrentOwnerType
+                        'Swapping unit ID '.$unit->id.
+                        ' to owner '.$newCurrentOwner.
+                        ' of type '.$newCurrentOwnerType
                     );
 
                     // Update the unit using Eloquent, which will trigger the observer
