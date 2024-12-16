@@ -72,6 +72,7 @@ final class LocalMarketOrderStatus extends Enum implements LocalizedEnum
         self::PendingDelivery => [
             self::Delivered,
             self::FailedDelivery,
+            self::PendingCancellation,
         ],
         self::PendingCancellation => [
             self::Cancelled,
