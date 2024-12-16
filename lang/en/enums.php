@@ -128,7 +128,7 @@ return [
         UnitOwnershipAction::PurchaseCommodity => 'Purchase Commodity',
         UnitOwnershipAction::BorrowerOwnershipTransfer => 'Borrower Ownership Transfer',
         UnitOwnershipAction::Cancel => 'Cancel',
-        UnitOwnershipAction::ConfirmedDelivery => 'Confirmed Delivery',
+        UnitOwnershipAction::DeliverCommodity => 'Confirmed Delivery',
     ],
     TraderOrderTimeLimitType::class => [
         TraderOrderTimeLimitType::ContractSignTimeLimit => 'Contract Sign Time Limit',
