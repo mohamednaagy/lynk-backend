@@ -26,7 +26,7 @@ class RequestDeliverProductsAction implements RequestDeliverProducts
                 $localMarketOrder,
                 OwnershipTypes::Customer,
                 $localMarketOrder->customer_name,
-                UnitOwnershipAction::BorrowerOwnershipTransfer
+                UnitOwnershipAction::DeliverCommodity
             );
             $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::PendingDelivery);
             Log::channel('local_market')->info("Delivery requested for Local Market Order ID: {$localMarketOrder->id}");
