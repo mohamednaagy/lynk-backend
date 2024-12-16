@@ -8,6 +8,7 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
+use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -82,7 +83,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
         $trader->storeOrderDocumentAsPdf(
             'local-commodity-market.selling-pledge-certificate',
             [
-                'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products, 'location'),
+                'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products, LynkCommodityProductDto::groupedByKeys()),
                 'trader_order_reference' => $traderOrder->reference,
                 'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
                 'customer_name' => $financeOrder->customer_name,
