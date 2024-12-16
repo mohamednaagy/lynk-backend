@@ -17,6 +17,6 @@ class CommoditiesPurchaseCompletedStatus extends BaseStatus
         $data['case'] = OrderStatus::CommoditiesPurchased;
         $data['external_order_no'] = $this->localMarketOrder->external_order_no;
         $this->localMarketWebhook->with($data)->handle();
-        $this->logQueueJob('Congratulations Commodities purchased');
+        Log::channel('local_market')->info("Congratulations Commodities purchased for order {$this->localMarketOrder->id}");
     }
 }
