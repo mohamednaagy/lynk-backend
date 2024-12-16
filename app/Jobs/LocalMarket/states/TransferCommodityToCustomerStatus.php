@@ -2,57 +2,35 @@
 
 namespace App\Jobs\LocalMarket\states;
 
-use App\Actions\Contracts\Orders\LocalMarketWebhook;
 use App\Enums\LocalMarket\OrderStatus;
 use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarket\UnitOwnershipAction;
-use App\Models\LocalMarketOrder;
-use App\Services\LocalMarket\OwnershipService;
 use App\Services\LocalMarket\UnitService;
-use App\Support\Traders\Traits\LocalMarketHelperTrait;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class TransferCommodityToCustomerStatus implements ShouldQueue
+class TransferCommodityToCustomerStatus extends BaseStatus
 {
-    use Dispatchable, InteractsWithQueue, LocalMarketHelperTrait, Queueable, SerializesModels;
-
-    private LocalMarketWebhook $localMarketWebhook;
-
-    private OwnershipService $ownershipService;
-
     private UnitService $unitService;
 
-    public function __construct(
-        private LocalMarketOrder $localMarketOrder
-    ) {
-
-        $this->localMarketWebhook = app(LocalMarketWebhook::class);
-        $this->ownershipService = app(OwnershipService::class);
+    protected function setUp(): void
+    {
+        parent::setUp();
         $this->unitService = app(UnitService::class);
-
-        $this->onQueue('local_market');
-        $this->logQueueJob();
     }
 
+    /**
+     * Execute the job.
+     */
     public function handle(): void
     {
-
-        $this->unitService->changeOrderUnitsOwnershipTo($this->localMarketOrder, OwnershipTypes::Customer, $this->localMarketOrder->customer_name, UnitOwnershipAction::BorrowerOwnershipTransfer);
-        $this->localMarketWebhook->with(['case' => OrderStatus::TransferOwnershipToCustomer, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
-        $this->localMarketOrder->changeStatusTo(OrderStatus::PendingSellCommodities);
-        $this->logQueueJob('Transfer Ownership to customer successfully');
-    }
-
-    private function logQueueJob(?string $message = 'Transfer Ownership to customer status job added to queue local_market'): void
-    {
-        Log::channel('local_market')->info(
-            "$message",
-            ['order_id' => $this->localMarketOrder->id]
-        );
+        try {
+            $this->unitService->changeOrderUnitsOwnershipTo($this->localMarketOrder, OwnershipTypes::Customer, $this->localMarketOrder->customer_name, UnitOwnershipAction::BorrowerOwnershipTransfer);
+            $this->localMarketWebhook->with(['case' => OrderStatus::TransferOwnershipToCustomer, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
+            $this->localMarketOrder->changeStatusTo(OrderStatus::PendingSellCommodities);
+            $this->logQueueJob('Transfer Ownership to customer successfully');
+        } catch (\Exception $e) {
+            Log::channel('local_market')->error("failed transfer commodity to customer, local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
+            throw $e;
+        }
     }
 }

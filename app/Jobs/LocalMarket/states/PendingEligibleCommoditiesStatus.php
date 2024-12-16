@@ -5,32 +5,22 @@ namespace App\Jobs\LocalMarket\states;
 use App\Actions\Contracts\LocalMarket\FindEligibleCommodities;
 use App\Enums\LocalMarket\OrderHistoryStatus;
 use App\Enums\LocalMarket\OrderStatus;
-use App\Models\LocalMarketOrder;
-use App\Support\Traders\Traits\LocalMarketHelperTrait;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class PendingEligibleCommoditiesStatus implements ShouldQueue
+class PendingEligibleCommoditiesStatus extends BaseStatus
 {
-    use Dispatchable, InteractsWithQueue, LocalMarketHelperTrait, Queueable , SerializesModels;
-
-    public function __construct(private LocalMarketOrder $localMarketOrder)
-    {
-        $this->onQueue('local_market');
-        Log::channel('local_market')->info("add PendingEligibleCommoditiesStatus job to queue local_market with local market id {$this->localMarketOrder->id} ");
-    }
-
     /**
      * Execute the job.
      */
     public function handle(FindEligibleCommodities $getSuitableCommoditiesStocks): void
     {
-        $this->localMarketOrder->update(['status' => OrderStatus::PendingEligibleCommodities]);
-        $getSuitableCommoditiesStocks->handle($this->localMarketOrder);
-        $this->createLocalMarketOrderHistory($this->localMarketOrder, OrderHistoryStatus::PendingEligibleCommodities);
+        try {
+            $this->localMarketOrder->update(['status' => OrderStatus::PendingEligibleCommodities]);
+            $getSuitableCommoditiesStocks->handle($this->localMarketOrder);
+            $this->createLocalMarketOrderHistory($this->localMarketOrder, OrderHistoryStatus::PendingEligibleCommodities);
+        } catch (\Exception $e) {
+            Log::channel('local_market')->error("failed pending eligible cCommodities status, local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
+            throw $e;
+        }
     }
 }
