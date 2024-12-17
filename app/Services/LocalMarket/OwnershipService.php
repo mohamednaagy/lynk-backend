@@ -4,6 +4,7 @@ namespace App\Services\LocalMarket;
 
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketUnitOwnership;
+use Illuminate\Support\Facades\Log;
 
 class OwnershipService
 {
@@ -17,6 +18,7 @@ class OwnershipService
         $previousOwnerIdentifier,
         $action
     ) {
+        Log::channel('local_market')->info('Adding ownership logs to DB for order '.$localMarketOrder.' - '.$action);
         LocalMarketUnitOwnership::create([
             'local_market_order_id' => $localMarketOrder,
             'current_owner' => $currentOwner,
