@@ -16,7 +16,11 @@ class LynkCommodityProductDto extends CommodityProductDto
         protected string $currency,
         protected string $original_supplier,
         protected array|string $previous_owner,
-    ) {
+    ) {}
+
+    public static function groupedByKeys()
+    {
+        return ['location', 'product'];
     }
 
     public function getProduct(): string

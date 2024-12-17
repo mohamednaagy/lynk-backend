@@ -206,7 +206,7 @@ class LynkV1Driver implements TraderInterface
                         'trader_order_reference' => $traderOrder->reference,
                         'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
                         'order_number' => $traderOrder->financing_order_id,
-                        'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products, 'location'),
+                        'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products, LynkCommodityProductDto::groupedByKeys()),
                         'amount' => $amount,
                         'customer_name' => $customerName,
                         'contract_signed_date' => $currentTimeInRiyadhTz->toDateString(),
