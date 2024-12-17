@@ -4,7 +4,7 @@ namespace App\Jobs\LocalMarket\states;
 
 use App\Enums\LocalMarket\OrderHistoryStatus;
 use App\Enums\LocalMarket\OrderStatus;
-use Illuminate\Support\Facades\Log;
+use App\Exceptions\LocalMarket\JobStatusException;
 
 class CommoditiesPurchaseCompletedStatus extends BaseStatus
 {
@@ -19,10 +19,9 @@ class CommoditiesPurchaseCompletedStatus extends BaseStatus
             $data['case'] = OrderStatus::CommoditiesPurchased;
             $data['external_order_no'] = $this->localMarketOrder->external_order_no;
             $this->localMarketWebhook->with($data)->handle();
-            Log::channel('local_market')->info("Congratulations Commodities purchased for order {$this->localMarketOrder->id}");
+            $this->logQueueJob('Congratulations Commodities purchased');
         } catch (\Exception $e) {
-            Log::channel('local_market')->error("failed commodities purchase, local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
-            throw $e;
+            throw new JobStatusException($e->getMessage(), 'failed commodities purchase completed status', $this->localMarketOrderID);
         }
     }
 }

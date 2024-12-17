@@ -3,7 +3,7 @@
 namespace App\Jobs\LocalMarket\states;
 
 use App\Enums\LocalMarket\OrderStatus;
-use Illuminate\Support\Facades\Log;
+use App\Exceptions\LocalMarket\JobStatusException;
 
 class SoldOrderSuccessStatus extends BaseStatus
 {
@@ -17,8 +17,7 @@ class SoldOrderSuccessStatus extends BaseStatus
             $this->localMarketWebhook->with(['case' => OrderStatus::CommoditiesSell, 'external_order_no' => $this->externalOrderNo])->handle();
             $this->logQueueJob('Order Sold successfully');
         } catch (\Exception $e) {
-            Log::channel('local_market')->error("failed sold order success status, local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
-            throw $e;
+            throw new JobStatusException($e->getMessage(), 'failed sold order success status', $this->localMarketOrderID);
         }
     }
 }

@@ -5,8 +5,8 @@ namespace App\Jobs\LocalMarket\states;
 use App\Enums\LocalMarket\OrderStatus;
 use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarket\UnitOwnershipAction;
+use App\Exceptions\LocalMarket\JobStatusException;
 use App\Services\LocalMarket\UnitService;
-use Illuminate\Support\Facades\Log;
 
 class TransferCommodityToCustomerStatus extends BaseStatus
 {
@@ -29,8 +29,7 @@ class TransferCommodityToCustomerStatus extends BaseStatus
             $this->localMarketOrder->changeStatusTo(OrderStatus::PendingSellCommodities);
             $this->logQueueJob('Transfer Ownership to customer successfully');
         } catch (\Exception $e) {
-            Log::channel('local_market')->error("failed transfer commodity to customer, local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
-            throw $e;
+            throw new JobStatusException($e->getMessage(), 'failed transfer commodity to customer', $this->localMarketOrderID);
         }
     }
 }

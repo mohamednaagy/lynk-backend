@@ -5,10 +5,10 @@ namespace App\Jobs\LocalMarket\states;
 use App\Enums\LocalMarket\OrderStatus;
 use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarket\UnitOwnershipAction;
+use App\Exceptions\LocalMarket\JobStatusException;
 use App\Services\LocalMarket\InventoryService;
 use App\Services\LocalMarket\UnitService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class PendingSellOrderStatus extends BaseStatus
 {
@@ -23,6 +23,9 @@ class PendingSellOrderStatus extends BaseStatus
         $this->unitService = app(UnitService::class);
     }
 
+    /**
+     * Execute the job.
+     */
     public function handle(): void
     {
         DB::beginTransaction();
@@ -34,8 +37,8 @@ class PendingSellOrderStatus extends BaseStatus
             $this->logQueueJob('pending successfully');
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::channel('local_market')->error("failed sell local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
             $this->localMarketOrder->changeStatusTo(OrderStatus::FailedSell);
+            throw new JobStatusException($e->getMessage(), 'failed sell order status', $this->localMarketOrderID);
         }
     }
 }

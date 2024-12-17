@@ -5,7 +5,7 @@ namespace App\Jobs\LocalMarket\states;
 use App\Actions\Contracts\LocalMarket\FindEligibleCommodities;
 use App\Enums\LocalMarket\OrderHistoryStatus;
 use App\Enums\LocalMarket\OrderStatus;
-use Illuminate\Support\Facades\Log;
+use App\Exceptions\LocalMarket\JobStatusException;
 
 class PendingEligibleCommoditiesStatus extends BaseStatus
 {
@@ -19,8 +19,7 @@ class PendingEligibleCommoditiesStatus extends BaseStatus
             $getSuitableCommoditiesStocks->handle($this->localMarketOrder);
             $this->createLocalMarketOrderHistory($this->localMarketOrder, OrderHistoryStatus::PendingEligibleCommodities);
         } catch (\Exception $e) {
-            Log::channel('local_market')->error("failed pending eligible cCommodities status, local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
-            throw $e;
+            throw new JobStatusException($e->getMessage(), 'failed pending eligible cCommodities status', $this->localMarketOrderID);
         }
     }
 }

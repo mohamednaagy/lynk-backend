@@ -4,7 +4,7 @@ namespace App\Jobs\LocalMarket\states;
 
 use App\Enums\LocalMarket\OrderHistoryStatus;
 use App\Enums\LocalMarket\OrderStatus;
-use Illuminate\Support\Facades\Log;
+use App\Exceptions\LocalMarket\JobStatusException;
 
 class FailedPurchaseStatus extends BaseStatus
 {
@@ -18,10 +18,9 @@ class FailedPurchaseStatus extends BaseStatus
         try {
             $this->createLocalMarketOrderHistory($this->localMarketOrder, OrderHistoryStatus::FailedPurchase);
             $this->localMarketWebhook->with(['case' => OrderStatus::FailedPurchase, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
-            Log::channel('local_market')->info('Sorry there is an error while purchasing commodities for order ');
+            $this->logQueueJob('Sorry there is an error while purchasing commodities');
         } catch (\Exception $e) {
-            Log::channel('local_market')->error("failed purchase, local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
-            throw $e;
+            throw new JobStatusException($e->getMessage(), 'failed purchase status', $this->localMarketOrderID);
         }
     }
 }

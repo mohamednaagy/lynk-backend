@@ -43,9 +43,9 @@ abstract class BaseStatus implements ShouldQueue
 
     protected function logQueueJob(?string $message = null): void
     {
-        $message = $message ?? "add {$this->className} job to queue local_market with local market";
+        $message = $message ?? "add {$this->className} job to queue local_market";
 
-        Log::channel('local_market')->info($message,
+        Log::channel('local_market')->info($message.' for the given order',
             ['order_id' => $this->localMarketOrder->id]);
     }
 }

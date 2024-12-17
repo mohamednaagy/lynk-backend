@@ -4,7 +4,7 @@ namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\LocalMarket\BuyCommodities;
 use App\Enums\LocalMarket\OrderHistoryStatus;
-use Illuminate\Support\Facades\Log;
+use App\Exceptions\LocalMarket\JobStatusException;
 
 class EligibleCommoditiesFoundStatus extends BaseStatus
 {
@@ -15,11 +15,10 @@ class EligibleCommoditiesFoundStatus extends BaseStatus
     {
         try {
             app(BuyCommodities::class)->handle($this->localMarketOrder);
-            Log::channel('local_market')->info("success buy commodity step to local market id {$this->localMarketOrderID} ");
+            $this->logQueueJob('success buy commodity step');
             $this->createLocalMarketOrderHistory($this->localMarketOrder, OrderHistoryStatus::EligibleCommoditiesAvailable);
         } catch (\Exception $e) {
-            Log::channel('local_market')->error("failed eligible local market order id {$this->localMarketOrderID}", ['message' => $e->getMessage()]);
-            throw $e;
+            throw new JobStatusException($e->getMessage(), 'failed eligible commodities found status', $this->localMarketOrderID);
         }
     }
 }
