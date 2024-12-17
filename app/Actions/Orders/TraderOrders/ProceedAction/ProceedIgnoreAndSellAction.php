@@ -6,9 +6,11 @@ use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedIgnoreAndSell
 use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
+use App\Enums\TraderOrderMode;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -29,13 +31,16 @@ class ProceedIgnoreAndSellAction implements ProceedIgnoreAndSell
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
-        
+
         $traderOrder->update(['contract_signed_type' => ContractSignedType::Sell]);
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::DeliveryCancelled);
 
-        (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
-            ->updateMurabhaCompleteDocument($traderOrder);
+        match ($traderOrder->mode) {
+            TraderOrderMode::Manual => (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
+                ->updateMurabhaCompleteDocument($traderOrder),
+            TraderOrderMode::Automatic => Trader::driver($traderOrder->provider, $traderOrder->version)->sellCommodityToLocalMarket($traderOrder),
+        };
 
         return [];
     }

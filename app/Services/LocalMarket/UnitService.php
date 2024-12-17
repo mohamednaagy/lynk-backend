@@ -168,12 +168,18 @@ class UnitService
         $ownershipService = app(OwnershipService::class);
         $localMarketOrder->inventoryUnits()->chunkById(100, function ($units) use ($ownershipService, $ownerType, $ownerIdentifier, $action) {
             foreach ($units as $unit) {
+                // Get the current values for previous_owner and previous_owner_type
+                $previousOwner = $unit->current_owner;
+                $previousOwnerType = $unit->current_owner_type;
+
+                // Perform update with new and old values using Eloquent's update() method
                 $unit->update([
                     'current_owner' => $ownerIdentifier,
                     'current_owner_type' => $ownerType,
-                    'previous_owner' => DB::raw('current_owner'),
-                    'previous_owner_type' => DB::raw('current_owner_type'),
+                    'previous_owner' => $previousOwner,
+                    'previous_owner_type' => $previousOwnerType,
                 ]);
+
                 $ownershipService->addOwnershipLogsToDB(
                     $unit->hold_for,
                     $unit,

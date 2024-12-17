@@ -245,7 +245,10 @@ class LynkV1Driver implements TraderInterface
         //         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
     }
 
-    public function sellCommodityToLocalMarket(TraderOrder $traderOrder) {}
+    public function sellCommodityToLocalMarket(TraderOrder $traderOrder)
+    {
+        LynkClient::of($traderOrder)->sellProduct();
+    }
 
     public function cancelOrder(FinancingOrder $financingOrder): int
     {
