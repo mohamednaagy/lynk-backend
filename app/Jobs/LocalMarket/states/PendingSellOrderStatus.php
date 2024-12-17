@@ -5,7 +5,6 @@ namespace App\Jobs\LocalMarket\states;
 use App\Enums\LocalMarket\OrderStatus;
 use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarket\UnitOwnershipAction;
-use App\Exceptions\LocalMarket\JobStatusException;
 use App\Services\LocalMarket\InventoryService;
 use App\Services\LocalMarket\UnitService;
 use Illuminate\Support\Facades\DB;
@@ -38,7 +37,7 @@ class PendingSellOrderStatus extends BaseStatus
         } catch (\Throwable $e) {
             DB::rollBack();
             $this->localMarketOrder->changeStatusTo(OrderStatus::FailedSell);
-            throw new JobStatusException($e->getMessage(), 'failed sell order status', $this->localMarketOrderID);
+            throw new $e;
         }
     }
 }

@@ -5,7 +5,6 @@ namespace App\Jobs\LocalMarket\states;
 use App\Enums\LocalMarket\OrderCancelledBy;
 use App\Enums\LocalMarket\OrderCancelReason;
 use App\Enums\LocalMarket\OrderStatus;
-use App\Exceptions\LocalMarket\JobStatusException;
 use App\Services\LocalMarket\InventoryService;
 use App\Services\LocalMarket\UnitService;
 use Illuminate\Support\Facades\DB;
@@ -42,7 +41,7 @@ class PendingCancelOrderStatus extends BaseStatus
         } catch (\Throwable $e) {
             DB::rollBack();
             $this->localMarketOrder->changeStatusTo(OrderStatus::FailedToCancel);
-            throw new JobStatusException($e->getMessage(), 'failed to exec transaction at pending cancel', $this->localMarketOrderID);
+            throw $e;
         }
     }
 

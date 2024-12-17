@@ -48,4 +48,11 @@ abstract class BaseStatus implements ShouldQueue
         Log::channel('local_market')->info($message.' for the given order',
             ['order_id' => $this->localMarketOrder->id]);
     }
+
+    public function failed(\Exception $exception): void
+    {
+        $errorMessage = "failed {$this->className}, the given order: ".$this->localMarketOrderID;
+        Log::channel('local_market')->error($errorMessage,
+            ['message' => $exception->getMessage()]);
+    }
 }
