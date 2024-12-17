@@ -50,23 +50,15 @@ class BursamV1Driver implements TraderInterface
 
     protected $version = 'v1';
 
-    public function getOrInitiateTraderOrder(FinancingOrder $financingOrder): ?Model
+    private function getOrInitiateTraderOrder(FinancingOrder $financingOrder): ?Model
     {
         if ($financingOrder->initiatedTraderOrders()->exists()) {
             return $financingOrder->initiatedTraderOrders()->first();
         }
 
-        return $financingOrder->traderOrders()->create([
-            'uuid_one' => Str::uuid(),
-            'provider' => $this->provider,
-            'reference' => '',
-            'status' => TraderOrderStatus::Initiated,
-            'version' => $this->version,
-            'mode' => TraderOrderMode::Automatic,
-            'default_contract_sign_time_limit' => $this->calculateTimeDifference(),
-            'expire_at' => Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME')),
+        $traderOrder = $this->createBaseTraderOrder($financingOrder, TraderOrderStatus::Initiated);
 
-        ]);
+        return $traderOrder;
     }
 
     protected function calculateTimeDifference()
@@ -81,21 +73,36 @@ class BursamV1Driver implements TraderInterface
     }
     
 
-    public function createHoldTraderOrder(FinancingOrder $financingOrder): ?Model
+    private function createHoldTraderOrder(FinancingOrder $financingOrder): ?Model
     {
+        $traderOrder = $this->createBaseTraderOrder($financingOrder, TraderOrderStatus::Hold);
 
-        $traderOrder = $financingOrder->traderOrders()->create([
-            'uuid_one' => Str::uuid(),
-            'provider' => $this->provider,
-            'reference' => '',
-            'status' => TraderOrderStatus::Hold,
-            'version' => $this->version,
-            'mode' => TraderOrderMode::Automatic,
-        ]);
-
+        // If it's a hold order, create history entry
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::OnHold);
 
         return $traderOrder;
+    }
+
+    private function createBaseTraderOrder(FinancingOrder $financingOrder, string $status): TraderOrder
+    {
+        // Create the base trader order
+        $data = [
+            'uuid_one' => Str::uuid(),
+            'provider' => $this->provider,
+            'reference' => '',
+            'status' => $status,
+            'version' => $this->version,
+            'mode' => TraderOrderMode::Automatic,
+        ];
+
+        // If it's an initiated order, add additional fields
+        if ($status === TraderOrderStatus::Initiated) {
+            $data['default_contract_sign_time_limit'] = $this->calculateTimeDifference();
+            $data['expire_at'] = Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME'));
+        }
+
+        // Create and return the order
+        return $financingOrder->traderOrders()->create($data);
     }
 
     /**
@@ -103,11 +110,15 @@ class BursamV1Driver implements TraderInterface
      */
     public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
     {
-        if ($this->checkCanInitiateTraderOrder()) {
-            return $this->getOrInitiateTraderOrder($financingOrder);
-        } else {
+        // Determine the status of the order
+        $status = $this->checkCanInitiateTraderOrder() ? TraderOrderStatus::Initiated : TraderOrderStatus::Hold;
+
+        // Call the appropriate method based on the status
+        if ($status === TraderOrderStatus::Hold) {
             return $this->createHoldTraderOrder($financingOrder);
         }
+
+        return $this->getOrInitiateTraderOrder($financingOrder);
     }
 
     public function checkCanInitiateTraderOrder()
