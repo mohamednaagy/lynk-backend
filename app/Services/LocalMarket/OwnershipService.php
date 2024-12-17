@@ -8,8 +8,15 @@ use App\Models\LocalMarketUnitOwnership;
 class OwnershipService
 {
     // used it in observer
-    public function addOwnershipLogsToDB($localMarketOrder, LocalMarketInventoryUnits $unit, $currentOwner, $currentOwnerIdentifier, $previousOwner, $previousOwnerIdentifier)
-    {
+    public function addOwnershipLogsToDB(
+        $localMarketOrder,
+        LocalMarketInventoryUnits $unit,
+        $currentOwner,
+        $currentOwnerIdentifier,
+        $previousOwner,
+        $previousOwnerIdentifier,
+        $action
+    ) {
         LocalMarketUnitOwnership::create([
             'local_market_order_id' => $localMarketOrder,
             'current_owner' => $currentOwner,
@@ -17,6 +24,7 @@ class OwnershipService
             'previous_owner' => $previousOwner,
             'previous_owner_type' => $previousOwnerIdentifier,
             'unit_id' => $unit->id,
+            'action' => $action,
         ]);
     }
 }

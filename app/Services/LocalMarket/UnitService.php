@@ -9,7 +9,6 @@ use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
 use App\Settings\Classes\LocalMurabahaSettings;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -165,21 +164,24 @@ class UnitService
 
     public function changeOrderUnitsOwnershipTo(LocalMarketOrder $localMarketOrder, $ownerType, $ownerIdentifier, $action)
     {
-        $localMarketOrder->inventoryUnits()->chunkById(100, function ($units) use ($ownerType, $ownerIdentifier, $action) {
+        $ownershipService = app(OwnershipService::class);
+        $localMarketOrder->inventoryUnits()->chunkById(100, function ($units) use ($ownershipService, $ownerType, $ownerIdentifier, $action) {
+            $units->update([
+                'current_owner' => $ownerIdentifier,
+                'current_owner_type' => $ownerType,
+                'previous_owner' => DB::raw('current_owner'),
+                'previous_owner_type' => DB::raw('current_owner_type'),
+            ]);
             foreach ($units as $unit) {
-                // Get the current values for previous_owner and previous_owner_type
-                $previousOwner = $unit->current_owner;
-                $previousOwnerType = $unit->current_owner_type;
-
-                // Perform update with new and old values using Eloquent's update() method
-                $unit->update([
-                    'current_owner' => $ownerIdentifier,
-                    'current_owner_type' => $ownerType,
-                    'previous_owner' => $previousOwner,
-                    'previous_owner_type' => $previousOwnerType,
-                    'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                    'action' => $action,
-                ]);
+                $ownershipService->addOwnershipLogsToDB(
+                    $unit->hold_for,
+                    $unit,
+                    $ownerIdentifier,
+                    $ownerType,
+                    $unit->current_owner,
+                    $unit->current_owner_type,
+                    $action
+                );
             }
         });
     }
