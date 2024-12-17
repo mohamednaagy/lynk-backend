@@ -44,7 +44,7 @@ trait LocalMarketHelperTrait
             $newData['products'][$key]['location'] = $inventory['location']['name'];
             $newData['products'][$key]['previous_owner'] = $data['previous_owner'];
             $newData['products'][$key]['original_supplier'] = $inventory['supplier']['name'];
-            $newData['products'][$key]['quantity'] = $data['unit_count'];
+            $newData['products'][$key]['quantity'] = $inventory['numberOfSuitableUnits'] * $inventory['item']['volume_sellable_unit'];
         }
 
         return $newData;
