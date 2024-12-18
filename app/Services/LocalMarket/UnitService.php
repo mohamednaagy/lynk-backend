@@ -164,7 +164,6 @@ class UnitService
 
     public function changeOrderUnitsOwnershipTo(LocalMarketOrder $localMarketOrder, $ownerType, $ownerIdentifier, $action)
     {
-        Log::channel('local_market')->info('Changing order units ownership to '.$ownerType.' - '.$ownerIdentifier.' - '.$action);
         $ownershipService = app(OwnershipService::class);
         $localMarketOrder->inventoryUnits()->chunkById(100, function ($units) use ($ownershipService, $ownerType, $ownerIdentifier, $action) {
             foreach ($units as $unit) {
