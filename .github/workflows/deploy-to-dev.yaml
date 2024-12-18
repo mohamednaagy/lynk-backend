@@ -55,6 +55,7 @@ jobs:
       - name: Run Tests with Docker Compose
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
+          sudo su - ubuntu
           cd /home/ubuntu/lynk-backend-automation
           docker-compose down || true  # Ensure any previous containers are stopped
           docker-compose up --abort-on-container-exit || true
@@ -64,6 +65,7 @@ jobs:
       - name: Merge Allure Results
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
+          sudo su - ubuntu
           cd /home/ubuntu/lynk-backend-automation
           mkdir -p merged-allure-results
           cp -R allure-results/admin/* merged-allure-results/
@@ -74,6 +76,7 @@ jobs:
       - name: Generate Allure Report
         run:
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
+          sudo su - ubuntu
           cd /home/ubuntu/lynk-backend-automation
           allure generate merged-allure-results -o allure-report
           EOF
@@ -81,6 +84,7 @@ jobs:
       - name: deploy Allure to GitHub Pages
         run:
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
+          sudo su - ubuntu
           cd /home/ubuntu/lynk-backend-automation
           allure generate merged-allure-results -o allure-report
           EOF
@@ -88,6 +92,7 @@ jobs:
       - name: Cleanup Docker Containers - Fix Permissions
         run:
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
+          sudo su - ubuntu
           cd /home/ubuntu/lynk-backend-automation
           docker-compose down --remove-orphans
           sudo chown -R $USER:$USER allure-results
